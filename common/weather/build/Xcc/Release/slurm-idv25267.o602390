@@ -1,2 +1,0 @@
-/var/spool/slurmd/job602390/slurm_script: line 24: kill: (78601) - No such process
-slurmstepd: error: *** JOB 602390 ON cn70 CANCELLED AT 2017-03-23T15:34:44 ***
