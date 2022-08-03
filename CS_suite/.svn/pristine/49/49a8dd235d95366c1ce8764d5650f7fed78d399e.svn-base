@@ -1,0 +1,5 @@
+
+#include "GUI/explorer/form_explorer_common.h"
+#include "CS_suite/CS_explorer/CS_explorer_engine.h"
+#include "frame_CS_context_functions.h"
+#include "CS_suite/application/CS_suite_directory.h"

@@ -1,0 +1,65 @@
+#ifndef residue_single_poolH
+#define residue_single_poolH
+#include "common/residue/residue_V4_common.h"
+class Soil_interface;
+class Organic_matter_pools_single_pool;
+class Organic_biomatter_single_pool;
+class Soil_abiotic_environment_profile;
+class Residue_decomposition_parameters;
+
+//110929 This class does not appear to be used in CropSyst any more
+
+//______________________________________________________________________________
+class Residues_single_pool
+: public Residues_V4_common
+{
+ public:
+   Residues_single_pool
+      (Organic_matter_pools_single_pool   &pools
+      ,Soil_interface                     &_soil
+      ,Soil_abiotic_environment_profile   &_soil_abiotic_environment_profile
+      ,std::ostream                       *_detail_log);                         //020307
+ public: // additions
+   virtual void add_surface_plant_pool
+      (Organic_matter_position position                                          //040517
+      ,Organic_matter_cycling _om_cycling                                        //060219
+      ,float64 new_surface
+      #ifdef NITROGEN
+      ,float64 new_N_surface_conc
+      #endif
+      ,const Residue_decomposition_parameters &residue_decomposition_params      //060219
+      );
+   virtual void add_subsurface_plant_pool
+      (soil_sublayer_array_64(new_subsurface)                                    //970421
+      #ifdef NITROGEN
+      ,float64 new_N_subsurface_conc
+      #endif
+      ,const Residue_decomposition_parameters &residue_decomposition_params);    //060219
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   virtual void add_manure_pool_original                                        //070707
+      (Organic_matter_source org_N_source                                        //120316
+      ,float64 _shallow_N_content
+      ,float64 _deep_N_content
+      ,float64 _decomposition_constant_lignified                                 //060122
+      ,float64 _default_carbon_nitrogen_ratio                                    //060225
+         // Used when no N mass (or for initial residue)
+      ,float64 _carbon_fraction                                                  //080225
+      ,float64 _area_per_mass);
+#endif
+   virtual void add_manure_pool_cycled                                           //080829
+      (const Biomass_decomposition_parameters &manure_decomp_params              //020324
+      ,float64 surface_N_content     // kg N/m2? Currently goes in (sub)layer 1
+      ,float64 subsurface_N_content  // kg N/m2? now goes to specified layer     //160120
+      ,nat8 injection_layer                                                      //151620
+      ) modification_ ;
+   inline virtual void exhaust_all()                                             {}
+      // In this model we do nothing since pools not deleted
+ private:
+   void setup_contribution(Organic_biomatter_common &residue)              const;//060728
+ protected:
+   inline virtual Organic_matter_cycling get_first_OM_cycling()            const { return OM_ORIGINAL_CYCLING; } //070707
+   inline virtual Organic_matter_cycling get_last_OM_cycling()             const { return OM_ORIGINAL_CYCLING; } //070707
+};
+//______________________________________________________________________________
+#endif
+

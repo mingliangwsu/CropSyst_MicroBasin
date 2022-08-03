@@ -1,0 +1,164 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="c:\CS_suite_4\CropSyst\biomatter_editor.exe"/>
+    <OBJFILES value="C:\temp\obj\CropSyst\GUI\bcb5\\biomatter_editor.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_biomatter_editor.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\residue_const.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_param_file.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_recent_file.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\biomass_decomposition_param.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\AutoFileEditBar.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\AutoFloat32EditBar.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_param_file_common.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\translator_windows.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\AutoStringEdit.obj"/>
+    <RESFILES value="biomatter_editor.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) ..\form_biomatter_editor.dfm 
+      ..\..\..\..\..\GUI\parameter\form_param_file.dfm 
+      ..\..\..\..\..\GUI\recent\form_recent_file.dfm 
+      ..\..\..\..\..\components\AutoControls\AutoFileEditBar.dfm 
+      ..\..\..\..\..\components\AutoControls\AutoFloat32EditBar.dfm"/>
+    <LIBFILES value="C:\temp\lib\BCB5\release\corn_complete_static.lib 
+      C:\temp\lib\BCB5\release\CS_directory.lib 
+      ..\..\..\..\..\components\TMS_4.7\source_BCB5\wininet.lib"/>
+    <LIBRARIES value="VCLSMP50.lib tmsc5.lib"/>
+    <SPARELIBS value="Vcl50.lib AutoControls.lib VCLX50.lib BCBSMP50.lib bcbie50.lib tmsc5.lib 
+      VCLDB50.lib TEE50.lib VCLSMP50.lib VCLBDE50.lib K102_R51.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi TeeQR50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi 
+      Inet50.bpi NMFast50.bpi dclocx50.bpi bcb2kaxserver50.bpi Tee50.bpi 
+      VCLIB50.bpi AutoControls.bpi K102_R51.bpi UED_components_package.bpi 
+      CORN_datasets.bpi autocontrols_simulation.bpi TeeUI50.bpi TeeDB50.bpi"/>
+    <PATHCPP value=".;..;..\..\..\..\..\common\residue;..\..\..\..\..\GUI\parameter;..\..\..\..\..\GUI\recent;..\..\..\..\..\common\biomatter;..\..\..\..\..\components\AutoControls;..\..\..\..\..\GUI\translator"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="CS_VERSION=4"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="biomatter_editor.cpp"/>
+    <INCLUDEPATH value="..\;..\..\..\..\..\CropSyst\GUI\Builder\biomatter_editor;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\GUI\translator;..\..\..\..\..\CropSyst\GUI\Builder\organic_matter_editor;..\..\..\..\..\common\biomatter;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;..\..\..\..\..\common\residue;..\..\..\..\..;..\..\..\..\..\CropSyst\source;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\USDA\NRCS"/>
+    <LIBPATH value="..\;..\..\..\..\..\CropSyst\GUI\Builder\biomatter_editor;..\..\..\..\..\GUI\translator;$(BCB)\Projects\Bpl;..\..\..\..\..\CropSyst\GUI\Builder\organic_matter_editor;..\..\..\..\..\common\biomatter;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;..\..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls\resources;&quot;C:\Program Files\Borland\BCB5\Projects\&quot;"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; -N0&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; 
+      -$Y- -$L- -$D- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="-I&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; -D&quot;&quot; -aa -Tpe -x -Gn"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=1
+AutoIncBuild=0
+MajorVer=4
+MinorVer=12
+Release=17
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=4.12.17.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=18
+Item0=$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\GUI\translator;..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;..\..\..\..;..\..\..\source;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\components\AutoControls\resources;..\..\..\..\USDA\NRCS
+Item1=..\..\..\..\GUI\translator;..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\components\AutoControls\resources;..\..\..\..\USDA\NRCS
+Item2=..\..\..\..\GUI\translator;..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\components\AutoControls\resources;C:\dev\USDA\NRCS
+Item3=..\..\..\..\GUI\translator;..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\components\AutoControls\resources;..\..\..\..\USDA\ARS
+Item4=..\..\..\..\GUI\translator;..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\components\AutoControls\resources;c:\dev\USDA\ARS
+Item5=..\..\..\..\GUI\translator;;;..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\components\AutoControls\resources
+Item6=..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.7\source_BCB5;C:\dev\components\Other\ShellShock\source_BCB5;..\..\..\..\components\AutoControls\resources
+Item7=..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\components\AutoControls\resources
+Item8=..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\components\AutoControls\resources
+Item9=..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\components\Other\ShellShock\source
+Item10=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\components\Other\ShellShock\source
+Item11=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.1\source_BCB5
+Item12=..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp;..\..\..\..\components\TMS_4.1\source_BCB5
+Item13=..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\cpp
+Item14=..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;c:\dev\cropsyst\cpp
+Item15=..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item16=..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item17=..\..\..\..\common\residue;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=10
+Item0=..\..\..\..\GUI\translator;$(BCB)\Projects\Bpl;..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls\resources;C:\Program Files\Borland\BCB5\Projects\
+Item1=$(BCB)\Projects\Bpl;..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls\resources;C:\Program Files\Borland\BCB5\Projects\
+Item2=..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls\resources;C:\Program Files\Borland\BCB5\Projects\
+Item3=..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\components\AutoControls\resources;C:\Program Files\Borland\BCB5\Projects\
+Item4=..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\components\AutoControls\resources
+Item5=..\organic_matter_editor;..\..\..\..\common\biomatter;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.1\source_BCB5
+Item6=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.1\source_BCB5
+Item7=..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.1\source_BCB5
+Item8=..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item9=..\..\..\..\common\residue;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=3
+Item0=CS_VERSION=4
+Item1=_DEBUG;CS_VERSION=4
+Item2=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=C:\temp\obj\CropSyst\GUI\bcb5\
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=c:\CS_suite_4\CropSyst\
+Item1=c:\CS_suite_4\CropSyst
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=c:\Simulation\Database\manure\swine.CS_biomatter
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

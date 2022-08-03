@@ -1,0 +1,13 @@
+
+####### Compiler, tools and options
+CC            = icc
+CXX           = icpc
+LIBS          = $(SUBLIBS) -fopenmp -ldl -L../../../../../corn/build/icc/Release/ -L../../../../../CS_suite/build/icc/Release/ -lCS_suite_static -L../../../../../UED/library/build/icc/Release/ -lUED_static -L../../library/icc/Release/ -lCropSyst_elements -lcorn_complete_static -L../../../../../common/weather/build/icc/Release/ -lweather_static_V5
+
+TARGET        = MicroBasin
+
+$(TARGET): ../../../../../corn/build/icc/Release/libcorn_complete_static.a ../../../../../CS_suite/build/icc/Release/libCS_suite_static.a ../../../../../UED/library/build/icc/Release/libUED_static.a ../../library/icc/Release/libCropSyst_elements.a ../../../../../corn/build/icc/Release/libcorn_complete_static.a ../../../../../common/weather/build/icc/Release/libweather_static_V5.a $(OBJECTS)  
+	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
+
+include ../../Xcc/Release/Makefile
+

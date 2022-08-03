@@ -1,0 +1,131 @@
+//---------------------------------------------------------------------------
+
+#ifndef form_clippingH
+#define form_clippingH
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include "RNAutoParameterEditBar.h"
+#include "RNAutoParameterEditBar.h"
+#include "RNAutoRadioGroup.h"
+#include <ExtCtrls.hpp>
+#include "RNAutoCheckBox.h"
+#include <ComCtrls.hpp>
+#include "RNAutoFloatEdit.h"
+#include "RNAutoIntegerEdit.h"
+#include <Buttons.hpp>
+//---------------------------------------------------------------------------
+namespace CropSyst
+{
+class Harvest_or_clipping_operation;
+}
+class Tparameter_file_form;
+
+//---------------------------------------------------------------------------
+class Tclipping_form : public TForm
+{
+__published:	// IDE-managed Components
+   TPageControl *harvest_clipping_pagecontrol;
+   TTabSheet *removal_mode_tabsheet;
+   TTabSheet *biomass_fate_tabsheet;
+   TPageControl *harvest_mode_page_control;
+   TTabSheet *primary_yield_tabsheet;
+   TLabel *Label2;
+   TLabel *Label1;
+   TTabSheet *clipping_tabsheet;
+   TLabel *Label3;
+   TLabel *Label5;
+   TTabSheet *last_clipping_tabsheet;
+   TLabel *Label4;
+   TLabel *Label6;
+   TTabSheet *grazing_tabsheet;
+   TLabel *Label7;
+   TRNAutoParameterEditBar *remove_for_grazing_edit;
+   TGroupBox *grazing_groupbox;
+   TRNAutoParameterEditBar *grazing_OM_editbar;
+   TRNAutoParameterEditBar *grazing_NH3_editbar;
+   TTabSheet *defoliation_tabsheet;
+   TLabel *Label8;
+   TGroupBox *biomatter_fate_groupbox;
+   TRNAutoParameterEditBar *biomass_returned_as_manure_editbar;
+   TBitBtn *suggested_harvest_button;
+   TBitBtn *suggest_last_clipping_button;
+   TBitBtn *suggest_grazing_button;
+   TBitBtn *suggest_defoliation_button;
+   TScrollBox *ScrollBox1;
+   TRNAutoParameterEditBar *remove_for_use_edit;
+   TRNAutoParameterEditBar *remain_as_residue_edit;
+   TRNAutoParameterEditBar *remove_for_disposal_edit;
+   TRNAutoParameterEditBar *remain_as_standing_dead_edit;
+   TRNAutoParameterEditBar *remain_as_standing_live_edit;
+   TLabel *Label12;
+   TLabel *Label13;
+   TLabel *Label14;
+   TLabel *Label15;
+   TLabel *clipping_fate_label;
+   TLabel *last_clipping_fate_label;
+   TLabel *Label18;
+   TLabel *Label19;
+   TLabel *Label20;
+   TTabSheet *constraints_tabsheet;
+   TRNAutoParameterEditBar *min_LAI_required_edit;
+   TRNAutoParameterEditBar *min_biomass_required_edit;
+   TRNAutoRadioGroup *harvest_amount_mode_radiogroup;
+   TGroupBox *remove_fixed_amount_groupbox;
+   TRNAutoParameterEditBar *remove_fixed_amount_edit;
+   TRNAutoParameterEditBar *reserve_biomass_editbar;
+   TLabel *Label10;
+   TBitBtn *suggest_clipping_button;
+   TRNAutoCheckBox *accept_less_checkbox;
+   TGroupBox *GAI_groupbox;
+   TRNAutoParameterEditBar *min_retain_GAI_edit;
+   TLabel *retain_GAI_mode_note;
+   TLabel *remove_percentage_note;
+   TLabel *notea;
+   TBitBtn *goto_biomass_fate_button;
+   TMemo *select_one_mode_memo;
+   TPanel *panel_NRCS_field_op;
+   TSpeedButton *SpeedButton1;
+   TComboBox *NRCS_harvest_field_op_number_combbox;
+   TPanel *panel_biomass_fate_terminate_crop;
+   TRNAutoCheckBox *terminate_crop_checkbox;
+   TLabel *terminate_crop_label;
+   TRNAutoIntegerEdit *percent_total_out;
+   TLabel *Label11;
+//050825obs    void __fastcall clipping_fate_radiogroupClick(TObject *Sender);
+   void __fastcall grazing_OM_editbar_onexit(TObject *Sender);
+   void __fastcall grazing_NH3_editbar_onexit(TObject *Sender);
+   void __fastcall terminate_crop_checkboxClick(TObject *Sender);
+   void __fastcall show_hide_controls(TObject *Sender);
+   void __fastcall harvest_mode_onchange(TObject *Sender);
+   void __fastcall update_total_percent(TObject *Sender);
+   void __fastcall suggested_harvest_buttonClick(TObject *Sender);
+   void __fastcall suggest_clipping_buttonClick(TObject *Sender);
+   void __fastcall suggest_last_clipping_buttonClick(TObject *Sender);
+   void __fastcall suggest_grazing_buttonClick(TObject *Sender);
+   void __fastcall suggest_defoliation_buttonClick(TObject *Sender);
+   void __fastcall harvest_amount_mode_radiogroup_onclick(TObject *Sender);
+   void __fastcall goto_biomass_fate_button_onclick(TObject *Sender);
+   void __fastcall NRCS_harvest_field_op_number_combboxChange(
+          TObject *Sender);
+   void __fastcall button_NRCS_helpClick(TObject *Sender);
+
+private:	// User declarations
+   CropSyst::Harvest_or_clipping_operation  *clipping_op;
+   int16    percents_total;
+   bool     after_first_show_hide_controls; // this prevents the biomass fates message from being shown until after the user makes a change
+   Tparameter_file_form       *parameter_file_form;
+public:		// User declarations
+   __fastcall Tclipping_form(TComponent* Owner);
+   void __fastcall bind_to
+      (CropSyst::Harvest_or_clipping_operation *clipping_op
+      ,Tparameter_file_form       *parameter_file_form);
+private:
+   void __fastcall update_percents(TObject *Sender);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE Tclipping_form *clipping_form;
+//---------------------------------------------------------------------------
+#endif

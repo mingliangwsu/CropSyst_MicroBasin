@@ -1,0 +1,449 @@
+//---------------------------------------------------------------------------
+#ifndef frame_CS_context_functionsH
+#define frame_CS_context_functionsH
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include "AdvCombo.hpp"
+#include "AdvEdBtn.hpp"
+#include "AdvEdit.hpp"
+#include "AdvFileNameEdit.hpp"
+#include "FlCtrlEx.hpp"
+#include <Buttons.hpp>
+#include <CheckLst.hpp>
+#include <ComCtrls.hpp>
+#include <ExtCtrls.hpp>
+#include <FileCtrl.hpp>
+#include <Graphics.hpp>
+#include <ImgList.hpp>
+#include <Dialogs.hpp>
+#include "AdvDirectoryEdit.hpp"
+#include <jpeg.hpp>
+#include "htmlbtns.hpp"
+#include "RNAutoFloatEdit.h"
+#include "RNAutoBitCheckListBox.h"
+#include <CropSyst/source/output.h>
+#include <CS_suite/CS_suite_directory.h>
+
+//
+//---------------------------------------------------------------------------
+namespace CS
+{
+   class Suite_directory;
+}
+class Tcommon_explorer_form;
+class Tnavigation_frame;
+class CS_Explorer_engine;
+class Tframe_CS_context;
+//---------------------------------------------------------------------------
+#include <GUI/explorer/navigation_responder.h>
+class Navigation_responder_CS
+: public  Navigation_responder_interface
+{
+   Tframe_CS_context    &context_frame;
+public:
+   inline Navigation_responder_CS
+      (Tframe_CS_context   &_context_frame)
+      : context_frame(_context_frame)
+      {}
+   virtual void navigation_file_selected(const CORN::OS::File_name &selected_filename);
+   virtual void navigation_directory_selected(const CORN_Directory_name /*CORN::OS::Directory_name*/ &selected_dirname);
+};
+//---------------------------------------------------------------------------
+class Tframe_CS_context : public TFrame
+{
+__published:	// IDE-managed Components
+   TImageList *scenarios_pagecontrol_images;
+   TPageControl *pagecontrol_context;
+   TTabSheet *tabsheet_arbitrary;
+   TTabSheet *tabsheet_project;
+   TGroupBox *GroupBox9;
+   TBitBtn *button_project_database;
+   TBitBtn *button_project_scenarios;
+   TBitBtn *button_project_CANMS_enterprises;
+   TComboBox *combobox_project_scenarios;
+   TComboBox *combobox_project_database;
+   TComboBox *combobox_project_enterprises;
+   TTabSheet *tabsheet_database;
+   TTabSheet *tabsheet_scenarios;
+   TPageControl *pagecontrol_scenarios;
+   TTabSheet *tabsheet_scenarios_create;
+   TLabel *label_scenarios_create_hint;
+   TPanel *panel_scenarios_create;
+   TEdit *edit_scenarios_scenario_name;
+   TTabSheet *tabsheet_scenarios_run;
+   TTabSheet *tabsheet_scenarios_reset;
+   TGroupBox *groupbox_scenarios_param_files;
+   TCheckBox *checkbox_param_reset_weather;
+   TCheckBox *checkbox_param_reset_soil;
+   TCheckBox *checkbox_param_reset_rotation;
+   TCheckBox *checkbox_param_reset_recalibration;
+   TGroupBox *groupbox_scenarios_initial;
+   TCheckBox *checkbox_initial_reset_soil_profile;
+   TCheckBox *checkbox_initial_reset_soil_N;
+   TCheckBox *checkbox_initial_reset_residue;
+   TCheckBox *checkbox_initial_reset_manure;
+   TCheckBox *checkbox_initial_reset_organic_matter;
+   TGroupBox *groupbox_scenarios_model_options;
+   TCheckBox *checkbox_scenarios_reset_submodels;
+   TCheckBox *checkbox_scenarios_reset_output;
+   TCheckBox *checkbox_scenarios_reset_CPF;
+   TCheckBox *checkbox_scenarios_reset_CO2;
+   TPanel *button_scenarios_reset;
+   TTabSheet *tabsheet_scenarios_analysis;
+   TTabSheet *tabsheet_enterprises;
+   TBitBtn *button_enterprise_create;
+   TRichEdit *RichEdit4;
+   TEdit *edit_enterprise_name;
+   TTabSheet *tabsheet_scenario;
+   TTabSheet *tabsheet_generated_scenarios;
+   TTabSheet *tabsheet_scenario_output;
+   TGroupBox *groupbox_reports_to_be_generated;
+   TListBox *listbox_pending_reports;
+   TPanel *panel_generate_reports;
+   TBitBtn *output_reexport_button;
+   TProgressBar *progress_bar;
+   TPanel *panel_output_buttons;
+   TBitBtn *fast_graph_button;
+   TBitBtn *formated_schedule_button;
+   TBitBtn *harvest_report_button;
+   TBitBtn *text_schedule_button;
+   TButton *button_output_edit_report_generation;
+   TRichEdit *RichEdit1;
+   TTabSheet *tabsheet_weather;
+   TPanel *panel_weather_buttons;
+   TTabSheet *tabsheet_soil;
+   TBitBtn *button_soil_import;
+   TBitBtn *button_soil_SOILPAR2;
+   TTabSheet *tabsheet_rotation;
+   TLabel *label_rotation_hint;
+   TBitBtn *button_rotation_create;
+   TEdit *edit_rotation_name;
+   TTabSheet *tabsheet_crop;
+   TLabel *Label7;
+   TBitBtn *BitBtn11;
+   TTabSheet *tabsheet_management;
+   TBitBtn *button_management_combinatorial_generation;
+   TBitBtn *button_management_create;
+   TEdit *edit_management_name;
+   TTabSheet *tabsheet_biomatter;
+   TLabel *Label5;
+   TBitBtn *button_biomatter_create;
+   TEdit *edit_biomatter_name;
+   TTabSheet *tabsheet_format;
+   TBitBtn *button_format_create;
+   TEdit *edit_format_name;
+   TTabSheet *tabsheet_STATSGO1;
+   TLabel *Label6;
+   TCheckListBox *installed_STATSGO_states_listbox;
+   TPanel *panel_STATSGO_install_function;
+   TDirectoryListBox *statsgo_directory_treelist;
+   TPanel *panel_STATSGO_installed;
+   TBitBtn *install_button;
+   TBitBtn *remove_button;
+   TPanel *panel_CS_speed_buttons;
+   TSpeedButton *button_lauch_CS_suite;
+   TSpeedButton *button_climgen;
+   TFileListBox *stats_go_filelist;
+   TImage *Image3;
+   TPanel *panel_modes;
+   TGroupBox *GroupBox1;
+   TBitBtn *button_scenarios_create_CropSyst_scenario;
+   TBitBtn *button_scenarios_create_CANMS_scenario;
+   TBitBtn *button_scenarios_create_CAFE_dairy_scenario;
+   TGroupBox *GroupBox3;
+   TBitBtn *button_project_GIS_simulation;
+   TBitBtn *button_CANMS;
+   TPanel *panel_watershed_module;
+   TGroupBox *groupbox_combinatorial_scenario_gen;
+   TAdvDirectoryEdit *edit_project_combinatorial_scenario_template;
+   TBitBtn *combinatorial_project_scenario_generation_button;
+   TEdit *edit_combsim_prefix;
+   TRichEdit *RichEdit6;
+   TPanel *panel_arbitrary_function;
+   TGroupBox *groupbox_arbitrary_simulation_folder;
+   TLabel *Label1;
+   TLabel *Label8;
+   TBitBtn *button_arbitrary_create_simulation_folder;
+   TComboBox *combobox_abritrary_simulation_folder_name;
+   TComboBox *combobox_arbitrary_projects;
+   TComboBox *combobox_arbitrary_database;
+   TPanel *panel_arbitrary_assume_context;
+   TComboBox *combobox_arbitrary_assume_context;
+   TCheckBox *checkbox_assume_permanent;
+   TRichEdit *RichEdit3;
+   TPageControl *pagecontrol_generated_scenarios;
+   TTabSheet *tabsheet_generated_scenarios_run;
+   TTabSheet *tabsheet_generated_scenarios_analysis;
+   TPanel *panel_scenarios_report_format;
+   TPanel *panel_scenarios_run_options;
+   TPanel *panel_simulation_model;
+   TAdvFileNameEdit *edit_simulation_model;
+   TPanel *panel_scenarios_run;
+   TBitBtn *button_senerios_run;
+   TCheckBox *checkbox_scenarios_run_simultaneously;
+   TCheckBox *checkbox_scenarios_run_statistical_analysis;
+   TPanel *panel_scenarios_enterprise;
+   TAdvFileNameEdit *edit_enterprise;
+   TPanel *panel_analysis_function;
+   TPanel *button_compare_project_scenarios;
+   TGroupBox *groupbox_instructions;
+   TLabel *Label12;
+   TLabel *Label13;
+   TLabel *Label11;
+   TTabSheet *TabSheet1;
+   TLabel *Label2;
+   TGroupBox *GroupBox4;
+   TButton *button_generate_annual_report;
+   TButton *button_generate_season_report;
+   TButton *button_generate_daily_report;
+   TPanel *panel_AgMIP;
+   TImage *image_AgMIP;
+   TBitBtn *button_AgMIP_import_ACE;
+   TTabSheet *tabsheet_scenarios_export;
+   TRadioGroup *radiogroup_scenarios_export_formats;
+   TLabel *Label14;
+   TLabel *Label15;
+   TLabel *Label16;
+   TBitBtn *button_scenarios_export;
+   TEdit *edit_scenarios_export_target_filename;
+   TLabel *Label17;
+   TLabel *Label18;
+   TGroupBox *groupbox_scenario_edit;
+   TBitBtn *button_scenario_edit;
+   TBitBtn *button_scenario_edit_CANMS;
+   TBitBtn *button_energy_estimation;
+   TGroupBox *groupbox_run_scenario;
+   TBitBtn *button_scenario_run;
+   TCheckBox *checkbox_scenario_display_runtime_graph;
+   TBitBtn *button_scenario_run_CANMS;
+   TCheckBox *checkbox_run_GIS_scenario;
+   TLabel *Label19;
+   TGroupBox *groupbox_scenarios_report_format;
+   TAdvFileNameEdit *edit_scenarios_report_filename;
+   TPanel *panel_scenario_right;
+   TGroupBox *groupbox_scenario_analysis;
+   TLabel *Label3;
+   TLabel *Label4;
+   TPanel *button_scenario_analysis;
+   TPanel *panel_scenario_database;
+   TBitBtn *button_scenario_database;
+   TComboBox *combobox_scenario_database;
+   TPanel *panel_scenario_format;
+   THTMLButton *button_scenarios_format_clear;
+   THTMLButton *HTMLButton1;
+   THTMLButton *button_scenario_format_clear;
+   TLabel *Label20;
+   TGroupBox *groupbox_scenario_report_format;
+   TAdvFileNameEdit *edit_scenario_report_filename;
+   TScrollBox *scrollbox_database_context;
+   TPanel *panel_database_functions;
+   TGroupBox *groupbox_database_parameter_file;
+   TPanel *panel_database_add_weather;
+   TImage *Image1;
+   TComboBox *combo_box_database_weather;
+   TPanel *panel_database_add_soil;
+   TImage *Image2;
+   TComboBox *combo_box_database_soil;
+   TGroupBox *groupbox_database_cropping_system_parameter_file;
+   TPanel *panel_database_add_rotation;
+   TImage *Image10;
+   TComboBox *combo_box_database_rotation;
+   TPanel *panel_database_add_management;
+   TImage *Image11;
+   TComboBox *combo_box_database_management;
+   TPanel *panel_database_add_crop;
+   TImage *Image12;
+   TComboBox *combo_box_database_crop;
+   TGroupBox *groupbox_database_secondary_files;
+   TPanel *panel_database_add_biomatter;
+   TImage *Image6;
+   TComboBox *combo_box_database_biomatter;
+   TPanel *panel_database_add_format;
+   TImage *Image7;
+   TComboBox *combo_box_database_format;
+   TGroupBox *groupbox_REACCH_import;
+   TLabel *Label21;
+   TLabel *Label22;
+   TGroupBox *groupbox_geolocation;
+   TPanel *Panel1;
+   TRNAutoFloatEdit *weather_REACCH_latitude;
+   TPanel *Panel2;
+   TRNAutoFloatEdit *weather_REACCH_longitude;
+   TPanel *Panel3;
+   TAdvDirectoryEdit *directoryedit_master_simulation_database;
+   TGroupBox *groupbox_REACCH_climate_scenario;
+   TRadioGroup *radiogroup_REACCH_weather_scenario;
+   TRadioGroup *radiogroup_REACCH_weather_RCP;
+   TPanel *panel_database_REACCH_import;
+   TGroupBox *groupbox_database_REACCH_import;
+   TRadioGroup *radiogroup_from;
+   TBitBtn *button_REACCH_import;
+   TTimer *timer_database_REACCH_available;
+   TGroupBox *groupbox_database_REACCH_ready;
+   TDateTimePicker *datetime_database_REACCH_check;
+   TPanel *panel_arbitrary_projects;
+   TBitBtn *button_arbitrary_project_new;
+   TEdit *edit_arbitrary_project_name;
+   TPanel *panel_template_project;
+   TAdvDirectoryEdit *diredit_project_template;
+   TButton *button_arbitrary_goto_template;
+   TCheckBox *checkbox_project_copy_template;
+   TBitBtn *button_project_watershed_simulation;
+   TComboBox *ComboBox1;
+   TBitBtn *button_project_cabon_sequestration;
+   TBitBtn *button_scenarios_create_NIFA_dairy_scenario;
+   TPanel *panel_weather_import;
+   TBitBtn *button_weather_import_UED;
+   TPanel *panel_weather_create;
+   TBitBtn *button_create_weather;
+   TPanel *panel_weather_secondary_tools;
+   TPanel *panel_weather_tools_advanced;
+   TGroupBox *groupbox_quality;
+   TButton *button_UED_export_quality;
+   TButton *button_UED_import_quality;
+   TBitBtn *button_UED_condense;
+   TBitBtn *UED_association_button;
+   TBitBtn *button_weather_export_UED;
+   TBitBtn *button_weather_UED_spatial;
+   TBitBtn *button_weather_map_UED_locations;
+   TBitBtn *button_weather_climgen;
+   TAdvEdit *edit_weather_name;
+   TLabel *Label9;
+   TPanel *panel_crop_advanced;
+   TBitBtn *create_generic_crop_button;
+   TBitBtn *create_fruit_crop_button;
+   TBitBtn *create_CROPGRO_crop_button;
+   TLabel *label_crop_create_alternate;
+   TPanel *panel_crop_create;
+   TAdvEdit *edit_crop_name;
+   TPanel *Panel4;
+   TAdvEdit *edit_soil_name;
+   TBitBtn *button_soil_new;
+   TBitBtn *BitBtn1;
+   TBitBtn *button_abort_run;
+   TGroupBox *groupbox_scenarios_crop_production_function;
+   TRNAutoBitCheckListBox *checklistbox_CPF_percent_water;
+   void __fastcall button_scenario_editClick(TObject *Sender);
+   void __fastcall button_scenario_runClick(TObject *Sender);
+   void __fastcall button_scenario_databaseClick(TObject *Sender);
+   void __fastcall button_scenarios_create_CropSyst_scenarioClick(
+          TObject *Sender);
+   void __fastcall button_scenarios_create_CANMS_scenarioClick(TObject *Sender);
+   void __fastcall button_senerios_runClick(TObject *Sender);
+   void __fastcall button_scenarios_resetClick(TObject *Sender);
+   void __fastcall button_compare_project_scenariosClick(TObject *Sender);
+   void __fastcall button_enterprise_createClick(TObject *Sender);
+   void __fastcall button_biomatter_createClick(TObject *Sender);
+   void __fastcall button_format_createClick(TObject *Sender);
+   void __fastcall button_rotation_createClick(TObject *Sender);
+   void __fastcall button_crop_createClick(TObject *Sender);
+   void __fastcall create_generic_crop_buttonClick(TObject *Sender);
+   void __fastcall create_fruit_crop_buttonClick(TObject *Sender);
+   void __fastcall create_CROPGRO_crop_buttonClick(TObject *Sender);
+   void __fastcall button_management_createClick(TObject *Sender);
+   void __fastcall fast_graph_buttonClick(TObject *Sender);
+   void __fastcall formated_schedule_buttonClick(TObject *Sender);
+   void __fastcall text_schedule_buttonClick(TObject *Sender);
+   void __fastcall harvest_report_buttonClick(TObject *Sender);
+   void __fastcall button_output_edit_report_generationClick(
+          TObject *Sender);
+   void __fastcall output_reexport_buttonClick(TObject *Sender);
+   void __fastcall button_create_weatherClick(TObject *Sender);
+   void __fastcall button_weather_import_UEDClick(TObject *Sender);
+   void __fastcall button_weather_export_UEDClick(TObject *Sender);
+   void __fastcall button_weather_climgenClick(TObject *Sender);
+   void __fastcall button_weather_UED_spatialClick(TObject *Sender);
+   void __fastcall button_weather_map_UED_locationsClick(TObject *Sender);
+   void __fastcall button_UED_condenseClick(TObject *Sender);
+   void __fastcall UED_association_buttonClick(TObject *Sender);
+   void __fastcall button_arbitrary_project_newClick(TObject *Sender);
+   void __fastcall button_arbitrary_create_simulation_folderClick(TObject *Sender);
+   void __fastcall button_climgenClick(TObject *Sender);
+   void __fastcall checkbox_UED_tools_modeClick(TObject *Sender);
+   void __fastcall combobox_arbitrary_assume_context_oldChange(TObject *Sender);
+   void __fastcall button_project_scenariosClick(TObject *Sender);
+   void __fastcall button_project_databaseClick(TObject *Sender);
+   void __fastcall button_project_CANMS_enterprisesClick(TObject *Sender);
+   void __fastcall button_project_GIS_simulationClick(TObject *Sender);
+   void __fastcall button_project_watershed_simulationClick(TObject *Sender);
+   void __fastcall button_project_cabon_sequestrationClick(TObject *Sender);
+   void __fastcall combinatorial_project_scenario_generation_buttonClick(TObject *Sender);
+   void __fastcall button_CANMSClick(TObject *Sender);
+   void __fastcall panel_database_add_weatherClick(TObject *Sender);
+   void __fastcall panel_database_add_soilClick(TObject *Sender);
+   void __fastcall panel_database_add_cropClick(TObject *Sender);
+   void __fastcall panel_database_add_rotationClick(TObject *Sender);
+   void __fastcall panel_database_add_biomatterClick(TObject *Sender);
+   void __fastcall panel_database_add_formatClick(TObject *Sender);
+   void __fastcall panel_database_add_managementClick(TObject *Sender);
+   void __fastcall button_soil_newClick(TObject *Sender);
+   void __fastcall button_soil_importClick(TObject *Sender);
+   void __fastcall button_soil_SOILPAR2Click(TObject *Sender);
+   void __fastcall button_scenario_run_CANMSxClick(TObject *Sender);
+   void __fastcall button_scenario_edit_CANMS_Click(TObject *Sender);
+   void __fastcall groupbox_scenario_formatClick(TObject *Sender);
+   void __fastcall groupbox_scenarios_formatClick(TObject *Sender);
+   void __fastcall listbox_pending_reportsClick(TObject *Sender);
+   void __fastcall BitBtn11Click(TObject *Sender);
+   void __fastcall button_scenarios_create_CAFE_dairy_scenarioClick(TObject *Sender);
+   void __fastcall button_energy_estimationClick(TObject *Sender);
+   void __fastcall edit_project_combinatorial_scenario_templateChange(TObject *Sender);
+   void __fastcall tabsheet_generated_scenarios_runShow(TObject *Sender);
+   void __fastcall tabsheet_scenarios_runShow(TObject *Sender);
+   void __fastcall tabsheet_generated_scenarios_analysisShow(TObject *Sender);
+   void __fastcall tabsheet_scenarios_analysisShow(TObject *Sender);
+   void __fastcall edit_combsim_prefixChange(TObject *Sender);
+   void __fastcall button_generate_annual_reportClick(TObject *Sender);
+   void __fastcall button_generate_season_reportClick(TObject *Sender);
+   void __fastcall button_generate_daily_reportClick(TObject *Sender);
+   void __fastcall button_AgMIP_import_ACEClick(TObject *Sender);
+   void __fastcall button_scenarios_exportClick(TObject *Sender);
+   void __fastcall radiogroup_scenarios_export_formatsClick(TObject *Sender);
+   void __fastcall button_scenarios_format_clear_Click(TObject *Sender);
+   void __fastcall button_scenario_format_clear_click(TObject *Sender);
+   void __fastcall button_UED_export_qualityClick(TObject *Sender);
+   void __fastcall button_UED_import_qualityClick(TObject *Sender);
+   void __fastcall button_REACCH_importClick(TObject *Sender);
+   void __fastcall timer_database_REACCH_availableTimer(TObject *Sender);
+   void __fastcall button_arbitrary_goto_templateClick(TObject *Sender);
+   void __fastcall start_CropSyst_wizardClick(TObject *Sender);
+   void __fastcall checkbox_project_copy_templateClick(TObject *Sender);
+   void __fastcall button_scenarios_create_NIFA_dairy_scenarioClick(TObject *Sender);
+   void __fastcall button_abort_runClick(TObject *Sender);
+
+private: // User declarations
+   Tcommon_explorer_form *explorer_form;
+   Tnavigation_frame *navigation_frame;
+   CS::Suite_Directory  *CS_suite_directory;   // guarenteed to be setup and not null.
+   bool template_dir_is_scenario;                                                //111104
+   float32 import_latitude;                                                      //140629
+   float32 import_longitude;                                                     //140629
+   nat32   CPF_percents_water;                                                   //150418
+   bool abort_run;                                                               //150419
+public:
+   CS_Explorer_engine   *explorer_engine;
+public:
+   Navigation_responder_CS  navigation_responder;
+public: // User declarations
+   __fastcall Tframe_CS_context(TComponent* Owner);
+   void bind_to
+      (Tcommon_explorer_form  *_explorer_form
+      ,Tnavigation_frame      *_navigation_frame
+      ,CS_Explorer_engine     *_explorer_engine);
+   virtual void __fastcall  Update();
+private: // The following methods are common to both CS_explorer and the output_manager_advanced
+   // They are implemented in form_common_output_management.cpp
+   void update_list_of_pending_reports();
+   void output_convert_pending_report();
+   bool report_out_of_sync(const CropSyst::Scenario_output_options::Conversion *conversion);
+private:
+   void show_context(int context);
+   void show_hide_controls();
+};
+//---------------------------------------------------------------------------
+extern PACKAGE Tframe_CS_context *frame_CS_context;
+//---------------------------------------------------------------------------
+#endif

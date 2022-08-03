@@ -1,0 +1,51 @@
+#include "geodesy/geolocation_item.h"
+//______________________________________________________________________________
+Geolocation_item::Geolocation_item()
+: CORN::Association()
+{}
+//_2013-05-29___________________________________________________________________
+/*170423
+const char *Geolocation_item::label_cstr(char *buffer) const
+{  Geolocation::label_cstr(buffer);
+   return buffer;
+}
+//_2013-05-29___________________________________________________________________
+*/
+const char *Geolocation_item::label_string(std::string &buffer) const
+{  return Geolocation::label_string(buffer);
+}
+//_2017-04-23___________________________________________________________________
+Geocoordinate_item::Geocoordinate_item()
+: CORN::Association()
+, Geocoordinate()
+{}
+//______________________________________________________________________________
+const char *Geocoordinate_item::get_key()                                  const
+{  //170423 Geocoordinate::label_cstr(key);
+   //170423 return key;
+   return Geocoordinate::label_string(key);                                      //170423
+}
+//_2014-01-28___________________________________________________________________
+const char *Geocoordinate_item::label_string(std::string &buffer)          const
+{  return Geocoordinate::label_string(buffer);
+}
+//_2017-04-23___________________________________________________________________
+/*170423
+const char *Geocoordinate_item::label_cstr(char *buffer)                   const
+{  Geocoordinate::label_cstr(buffer);
+   return buffer;
+}
+//_2014-01-28___________________________________________________________________
+*/
+int Geocoordinate_item::compare(const CORN::Item &other_item)              const
+{
+   int compare = 0;
+   const Geocoordinate_item *other_geocoord
+      = dynamic_cast<const Geocoordinate_item *> (&other_item);
+   if (other_geocoord)
+   {  compare = Geocoordinate::compare(*other_geocoord);
+   } else
+      compare = -1;
+   return compare;
+}
+//_2016-09-02___________________________________________________________________

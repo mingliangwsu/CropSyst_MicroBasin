@@ -1,0 +1,104 @@
+#ifndef datetime_abstractH
+#define datetime_abstractH
+#include "corn/const.h"
+#include "corn/chronometry/date_types.hpp"
+#include "corn/chronometry/time_types.hpp"
+
+namespace CORN
+{
+   class Temporal_base;                                                          /*141126*/
+//______________________________________________________________________________
+interface_ Date_time
+{
+public:
+   inline Date_time() {}
+   inline virtual ~Date_time() {}                                                //130515
+public: // Conversions
+   virtual Datetime64   get_datetime64()                                   const = 0;
+   ///< \return the full date and time
+   virtual Date32       get_date32()                                       const = 0;
+   ///< Extracts the year and day of year I.e. 2003001
+   virtual float64      get_time64()                                       const = 0;
+   ///< Returns the time (fraction)
+public: // The following get from the date part
+   virtual Year         get_year()                                         const = 0;
+   ///< extracts the year from the Date date
+   virtual DOY          get_DOY()                                          const = 0;
+   ///< extracts the day of year from the Date date
+   virtual Month        get_month()                                        const = 0;
+   virtual DOM          get_DOM()                                          const = 0;
+   virtual void         gregorian(Year &year, Month &month, DOM &dom)      const = 0;
+  // extracts the year month and day of month from the Date date
+public: // The following get from the time part
+	virtual Hour         get_hour()                                         const = 0;
+	virtual Minute       get_minute()                                       const = 0;
+	virtual Second       get_second()                                       const = 0;
+	virtual Centisecond  get_centisecond()                                  const = 0;
+	virtual Millisecond  get_millisecond()                                  const = 0;
+	virtual Hours        get_hours_after_midnight()                         const = 0;
+	virtual Minutes      get_minutes_after_midnight()                       const = 0;
+	virtual Seconds      get_seconds_after_midnight()                       const = 0;
+
+#define get_hours() get_hours_after_midnight()
+#define get_minutes() get_minutes_after_midnight()
+#define get_seconds() get_seconds_after_midnight()
+
+public: // The following get from the time date part
+	virtual int32        get_HHMMSS()                                       const = 0;
+public: // The following reset the entire date time value.
+   virtual Datetime64   set_now() = 0;                                           //030715
+   // Sets to and returns the computer's system date/time.
+   virtual Datetime64   set_date32(Date32 date32)                                = 0;
+   virtual Datetime64   set_datetime64(Datetime64 value)                         = 0;
+   virtual Datetime64   set_DT(const Date &date, const Time &time)               = 0;
+public: // The following methods set only the date part of the date time.
+        // The time part is preserved The updated date time is returned.
+   virtual Datetime64   set_DOY(DOY doy)                                         = 0;//030713
+   virtual Datetime64   set_year(Year year)                                      = 0;//030713
+   virtual Datetime64   set_c_str(const char *date_str)                          = 0;//030713
+   virtual Datetime64   set_YMD(Year year,Month month,DOM dom)                   = 0;//030713
+   virtual Datetime64   set_YD(Year year,DOY doy)                                = 0;//030713
+   virtual Datetime64   inc()                                                    = 0;
+      // Adds 1 to the date. Returns the new date (chronometry).
+   virtual Datetime64   dec()                                                    = 0;
+      // Subtracts one from the date. Returns the new date (chronometry).
+   virtual Datetime64   inc_day(int32 days)                                      = 0;
+      // Adds days to the date incrementing the year if necessary.
+      // If offset is negative, offset days are subtracted.
+   virtual Datetime64   dec_day(int32 days)                                      = 0;
+      // Subtracts days from the date decrementing the year if necessary.
+      //   If offset is negative, offset days are added.
+   virtual Datetime64   inc_year(int16 years)                                    = 0;//970909
+      // Adds offset years to the date.
+      // If years is negative,  years are subtracted
+   virtual Datetime64   dec_year(int16 years)                                    = 0;//970909
+      // Subtracts offset years to the date.
+      // If years is negative,  years are added
+   virtual Datetime64   inc_month(int16 months)                                  = 0;//970909
+      // Adds months to the date.
+      //   If months is negative,  months are subtracted
+   virtual Datetime64   dec_month(int16 months)                                  = 0;//970909
+      // Subtracts months from the date.
+      //   If months is negative,  months are added
+public:
+   // The following methods set only the time part of the date time.
+   // The entire time part is cleared and the new time updated, the date is not changed.
+   // The updated date time is returned.
+   virtual Datetime64   set_time64  (Datetime64 time64)                          = 0;
+   virtual Datetime64   set_time    (const Time &time)                           = 0;
+   virtual Datetime64   set_S       (Seconds seconds)                            = 0;
+	virtual Datetime64   set_HHMMSS  (int32 HHMMSS) = 0;
+   virtual Datetime64   set_HMS     (Hour hour, Minute minute, Second second)    = 0;
+   virtual Datetime64   set_HMSm    (Hour hour, Minute minute, Second second,Millisecond millisecond) = 0;
+   virtual Datetime64   set_HMSc    (Hour hour, Minute minute, Second second,Centisecond centisecond) = 0;
+public: // Time arithmetic
+	virtual Datetime64   inc_hour(Hours hours) = 0;                               //030714
+	virtual Datetime64   inc_minute(Minutes minutes) = 0;                         //030714
+	virtual Datetime64   inc_second(Seconds seconds) = 0;                         //030714
+public:  //
+   virtual uint32 days_between(const Date_time &date2,bool inclusive) const = 0;
+};
+//_2003-07-13___________________________________________________________________
+}  // namespace CORN
+#endif
+

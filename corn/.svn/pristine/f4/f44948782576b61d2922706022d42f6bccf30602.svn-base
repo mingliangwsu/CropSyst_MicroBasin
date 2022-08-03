@@ -1,0 +1,68 @@
+#include "corn/application/progress.h"
+#include <fstream>
+namespace CORN
+{
+//______________________________________________________________________________
+bool Progress_parameter::recognize_assignment
+(const std::string &variable
+,const std::string &value)                                         modification_
+{  bool recognized = false;
+   if        (variable == "--progress-indicator")
+   {
+      /* NYI
+      recognized = xxxx
+      */
+   } else if (variable == "--progress-units")
+   {
+      /* NYI
+      recognized = xxxx
+      */
+   } else if (variable == "--progress-frequency")
+   {
+      /* NYI
+      recognized = xxxx
+      */
+   } else if (variable == "--progress")
+   {
+      indicators |= PROGRESS_DEFAULT | PROGRESS_TIME;
+      recognized = true;
+   }
+   return recognized;
+}
+//_2017-03-16___________________________________________________________________
+bool Progress_indicator::step()                                         updates_
+{
+   // NYI check frequency condition
+   specific.clear();
+   return true;
+}
+//_2017-03-16___________________________________________________________________
+void Progress_indicator::stop
+(std::ostream &stream, char delimitor)                                stream_IO_
+{
+   if (parameter.indicators & PROGRESS_TIME)
+   {
+      CORN::Time stop_time;
+         // may need to be date time because the program run may span days
+      CORN::Seconds run_seconds // need to implement a function to calculate seconds between datetime
+         = (stop_time.get_seconds_after_midnight()
+         - start_time.get_seconds_after_midnight());
+      stream << std::endl
+             << "info: stop=" << stop_time.as_string() << std::endl
+             << "info: elapsed=" << run_seconds << " seconds" << std::endl;
+   }
+}
+//_2017-03-16___________________________________________________________________
+void Progress_indicator::stream_to(std::ostream &stream, char delimiter) stream_IO_
+{
+   // Currently only the 'program specific' indicator mode has been implemented
+   // Eventually provide the other modes.
+   bool console_mode = (delimiter == '\r');
+   if (console_mode)    stream << delimiter;
+   stream << specific;
+   if (!console_mode)   stream << delimiter;
+}
+//_2017-03-16___________________________________________________________________
+
+} // namespace CORN
+

@@ -1,0 +1,76 @@
+L_is_not_a_reasonable_value,
+/* validtyp *
+en is not a reasonable value
+fr n'est pas une valeur raisonnable
+it non sembra un valore ragionevole
+es no es un valor razonable
+ca no és un valor raonable
+*/
+L_must_be_greater_than,
+/* validtyp *      it-gb
+en must be greater than
+fr faut être supérieur à
+it deve essere maggore di
+es_ch debe ser mas que
+es tiene que ser mayor que
+ca ha de ser més gran que
+*/
+L_must_be_less_than,
+/* validtyp *
+en must be less than
+fr faut être inférieur à
+it deve essere minore di
+es debe ser menos que
+ca ha de ser més petit que
+*/
+L_must_range_from,
+/* validtyp *
+en must range from
+fr faut varier de
+it deve variare tra
+es debe fluctuar desde
+ca ha de variar des de
+*/
+L_should_be_greater_than,
+/* validtyp *
+en should be greater than
+fr doit être supérieur à
+it dovrebbe essere maggore di
+es_ch debiera ser mas que
+es debería ser mayor que
+ca ha de ser més gran que
+*/
+L_should_be_less_than,
+/* validtyp *
+en should be less than
+fr devrait être inférieur à
+it dovrebbe essere minore di
+es_ch debiera ser menos que
+es debería ser mayor que
+ca hauria de ser més gran que
+*/
+L_should_range_from,
+/* validtyp *
+en should range from
+fr devrait varier de
+it dovrebbe variare tra
+es_ch debiera fluctuar de
+es debería fluctuar de
+ca hauria de fluctuar des de
+*/
+L_Valid,
+/* validtyp *
+en Valid
+fr Valid
+it Valido
+es Correcto
+ca Correcte
+*/
+L_Validating,
+/* validtyp  *
+en Validating
+fr Validation en cours
+it Validazione in atto
+es Validando
+ca Validació en curs
+*/

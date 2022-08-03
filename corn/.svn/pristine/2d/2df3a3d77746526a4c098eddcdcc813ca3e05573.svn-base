@@ -1,0 +1,649 @@
+#include "corn/data_source/datarec.h"
+#include "corn/string/strconv.hpp"
+#include "corn/datetime/date.hpp"
+#ifndef compareHPP
+#  include "corn/math/compare.hpp"
+#endif
+#ifndef indexerH
+#  include "corn/container/indexer.h"
+#endif
+#include "corn/OS/file_system_engine.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+namespace CORN {
+//______________________________________________________________________________
+Data_record::Data_record
+(const char *_primary_section                                                   //030109
+,bool _one_based_enumerated_sections_obsolete)
+: primary_section_name(_primary_section)
+, sections()
+, structure_defined(false)                                                       //010516
+, enumerated_sections_definitions()
+, current_section(0)
+, position(0)
+, modified(false)
+, preserve_unexpected_entries(false)                                             //080820
+{  set_current_section(_primary_section);  // must come before and after initialize!
+}
+//______________________________________________________________________________
+VV_string_entry *Data_record::expect_string (const char *_key ,modifiable_ std::string &_value,uint16 _max_strlen,Phrase_label _annotation1,Phrase_label _annotation2)
+{   Association_list &section_entries = get_current_section()->entries;
+   VV_string_entry *entry = (VV_string_entry *)section_entries.find_cstr(_key);  //120921_050518
+   if (!entry) // avoid duplicate entries                                        //010404
+   {  entry = new VV_string_entry(_key,_value,_max_strlen,_annotation1,_annotation2);//050518
+      section_entries.append((CORN::Item *)entry) ;                              //010404
+   }                                                                             //050518
+   return entry;                                                                 //050518
+}
+//______________________________________________________________________________
+VV_directory_entry_entry * Data_record::expect_directory_entry_name
+(const char *_key
+,modifiable_ CORN::OS::Directory_entry_name & _value
+,nat16 _max_strlen,Phrase_label _annotation1,Phrase_label _annotation2)
+{   Association_list &section_entries = get_current_section()->entries;
+   VV_directory_entry_entry *entry=(VV_directory_entry_entry *)section_entries.find_cstr(_key);//120921_050518
+   if (!entry) // avoid duplicate entries                                        //010404
+   {  entry = new VV_directory_entry_entry(_key,_value,_max_strlen,_annotation1,_annotation2); //050518
+      section_entries.append((CORN::Item *)entry) ;                              //010404
+   }                                                                             //050518
+   return entry;                                                                 //050518
+}
+//__2012-02-07__________________________________________________________________
+#ifndef _MSC_VER
+//100929 This is sort of deprecated because it is unsafe, it is currently only used in ClimGen.
+VV_char_array_entry *Data_record::expect_char_array(const char *_key ,modifiable_  char *_value,uint16 _max_strlen,Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_char_array_entry *entry = (VV_char_array_entry *)section_entries.find_cstr(_key); //120921_050518
+   if (!entry) // avoid duplicate entries                                        //010404
+   {  entry = new VV_char_array_entry(_key,_value,_max_strlen,_annotation1,_annotation2);  //050518
+      section_entries.append((CORN::Item *)entry) ;                              //010404
+   }
+   return entry;                                                                 //050518
+}
+#endif
+//______________________________________________________________________________
+VV_int8_entry *Data_record::expect_int8   (const char *_key ,modifiable_ int8      & _value, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_int8_entry *entry = (VV_int8_entry *)section_entries.find_cstr(_key);      //120921_050518
+   if (!entry) // avoid duplicate entries                                        //010404
+   {  entry = new VV_int8_entry(_key,_value,_annotation1,_annotation2);          //050518
+      section_entries.append((CORN::Item *)entry) ;                              //010404
+   }                                                                             //050518
+   return entry;                                                                 //050518
+}
+//_1998-04-05___________________________________________________________________
+VV_int16_entry *Data_record::expect_int16  (const char *_key ,modifiable_ int16 & _value, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_int16_entry *entry = (VV_int16_entry *)section_entries.find_cstr(_key);    //120921
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_int16_entry(_key,_value,_annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_______________________________________________________
+VV_int32_entry * Data_record::expect_int32  (const char *_key ,modifiable_ int32 & _value, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_int32_entry *entry = (VV_int32_entry *)section_entries.find_string(_key);  //120921
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_int32_entry(_key,_value,_annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_______________________________________________________
+VV_nat16_entry *Data_record::expect_nat16  (const char *_key ,modifiable_ nat16 & _value, nat8 _radix, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_nat16_entry *entry = (VV_nat16_entry *)section_entries.find_cstr(_key);    //120921
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_nat16_entry(_key,_value,_radix,_annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04__2000-09-26___________________________________________
+VV_nat8_entry * Data_record::expect_nat8   (const char *_key ,modifiable_ nat8 & _value, nat8 _radix,Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries ;
+   VV_nat8_entry *entry = (VV_nat8_entry *)section_entries.find_cstr(_key);      //120921
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_nat8_entry(_key,_value,_radix,_annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04__1998-04-05___________________________________________
+VV_nat32_entry *Data_record::expect_nat32  (const char *_key ,modifiable_ nat32 & _value, nat8 _radix, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries =  get_current_section()->entries ;
+   VV_nat32_entry *entry = (VV_nat32_entry *)section_entries.find_cstr(_key);    //120921
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_nat32_entry(_key,_value,_radix, _annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2000-09-26_______________________________________________________
+VV_float32_entry * Data_record::expect_float32  (const char *_key ,modifiable_  float32   & _value, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries =  get_current_section()->entries ;
+   VV_float32_entry *entry = (VV_float32_entry *)section_entries.find_cstr(_key);//120921
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_float32_entry(_key,_value,_annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_2009-09-26____________________________________________
+VV_float64_entry *Data_record::expect_float64 (const char *_key ,modifiable_  float64 & _value, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_float64_entry *entry = (VV_float64_entry *)section_entries.find_cstr(_key);
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_float64_entry(_key,_value,_annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_2009-09-26____________________________________________
+VV_bool_entry * Data_record::expect_bool   (const char *_key ,modifiable_  bool    & _value,VV_bool_entry::Form    _text_form, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_bool_entry *entry = (VV_bool_entry *)section_entries.find_cstr(_key);
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_bool_entry(_key,_value,_text_form,_annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_2009-09-26____________________________________________
+VV_date_entry *Data_record::expect_date   (const char *_key ,modifiable_  CORN::Date & _value, bool formatted, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_date_entry *entry = (VV_date_entry *)section_entries.find_cstr(_key);
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_date_entry(_key,_value,formatted,get_year_offset_for_dates_with_only_two_digits(),_annotation1,_annotation2);
+       section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2005-04-12_______________________________________________________
+VV_datetime64_entry * Data_record::expect_datetime64(const char *_key ,modifiable_  CORN::Date_time_64 & _value, bool formatted, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_datetime64_entry *entry = (VV_datetime64_entry *)section_entries.find_cstr(_key);
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_datetime64_entry(_key,_value,formatted,get_year_offset_for_dates_with_only_two_digits(),_annotation1,_annotation2);
+       section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2005-04-12_______________________________________________________
+VV_byte_entry * Data_record::expect_byte  (const char *_key ,modifiable_  unsigned char    & _value, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_byte_entry *entry = (VV_byte_entry *)section_entries.find_cstr(_key);
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_byte_entry(_key,_value,_annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18___________________________________________________________________
+VV_enum_entry *  Data_record::expect_enum  (const char *_key ,modifiable_  Labeled_enum    & _value, Phrase_label _annotation1,Phrase_label _annotation2)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_enum_entry *entry = (VV_enum_entry *)section_entries.find_cstr(_key);
+   if (!entry) // avoid duplicate entries
+   {  entry =  new VV_enum_entry(_key,_value, _annotation1,_annotation2);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_2002-03-22____________________________________________
+VV_units_entry * Data_record::expect_units(const char *_key, modifiable_ Units_clad &units)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_units_entry *entry = (VV_units_entry *)section_entries.find_cstr(_key);
+    if (!entry) // avoid duplicate entries
+   {  entry =  new VV_units_entry(_key,units);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2005-04-13___________________________________________________________________
+VV_int16_entry *Data_record::expect_valid_int16 (const Valid_int16  &v_integer)
+{  Association_list &section_entries = get_current_section()->entries;
+  VV_int16_entry *entry = (VV_int16_entry *)section_entries.find_cstr(v_integer.key);
+   if (!entry) // avoid duplicate entries
+   {  entry = new VV_int16_entry(v_integer.key,v_integer.value,v_integer.description1,v_integer.description2);
+       section_entries.append((CORN::Item *)entry) ;
+      expect_valid_number(v_integer,section_entries);
+   }
+   return entry;
+}
+//______________________________________________________________________________
+VV_int32_entry * Data_record::expect_valid_int32 (const Valid_int32 &v_long)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_int32_entry *entry = (VV_int32_entry *) section_entries.find_cstr(v_long.key);
+   if (!entry) // avoid duplicate entries
+   {  entry = new VV_int32_entry(v_long.key,v_long.value,v_long.description1,v_long.description2);
+      section_entries.append((CORN::Item *)entry) ;
+      expect_valid_number(v_long,section_entries);
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_2002-03-22____________________________________________
+VV_float32_entry * Data_record::expect_valid_float32(const Valid_float32 &v_float)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_float32_entry *entry  = (VV_float32_entry *)section_entries.find_cstr(v_float.key);
+   if (!entry) // avoid duplicate entries
+   {  entry = new VV_float32_entry(v_float.key,v_float.value,v_float.description1,v_float.description2);
+      section_entries.append((CORN::Item *)entry) ;
+      expect_valid_number(v_float,section_entries);
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_2002-03-22____________________________________________
+VV_float64_entry * Data_record::expect_valid_float64(const Valid_float64 &v_double)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_float64_entry *entry = (VV_float64_entry *)section_entries.find_cstr(v_double.key);
+   if (!entry) // avoid duplicate entries
+   {  entry = new VV_float64_entry(v_double.key,v_double.value,v_double.description1,v_double.description2);
+       section_entries.append((CORN::Item *)entry) ;
+      expect_valid_number(v_double,section_entries);
+   }
+   return entry;
+}
+//_2005-05-18__2001-04-04_2002-03-22____________________________________________
+VV_parameter_entry *Data_record::expect_parameter(Parameter_abstract &_parameter)
+{  Association_list &section_entries = get_current_section()->entries;
+   VV_parameter_entry *entry = (VV_parameter_entry *)section_entries.find_cstr(_parameter.properties.name_long);
+   if (!entry) // avoid duplicate entries
+   {  entry = new VV_parameter_entry(_parameter);
+      section_entries.append((CORN::Item *)entry) ;
+   }
+   return entry;
+}
+//_2009-04-14___________________________________________________________________
+void Data_record::expect_valid_number(const Valid_number &v_number,Association_list &section_entries)
+{  if (v_number.alt_units_codes)
+   {  std::string key_units(v_number.key);                                       //131008_040909
+                  key_units.append("_units");
+      std::string key_units_shown(key_units);                                    //131008_040909
+                  key_units_shown.append("_shown");
+      // I think now I can use expect units
+      section_entries.append((CORN::Item *)(new VV_units_entry(key_units.c_str(),(Units_clad &)v_number.units_code)));
+      section_entries.append((CORN::Item *)(new VV_units_entry(key_units_shown.c_str(),(Units_clad &)v_number.shown_units_code)));
+   }
+}
+//_2004-04-14___________________________________________________________________
+char *Data_record::enum_variable(nat16 index,const char *variable,bool enumerate_variable) const
+{  static char buffer[255];
+   buffer[0] = 0;
+   if (enumerate_variable)
+   {  strcat(buffer,variable);
+      strcat(buffer,"_");
+   }
+   char _str[10];
+   CORN::int16_to_cstr((int16)index,_str,10);
+   strcat(buffer,_str);
+   return buffer;
+}
+//_2003-08-01___________________________________________________________________
+void Data_record::expect_float32_array(const char *_variable_or_section_label, float32 *array, bool one_based ,nat16 max_index,bool enumerate_variable)
+{  if (!enumerate_variable)                                                      //030801
+       set_current_section(_variable_or_section_label);
+    for (nat16 i = one_based; i <= max_index; i++)
+      expect_float32(enum_variable(i,_variable_or_section_label,enumerate_variable),array[i]);//030801
+}
+//_1998-12-12___________________________________________________________________
+void Data_record::expect_float64_array(const char *_variable_or_section_label, float64 *array, bool one_based ,nat16 _max_index,bool enumerate_variable)
+{  if (!enumerate_variable)                                                      //030801
+    set_current_section(_variable_or_section_label);
+    for (nat16 i = one_based; i <= _max_index; i++)
+      expect_float64(enum_variable(i,_variable_or_section_label,enumerate_variable),array[i]); //030801
+}
+//_1998-12-12___________________________________________________________________
+void Data_record::expect_float32_array_with_units_code_adjustable
+(const char *_variable_or_section_label
+,Units_clad &units_code
+,float32 *array
+,bool one_based
+,nat16 max_index
+,bool enumerate_variable)
+{  if (!enumerate_variable)
+       set_current_section(_variable_or_section_label);
+   char units_variable[256]; units_variable[0] = 0;
+   if (enumerate_variable)
+   {  strcpy(units_variable,_variable_or_section_label);
+      strcat(units_variable,"_");
+   }
+   strcat(units_variable,"units");
+   expect_units(units_variable,units_code);
+   expect_float32_array(_variable_or_section_label, array,  one_based , max_index,enumerate_variable);
+}
+//_2007-04-03___________________________________________________________________
+void Data_record::expect_float32_array_with_units_code_fixed
+(  const char *_variable_or_section_label
+,  Units_code units_code_fixed,  float32 *array, bool one_based ,nat16 max_index,bool enumerate_variable)
+{  if (!enumerate_variable)
+       set_current_section(_variable_or_section_label);
+    Units_code_item *units_code_item = new Units_code_item(units_code_fixed);
+//070418 there are problems in some cases with ths units_codes is deallocated
+//       I am not sure why,  Not adding units_code_item to the units_codes list is a memory leak
+//       but this doesn't add much so it shouldn't hurt anything for now.
+//070418 /*_______*/     units_codes.append(units_code_item);
+   char units_variable[256]; units_variable[0] = 0;
+   if (enumerate_variable)
+   {  strcpy(units_variable,_variable_or_section_label);
+      strcat(units_variable,"_");
+   }
+   strcat(units_variable,"units");
+   expect_units(units_variable,units_code_item->units_code);
+   expect_float32_array(_variable_or_section_label, array,  one_based , max_index,enumerate_variable);
+}
+//_2007-04-03___________________________________________________________________
+void Data_record::expect_float32_array_with_units_label
+(const char *_variable_or_section_label
+,const char *units_label, float32 *array, bool one_based ,nat16 max_index,bool enumerate_variable)
+{  if (!enumerate_variable)
+       set_current_section(_variable_or_section_label);
+    Units_label_item *units_label_item = new Units_label_item(units_label);
+    units_labels.append(units_label_item);
+   char units_variable[256]; units_variable[0] = 0;
+   if (enumerate_variable)
+   {  strcpy(units_variable,_variable_or_section_label);
+      strcat(units_variable,"_");
+   }
+   strcat(units_variable,"units");
+    expect_string(units_variable,units_label_item->units_label,255);
+   expect_float32_array(_variable_or_section_label, array,  one_based , max_index,enumerate_variable);
+}
+//_2003-08-01__2001-11-28_______________________________________________________
+void Data_record::expect_dynamic_float32_array
+(const char *_variable_or_section_label
+,CORN::Dynamic_array<float32> &array
+,const nat8 &array_size
+,bool one_based
+,Units_code units_code_fixed
+,bool enumerate_variable)
+{  if (!enumerate_variable)
+       set_current_section(_variable_or_section_label);
+   char units_variable[256]; units_variable[0] = 0;
+   if (enumerate_variable)
+   {  strcpy(units_variable,_variable_or_section_label);
+      strcat(units_variable,"_");
+   }
+   if (units_code_fixed)
+   {  Units_code_item *units_code_item = new Units_code_item(units_code_fixed);
+      strcat(units_variable,"units");
+      expect_units(units_variable,units_code_item->units_code);
+   }
+  if (!enumerate_variable)
+       set_current_section(_variable_or_section_label);
+    for (nat16 i = one_based; i < array.get_count(); i++)
+      expect_float32(enum_variable(i,_variable_or_section_label,enumerate_variable),array.ref(i));
+}
+//_2016-09-18___________________________________________________________________
+void Data_record::expect_bool_array
+(const char *_variable_or_section_label
+,bool *array, VV_bool_entry::Form _text_form, bool one_based ,nat16 max_index,bool enumerate_variable)
+{  if (!enumerate_variable)
+       set_current_section(_variable_or_section_label);
+    for (nat16 i = one_based; i <= max_index; i++)
+      expect_bool(enum_variable(i,_variable_or_section_label,enumerate_variable),array[i],_text_form);
+}
+//_2003-08-01__1999-05-19_______________________________________________________
+void Data_record::expect_int16_array
+( const char *_variable_or_section_label
+, int16 *array, bool one_based ,nat16 max_index,bool enumerate_variable)
+{  if (!enumerate_variable)
+       set_current_section(_variable_or_section_label);
+   for (nat16 i = one_based; i <= max_index; i++)
+      expect_int16(enum_variable(i,_variable_or_section_label,enumerate_variable),array[i]);
+}
+//_2003-08-01__1998-12-12_______________________________________________________
+void Data_record::expect_nat32_array(
+   const char *_variable_or_section_label,
+    nat32 *array, bool one_based ,nat16 max_index, nat8 _radix,bool enumerate_variable)
+{  if (!enumerate_variable)
+       set_current_section(_variable_or_section_label);
+   for (nat16 i = one_based; i <= max_index; i++)
+      expect_nat32(enum_variable(i,_variable_or_section_label,enumerate_variable),array[i],_radix);
+}
+//_2003-08-01__1998-12-12_______________________________________________________
+void Data_record::expect_string_array
+( const char *_variable_or_section_label                                        //030109
+, std::string *array
+, nat16 _max_strlen
+, bool one_based
+, nat16 max_index
+, bool enumerate_variable)
+{  if (!enumerate_variable)                                                      //030801
+       set_current_section(_variable_or_section_label);
+    for (nat16 i = one_based; i <= max_index; i++)
+      expect_string(enum_variable(i,_variable_or_section_label,enumerate_variable),array[i],_max_strlen); //030801
+}
+//_1998-12-12___________________________________________________________________
+void Data_record::expect_date_array
+( const char *_variable_or_section_label                                         //030109
+, CORN::Date *array, bool formatted, bool one_based ,nat16 max_index,bool enumerate_variable)
+{  if (!enumerate_variable)                                                      //030801
+       set_current_section(_variable_or_section_label);
+   for (nat16 i = one_based; i <= max_index; i++)
+       expect_date(enum_variable(i,_variable_or_section_label,enumerate_variable),array[i],formatted);
+}
+//_1999-11-05___________________________________________________________________
+VV_Section *Data_record::set_current_section(const char *new_current_section)
+{  if (strlen(new_current_section))                                              //030109
+   {  {  current_section = (VV_Section *)(sections.find_cstr(new_current_section));   //030117
+         if (!current_section)
+         {  if (!structure_defined || (structure_defined && preserve_unexpected_entries)
+                /*170307
+                 * always preserve unexpected entries other wise
+                 * values default to the primary section.
+                 * This was problem with crop [emergence] model= clobbering
+                 * the [crop] model=
+                 * */
+                     ) //120311
+            {  current_section = new VV_Section(new_current_section);
+               sections.append(current_section);
+            }
+         }
+      }
+   }
+   // else no name was specified, don't try to change the current section.       //030109
+   return current_section;
+}
+//______________________________________________________________________________
+void Data_record::expect_enumerated_section
+(VV_enumerated_section *enumerated_section_def
+,bool for_write)
+{  //Add the section prefix to a association list of section prefixes
+   enumerated_sections_definitions.append(enumerated_section_def);
+   std::string section_count(enumerated_section_def->section_label_prefix);      //131008_040909
+   section_count.append(":count");                                               //040208
+   expect_nat16 (section_count.c_str(),enumerated_section_def->count,10);        //120314
+   /* quite obsolete
+   #if ((CS_VERSION > 0) && (CS_VERSION <= 4))
+   // Aliases for old styles files                                               //040208
+   if (!for_write)                                                               //040208
+   {  std::string old_section_count(enumerated_section_def->section_label_prefix);//131008_040909
+      old_section_count.append("_count");                                        //040208
+      alias_entry(section_count.c_str(),old_section_count.c_str());              //040208
+   }
+   #endif
+   */
+}
+//______________________________________________________________________________
+void VV_enumerated_section::setup_structure(Data_record &data_rec,bool for_write) modification_
+{  data_rec.structure_defined =false;                                            //120314
+   std::string current_section_key(data_rec.get_current_section()->get_section_label()); //040909
+   nat32 actual_list_count = get_container_element_count();                      //40123
+   set_count(for_write? actual_list_count :(nat32)count,false);                  //110719
+   for (nat16 ndx = (int16)(one_based ? 1 : 0)                                   //981008
+        ; ndx < (count + one_based) ; ndx++)                                     //981008
+   {  // Now create a section for all the counted elements
+     std::string section_ndx(section_label_prefix);                              //040909
+     section_ndx.append(":");                                                    //040208
+      char ndx_str[10];
+      nat16_to_cstr(ndx,ndx_str,10);                                             //120314
+      section_ndx.append(ndx_str);
+     data_rec.set_current_section(section_ndx.c_str());                          //030109
+      //        Expect entries for the section
+     setup_element_structure(data_rec,for_write,ndx);                            //010103
+   }
+   data_rec.set_current_section(current_section_key.c_str());                    //010103
+   // make sure we return to the original section
+}
+//______________________________________________________________________________
+void VV_enumerated_section::set_count(nat16 new_count,  bool unexpected_only)
+{  if (!(unexpected_only && count))                                              //040323
+       count= std::max<nat16>(new_count,count);
+}
+//_2012-03-14___________________________________________________________________
+bool VV_container_enumerated_section::setup_element_structure
+(Data_record &data_rec,bool for_write, int16 index0)               modification_
+{  Item *element =                                                               //990129
+         one_based ? container.get_Nth((nat16) index0) :
+          container.get_at((nat16) index0);
+   if (element) element->setup_structure(data_rec,for_write);
+   return element != 0;
+}
+//______________________________________________________________________________
+bool Data_record::has_structure()
+{  return structure_defined; }
+//_2001-01-12___________________________________________________________________
+bool Data_record::delete_entry(const char *_section,const char *_entry)
+{   bool at_least_one_entry_deleted = false;
+    VV_Section *from_section = (VV_Section *)sections.find_cstr(_section);
+    if (from_section)
+      at_least_one_entry_deleted = from_section->entries.remove_all_matching_key_cstr(_entry);
+    return at_least_one_entry_deleted;
+}
+//_2003-01-17___________________________________________________________________
+modifiable_ VV_abstract_entry *Data_record::get_entry(const char *_section,const char *_entry)
+{  modifiable_ VV_abstract_entry *found_entry = 0;
+    VV_Section *from_section =
+      dynamic_cast<VV_Section *>(_section ? sections.find_cstr(_section): sections.get_at(0));
+    if (from_section)
+      found_entry = dynamic_cast<modifiable_ VV_abstract_entry *>(from_section->entries.find_cstr(_entry));
+   return found_entry;
+}
+//_2011-11-07___________________________________________________________________
+void Data_record::alias_entry(const char *actual_variable,const char *alias_variable )
+{  if (current_section)
+      current_section->alias(actual_variable,alias_variable);
+}
+//_2001-11-09_____________________________________________________________________________
+bool Data_record::was_section_encountered(const char *section_name)        const
+{  VV_Section *section = (VV_Section *)sections.find_cstr(section_name);
+   bool encountered = section
+   ?  section->was_encountered()                                                 //050927
+   :  false;
+   return encountered;
+}
+//_2003-01-17_____________________________________________________________________________
+bool Data_record::was_entry_encountered(const char *section_name,const char *entry_name) const
+{  VV_Section *section = (VV_Section *)sections.find_cstr(section_name);
+   bool encountered = section
+   ?  section->was_encountered()                                                 //050927
+   :  false;
+   if (encountered) // if the section was encountered, see if the entry was encountered
+      encountered = section->was_entry_encountered(entry_name);
+   return encountered;
+}
+//_2005-09-27___________________________________________________________________
+bool /*void*/ Data_record::expect_structure(bool /*unused for_write*/)
+{  structure_defined = false;                                                    //120314
+   // If we don't have sections derived methods will crash. 021113
+   if (sections.count() == 0)                                                    //021113
+      set_current_section(primary_section_name.c_str());
+   return true;
+}
+//_1998-04-05___________________________________________________________________
+const char *Data_record::Units_label_item::get_key() const
+{  return units_label.c_str(); }
+//_2003-01-09___________________________________________________________________
+VV_Section *Data_record::get_current_section()
+{  if (!current_section) current_section = set_current_section(get_primary_section_name());  //030709
+   return current_section;
+}
+//_2001-01-09___________________________________________________________________
+void Data_record::delete_section(const char * _section)
+{  sections.remove((Item *)(sections.find_cstr(_section)));
+}
+//2003-01-17____________________________________________________________________
+bool Data_record::notify_indexer(CORN::Indexer &indexer)
+{
+   std::string buffer;                                                           //150730
+   indexer.know_position(get_position());
+   FOR_EACH_IN(section,VV_Section,sections,each_section)
+   {  const char *section_label=section->get_key();
+      //for each entry in current section:
+      FOR_EACH_IN(entry,VV_abstract_entry,section->entries,each_entry)
+      {  // lookup field in actual fields:
+         const char *entry_label = entry->get_key();
+         buffer.clear(); entry->append_to_string(buffer);                        //150731
+         indexer.know_value(buffer,entry_label,section_label);
+      } FOR_EACH_END(each_entry)
+   } FOR_EACH_END(each_section)
+   return indexer.commit();
+}
+//_2005-11-08___________________________________________________________________
+nat16 Data_record::resolve_directory_entry_names
+(const CORN::OS::Directory_name &with_respect_to_dirname)                  const //160114
+{  nat16 directory_entry_names_encountered = 0;
+
+//std::clog << "wrt:" << with_respect_to_dirname.c_str() << std::endl;
+
+   FOR_EACH_IN(section,VV_Section,sections,each_section)
+   {
+      FOR_EACH_IN(entry,VV_abstract_entry,section->entries,each_entry)
+      {
+         const CORN::VV_directory_entry_entry *entry_as_DEN =
+            dynamic_cast<const CORN::VV_directory_entry_entry *>(entry);
+         if (entry_as_DEN)
+         {
+            CORN::OS::Directory_entry_name &entry_DEN = entry_as_DEN->ref_value();
+
+//std::clog << "entry:" << entry->get_key() << "=" << entry_DEN.c_str() << std::endl;
+
+            if (entry_DEN.has_name(true))                                        //160121
+            {
+            if (entry_DEN.is_relative()
+               || CORN::OS::file_system_engine.is_shortcut(entry_DEN))
+            {
+                CORN::OS::Directory_entry_name *resolved_DEN =
+                   CORN::OS::file_system_engine.
+                      render_resolved_absolute_DEN //161013 directory_entry_name
+                      (entry_DEN,with_respect_to_dirname);                       //160114
+                if (resolved_DEN)
+                   entry_DEN.set_DEN(*resolved_DEN);
+
+//std::clog << "DEN2:" << entry_DEN.c_str() << std::endl;
+
+            } // if needs resolution
+            if (!entry_DEN.is_qualified())
+            {  std::wstring  name_with_extension;
+               entry_DEN.get_name_with_extension(name_with_extension);
+               CORN::OS::Directory_entry_name_concrete
+                  DEN_qualified(with_respect_to_dirname,name_with_extension);
+               entry_DEN.set_DEN(DEN_qualified);
+
+//std::clog << "DEN3:" << entry_DEN.c_str() << std::endl;
+
+            }
+
+//std::clog << "DEN3:" << entry_DEN.c_str() << std::endl;
+
+
+            directory_entry_names_encountered ++;
+            }
+         } // if (entry_as_DEN)
+      } FOR_EACH_END(each_entry)
+   } FOR_EACH_END(each_section)
+   return directory_entry_names_encountered > 0;
+   // returns the number of DENs encountered, whether actually needed resolving or not.
+}
+//_2015-12-07___________________________________________________________________
+bool Data_record::get_start()
+{  set_current_section(get_primary_section_name());
+   if (!has_structure()) expect_structure(false);
+   return true;
+}
+//_2016-10-23___________________________________________________________________
+
+
+} // namespace CORN
+

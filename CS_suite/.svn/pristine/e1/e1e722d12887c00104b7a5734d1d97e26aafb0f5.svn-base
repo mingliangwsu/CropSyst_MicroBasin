@@ -1,0 +1,91 @@
+#ifndef database_file_substitutionH
+#define database_file_substitutionH
+#include "UED/library/database_file.h"
+#include "corn/const.h"
+//#  include "corn/format/binary/binary_record_file.h"
+using namespace UED;
+namespace CS_UED
+{
+//______________________________________________________________________________
+class Date_substituter
+: public CORN::Enumeration
+{
+   UED_variable_code variable_code;
+   CORN::Year earliest_year;
+   CORN::Year latest_year;
+   int8 year_offset; // used to offset the earliest year to substitute from       //161207
+      // Normally 0 may be negative
+      // Added for FlexCropping project but may be generally usuable
+   nat16  years_range;
+   //CORN::Date32 exclude_available_weather_date;                                  //170310
+ public:
+   Date_substituter
+      (UED_variable_code variable_code_
+      ,const CORN::Year &earliest_year_
+      ,const CORN::Year &latest_year_
+      ,int8              year_offset_);                                            //161207
+      //,CORN::Date32 exclude_available_weather_date_)                             //170310
+   Time_query *substitute(const Time_query &time_query)               rendition_;//160331
+   inline virtual nat32 get_key_nat32()                                    const { return variable_code;} //160331_110305_020319
+};
+//_2016-03-31___________________________________________________________________
+class _UED_DLL
+Database_file_indexed
+: public UED::Database_file_indexed
+{
+ protected:
+   contribute_ CORN::Enumeration_list *date_substituters;
+      // this option allows missing records to be subtitutes with dates that
+      // are available at a  future (or past) time in the dataset
+   contribute_ int8 substitute_year_offset;                                      //161207
+      // Usually 0 unless using date subsitution
+      // Added for FlexCropping project but generally useful.
+   contribute_ Datetime64 preclude_latest_date_time;
+      // non 0 values forces the UED to presume there is no data
+      // after the specified date (This was special for Harsimran's project)
+      // [probably should have a specialization class (CropSyst UED) to handle this
+ public: // structors
+    Database_file_indexed                                                        //070718
+      (const char *ued_filename
+      ,std::ios_base::openmode _openmode = std::ios::in                          //130311
+      ,bool _auto_float16 = true);                                               //140612
+ public: // UED::Database_file_indexed reimplementions
+   virtual Datetime64 get_latest_date_time                                       //970915
+      ( Record_code   for_record_type_code = UED_FOR_ALL_RECORD_TYPES
+      , Variable_code for_var_code = UED_FOR_ALL_VARIABLES);
+   virtual Binary_data_record_cowl *locate_data_record
+      (Record_code  rec_type
+      ,Variable_code var_code
+      ,const Time_query &time_query)                                 stream_IO_;
+ public:
+   bool enable_substitute_dates
+      (int8          substitute_year_offset
+      ,Datetime64    preclude_latest_date_time_
+      ,bool          enable)                                      contribution_;
+   Time_query * substitute_time_query
+      (Record_code       rec_type
+      ,Variable_code     variable_code
+      ,const Time_query &time_query);
+      // may return 0 if time query date cannot be substituted.
+   virtual float32 get_no_create
+      (Record_code  rec_type
+      ,Variable_code       variable
+      ,const Time_query   &time_query
+      ,CORN::Units_code   &requested_units
+      ,CORN::Quality      &attribute )                               stream_IO_;
+      /*,bool substituted_time_query=false*/
+   virtual bool get_parameter_on                                                 //151122
+      (modifiable_ CS::Parameter &parameter
+      ,Variable_code     variable
+      ,const Time_query &time_query
+      ,Record_code       rec_type)                                   stream_IO_; //160331
+};
+//_2017-03-11___________________________________________________________________
+
+
+//______________________________________________________________________________
+}
+
+
+
+#endif

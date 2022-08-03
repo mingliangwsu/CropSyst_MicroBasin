@@ -1,0 +1,5 @@
+#include "WP_wind_speed.h"
+
+// NYI move the windspeed estimation to here.
+
+

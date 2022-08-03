@@ -1,0 +1,14 @@
+//---------------------------------------------------------------------------
+
+//#include <vcl.h>
+#pragma hdrstop
+USEUNIT("..\..\CANMS\CANMS_directory.cpp");
+USEUNIT("..\..\ClimGen\ClimGen_directory.cpp");
+USEUNIT("..\..\CS_suite_directory.cpp");
+USEUNIT("..\..\CropSyst\CropSyst_directory.cpp");
+USEUNIT("..\..\UED\UED_directory.cpp");
+//---------------------------------------------------------------------------
+#define Library
+
+// To add a file to the library use the Project menu 'Add to Project'.
+

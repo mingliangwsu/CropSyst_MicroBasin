@@ -1,0 +1,224 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\temp\lib\BCB5\release\UED_static.lib"/>
+    <OBJFILES value="C:\temp\obj\UED\library\BCB5\\index.obj 
+      C:\temp\obj\UED\library\BCB5\\locrec.obj 
+      C:\temp\obj\UED\library\BCB5\\rec_io.obj 
+      C:\temp\obj\UED\library\BCB5\\record.obj 
+      C:\temp\obj\UED\library\BCB5\\std_codes.obj 
+      C:\temp\obj\UED\library\BCB5\\timeqry.obj 
+      C:\temp\obj\UED\library\BCB5\\unitsrec.obj 
+      C:\temp\obj\UED\library\BCB5\\varcodes.obj 
+      C:\temp\obj\UED\library\BCB5\\varrec.obj 
+      C:\temp\obj\UED\library\BCB5\\codes.obj 
+      C:\temp\obj\UED\library\BCB5\\units_def.obj 
+      C:\temp\obj\UED\library\BCB5\\datasetrec.obj 
+      C:\temp\obj\UED\library\BCB5\\datasetrec_creation.obj 
+      C:\temp\obj\UED\library\BCB5\\database_file.obj 
+      C:\temp\obj\UED\library\BCB5\\UED_fname.obj 
+      C:\temp\obj\UED\library\BCB5\\UED_directory.obj 
+      C:\temp\obj\UED\library\BCB5\\variable_format.obj 
+      C:\temp\obj\UED\library\BCB5\\std_variables.obj 
+      C:\temp\obj\UED\library\BCB5\\geolocation.obj 
+      C:\temp\obj\UED\library\BCB5\\geocoordinate.obj"/>
+    <RESFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..;..\..\..\..\CS_suite\UED;..\..\..\..\common\geodesy"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="xUED_DUMP;xUSE_PCH;xOLD_BINARY_FILE;CS_VERSION=4;USE_OS_FS"/>
+    <SYSDEFINES value="NO_STRICT;_RTLDLL"/>
+    <MAINSOURCE value="UED_static.bpf"/>
+    <INCLUDEPATH value="..\..\..\..\common\geodesy;..\..\..\..\common\geolocation;..\..;..\..\..\..\CS_suite\UED;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\components\AutoControls;..\..\..\..;..\..\..\..\common"/>
+    <LIBPATH value="..\..\..\..\common\geodesy;..\..\..\..\common\geolocation;..\..;..\..\..\..\CS_suite\UED;..\..\..;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+    <LISTFILE value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-O2 -Vmm -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\UED\library\BCB5\&quot; -N0&quot;C:\temp\obj\UED\library\BCB5\&quot; -$Y- 
+      -$L- -$D- -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="-l&quot;C:\dev\components\AutoControls\&quot; /P128"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=30
+Item0=..\..\..\..\common\geodesy;..\..\..\..\common\geolocation;..\..;..\..\..\..\CS_suite\UED;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\components\AutoControls;..\..\..\..;..\..\..\..\common
+Item1=..\..\..\..\common\geolocation;..\..;..\..\..\..\CS_suite\UED;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\components\AutoControls;..\..\..\..;..\..\..\..\common
+Item2=..\..\..\..\common\geolocation;..\..;..\..\..\..\CS_suite\UED;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\components\AutoControls;..\..\..\..
+Item3=..\..;..\..\..\..\CS_suite\UED;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\components\AutoControls;..\..\..\..
+Item4=..\;..;..\..\..\CS_suite\UED;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;..\..\..
+Item5=..;..\..\..\CS_suite\UED;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;..\..\..
+Item6=..\;..\..\..\CS_suite\UED;..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;..\..\..
+Item7=..\..\..\CS_suite\UED;..\;..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;..\..\..
+Item8=..\;..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;..\..\..
+Item9=..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;..\..\..
+Item10=..\;..\..\tuple;..\..\convert;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;..\..\..
+Item11=..\..\tuple;..\..\convert;..\;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;..\..\..
+Item12=..\;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls;c:\dev
+Item13=..\;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;..\..\components\AutoControls
+Item14=..\;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..;c:\dev;C:\dev\components\AutoControls
+Item15=..\;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item16=..\;..\tuple;..;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item17=..\tuple;..;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item18=..\tuple;..\;..;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item19=..\;..\convert;..;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item20=..\convert;..\;..;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item21=..;..\..\Common\measure;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item22=..\;..\..\Common\measure;..;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item23=..\..\Common\measure;..\;..;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item24=..\;..;..\..\corn\format;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item25=..\;..\..\corn\format;..;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item26=..\..\corn\format;..;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item27=..\..\corn\format;..;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item28=..\..\corn\format;..;$(BCB)\include;$(BCB)\include\vcl;dev
+Item29=..\..\corn\format;..\;$(BCB)\include;$(BCB)\include\vcl;\dev
+
+[HistoryLists\hlLibraryPath]
+Count=24
+Item0=..\..\..\..\common\geodesy;..\..\..\..\common\geolocation;..\..;..\..\..\..\CS_suite\UED;..\..\..;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\..\..\common\geolocation;..\..;..\..\..\..\CS_suite\UED;..\..\..;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..;..\..\..\..\CS_suite\UED;..\..\..;..\..\..\tuple;..\..\..\convert;..\..\tuple;..\..\convert;..\..\..\Common\measure;..\..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\;..;..\..\..\CS_suite\UED;..\..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..;..\..\..\CS_suite\UED;..\..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item5=..\;..\..\..\CS_suite\UED;..\..;..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\..\..\CS_suite\UED;..\..;..\;..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\;..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item8=..;..\..\tuple;..\..\convert;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item9=..\;..\..\tuple;..\..\convert;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item10=..\..\tuple;..\..\convert;..\;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item11=..\;..;..\tuple;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item12=..\;..\tuple;..;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item13=..\tuple;..;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item14=..\tuple;..\;..;..\convert;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item15=..\;..\convert;..;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item16=..\convert;..\;..;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item17=..;..\..\Common\measure;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item18=..\;..\..\Common\measure;..;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item19=..\..\Common\measure;..\;..;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item20=..\;..;..\..\corn\format;$(BCB)\lib\obj;$(BCB)\lib
+Item21=..\;..\..\corn\format;..;$(BCB)\lib\obj;$(BCB)\lib
+Item22=..\..\corn\format;..;$(BCB)\lib\obj;$(BCB)\lib
+Item23=..\..\corn\format;..\;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=17
+Item0=xUED_DUMP;xUSE_PCH;xOLD_BINARY_FILE;CS_VERSION=4;USE_OS_FS
+Item1=xUED_DUMP;xUSE_PCH;xOLD_BINARY_FILE;CS_VERSION=4
+Item2=xUED_DUMP;xUSE_PCH;xOLD_BINARY_FILE
+Item3=xUED_DUMP;xUSE_PCH;xOLD_BINARY_FILE;_DEBUG
+Item4=xUED_DUMP;xUSE_PCH;OLD_BINARY_FILE;_DEBUG
+Item5=xUED_DUMP;xUSE_PCH;_DEBUG;xOLD_BINARY_FILE
+Item6=xUED_DUMP;xUSE_PCH;_DEBUG;OLD_BINARY_FILE
+Item7=xUED_DUMP;xUSE_PCH;_DEBUG
+Item8=xUED_DUMP;xUSE_PCH
+Item9=xUED_DUMP;USE_PCH
+Item10=_DEBUG;xUED_DUMP;USE_PCH
+Item11=_DEBUG;xUED_DUMP;xUSE_PCH
+Item12=_DEBUG;xUED_DUMP;SUPPORT_STRING;USE_PCH
+Item13=_DEBUG;xUED_DUMP;SUPPORT_STRING
+Item14=_DEBUG;UED_DUMP;SUPPORT_STRING
+Item15=_DEBUG;UED_DUMP
+Item16=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=7
+Item0=C:\temp\obj\UED\library\BCB5\
+Item1=C:\temp\obj\UED\library\BCB5
+Item2=C:\temp\obj\UED\BCB5\
+Item3=C:\temp\obj\UED\cbuilder5\
+Item4=C:\temp\obj\UED\cbuilder5
+Item5=C:\temp\obj\BCB5\
+Item6=C:\temp\obj\BCB5
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=C:\temp\lib\BCB5\release\
+Item1=C:\temp\lib\BCB5\release
+
+[HistoryLists\hIBPIOutputDir]
+Count=1
+Item0=C:\dev\components\AutoControls\
+
+[HistoryLists\hlTlibPageSize]
+Count=4
+Item0=0x0080
+Item1=0x0040
+Item2=0x0020
+Item3=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+
+  <FILES>
+    <FILE type="override" value="..\..\units_def.cpp" translator="Auto">
+      <WARNOPTSTR value=" -w-par"/>
+    </FILE>
+    <FILE type="override" value="..\..\varcodes.cpp" translator="Auto">
+      <WARNOPTSTR value=" -w-par"/>
+    </FILE>
+  </FILES>
+</PROJECT>

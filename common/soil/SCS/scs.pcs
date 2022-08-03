@@ -1,0 +1,17 @@
+char *TL_Hydrologic_condition ="Hydrologic condition";
+char *TL_Poor ="Poor";
+char *TL_Fair ="Fair";
+char *TL_Good ="Good";
+char *TL_Hydrologic_group ="Hydrologic group";
+char *TL_Land_treatment ="Land treatment";
+char *TL_Fallow ="Fallow";
+char *TL_Row_crops ="Row crops";
+char *TL_Small_grain ="Small grain";
+char *TL_Close_seed_legumes ="Close seed legumes";
+char *TL_Pasture ="Pasture";
+char *TL_Dirt_road ="Dirt road";
+char *TL_Paved_road ="Paved road";
+char *TL_Farmstead ="Farmstead";
+char *TL_Straight_Row ="Straight row";
+char *TL_Contoured ="Contoured";
+char *TL_Terraced ="Terraced";

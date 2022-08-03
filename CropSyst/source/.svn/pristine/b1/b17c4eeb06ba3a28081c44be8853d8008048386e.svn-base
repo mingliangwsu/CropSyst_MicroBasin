@@ -1,0 +1,93 @@
+#ifndef cs_projectH
+#define cs_projectH
+#if (CS_VERSION == 4)
+// Although we no longer directly use project parameters in CropSyst,
+// it is still needed for storing GIS simulation parameters that are used in CropSyst modules
+
+#include "corn/application/project.h"
+#include "common/simulation/simulation.h"
+#include "cs_filenames.h"
+#include "options.h"
+#include "cs_glob.h"
+#include "project_types.h"
+#include "model_options.h"
+#include "rptoptns.h"
+
+// Report options to get the number of GS and Annual variables
+
+#define LABEL_project                  "project"
+#define    LABEL_cropping_system_model "cropping_system_model"
+#define    LABEL_runoff               "runoff"
+#define    LABEL_crop_production_function "crop_production_function"
+
+// STATSGO section
+#define LABEL_STATSGO "STATSGO"
+// I am using the same labels as the statsgo nomenclature
+#define LABEL_mapunit_dbf  "mapunit_dbf"
+// GIS related module
+#define LABEL_GIS                "GIS"
+#define LABEL_subsurface_flow    "subsurface_flow"
+#define LABEL_watershed_runoff   "watershed_runoff"
+#define LABEL_enabled            "enabled"
+//______________________________________________________________________________
+class CropSyst_project_directory;                                                //050325
+namespace CropSyst
+{  class Desired_variables;                                                      //091007
+}
+//______________________________________________________________________________
+class CropSyst_project  // Rename this to CropSyst_project_parameters
+: public Common_project_parameters
+{public: // public for parameter editor
+   CropSyst_project_type_labeled project_type_labeled;                           //050202
+ public:
+   #if (CS_VERSION >= 5)
+   // active_scenario_filename is obsolete, now GIS runs will be initiated
+   // within the scenario directory
+   // NYI
+   #else
+   #if (__BCPLUSPLUS__ < 0x0570)
+
+   #else
+   CORN::OS::Directory_name &active_scenario_filename;                           //130128
+   #endif
+        // alias reference to Common_project &active_filename   //050324
+   #endif
+      //130120  trying to get rid of Filtered_file_name
+/*130808 obsolete the data for STATSGO1 is no longer available anywhere and STATSGO2 we have other import mechanisms that will not be done during CropSyst run
+#ifndef LADSS_UNIX
+   CORN_Directory_name_instance  STATSGO_path;        // This will either be a specific location (any name), or will be statsgo in the respective database directory //050802
+#endif
+*/
+ public:
+#if (CS_VERSION==4)
+   FMT_filename          report_format_filename_rel;                             //051229
+#endif
+ public:
+   bool     run_statistical_analysis;  // When running the simulation perform statistical analysis on each run (generated scenarios)   //060706
+ protected:
+   // Statistics and probability selection are used primarily for GIS module
+   // (selected variables to tally) but may have general application
+   // The statistics and probablity selection are packed in a single nat32 for storage in the file
+   // 0000 pppp pppp ppPP PPPP PPPP SSSS SSSS
+   // S statistic, P probility 10, p probability 5
+   nat32 GS_statistic_selection    [GS_MAX_IDS];                                 //050204
+   nat32 ANNL_statistic_selection  [MAX_YLY_entries];                            //050204
+ public: // constructor
+   CropSyst_project();                                                           //050325
+   inline virtual ~CropSyst_project() {}                                         //120407
+   virtual void expect_structure(bool for_write = false);                        //981208
+   #if (CROPSYST_VERSION < 5)
+   virtual void get_end() ;                                                      //140309
+   #endif
+   inline virtual const char *get_primary_section_name()                   const { return LABEL_project;}         //020912
+   inline virtual const char *get_type_label()                             const { return "CropSyst project";}    //051011
+ public:
+   #if (defined(XLS_OUTPUT) || defined(UED_OUTPUT))
+   void list_required_variables(CropSyst::Desired_variables &required_variables)    const;//091006
+   #endif
+};
+//_2002-03-08___________________________________________________________________
+#endif
+// cs_project.h
+
+#endif

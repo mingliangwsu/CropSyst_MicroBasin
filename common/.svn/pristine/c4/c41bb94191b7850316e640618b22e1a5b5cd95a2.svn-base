@@ -1,0 +1,4 @@
+char *TL_Soil_texture_triangle ="Soil texture triangle";
+char *TL_sand ="sand";
+char *TL_clay ="clay";
+char *TL_silt ="silt";

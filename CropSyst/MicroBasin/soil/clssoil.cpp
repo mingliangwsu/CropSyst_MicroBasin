@@ -1,0 +1,706 @@
+#include "clssoil.h"
+#include <iomanip>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include "CropSyst/source/soil/chemicals_profile.h"
+#include "CropSyst/source/organic_matter/OM_residues_profile_abstract.h"
+#ifdef CHECK_MASS_BALANCE
+#include "control/balanceitem.h"
+#endif
+clsSoil::clsSoil
+(AllControlClass        &ControlRef_
+//160608 #ifdef OLD_EVAPORATE
+//160608 ,modifiable_ Physical::Water_depth  &evaporation_potential_remaining             //160412RLN
+//160608 #endif
+,const CORN::Date_const/*170615LML _const_interface*/       &today_                  //150630RLN
+//160721 #ifdef CROPSYST_WEATHER
+//160721 ,const Weather          &weather_                                                //140218RLN
+//160721 #else
+#ifdef MBVB_SNOW
+,clsSnow                &clsSnowRef_
+#endif
+#ifdef CROPSYST_WEATHER
+//RLN NYI WARNING need to determine exactly what soil needs of weather
+#else
+#ifdef MBVB_SOIL_TEMPERATURE
+,WeatherStateDailyClass &weather_
+#endif
+#endif
+#ifdef CROPSYST_VERSION
+//150723 Actually this can be moved to constructor in all versions but need to check
+,const CS::Annual_temperature &annual_temperature_                               //150724_141222RLN
+#endif
+#ifdef PROVIDES_SOIL_TEMPERATURE_PROFILE
+,const CS::Land_unit_meteorological &meteorological_                       //151022
+#endif
+,const Organic_matter_residues_profile_abstract *OM_residues_profile_kg_m2_      //160224RLN
+//160225 ,BasinCellClass &BasinCellRef_                                                   //160211LML
+)
+#ifdef CROPSYST_VERSION
+:CropSyst::Soil
+   (0 // NYI Smart_soil_parameters          *_parameters check if parameter are needed
+   ,false
+   #ifdef OLD_EVAPORATE
+   ,evaporation_potential_remaining                                              //160412RLN
+   #endif
+   ,today_.get_date32()
+   ,annual_temperature_                                                          //150424RLN
+   #ifdef PROVIDES_SOIL_TEMPERATURE_PROFILE
+   ,meteorological_                                                              //160721RLN
+   #endif
+   )
+#else
+:today(_today)                                                                   //150630RLN
+#endif
+,pSoilProfile              (0)                                                   //151222
+,pSoilProcesses            (0)                                                   //151222
+,pSoilState                (0)                                                   //151222
+,pChemTransport_optional   (0)                                                   //151222
+#ifdef MBVB_SOIL_TEMPERATURE
+,pSoilTemperature          (0)                                                   //151222
+#endif
+,ControlRef                (ControlRef_)
+//160721 #ifdef CROPSYST_WEATHER
+//160721 ,weather                   (weather_)                                            //140218
+//160721 #else
+#ifdef CROPSYST_WEATHER
+//RLN NYI WARNING need to determine exactly what soil needs of weather
+#else
+#ifdef MBVB_SOIL_TEMPERATURE
+,weather(weather_)
+#endif
+#endif
+//160721 #endif
+#ifdef MBVB_SNOW
+,clsSnowRef                (clsSnowRef_)
+#endif
+,OM_residues_profile_kg_m2 (OM_residues_profile_kg_m2_)                          //160225rln
+//160225 ,BasinCellRef              (BasinCellRef_)                                       //160211LML
+{}
+//______________________________________________________________________________
+/*160324LML obs.
+void clsSoil::instantiateSoil
+(SoilProfileClass *_pSoilProfile
+,SoilStateClass *_pSoilState,SoilProcessesClass *_pSoilProcesses
+#ifndef CROPSYST_VERSION
+//150723 Actually this can be moved to constructor in all versions but need to check
+,const CS::Annual_temperature &annual_temperature                                //141222RLN
+#endif
+)
+{
+    pSoilProfile = _pSoilProfile;
+    pSoilState = _pSoilState;
+    pSoilProcesses = _pSoilProcesses;
+	#ifndef CROPSYST_VERSION
+    pOrganicResidueState = new OrganicResidueStateClass;
+    pOrganicResidue = new OrganicResidueClass(*pSoilProfile,
+                                              *pSoilState,
+                                              *pOrganicResidueState,
+                                              *this,
+                                              ControlRef,today);                 //150630RLN
+    pSOMResidueMaster = new SoilOMAndResidueMasterClass(*pSoilProfile,
+                                                        *pSoilState,
+                                                        *pOrganicResidue,
+                                                        *pOrganicResidueState,
+                                                        *this,today);            //150630RLN
+    pAbioticFunctions = new SoilAbioticFunctionsClass;
+	#endif
+    if (pSoilState->chemicals_optional)                                          //151212RLN
+    {
+       #ifndef CROPSYST_CHEMICAL_TRANSPORT
+       pSoilProcesses->pChemTransport_optional                                      //151212RLN
+          = pChemTransport_optional                                                 //151212RLN
+          = new SoilChemicalTransportClass
+               (*pSoilState,*pSoilProfile,*pSoilProcesses,ControlRef);
+       #endif
+       #ifndef CROPSYST_VERSION
+       pSoilNTransformation = new SoilNitrogenTransformationClass
+          (*pSoilProfile,*pSoilState,*pAbioticFunctions);
+       #endif
+    }
+    pSoilTemperature = new SoilTemperatureClass
+        (ControlRef
+        ,*pSoilProfile
+        ,*pSoilState
+        ,annual_temperature                                                      //141222
+        ,weather
+        ,OM_residues_profile_kg_m2                                               //160225
+        ,today
+        //160225 ,BasinCellRef
+        );                                                                 //150630RLN
+//    #ifdef CROPSYST_VERSION
+//       temperature_profile_hourly = pSoilTemperature;                               //150810RLN
+//    #endif
+}
+*/
+//______________________________________________________________________________
+void clsSoil::instantiateSoilReferenceAndTemperature(
+                                        SoilProfileClass *_pSoilProfile
+                                        ,SoilStateClass *_pSoilState
+                                        ,SoilProcessesClass *_pSoilProcesses)
+{
+    pSoilProfile = _pSoilProfile;
+    pSoilState = _pSoilState;
+    pSoilProcesses = _pSoilProcesses;
+    #ifndef CROPSYST_VERSION
+    pOrganicResidueState = new OrganicResidueStateClass;
+    pOrganicResidue = new OrganicResidueClass(*pSoilProfile,
+                                              *pSoilState,
+                                              *pOrganicResidueState,
+                                              *this,
+                                              ControlRef,today);                 //150630RLN
+    pSOMResidueMaster = new SoilOMAndResidueMasterClass(*pSoilProfile,
+                                                        *pSoilState,
+                                                        *pOrganicResidue,
+                                                        *pOrganicResidueState,
+                                                        *this,today);            //150630RLN
+    pAbioticFunctions = new SoilAbioticFunctionsClass;
+    #endif
+    #ifdef MBVB_SOIL_TEMPERATURE
+    pSoilTemperature = new SoilTemperatureClass
+        (ControlRef
+        ,*pSoilProfile
+        ,*pSoilState
+        ,annual_temperature                                                      //141222
+        ,weather
+        ,OM_residues_profile_kg_m2                                               //160225
+        ,today
+        //160225 ,BasinCellRef
+        );                                                                 //150630RLN
+    #endif
+//    #ifdef CROPSYST_VERSION
+//       temperature_profile_hourly = pSoilTemperature;                               //150810RLN
+//    #endif
+}
+//160324LML_____________________________________________________________________
+void clsSoil::instantiateSoilChemicalTransport()
+{
+    #ifndef CROPSYST_VERSION
+    pOrganicResidueState = new OrganicResidueStateClass;
+    pOrganicResidue = new OrganicResidueClass(*pSoilProfile,
+                                              *pSoilState,
+                                              *pOrganicResidueState,
+                                              *this,
+                                              ControlRef,today);                 //150630RLN
+    pSOMResidueMaster = new SoilOMAndResidueMasterClass(*pSoilProfile,
+                                                        *pSoilState,
+                                                        *pOrganicResidue,
+                                                        *pOrganicResidueState,
+                                                        *this,today);            //150630RLN
+    pAbioticFunctions = new SoilAbioticFunctionsClass;
+    #endif
+    if (pSoilState->chemicals_optional)                                          //151212RLN
+    {
+       #ifndef CROPSYST_CHEMICAL_TRANSPORT
+       pSoilProcesses->pChemTransport_optional                                      //151212RLN
+          = pChemTransport_optional                                                 //151212RLN
+          = new SoilChemicalTransportClass
+               (*pSoilState,*pSoilProfile,*pSoilProcesses,ControlRef);
+       #endif
+       #ifndef CROPSYST_VERSION
+       pSoilNTransformation = new SoilNitrogenTransformationClass
+          (*pSoilProfile,*pSoilState,*pAbioticFunctions);
+       #endif
+    }
+}
+//_____________________________________________________________________________/
+clsSoil::~clsSoil()
+{
+#ifdef Destruct_Monitor
+    std::clog<<"~clsSoil:"<<std::endl;
+#endif
+#ifndef CROPSYST_VERSION
+    delete pOrganicResidueState;
+    delete pSOMResidueMaster;
+    delete pOrganicResidue;
+    delete pSoilNTransformation;
+    delete pAbioticFunctions;
+#endif
+    delete pChemTransport_optional;
+#ifdef MBVB_SOIL_TEMPERATURE
+    delete pSoilTemperature;
+#endif
+
+#ifdef Destruct_Monitor
+    std::clog<<"~clsSoil done."<<std::endl;
+#endif
+}
+//______________________________________________________________________________
+double clsSoil::WaterPotential(double Water_Content,double Saturation,
+     double Air_Entry, double b_Value)
+{
+    return Air_Entry * pow((Water_Content / Saturation),(-b_Value));
+}
+//______________________________________________________________________________
+void clsSoil::DailySoilProcesses
+(
+#ifndef CROPSYST_VERSION
+WeatherStateDailyClass &Weather
+//140221 RLNWeather is not member reference
+, clsSimulation &Simulation
+#ifdef CROPSYST_PROPER_CROP
+,const CropSyst::Crop_interfaced &crop                                           //140502
+#else
+, clsCrop &crop
+#endif
+, DebugStateClass &DebugState
+#endif
+)
+{
+    ////Calculate soil profile water potential
+    #if (!defined (CROPSYST_HYDROLOGY) || defined(MBVB_FD))
+    for (int i = 1; i <= pSoilProfile->NumberOfLayers(); i++) {
+        pSoilState->Water_Potential[i] = 
+                WaterPotential(pSoilState->get_liquid_water_content_volumetric(i),
+                               pSoilProfile->Saturation_Water_Content[i], 
+                               pSoilProfile->Air_Entry_Potential[i],
+                               pSoilProfile->b_Value[i]);
+    }
+    #endif
+    ////Call SoilTemperature.CalculateSoilTemperature(Simulation, Weather, Snow)
+	#ifndef CROPSYST_VERSION
+    /*std::clog<<"(before pSOMResidueMaster->DailyProcess) "
+            <<" Layer_Nitrate_N_Mass:"<<pSoilState->Layer_Nitrate_N_Mass[1]
+            <<" Layer_Ammonium_N_Mass:"<<pSoilState->Layer_Ammonium_N_Mass[1]
+               <<std::endl;*/
+    pSOMResidueMaster->DailyProcess(Simulation, DebugState);
+    /*std::clog<<"(before pSoilNTransformation->NitrogenTransformation) "
+            <<" Layer_Nitrate_N_Mass:"<<pSoilState->Layer_Nitrate_N_Mass[1]
+              <<" Layer_Ammonium_N_Mass:"<<pSoilState->Layer_Ammonium_N_Mass[1]
+               <<std::endl;*/
+    pSoilNTransformation->NitrogenTransformation(crop, Simulation, Weather);
+	#endif
+    /*std::clog<<"(after pSoilNTransformation->NitrogenTransformation) "
+            <<" Layer_Nitrate_N_Mass:"<<pSoilState->Layer_Nitrate_N_Mass[1]
+              <<" Layer_Ammonium_N_Mass:"<<pSoilState->Layer_Ammonium_N_Mass[1]
+               <<std::endl;*/
+    ////Calculate soil profile water depletion from field capacity
+    double Soil_Water_Depletion(0.0);
+    for (int i = 1; i <= pSoilProfile->NumberOfLayers(); i++) {
+        Soil_Water_Depletion += 
+                (pSoilProfile->get_field_capacity_volumetric(i)
+                 - pSoilState->get_liquid_water_content_volumetric(i)
+                ) * pSoilProfile->get_thickness_m(i) * 1000;
+    }
+    pSoilState->Profile_Soil_Water_Depletion = Soil_Water_Depletion;
+    #ifdef MBVB_SOIL_TEMPERATURE
+    #ifdef MBVB_SNOW
+    if (clsSnowRef.Current_Snow_Pack_SWE_mm > 0)                                 //140826FMS
+    #else
+    if (has_snow_cover)                                                        //160721RLN
+    #endif
+        pSoilState->Surface_Soil_Cover = SSC_Snow;                               //140826FMS
+    #endif
+}
+//______________________________________________________________________________
+bool clsSoil::start_day()                                                        //141221
+{
+   bool started = Soil::start_day();                                             //160606_150810RLN
+    #ifndef CROPSYST_VERSION
+    //determine net precipitation
+    pSoilProcesses->DetermineEffectivePrecipitation(weather, Simulation, crop);
+    if (ControlRef.useHourlyRunoff() == false) {
+        //determine daily runoff - see Sub calcHourlyRunoff below, 
+        //which kicks in when .useHourlyRunoff = True
+        pSoilProcesses->DetermineSCSRunoff(crop, Simulation, Management);
+    }
+    //FMS Aug 20, 2014 pSoilProcesses->DetermineSoilWaterEvaporation(weather,Snow,Simulation,  crop);
+    #endif
+    #ifdef MBVB_SOIL_TEMPERATURE
+    started &= pSoilTemperature->start_day();                                    //150810RLN was InitializeDayforSoilTemperature();
+    #endif
+    return started;                                                              //150810RLN_141221
+}
+//______________________________________________________________________________
+bool clsSoil::initialize_parameters                                              //150723
+#ifdef CROPSYST_VERSION
+(const CORN::OS::File_name &soil_filename
+,CropSyst::Scenario &initial_profile)
+#else
+(int soil_ID,clsSimulation &Simulation)
+#endif
+
+//I needed to rename this because initialize() is already declared for Simulation_element 150724RLN
+
+{
+    //Re-dimension soil variables
+    //hand over GridCell ID to Soil ID
+    //I_D = ID;
+#ifdef LIU_DEBUG
+    //std::clog<<"ClearStateVariables..."<<std::endl;
+#endif
+    //160317LML pSoilState->ClearStateVariables();
+    /*150723 NYI
+    #ifdef CROPSYST_SOILFILE
+    pSoilState->SetDefaultSoilState();
+    #else
+    */
+    /*160317LML
+    pSoilState->ReadSoilStateParameters
+       #ifdef CROPSYST_VERSION
+       (soil_filename,initial_profile);                                                          //150723RLN
+       #else
+       (soil_ID);                                                                //130826FMS
+       #endif
+       */
+
+    pSoilState->CopySoilStateParameters(pSoilState->initSoilStateRef,initial_profile); //160317LML
+    //150723 NYI #endif
+    //for (int i = 0; i <= pSoilProfile->NumberOfLayers(); i++)
+    //{
+    //    chemicals->NH4->mass[i] = pSoilState->
+    //}
+    pSoilProcesses->initialize();                                                //150528RLN
+    #ifndef CROPSYST_VERSION
+    //Set SCS Curve Number values for fallow and residue covered soils
+    pSoilState->SetSCSSoilCurveNumbers();
+    // Initialize soil organic matter pools
+    pSOMResidueMaster->InitializeSoilOrganicMatter(Simulation);
+    //Initialize residues
+    pOrganicResidue->initialize(Simulation);    //Check later M.Liu Feb. 5, 2014
+    //std::clog<<"Finish clsSoil initilization."<<std::endl;
+   #endif
+   return true;
+}
+//______________________________________________________________________________
+
+//160722 Note that HourlySoilProcesses has been moved to Soil_MicroBasin::process_hour()
+
+void clsSoil::HourlySoilProcesses
+(
+#ifndef CROPSYST_VERSION
+clsSimulation &Simulation,
+#endif
+#if (defined(CROPSYST_PROPER_CROP) || defined(CROPSYST_VERSION))
+/*160606RLN  CropSyst handles transipration
+float64 fract_canopy_cover,                                                      //141212
+*/
+#ifdef MBVB_SOIL_TEMPERATURE
+float64 crop_height,
+#endif
+#else
+clsCrop &crop,
+#endif
+#if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_MANAGEMENT))
+#else
+clsManagement &Management,
+#endif
+#ifndef CROPSYST_WEATHER
+//160810 WeatherStateDailyClass &Weather,
+#ifndef CROPSYST_VERSION
+clsSnow &Snow,
+#endif
+#endif
+//160812RLN was used for debug int cellid //141126LML  for debug
+)
+{
+    bool success_FD(false);
+    #ifndef CROPSYST_VERSION
+    #ifdef CROPSYST_PROPER_CROP
+    #else
+    bool Crop_Emerged = Simulation.pSimulationRotation->getCropExist();
+    #endif
+    #endif
+    int current_hour = ControlRef.hour;
+    float64 actually_infiltrated_time_step_m(0.0);
+    float64 actually_evaporated_time_step_m_ts(0.0);
+    //float64 actually_reported_drainage_m_ts;
+    float64 actually_balance_drainage_m_ts(0.0);
+    float64 surface_runoff_m_ts(0.0);
+    float64 balance_leached_NH4_N_kg_ts(0.0);                                    //170417LML
+    float64 balance_leached_NO3_N_kg_ts(0.0);                                    //170417LML
+    //float64 runoff_m_ts(0.0);
+    double error_FD_m_ts(-9999.0);
+    //double pot_soil_evap_mm(0.0);
+    #ifdef CHECK_MASS_BALANCE
+    BalanceItem water_bal;
+    BalanceItem DIN;
+    double water_storage = pSoilState->pond.ref_depth().get_m()
+                           + pSoilState->getTotalSoilWaterContent_m();
+    /*170502LML double initDIN = chemicals->sum_NH4_to_depth(ENTIRE_PROFILE_DEPTH_as_9999,true)
+                     + chemicals->sum_NO3_to_depth(ENTIRE_PROFILE_DEPTH_as_9999,true)
+                     + chemicals->NH4->get_surface_mass() * NH4_to_N_conv
+                     + chemicals->NO3->get_surface_mass() * NO3_to_N_conv
+                     ;*/
+
+
+    //std::clog << "initial_surfaceN:" << (chemicals->NH4->get_N_mass(0) + chemicals->NO3->get_N_mass(0)) << std::endl;
+
+
+    water_bal.SetInitPool(water_storage);
+    //170502LML DIN.SetInitPool(initDIN);
+    #ifndef CROPSYST_VERSION
+    BalanceItem nitrate_bal,amonia_bal;
+    #endif
+    #endif
+    /*LML 141022 need treatments on the pond, i.e. seperate runon and surface water storage*/
+    double eff_rain_m_ts = 
+        //160616LML mm_to_m(Snow.Hourly_Rain_mm[current_hour] + Snow.Hourly_Snow_Melt_Amount[current_hour]);
+        pSoilState->pond.relinquish_depth();                                     //160616LML
+    double irrig_m_ts = 0;
+    #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_MANAGEMENT))
+    #else
+    irrig_m_ts = mm_to_m(Management.pManagementState->Irrigation_Amount / 24.0);
+    #endif
+    double runon_m_ts(0.0);
+    double yesterday_hourly_transpiration_m(0);
+
+    /*160606RLN  CropSyst handles transipration
+    pSoilProcesses->UpdateHourlySoilWaterContentByDailyTranspiration
+         (weather
+         #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_CROP))
+         ,fract_canopy_cover                                                     //150317RLN
+         #else
+         ,crop
+         #endif
+         ,yesterday_hourly_transpiration_m);                                     //150310LML_140904FMS
+    */
+    /*160505RLN
+    if (current_hour == 0)
+    {  // calculate daily potential evaporation (for CROPSYST_FD method)         //141022LML
+        for (int hour_of_day = 0;hour_of_day < 24; hour_of_day++) {
+            double temp = pSoilProcesses->calcPotSoilWaterEvaporationHourly
+               (hour_of_day
+               ,Weather
+               ,Snow
+               #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_CROP))
+               ,fract_canopy_cover                                               //141212
+               #else
+               ,Simulation
+               ,crop
+               #endif
+               );
+            assert(temp >= 0.0);
+            pSoilProcesses->UpdateSoilAndCropOutputsOnSoilPotEvap
+               (hour_of_day
+               #ifndef CROPSYST_VERSION
+               #ifndef CROPSYST_PROPER_CROP
+               ,Crop_Emerged
+               ,crop
+               #endif
+               #endif
+               ,temp);
+
+               //160414RLN UpdateSoilAndCropOutputsOnSoilPotEvap is probably obsolete
+
+            if (hour_of_day == current_hour) pot_soil_evap_mm = temp;
+        }
+    } else {
+        pot_soil_evap_mm = pSoilProcesses->calcPotSoilWaterEvaporationHourly
+        (current_hour
+        ,Weather
+        ,Snow
+        #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_CROP))
+        ,fract_canopy_cover                                                      //141212
+        #else
+         ,Simulation
+         ,crop
+        #endif
+        );
+    } */
+
+    //TODO: soil hourly evaporation
+
+    //std::clog<<"hour:"<<current_hour<<"\tpot_soil_evap_mm:"<<pot_soil_evap_mm<<std::endl;
+    #if (defined(CHECK_OVERLANDFLOW_WATER_AND_NITROGEN_FOR_DEBUG) || defined(CHECK_SOIL_LATERALFLOW_WATER_AND_NITROGEN_FOR_DEBUG) || defined(CHECK_HOURLY_CASCADE_FOR_DEBUG))
+    pot_soil_evap_mm = 0;
+    std::clog<<"DEBUG!!! SET pot_soil_evap_mm = 0!!!\n";
+    #endif
+    /*160505RLN soil evaporation will be from Crop Proper
+    if (ControlRef.infiltration_model_labeled.get() == CASCADE_HOURLY_INFILTRATION) //150709
+    {
+        actually_evaporated_time_step_m_ts = 
+            mm_to_m(pSoilProcesses->DetermineSoilWaterEvaporationHourly(pot_soil_evap_mm));
+        assert(actually_evaporated_time_step_m_ts >= 0);
+    }
+    */
+    //pSoilState->Daily_PET_MB += mm_to_m(pot_soil_evap_mm);                       //160407LML
+    #ifndef CROPSYST_VERSION
+    pSoilProcesses->TillageEffectOnWCHourly(Management);
+    #ifdef CHECK_MASS_BALANCE
+    nitrate_bal.SetInitPool(pSoilState->getProfileNO3NMass()+pSoilState->Layer_Nitrate_N_Mass[0]);
+    amonia_bal.SetInitPool(pSoilState->getProfileNH4NMass()+pSoilState->Layer_Ammonium_N_Mass[0]);
+    #endif
+    #endif
+
+    if (ControlRef.infiltration_model_labeled.get() == FINITE_DIFFERENCE_INFILTRATION) //150709RLN
+    {
+#ifndef LIU_FD_RICHARD
+        success_FD = pSoilProcesses->performFD_InfiltrationAndTransport
+            (false
+            ,eff_rain_m_ts
+            ,irrig_m_ts
+            ,runon_m_ts
+            ,actually_infiltrated_time_step_m
+            ,actually_evaporated_time_step_m_ts
+            //,actually_reported_drainage_m_ts
+            ,actually_balance_drainage_m_ts
+            ,surface_runoff_m_ts
+            ,error_FD_m_ts
+            //#ifndef CROPSYST_VERSION
+            //,Management
+            //,Simulation
+            //#endif
+            );
+
+        #ifdef LIU_DEBUG
+        if(!success_FD) std::clog<<" DOY:"<<(int)today.get_DOY()
+                                <<" Hour:"<<(int)ControlRef.hour
+                                <<" Unsucess FD verticle flow counted!"<<std::endl;
+        #endif
+#else
+        #ifdef MBVB_FD
+        pSoilProcesses->performFDRichard(Simulation, Management);
+        success_FD = true;
+        #endif
+#endif
+    }
+    pSoilProcesses->UpdateSoilAndCropOutputsOnSoilEvap
+        (ControlRef.hour
+        #if (defined(CROPSYST_PROPER_CROP) || defined(CROPSYST_VERSION))
+        #else
+        ,Crop_Emerged
+        ,crop
+        #endif
+        ,m_to_mm(actually_evaporated_time_step_m_ts));                           //141021LML
+    // moved after FD cascade for calculating soil evaporation                   //141021LML
+
+    #ifdef MBVB_SOIL_TEMPERATURE
+    pSoilTemperature->CalculateHourlySoilTemperature
+        #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_CROP))
+        (fract_canopy_cover
+        #ifdef MBVB_SNOW
+        ,clsSnowRef
+        #endif
+        ,crop_height);                             //141212
+        #else
+        (Simulation, Snow, crop);
+        #endif
+    #endif
+
+    //160616LML moved under clsSnowRef.HourlySnowRoutine(current_hour);                                  //160224RLN
+        //160224RLN  (weather,BasinCellRefX);                                    //160211LML
+    //if (cellid == 106) {
+    //    std::clog<<"beforre cascade: NO3_amount[0]"<<pSoilState->Layer_Nitrate_N_Mass[0]
+    //            <<" NO3_con[0]"<<pSoilState->Layer_Nitrate_N_Conc[0]<<std::endl;
+    //}
+    if (!success_FD)
+    {
+        /*std::clog<<"BEFORE PerformHourlyCascadeInfiltrationAndTransport:"
+                 <<"\thour:"<<ControlRef.hour
+                 <<"\tcell:"<<clsSnowRef.RefGridID
+                 <<"\tamount[NH4][layer=0]:"<<chemicals->get_NH4_molecular_mass_kg_m2(0)
+                 <<"\tamount[NO3][layer=0]:"<<chemicals->get_NO3_molecular_mass_kg_m2(0)
+                 <<std::endl;*/
+        pSoilProcesses->PerformHourlyCascadeInfiltrationAndTransport(
+                eff_rain_m_ts
+                ,irrig_m_ts
+                ,runon_m_ts
+                ,actually_infiltrated_time_step_m
+                //,actually_reported_drainage_m_ts
+                ,actually_balance_drainage_m_ts
+                ,surface_runoff_m_ts
+                ,balance_leached_NH4_N_kg_ts                                     //170417LML
+                ,balance_leached_NO3_N_kg_ts                                     //170417LML
+				#ifndef CROPSYST_VERSION
+				,Simulation
+                ,Management
+				#endif
+				);
+
+        /*if (pSoilState->get_liquid_water_content_volumetric(17) > pSoilProfile->get_saturation_water_content_volumetric(17,0))
+        std::clog<<"AFTER PerformHourlyCascadeInfiltrationAndTransport:"
+                 <<"\thour:"<<ControlRef.hour
+                 //<<"\tcell:"<<
+                 //<<"\tamount[NH4][layer=0]:"<<chemicals->get_NH4_molecular_mass_kg_m2(0)
+                 //<<"\tamount[NO3][layer=0]:"<<chemicals->get_NO3_molecular_mass_kg_m2(0)
+                 <<"\tvwc[17]:" << pSoilState->get_liquid_water_content_volumetric(17)
+                 <<"\tvwc_sat[17]:" << pSoilProfile->get_saturation_water_content_volumetric(17,0)
+                 <<std::endl;*/
+
+    }
+    pSoilState->pond.set_depth(surface_runoff_m_ts);                             //160616LML
+    #ifdef MBVB_SNOW
+    clsSnowRef.HourlySnowRoutine(current_hour);                                  //160224RLN_160616LML moved here
+    #endif
+    //if (cellid == 106) {
+    //    std::clog<<"after cascade: NO3[0]"<<pSoilState->Layer_Nitrate_N_Mass[0]
+    //             <<" NO3_con[0]"<<pSoilState->Layer_Nitrate_N_Conc[0]<<std::endl;
+    //}
+    //Hourly_Prec_Irrig_SnowMelt_m = Hourly_Non_Intercepted_Rain_m + 
+    //Hourly_Irrigation_m + Hourly_Snow_Melt_m;                                  //130110FMS
+    pSoilState->Hourly_Prec_Irrig_SnowMelt_m         = eff_rain_m_ts + irrig_m_ts;  //140917LML
+    pSoilState->Daily_Irrigation_m                  += irrig_m_ts;
+    pSoilState->Daily_Drainage_m                    += actually_balance_drainage_m_ts;         //140509 RLN
+    pSoilState->Hourly_Drainage_m                    = actually_balance_drainage_m_ts;         //140509 RLN
+    pSoilState->Hourly_balance_leached_NH4_N         = balance_leached_NH4_N_kg_ts;            //170417LML
+    pSoilState->Hourly_balance_leached_NO3_N         = balance_leached_NO3_N_kg_ts;            //170417LML
+    pSoilState->Hourly_Infiltration_m                = actually_infiltrated_time_step_m;
+    pSoilState->Daily_Infiltration                  += actually_infiltrated_time_step_m;
+    pSoilState->Hourly_Runoff_infiltration_excess_m  = surface_runoff_m_ts;
+    pSoilState->Daily_Runoff_infiltration_excess_m  += surface_runoff_m_ts;
+    //pSoilState->Hourly_Runoff_m
+
+    #ifdef MSVB_INFILTRATION
+    if (ControlRef.infiltration_model_labeled.get()==CASCADE_HOURLY_INFILTRATION) //150709RLN
+        pSoilProcesses->Finite_Difference_Error_mm = -9999.0;
+    else if (!success_FD)
+        pSoilProcesses->Finite_Difference_Error_mm = m_to_mm(error_FD_m_ts);
+    // Set hourly WC
+    #endif
+    for (int layer = 1; layer <= pSoilProfile->get_number_layers(); layer ++)
+    {   if (ControlRef.hour == 23)
+            pSoilState->Yesterday_WC[layer] = pSoilState->get_water_plus_ice_content_volumetric(layer);
+        pSoilState->Today_Hourly_WC[layer][ControlRef.hour] = pSoilState->get_water_plus_ice_content_volumetric(layer);
+    }
+    #ifdef CHECK_MASS_BALANCE
+    water_storage
+       = pSoilState->pond.ref_depth().get_m()                                    //160411RLN
+       + pSoilState->getTotalSoilWaterContent_m();
+    water_bal.SetFluxIn(0);                                                      //160822LML eff_rain_m_ts+irrig_m_ts);
+    water_bal.SetFluxOut(actually_balance_drainage_m_ts+actually_evaporated_time_step_m_ts+yesterday_hourly_transpiration_m);
+    water_bal.SetFinalPool(water_storage);
+
+    /*170502LML double finalDIN = chemicals->sum_NH4_to_depth(ENTIRE_PROFILE_DEPTH_as_9999,true)
+                      + chemicals->sum_NO3_to_depth(ENTIRE_PROFILE_DEPTH_as_9999,true)
+                      + chemicals->NH4->get_surface_mass() * NH4_to_N_conv
+                      + chemicals->NO3->get_surface_mass() * NO3_to_N_conv;*/
+
+    //std::clog << "final_surfaceN:" << (chemicals->NH4->get_N_mass(0) + chemicals->NO3->get_N_mass(0)) << std::endl;
+
+
+    //170502LML DIN.SetFinalPool(finalDIN);
+    //170502LML DIN.SetFluxOut(balance_leached_NH4_N_kg_ts + balance_leached_NO3_N_kg_ts);
+
+    #ifndef CROPSYST_VERSION
+    if (pSoilState->chemicals_optional)                                           //151212RLN
+    {
+    nitrate_bal.SetFinalPool(pSoilState->getProfileNO3NMass()+pSoilState->Layer_Nitrate_N_Mass[0]);
+    nitrate_bal.SetFluxOut(pChemTransport->Chemical_Mass_Leaching_NO3);
+    amonia_bal.SetFinalPool(pSoilState->getProfileNH4NMass()+pSoilState->Layer_Ammonium_N_Mass[0]);
+    amonia_bal.SetFluxOut(pChemTransport->Chemical_Mass_Leaching_NH4);
+    }
+    #endif
+    if (!water_bal.IsMassBalance(1e-4)) {
+        #pragma omp critical
+        {
+        water_bal.PrintMassBalanceTerms("clssoil::HourlySoilProcesses Water");
+        }
+    }
+    /*170502LML if (!DIN.IsMassBalance(1e-4)) {
+        #pragma omp critical
+        {
+        DIN.PrintMassBalanceTerms("clssoil::HourlySoilProcesses DIN");
+        }
+    }*/
+    #endif
+}
+//_____________________________________________________________________________/
+#ifdef CROPSYST_HYDROLOGY
+unmodifiable_ Soil_hydrology_interface *clsSoil::ref_hydrology()  const
+{  return pSoilState->hydrology;
+}
+//_2014-05-20___________________________________________________________________
+#endif

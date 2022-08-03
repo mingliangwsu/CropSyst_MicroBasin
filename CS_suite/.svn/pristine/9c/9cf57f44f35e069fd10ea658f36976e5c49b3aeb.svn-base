@@ -1,0 +1,88 @@
+#ifndef CS_OBSERVATIONH
+#define CS_OBSERVATIONH
+
+#include "corn/math/statistical/statistics_types.hpp"
+#include "CS_suite/observation/CS_emanator.h"
+
+namespace CS
+{
+//______________________________________________________________________________
+class Emanator;
+//class Inspectors;
+//______________________________________________________________________________
+} // namespace CS
+#define CS_EPHEMERAL true
+#define CS_NOT_EPHEMERAL false
+/*170317 CS_ONTOLOGY_ROOT was essentially want is now the ontology domain
+#define CS_ONTOLOGY_ROOT true
+#define CS_NOT_ONTOLOGY_ROOT false
+*/
+//170321#define CS_IS_DOMAIN  true
+//170321#define CS_NOT_DOMAIN false
+
+//______________________________________________________________________________
+#define RENDER_INSPECTORS_DECLARATION           \
+virtual CS::Emanator *render_inspectors         \
+(CORN::Container      &inspectors               \
+,const CS::Emanator  *context                   \
+,const std::string   &instance ) rendition_
+//______________________________________________________________________________
+#define RENDER_INSPECTORS_DECLARATION_structure \
+virtual CS::Emanator *render_inspectors_structure         \
+(CORN::Container      &inspectors               \
+,const CS::Emanator  *context                   \
+,const std::string   &instance                  \
+,CORN::Statistic      statistic) rendition_
+// This is used where the object is a structure where all items
+// have the same statistic.
+// Now that recorders have tallies of tallies this
+// RENDER_INSPECTORS_DECLARATION_group is probably not applicable
+// it is currently only used in
+//______________________________________________________________________________
+/*170321 replaced with RENDER_INSPECTORS_DECLARATION_group
+#define RENDER_INSPECTORS_DECLARATION           \
+virtual CS::Emanator *render_inspectors         \
+(CORN::Container      &inspectors               \
+,const CS::Emanator  *context                   \
+,const std::string   &instance                  \
+,CORN::Statistic      statistic) rendition_
+//______________________________________________________________________________
+*/
+#define RENDER_INSPECTORS_DECLARATION_PURE      \
+   RENDER_INSPECTORS_DECLARATION = 0
+//______________________________________________________________________________
+#define RENDER_INSPECTORS_DEFINITION(rendering_class)    \
+CS::Emanator *rendering_class::render_inspectors         \
+(CORN::Container      &inspectors                        \
+,const CS::Emanator  *context                            \
+,const std::string   &instance          ) rendition_
+//______________________________________________________________________________
+#define RENDER_INSPECTORS_DECLARATION_structure(rendering_class)    \
+CS::Emanator *rendering_class::render_inspectors_structure         \
+(CORN::Container      &inspectors                        \
+,const CS::Emanator  *context                            \
+,const std::string   &instance                           \
+,CORN::Statistic      statistic) rendition_
+//______________________________________________________________________________
+/*170321
+#define RENDER_INSPECTORS_DEFINITION(rendering_class)    \
+CS::Emanator *rendering_class::render_inspectors         \
+(CORN::Container      &inspectors                        \
+,const CS::Emanator  *context                            \
+,const std::string   &instance                           \
+,CORN::Statistic      statistic_obsolete) rendition_
+//______________________________________________________________________________
+*/
+
+/*
+#define KNOW_EMANATOR(ephemeral)  \
+CS::Emanator &emanator \
+= CS::provide_emanators().know((nat32)this,instance,get_ontology(),ephemeral,context)
+//______________________________________________________________________________
+*/
+#define KNOW_EMANATOR(inception_date,ephemeral)  \
+CS::Emanator &emanator \
+= CS::provide_emanators().know((nat32)this,instance,get_ontology(),ephemeral,context,inception_date)
+//______________________________________________________________________________
+
+#endif

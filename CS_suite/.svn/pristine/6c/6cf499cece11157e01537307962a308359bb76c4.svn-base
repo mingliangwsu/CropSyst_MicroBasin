@@ -1,0 +1,36 @@
+//______________________________________________________________________________
+
+#ifndef form_auto_NO3_applH
+#define form_auto_NO3_applH
+//______________________________________________________________________________
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include "RNAutoParameterEditBar.h"
+//______________________________________________________________________________
+#include "mgmt_param.h"
+#include <ExtCtrls.hpp>
+class Tparameter_file_form;
+//______________________________________________________________________________
+class Tform_auto_NO3_application : public TForm
+{
+__published:	// IDE-managed Components
+   TLabel *Label1;
+   TLabel *Label2;
+   TLabel *Label3;
+   TRNAutoParameterEditBar *percent_of_application_editbar;
+   TLabel *Label4;
+private:	// User declarations
+   CropSyst::N_application_soil_observation_mode::Split_application *auto_NO3_appl_op;
+public:		// User declarations
+   __fastcall Tform_auto_NO3_application(TComponent* Owner);
+   void bind_to
+      (CropSyst::N_application_soil_observation_mode::Split_application *i_auto_NO3_appl_op
+      ,Tparameter_file_form       *_parameter_file_form);
+};
+//______________________________________________________________________________
+extern PACKAGE Tform_auto_NO3_application *form_auto_NO3_application;
+//______________________________________________________________________________
+#endif
+

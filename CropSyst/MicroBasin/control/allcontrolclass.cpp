@@ -1,0 +1,528 @@
+#include "allcontrolclass.h"
+#include "util/pubtools.h"
+#include "parameters/organicresidueparameterclass.h"
+//160225 obsolete #include "management/managescheduleclass.h"     //LML 140827
+//#include "corn/datetime/date.hpp"
+#include "corn/OS/file_system_engine.h"
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+
+const char *Auto_N_grid_option_table[] =
+{
+    "auto_N_default"
+    ,"auto_N_grid_fixed"
+    ,"auto_N_grid_varied"
+    ,0
+};
+//______________________________________________________________________________
+AllControlClass::AllControlClass
+(const CORN::OS::Directory_name &_scenario_directory)
+:CropSyst::Scenario           (false)
+//160225 (&_scenario_directory)
+,end_date(stop_date)                                                             //150630RLN
+,hour                         (0)
+,max_soil_layers              (15)
+,solute_species               (0)
+#ifndef CROPSYST_VERSION
+,max_num_crops_each_grid      (5)
+#endif
+//,b_hourly_met                 (0)
+,TimeStep_Lateralflow         (0)
+,TimeStep_SoilLateralflow     (0)
+,TimeStep_Overlandflow        (0)
+,TimeStep_Cascadeflow         (0)
+,Invalid_Met_Label            (-9999.0)                       //The value that indicate the met record is invalid
+,b_soil_lateralflow           (true)
+,b_instant_overlandflow       (false)
+,total_crop_types             (0)
+,Overlandflow_Method(1)    //8-D
+,use_Hourly_Runoff            (0)
+,PerchedWT_Enabled            (0)
+,PerchedWT_Disabled_Watershed_Property_Calculated(false)
+//170424LML ,method_outlet_flowrate       (0)
+//151028LML obs,constant_outlet_slop_or_elevation (0)
+,Current_CO2_Concentration    (0)
+,bOutput_Format_Esri_Grid     (false)                                            //150721RLN
+,bWrite_Hourly_Output         (false)                                            //150721RLN
+,bWrite_Daily_Output          (false)                                            //150721RLN
+,bWrite_Growth_Season_Output  (false)                                            //150721RLN
+,bWrite_Growth_Daily_Output   (false)                                            //150721RLN
+,bWrite_Annual_Output         (false)                                            //150721RLN
+//150708RLN  unused?         ,bPrintedBasinHead            (false)
+,Flux_Carbon_Daily_unused     (false)                                            //140702FMS
+,Hourly_Outputs               (false)                                            //140605FMS
+,Culm_Snow_Melt               (0.0)                   //m SWE                    //140501FMS
+,Worksheet_Output_all_Cell_MB (false)                                            //140606FMS
+,Start_Date_Hourly_Output     (2099265)                                          //150721RLN
+,End_Date_Hourly_Output       (2099265)                                          //150721RLN
+,Start_Date_Hourly_Esri_Grid_Output(2099265)                                     //150721RLN
+,End_Date_Hourly_Esri_Grid_Output  (2099265)                                     //150721RLN
+,auto_N_grid_option           (AUTO_N_DEFAULT)                                   //170331LML
+,use_even_soil_N_and_FC       (true)                                             //170404LML
+#ifndef CROPSYST_VERSION
+,num_management_types         (0)                                                //150721RLN
+,parrManagementSchedule       (0)                                                //150721RLN
+#endif
+//150617LML ,doSurfaceFlowSimulation      (0)
+/*150721 RLN
+,excess_water                 (0.0)
+,infiltrated                  (0.0)
+,water_applied                (0.0)
+,water_in_vertical            (0.0)
+,vertical_drainage            (0.0)
+*/
+{
+   debug.excess_water                 =(0.0);
+   debug.infiltrated                  =(0.0);
+   debug.water_applied                =(0.0);
+   debug.water_in_vertical            =(0.0);
+   debug.vertical_drainage            =(0.0);
+
+    //Initialize
+   #ifdef CROPSYST_VERSION
+   #else
+    pOrganic_Residue_Parameters = new OrganicResidueParameterClass(*this);
+    #ifdef CROPSYST_PROPER_CROP
+    #else
+    #endif
+    #ifdef CROPSYST_PROPER_MANAGEMENT
+    #else
+    parrManagementSchedule = new ManageScheduleClass[200];                       //140827LML
+    #endif
+   #endif
+}
+//______________________________________________________________________________
+AllControlClass::~AllControlClass()
+{
+#ifdef Destruct_Monitor
+    std::clog<<"~AllControlClass:"<<std::endl;
+#endif
+   #ifdef CROPSYST_VERSION
+   #else
+    delete pOrganic_Residue_Parameters;
+    #ifdef CROPSYST_PROPER_CROP
+    #else
+        delete pCrop_Parameter_Collection;
+    #endif
+    #ifndef CROPSYST_PROPER_MANAGEMENT
+     delete[] parrManagementSchedule;
+    #endif
+    #endif
+#ifdef Destruct_Monitor
+    std::cout<<"~AllControlClass done."<<std::endl;
+#endif
+}
+//______________________________________________________________________________
+#ifndef CROPSYST_VERSION
+void AllControlClass::setStartDate(CORN::Date& sdate) {start_date = sdate;}
+void AllControlClass::setEndDate(CORN::Date& edate) {end_date = edate;}
+#endif
+const CORN::Date_32_cowl& AllControlClass::getStartDate() const {return start_date;}
+CORN::Date_const& AllControlClass::getEndDate() const {return end_date;}
+int AllControlClass::getMaxSoilLayers() const {return max_soil_layers;}
+double AllControlClass::getTSLateralFlow() const {return TimeStep_Lateralflow;}
+double AllControlClass::getTSOverlandFlow() const
+{  return TimeStep_Overlandflow;
+}
+double AllControlClass::getTSSoilLateralFlow() const
+{  return TimeStep_SoilLateralflow; }
+double AllControlClass::getTSCascadeFlow() const
+{  return TimeStep_Cascadeflow; }
+int AllControlClass::getSoluteSpecies() const {return solute_species;}
+double AllControlClass::getInvalidMetLabel() const {return Invalid_Met_Label;}
+//bool AllControlClass::getBHourlyMet() const {return b_hourly_met;}
+//void AllControlClass::setBHourlyMet(bool _hourly) {b_hourly_met = _hourly;}
+#ifndef CROPSYST_VERSION
+void AllControlClass::setMaxNumCropsEachGrid(int MNCEG) {
+    max_num_crops_each_grid = MNCEG;
+}
+int AllControlClass::getMaxNumCropsEachGrid() {return max_num_crops_each_grid;}
+#endif
+bool AllControlClass::useHourlyRunoff() {return use_Hourly_Runoff;}
+//bool AllControlClass::isDoSpatialSimulation() {return do_Spatial_Simulation;}
+bool AllControlClass::isDoSoilLaterFlow() {return b_soil_lateralflow;}
+bool AllControlClass::isInstantOverlandFLow() {return b_instant_overlandflow;}
+void AllControlClass::setDoSoilLaterFlow(bool setvalue)
+{  b_soil_lateralflow = setvalue; }
+void AllControlClass::setInstantOverlandFLow(bool setvalue)
+{  b_instant_overlandflow = setvalue; }
+int AllControlClass::getTotalCropTypes() {return total_crop_types;}
+//______________________________________________________________________________
+bool AllControlClass::expect_structure(bool for_write)
+{
+   set_current_section("MicroBasin");
+      expect_nat8("soil_layers", max_soil_layers,10);
+      expect_nat8("solute_species", solute_species,10);
+
+      expect_float64("invalid_met_marker", Invalid_Met_Label);
+    //bool do_Spatial_Simulation;                   //LML 140813 if false, none soil lateral flow, and overlandflow is instant
+      expect_bool("soil_lateralflow", b_soil_lateralflow);
+      expect_bool("instant_overlandflow", b_instant_overlandflow);
+
+    //bool Use_MicroBasin_Soil_Profile;
+
+#ifdef LIU_FD_RICHARD
+      expect_nat8("FD_bc_bottom", FD_Bottom_BC_type,10);   //Bottom layer condition: 1: water table 2: none flux 3: Constant water potential
+      expect_nat32("FD_Delt", FD_Delt,10);                  //(second) time step for FD (should be divided by 3600 second, eg. 36, 72 etc.)
+      expect_float64("FD_Delx", FD_Delx);                //(meter) node delta-x for FD (Should be divided by 0.05, eg. 0.05, 0.025 etc.)
+#endif
+    //150617LML bool doSurfaceFlowSimulation;
+      expect_nat8("overlandflow_method", Overlandflow_Method,10);
+         //1:8-direction 2:4-direction
+      /* CropSyst scenario file has infiltration_model
+            expect_bool("xxxxxx", use_Hourly_Cascade;
+         //true: Ho01_NAS1
+      */
+      expect_bool("hourly_runoff", use_Hourly_Runoff);
+      /* CropSyst scenario file has run_freezing
+      expect_bool("xxxxxx", Run_Freezing_Thaw;
+      */
+      //150708 unused? long int Counter_Cascade_Hourly_in_FD;
+      expect_bool("pershed_water_table", PerchedWT_Enabled);
+      //170424LML expect_nat8("method_outlet_flowrate", method_outlet_flowrate,10);
+      //1: constant elevation 2: constant slop LML 14/04/25
+      //151028LML obsexpect_float64("constant_outlet_slop_or_elevation", constant_outlet_slop_or_elevation);
+    //double Outlet_Slope;    //(m/m)
+    /*
+    //CropSyst scenario file already has CO2 specification
+      expect_bool ("Do_CO2_Run", CO2_Run;
+      expect_float64("xxxxxx", Current_CO2_Concentration;
+      expect_float64("xxxxxx", Daily_CO2_Concentration_Increase;
+      expect_float64("xxxxxx", Initial_CO2_Concentration;
+    */
+    //150708RLN  unused?           expect_bool("xxxxxx", RecalculateSoilProperties);
+
+      expect_file_name("weather_control", weathercontrol_name);
+
+   set_current_section("MicroBasin_output_options");
+      expect_bool    ("annual"         , bWrite_Annual_Output);
+     // expect_bool    ("seasonal"       , bWrite_Season_Output);
+      expect_bool    ("daily"          , bWrite_Daily_Output);
+      expect_bool    ("hourly"         , bWrite_Hourly_Output);
+
+      expect_bool    ("growth_daily"   ,bWrite_Growth_Daily_Output);
+      expect_bool    ("growth_seasonal",bWrite_Growth_Season_Output);
+      //150708RLN unused expect_bool("xxxxxx", bPrintedBasinHead);
+      //150708RLN expect_bool("xxxxxx", Flux_Carbon_Daily_unused);
+      // Not a parameter      expect_bool("xxxxxx", Hourly_Outputs);
+
+      expect_int32   ("hourly_start_date"  , Start_Date_Hourly_Output.mod_date32());
+      expect_int32    ("hourly_stop_date"    , End_Date_Hourly_Output.mod_date32());
+      expect_bool    ("ESRI_grid"     ,bOutput_Format_Esri_Grid);
+      expect_int32    ("ESRI_grid_hourly_start_date", Start_Date_Hourly_Esri_Grid_Output.mod_date32());
+      expect_int32    ("ESRI_grid_hourly_stop_date", End_Date_Hourly_Esri_Grid_Output.mod_date32());
+    set_current_section("grid_filenames");
+      //150708 appears obsolete expect_filename("xxxxxx", flowdir_name);
+      expect_file_name("grid_ID"     , gridid_name);
+      expect_file_name("basin_mask"  , gridmask_name);
+      expect_file_name("basin_debug_output_mask", gridoutputmask_name);                     //151007LML
+      expect_file_name("outlet"      , outlets_name);
+      expect_file_name("elevation"   , elev_name);
+      expect_file_name("slope"       , slop_name);
+      expect_file_name("aspect"      , aspect_name);
+      expect_file_name("area"        , area_name);
+      expect_file_name("latitude"    , latitude_name);
+      expect_file_name("longitude"   , longitude_name);
+      expect_file_name("soil_type"   , soiltype_name);
+    //std::expect_file_name annualtavg_name;//[FILENAMELENGTH];
+      expect_file_name("rotation_ID" , croprotation_name);
+      expect_file_name("crop_management_zone_ID", cropmanagementzone_name);                                         //LML 150515
+    #ifdef MACA_V1_MBMET
+      expect_file_name("weather_station_ID", weatherstationID_name);
+
+    #endif
+    //std::string weatherdata_prefix_name;//[FILENAMELENGTH];
+    //std::string weatherdata_suffix_name;//[FILENAMELENGTH];
+
+    set_current_section("MicroBasin_parameter_filenames");
+      expect_file_name("soil_state", soilstate_filename);
+      expect_bool("use_even_soil_N_and_FC",use_even_soil_N_and_FC);              //170404LML
+      expect_file_name("initial_soil_N_and_water_filename",initial_soil_N_and_available_water_name); //170404LML
+//170404LML #ifdef PREDEFINE_N_APPLICATION_PER_CELL
+      expect_enum("auto_N_grid_option",auto_N_grid_option);
+      expect_file_name("predefined_N_fertilization", predefined_N_fertilization_name);
+//170404LML #endif
+      #ifndef CROPSYST_VERSION
+      expect_file_name("soil", soilproperty_filename);
+      expect_file_name("crop", cropproperty_filename);
+      expect_file_name("rotation", rotation_filename);
+      expect_file_name("management", management_filename);
+      expect_file_name("organic_residue", organic_residue_filename);
+      #endif
+
+   set_current_section("MicroBasin_output_filenames");
+
+      expect_file_name("annual",        annual_output_filename);
+      expect_file_name("daily",         daily_output_filename);
+      expect_file_name("growth_daily",  growth_daily_output_filename);
+      expect_file_name("growth_season", growth_season_output_filename);
+      expect_file_name("hourly",        hourly_output_filename);
+      expect_file_name("basin_hourly",  basin_hour_output_filename);
+
+   set_current_section("timestep");
+      expect_float64("lateral_flow"       ,TimeStep_Lateralflow);
+      expect_float64("soil_lateral_flow"  ,TimeStep_SoilLateralflow);
+      expect_float64("overland_flow"      ,TimeStep_Overlandflow);
+      expect_float64("cascade_flow"       ,TimeStep_Cascadeflow);
+   #ifndef CROPSYST_VERSION
+   set_current_section("MicroBasin");
+      expect_string_array("management_types",Management_Name_Lists, 50, false , 200,false);                                           //981212
+      expect_string_array("crop_types",Crop_Name_Lists, 50, false , 30,false);                                           //981212
+   #endif
+
+/*
+                    #ifndef CROPSYST_PROPER_MANAGEMENT
+                    else if (record_key.compare("Management_Type_Name") == 0) {
+                        removeWhitespace(dataline);
+                        Management_Name_Lists[num_management_types].assign(dataline);
+                        num_management_types++;
+                    }
+                    #endif
+                    else if (record_key.compare("File_Rotation_Prefix") == 0) {
+                        removeWhitespace(dataline);
+                        rotation_prefix_name.assign(dataline);
+                    } else if (record_key.compare("File_Rotation_Suffix") == 0) {
+                        removeWhitespace(dataline);
+                        rotation_suffix_name.assign(dataline);
+                    } else if (record_key.compare("File_Management_Prefix") == 0) {
+                        removeWhitespace(dataline);
+                        management_prefix_name.assign(dataline);
+                    } else if (record_key.compare("File_Management_Suffix") == 0) {
+                        removeWhitespace(dataline);
+                        management_suffix_name.assign(dataline);
+                    } else if (record_key.compare("File_Organic_Reside_Parameter") == 0) {
+                        removeWhitespace(dataline);
+                        organic_residue_parameter_name = dataline;
+                    }
+                    #endif
+                    else if (record_key.compare("File_Soil_State_Parameter_Prefix") == 0) {
+                        removeWhitespace(dataline);
+                        soilstate_prefix_name.assign(dataline);
+                    } else if (record_key.compare("File_Soil_State_Parameter_Suffix") == 0) {
+                        removeWhitespace(dataline);
+                        soilstate_suffix_name.assign(dataline);
+*/
+   return CropSyst::Scenario::expect_structure(for_write);
+}
+//_2015-07-01___________________________________________________________________
+bool AllControlClass::get_end()                                                       //010110
+{
+   #ifndef CROPSYST_VERSION
+    num_management_types = 0;
+    for (nat8 m = 0; Management_Name_Lists[m].length() ;m++)
+       num_management_types++;
+   #endif
+/*160121RLN Don't need to resolve filenames here anymore because
+ * Simulation engine now loads, composes and resolves filenames as needed
+    CORN::OS::Directory_entry_name *weathercontrol_filename_resolved    = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(weathercontrol_name  .c_str())   ,*scenario_directory); weathercontrol_name    .set_DEN(*weathercontrol_filename_resolved );delete weathercontrol_filename_resolved ;
+    CORN::OS::Directory_entry_name *gridid_filename_resolved            = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(gridid_name          .c_str())   ,*scenario_directory); gridid_name            .set_DEN(*gridid_filename_resolved );        delete gridid_filename_resolved ;
+    CORN::OS::Directory_entry_name *gridmask_filename_resolved          = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(gridmask_name        .c_str())   ,*scenario_directory); gridmask_name          .set_DEN(*gridmask_filename_resolved );      delete gridmask_filename_resolved ;
+    CORN::OS::Directory_entry_name *outlets_filename_resolved           = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(outlets_name         .c_str())   ,*scenario_directory); outlets_name           .set_DEN(*outlets_filename_resolved );       delete outlets_filename_resolved ;
+    CORN::OS::Directory_entry_name *elev_filename_resolved              = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(elev_name            .c_str())   ,*scenario_directory); elev_name              .set_DEN(*elev_filename_resolved );          delete elev_filename_resolved ;
+    CORN::OS::Directory_entry_name *slop_filename_resolved              = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(slop_name            .c_str())   ,*scenario_directory); slop_name              .set_DEN(*slop_filename_resolved );           delete slop_filename_resolved ;
+    CORN::OS::Directory_entry_name *aspect_filename_resolved            = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(aspect_name          .c_str())   ,*scenario_directory); aspect_name            .set_DEN(*aspect_filename_resolved );           delete aspect_filename_resolved ;
+    CORN::OS::Directory_entry_name *area_filename_resolved              = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(area_name            .c_str())   ,*scenario_directory); area_name              .set_DEN(*area_filename_resolved );           delete area_filename_resolved ;
+    CORN::OS::Directory_entry_name *latitude_filename_resolved          = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(latitude_name        .c_str())   ,*scenario_directory); latitude_name          .set_DEN(*latitude_filename_resolved );           delete latitude_filename_resolved ;
+    CORN::OS::Directory_entry_name *longitude_filename_resolved         = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(longitude_name       .c_str())   ,*scenario_directory); longitude_name         .set_DEN(*longitude_filename_resolved );           delete longitude_filename_resolved ;
+    CORN::OS::Directory_entry_name *soiltype_filename_resolved          = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(soiltype_name        .c_str())   ,*scenario_directory); soiltype_name          .set_DEN(*soiltype_filename_resolved );           delete soiltype_filename_resolved ;
+    CORN::OS::Directory_entry_name *croprotation_filename_resolved      = CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(croprotation_name    .c_str())   ,*scenario_directory); croprotation_name      .set_DEN(*croprotation_filename_resolved );               delete croprotation_filename_resolved ;
+    CORN::OS::Directory_entry_name *cropmanagementzone_filename_resolved= CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(cropmanagementzone_name.c_str()) ,*scenario_directory); cropmanagementzone_name.set_DEN(*cropmanagementzone_filename_resolved );               delete cropmanagementzone_filename_resolved ;
+    CORN::OS::Directory_entry_name *soilstate_filename_resolved= CORN::OS::file_system_engine.render_resolved_absolute_directory_entry_name(CORN::OS::Directory_entry_name_concrete(soilstate_filename.c_str()) ,*scenario_directory); soilstate_filename.set_DEN(*soilstate_filename_resolved );               delete soilstate_filename_resolved ;
+*/
+   /*160226LML
+   #if (defined(LIU_DEBUG))
+   //RLN I output this here because parameters are loaded in initialize
+        std::clog <<"All control is initialized!\n";
+        print_allcontrol();
+   #endif
+   */
+    automatic_validate();                                                        //150611LML
+    #ifdef CROPSYST_VERSION
+    #else
+    //Read organic residue parameters
+    pOrganic_Residue_Parameters->ReadInputParameters();
+    //Read crop parameters
+    pCrop_Parameter_Collection = new CropParameterCollection(*this);
+    pCrop_Parameter_Collection->ReadCropParameterFiles();
+    read_management_files();                        //LML 140827
+    #endif
+    readInitialSoilState();                                                      //170404LML
+    return CropSyst::Scenario::get_end();
+}
+//_2015-07-01___________________________________________________________________
+void AllControlClass::print_allcontrol()
+{
+    //Print out all controls
+    std::clog<<"-------Control-------\n";
+    std::clog<<"start_date:"<<(int)start_date.get_year()<<" "<<(int)start_date.get_month()<<" "<<(int)start_date.get_DOM()<<std::endl;
+    std::clog<<"end_date:"<<(int)end_date.get_year()<<" "<<(int)end_date.get_month()<<" "<<(int)end_date.get_DOM()<<std::endl;
+    std::clog<<"Write_Esri_Grid_Output:"<<bOutput_Format_Esri_Grid<<std::endl;
+    std::clog<<"Write_Annual_Output:"<<bWrite_Annual_Output<<std::endl;
+    std::clog<<"Write_Daily_Output:"<<bWrite_Daily_Output<<std::endl;
+    std::clog<<"Write_Growth_Daily_Output:"<<bWrite_Growth_Daily_Output<<std::endl;
+    std::clog<<"Write_Growth_Season_Output:"<<bWrite_Growth_Season_Output<<std::endl;
+    std::clog<<"Write_Hourly_Output:"<<bWrite_Hourly_Output<<std::endl;
+    std::clog<<"Start_Date_Hourly_Output:"<<(int)Start_Date_Hourly_Output.get_year()<<" "
+            <<(int)Start_Date_Hourly_Output.get_month()<<" "<<(int)Start_Date_Hourly_Output.get_DOM()<<std::endl;
+    std::clog<<"End_Date_Hourly_Output:"<<(int)End_Date_Hourly_Output.get_year()<<" "
+            <<(int)End_Date_Hourly_Output.get_month()<<" "<<(int)End_Date_Hourly_Output.get_DOM()<<std::endl;
+   #ifdef LIU_ENGINE
+    std::clog<<"annual_output_prefix_name:"<<annual_output_prefix_name<<std::endl;
+    std::clog<<"annual_output_suffix_name:"<<annual_output_suffix_name<<std::endl;
+    std::clog<<"daily_output_prefix_name:"<<daily_output_prefix_name<<std::endl;
+    std::clog<<"daily_output_suffix_name:"<<daily_output_suffix_name<<std::endl;
+    std::clog<<"growth_daily_output_prefix_name:"<<growth_daily_output_prefix_name<<std::endl;
+    std::clog<<"growth_daily_output_suffix_name:"<<growth_daily_output_suffix_name<<std::endl;
+    std::clog<<"growth_season_output_prefix_name:"<<growth_season_output_prefix_name<<std::endl;
+    std::clog<<"growth_season_output_suffix_name:"<<growth_season_output_suffix_name<<std::endl;
+    std::clog<<"hourly_output_prefix_name:"<<hourly_output_prefix_name<<std::endl;
+    std::clog<<"hourly_output_suffix_name:"<<hourly_output_suffix_name<<std::endl;
+   #endif
+    std::clog<<"soil_layers:"<<(int)max_soil_layers<<std::endl;
+    std::clog<<"solute_species:"<<(int)solute_species<<std::endl;
+    std::clog<<"Do_Soil_Lateralflow:"<<b_soil_lateralflow<<std::endl;
+    std::clog<<"Do_Instant_Overlandflow:"<<b_instant_overlandflow<<std::endl;
+    //std::clog<<"b_hourly_met:"<<b_hourly_met<<std::endl;
+    std::clog<<"TimeStep_Lateralflow:"<<TimeStep_Lateralflow<<std::endl;
+    std::clog<<"TimeStep_SoilLateralflow:"<<TimeStep_SoilLateralflow<<std::endl;
+    std::clog<<"TimeStep_Overlandflow:"<<TimeStep_Overlandflow<<std::endl;
+    std::clog<<"TimeStep_Cascadeflow:"<<TimeStep_Cascadeflow<<std::endl;
+    std::clog<<"Invalid_Met_Label:"<<Invalid_Met_Label<<std::endl;
+    //150617LML std::clog<<"doSurfaceFlowSimulation:"<<doSurfaceFlowSimulation<<std::endl;
+    std::clog<<"PerchedWT_Enabled:"<<PerchedWT_Enabled<<std::endl;
+   #ifdef LIU_ENGINE
+    std::clog<<"use_Hourly_Cascade:"<<use_Hourly_Cascade<<std::endl;
+    std::clog<<"use_Hourly_Runoff:"<<use_Hourly_Runoff<<std::endl;
+   #endif
+    //std::clog<<"Is_Hourly_Met:"<<b_hourly_met<<std::endl;
+    std::clog<<"weathercontrol_name:"<<weathercontrol_name<<std::endl;
+    //150709 appears obsolete std::clog<<"flowdir_name:"<<flowdir_name<<std::endl;
+    std::clog<<"gridid_name:"<<gridid_name<<std::endl;
+    std::clog<<"gridmask_name:"<<gridmask_name<<std::endl;
+    std::clog<<"gridoutputmask_name:"<<gridoutputmask_name<<std::endl;
+    std::clog<<"outlets_name:"<<outlets_name<<std::endl;
+    std::clog<<"elev_name:"<<elev_name<<std::endl;
+    std::clog<<"slop_name:"<<slop_name<<std::endl;
+    std::clog<<"area_name:"<<area_name<<std::endl;
+    std::clog<<"soiltype_name:"<<soiltype_name<<std::endl;
+    std::clog<<"cropratation_name:"<<croprotation_name<<std::endl;
+    std::clog<<"cropmanagementzone_name:"<<cropmanagementzone_name<<std::endl;
+    #ifdef MACA_V1_MBMET
+    std::clog<<"Weatherstation_ID_name:"<<weatherstationID_name<<std::endl;
+    #endif
+   #ifdef LIU_ENGINE
+    std::clog<<"soilproperty_prefix_name:"<<soilproperty_prefix_name<<std::endl;
+    std::clog<<"soilproperty_suffix_name:"<<soilproperty_suffix_name<<std::endl;
+    std::clog<<"cropproperty_prefix_name:"<<cropproperty_prefix_name<<std::endl;
+    std::clog<<"cropproperty_suffix_name:"<<cropproperty_suffix_name<<std::endl;
+    std::clog<<"rotation_prefix_name:"<<rotation_prefix_name<<std::endl;
+    std::clog<<"rotation_suffix_name:"<<rotation_suffix_name<<std::endl;
+    std::clog<<"Organic_Reside_Parameter_name:"<<organic_residue_parameter_name<<std::endl;
+    std::clog<<"Soil_State_Parameter_Prefix_name:"<<soilstate_prefix_name<<std::endl;
+    std::clog<<"Soil_State_Parameter_Suffix_name:"<<soilstate_suffix_name<<std::endl;
+   #endif
+    std::clog<<"-------End Control-------\n";
+//#endif
+}
+//______________________________________________________________________________
+#if (!(defined(CROPSYST_VERSION) || defined( CROPSYST_PROPER_MANAGEMENT)))
+void AllControlClass::read_management_files()
+{
+    //LML 140827 read all management files
+    for (int i = 0; i < num_management_types; i++)
+    {   parrManagementSchedule[i].Management_Name = Management_Name_Lists[i];
+        parrManagementSchedule[i].ReadManagementEvents(*this,i);
+    }
+}
+//______________________________________________________________________________
+int AllControlClass::find_management_index(std::string management_name)
+{
+    //LML 140827 read all management files
+    for (int i = 0; i < num_management_types; i++) {
+        if (management_name.compare(parrManagementSchedule[i].Management_Name) == 0) {
+            return i;
+        }        
+    }
+    return -1;
+}
+//_150611 LML___________________________________________________________________
+#endif
+bool AllControlClass::automatic_validate()
+{
+    //Automatic correct the control options. If failed, return false.
+    TimeStep_SoilLateralflow    = CORN::must_be_less_or_equal_to(1.0,TimeStep_SoilLateralflow);
+    TimeStep_Overlandflow       = CORN::must_be_less_or_equal_to(1.0,TimeStep_Overlandflow);
+    TimeStep_Lateralflow        = CORN::must_be_greater_or_equal_to(TimeStep_Lateralflow,std::max<double>(TimeStep_SoilLateralflow,TimeStep_Overlandflow));
+
+    if (Overlandflow_Method == 2) {                                              //160317LML
+        std::cerr<<"4-direction flow has not been implemented yet!!!\n";
+        assert(false);
+    }
+    return true;
+}
+//_____________________________________________________________________________/
+bool AllControlClass::readInitialSoilState()
+{   //read initial csv format input.
+    //The file head is: depth_m, NO3_N(kg/ha), NH4_N(kg/ha), avail_water(0-1)
+    //this head info will be skipped
+    //This information will be used for entire watershed
+    std::ifstream ifile(initial_soil_N_and_available_water_name.c_str());
+    const int var_counts = 4;
+    if (ifile.is_open()) {
+        std::string line("");
+        std::getline(ifile,line);
+        std::stringstream ss(line);
+        size_t var_counts = std::count(line.begin(), line.end(), ',') + 1;
+        if (var_counts != var_counts) {
+            std::cerr << "Wrong var columns of input soil initial file:" << initial_soil_N_and_available_water_name.c_str()
+                      << std::endl;
+            return -1;
+        }
+        int layer = 0;
+        std::string token;
+        while (std::getline(ifile,line)) {
+            std::stringstream ss_data(line);
+            int i = 0;
+            Initial_N_and_water temp_layer;
+            while (std::getline(ss_data, token, ',')) {
+                if (i == 0)      temp_layer.depth = std::stod(token);
+                else if (i == 1) temp_layer.NO3_N = std::stod(token);
+                else if (i == 2) temp_layer.NH4_N = std::stod(token);
+                else             temp_layer.avail_water = std::stod(token);
+                if (temp_layer.depth > 0 && i > 2) {
+                    initial_N_and_water.push_back(temp_layer);
+                }
+                i++;
+            }
+        }
+        ifile.close();
+    } else {
+        std::clog << "Cannot open soil initial state file:\"" << initial_soil_N_and_available_water_name.c_str()
+                  << "\"!!!\n";
+        return false;
+    }
+    return true;
+}
+//_17-04-04LML_________________________________________________________________/
+int AllControlClass::getInitializationLayer(const double depth_m, const int top_layer, const int bottom_layer)
+{
+    int nmax = initial_N_and_water.size();
+    if (nmax > 0) {
+      if (depth_m >= initial_N_and_water[bottom_layer].depth) {
+        return bottom_layer;
+      } else if (top_layer >= (bottom_layer - 1)) {
+        return bottom_layer;
+      } else {
+        int middle = top_layer + (bottom_layer - top_layer) / 2;
+        if (depth_m >= initial_N_and_water[middle].depth)
+            return getInitializationLayer(depth_m, middle, bottom_layer);
+        else
+            return getInitializationLayer(depth_m, top_layer, middle);
+      }
+    } else {
+      return -1;
+    }
+}
+//_17-04-04LML_________________________________________________________________/

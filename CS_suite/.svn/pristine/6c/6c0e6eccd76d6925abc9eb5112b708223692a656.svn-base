@@ -1,0 +1,93 @@
+#ifndef form_sowing_eventH
+#define form_sowing_eventH
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include <Buttons.hpp>
+#include <ComCtrls.hpp>
+#include "AutoDateButton.h"
+#include "AutoFileEditBar.h"
+#include "AutoFloat32EditBar.h"
+#include "AutoInt16EditBar.h"
+#include "AutoRadioGroup.h"
+#include <ExtCtrls.hpp>
+#include "AutoStringEdit.h"
+#include "FlCtrlEx.hpp"
+#include <FileCtrl.hpp>
+#include "AutoSimDatabaseFileEditBar.h"
+#include "AutoSimDatabaseDropdownFileEditBar.h"
+//---------------------------------------------------------------------------
+// forward decl
+namespace CropSyst
+{  class Sowing_operation;
+   class Sowing_event;
+}
+namespace CS
+{  class Database_directory;
+}
+class Tparameter_file_form;
+namespace CORN
+{  class Smart_directory_name;
+}
+//-------------
+class Tsowing_event_form : public TForm
+{
+__published:	// IDE-managed Components
+   TPageControl *PageControl1;
+   TBitBtn *ok_button;
+   TBitBtn *cancel_button;
+   TBitBtn *help_button;
+   TTabSheet *sowing_tabsheet;
+   TTabSheet *conditions_tabsheet;
+   TTabSheet *seeding_sheet;
+   TAutoFloat32EditBar *seeding_rate_edit;
+   TAutoFloat32EditBar *emergence_rate_edit;
+   TAutoFloat32EditBar *sowing_depth_edit;
+   TLabel *Label1;
+   TPageControl *PageControl2;
+   TTabSheet *mositure_conditions_tabsheet;
+   TTabSheet *temperature_conditions_tabsheet;
+   TAutoRadioGroup *temperature_evaluation_radiogroup;
+   TAutoFloat32EditBar *temperature_5_days_edit;
+   TAutoInt16EditBar *expected_days_to_emerge_edit;
+   TGroupBox *groupbox_sowing_date;
+   TAutoDateButton *sowing_date_button;
+   TAutoRadioGroup *radiogroup_sowing_date;
+   TGroupBox *groupbox_delay_sowing_after;
+   TAutoInt16EditBar *delay_after_precip_edit;
+   TAutoFloat32EditBar *appreciable_precip_edit;
+   TGroupBox *groupbox_sow_only_when_PAW;
+   TAutoFloat32EditBar *min_required_PAW_edit;
+   TLabel *good_germination_label;
+   TAutoFloat32EditBar *max_required_PAW_edit;
+   TLabel *good_planting_op_label;
+   TAutoSimDatabaseDropdownFileEditBar *crop_database_dropdownfilebar;
+   TAutoSimDatabaseDropdownFileEditBar *management_database_dropdownfilebar;
+   void __fastcall sowing_date_radiogroup_onclick(TObject *Sender);
+   void __fastcall ok_button_onclick(TObject *Sender);
+   void __fastcall help_buttonClick(TObject *Sender);
+private:	// User declarations
+   CropSyst::Sowing_event *sowing_event;
+   CropSyst::Sowing_operation *sowing_op;
+   Tparameter_file_form *parameter_form;
+   CORN::Smart_directory_name *master_database_crop_directory;
+   CORN::Smart_directory_name *project_database_crop_directory;
+   CORN::Smart_directory_name *scenario_database_crop_directory;
+   CORN::Smart_directory_name *master_database_management_directory;
+   CORN::Smart_directory_name *project_database_management_directory;
+   CORN::Smart_directory_name *scenario_database_management_directory;
+public:		// User declarations
+   __fastcall Tsowing_event_form(TComponent* Owner);
+   void bind_to
+      (CropSyst::Sowing_event *sowing_event
+      ,Tparameter_file_form   *parameter_form
+      ,CS::Database_directory *master_database_directory
+      ,CS::Database_directory *project_database_directory
+      ,CS::Database_directory *scenario_database_directory);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE Tsowing_event_form *sowing_event_form;
+//---------------------------------------------------------------------------
+#endif

@@ -1,0 +1,467 @@
+#include "CS_land_unit_meteorological.h"
+#include "corn/OS/file_system_engine.h"
+#include "common/weather/atmospheric_CO2_change_recalibration.h"
+#include "common/weather/atmospheric_CO2_change_linear.h"
+#include "common/weather/sky.h"
+#include "common/weather/subdaily.h"
+#include "common/weather/hour/weather_hours.h"
+#include "common/weather/snow_pack.h"
+#include "common/weather/storms.h"
+#include "common/weather/day/sun_days.h"
+//______________________________________________________________________________
+namespace CS
+{
+//______________________________________________________________________________
+Land_unit_meteorological::Land_unit_meteorological
+(const CORN::Date     &today_
+,const Geocoordinate &geocoordinate_
+,Snow_pack_model      snow_pack_model_                                           //151202
+)
+: CS::Simulation_element_abstract(today_)
+, geocoordinate(geocoordinate_)
+, solar_irradiance_extraterrestrial(0)                                           //151130
+,  solar_irradiance_extraterrestrial_owned(true)                                 //151215
+, sun(0) , sun_owned(false)                                                      //151027
+, sky(0) , sky_owned(false)                                                      //151027
+, sun_days(0)    , sun_days_owned(true)                                          //160117
+, sun_hours(0) , sun_hours_owned(true)                                           //160811_160117
+, season(today_,!geocoordinate_.is_in_northern_hemisphere())                     //151029
+, weather_provider(0) , weather_provider_owned(true)                             //151215
+#if (CS_VERSION==5)
+, ET_ref          (0)                                                            //260731
+#endif
+, weather_spanning(0)                                                            //151212
+, subdaily        (0), subdaily_owned(true)                                      //151212
+, hourly          (0), hourly_owned  (true)                                      //151212
+, storms          (0), storms_owned  (true)                                      //120916
+, snow_pack(0)
+, snow_pack_model(snow_pack_model_)                                              //151202_151023
+, atmospheric_CO2_change(0)                                                      //151208
+{}
+//_________________________________________________________________constructor_/
+Land_unit_meteorological::~Land_unit_meteorological()
+{
+   if (sun_hours_owned)          delete sun_hours;                               //160811
+   if (sun_days_owned)           delete sun_days;                                //160811
+   if (sky_owned)                delete sky;
+   if (sun_owned)                delete sun;
+   //151215 no longer owned, essentially an optional reference delete weather_spanning;
+//   delete sun_hours;                                                             //151201
+//   delete sun_days;                                                              //151201
+   delete snow_pack;
+#ifdef DISABLED_CRASHES
+// Not sure why this is crashing in the pest model.
+   if (hourly_owned)             delete hourly;                                  //151212
+#endif
+   if (subdaily_owned)           delete subdaily;                                //151212
+   if (weather_provider_owned)   delete weather_provider;                        //151215
+   if (solar_irradiance_extraterrestrial_owned)                                  //151215
+      delete solar_irradiance_extraterrestrial;
+   // this is crashing delete storms;
+}
+//_2015-10-23______________________________________________________destructor__/
+/*160811 Not implemented yet because need to be careful the order of instanciation
+bool Land_unit_meteorological::provide_everything()                   provision_
+{
+   bool provided = true;
+
+   provide_sun();
+   provide_sky();
+   provide_sun_hours();
+
+   provided &= sun && sky && sun_days && sun_hours;
+   provided &= provide_hourly() != 0; // provides subdaily
+   #if (CS_VERSION==5)
+   assert(weather_provider); // weather provided either needs to have been submitted or known
+   provide_ET_reference(); // ET reference provides everything
+   provided &= ET_ref != 0;
+   #endif
+   return provided;
+}
+*/
+//_2016-08-11___________________________________________________________________
+bool Land_unit_meteorological::know_sun(Sun *sun_)                    cognition_
+{
+   #if (CS_VERSION==5)
+   assert(!ET_ref);
+      // The ET has already been instanciated with an existing sun
+      // creating a new sun would cause error with ET
+   #endif
+   if (sun_owned && sun && sun_) delete sun;
+   sun = sun_; sun_owned = false;
+   if (!sun_) provide_sun(); // in the rare case the caller reset the sun by passing 0.
+   return true;
+}
+//_2016-08-01__________________________________________________________________/
+bool Land_unit_meteorological::know_sky(Sky *sky_)                    cognition_
+{
+   if (sky_owned && sky && sky_) delete sky;
+   sky = sky_; sky_owned = false;
+   if (!sky_) provide_sky(); // in the rare case the caller reset the sky by passing 0.
+   return true;
+}
+//_2016-08-01__________________________________________________________________/
+const Sun &Land_unit_meteorological::provide_sun()                    provision_
+{
+   if (!sun)
+   {
+      sun = new Sun(today,geocoordinate);                                        //151027
+      sun_owned = true;
+   }
+   return *sun;
+}
+//_2016-08-01__________________________________________________________________/
+const Sky &Land_unit_meteorological::provide_sky()                    provision_
+{  if (!sky)
+   {
+      sky = new Sky                                                              //151027
+         (provide_solar_irradiance_extraterrestrial() //160822  weather_provider->ET_solar_irradiance
+         ,ref_air_temperature_avg()
+         ,ref_solar_radiation()
+         ,ref_precipitation_actual());
+      sky_owned = true;
+   }
+   return *sky;
+}
+//_2016-08-01__________________________________________________________________/
+const Sun_days &Land_unit_meteorological::provide_sun_days()          provision_
+{
+   if (!sun_days)
+   {  sun_days = new Sun_days
+         (geocoordinate.get_longitude_dec_deg()
+         ,geocoordinate.get_longitude_dec_deg());
+      sun_days_owned = true;
+   }
+   return *sun_days;
+}
+//_2016-08-11___________________________________________________________________
+const Sun_hours &Land_unit_meteorological::provide_sun_hours()        provision_
+{
+   if (!sun_hours)
+   {
+      sun_hours = new  Sun_hours
+         (provide_sun_days()
+         ,geocoordinate.get_latitude_dec_deg());
+      sun_hours_owned = true;
+   }
+   return *sun_hours;
+}
+//_2016-08-11___________________________________________________________________
+#if (CS_VERSION==5)
+const ET_Reference &Land_unit_meteorological::provide_ET_reference()  provision_
+{
+   ET_ref = new ET_Reference_calculator                                          //160731
+      (geocoordinate.get_elevation()
+      ,provide_sun().ref_day_length_hours_today()
+      ,*weather_provider);
+   return *ET_ref;
+}
+#endif
+//_2016-08-01__________________________________________________________________/
+bool Land_unit_meteorological::initialize()                      initialization_
+{
+   provide_sun();                                                                //160801
+   provide_sky();                                                                //160801
+   #if (CS_VERSION==5)
+   provide_ET_reference();                                                       //160801
+   #endif
+   return true; // sun && sky;                                                   //160801
+}
+//_2015-10-27_______________________________________________________initialize_/
+bool Land_unit_meteorological::know_weather_spanning
+(Weather_spanning_interface &weather_known)                           cognition_
+{  weather_spanning = &weather_known;
+   return true;
+}
+//_2015-12-15___________________________________________________________________
+bool Land_unit_meteorological::take_storms(meteorology::Storms *storms_given)
+{
+   if (!storms_owned) return false;
+   if (storms) delete storms;
+   storms = storms_given;
+   return storms != 0;
+}
+//_2015-12-15___________________________________________________________________
+bool Land_unit_meteorological::submit_weather_provider(Weather_provider *weather_provider_remitted) remission_
+{
+   if (weather_provider_owned)
+      delete weather_provider;
+   weather_provider = weather_provider_remitted; weather_provider_owned = true;
+   return weather_provider_remitted != 0;
+}
+//_2015-12-15___________________________________________________________________
+bool Land_unit_meteorological::know_weather_provider
+(Weather_provider *weather_provider_known)                            cognition_
+{
+   if (weather_provider_owned)
+      delete weather_provider;
+   weather_provider = weather_provider_known; weather_provider_owned = false;
+   return weather_provider != 0;
+}
+//_2015-12-22____________________________________________know_weather_provider_/
+bool Land_unit_meteorological::submit_solar_irradiance_extraterrestrial
+(Solar_irradiance_extraterrestrial_hourly *solar_irradiance_extraterrestrial_submitted)
+{
+   solar_irradiance_extraterrestrial = solar_irradiance_extraterrestrial_submitted;
+   solar_irradiance_extraterrestrial_owned = true;
+   return solar_irradiance_extraterrestrial != 0;
+}
+//_2015-12-15___________________________________________________________________
+bool Land_unit_meteorological::know_solar_irradiance_extraterrestrial
+(const Solar_irradiance_extraterrestrial_hourly &solar_irradiance_extraterrestrial_known) cognition_
+{
+   solar_irradiance_extraterrestrial = const_cast<Solar_irradiance_extraterrestrial_hourly *>
+      (&solar_irradiance_extraterrestrial_known);
+   solar_irradiance_extraterrestrial_owned = false;
+   return solar_irradiance_extraterrestrial != 0;
+}
+//_2015-12-15___________________________________________________________________
+const Solar_irradiance_extraterrestrial_hourly &
+Land_unit_meteorological::provide_solar_irradiance_extraterrestrial() provision_
+{
+   if (!solar_irradiance_extraterrestrial)
+   {
+      solar_irradiance_extraterrestrial = new Solar_irradiance_extraterrestrial_hourly
+       (geocoordinate
+       ,provide_sun_days()
+       ,provide_sun_hours()
+       ,today);
+      solar_irradiance_extraterrestrial_owned = true;
+   } return *solar_irradiance_extraterrestrial;
+}
+//_2016-08-11___________________________________________________________________
+bool Land_unit_meteorological::setup_CO2
+(const CORN::OS::File_name &recalibration_filename
+,float64 initial_CO2_conc
+,float64 annual_CO2_change
+, const CORN::Date &start_date
+, const CORN::Date &stop_date
+, const CORN::Date &today)                                       initialization_ //150315
+{  bool result = true;
+   {  // By default, we setup the linear parameters                              //090707
+      // In version 5 CO2 data may be stored in UED file                         //090707
+      if (recalibration_filename.get_name().length() &&
+         CORN::OS::file_system_engine.exists(recalibration_filename))           //130121
+      { // There may be CO2 data in the recalibration file.                      //090707
+         bool CO2_recalibration_encountered = false;                             //090707
+         Atmospheric_CO2_change_recalibration *CO2_change_with_recalibration     //090707
+            = new Atmospheric_CO2_change_recalibration
+               (recalibration_filename.c_str()                                   //121126
+               ,start_date
+               ,stop_date
+               ,today                                                            //150315
+               ,(float32)initial_CO2_conc// 365.0 //active_model_options->initial_CO2_conc
+               ,CO2_recalibration_encountered);
+         if (CO2_recalibration_encountered)                                      //090707
+            atmospheric_CO2_change = CO2_change_with_recalibration;              //151201
+         else { delete CO2_change_with_recalibration; CO2_change_with_recalibration = 0;}//151208
+#ifdef REACCH_VERSION
+//after loading the CO2 values, I need to clear the recalibration filename
+recalibration_filename.set_cstr("");
+#endif
+      } else
+         atmospheric_CO2_change =                                                //090316
+            new Atmospheric_CO2_change_linear                                    //090316
+               ((float32)initial_CO2_conc                                        //090316
+               ,(float32)annual_CO2_change);                                     //090316
+   }
+   return result;
+}
+//_2012-01-25___________________________________________________________________
+const Sun &Land_unit_meteorological::ref_sun()                             const
+{  return *sun;
+}
+//_2015-09-21___________________________________________________________________
+const Sun_days &Land_unit_meteorological::ref_sun_days()                   const
+{
+   return *sun_days;
+}
+//2015-11-30____________________________________________________________________
+float64 Land_unit_meteorological::get_snow_pack_thickness()                const
+{  return snow_pack                                                              //151124
+      ? snow_pack->ref_snow_pack_thickness()                                     //151023
+      : 0.0;
+}
+//_2014-12-08___________________________________________________________________
+float64 Land_unit_meteorological::get_snow_water_equivelent_depth()        const
+{  return snow_pack
+      ? snow_pack->get_water_equivelent_depth()
+      : 0.0;
+}
+//_2015-10-26___________________________________________________________________
+const Precipitation                  &Land_unit_meteorological::ref_precipitation_actual()           const { return ref_weather_provider().precipitation_actual; }
+const Precipitation                  &Land_unit_meteorological::ref_precipitation_effective()        const { return liberated_water; }
+const Vapor_pressure_deficit_max     &Land_unit_meteorological::ref_vapor_pressure_deficit_max()     const { return ref_weather_provider().vapor_pressure_deficit_max; }
+const Vapor_pressure_daytime         &Land_unit_meteorological::ref_vapor_pressure_daytime()         const { return ref_weather_provider().vapor_pressure_daytime; }
+const Vapor_pressure_nighttime       &Land_unit_meteorological::ref_vapor_pressure_nighttime()       const { return ref_weather_provider().vapor_pressure_nighttime; }
+const Air_temperature_maximum        &Land_unit_meteorological::ref_air_temperature_max()            const { return ref_weather_provider().air_temperature_max; }
+const Air_temperature_minimum        &Land_unit_meteorological::ref_air_temperature_min()            const { return ref_weather_provider().air_temperature_min; }
+const Air_temperature_average        &Land_unit_meteorological::ref_air_temperature_avg()            const { return ref_weather_provider().air_temperature_avg; }
+const Solar_radiation                &Land_unit_meteorological::ref_solar_radiation()                const { return ref_weather_provider().solar_radiation; }
+const Dew_point_temperature          &Land_unit_meteorological::ref_dew_point_temperature_max()      const { return ref_weather_provider().dew_point_temperature_max; }
+const Dew_point_temperature          &Land_unit_meteorological::ref_dew_point_temperature_min()      const { return ref_weather_provider().dew_point_temperature_min; }
+const Dew_point_temperature          &Land_unit_meteorological::ref_dew_point_temperature_avg()      const { return ref_weather_provider().dew_point_temperature_avg; }
+const Relative_humidity              &Land_unit_meteorological::ref_relative_humidity_max()          const { return ref_weather_provider().relative_humidity_max; }
+const Relative_humidity              &Land_unit_meteorological::ref_relative_humidity_min()          const { return ref_weather_provider().relative_humidity_min; }
+const Vapor_pressure_deficit_fullday &Land_unit_meteorological::ref_vapor_pressure_deficit_fullday_avg() const { return ref_weather_provider().vapor_pressure_deficit_fullday_avg; }
+const Vapor_pressure_deficit_daytime &Land_unit_meteorological::ref_vapor_pressure_deficit_daytime() const { return ref_weather_provider().vapor_pressure_deficit_daytime; }
+const Wind_speed                     &Land_unit_meteorological::ref_wind_speed()                     const { return ref_weather_provider().wind_speed; }
+const Aerodynamics                   &Land_unit_meteorological::ref_aerodynamics ()                  const { return ref_weather_provider().aerodynamics; }
+#if (CS_VERSION==5)
+const ET_Reference                   &Land_unit_meteorological::ref_ET_reference()                   const { return *ET_ref; } //160731
+#endif
+const Sky                            &Land_unit_meteorological::ref_sky()                            const { return *sky; } //151027
+      bool                            Land_unit_meteorological::is_winter_time()              affirmation_ { return season.is_winter_time(); }
+//_2015-10-23___________________________________________________________________
+const Weather_subdaily *Land_unit_meteorological::provide_subdaily()  provision_
+{
+   if (!subdaily)
+   {  subdaily_owned = true;
+      subdaily = new Weather_subdaily
+         (ref_weather_spanning()
+         ,today
+         ,ref_air_temperature_max()
+         ,ref_air_temperature_min()
+         ,ref_relative_humidity_max()
+         ,ref_relative_humidity_min());
+      subdaily->update();
+         // because subdaily could be provided at any time even after
+         // today's weather would have been updated
+   }
+   return subdaily;
+};
+//2015-12-12____________________________________________________________________
+const CS::Weather_hours *Land_unit_meteorological::provide_hourly()   provision_
+{
+   if (!hourly)
+   {  hourly_owned = true;
+      provide_subdaily();
+      if (!subdaily)  return 0; // can't have hourly without subdaily
+      hourly = new CS::Weather_hours_calculated
+         (*subdaily // provide_subdaily()
+         ,geocoordinate                                                          //151116
+         ,*solar_irradiance_extraterrestrial
+         ,ref_solar_radiation()
+         ,provide_sun_hours());                                                  //160811_160117
+      hourly->update(today.get_DOY());
+         // because hourly could be provided at any time even after
+         // today's weather would have been updated.
+   }
+   return hourly;
+}
+//_2015-10-23___________________________________________________________________
+const Snow_pack    *Land_unit_meteorological::get_snow_pack()              const
+{ return snow_pack;                                                              //151023
+}
+//_2015-10-23___________________________________________________________________
+
+/* NYI render variable recorders
+
+// Weather
+#define CSVP_weather_precipitation
+#define CSVP_weather_snow_storage
+#define CSVP_weather_temperature
+#define CSVP_weather_solar_radiation
+
+
+// ET
+#define CSVP_weather_ET_pot                                          0x20001
+#define CSVP_weather_ET_act                                          0x20002
+#define CSVP_weather_ET_ref                                          0x20003
+*/
+//______________________________________________________________________________
+bool Land_unit_meteorological::start()                             modification_
+{  bool started = CS::Simulation_element_abstract::start();
+   if (solar_irradiance_extraterrestrial_owned)
+      started &=solar_irradiance_extraterrestrial->start();
+      // MicroBasin have a single E.T. and must start separately
+   return started;
+}
+//_2015-11-30___________________________________________________________________
+bool Land_unit_meteorological::start_day()                         modification_
+{  bool started = true;                                                          //151201
+   if (sun_owned)  started &= sun->update();                                     //151027
+   if (sky_owned)  started &= sky->update_clouds();                              //151027
+   weather_provider->update();                                                   //151202
+   if (subdaily && subdaily_owned)  started &= subdaily->update();               //151212
+   if (hourly   && hourly_owned)    started &= hourly->update(today.get_DOY());  //151212
+   if (atmospheric_CO2_change)      started &= atmospheric_CO2_change->update(); //151201
+   liberated_water.update_value_qualified_code(ref_precipitation_actual(),simulated_quality,true); //151124
+      // Liberated water (effective precipitation)
+      // will be the precipitation unless it is absorbed by snow pack
+      // which may take or release as melt.
+   if (snow_pack && snow_pack->is_melted_completely())                           //160117
+      { delete snow_pack; snow_pack = 0; }
+   if (    (ref_air_temperature_min().Celcius() < 0.0)
+        && !snow_pack
+        && (ref_precipitation_actual().get_m() > 0.0) )
+   {  // create snow pack
+      switch (snow_pack_model)
+      {  case ENERGY_SNOW_PACK :
+            snow_pack = new Snow_pack_energy_based // Erin_Brooks
+               (liberated_water
+               ,ref_precipitation_actual()
+               ,ref_air_temperature_avg()
+               ,ref_dew_point_temperature_avg()
+               ,ref_solar_radiation()
+               ,ref_sky()
+               ,ref_sun()
+               ,ref_aerodynamics()
+               ,86400 // time_step
+               //,_soil_slope_percent   // Warning need to make these available again
+               //,_site_aspect_deg
+               //,_forest_vegetation
+               );
+         break;
+         case SIMPLE_SNOW_PACK :
+            snow_pack = new Snow_pack_temperature_based
+               (liberated_water
+               ,ref_precipitation_actual()
+               ,ref_air_temperature_avg());
+         break;
+         default: case NO_SNOW_PACK :
+            // snow_pack remains null
+         break;
+      }
+   }
+   reported_snow_storage = 0.0;                                                  //160629
+   if (snow_pack)
+   {
+      started = snow_pack->update().is_valid();                                  //151201
+      reported_snow_storage = get_snow_water_equivelent_depth();                 //160629
+   }
+   if (storms && storms_owned)    storms->start_day();                           //160817_160506
+   #if (CS_VERSION==5)
+   started &= ET_ref->update().is_valid();                                       //160731
+   #endif
+   return started;                                                               //151201
+}
+//_2015-10-23________________________________________________________start_day_/
+bool Land_unit_meteorological::end_year()                          modification_
+{  bool ended = true;
+   if (atmospheric_CO2_change) ended &= atmospheric_CO2_change->end_year(today.get_year());
+   ended &= CS::Simulation_element_abstract::end_year();
+   return ended;
+}
+//_2015-12-01___________________________________________________________________
+CS::CO2_atmospheric_concentration CO2_not_applicable;                            //150507
+const CS::CO2_atmospheric_concentration &Land_unit_meteorological::ref_CO2_current_conc() const //150507
+{  return atmospheric_CO2_change                                                 //090709
+      ? atmospheric_CO2_change->ref_CO2_current_conc()
+      : CO2_not_applicable;  // I am currently returning 0 this should trigger an obvious error
+   // Caller will need to provide an atmospheric_CO2_change model.
+} // ppm
+//_2015-12-01__2003-11-22_______________________________________________________
+const Weather_spanning_interface &Land_unit_meteorological::ref_weather_spanning() const
+{  return *weather_spanning;
+}
+//_2015-12-01___________________________________________________________________
+const CS::Solar_irradiance_extraterrestrial &Land_unit_meteorological::ref_solar_irradiance_extraterrestrial() const
+{  return *solar_irradiance_extraterrestrial;
+}
+//_2015-12-01___________________________________________________________________
+const meteorology::Storms  *Land_unit_meteorological::ref_storms()         const
+{  return storms;
+}
+//_2015-12-15___________________________________________________________________
+} // namespace CS

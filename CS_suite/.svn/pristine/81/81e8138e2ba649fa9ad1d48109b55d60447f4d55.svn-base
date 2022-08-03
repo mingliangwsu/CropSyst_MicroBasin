@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\CS_Suite_4\CropSyst\CPF_runner.exe"/>
+    <OBJFILES value="..\..\..\..\corn\format\binary\binary_file_abstract.obj 
+      ..\..\..\..\corn\format\binary\binary_file_fstream.obj 
+      ..\CPF_runner_main.obj 
+      ..\..\..\..\CropSyst\source\project\optimization\crop_production_function\CPF_water.obj 
+      ..\..\..\..\CropSyst\source\cs_scenario_directory.obj 
+      ..\..\..\file_system\database_directory.obj 
+      ..\..\..\..\CropSyst\source\crop\growth_stages.obj 
+      ..\..\..\..\CropSyst\source\management\management_param_class.obj 
+      ..\..\..\..\CropSyst\source\management\management_param_struct.obj 
+      ..\..\..\..\CropSyst\source\management\management_param_V4.obj"/>
+    <RESFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value="C:\temp\lib\BCB5\release\ued_static.lib 
+      C:\temp\lib\BCB5\release\corn_complete_static.lib 
+      C:\temp\lib\BCB5\release\common_sim_static.lib 
+      C:\temp\lib\BCB5\release\CS_directory.lib"/>
+    <LIBRARIES value=""/>
+    <SPARELIBS value="Vcl50.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi TeeQR50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi 
+      Inet50.bpi NMFast50.bpi dclocx50.bpi bcb2kaxserver50.bpi Tee50.bpi 
+      VCLIB50.bpi K102_R51.bpi UED_components_package.bpi CORN_datasets.bpi 
+      TeeUI50.bpi TeeDB50.bpi autocontrols_simulation.bpi AutoControls.bpi"/>
+    <PATHCPP value=".;..\..\..\..\corn\format\binary;..;..\..\..\..\CropSyst\source\project\optimization\crop_production_function;..\..\..\..\CropSyst\source;..\..\..\file_system;..\..\..\..\CropSyst\source\crop;..\..\..\..\CropSyst\source\management"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="CROPSYST;CS_VERSION=4"/>
+    <SYSDEFINES value="NO_STRICT;_NO_VCL;_RTLDLL;USEPACKAGES"/>
+    <MAINSOURCE value="CPF_runner.bpf"/>
+    <INCLUDEPATH value="..\..\..\..\CropSyst\source\management;..\..\..\..\CropSyst\source\crop;..\..\..\file_system;..\;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\CropSyst\source\project\optimization\crop_production_function;..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\source;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\.."/>
+    <LIBPATH value="..\..\..\..\CropSyst\source\management;..\..\..\..\CropSyst\source\crop;..\..\..\file_system;..\..\..\..\CropSyst\source;..\;..\..\..\..\CropSyst\source\project\optimization\crop_production_function;..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -tWC -tWM- -c"/>
+    <PFLAGS value="-$Y- -$L- -$D- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="-D&quot;&quot; -ap -Tpe -x -Gn"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0x32.obj $(PACKAGES) $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cw32i.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[Excluded Packages]
+$(BCB)\Projects\Bpl\MPCommonLibC5D.bpl=Mustang Peak Common Library DesignTime Package
+$(BCB)\Projects\Bpl\ThemeManagerC5D.bpl=Soft Gems Theme Manager
+
+[HistoryLists\hlIncludePath]
+Count=13
+Item0=$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\CropSyst\source\project\optimization\crop_production_function;..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..;..\..\..\..\Common\geolocation;C:\dev\cropsyst\source\project\optimization\crop_production_function;..\..\..\..\cropsyst\source;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\..
+Item1=..\..\..\..\CropSyst\source\project\optimization\crop_production_function;..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\..
+Item2=..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\..
+Item3=..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..\;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\..
+Item4=..\;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\..
+Item5=..\;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\..
+Item6=..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\..
+Item7=..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\..
+Item8=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS;c:\dev
+Item9=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item10=..\;..;$(BCB)\include;$(BCB)\include\vcl;c:\dev\common; c:\dev\USDA\NRCS
+Item11=..\;..;$(BCB)\include;$(BCB)\include\vcl
+Item12=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=10
+Item0=..\..\..\..\CropSyst\source\project\optimization\crop_production_function;..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..\..\..\corn\format\binary\oldbinrec;..\..\..\..\corn\format\binary;..\..\..\..\UED\library;..\..\..\..\corn\data_source;..\;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\;..;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\;..\..\..\..\Common\geolocation;..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item5=..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\..\..\..\cropsyst\cpp\project\optimization\crop_production_function;..\..\..\..\cropsyst\cpp;..\;..;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\;..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;..;$(BCB)\lib\obj;$(BCB)\lib
+Item8=..\..\..\..\components\autocontrols\combined;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;..\;..;$(BCB)\lib\obj;$(BCB)\lib
+Item9=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=4
+Item0=CROPSYST;CS_VERSION=4
+Item1=_DEBUG;CROPSYST;CS_VERSION=4
+Item2=_DEBUG;CS_VERSION=4
+Item3=_DEBUG
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=C:\CS_Suite_4\CropSyst\
+Item1=C:\CS_Suite_4\CropSyst
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=&quot;C:\Simulation\Projects\REACCH\Scenarios\prosser-obs-WW-1990-1999\.CropSyst_scenario&quot;  
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

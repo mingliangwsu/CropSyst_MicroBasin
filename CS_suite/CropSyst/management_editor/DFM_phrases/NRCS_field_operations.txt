@@ -1,0 +1,188 @@
+(optional-unknown-not listed) #4
+(unknown - not listed here) #29
+Mower, swather, windrower #30
+Pruning #31
+Harvest, banana #32
+Harvest, banana remove stem #33
+Harvest, broccoli and cauliflower #34
+Harvest, cabbage and head lettuce #35
+Harvest, corn silage with cover crop #36
+Harvest, cotton #37
+Harvest, cotton and shred #38
+Harvest, cut flowers #39
+Harvest, forage sorghum #40
+Harvest, grain, grow cover #41
+Harvest, grass or legume seed, leave forage #42
+Harvest, grass seed, remove forage #43
+Harvest, hand pick #44
+Harvest, hand pull #45
+Harvest, hay, grass #46
+Harvest, hay, legume #47
+Harvest, hay, no regrowth #48
+Harvest, kenaf #49
+Harvest, killing crop #50
+Harvest, leafy veg. #51
+Harvest, legume seed, remove forage #52
+Harvest, peanut digger #53
+Harvest, plantains #54
+Harvest, root crops, digger #55
+Harvest, rootcrops, manually #56
+Harvest, silage #57
+Harvest, snapper header #58
+Harvest, stripper header #59
+Harvest, sugarcane, after burning #60
+Harvest, sugarcane, modern #61
+Harvest, sugarcane, old type #62
+Harvest, tobacco, burley #63
+Harvest, tobacco, flue cured #64
+Graze, continuous #65
+Graze, intensive rotational #66
+Graze, rotational #67
+Graze, stubble or residue #68
+Manure injector #57
+Manure spreader #58
+Fert applic. anhyd knife 12 in #23
+Fert applic. deep plcmt hvy shnk #24
+Fert applic. surface broadcast #25
+Fert. applic. anhyd knife 30 in #26
+Fert. applic., strip-till 30 in #27
+Add mulch #16
+Aerator, field surface, ground driven #17
+Aerial seeding #18
+Bale straw or residue #19
+Bed shaper #20
+Bed shaper, 12 in #21
+Bedder, hipper, disk hiller #22
+Bedder, hipper, hiller 12 in high #23
+Bedder, hipper, hiller 15 in high #24
+Bedder, hipper, hiller 18 in high #25
+Bulldozer, clearing #26
+Burn residue #27
+Burn residue, high intensity #28
+Burn residue, low intensity #29
+Chisel, st. pt. #30
+Chisel, st. pt. 12 in deep #31
+Chisel, st. pt. 15 in deep #32
+Chisel, sweep shovel #33
+Chisel, twisted shovel #34
+Chop veg. with machete #35
+Cultipacker, roller #36
+Cultivate, manually #37
+Cultivator, field 6-12 in sweeps #38
+Cultivator, field w/ spike points #39
+Cultivator, hipper, disk hiller on beds #40
+Cultivator, off bar w/disk hillers on beds #41
+Cultivator, row - 1st pass ridge till #42
+Cultivator, row - 2nd pass ridge till #43
+Cultivator, row 1 in ridge #44
+Cultivator, row 3 in ridge #45
+Cultivator, row, high residue #46
+Disk, offset, heavy #47
+Disk, offset, heavy 12 in depth #48
+Disk, offset, heavy 15 in depth #49
+Disk, tandem heavy primary op. #50
+Disk, tandem light finishing #51
+Disk, tandem secondary op. #52
+Do all #53
+Do all, on beds #54
+Drill or air seeder single disk openers 7-10 in spac. #55
+Drill or air seeder, hoe opener in hvy residue #56
+Drill or air seeder, hoe/chisel openers 6-12 in spac. #57
+Drill or airseeder, double disk #58
+Drill or airseeder, double disk opener, w/ fert openers #59
+Drill or airseeder, double disk, w/ fluted coulters #60
+Drill or airseeder, offset double disk openers #61
+Drill, air seeder, sweep or band opener #62
+Drill, deep furrow  12 to 18 in spacing #63
+Drill, heavy, direct seed, dbl disk opnr #64
+Drill, heavy, direct seed, dbl disk opnr w/row cleaners #65
+Drill, semi-deep furrow  12 to 18 in spacing #66
+Furrow diker #67
+Furrow shaper, torpedo #68
+Graze, continuous #69
+Graze, intensive rotational #70
+Graze, rotational #71
+Graze, stubble or residue #72
+Harrow, coiled tine #73
+Harrow, heavy #74
+Harrow, rotary #75
+Harrow, spike tooth #76
+Harrow, tine, on beds #77
+Kill crop #78
+Knife, windrow dry beans #79
+Land plane #80
+Lister, 40 in #81
+Manure injector #82
+Manure spreader #83
+Middle buster, digger #84
+Mulch treader #85
+Para-plow or para-till #86
+Permeable weed barrier applicator #87
+Planter, double disk opnr #88
+Planter, double disk opnr w/fluted coulter #89
+Planter, double disk opnr, 18 in rows #90
+Planter, in-row subsoiler #91
+Planter, ridge till #92
+Planter, runner opener #93
+Planter, small veg seed #94
+Planter, strip till #95
+Planter, sugarcane #96
+Planter, transplanter, vegetable #97
+Planter, transplanter, vegetable, no-till #98
+Planting, broadcast seeder #99
+Planting, hand 10 percent dist. #100
+Planting, hand 5 percent dist. #101
+Planting, manual #102
+Planting, no-til manually #103
+Plastic mulch applic. 40 inch beds 100 percent cover #104
+Plastic mulch applic. 40 inch beds 75 percent cover #105
+Plastic mulch applic. 48 inch beds 100 percent cover #106
+Plastic mulch applic. 48 inch beds 80 percent cover #107
+Plastic mulch applic. 54 inch beds 100 percent cover #108
+Plastic mulch applic. 54 inch beds 80 percent cover #109
+Plastic mulch applic. 64 inch beds 100 percent cover #110
+Plastic mulch applic. 64 inch beds 85 percent cover #111
+Plastic mulch applicator 100 percent cover #112
+Plastic mulch applicator 40 percent cover #113
+Plastic mulch applicator 75 percent cover #114
+Plastic mulch, 05 percent removal #115
+Plastic mulch, 10 percent removal #116
+Plastic mulch, 25 percent removal #117
+Plastic mulch, 50 percent  removal #118
+Plastic mulch, remove #119
+Plow, disk #120
+Plow, moldboard #121
+Plow, moldboard, conservation #122
+Plow, moldboard, up hill #123
+Plow, reversable #124
+Regrow #125
+Residue, row cleaner #126
+Rodweeder #127
+Roller, corrugated packer #128
+Roller, on beds #129
+Roller, residue #130
+Roller, smooth #131
+Root rake #132
+Rotary hoe #133
+Rototiller, field #134
+Rototiller, field, add residue #135
+Rototiller, row cult add residue #136
+Rototiller, row cultivator #137
+Sand fighter #138
+Seedbed finisher #139
+Shredder, flail or rotary #140
+Shredder, rotary, regrow veg #141
+Shredder, rotary, remove residue #142
+Sprayer, kill crop #143
+Sprayer, post emergence #144
+Stalk puller #145
+Striptiller w/middlebuster on beds #146
+Subsoiler #147
+Subsoiler bedder (ripper/hipper) #148
+Subsoiler ripper, 24 to 40 in. deep #149
+Sweep plow 20-40 in wide #150
+Sweep plow wider  than 40 in w/ mulch treader #151
+Sweep plow, wider than 40 in #152
+Water mulch; off #153
+Water mulch; on #154
+Weed control, manual hoe #155

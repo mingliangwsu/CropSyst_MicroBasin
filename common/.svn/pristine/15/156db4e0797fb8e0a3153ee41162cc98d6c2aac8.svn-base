@@ -1,0 +1,81 @@
+#ifndef dailyH
+#define dailyH
+#ifndef wthrbaseH
+#  include "common/weather/wthrbase.h"
+#endif
+// included because it has the super class.
+
+#include "common/weather/database/CS_weather_daily_UED.h"
+
+/*
+   This is a weather class that operates on a daily time step.
+*/
+
+namespace CS
+{
+//______________________________________________________________________________
+class Weather_daily
+{
+   const Geocoordinate              &geocoordinate;
+   const CORN::Date_const_interface /*170525 Date */                 &today;
+   provided_ Weather_provider       *weather_provider;
+   provided_ Sun_days               *sun_days;
+   provided_ Sun_hours              *sun_hours;
+
+   // sun_days and sun_hours should actually be cognate
+   // because these could be shared regionally
+
+   provided_ CS::Solar_irradiance_extraterrestrial_hourly *ET_solar_irrad;
+ public:
+   Weather_daily
+      (const Geocoordinate              &geocoordinate
+      ,const CORN::Date_const_interface /*170525 Date */                 &today);
+   inline virtual ~Weather_daily() {}                                            //170217
+   Sun_days &provide_sun_days()                                      provision_;
+   Sun_hours &provide_sun_hours()                                    provision_;
+   CS::Solar_irradiance_extraterrestrial_hourly &provide_ET_solar_irrad() provision_;
+   Weather_provider &provide_weather_provider()                      provision_;
+   virtual bool start()                                            modification_;
+};
+//_2016-07-29__________________________________________________________________/
+} // namespace CS
+
+class Weather_daily_deprecated
+: public Weather_base                                                            //011020
+{
+ public: // constructor
+   inline Weather_daily_deprecated                                                          //011020
+      (Weather_database    *_weather_database                                    //050307
+      ,modifiable_ Weather_provider &provider_                                   //151201
+      ,const CORN::Date_const_interface /*170525 Date */    &_today                                               //150125
+      ,const Geocoordinate &_geocoordinate                                       //150629
+      ,float64              screening_height                                     //151128
+      ,bool                 _treat_valid_data_as_real                            //081109
+      ,bool                 _read_only = false                                   //000711
+      )                          //991004
+      :Weather_base                                                              //011020
+      (_weather_database                                                         //050307
+      ,provider_                                                                 //151201
+      ,_today                                                                    //150125
+      ,_geocoordinate                                                            //150629
+      ,screening_height                                                          //151128
+      ,_treat_valid_data_as_real                                                 //081109
+      ,_read_only                                                                //000711
+      ,seconds_per_day)
+      {}
+   inline virtual ~Weather_daily_deprecated() {}                                            //151204
+ public: // The following accessors get the weather data with the best quality available
+        // These are normally only used by this class when advancing the time step
+        // but may also be used to get values for non current dates
+ public:  // The following are currently temporary for Weather_interface
+   // they should be overridden by derived classes a they are here
+   // to allow me to compile ClimGen while in
+   // the transition to the new weather classes
+   // These should never be reached.
+
+   inline virtual float64 get_curr_act_vapor_pressure()        const  { return 9999999.9; }
+   inline virtual float64 get_atmospheric_pressure_est_kPa()   const  { return 9999999.9; } //011008
+};
+//______________________________________________________________________________
+#endif
+

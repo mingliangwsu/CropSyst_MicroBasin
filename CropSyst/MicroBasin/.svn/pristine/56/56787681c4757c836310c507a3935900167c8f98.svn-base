@@ -1,0 +1,485 @@
+#include "cropinputclass.h"
+#include "control/allcontrolclass.h"
+#include "math.h"
+#include <iostream>
+#include <sstream>
+
+#include <fstream>
+#include "util/pubtools.h"
+#include <cstring>
+CropInputClass::CropInputClass()
+{}
+//______________________________________________________________________________
+std::string CropInputClass::getCropParameterFileName
+(const std::string &cropname                                                     //150709RLN
+,AllControlClass &ControlRef)
+{
+   #ifdef LIU_ENGINE
+    std::ostringstream ss("");
+    ss<<ControlRef.cropproperty_prefix_name<<cropname<<ControlRef.cropproperty_suffix_name;
+    return ss.str();
+   #else
+   std::wstring property_crop_name(ControlRef.cropproperty_filename.get_name());
+   CORN::append_string_to_wstring(cropname,property_crop_name);
+   CORN::OS::File_name_concrete soil_profile_filename
+      (ControlRef.cropproperty_filename.get_parent_directory_name_qualified()
+      ,property_crop_name
+      ,ControlRef.cropproperty_filename.get_extension());
+   std::string result(soil_profile_filename.c_str());
+   return result;
+   #endif
+}
+//______________________________________________________________________________
+void CropInputClass::ReadCropParameters(std::string cropname, AllControlClass &ControlRef)
+{
+    //Implement later M.Liu
+    double Maximum_Nitrogen_Uptake(0.0);
+    double PAW_Where_N_Uptake_Rate_Decreases(0.0);
+    double Soil_N_Conc_Where_N_Uptake_Decreases(0.0);
+    std::stringstream ss;
+    std::string parameterfilename = getCropParameterFileName(cropname,ControlRef);
+#ifdef LIU_DEBUG
+    std::cout<<"Plant parameterfilename:"<<parameterfilename<<std::endl;
+#endif
+    std::ifstream ifile(parameterfilename.c_str());
+    if (ifile.is_open()) {
+        Crop_Name = cropname;
+        std::string nameline("");
+        while (std::getline(ifile,nameline)) {
+            std::string record_key = getKeyWord(nameline);
+            std::string dataline("");
+            int idata(0);
+            double fdata(0.0);
+            bool bdata(true);
+            if (!record_key.empty()) {
+                //read the data line
+                std::getline(ifile,dataline);
+                ss.clear();
+                ss.str(dataline);
+                if (dataline.empty() || !getKeyWord(dataline).empty()) {
+                    char errormessage[200];
+                    sprintf(errormessage,"Warning: %s has no data!",record_key.c_str());
+                    nrerror(errormessage);
+                } else {
+                    if (record_key.compare("Crop_Growth_RUE") == 0) {
+                        ss>>fdata;
+                        Radiation_Use_Efficiency = fdata;
+                    }
+                    else if (record_key.compare("Crop_Growth_WUE") == 0) {
+                        ss>>fdata;
+                        Water_Use_Efficiency_at_1_kPa = fdata/1000; //g/kg to kg/kg
+                    }
+                    else if (record_key.compare("Crop_Growth_SWUE") == 0) {
+                        ss>>fdata;
+                        Slope_of_Water_Use_Efficiency_Function_of_VPD = fdata;
+                    }
+                    else if (record_key.compare("Crop_Growth_OGMT") == 0) {
+                        ss>>fdata;
+                        Optimum_Growth_Mean_Temperature = fdata;
+                    }
+                    else if (record_key.compare("Morphology_ICC") == 0) {
+                        ss>>fdata;
+                        Initial_Canopy_Cover = fdata;
+                    }
+                    else if (record_key.compare("Morphology_MXCC") == 0) {
+                        ss>>fdata;
+                        Maximum_Canopy_Cover = fdata;
+                    }
+                    else if (record_key.compare("Morphology_GCC") == 0) {
+                        ss>>fdata;
+                        Green_Canopy_Cover_At_Maturity = fdata;
+                    }
+                    else if (record_key.compare("Morphology_TCC") == 0) {
+                        ss>>fdata;
+                        Total_Canopy_Cover_At_Maturity = fdata;
+                    }
+                    else if (record_key.compare("Morphology_MCH") == 0) {
+                        ss>>fdata;
+                        Maximum_Crop_Height = fdata;
+                    }
+                    else if (record_key.compare("Morphology_CLWP") == 0) {
+                        ss>>fdata;
+                        Critical_Leaf_Water_Potential_For_Canopy_Expansion = fdata;
+                    }
+                    else if (record_key.compare("Morphology_MLWP") == 0) {
+                        ss>>fdata;
+                        Minimum_Leaf_Water_Potential_For_Canopy_Expansion = fdata;
+                    }
+                    else if (record_key.compare("Morphology_MRD") == 0) {
+                        ss>>fdata;
+                        Max_Root_Depth = fdata;
+                    }
+                    else if (record_key.compare("Morphology_MRDS") == 0) {
+                        ss>>fdata;
+                        Max_Root_Density = fdata;
+                    }
+                    else if (record_key.compare("Morphology_CRDF") == 0) {
+                        ss>>fdata;
+                        Curvature_Root_Density_Function = fdata;
+                    }
+                    else if (record_key.compare("Morphology_RLPU") == 0) {
+                        ss>>fdata;
+                        Root_Length_Per_Unit_Root_Mass = fdata;
+                    }
+                    else if (record_key.compare("Morphology_RGSTS") == 0) {
+                        ss>>fdata;
+                        Root_Growth_Sensitivity_To_Stress = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_BT") == 0) {
+                        ss>>fdata;
+                        Base_Temperature_for_Development = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_MT") == 0) {
+                        ss>>fdata;
+                        Maximum_Temperature_for_Development = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_TTE") == 0) {
+                        ss>>fdata;
+                        Thermal_Time_for_Emergence = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_TTBCR") == 0) {
+                        ss>>fdata;
+                        Thermal_Time_For_Budbreak_If_Chill_Reached = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_TTBCNR") == 0) {
+                        ss>>fdata;
+                        Thermal_Time_For_Budbreak_If_Chill_Not_Reached = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_TTF") == 0) {
+                        ss>>fdata;
+                        Thermal_Time_for_Flowering = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_TTYF") == 0) {
+                        ss>>fdata;
+                        Thermal_Time_for_Yield_Formation = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_TTECG") == 0) {
+                        ss>>fdata;
+                        Thermal_Time_At_The_End_Of_Canopy_Growth = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_TTBCS") == 0) {
+                        ss>>fdata;
+                        Thermal_Time_At_The_Beginning_Of_Canopy_Senescence = fdata;
+                    }
+                    else if (record_key.compare("Crop_Develop_TTM") == 0) {
+                        ss>>fdata;
+                        Thermal_Time_for_Maturity = fdata;
+                    }
+                    else if (record_key.compare("Plant_Water_CET") == 0) {
+                        ss>>fdata;
+                        Crop_ET_Coeff_100_Percent_Cover = fdata;
+                    }
+                    else if (record_key.compare("Plant_Water_MWU") == 0) {
+                        ss>>fdata;
+                        Max_Water_Uptake = fdata;
+                    }
+                    else if (record_key.compare("Plant_Water_LWPSC") == 0) {
+                        ss>>fdata;
+                        Leaf_Water_Pot_for_Stomatal_Closure = fdata;
+                    }
+                    else if (record_key.compare("Plant_Water_WLWP") == 0) {
+                        ss>>fdata;
+                        Wilting_Leaf_Water_Pot = fdata;
+                    }
+                    else if (record_key.compare("Plant_Nitrogen_MNU") == 0) {
+                        ss>>fdata;
+                        Maximum_Nitrogen_Uptake = fdata/10000;  //kg/m2/day
+                    }
+                    else if (record_key.compare("Plant_Nitrogen_WAC") == 0) {
+                        ss>>fdata;
+                        PAW_Where_N_Uptake_Rate_Decreases = fdata;
+                    }
+                    else if (record_key.compare("Plant_Nitrogen_NAC") == 0) {
+                        ss>>fdata;
+                        Soil_N_Conc_Where_N_Uptake_Decreases = fdata;
+                    }
+                    else if (record_key.compare("Plant_Nitrogen_RNN") == 0) {
+                        ss>>fdata;
+                        Residual_N_Not_Available_For_Uptake = fdata;
+                    }
+                    else if (record_key.compare("Plant_Nitrogen_RNC") == 0) {
+                        ss>>fdata;
+                        Root_N_Concentration = fdata;
+                    }
+                    else if (record_key.compare("Plant_Nitrogen_GNC") == 0) {
+                        ss>>fdata;
+                        Grain_N_Coefficient = fdata;
+                    }
+                    else if (record_key.compare("Plant_Nitrogen_MEGPN") == 0) {
+                        ss>>fdata;
+                        Max_Early_Growth_Plant_N_Conc = fdata;
+                    }
+                    else if (record_key.compare("Harvest_UHI") == 0) {
+                        ss>>fdata;
+                        Unstressed_Harvest_Index = fdata;
+                    }
+                    else if (record_key.compare("Harvest_MTF") == 0) {
+                        ss>>fdata;
+                        Maximum_Translocation_Fraction = fdata;
+                    }
+                    else if (record_key.compare("Tree_Fruit_FMFL") == 0) {
+                        ss>>fdata;
+                        Fresh_Mass_Fruit_Load = fdata;
+                    }
+                    else if (record_key.compare("Tree_Fruit_FSIF") == 0) {
+                        ss>>fdata;
+                        Fraction_Solids_In_Fruits = fdata;
+                    }
+                    else if (record_key.compare("Tree_Fruit_RCH") == 0) {
+                        ss>>fdata;
+                        Required_Chill_Hours = fdata;
+                    }
+                    else if (record_key.compare("Perennial_DSD") == 0) {
+                        ss>>idata;
+                        DOY_Start_Dormancy = idata;
+                    }
+                    else if (record_key.compare("Perennial_DED") == 0) {
+                        ss>>idata;
+                        DOY_End_Dormancy = idata;
+                    }
+                    else if (record_key.compare("Initialize_IGRI") == 0) {
+                        ss>>fdata;
+                        Initial_Green_Area_Index = fdata;
+                    }
+                    else if (record_key.compare("Initialize_RDAE") == 0) {
+                        ss>>fdata;
+                        Root_Depth_At_Emergence = fdata;
+                    }
+                    else if (record_key.compare("Initialize_PD") == 0) {
+                        ss>>fdata;
+                        Planting_Depth = fdata;
+                    }
+                    else if (record_key.compare("Type_C3") == 0) {
+                        ss>>bdata;
+                        C3_Crop = bdata;
+                    }
+                    else if (record_key.compare("Type_PC") == 0) {
+                        ss>>bdata;
+                        Perennial_Crop = bdata;
+                    }
+                    else if (record_key.compare("Type_RC") == 0) {
+                        ss>>bdata;
+                        Root_Crop = bdata;
+                    }
+                    else if (record_key.compare("Type_TRC") == 0) {
+                        ss>>bdata;
+                        Tree_Fruit_Crop = bdata;
+                    }
+                    else if (record_key.compare("Type_GC") == 0) {
+                        ss>>bdata;
+                        Grain_Crop = bdata;
+                    }
+                    else if (record_key.compare("Type_VC") == 0) {
+                        ss>>bdata;
+                        Vegetable_Crop = bdata;
+                    }
+                    else if (record_key.compare("Type_LEG") == 0) {
+                        ss>>bdata;
+                        Leguminous_Crop = bdata;
+                    }
+                    else if (record_key.compare("CO2_BCO2") == 0) {
+                        ss>>fdata;
+                        Baseline_CO2_Concentration = fdata;
+                    }
+                    else if (record_key.compare("CO2_ECO2") == 0) {
+                        ss>>fdata;
+                        Experimental_Elevated_CO2_Concentration = fdata;
+                    }
+                    else if (record_key.compare("CO2_EBGR") == 0) {
+                        ss>>fdata;
+                        Experimental_Biomass_Gain_Ratio_In_Response_To_CO2 = fdata;
+                    }
+                    else if (record_key.compare("SCS_IIA") == 0) {
+                        ss>>fdata;
+                        Crop_CN_IIA = fdata;
+                    }
+                    else if (record_key.compare("SCS_IIB") == 0) {
+                        ss>>fdata;
+                        Crop_CN_IIB = fdata;
+                    }
+                    else if (record_key.compare("SCS_IIC") == 0) {
+                        ss>>fdata;
+                        Crop_CN_IIC = fdata;
+                    }
+                    else if (record_key.compare("SCS_IID") == 0) {
+                        ss>>fdata;
+                        Crop_CN_IID = fdata;
+                    }
+                    else if (record_key.compare("MR_Leaves") == 0) {
+                        ss>>fdata;
+                        Maintenance_Coef_leaves = fdata;
+                    }
+                    else if (record_key.compare("MR_Stems") == 0) {
+                        ss>>fdata;
+                        Maintenance_Coef_stems = fdata;
+                    }
+                    else if (record_key.compare("MR_Roots") == 0) {
+                        ss>>fdata;
+                        Maintenance_Coef_roots = fdata;
+                    }
+                    else if (record_key.compare("BE_Leaves") == 0) {
+                        ss>>fdata;
+                        Biosynthesis_Coef_leaves = fdata;
+                    }
+                    else if (record_key.compare("BE_Stems") == 0) {
+                        ss>>fdata;
+                        Biosynthesis_Coef_stems = fdata;
+                    }
+                    else if (record_key.compare("BE_Roots") == 0) {
+                        ss>>fdata;
+                        Biosynthesis_Coef_roots = fdata;
+                    }
+                    else if (record_key.compare("MR_Temp_Base") == 0) {
+                        ss>>fdata;
+                        Temperature_At_Maintenance_Are_Reported = fdata;
+                    }
+                    else if (record_key.compare("Extinction_Coefficient_Crop_Of_Radiacion_Solar") == 0) {
+                        ss>>fdata;
+                        Extinction_Coefficient_Crop_Of_Radiacion_Solar = fdata;
+                    } else {
+                        char errormessage[200];
+                        sprintf(errormessage,"Warning: Cann//t find keyword %s",record_key.c_str());
+                        //nrerror(errormessage);
+                    }
+                }
+            }
+        }
+    } else {
+        char errormessage[200];
+        sprintf(errormessage,"Cann't open file %s\n",parameterfilename.c_str());
+        nrerror(errormessage);
+    }
+    ifile.close();
+    //Additional Crop Parameters
+    //OJO Convert to parameter !!!
+    if (C3_Crop) 
+        //This could be included in constant definitions. 
+        //It is also used to calculate reference N Concentrations
+         Max_Early_Growth_Plant_N_Conc = 0.06;
+    else
+         Max_Early_Growth_Plant_N_Conc = 0.05;
+    Water_Availability_Coefficient = 
+        WaterAvailabilityFactor(PAW_Where_N_Uptake_Rate_Decreases);
+    N_Availability_Coefficient = 
+        NAvailabilityFactor(Soil_N_Conc_Where_N_Uptake_Decreases,
+                            Residual_N_Not_Available_For_Uptake);
+    Maximum_Nitrogen_Uptake_Per_Unit_Root_Length = 
+        MaximumNitrogenUptakePerUnitRootLength(Planting_Depth,Maximum_Nitrogen_Uptake);
+    //If Simulation.SimulationRotation.CO2Run Then
+    //Adjust maximum canopy cover to increased atmospheric CO2 concentration assuming that LAI increases at half the rate than biomass production
+    //    Dim LAI_CO2_Adj As Double
+    //
+    //    LAI_CO2_Adj = (-Log(1 - Maximum_Canopy_Cover) / 0.5) * (1 + (Experimental_Biomass_Gain_Ratio_In_Response_To_CO2 - 1) / 2)
+    //
+    //    Maximum_Canopy_Cover = 1 - Exp(-0.5 * LAI_CO2_Adj)
+    //End If
+    //Calculate canopy cover parameters
+    DetermineCanopyGrowthParameters(Initial_Canopy_Cover, Maximum_Canopy_Cover);
+    DetermineSenescenceCanopyGrowthParameters(Green_Canopy_Cover_At_Maturity);
+}
+//______________________________________________________________________________
+void CropInputClass::DetermineCanopyGrowthParameters(double Initial_Canopy_Cover, 
+  double Maximum_Canopy_Cover)
+{
+    double Season_Fraction_For_Half_Maximum_Canopy_Cover(0.5025);
+    while (fabs(Maximum_Canopy_Cover - Actual_CC_Max) >= 0.001) {
+        double New_Asym_CC = Maximum_Canopy_Cover;
+        Season_Fraction_For_Half_Maximum_Canopy_Cover -= 0.0025;
+        while (fabs(New_Asym_CC - Asym_CC) > 0.0001) {
+            Asym_CC = New_Asym_CC;
+            Shape_Factor = -log(1.0 / (Asym_CC / Initial_Canopy_Cover - 1.0)) / Season_Fraction_For_Half_Maximum_Canopy_Cover;
+            b_Coefficient = 1.0 / exp(-Shape_Factor * Season_Fraction_For_Half_Maximum_Canopy_Cover);
+            New_Asym_CC = -(Initial_Canopy_Cover - (1.0 + b_Coefficient) * Maximum_Canopy_Cover) / b_Coefficient;
+        };
+        Actual_CC_Max = Asym_CC / (1.0 + b_Coefficient * exp(-Shape_Factor));
+    };
+}
+//______________________________________________________________________________
+double CropInputClass::WaterAvailabilityFactor(double PAW_Where_N_Upake_Rate_Decreases)
+{
+    return 5.259 * pow(PAW_Where_N_Upake_Rate_Decreases, (-1.0246));
+}
+//______________________________________________________________________________
+double CropInputClass::NAvailabilityFactor(double Soil_N_Conc_Where_N_Uptake_Decreases, double Residual_N_Not_Available_For_Uptake)
+{
+    double N_Conc_Where_N_Uptake_Decreases_Minus_Residual_N;
+    double NAvailability;
+
+    N_Conc_Where_N_Uptake_Decreases_Minus_Residual_N = (Soil_N_Conc_Where_N_Uptake_Decreases - Residual_N_Not_Available_For_Uptake);
+    if (N_Conc_Where_N_Uptake_Decreases_Minus_Residual_N > 0.00001)
+        NAvailability = 4.9259 * pow(N_Conc_Where_N_Uptake_Decreases_Minus_Residual_N,(-0.9821));
+    else NAvailability = 0;
+
+    return NAvailability;
+}
+//______________________________________________________________________________
+double CropInputClass::MaximumNitrogenUptakePerUnitRootLength(double planting_depth,double maximum_nitrogen_uptake)
+{
+    double Standardized_Thickness;  //in m
+    int Arbitrary_Number_Of_Layers;
+    double Maximum_Root_Density;
+    double Curvature;
+    double Maximum_Root_depth;
+    double Depth_From_Surface;
+    double Weight[21];
+    double Cumulative_Weight;
+    double Top_Layer_Root_Fraction;
+    double Top_Layer_Root_Density;
+    double Layer_Root_Fraction;
+    double Layer_Root_Density;
+    double Total_Root_Length;
+    double Maximum_Nitrogen_Uptake_Rate;
+    int i,j;
+    double tempMaximum_Nitrogen_Uptake_Per_Unit_Root_Length;
+    Maximum_Nitrogen_Uptake_Rate = maximum_nitrogen_uptake;         //kg/m2/day
+    Maximum_Root_depth = Max_Root_Depth;
+    Maximum_Root_Density = Max_Root_Density;                        // //cm root/cm3 soil volume
+    Curvature = Curvature_Root_Density_Function;
+    Arbitrary_Number_Of_Layers = 20;
+    Depth_From_Surface = 0;
+    Standardized_Thickness = (Maximum_Root_depth - planting_depth) / Arbitrary_Number_Of_Layers;// //divide arbitrarily in 20 pieces for integration
+    Cumulative_Weight = 0;
+    for (i = 1; i<=Arbitrary_Number_Of_Layers; i++) {
+        if (Depth_From_Surface > planting_depth) {
+            Weight[i] = -Maximum_Root_Density * (1.0 - exp(Curvature * (1.0 - (Depth_From_Surface + (Standardized_Thickness / 2.0))
+                            / Maximum_Root_depth) / Maximum_Root_Density));
+            Cumulative_Weight += Weight[i];
+        } else {
+            Weight[i] = 0;
+            j = i + 1;
+        }
+        Depth_From_Surface += Standardized_Thickness;
+    }
+    Total_Root_Length = 0;
+    for (i = j; i <= Arbitrary_Number_Of_Layers; i++) {
+        if (i == j) {
+            Top_Layer_Root_Fraction = Weight[i] / Cumulative_Weight;
+            Top_Layer_Root_Density = Maximum_Root_Density;
+            Total_Root_Length += Top_Layer_Root_Density * Standardized_Thickness * 10000;    // //Convert cm root/ cm3 soil volume to meters of root
+        } else {
+            Layer_Root_Fraction = Weight[i] / Cumulative_Weight;
+            Layer_Root_Density = Top_Layer_Root_Density * Layer_Root_Fraction / Top_Layer_Root_Fraction;
+            Total_Root_Length += Layer_Root_Density * Standardized_Thickness * 10000;    // //Convert cm root/ cm3 soil volume to meters of root
+        }
+    }
+    //Assume that 30% of the root length at maturity is actively involved in N uptake during rapid linear growth and have soil N fully available
+    tempMaximum_Nitrogen_Uptake_Per_Unit_Root_Length = 
+        Maximum_Nitrogen_Uptake_Rate / (0.3 * Total_Root_Length);   // //kg/m root/day //It was 0.5 OJOXXX
+    //std::cout<<tempMaximum_Nitrogen_Uptake_Per_Unit_Root_Length<<std::endl;
+    return tempMaximum_Nitrogen_Uptake_Per_Unit_Root_Length;
+}
+//______________________________________________________________________________
+void CropInputClass::DetermineSenescenceCanopyGrowthParameters(double Canopy_Cover_At_Maturity)
+{
+    double Check(1.0);
+    double New_C_low = Canopy_Cover_At_Maturity;
+    while (Check > 0.0001) {
+        C_low = New_C_low;
+        Senescence_Asym_CC = -(C_low - Actual_CC_Max * (1.0 + b_Coefficient)) / b_Coefficient;
+        New_C_low = Senescence_Asym_CC - 
+                    (1.0 + b_Coefficient * exp(-Shape_Factor)) * 
+                    (Senescence_Asym_CC - Canopy_Cover_At_Maturity);
+        Check = fabs(New_C_low - C_low);
+    };
+}
+//______________________________________________________________________________

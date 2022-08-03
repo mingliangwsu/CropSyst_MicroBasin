@@ -1,0 +1,711 @@
+*** print words and numbers of letters ***
+The     3
+quick     5
+brown     5
+fox     3
+jumps     5
+over     4
+the     3
+lazy     4
+dog     3
+
+*** check out size for tagged lists (4 lines) ***
+Number of lines with e   (3) 3
+Number of lines with z   (1) 1
+Number of lines with *   (0) 0
+Number of lines with mps (1) 1
+
+*** swap dog and fox ***
+The quick brown dog jumps over the lazy fox 
+*** put quick before fox ***
+The brown dog jumps over the lazy quick fox 
+*** put lazy after The ***
+The lazy brown dog jumps over the quick fox 
+*** search for a word that is not there ***
+Can't find cat
+*** print out again ***
+The lazy brown dog jumps over the quick fox 
+*** Recover saved copy ***
+The quick brown fox jumps over the lazy dog 
+*** print in reverse order ***
+dog lazy the over jumps fox brown quick The 
+*** convert words containing 'o' to upper case ***
+The quick BROWN FOX jumps OVER the lazy DOG 
+*** convert words containing 'O' to lower case ***
+The quick brown fox jumps over the lazy dog 
+*** upper case "quick brown fox" ***
+The QUICK BROWN FOX jumps over the lazy dog 
+*** lower case "quick brown fox" ***
+The quick brown fox jumps over the lazy dog 
+*** rfind over ***
+*** try again ***
+*** try jumps ***
+*** const find and rfind ***
+*** GString tests ***
+1  PQRST
+1  12345
+1  XXX  YYYABCZZZ
+1  XXXABCYYY  ZZZ
+1  XXXABCYYY  ZZZ
+1  XXX |   YYYABCZZZ
+100101011000100100111101110110001100010001000110011110011100100100100100
+*** all the data ***
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** just those with 've' ***
+five
+seven
+eleven
+twelve
+seventeen
+*** just those without 've' ***
+One
+two
+three
+four
+six
+eight
+nine
+ten
+thirteen
+fourteen
+fifteen
+sixteen
+eighteen
+nineteen
+twenty
+
+
+*** just those beginning with 'fo' or 's' ***
+four
+six
+seven
+fourteen
+sixteen
+seventeen
+*** just those with 'e' ***
+One
+three
+five
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+*** just those with exactly two 'e's ***
+three
+seven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+*** erase eleven ***
+number of erases = 1
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** restore it ***
+number of inserts = 1
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** replace all 'e's by 'k' ***
+number of substitutes = 33
+Onk
+two
+thrkk
+four
+fivk
+six
+skvkn
+kight
+nink
+tkn
+klkvkn
+twklvk
+thirtkkn
+fourtkkn
+fiftkkn
+sixtkkn
+skvkntkkn
+kightkkn
+ninktkkn
+twknty
+
+
+*** fix all numbers with three (or more) 'e's ***
+number of substitutes = 13
+Onk
+two
+thrkk
+four
+fivk
+six
+skvkn
+kight
+nink
+tkn
+eleven
+twklvk
+thirtkkn
+fourtkkn
+fiftkkn
+sixtkkn
+seventeen
+eighteen
+nineteen
+twknty
+
+
+*** fix the first 'e' ***
+number of substitutes = 13
+One
+two
+threk
+four
+five
+six
+sevkn
+eight
+nine
+ten
+eleven
+twelvk
+thirtekn
+fourtekn
+fiftekn
+sixtekn
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** fix the last 'e' ***
+number of substitutes = 7
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** replace first 'e' by 'k' and second by 'j' ***
+number of substitutes = 11
+One
+two
+thrkj
+four
+five
+six
+skvjn
+eight
+nine
+ten
+kljven
+twklvj
+thirtkjn
+fourtkjn
+fiftkjn
+sixtkjn
+skvjnteen
+kightjen
+ninktjen
+twenty
+
+
+*** restore them ***
+number of substitutes = 11
+number of substitutes = 11
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** repl. 2nd 'e' by 'k' unless there is a double 'e' ***
+number of substitutes = 3
+One
+two
+three
+four
+five
+six
+sevkn
+eight
+nine
+ten
+elkven
+twelvk
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** restore them ***
+number of substitutes = 3
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** select 3'e's & not double 'e'; replace by 11 ***
+number of substitutes = 1
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+11
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** restore it ***
+number of substitutes = 1
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** change single letter between 't' and 'n' to q ***
+number of substitutes = 1
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+tqn
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** restore it ***
+number of substitutes = 1
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** numbers ***
+number of substitutes = 5
+One
+2
+3
+4
+5
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+4teen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** restore ***
+number of substitutes = 5
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** cap 1st t or v in lines with one but not both ***
+number of substitutes = 14
+One
+Two
+Three
+four
+fiVe
+six
+seVen
+eighT
+nine
+Ten
+eleVen
+twelve
+Thirteen
+fourTeen
+fifTeen
+sixTeen
+seventeen
+eighTeen
+nineTeen
+Twenty
+
+
+*** restore ***
+number of substitutes = 14
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** UC ee if first letter f xor second letter i ***
+number of substitutes = 4
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourtEEn
+fifteen
+sixtEEn
+seventeen
+eightEEn
+ninetEEn
+twenty
+
+
+*** restore last E ***
+number of substitutes = 4
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourtEen
+fifteen
+sixtEen
+seventeen
+eightEen
+ninetEen
+twenty
+
+
+*** do it again ***
+number of substitutes = 4
+One
+two
+three
+four
+five
+six
+seven
+eight
+nine
+ten
+eleven
+twelve
+thirteen
+fourteen
+fifteen
+sixteen
+seventeen
+eighteen
+nineteen
+twenty
+
+
+*** The fox ***
+The quick brown fox jumps over the lazy dog.
+
+number of substitutes = 1
+The fast brown fox jumps over the lazy dog.
+
+number of substitutes = 1
+The fast brown fox jumps over the lazy dog.
+
+number of substitutes = 1
+The fast brown fox jumps over the lazy dog?
+
+number of substitutes = 1
+The slow grey fox jumps over the lazy dog.
+
+number of substitutes = 1
+The quick brown fox leaps over the lazy dog.
+
+number of substitutes = 1
+The quick brown dog jumps over the lazy fox.
+
+number of substitutes = 1
+A quick brown cat jumps over a lazy dog?
+
+number of substitutes = 1
+A quick brown cat jumps over a lazy dog.
+
+number of substitutes = 1
+A quick brown cat jumps over a lazy dog?
+
+number of substitutes = 1
+number of substitutes = 1
+XXX quick brown fox jumps over XXX lazy dog.
+
+number of substitutes = 1
+The ... 
+
+number of substitutes = 1
+The quick brown hawk flies over the lazy dog.
+
+number of substitutes = 0
+The quick brown fox jumps over the lazy dog.
+
+number of substitutes = 1
+The quick brown fox climbs over the lazy dog.
+
+number of substitutes = 1
+"The quick brown fox jumps over the lazy dog."
+
+number of substitutes = 1
+A slow red fox jumps over the lazy dog.
+
+number of substitutes = 0
+The quick brown fox jumps over the lazy dog.
+
+number of substitutes = 1
+The slow brown fox jumps over the lazy dog.
+
+number of substitutes = 0
+The quick brown fox jumps over the lazy dog.
+
+number of substitutes = 1
+The slow brown fox jumps over the lazy dog.
+
+test s function on a string
+1 one TWO three four
+0 one TWO three four
+
+test substitute functions on string with StringList
+number of substitutes = 5
+I II III IV V 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+number of substitutes = 5
+1 2 3 4 5 6 7 1 2 3 4 5 6 7 I II III IV V 6 7
+number of substitutes = 15
+I II III IV V 6 7 I II III IV V 6 7 I II III IV V 6 7
+

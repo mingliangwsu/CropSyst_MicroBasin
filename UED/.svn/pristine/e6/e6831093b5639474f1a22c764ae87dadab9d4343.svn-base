@@ -1,0 +1,17 @@
+#include "UED/convert/text_dBase_Excel_with_TDF/text_dbase_excel_with_tdf_convertor.h"
+#include "corn/datetime/time.h"
+#include "corn/tabular/delineated_datarec.h"
+#include "common/weather/gen_dat_filename.h"
+#include "common/weather/storm_event.h"
+#include <sstream>
+#include "corn/OS/file_system_logical.h"
+namespace CORN { namespace OS {
+File_system &file_system() { return CORN::OS::file_system_logical; }
+}}
+//______________________________________________________________________________
+int main(int argc, const char *argv[])
+{  Text_dBase_Excel_with_TDF_convertor convertor(argc,argv);
+   return convertor.convert();
+}
+//______________________________________________________________________________
+

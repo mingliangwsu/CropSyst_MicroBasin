@@ -1,0 +1,20 @@
+
+       CS_Explorer_engine *explorer_engine = new CS_Explorer_engine;
+       Tnavigation_frame *navigation_frame = new Tnavigation_frame(common_explorer_form);
+      // I am pretty sure frame are relinquished to this form so don't delete
+
+       Application->HelpFile = "C:\\CS_Suite_4\\CS_explorer\\help.htm";
+       Application->Title = "CS_explorer";
+
+      Tframe_CS_context *context_frame = new Tframe_CS_context(common_explorer_form);
+      context_frame->bind_to
+         (common_explorer_form
+         ,navigation_frame
+         ,explorer_engine);
+      common_explorer_form->bind_to
+         (context_frame
+         ,navigation_frame
+         ,explorer_engine
+         ,&context_frame->navigation_responder);
+
+         

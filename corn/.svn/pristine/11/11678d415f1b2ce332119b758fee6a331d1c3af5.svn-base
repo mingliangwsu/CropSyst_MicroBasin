@@ -1,0 +1,204 @@
+#include <corn/image/gif/gif_image.h>
+#include <corn/image/gif/gif_lz.h>
+#ifdef _Windows
+#include <conio.h>
+#endif
+
+
+/*______*/  GIF_image::GIF_image
+/*______*/  (color_map *i_global_color_table
+/*______*/  ,Binary_fstream &in_strm
+/*______*/  ,GIF_control_extension i_graphic_control)
+/*000129*/  :Image_8bit()
+/*______*/  ,left(0)
+/*______*/  ,top(0)
+/*______*/  ,width(0)
+/*______*/  ,height(0)
+/*______*/  ,local_color_table(0)
+/*______*/  ,global_color_table(i_global_color_table)
+/*______*/  ,interlaced(0)
+/*______*/  ,modified(0)
+/*______*/  ,graphic_control(i_graphic_control)
+/*______*/  {
+/*______*/
+/*______*/    read(in_strm);
+/*______*/    // color_table = must follow read
+/*______*/    color_table = local_color_table ? local_color_table : global_color_table;
+/*______*/  };
+/*______*/
+/*______*/  GIF_image::GIF_image
+/*______*/  (color_map *i_global_color_table
+/*______*/  ,uint16 i_width, uint16 i_height
+/*______*/  ,uint16 i_left ,uint16 i_top )
+/*000129*/  :Image_8bit()
+/*991115*/  ,CORN_container_item()
+/*______*/     ,width(i_width)
+/*______*/     ,height(i_height)
+/*______*/     ,left(i_left)
+/*______*/     ,top(i_top)
+/*______*/     ,local_color_table(0)
+/*______*/  	,global_color_table(i_global_color_table)
+/*______*/  	,color_table(i_global_color_table)
+/*______*/     ,interlaced(0)
+/*______*/     ,modified(1)
+/*______*/     {
+/*050513*/        dimension(i_height,i_width,1.0,0,0,255);
+/*______*/     };
+
+/*______*/  void GIF_image::copy_from(const GIF_image &to_be_copied)
+/*______*/  {
+/*______*/     Image_8bit::copy_from(to_be_copied);
+//             do not copy container item
+/*______*/     left = to_be_copied.left;
+/*______*/     top = to_be_copied.top;
+/*______*/     width = to_be_copied.width;
+/*______*/     height = to_be_copied.height;
+/*______*/     local_color_table = 0; //cant copy pointers to_be_copied.local_color_table;
+/*______*/     global_color_table = to_be_copied.global_color_table;
+/*______*/     color_table = to_be_copied.color_table;
+/*______*/     interlaced = to_be_copied.interlaced;
+/*______*/     modified = to_be_copied.modified;
+/*______*/     graphic_control.copy_from(to_be_copied.graphic_control);
+/*______*/  };
+
+/*______*/  void GIF_image::write(Binary_fstream &out_strm)
+/*______*/  {
+/*______*/     if (graphic_control.enabled)
+/*______*/        graphic_control.write(out_strm);
+/*______*/     out_strm.put(GIF_image_separator);
+/*______*/  	out_strm.write_uint16(left);
+/*______*/  	out_strm.write_uint16(top);
+/*______*/  	out_strm.write_uint16(width);
+/*______*/  	out_strm.write_uint16(height);
+/*______*/
+/*______*/  	uint8 packed
+/*______*/     = (local_color_table ? 0x80 : 0x00)
+/*______*/     | (interlaced ? 0x40 : 0x00)
+/*______*/     | (local_color_table && local_color_table->sorted ? 0x02 : 0x00)
+/*______*/     | (local_color_table ? (local_color_table->bits_per_pixel -1) : 0x00);
+/*______*/
+/*______*/     out_strm.put(packed);
+/*______*/
+/*______*/  	if (local_color_table)
+/*______*/  		local_color_table->write(out_strm);
+/*______*/
+/*______*/  	LZ_compresser *compresser = new LZ_compresser
+/*______*/     (out_strm,color_table->bits_per_pixel
+/*______*/     ,((long) width * (long) height));  // Reset decompress algorithm parameters.
+/*______*/
+/*______*/  	uint16 row;
+/*______*/  	for (row = 0; row < height; row++)
+/*______*/     {
+#ifdef _Windows
+                  kbhit();  // let easywin multitask
+#endif
+/*______*/  //     cout << '\r' << row; for debugging
+/*______*/        compresser->PixelCount -= width;
+/*______*/        compresser->compress_line(out_strm,get_row(row)/*matrix[row]*/,width);
+/*______*/     };
+/*______*/     delete compresser;
+/*______*/  };
+/*______*/
+/*______*/  GIF_image::~GIF_image()
+/*______*/  {
+/*______*/    if (local_color_table)
+/*______*/      delete local_color_table;
+/*______*/  };
+/*______*/
+/*______*/  void GIF_image::read(Binary_fstream &in_strm)
+/*______*/  {
+/*______*/  	left 	 = in_strm.read_uint16();
+/*______*/  	top 	 = in_strm.read_uint16();
+/*______*/  	width  = in_strm.read_uint16();
+/*______*/  	height = in_strm.read_uint16();
+/*______*/  	uint8 packed = in_strm.get();
+/*______*/  	uint8 bits_per_pixel =(packed & 0x07) + 1;
+/*______*/  	int color_table_size = (1 << bits_per_pixel);
+/*______*/
+/*______*/  	interlaced = (packed & 0x40);
+/*______*/  	bool has_local_color_table = (packed  & 0x80);
+/*______*/
+/*______*/  	if (has_local_color_table)
+/*______*/  		color_table = local_color_table = new color_map(in_strm);
+/*______*/     else
+/*______*/        local_color_table = 0;
+/*______*/
+/*______*/  	long PixelCount = (long) width * (long) height;
+/*______*/
+/*______*/  	LZ_decompresser *decompresser = new LZ_decompresser(in_strm);  // Reset decompress algorithm parameters.
+/*______*/
+/*050513*/     dimension(height,width,1.0,0,0,255); // actually highest_value is color_table_size
+//000129obs 	matrix = (uint8 **)malloc(sizeof(uint8 *) * height);
+/*______*/  	uint16 row;
+/*______*/  	for (row = 0; row < height; row++)
+/*______*/  	{
+//000129obs 	  matrix[row] = (uint8 *)malloc(sizeof(uint8)*width);
+#ifdef _Windows
+/*______*/       kbhit(); // let easywin multitask.
+#endif
+/*______*/          decompresser->decompress_line(in_strm,get_row(row)/*matrix[row]*/,width);
+/*______*/  	};
+/*______*/     delete decompresser;
+/*______*/  };
+/*______*/
+/*______*/  void GIF_image::recolor(uint8 new_colors[])
+/*______*/  {
+/*______*/    for (uint16 i = 0; i < height; i++)  // rows
+/*______*/  	  for (uint16 j = 0; j < width; j++) // cols
+/*000128*/  	  { uint8 old_color = get_at(i,j);
+/*______*/         if (old_color > 255) // this shouldn't happen
+/*______*/            old_color = 0;
+/*______*/         uint8 new_color = new_colors[old_color];
+/*______*/  		 point(j,i,new_color);
+/*______*/  	  }
+/*______*/  };
+/*______*/
+/*______*/  void GIF_image::overlay_image(GIF_image &image_to_overlay,uint16 col,uint16 row)
+/*______*/  { // static to save stack;
+/*______*/    static uint8 map_colors_1[256];
+/*______*/    static uint8 map_colors_2[256];
+/*______*/    color_table->union_colors(image_to_overlay.color_table,map_colors_1,map_colors_2);
+/*______*/    image_to_overlay.recolor(map_colors_2);
+/*______*/    uint16 i;
+/*______*/    uint16 j;
+/*______*/    for (i = 0; i < image_to_overlay.height; i++)
+/*______*/  	  for (j = 0; j < image_to_overlay.width; j++)
+/*______*/  	  {
+/*000129*/  		 set_at(i+row+image_to_overlay.top,j+col+image_to_overlay.left
+/*000129*/         ,image_to_overlay.get_at(i,j));
+/*______*/  	  };
+/*______*/  };
+/*______*/
+/*______*/  void GIF_image::quantize(int max_colors = 128)
+/*______*/  {
+/*______*/     static uint8 new_colors[256];
+/*______*/     color_table->quantize(max_colors,new_colors);
+/*______*/     recolor(new_colors);
+/*______*/
+/*______*/     color_table->remove_duplicate_colors(new_colors);
+/*______*/     recolor(new_colors);
+/*______*/     color_table->num_colors = max_colors;
+/*______*/  };
+/*______*/
+/*______*/  void GIF_image::set_torus(uint16 col, uint16 row,uint8 color) // signed row/col
+/*______*/  {
+/*______*/     // This function set the color at x,y
+/*______*/     // if X is < 0 or X > width, the dimensions are wrapped around
+/*______*/     if (row < 0)       row = height + row;
+/*______*/     if (row >= height) row = row - height;
+/*______*/     if (col < 0)       col = width + col;
+/*______*/     if (col >= width)  col = col - width;
+/*000129*/     set_at(row,col,color);
+/*______*/  };
+/*______*/
+/*______*/  uint8 GIF_image::get_torus(uint16 col, uint16 row) // signed row col
+/*______*/  {
+/*______*/     // This function returns the color at x,y
+/*______*/     // if X is < 0 or X > width, the dimensions are wrapped around
+/*______*/     if (row < 0)       row = height + row;
+/*______*/     if (row >= height) row = row - height;
+/*______*/     if (col < 0)       col = width + col;
+/*______*/     if (col >= width)  col = col - width;
+/*000129*/     return get_at(row,col);
+/*______*/  };
+

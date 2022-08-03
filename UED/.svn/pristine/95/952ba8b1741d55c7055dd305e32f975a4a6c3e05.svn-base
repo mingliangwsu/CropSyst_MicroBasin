@@ -1,0 +1,26 @@
+#ifndef DSSAT_ICASA_convertorH
+#define DSSAT_ICASA_convertorH
+#include "UED/convert/convertor.h"
+#include "ICASA/library/weather/ICASA_weather.h"
+using namespace ICASA;
+
+//______________________________________________________________________________
+class DSSAT_ICASA_Convertor
+: public UED::Convertor
+{
+//140627 decided not to use this   CORN::OS::Extension daily_weather_target_file_extension;                      //140627
+   std::string site_code;
+      // This is for lack of better name
+ public:
+   DSSAT_ICASA_Convertor(int argc,const  char *argv[]);
+   virtual uint32 perform_import();
+   virtual uint32 perform_export();
+   virtual uint16 get_version()                 const { return 0x0000; };
+   virtual const char *get_application_name()   const { return "IBSNAT_ICASA_DSSAT_AgMIP UED import utility (Roger Nelson rnelson@wsu.edu)"; };
+   inline virtual const char* /*140627 CORN::OS::Extension &*/ get_daily_weather_target_file_extension() const { return "wth"; }
+ private:
+   uint32 import_weather_unit(ICASA::Weather_unit &weather_unit);                //140627
+   // returns the number of lines encountered in this unit.
+};
+//______________________________________________________________________________
+#endif

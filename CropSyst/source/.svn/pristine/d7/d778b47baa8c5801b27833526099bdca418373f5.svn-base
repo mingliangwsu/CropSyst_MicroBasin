@@ -1,0 +1,70 @@
+//______________________________________________________________________________
+float64 calc_source_limited_harvest_index
+(float64 fraction_biomass_produced_during_yield_formation                        //161010
+/*161010 now passing  fraction_biomass_produced_during_yield_formation
+ float64 biomass_at_maturity
+, float64 biomass_at_flowering
+*/
+, float64 attainable_harvest_index                                      // 120118  sink_strength_based_harvest_index
+, float64 translocation_fraction_max)                                            //, Maximum_Translocation_Fraction As Single
+{
+   if (attainable_harvest_index < 0.0001)
+      return attainable_harvest_index;
+      // Added by RLN because exp blows up when to small.
+//attainable_harvest_index = 0.4;
+//translocation_fraction_max =  0.2;
+   float64 harvest_index = attainable_harvest_index;                    //130503
+   if (attainable_harvest_index > translocation_fraction_max)           //130503
+   {
+/*161010 now passing  fraction_biomass_produced_during_yield_formation
+      float64 fraction_biomass_produced_during_yield_formation
+         =
+         biomass_at_maturity > 0.000001
+            ?  (biomass_at_maturity - biomass_at_flowering) //biomass_produced_during_yield_formation                              //        / (Biomass_Produced_During_Yield_Formation + Biomass_Produced_Before_Yield_Formation)
+             / biomass_at_maturity //biomass_produced_before_and_after_yield_formation
+            : 0;
+*/
+      float64 translocation_fraction_min = translocation_fraction_max / 3.0;
+      float64 max_fraction_biomass_produced_during_yield_formation =                //120118 was constant 0.6
+         // THIS IS  Biomass fraction needed during grain filling so as to match expected unstressed HI at minimum translocation
+         (attainable_harvest_index - translocation_fraction_min)
+        /(1.0 - translocation_fraction_min);
+
+      // Determine HI asymptote and decay coefficient
+      float64 decay_coeff_max = (1.0 - translocation_fraction_max)               // Max_Decay_Coefficient = (1 - Maximum_Translocation_Fraction)
+         / (attainable_harvest_index - translocation_fraction_max);              //     / (Maximum_Harvest_Index - Maximum_Translocation_Fraction)
+      float64 decay_coef = decay_coeff_max; /* initial value for iteration */    //Decay_Coefficient = Max_Decay_Coefficient 'initial value for iteration
+      static const float64 fraction_near_zero = 0.00001;                         //    Fraction_Near_Zero = 0.00001                                       // Fraction_Near_Zero = 0.00001
+      float64 HI_at_fraction_near_zero = fraction_near_zero +                    //    HI_at_Fraction_Near_Zero = Fraction_Near_Zero + (1 - Fraction_Near_Zero) * Maximum_Translocation_Fraction
+         (1.0 - fraction_near_zero) * translocation_fraction_max;
+      float64 harvest_index_asymptote = 0.0;
+      float64 error = 0.0;
+      bool keep_searching = true;
+      nat32 iters = 0;                                                           //160808
+
+         // normally there will be less than 10 iterations but there could be
+         // pathologic cases.
+      do                                                                         //    Do
+      {
+          harvest_index_asymptote = (attainable_harvest_index - translocation_fraction_max             //Harvest_Index_Asymptote = (Maximum_Harvest_Index - Maximum_Translocation_Fraction
+              * exp(-decay_coef * max_fraction_biomass_produced_during_yield_formation))        //   * Exp(-Decay_Coefficient * Maximum_Fraction_Biomass_Produced_During_Yield_Formation))
+            / (1.0 - exp(-decay_coef * max_fraction_biomass_produced_during_yield_formation));  // (1 - Exp(-Decay_Coefficient * Maximum_Fraction_Biomass_Produced_During_Yield_Formation))
+          float64 new_decay_coef =                                               //New_Decay_Coefficient =
+             -log((harvest_index_asymptote - HI_at_fraction_near_zero)           //  -Log((Harvest_Index_Asymptote - HI_at_Fraction_Near_Zero)
+                   / (harvest_index_asymptote - translocation_fraction_max))     //        / (Harvest_Index_Asymptote - Maximum_Translocation_Fraction))
+                 / fraction_near_zero;                                           //        / Fraction_Near_Zero
+          error = fabs(new_decay_coef - decay_coef);                             //    Error = Abs(New_Decay_Coefficient - Decay_Coefficient)
+          iters ++;                                                              // 160808
+          decay_coef = new_decay_coef;                                           //     Decay_Coefficient = New_Decay_Coefficient
+          keep_searching = !((error < 0.0001) || (decay_coef < (0.1 * decay_coeff_max))); //160808
+      } while ((iters < 100) && keep_searching);                                 //160808
+      //Calculate harvest index
+      if (iters < 100)                                                           //160808
+         harvest_index =
+         harvest_index_asymptote - (harvest_index_asymptote - translocation_fraction_max) //HI = Harvest_Index_Asymptote - (Harvest_Index_Asymptote - Maximum_Translocation_Fraction) _
+              * exp(-decay_coef * fraction_biomass_produced_during_yield_formation);  //        * Exp(-Decay_Coefficient * Fraction_Biomass_Produced_During_Yield_Formation)
+      } //  else  harvest_index is simply  attainable_harvest_index
+   return harvest_index;
+}                                                                                //End Function
+//_2012-01-18___________________________________________________________________
+

@@ -1,0 +1,19 @@
+#ifndef SCENARIO_NAME_SEL_H
+#define SCENARIO_NAME_SEL_H
+
+#include <corn/container/association.h>
+class Name_selection
+: public Association
+{
+   CORN_string name;
+public:
+   inline Name_selection(const char *i_name)
+   : Association()
+   , name(i_name)
+   {};
+
+   inline virtual const char *get_key() const
+   { return name.c_str(); };
+};
+
+#endif

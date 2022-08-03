@@ -1,0 +1,277 @@
+#include "STATSGO_SSURGO_database.h"
+#include "corn/parameters/parameter.h"
+#include "corn/container/enumlist.h"
+#include "corn/OS/directory_entry_name.h"
+#include "corn/OS/file_system_engine.h"
+#include "soil/survey/database/tabular/chorizon.h"
+#include "soil/survey/database/tabular/component.h"
+#include "soil/survey/database/tabular/mapunit.h"
+#include "soil/survey/database/tabular/chtexturegrp.h"
+#include "corn/format/binary/binary_file_fstream.h"
+#include <assert.h>
+using namespace CORN;
+namespace USDA_NRCS { namespace STATSGO2_SSURGO {
+//______________________________________________________________________________
+CORN::Parameter_number *chorizon_fields;
+CORN::Parameter_number *component_fields;
+CORN::Parameter_number *mapunit_fields;
+//______________________________________________________________________________
+Database::Database
+(const char *_database_directory_name
+,const char *_table_index_directory
+) // I.e. C:\Simulation\Database\STATSGO2\gsmsoil_us
+: database_directory_name(_database_directory_name)
+, table_index_directory_name(_table_index_directory ? _table_index_directory : _database_directory_name)
+, chorizon_table     (0)   ,chorizon_indexer(0)
+, component_table    (0)   ,component_indexer(0)
+, mapunit_table      (0)   ,mapunit_indexer(0)
+, chtexturegrp_table (0)   ,chtexturegrp_indexer(0)                              //110324
+{}
+//______________________________________________________________________________
+Database::~Database()
+{  if (chorizon_table)     delete chorizon_table;     if (chorizon_indexer)      delete chorizon_indexer;
+   if (component_table)    delete component_table;
+   if (component_indexer)  delete component_indexer;
+   if (mapunit_table)      delete mapunit_table;      if (mapunit_indexer)       delete mapunit_indexer;
+   if (chtexturegrp_table) delete chtexturegrp_table; if (chtexturegrp_indexer)  delete chtexturegrp_indexer;
+}
+//______________________________________________________________________________
+#define provide_XXXX_table(provide_NAME_table,NAME_table,table_filename)       \
+CORN::Data_table &Database::provide_NAME_table()              provision_       \
+{  if (!NAME_table)                                                            \
+   {  CORN::OS::File_name_concrete qualified_filename_txt(database_directory_name,table_filename);\
+      NAME_table = new CORN::MicroSoft::Access::Import_export_table(qualified_filename_txt,false,0,0 );\
+   };                                                                          \
+   return *NAME_table;                                                         \
+};
+provide_XXXX_table(provide_chorizon_table    ,chorizon_table      ,L"chorizon.txt");
+provide_XXXX_table(provide_component_table   ,component_table     ,L"comp.txt"    );
+provide_XXXX_table(provide_mapunit_table     ,mapunit_table       ,L"mapunit.txt" );
+provide_XXXX_table(provide_chtexturegrp_table,chtexturegrp_table  ,L"chtexgrp.txt");
+//______________________________________________________________________________
+#define provide_XXXX_indexer(provide_NAME_indexer,NAME_indexer,key_field_name,NAME_table,provide_NAME_table,record_type_for_indexing_given)  \
+const Table_indexer &Database::provide_NAME_indexer(bool persistent) provision_ \
+{  if (!NAME_indexer)                                                           \
+   {  if (!NAME_table) provide_NAME_table();                                    \
+      {  NAME_indexer = new Table_indexer(*NAME_table,key_field_name,mapunit_filter,new USDA_NRCS::record_type_for_indexing_given(),persistent?&table_index_directory_name:0,false);              \
+      }                                                                         \
+   }                                                                            \
+   return *NAME_indexer;                                                        \
+}
+provide_XXXX_indexer(provide_chorizon_index     ,chorizon_indexer    ,"chkey"  ,chorizon_table      ,provide_chorizon_table    ,CHorizon)
+provide_XXXX_indexer(provide_component_index    ,component_indexer   ,"cokey"  ,component_table     ,provide_component_table   ,Component)
+provide_XXXX_indexer(provide_mapunit_index      ,mapunit_indexer     ,"mukey"  ,mapunit_table       ,provide_mapunit_table     ,Mapunit)
+provide_XXXX_indexer(provide_chtexturegrp_index ,chtexturegrp_indexer,"chkey" /*"chtgkey"*/,chtexturegrp_table  ,provide_chtexturegrp_table,CHtexturegrp)
+                                                                     // for chtexturegrp we index on chkey
+//_2011-11-07___________________________________________________________________
+Table_indexer::Table_indexer
+(CORN::Data_table   &_indexed_table
+,const char         *_key_field_name
+,const CORN::Dynamic_array<nat32> &_mapunit_filter                               //121229
+,CORN::Data_record  *_record_for_indexing_owned
+,const CORN::OS::Directory_name *_persistent_index_files_directory
+,bool /*keep_index_in_memory*/)
+: CORN::Indexer/*150730_abstract*/()
+, key_field_name(_key_field_name)
+, curr_key_item(0)
+, indexed_table(_indexed_table)
+, persistent(_persistent_index_files_directory!=NULL)
+, record_for_indexing_owned(_record_for_indexing_owned)
+, mapunit_filter(_mapunit_filter)
+{  setup_index(_persistent_index_files_directory);
+}
+//_2011-10-24___________________________________________________________________
+bool Table_indexer::setup_index
+(const CORN::OS::Directory_name *persistent_index_files_directory)
+{
+   std::string buffer;                                                           //140629
+   std::string index_name(record_for_indexing_owned->get_primary_section_name());
+   index_name.append("_"); index_name.append(key_field_name);
+   CORN::OS::file_system_engine.create_directory(*persistent_index_files_directory); //140929
+   CORN::OS::File_name_concrete index_file_name(persistent_index_files_directory,index_name.c_str(),"index");
+//#ifdef __CONSOLE__
+//#endif
+   nat32 row = 0;
+   nat32 exclude_count = 0; // just informational                                //141211
+   nat32 include_count = 0;                                                      //141211
+   std::clog << "Index:" << std::endl << index_file_name.c_str() << std::endl;
+   if (persistent && CORN::OS::file_system_engine.exists(index_file_name))
+   {
+      std::clog << "Loading" << std::endl;
+      std::clog << "row\tMUKEY\tincl\texcl" << std::endl;
+      nat32 last_mukey = 0;
+      Binary_file_fstream index_file(index_file_name.c_str(),false,std::ios_base::in);
+      while (!index_file.at_eof())
+      {  Indice *indice = new Indice("");
+         nat32 found_in_filter_index = 0;
+         indice->read_binary(index_file);
+
+         //141218 std::clog << "row:" << row << '\t' << indice->MUkey; // std::endl;
+         std::clog << row << '\t' << indice->MUkey;
+         const char *sort_state = "";
+         if (indice->MUkey < last_mukey)
+               sort_state       = "unsorted" ;
+         row++;
+         last_mukey = indice->MUkey;
+
+         if (mapunit_filter.is_empty() || mapunit_filter.is_in_array(indice->MUkey,found_in_filter_index))
+         {  include_count++;                                                     //141211
+            append(indice);
+         } else
+         {  exclude_count++;
+         }
+         std::clog << '\t' << (int)include_count << '\t' << (int)exclude_count;
+         std::clog << '\t' << sort_state;
+         std::clog << '\r';         //141211
+
+         /*141218
+         std::clog
+            << " included: " << (int)include_count                         //141211
+            << " ignored:" << (int)exclude_count                        //141211
+            << '\r';
+         */
+      }
+   } else
+   {  std::clog << "Indexing" << std::endl;
+      std::clog << "row\tMUKEY\tincl\texcl" << std::endl;
+
+
+      Binary_file_fstream *index_file = persistent
+         ? new Binary_file_fstream (index_file_name.c_str(),false,std::ios_base::out)
+         : 0;
+      if (record_for_indexing_owned)
+      {  for (bool ok = indexed_table.goto_first();ok;)
+         {  nat32 file_pos = dynamic_cast<Tabular_text_file &>(indexed_table).get_file_position();
+            ok = indexed_table.get(*record_for_indexing_owned);                  //111106
+            FOR_EACH_IN(section,VV_section,record_for_indexing_owned->sections,each_section)
+            { // This format doesn't really have sections, but the expected data record layout may
+                  FOR_EACH_IN(entry,VV_abstract_entry,section->entries,each_entry)
+                  {  // I could check the field name but they should be in sequence
+                     buffer.clear();                                             //140926
+                     know_value(entry->append_to_string(buffer).c_str(),entry->get_key(),section->get_key() );
+                  } FOR_EACH_END(each_entry)
+            } FOR_EACH_END(each_section)
+            know_position(file_pos);
+            std::clog <<  row << '\t' << curr_key_item->MUkey;
+            // Write all indices to the index files.
+            // Only keep in memory the items were are currently
+            // interested in.
+            if (!mapunit_filter.is_empty()  &&curr_key_item) // if there are no mapunits in the filter, then we don't apply a filter
+            {  nat32 found_in_filter_index = 0;
+               if (!mapunit_filter.is_in_array(curr_key_item->MUkey,found_in_filter_index))
+               {  remove(curr_key_item);
+                  curr_key_item = 0;
+               }
+            }
+            if (index_file && curr_key_item)
+            {
+               curr_key_item->write_binary(*index_file);
+               include_count++;                                                  //141211
+            } else
+            {  exclude_count++;                                                  //141211
+            }
+            std::clog  << '\t' << (int)include_count << '\t' << (int)exclude_count << '\r'; //141211
+            row++;
+         }
+      }
+      std::clog << std::endl << "Indexed." << std::endl;
+      delete index_file;
+   }
+   std::clog << std::endl << "Sorting...." << std::endl;
+   sort();
+   std::clog << std::endl << "Sorted." << std::endl;
+   indexed_table.reset();     // We read to the end of file which will make rdstate not 'good'
+   std::clog << std::endl << "Goto first record" << std::endl;
+   indexed_table.goto_first();// We want to be in a good state ready to read.
+   std::clog << std::endl << "Ready" << std::endl;
+   return true;
+}
+//_2011-11-07___________________________________________________________________
+const char *Table_indexer::get_key_name(nat8 /*key_number*/) const
+{  return key_field_name.c_str();   // there is only one key field
+}
+//_2011-10-24___________________________________________________________________
+nat8 Table_indexer::get_key_count() const
+{  return 1; // there is only a primary key
+}
+//_2011-10-24___________________________________________________________________
+bool  Table_indexer::know_position(nat32 position)                    cognition_
+{  assert(curr_key_item); // The caller must previously call know_value
+   curr_key_item->file_pos = position;
+   return true;
+}
+//_2011-10-24___________________________________________________________________
+bool  Table_indexer::know_value
+(const std::string &value                                                        //150730
+//150731 const char *value
+,  const char *field , const char *section )                          cognition_ //150731
+{  bool is_key_field = true;
+   if (key_field_name == field)
+   {  curr_key_item = provide_indice(value.c_str());                             //150730
+      // We assume the caller will next (after calling know_value for all the fields)
+      // call know_position where by curr_mukey_item will have been set by this.
+   } else is_key_field = false;
+   return is_key_field;
+}
+//_2011-10-24___________________________________________________________________
+bool  Table_indexer::commit()
+{  //NYN?
+   return false;
+}
+//_2011-10-24___________________________________________________________________
+nat8 Table_indexer::get_key_sequence(const char *field, const char */*section*/) const
+{  return (key_field_name == field) ? 1 : 0;
+}
+//_2011-10-24___________________________________________________________________
+Table_indexer::Indice *Table_indexer::provide_indice(const char *key) provision_
+{
+   Table_indexer::Indice *pot_item = new Table_indexer::Indice(key);
+   Table_indexer::Indice *existing_key_item = dynamic_cast<Table_indexer::Indice *>(find(pot_item->unique_key));
+   if (!existing_key_item)
+   {  Table_indexer &modifiable_self = const_cast<Table_indexer &>(*this);       //150903
+      modifiable_self.append(pot_item);                                          //150903
+      //150903 append(pot_item);
+      existing_key_item = pot_item;
+   } else delete pot_item;
+   return existing_key_item;
+}
+//_2011-10-24___________________________________________________________________
+nat32 Table_indexer::Indice::write_binary(CORN::Binary_file_interface &bin_file) performs_IO_
+{  bin_file.write_nat32(unique_key);
+   bin_file.write_nat32(MUkey);
+   bin_file.write_nat32(file_pos);
+   return sizeof(nat32) * 3;                                                     //121126
+}
+//_2011-11-07___________________________________________________________________
+nat32 Table_indexer::Indice::read_binary(CORN::Binary_file_interface &bin_file) performs_IO_
+{  unique_key  = bin_file.read_nat32();
+   MUkey       = bin_file.read_nat32();
+   file_pos    = bin_file.read_nat32();
+   return sizeof(nat32) * 3;                                                     //121126
+}
+//_2011-11-07___________________________________________________________________
+nat32 Database::filter_map_units(const CORN::Dynamic_array<nat32> &_mapunit_filter)
+{  // Note that thiss allows
+   mapunit_filter.append_array(_mapunit_filter);  //apply additional filter which may have been previously specified
+   return !mapunit_filter.is_empty()
+      ?   chorizon_indexer    ? chorizon_indexer      ->refilter_mapunits() : 0
+        + component_indexer   ? component_indexer     ->refilter_mapunits() : 0
+        + mapunit_indexer     ? mapunit_indexer       ->refilter_mapunits() : 0
+        + chtexturegrp_indexer? chtexturegrp_indexer  ->refilter_mapunits() : 0
+      : 0;
+}
+//_2011-11-07___________________________________________________________________
+nat32 Table_indexer::refilter_mapunits()
+{  nat32 deletions = 0;
+   if (mapunit_filter.is_empty() ) return 0;
+   FOR_EACH(indice,Table_indexer::Indice,each_indice)
+   {  nat32 pos;
+      if (!mapunit_filter.is_in_array(indice->MUkey,pos))
+         deletions +=each_indice->delete_current();
+   } FOR_EACH_END(each_indice)
+   // else if no mapunits specified, then don't apply this filter
+   return deletions;
+}
+//_2011-11-07___________________________________________________________________
+}} // namespace
+

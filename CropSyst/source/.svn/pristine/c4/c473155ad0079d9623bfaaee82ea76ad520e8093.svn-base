@@ -1,0 +1,90 @@
+#ifndef cs_project_directoryH
+#define cs_project_directoryH
+#ifdef USE_OS_FS
+#error In V5 this class has been reimplement in project_directory_CropSyst.h
+#endif
+#include <common/simulation/simulation_project_directory.h>
+#include "project_types.h"
+#include <options.h>
+class Database_directory_paths;
+class Database_directory;
+//______________________________________________________________________________
+class CropSyst_project_directory
+: public Common_simulation_project_directory
+{
+/*160801 obsolete
+#if (CS_VERSION==4)
+   CropSyst_project_type  project_type;                                          //060614
+   // So we know what kind of icon to assign.
+//090715 In later versions there is no project type,
+//Projects either either use the GIS or optimization models or not.
+#endif
+*/
+ public:
+      CropSyst_project_directory
+      (const char             *associated_parameters_filename
+/*160801 obsolete
+#if (CS_VERSION==4)
+   ,CropSyst_project_type  _project_type                                         //060614
+#endif
+*/
+      );
+   CropSyst_project_directory                                                    //100209
+      (const CORN::Smart_directory_name &dir_name
+/*160801 obsolete
+#if (CS_VERSION==4)
+   ,CropSyst_project_type  _project_type                                         //060614
+#endif
+*/
+      );
+   virtual ~CropSyst_project_directory();                                        //090518
+//NYI/*020411_*/    virtual uint16 get_section_entry_changes(Section_entry_change **changes) const;
+   // If the derived class has a new version with renamed sections and entries
+   // it should override this method to return the table of changes
+   // The return value is the number of changes in the table.
+ private: // directories                                                         //020426
+   provided_ Database_directory *database_directory;                             //090518
+               // 0 until setup_directory_tree Must come after directory declaration // Note: probably could go in Common_project class
+ public: // directories
+/*160801 obsolete
+#if (CS_VERSION==4)
+// In version 5, There is simply a project folder, If one wants to use the GIS or watershed functions, those files will
+// be added to the project and the the files will simply have the icons.
+// we no longer indicate this is a change in the nature of the project.
+   virtual const CORN::Smart_file_name &get_folder_icon_filename(CORN::Smart_file_name &icon_filename,int &icon_index) const; //060614
+   virtual const char *get_infotip();                                            //060614
+#endif
+*/
+   virtual bool get_associated_filename(CORN::Smart_file_name &return_filename) const;  //101116
+   const Database_directory &provide_database_directory
+      (bool create_if_not_exists)                                      provision_;//090518
+#ifndef LADSS_UNIX
+// not needed for LADSS
+ private: // GIS files/folders                                                   //040810
+// not needed for LADSS/*050202*/ public: // GIS model
+   CORN::Smart_directory_name    GIS_dir_qual;                                   //050203
+   CORN::Smart_directory_name    GIS_aggregation_dir_qual;                       //050930
+   CORN::Smart_file_name         selected_scenarios;        // This is the name of the files selected for batch run  //060710_
+   mutable CORN::Smart_file_name         *generate_scenarios_log_filename;
+ public:                                                                         //040810
+   const CORN::Smart_directory_name &get_GIS_dir_qual             (bool create_if_necessary) const; //040810
+   const CORN::Smart_directory_name &get_GIS_aggregation_dir_qual (bool create_if_necessary) const; //050930
+   const CORN::File_name            &get_GIS_polygon_scenarios_filename()                    const; //050206
+   void set_GIS_dir(const CORN::Ustring &GIS_dir_unqual);                                           //091105
+   const CORN::Smart_file_name  &generate_scenarios_log_file(const char *extension)provision_; //101118
+ private: // Carbon sequestration files/folders               
+   CORN::Smart_directory_name carbon_sequestration_optimization_dir_qual;        //020426
+ public:                                                                         //040810
+          const CORN::Smart_directory_name &get_carbon_sequestration_optimization_dir_qual(bool create_if_necessary) const;
+   inline const CORN::Smart_file_name      &get_selected_scenarios_filename() const { return selected_scenarios; };   //060710
+   inline const char *get_selected_scenarios_filename_cstr()                  const { return selected_scenarios.c_str(); };      //060710
+ private: // scenario_comparision folders                                        //070423
+   CORN::Smart_directory_name    scenario_comparison_dir_qual;                   //050930
+ public:                                                                         //070423
+   const CORN::Smart_directory_name &get_scenario_comparison_dir_qual
+      (bool create_if_necessary)                                           const;//070423
+#endif
+};
+//______________________________________________________________________________
+#endif
+

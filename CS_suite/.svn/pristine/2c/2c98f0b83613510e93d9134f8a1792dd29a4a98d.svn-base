@@ -1,0 +1,69 @@
+#error This class has been replaced by Land_unit_meteorological remove from the project. 151128
+#ifndef CS_land_unitH
+#define CS_land_unitH
+#include "corn/primitive.h"
+#include "corn/OS/directory_entry_name.h"
+#include "common/weather/parameter/WP_air_temperature.h"
+#include "common/weather/parameter/WP_wind_speed.h"
+//______________________________________________________________________________
+class Geocoordinate;                                                             //151115
+class Sun;                                                                       //150921
+class Weather;
+namespace CS { namespace meteorology {
+class Storms;                                                                    //140214
+}}
+namespace CORN
+{  class Date;
+}
+//______________________________________________________________________________
+namespace CS
+{
+//______________________________________________________________________________
+class Land_unit
+// Actually this should be renamed Land_unit_weather
+{
+   // This has the weather (including storms generation)
+   // and soil parameters (but not soil state).
+ protected:
+   //151116 provided_ const Geolocation             *geolocation; //not owned
+   const Geocoordinate &geocoordinate; //not owned
+      // Either provided by weather (database) or
+      // Derived class (I.e. Land_unit_simulation) may discover it.
+ public: // probably should be protected
+   const Sun                     *sun;                                           //150921
+   ::Weather                     *weather;
+ protected:
+   meteorology::Storms           *storms;                                        //140217
+   virtual float64 get_snow_pack_thickness()                               const;//141215_141207
+ public:
+    // In GIS CS modules the ID is the unique land unit fragment ID
+    sint32 ID;
+    // signed because ArcGIS uses negative IDs to indicate offsite area
+    std::string ID_string;                                                       //150917
+      // String representation of ID
+ public:
+   Land_unit
+      (sint32 ID
+      ,const Geocoordinate &geocoordinate
+      );
+   virtual bool set_weather                                                      //010207
+      (Weather          *_weather                                                //041104
+      ,meteorology::Storms  *_storms);                                               //140217
+   bool setup_CO2
+      (const CORN::OS::File_name &recalibration_filename
+      , const CORN::Date &start_date
+      , const CORN::Date &stop_date
+      , const CORN::Date &today);                                                //150315
+   virtual const Air_temperature_average &ref_air_temperature_avg()        const;//150527_141208
+   virtual const Wind_speed              &ref_wind_speed()                 const;//150527_150427
+   virtual const Sun                     &ref_sun()                        const;//150921
+   inline virtual const Geocoordinate    &get_geocoordinate()              const { return geocoordinate; } //151118
+   /*151116
+   virtual const Geolocation *Xprovide_geolocation()                   provision_;//151115
+   inline virtual const Geolocation *know_geolocation(const Geolocation *geoloc)  assignation_ //151115
+      { return geolocation = geoloc; }
+   */
+};
+//_2013-06-20___________________________________________________________________
+}
+#endif

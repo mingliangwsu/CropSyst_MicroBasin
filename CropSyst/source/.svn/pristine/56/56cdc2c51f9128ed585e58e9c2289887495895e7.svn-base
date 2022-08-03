@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="CropSyst_sim_static.lib"/>
+    <OBJFILES value="C:\temp\obj\BCB5\\cs_accum.obj C:\temp\obj\BCB5\\cs_chem.obj 
+      C:\temp\obj\BCB5\\cs_et.obj C:\temp\obj\BCB5\\cs_event.obj 
+      C:\temp\obj\BCB5\\cs_events.obj C:\temp\obj\BCB5\\cs_glob.obj 
+      C:\temp\obj\BCB5\\cs_irrdy.obj C:\temp\obj\BCB5\\cs_mgmt.obj 
+      C:\temp\obj\BCB5\\cs_rain.obj C:\temp\obj\BCB5\\cs_rprt.obj 
+      C:\temp\obj\BCB5\\cs_rslts.obj C:\temp\obj\BCB5\\cs_rusle.obj 
+      C:\temp\obj\BCB5\\cs_till.obj C:\temp\obj\BCB5\\pond.obj 
+      C:\temp\obj\BCB5\\csprofss.obj C:\temp\obj\BCB5\\organicn.obj 
+      C:\temp\obj\BCB5\\orgncmtr.obj C:\temp\obj\BCB5\\perform_op.obj 
+      C:\temp\obj\BCB5\\chem_bal.obj C:\temp\obj\BCB5\\rptoptns.obj 
+      C:\temp\obj\BCB5\\rprtclss.obj C:\temp\obj\BCB5\\soil.obj 
+      C:\temp\obj\BCB5\\soilbase.obj C:\temp\obj\BCB5\\soilchem.obj 
+      C:\temp\obj\BCB5\\soilentr.obj C:\temp\obj\BCB5\\soilersn.obj 
+      C:\temp\obj\BCB5\\soilfrzj.obj C:\temp\obj\BCB5\\soilfrzn.obj 
+      C:\temp\obj\BCB5\\soilroff.obj C:\temp\obj\BCB5\\soiltemp.obj 
+      C:\temp\obj\BCB5\\static_phrases.obj C:\temp\obj\BCB5\\storm.obj 
+      C:\temp\obj\BCB5\\surftemp.obj C:\temp\obj\BCB5\\UED_out.obj 
+      C:\temp\obj\BCB5\\watertab.obj C:\temp\obj\BCB5\\wshedio.obj 
+      C:\temp\obj\BCB5\\unstressed_growth.obj C:\temp\obj\BCB5\\layer_dbf.obj 
+      C:\temp\obj\BCB5\\comp_dbf.obj C:\temp\obj\BCB5\\cs_vars.obj 
+      C:\temp\obj\BCB5\\environment_base.obj C:\temp\obj\BCB5\\CS_simulation.obj 
+      C:\temp\obj\BCB5\\biomatter_base.obj 
+      C:\temp\obj\BCB5\\soil_infiltration_finite_diff.obj 
+      C:\temp\obj\BCB5\\output.obj C:\temp\obj\BCB5\\cs_UED.obj 
+      C:\temp\obj\BCB5\\desired_vars.obj C:\temp\obj\BCB5\\recorder_datarec.obj 
+      C:\temp\obj\BCB5\\recorder.obj C:\temp\obj\BCB5\\soil_infiltration.obj 
+      C:\temp\obj\BCB5\\cs_datarec.obj 
+      C:\temp\obj\BCB5\\soil_infiltration_cascade.obj 
+      C:\temp\obj\BCB5\\layering.obj C:\temp\obj\BCB5\\UED_season.obj 
+      C:\temp\obj\BCB5\\UED_annual.obj C:\temp\obj\BCB5\\UED_harvest.obj 
+      C:\temp\obj\BCB5\\land_unit_output.obj 
+      C:\temp\obj\BCB5\\soil_temperature_common.obj 
+      C:\temp\obj\BCB5\\mgmt_types.obj C:\temp\obj\BCB5\\organic_matter.obj 
+      C:\temp\obj\BCB5\\residue.obj C:\temp\obj\BCB5\\cs_chem_pot_mineral_N.obj 
+      C:\temp\obj\BCB5\\cs_UED_db.obj C:\temp\obj\BCB5\\residue_old_OM.obj 
+      C:\temp\obj\BCB5\\land_unit_sim.obj C:\temp\obj\BCB5\\crop_rows.obj 
+      C:\temp\obj\BCB5\\canopy_portion.obj 
+      C:\temp\obj\BCB5\\crop_canopy_biomass_GAI.obj 
+      C:\temp\obj\BCB5\\crop_CO2.obj C:\temp\obj\BCB5\\crop_common.obj 
+      C:\temp\obj\BCB5\\crop_cropsyst.obj C:\temp\obj\BCB5\\crop_emergence.obj 
+      C:\temp\obj\BCB5\\crop_fruit.obj C:\temp\obj\BCB5\\crop_interfaced.obj 
+      C:\temp\obj\BCB5\\crop_interfaced_cropgro.obj 
+      C:\temp\obj\BCB5\\crop_interfaced_cropsyst.obj 
+      C:\temp\obj\BCB5\\crop_n.obj C:\temp\obj\BCB5\\crop_param.obj 
+      C:\temp\obj\BCB5\\crop_root.obj C:\temp\obj\BCB5\\crop_thermal_time.obj 
+      C:\temp\obj\BCB5\\crop_transpiration.obj 
+      C:\temp\obj\BCB5\\crop_transpiration_2.obj 
+      C:\temp\obj\BCB5\\crop_transpiration_2_abandoned.obj 
+      C:\temp\obj\BCB5\\crop_types.obj 
+      C:\temp\obj\BCB5\\soil_temperature_hourly.obj"/>
+    <RESFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..;..\..\..\..\Common\environment;..\..\..\..\Common\biomatter;..\..\..\..\Common\recorder;..\..\..\..\Common\soil;..\..\..\..\Common\residue;..\..\crop"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="_DEBUG;STATSGO_DATABASE;BUILDER_API;CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;xRECORD;DATA_RECORDING;Master_weather=Weather;OM_ABSTRACT;NITROGEN_ABSTRACT;HOURLY_RESOLUTION"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
+    <MAINSOURCE value="CropSyst_sim_static.bpf"/>
+    <INCLUDEPATH value="..\..\crop;..\..\..\..\Common\residue;..\..\..\..\Common\soil;..\..\..\..\Common\recorder;..\..\..\..\Common\biomatter;..\..\..\..\Common\environment;..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\include;$(BCB)\include\vcl;..\..\..\.."/>
+    <LIBPATH value="..\..\crop;..\..\..\..\Common\residue;..\..\..\..\Common\soil;..\..\..\..\Common\recorder;..\..\..\..\Common\biomatter;..\..\..\..\Common\environment;..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+    <LISTFILE value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=CropSyst_sim_BCB.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\BCB5\&quot; -N0&quot;C:\temp\obj\BCB5\&quot; -$YD -$W -$O- -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="/P256"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=13
+Item0=..\..\crop;..\..\..\..\Common\residue;..\..\..\..\Common\soil;..\..\..\..\Common\recorder;..\..\..\..\Common\biomatter;..\..\..\..\Common\environment;..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item1=..\..\..\..\Common\residue;..\..\..\..\Common\soil;..\..\..\..\Common\recorder;..\..\..\..\Common\biomatter;..\..\..\..\Common\environment;..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item2=..\..\..\..\Common\environment;..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item3=..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item4=..;..\..\..\Common\soil\statsgo;..\..\..\corn\format;..\..\..\Common\weather;..\..\..\Common;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item5=..\;..\..\..\Common\soil\statsgo;..\..\..\corn\format;..;..\..\..\Common\weather;..\..\..\Common;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item6=..\..\..\Common\soil\statsgo;..\..\..\corn\format;..\;..;..\..\..\Common\weather;..\..\..\Common;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item7=..\;..\..\..\Common\weather;..\..\..\Common;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item8=..\..\..\Common\weather;..\..\..\Common;..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item9=..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item10=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item11=..\;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item12=..\;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=12
+Item0=..\..\crop;..\..\..\..\Common\residue;..\..\..\..\Common\soil;..\..\..\..\Common\recorder;..\..\..\..\Common\biomatter;..\..\..\..\Common\environment;..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\..\..\Common\residue;..\..\..\..\Common\soil;..\..\..\..\Common\recorder;..\..\..\..\Common\biomatter;..\..\..\..\Common\environment;..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..\..\..\Common\environment;..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\..\..\..\CANMS\src\equipment\function;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\corn\format;..\..\..\..\Common\weather;..\..\..\..\Common;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..;..\..\..\Common\soil\statsgo;..\..\..\corn\format;..\..\..\Common\weather;..\..\..\Common;$(BCB)\lib\obj;$(BCB)\lib
+Item5=..\;..\..\..\Common\soil\statsgo;..\..\..\corn\format;..;..\..\..\Common\weather;..\..\..\Common;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\..\..\Common\soil\statsgo;..\..\..\corn\format;..\;..;..\..\..\Common\weather;..\..\..\Common;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\;..\..\..\Common\weather;..\..\..\Common;..;$(BCB)\lib\obj;$(BCB)\lib
+Item8=..\..\..\Common\weather;..\..\..\Common;..\;..;$(BCB)\lib\obj;$(BCB)\lib
+Item9=..;$(BCB)\lib\obj;$(BCB)\lib
+Item10=..\;..;$(BCB)\lib\obj;$(BCB)\lib
+Item11=..\;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=14
+Item0=_DEBUG;STATSGO_DATABASE;BUILDER_API;CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;xRECORD;DATA_RECORDING;Master_weather=Weather;OM_ABSTRACT;NITROGEN_ABSTRACT;HOURLY_RESOLUTION
+Item1=_DEBUG;STATSGO_DATABASE;BUILDER_API;CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;xRECORD;DATA_RECORDING;Master_weather=Weather;OM_ABSTRACT;NITROGEN_ABSTRACT
+Item2=_DEBUG;STATSGO_DATABASE;BUILDER_API;CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;xRECORD;DATA_RECORDING;Master_weather=VP_weather_class;OM_ABSTRACT;NITROGEN_ABSTRACT
+Item3=_DEBUG;STATSGO_DATABASE;BUILDER_API;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;xRECORD;DATA_RECORDING;Master_weather=VP_weather_class;OM_ABSTRACT;NITROGEN_ABSTRACT
+Item4=_DEBUG;STATSGO_DATABASE;BUILDER_API;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;xRECORD;DATA_RECORDING;Master_weather=VP_weather_class
+Item5=_DEBUG;STATSGO_DATABASE;BUILDER_API;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;xRECORD;DATA_RECORDING
+Item6=_DEBUG;STATSGO_DATABASE;BUILDER_API;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;RECORD
+Item7=_DEBUG;SUPPORT_STRING;BUILDER_API;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder;RECORD
+Item8=_DEBUG;SUPPORT_STRING;BUILDER_API;CROPSYST;ONEHEADER;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING;UED_recorder
+Item9=_DEBUG;SUPPORT_STRING;BUILDER_API;CROPSYST;ONEHEADER;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT;RECORDING
+Item10=_DEBUG;SUPPORT_STRING;BUILDER_API;CROPSYST;ONEHEADER;TEXTTRI_MEM;ARCCS_TABLE;XLS_OUTPUT
+Item11=_DEBUG;SUPPORT_STRING;BUILDER_API
+Item12=_DEBUG;SUPPORT_STRING
+Item13=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=C:\temp\obj\BCB5\
+
+[HistoryLists\hlTlibPageSize]
+Count=4
+Item0=0x0100
+Item1=0x0080
+Item2=0x0040
+Item3=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+
+  <FILES>
+    <FILE type="override" value="..\..\desired_vars.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\soil_infiltration.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\static_phrases.cpp" translator="Auto">
+      <CFLAG1 value=" -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\environment\environment_base.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\mgmt_types.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\residue\residue.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\recorder\recorder_datarec.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\recorder\recorder.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\soil\statsgo\layer_dbf.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\residue\residue_old_OM.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\soil_temperature_common.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\soil\layering.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\soil\statsgo\comp_dbf.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+  </FILES>
+</PROJECT>

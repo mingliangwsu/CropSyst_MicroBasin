@@ -1,0 +1,91 @@
+#  include <string.h>
+#  include "corn/string/strconv.hpp"
+// For stricmp
+#  include "corn/container/association.h"
+
+namespace CORN {
+
+//______________________________________________________________________________
+Association::Association() : Item() {}                     // DO NOT INLINE THIS
+//_1998-02-07___________________________________________________________________
+Association::~Association() {}                             // DO NOT INLINE THIS
+//2008-11-25____________________________________________________________________
+Association_list::Association_list(bool _unique_keys)
+: Bidirectional_list()
+{
+   set_unique_keys(_unique_keys);
+}
+//______________________________________________________________________________
+/* 170424 replaced with label_string
+const char *Association::label_cstr(char *buffer) const
+{ strcpy(buffer,get_key()); return buffer;}                                      //030117
+//_1997-07-20___________________________________________________________________
+*/
+const char *Association::label_string(std::string &buffer) const
+{ buffer.append(get_key()); return buffer.c_str();}
+//_2017-04-24___________________________________________________________________
+Association *Alias_association_list::find_cstr(const char *search_key,bool case_sensitive) const //120921
+{  // First see if it is a normal association.
+   Association *result =
+      dynamic_cast<Association *>                                                //140716
+      (Association_list::find_cstr(search_key,case_sensitive));
+   // If we didn't find the association see if there is an alias
+   if (!result)
+   {  Alias *matching_alias = (Alias *)aliases.find_cstr(search_key,case_sensitive);
+      if (matching_alias)
+      {  const char *actual = matching_alias->get_actual();                      //030117
+         result =
+            dynamic_cast<Association *>                                          //140716
+            (Association_list::find_cstr(actual,case_sensitive));
+      }
+   }
+   return result;
+}
+//______________________________________________________________________________
+Item * Association_list::append(Item *new_element)                 modification_
+{  // Note currently returning 0 if not unique and not appended, but we should signal a violation
+   if (!new_element) return 0;
+   Association *new_association = (Association *)new_element;
+   if (unique_keys)
+   {  std::string new_association_key(new_association->get_key());               //140928
+      if (find_string(new_association_key)!=NULL)                                //140928
+      return 0; // already listed
+   }
+   return Bidirectional_list::append(new_element);
+}
+//_2008-02-24___________________________________________________________________
+Item * Association_list::prepend(Item *new_element)                modification_
+{  // Note currently returning 0 if not unique and not  appended, but we should signal a violation
+   if (!new_element) return 0;
+   Association *new_association = (Association *)new_element;
+   if (unique_keys)
+   {  std::string new_association_key(new_association->get_key());               //140928
+      if (find_string(new_association_key)!=NULL)                                //140928
+      return 0; // already listed
+   }
+   return (Item *)Bidirectional_list::prepend(new_element);
+}
+//_2008-02-24___________________________________________________________________
+void Alias_association_list::alias
+(const char *actual_variable
+,const char *alias_variable)
+{  Alias *new_alias = new Alias(actual_variable,alias_variable);
+   aliases.append(new_alias);
+}
+//_2001-12-09___________________________________________________________________
+Alias::Alias(const char *i_actual,const char *i_alias)
+: alias  (0)
+, actual (0)
+{  alias =  new char [strlen(i_alias) + 1];
+   strcpy(alias,i_alias);
+   actual = new char [strlen(i_actual) + 1];
+   strcpy(actual,i_actual);
+}
+//_2002-01-25___________________________________________________________________
+Alias::~Alias()
+{  if (alias)  delete [] alias; alias = 0;
+   if (actual) delete [] actual; actual = 0;
+}
+//_2003-05-09___________________________________________________________________
+} // namespace CORN
+

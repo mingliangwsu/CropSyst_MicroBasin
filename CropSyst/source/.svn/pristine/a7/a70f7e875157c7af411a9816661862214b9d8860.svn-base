@@ -1,0 +1,267 @@
+#ifndef crop_interfaced_cropgroH
+#define crop_interfaced_cropgroH
+
+#include "crop/crop_interfaced.h"
+#include "crop/crop_common.h"
+#include "CropGro/cpp/cropgro.h"
+
+#include <common/weather/any_timestep/temperature_est.h>
+#include "crop/crop_param.h"
+#include <corn/math/statistical/stats.h>
+
+/* 031119
+   This class allows CropGro class to be interfaced to CropSyst
+
+   Currently there are some stub values since I don't know
+   how to provided all the things that CropSyst needs.
+*/
+//namespace_CropSyst_begin                                                         //050804
+
+class Soil_interface;                                                            //060206
+//______________________________________________________________________________
+class Crop_interfaced_CropGro
+: public virtual CropSyst::Crop_interfaced                                       //131008NS
+, public virtual Crop_common                                                     //031201
+{
+ private: // parameters
+   Crop_parameters           *parameters; // Will be owned by this
+//rln moved to Crop_common   float32                    intercepted_precipitation_m;
+   CropGro_species_parameters species_parameters;
+   Ecotype                    ecotype_parameters;
+   CropGro_model_input        model_input;
+   ControlType                CONTROL;
+   SwitchType                 ISWITCH;
+   Weather_interface          &weather;
+   Soil_interface             &soil;
+ private: // Variables used by CropSyst not available in CropGro
+   nat32  growth_stage;
+//NYI this is not in CropSyst thermal time units/*_______*/    float32 DTX_accum;  // Accumulated thermal time
+   Statistical_running_index vapor_deficit_stats; // used only for output
+   Statistical_running_index N_stress_stats;
+//crop_common/*_______*/    Statistical_running_index water_stress_stats;
+private: // May eventually want to move these dates into CropGro crop.
+   contribute_ CORN::Date  emergence_date;                                       //130715
+   contribute_ CORN::Date  flowering_date;                                       //130715
+   contribute_ CORN::Date  tuber_init_date;                                      //130715_081111
+   contribute_ CORN::Date  grain_filling_date;                                   //130715
+   contribute_ CORN::Date  maturity_date;  // start of physio maturity           //130715
+   contribute_ CORN::Date  NA_date; // This is a buffer for dates that are not applicable to CropGro. //130715_081013
+   Temperature_estimator      hourly_temperature_estimator;
+ private: // interface variables stored by this
+   Statistical_running_index SWFAC_stats;                                        //010726
+   float32     EOP;   // Potential plant transpiration rate	mm/d
+   float32     PAR;   // Daily photosynthetically active radiation or photon flux density	moles[quanta]/m2-d
+   float32     TRWUP; // Potential daily root water uptake over soil profile	cm/d
+   float64     GAI_yesterday;
+   float64     new_GAI; // The little amount of GAI produced today
+ private:
+   Crop_CropGro              *crop;
+ public: // 'structors
+   Crop_interfaced_CropGro
+      (Soil_interface            &_soil_interface
+      ,Soil_nitrogen_interface   &_soil_chemicals_ref                            //040604
+      ,Weather_interface         &_weather_ref
+      ,Crop_parameters           *_parameters
+      ,Transpiration_model        _transpiration_model                           //050331
+      //130505 ,bool                       _run_salinity
+      );                                //040211
+   virtual ~Crop_interfaced_CropGro();
+ public:  // The following accessors are used for processing
+   virtual void *get_association_for_events()                              const { return (void *) parameters; } //060411
+          virtual bool     in_growing_season()                             const;
+//130903          virtual bool     in_growth_period()                              const;
+          virtual bool     is_terminated()                                 const;
+   inline virtual bool     is_fallow()                                     const { return false; }
+//131204 check unused   inline virtual bool     is_perennial()                                  const { return false; } // CropGro does not appear to have perennial
+//131204 check unused    inline virtual bool     has_nitrogen_model()                            const { return true; }
+          virtual nat32    get_growth_stage()                              const;
+          virtual nat32    get_growth_stage_index()                        const;//110824
+//131204 check unused      inline virtual int16    get_season()                                    const { return crop->season;}   //041012
+   inline virtual float64  get_fract_canopy_cover()                        const { return 0.0; /*N/A fract_canopy_cover;*/ }
+          virtual void    *get_unique_identifier()                         const; // I think I can return this
+   inline virtual Crop_model     get_crop_model()                          const { return CROPGRO_MODEL; }
+//131204 unused          virtual Harvested_part get_harvested_part()                      const;
+   virtual float64               get_canopy_resistance()                   const { return 0.00081;}
+      // note that this canopy_resistance constant
+      // is available from is available in ET_ref.h
+      // In CropSyst this is adjusted by atmospheric CO2 concentration.
+/*040514_*/    virtual float64 get_terminate_straw_to_residue()            const { return 1.0; }
+/*_______*/    virtual bool    set_fallow(bool i_fallow)               modification_ { return false;}
+/*_______*/       // not sure how to handle fallow in this case
+//131204 no longer used     virtual void    set_harvest_date(Date32 harvest_date)   modification_;
+/*040514_*/    virtual void    set_terminate_pending(/*071111 float64 straw_to_residue*/){} // Crop Gro does not have terminate like cropsyst
+/*071111_*/    inline virtual bool        is_terminate_pending() const  { return false; } // Crop Gro does not have terminate like cropsyst
+/*_______*/ private:
+/*020310_*/    nat32 triggered_synchronizations;
+/*020310_*/    nat32 previously_triggered_synchronizations;
+/*020310_*/    bool trigger_synchronization(nat32 event_sync);
+/*_______*/       // returns true if the sync has not already been triggered.
+ public:  // The following accessors are used only for output
+         // Eventually they may be replaced by data_record I/O
+          virtual float64 get_pot_transpiration_m()                        const;
+   inline virtual float64 get_intercepted_precipitation_m()                const { return Crop_common::get_intercepted_precipitation_m(); } //140320
+   inline virtual float64 intercept_precipitation(float64 water_reaching_plant) modification_ { return Crop_common::intercept_precipitation(water_reaching_plant); } //140320
+   /*140320 replaced by intercept_precipitation()
+   inline virtual float64 set_intercepted_precipitation_m(float64 i_interception_m)                                    modification_{ return intercepted_precipitation_m = i_interception_m; }
+   */
+
+   virtual const char  *get_description()                                  const;
+   virtual const char  *describe_growth_stage()                            const;
+   virtual float64 get_recorded_root_depth_m()                             const;
+   virtual float64 get_root_length_m()                                     const;
+   virtual float64 get_plant_height_m()                                    const;
+   virtual float64 get_active_fract_root_length_m(uint8 sublayer)          const;
+   virtual float64 const *get_total_fract_root_length_m()                  const;
+      // This will need to return an array, not sure what
+      // to fill it with in the case of CropGro
+   virtual float64      get_latest_yield_kg_m2()                           const;
+   virtual const CORN::Date &get_planting_or_restart_date()                const;
+   virtual const CORN::Date &get_emergence_date()                          const;
+   virtual const CORN::Date &get_flowering_date()                          const;
+   virtual const CORN::Date &get_tuber_init_date()                         const;//081111
+   virtual const CORN::Date &get_grain_filling_date()                      const;
+   virtual const CORN::Date &get_maturity_date()                           const;
+   virtual const CORN::Date &get_harvest_date()                            const;
+
+   inline virtual const CORN::Date &get_bud_break_date()                   const { return NA_date;} // Not applicable to CropGro   //081013_
+   inline virtual const CORN::Date &get_initial_fruit_growth_date()        const { return NA_date;} // Not applicable to CropGro   //081013_
+   inline virtual const CORN::Date &get_rapid_fruit_growth_date()          const { return NA_date;} // Not applicable to CropGro   //081013_
+   inline virtual const CORN::Date &get_dormancy_start_date()              const { return NA_date;} // Not applicable to CropGro   //081013_
+   inline virtual const CORN::Date &get_dormancy_end_date()                const { return NA_date;} // Not applicable to CropGro   //081013_
+   inline virtual const CORN::Date &get_chill_requirement_satisfied_date() const { return NA_date;} // Not applicable to CropGro   //081013_
+ public: // days after event
+   virtual int16        get_days_after_flowering()                         const {return 0; }  // This is currently only used for Automatic clipping events. CropGro does not have clipping. //040830
+
+ public:  // The following are for report details only,
+         // Eventually they may be replaced by data_record I/O
+   virtual float64 get_accum_degree_days()                                 const;
+   virtual float64 get_dry_biomass_kg_ha()                                 const;
+   virtual float64 get_act_root_biomass_kg_ha()                            const;
+#ifdef CROP_ORCHARD
+   virtual float64 get_fruit_dry_biomass_kg_ha()                           const;
+#endif
+   virtual float64 get_canopy_biomass_kg_ha()                              const;
+   virtual float64 get_VPD_daytime()                                       const;
+   virtual float64 get_VPD_daytime_mean()                                  const;
+   virtual float64 get_intercepted_PAR_MJ_m2()                             const;
+   virtual float64 get_intercepted_PAR_accum_MJ_m2()                       const;
+   virtual float64 get_intercepted_PAR_season_accum_MJ_m2()                const;
+   virtual float64 get_peak_LAI()                                          const;
+   virtual float64 get_total_yield_kg_m2()                                 const;
+   virtual float64 get_N_stress_index()                                    const;
+   virtual float64 get_N_stress_index_mean()                               const;   // Note, I think this may be stress index mean
+   virtual float64 get_N_above_ground_accum_kg_ha()                        const;
+   virtual float64 get_N_concentration_kgN_kgBM()                          const;  // units?
+ public: // data record output
+   virtual void setup_structure
+      (CORN::Data_record &data_rec
+      ,bool for_write
+      ,const Desired_variables &desired_vars);
+ public:  // The following are used for accumulation and/or output
+   virtual float64 get_gaseous_N_loss_kg_m2()                              const;
+   virtual float64 get_N_fixation_kg_m2()                                  const;
+   virtual float64 get_daily_N_fert_requirements_kg_m2()                   const;
+   virtual float64 get_N_content_kg_m2()                                   const;
+   #ifdef NITROGEN
+            virtual float64     get_N_mass_canopy_kg_m2(bool before_harvest)   const; //110915
+   #endif
+//110915NITRO          virtual float64     get_canopy_N_assimilation_kg_m2(bool before_harvest)  const;
+   virtual float64 get_seedling_N_kg_m2()                      const;
+   virtual float64 get_act_transpiration_m()                   const;
+   virtual float64 get_recorded_act_transpiration_m()          const;
+   virtual float64 get_canopy_biomass_kg_m2()                  const;
+   virtual float64 get_act_root_biomass_kg_m2()                const;
+   virtual float64 get_LAI(bool from_canopy)                   const;
+   virtual float64 get_GAI()                                   const;
+   virtual float64 get_GAI_today()                             const;
+   virtual float64 get_temperature_stress()                    const;
+   virtual float64 get_water_stress()                          const;
+   virtual float64 get_water_stress_index()                    const;
+   virtual float64 get_water_stress_index_mean()               const;
+   virtual float64 get_temperature_stress_index()              const;
+   virtual float64 get_temperature_stress_index_mean()         const;
+
+   virtual float64 get_flower_temperature_stress_index_mean()  const { return 0.0; } //081125
+   virtual float64 get_flowering_N_stress_index_mean()         const { return 0.0; } //081125
+   #if (CROPSYST_VERSION==4)
+   virtual float64 get_flower_water_stress_index_mean()        const { return 0.0; } //081125
+   virtual float64 get_filling_duration_index_mean()           const { return 0.0; } //081125
+   #endif
+
+   virtual float64 get_tuber_init_temperature_stress_index()   const { return 0.0; }  //081111
+   virtual float64 get_tuber_fill_temperature_stress_index()   const { return 0.0; }  //081111
+   virtual float64 get_tuber_init_temperature_stress_index_mean()   const { return 0.0; } //081111
+   virtual float64 get_tuber_fill_temperature_stress_index_mean()   const { return 0.0; } //081111
+
+   virtual float64 get_nitrogen_stress()                       const;
+   virtual float64 get_overall_growth_stress()                 const;
+   virtual float64 get_C_mass_canopy()                         const;//110915_060818
+   virtual float64 get_C_mass_roots()                          const;//110915_060818
+ public:  // The following are parameter accessors
+   virtual Land_use  param_land_use()                          const;
+   virtual float64   param_emergence_deg_day()                 const;
+   //not needed (used only to reinit soil   inline virtual float64   param_wilt_leaf_water_pot() const { return 0.0; };
+   virtual float64   param_base_temp()                         const;
+ public: // The following parameters are used for scaling runtime graph
+   virtual float64    param_max_LAI()                          const;
+ public:  // The following
+   virtual void biomass_to_residue                                               //970130
+      (bool include_roots
+      ,float64 straw_to_residue);                                                //990227
+ protected:  // The following
+   virtual float64 remove_biomass_X
+      (float64 percent_biomass_removed                                           //970622
+      ,Biomass_fate_parameters &biomass_fate_parameters                          //040610
+      ,bool due_to_freezing                                                      //000320
+      ,bool due_to_death                                                         //000320
+      ,const CORN::Date &  today);
+   inline virtual float64 global_solar_rad_intercepted_green_canopy()      const { return 0.0; /* N/A */  }
+   inline virtual float64 get_solid_canopy_interception()                  const { return 1.0;}  // This could be calculated as in CropSyst. //021211
+ public:  // The following are processes used by the calling program
+   virtual bool sow()                                               modification_;//020220
+                  // plant_crop
+   virtual bool process(const CORN::Date &today)                    modification_;//020711
+   inline virtual bool end_day()                                    modification_{ return true; }//070221
+   virtual void set_automatic_nitrogen_mode(bool enable)            modification_ //040525
+      {  /* CropGro does not have auto N */};
+   virtual bool harvest
+      (Date32 today
+      ,const Biomass_fate_parameters &harvest_biomass_fate_parameters) modification_;//050822
+      // Returns true if could harvest                                           //020311
+   virtual void harvest_crop
+      ( const Biomass_fate_parameters &harvest_biomass_fate_parameters           //031015
+      ,bool terminate)                                             modification_;//050822
+   inline virtual float64 update_pot_evapotranspiration                          //010910
+      (float64 _pot_ref_evapotranspiration_m)                      modification_
+      { return Crop_common::update_pot_evapotranspiration(_pot_ref_evapotranspiration_m); }
+
+//100315/*081105_*/    virtual void  know_pot_evapotranspiration(float64 _pot_ref_evapotranspiration) modification_{ Crop_common::know_pot_evapotranspiration(_pot_ref_evapotranspiration); };
+
+   virtual float64 est_degree_days_X_days_from_now                               //000330
+      (const CORN::Date_const_interface /*170525 Date */ & today, Days days_from_now)                       const;//010202
+      // This returns an estimate (in this case the actual)
+      // of the thermal time the crop will have in the specified
+      // number of days from the current date.
+   virtual nat32 relinquish_triggered_synchronizations()            modification_;//031120
+      // returns the current triggered syncs and also clears resets them.
+   virtual float64 update_root_depth                                             //981023S
+      (float64 soil_rooting_depth
+      ,float64 total_soil_depth )                                   modification_;
+ public: // Support for management operations and response
+   inline virtual bool  set_no_more_clippings_this_season()         modification_{ return false; }  // CropGro does not have clipping response   //071111
+   virtual bool         get_no_more_clippings_this_season()                const { return false; }   //040721
+   inline virtual void  end_season_if_no_dormancy()                 modification_{  };  // CropGro does not have dormancy, do nothing //50818
+ private:
+   float64 clumping(float64 xAI,float64 area_factor)                       const;//000623
+   float64 calc_fract_cover(float64 xAI)                                   const;//000623
+ private: // total_fract_root length is used to calculate PAW
+   float64 uptake_N_from_soil()                                    modification_;//031129
+
+//NYN   float64 total_fract_root_length[NL_alloc];                               //031124
+//NYN   void update_total_fract_root_length();
+};
+//______________________________________________________________________________
+//namespace_CropSyst_end;                                                          //050804
+
+#endif
+

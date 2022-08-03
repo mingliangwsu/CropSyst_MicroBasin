@@ -1,0 +1,465 @@
+#include "organic_matter/OM_common.h"
+#include "corn/math/compare.hpp"
+#include "soil/texture_interface.h"
+#include <math.h>
+#ifdef DETAILED_BALANCES
+C_Balance *C_balance=0;                                                            //111005
+#endif
+//______________________________________________________________________________
+Organic_biomatter_common::Organic_biomatter_common
+(const Organic_biomatter_common &from_copy)
+: Biomass_abstract(from_copy)
+, type                             (from_copy.type)
+, position                         (from_copy.position)
+, layer                            (from_copy.layer)
+, detrition_constant                (from_copy.detrition_constant)               //090702
+, soil_texture                      (from_copy.soil_texture)
+, ref_soil_abiotic_environment_layer    (from_copy.ref_soil_abiotic_environment_layer)
+{}
+//______________________________________________________________________________
+Organic_biomatter_common::Organic_biomatter_common    // For stable provide
+(Organic_matter_type     _type
+,uint8                   _layer
+,Organic_matter_position _position
+,float64                 _biomass
+,float64                 _carbon_fraction
+,float64                 _carbon_nitrogen_ratio
+,float64                 _decomposition_constant
+,float64                 _detrition_constant         // only applies to residues (otherwise should be ????) //090702
+,const Soil_texture_interface &_soil_texture                                     //070707
+, Soil_abiotic_environment_layer * _soil_abiotic_environment_layer)
+:Biomass_abstract
+   (_biomass
+   ,_carbon_fraction                                                             //070726
+   ,_carbon_nitrogen_ratio                                                       //070726
+   ,_decomposition_constant)                                                     //100210
+, type                           (_type)
+, position                       (_position)
+, layer                          (_layer)
+, detrition_constant             (_detrition_constant)                           //090702
+, soil_texture                   (_soil_texture)
+, ref_soil_abiotic_environment_layer (_soil_abiotic_environment_layer)
+{}
+//______________________________________________________________________________
+bool Organic_biomatter_common::is_straw_or_manure_residue()                const
+{  return  (type == STRAW_RESIDUE) || (type == MANURE_RESIDUE); }
+//______________________________________________________________________________
+bool Organic_biomatter_common::is_manure()                                 const
+{  return  (type == MANURE_RESIDUE); }
+//______________________________________________________________________________
+bool Organic_biomatter_common::is_standing_stubble()                       const
+{  return  (position == OM_stubble_surface_position); }
+//______________________________________________________________________________
+bool Organic_biomatter_common::is_flat_surface()                           const
+{  return  (position == OM_flat_surface_position); }
+//_2006-07-28___________________________________________________________________
+bool Organic_biomatter_common::is_above_ground()                           const
+{  // NYI may want to specify flags for what to include as above ground.
+   return position > OM_subsurface_position;
+}
+//_2006-07-17___________________________________________________________________
+bool  Organic_biomatter_common::is_comparable(const Organic_biomatter_common &to_other) const
+{  Organic_matter_cycling  this_cycling = get_carbon_cycling();                  //090827
+   Organic_matter_cycling  other_cycling = to_other.get_carbon_cycling();        //090827
+   bool comparable
+   =  (type       == to_other.type)
+   && (position   == to_other.position)
+   && (layer      == to_other.layer)
+   && (this_cycling == other_cycling)                                            //090827
+   && (CORN::is_approximately<float64>(carbon_fraction        ,to_other.carbon_fraction       ,0.000001))
+   && (CORN::is_approximately<float64>(carbon_nitrogen_ratio  ,to_other.carbon_nitrogen_ratio ,0.000001))
+   && (CORN::is_approximately<float64>(decomposition_constant ,to_other.decomposition_constant,0.000001))
+   && (CORN::is_approximately<float64>(detrition_constant     ,to_other.detrition_constant    ,0.000001)); //090702
+   return comparable;
+}
+//_2006-06-05___________________________________________________________________
+float64 Organic_biomatter_common::add_different_mass
+(const Organic_biomatter_common &added_biomatter)                                //060728
+{  float64 mass_to_add           = added_biomatter.kg();                         //060728
+   float64 current_mass = kg();                                                  //060316
+   add_similar_mass(added_biomatter);                                            //070726
+   if (mass_to_add > current_mass) set_RUSLE2_residue_type(added_biomatter.get_RUSLE2_residue_type());   //060721
+   // This needs to go in mass balance too somehow
+   // Determine new area to mass ratio weighted by mass
+   if (is_above_ground())    // area_per_mass only applies to above ground       //060728
+   {  float64 current_area_per_mass = get_area_per_mass();                       //060728
+      float64 new_area_per_mass                                                  //060728
+        = (current_mass * current_area_per_mass                                  //060728
+         + mass_to_add * added_biomatter.get_area_per_mass())                    //070707
+         / (current_mass + mass_to_add);                                         //060728
+      set_area_per_mass(new_area_per_mass);                                      //070707
+   }
+   return kg();                                                                  //060728
+}
+//______________________________________________________________________________
+modifiable_ Organic_biomatter_common *Organic_biomatter_common
+::detrition()                                                      modification_
+{  Organic_biomatter_common *detritis = 0;
+   if (detrition_constant >0.000000001)
+   {  detritis  = clone();
+      detritis->set_position(OM_subsurface_position); // The detritis is comingled with the first soil layer
+      detritis->layer = 2;                            // The detrition_constant is set to 0 by set_position.
+      float64 non_decayed_fraction        = exp(-detrition_constant);
+      float64 decayed_fraction            = (1.0 - non_decayed_fraction);
+      detritis->multiply_by(decayed_fraction);
+      this    ->multiply_by(non_decayed_fraction);
+   }
+   return detritis;
+}
+//_2009-07-02___________________________________________________________________
+#ifndef OLD_SINGLE_RESIDUES_POOL
+#ifdef DETAILED_BALANCES
+#include <common/residue/residue_balancer.h>
+extern Residue_balancer *residue_mass_balance[OM_POSITION_COUNT];                //090407
+#endif
+#include "soil/abiotic_environment.h"
+//______________________________________________________________________________
+Organic_biomatter_common_pool::Organic_biomatter_common_pool
+      (Organic_matter_type     _type
+      ,uint8                   _layer
+      ,Organic_matter_position _position
+      ,Organic_matter_cycling  _cycling
+      ,RUSLE2_Residue_type     _RUSLE2_residue_type                              //060721
+      ,float64                 _biomass
+      ,float64                 _carbon_fraction
+      ,float64                 _carbon_nitrogen_ratio
+      ,float64                 _decomposition_constant
+      ,float64                 _detrition_constant                               //090702
+      ,float64                 _area_per_mass       // = 0.0  stubble and surface residue_only?
+      ,float64                 &_contact_fraction
+      ,const Soil_texture_interface    &_soil_texture                            //070707
+      ,Soil_abiotic_environment_layer * _soil_abiotic_environment_layer)
+: Organic_biomatter_common
+      (_type
+      ,_layer
+      ,_position
+      ,_biomass
+      ,_carbon_fraction
+      ,_carbon_nitrogen_ratio
+      ,_decomposition_constant
+      ,_detrition_constant                                                       //090702
+      ,_soil_texture                                                             //070707
+      ,_soil_abiotic_environment_layer)
+, contact_fraction         (_contact_fraction)
+, carbon_cycling(_cycling)
+, RUSLE2_residue_type      (UNKNOWN_RESIDUE_TYPE)                                //060731
+, area_per_mass            (_area_per_mass)
+, C_fraction_transfered_to_CO2(0.0)                                              //120120
+,  C_decomposed_for_output_only     (0.0)                                        //090520
+{  for (int i = 0; i <= 3; i++) C_fraction_transferred_to[i] = 0.0;              //120120
+}
+// Constructor used for For SOM redistribution
+//______________________________________________________________________________
+Organic_biomatter_common_pool::Organic_biomatter_common_pool(const Organic_biomatter_common_pool &from_copy)
+: Organic_biomatter_common(from_copy)
+,  contact_fraction                 (from_copy.contact_fraction)
+,  carbon_cycling                   (from_copy.carbon_cycling)
+,  RUSLE2_residue_type              (from_copy.RUSLE2_residue_type)              //060731
+,  area_per_mass                    (from_copy.area_per_mass)
+,  C_fraction_transfered_to_CO2     (from_copy.C_fraction_transfered_to_CO2)
+,  C_decomposed_for_output_only     (0.0)                                        //090520
+{  for (int i = 0; i <= 3; i++)
+      C_fraction_transferred_to[i] = from_copy.C_fraction_transferred_to[i];
+}
+//______________________________________________________________________________
+void Organic_biomatter_common_pool::contribute_to
+(float64       _C_fraction_transfered_to_CO2
+,Organic_biomatter_common_pool *_receiver_1 ,float64 _C_fraction_transferred_to_1
+,Organic_biomatter_common_pool *_receiver_2 ,float64 _C_fraction_transferred_to_2
+,Organic_biomatter_common_pool *_receiver_3 ,float64 _C_fraction_transferred_to_3)
+{  C_fraction_transfered_to_CO2 = _C_fraction_transfered_to_CO2;
+   receiver[1] = _receiver_1;
+   receiver[2] = _receiver_2;
+   receiver[3] = _receiver_3;
+   C_fraction_transferred_to[1] = _C_fraction_transferred_to_1;
+   C_fraction_transferred_to[2] = _C_fraction_transferred_to_2;
+   C_fraction_transferred_to[3] = _C_fraction_transferred_to_3;
+}
+//______________________________________________________________________________
+float64 Organic_biomatter_common_pool::actual_C_decomposition
+(float64 &N_deficit_for_immobilization
+,float64 &decomposition_reduction_factor)
+{
+   float64 act_carbon_decomp = 0.0;
+   Decomposition *decomposition = get_decomposition();                           //111003
+   if (decomposition)
+   {  act_carbon_decomp = decomposition->actual(N_deficit_for_immobilization,decomposition_reduction_factor);
+   }
+   C_decomposed_for_output_only = act_carbon_decomp;                             //090520
+   return act_carbon_decomp;
+}
+//______________________________________________________________________________
+float64 Organic_biomatter_common_pool::Decomposition::actual
+(float64 N_deficit_for_immobilization
+,float64 decomposition_reduction_factor)
+{  // Begin reduction to potential decomposition amount
+//decomposition_reduction_factor = 1.0;  //cout << "decomposition_reduction_factor deactivated" << '\r';
+      if ((net_N_mineralization < 0.0)   // negative net_N_mineralization implies immobilization
+         || is_a_residue)                                                        //060424
+           act_carbon = pot_carbon * decomposition_reduction_factor ;
+      else act_carbon = pot_carbon; // updated from VB                           //040715
+   act_carbon = std::min<float64>(act_carbon,pool.get_carbon_kg());              //120312
+   return act_carbon;
+}
+//_2011-10-04_(was in Organic_biomatter_multiple_pool unmodified)_______________
+float64 Organic_biomatter_common_pool::deduct_carbon(float64 removed_carbon_mass)
+{
+   if (removed_carbon_mass > 0.0)
+   {  float64 removed_biomass = removed_carbon_mass / get_carbon_fraction();
+      subtract_mass(removed_biomass);
+      #ifdef DETAILED_BALANCES
+      // Actually in general we should have an option to not do these balances
+      // residue balance
+      if (is_straw_or_manure_residue())                                          //080229
+      {
+         if (residue_mass_balance[position])                                     //090408
+             residue_mass_balance[position]->decomposed += removed_biomass;      //090407
+      }
+      #endif
+      get_carbon_nitrogen_ratio();
+      // This should update carbon and nitrogen.
+   }
+   return get_carbon_kg();                                                       //111007
+}
+//______________________________________________________________________________
+Organic_matter_position Organic_biomatter_common_pool
+::set_position(Organic_matter_position new_position)                modification_
+{  if (new_position == OM_subsurface_position)                                   //090702
+      detrition_constant  = 0.0;                                                 //090702
+   return Organic_biomatter_common::set_position(new_position);
+}
+//_2009-04-13___________________________________________________________________
+void Organic_biomatter_common_pool::set_standing_stubble()
+{  // This is used by decomposing canopy.
+   // It is called when the canopy portion is deleted
+   // (usually when the plant is completely dead).
+   // It is only valid to call this when this matter is currently attached to the plant.
+   if (position == OM_attached_to_plant_position)                                //061025
+       position =  OM_stubble_surface_position;                                  //060125
+   // Once the matter is no longer attached to the plant,
+   // it is fully relinquished to the organic matter pools
+   // and can be deleted when exhausted.
+}
+//_2006-05-30___________________________________________________________________
+float64 Organic_biomatter_common_pool::set_contact_fraction(float64 &_contact_fraction) modification_
+{   contact_fraction = _contact_fraction;
+    return contact_fraction;
+}
+//______________________________________________________________________________
+float64 Organic_biomatter_common_pool::reset_mass(float64 new_mass) modification_
+{  float64 return_mass = Organic_biomatter_common::reset_mass(new_mass);
+   if (type == MICROBIAL_BM)                                                     //060807
+   {  // correct for change in sand (Not yet in VB)
+      float64 sand_fraction = soil_texture.get_sand_percent(layer) / 100.0;      //060807
+      float64 alpha = 0.25  / (1.0 + (pow((sand_fraction / 0.4), 3)));           //070801_050714 Added by Armen
+         //070801 0.25 was 0.5
+         // transfer coefficient
+      float64 C_Fraction_From_MB_To_MetastableSOM = alpha;                       //060307
+      float64 C_Fraction_From_MB_To_LabileSOM = (1.0 - alpha);                   //060307
+      C_fraction_transferred_to[1] = C_Fraction_From_MB_To_LabileSOM;            //060307
+      C_fraction_transferred_to[2] = C_Fraction_From_MB_To_MetastableSOM;       //060307
+   }
+   return return_mass;
+}
+//_2007-07-07___________________________________________________________________
+Organic_biomatter_common_pool::Decomposition::Decomposition
+(const Organic_biomatter_common_pool &_pool                                       //110930
+,float64 _tillage_decomposition_rate_adj
+,float64 _minimized_temperature_moisture_function
+,bool    _is_a_residue)
+:pool(_pool)
+,minimized_temperature_moisture_function(_minimized_temperature_moisture_function)
+,is_a_residue(_is_a_residue)
+, pot_carbon             (0.0)
+, act_carbon             (0.0)
+, tillage_decomposition_rate_adj(_tillage_decomposition_rate_adj)
+, N_immobilization_demand(0.0)
+, net_N_mineralization   (0.0)
+, N_mineralization       (0.0)
+{}
+//______________________________________________________________________________
+float64 Organic_biomatter_common_pool::Decomposition::potential()    // original: CarbonDecomosed()
+{  // This applies to:
+   // All residue and organic matter in V4.2
+   // Only residue in V4.3   (V4.3
+
+// Not yet implemented hourly temperature
+//For Hour = 1 To 24
+//    Hourly_Temperature = SoilState.SoilTemperature(Hour, Layer)
+//    Temperature_Function = AbioticFunctions.TemperatureFunction(Hourly_Temperature)
+//    Term = Term + (1 - Exp(-(Carbon_Decomposition_Constant / 24) * Temperature_Function))
+//Next Hour
+
+/*
+continue here need to make this like VB version
+note that this is still sort of valid for Residue organic matter
+so will need decomposition potential for that mode
+*/
+
+
+// This disables for debugging only
+//minimized_temperature_moisture_function = 1.0;
+
+#ifdef DEBUG_CARBON_TEST
+minimized_temperature_moisture_function = 0.5;
+tillage_decomposition_rate_adj = 1.0;
+#endif
+
+   float64 carbon_mass = pool.get_carbon_kg() ;
+   pot_carbon =  carbon_mass * minimized_temperature_moisture_function
+      * tillage_decomposition_rate_adj
+            * pool.get_decomposition_constant();                                 //111001
+   return pot_carbon;
+}
+//______________________________________________________________________________
+float64 Organic_biomatter_common_pool::potential_C_decomposition
+(float64 &N_mineralization_sum
+,float64 &N_immobilization_demand_sum
+,float64 tillage_decomposition_rate_adj)
+{
+   float64 pot_C_decomp = 0.0;
+   float64 carbon_mass = get_carbon_kg();
+   Decomposition *decomposition = 0;
+   if (carbon_mass > 0.0)
+   {  // Only perform decomposition if there is mass (any carbon)
+      switch (type)
+      {  case STRAW_RESIDUE : case  MANURE_RESIDUE :
+         {  float64 moisture_function = ref_soil_abiotic_environment_layer->get_moisture_function();
+            float64 temperature_function = ref_soil_abiotic_environment_layer->get_temperature_function_daily_mean(decomposition_temperature_function);
+            //printf("moisture_function(%f)\ttemperature_function(%f)\n",moisture_function,temperature_function);
+            decomposition = provide_decomposition_residue
+               (moisture_function,temperature_function);                         //111003
+         } break;
+         default :  // Soil organic matter, or microbial
+         {  float64 minimized_temperature_moisture_function = ref_soil_abiotic_environment_layer->get_minimized_temperature_moisture_function();
+            decomposition = provide_decomposition_SOM
+               (tillage_decomposition_rate_adj,minimized_temperature_moisture_function);  // Not is a residue   is_residue()
+         } break;
+      }
+      pot_C_decomp = decomposition->potential();
+      update_net_N_mineralization();
+      decomposition->N_mineralization_or_immobilization_demand(get_carbon_nitrogen_ratio()); //110930
+      N_mineralization_sum       +=decomposition->N_mineralization;
+      N_immobilization_demand_sum+=decomposition->N_immobilization_demand;
+   }
+   return pot_C_decomp;
+}
+//_2011-10-03___________________________________________________________________
+float64 Organic_biomatter_common_pool::update_net_N_mineralization()
+{  // In VB this function is NetNMineralization()
+   // Note that in the single OM model, this function is essentially
+   // applicable only to residues because the SOM pool doesn't release C to other pools.
+   float64 CN_ratio = carbon_nitrogen_ratio;
+   float64 net_transfer =  (CN_ratio == 0.0)
+   ? 0.0
+   : 1.0 / carbon_nitrogen_ratio;
+   for (int i = 1; i <=3; i++)
+      if (receiver[i])
+         net_transfer -= C_fraction_transferred_to[i] /
+            get_humified_carbon_nitrogen_ratio(i);
+            // For single pool, should be C/N of humified residue
+            // for multiple pool, it is the carbon_nitrogen_ratio
+   Decomposition *decomposition = get_decomposition();                           //111003
+   decomposition->net_N_mineralization =  net_transfer * decomposition->pot_carbon;
+   return decomposition->net_N_mineralization;
+}
+//_2011-10-03___________________________________________________________________
+float64 Organic_biomatter_common_pool::get_N_mineralization_mass()    const
+{  // Returns the actual N mass mineralized today
+   const Decomposition *decomposition = get_decomposition_unmodifiable();
+   return decomposition ? decomposition->N_mineralization : 0.0;
+}
+//_2001-10-04__2006-11-16_______________________________________________________
+float64 Organic_biomatter_common_pool::get_N_immobilization_demand_mass() const
+{  // Returns the actual N mass immobilized  today
+   const Decomposition *decomposition = get_decomposition_unmodifiable();
+   return decomposition ? decomposition->N_immobilization_demand : 0.0;
+}
+//_2001-10-04__2006-11-16_______________________________________________________
+void  Organic_biomatter_common::write_header(std::ostream &stream)  performs_IO_
+{
+   char units_buffer[30];
+   CORN::Units_clad units(units_ref);                                                 //150227
+   stream
+   << "type\t"
+   << "position\t"
+   << "layer\t"
+   << "detrition\t"
+   // The following are Biomass_abstract and superclasses
+   // I dont currently have read/write for these classes
+   << "C_fraction\t"
+   << "C/N\t"
+   << "decomposition\t"
+   << "amount(" <<units.label_cstr(units_buffer)<<")\t";
+}
+//_2012-09-12___________________________________________________________________
+bool Organic_biomatter_common::write(std::ostream &stream)         performs_IO_
+{  stream
+   << ((nat16)type) << "\t"
+   << ((nat16)position) << "\t"
+   << ((nat16)layer) << "\t"
+   << detrition_constant << "\t"
+   // The following are Biomass_abstract and superclasses
+   // I dont currently have read/write for these classes
+   << carbon_fraction << "\t"
+   << carbon_nitrogen_ratio << "\t"
+   << decomposition_constant << "\t"
+   << get_amount()/*151119 amount_ref*/ << "\t";                                                        //150227
+   return true;                                                                  //150728
+}
+//_2012-09-12___________________________________________________________________
+std::istream &Organic_biomatter_common::read(std::istream &stream)  performs_IO_
+{
+   nat16 type_buff;
+   nat16 position_buff;
+   nat16 layer_buff;
+   stream
+   >> type_buff
+   >> position_buff
+   >> layer_buff
+   >> detrition_constant
+   >> carbon_fraction
+   >> carbon_nitrogen_ratio
+   >> decomposition_constant
+   >> (*amount_ptr); //151119 amount_ref;
+   type     = (Organic_matter_type)type_buff;
+   position = (Organic_matter_position)position_buff;
+   layer    = (nat8)layer_buff;
+   return stream;
+}
+//_2012-09-12___________________________________________________________________
+void  Organic_biomatter_common_pool::write_header(std::ostream &stream)  performs_IO_
+{  Organic_biomatter_common::write_header(stream);
+   stream
+   << "C_cycling\t"
+   << "residue_type\t"
+   << "area/mass\t";
+}
+//_2012-09-12___________________________________________________________________
+bool Organic_biomatter_common_pool::write(std::ostream &stream)    performs_IO_ //150728
+{  Organic_biomatter_common::write(stream);
+   stream
+   << ((nat16)carbon_cycling) << "\t"
+   << ((nat16)RUSLE2_residue_type) << "\t"
+   << area_per_mass << "\t";
+   // dont write transfers and receivers
+   return true;
+}
+//_2012-09-12___________________________________________________________________
+std::istream &Organic_biomatter_common_pool::read(std::istream &stream) performs_IO_
+{
+   Organic_biomatter_common::read(stream);
+   nat16 carbon_cycling_buff;
+   nat16 RUSLE2_residue_type_buff;
+   stream
+   >>carbon_cycling_buff
+   >>RUSLE2_residue_type_buff
+   >>area_per_mass;
+   // dont read transfers and receivers, these need to be reconnected after reading
+   carbon_cycling = (Organic_matter_cycling)carbon_cycling_buff;
+   RUSLE2_residue_type = (RUSLE2_Residue_type)RUSLE2_residue_type_buff;
+   return stream;
+}
+//_2012-09-12___________________________________________________________________
+#endif
+

@@ -1,0 +1,17 @@
+#ifndef request_WinINetH
+#define request_WinINetH
+#define POST 1
+#define GET 0
+/*_________________________________________________________________________*/
+extern bool WinINet_request_to_cstr
+   (int Method
+   , const char */*LPCSTR*/ Host
+   , const char */*LPCSTR*/ url
+   , const char */*LPCSTR*/ header
+   ,       char */*LPSTR*/  data
+   ,char *result);
+// This function is available to both C and C++
+// although for C++ it is recommended to use WinINet_request_URI versions.
+/*_________________________________________________________________________*/
+
+#endif

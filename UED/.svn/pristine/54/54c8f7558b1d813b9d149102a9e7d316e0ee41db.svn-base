@@ -1,0 +1,76 @@
+#ifndef tuple_indexH
+#define tuple_indexH
+#include "corn/container/item.h"
+#include "corn/datetime/datetime64.h"
+
+#include "UED/library/UED_types.h"
+#	include "corn/dynamic_array/dynamic_array_T.h"
+using namespace CORN;
+
+namespace CORN
+{
+   class Bidirectional_list;
+}
+namespace UED
+{
+class Export_tuple;
+//______________________________________________________________________________
+class Searchable_tuple
+: public CORN::Item
+{public:
+    Date_time_64             date_time;
+ public:
+   Searchable_tuple(const Date_time_64 &_date_time)
+   :Item()
+   ,date_time(_date_time)
+   {}
+  inline virtual int compare(const Item &other)                            const //980511
+   { return date_time.temporal_compare(((Searchable_tuple &)other).date_time);
+   }
+};
+//_1999-05-06___________________________________________________________________
+class Export_tuple
+: public Searchable_tuple
+{
+    // The tuple represents one row of data
+    // When dates and times are to go in a column,
+    // the corresponding values array will not be set to a value.
+ public:
+   Dynamic_array<float32> data;   // previously was superclass                   //090709
+ public:
+   inline Export_tuple(const Date_time_64 &_date_time)
+      :Searchable_tuple(_date_time)
+      ,data(0.0,20,0.0)                                                          //090709
+      {}
+   inline nat32 get_count()                   const { return data.get_count();}  //090714
+};
+typedef Export_tuple *  Export_tuple_pointer;
+//_1999-05-06___________________________________________________________________
+class Tuple_index
+{  Units_code    level_time_step;
+   bool              tuple_level;  // True if tuple level, else it is a subindex level
+   Tuple_index  *sublevel_index;
+   Export_tuple_pointer *tuples;
+   nat16            count;
+   Year         first_year;
+ public:
+   // This creates an index for a specified level and all levels underneath
+   // If the time_steps match, then this level will contain tuples not sublevels.
+   Tuple_index();
+   virtual ~Tuple_index();
+   Export_tuple *find_matching(const CORN::Date_time_64 &index_date_time);
+   void setup
+      (Units_code   tuple_time_step     // This is the timestep of the output file detail lines
+      ,Units_code   level_time_step   // This is the timestep of this index level
+      ,Year         year = 0
+      ,nat16        years= 0               // Optional
+      );
+   void extract_tuples(CORN::Bidirectional_list &sorted_tuples)    renunciation_;
+   // This traverses all the levels and removes all the tuples
+   // appending them to the sorted_tuples list.
+   // This sublevel indexes are all destroyed.
+};
+//______________________________________________________________________________
+} // namespace UED
+#endif
+

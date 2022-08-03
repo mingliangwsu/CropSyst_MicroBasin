@@ -1,0 +1,99 @@
+#ifndef scenarios_scheduler_engineH
+#define scenarios_scheduler_engineH
+#include "corn/container/container.h"
+#include "corn/container/text_list.h"
+#include "corn/datetime/date.hpp"
+#include "corn/application/arguments.h"
+
+namespace CS
+{
+//______________________________________________________________________________
+class Scenarios_scheduler_engine
+{
+ public:
+
+   enum Workload_manager  // or Resource_manager
+      { unspecified_manager
+      , native_manager
+      , TORQUE_manager
+      , SLURM_manager };
+   //_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+   class Arguments
+   : public extends_ CORN::Arguments
+   {
+    public:
+      // bool  postpone;
+      nat32 stale_seconds;
+      nat32 postpone_seconds;
+      nat32 sleep_seconds;
+      nat32 limit_scenarios;
+      nat16 cores;            // 0 = uses all cores
+      Workload_manager  manager;
+      std::string       submit_command;
+      std::string       queue_or_partition_name;
+      CORN::Text_list submit_args;  bool recognize_submit_args;
+      std::string model; CORN::Text_list model_args; bool recognize_model_args;
+    public:
+      Arguments();
+      inline virtual ~Arguments() {}
+
+      inline nat32 get_postpone_seconds() const { return postpone_seconds; }
+      inline nat32 get_sleep_seconds()    const { return sleep_seconds; }
+      virtual bool recognize(const std::string &paramstring)      modification_;
+      virtual bool recognize_assignment
+         (const std::string &variable
+         ,const std::string &value)                               modification_;
+      nat32 time_seconds(const std::string &value)                        const;
+      virtual bool get_author_mailto_URI(std::string &email_URI)           const;
+   };
+   //_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+ protected:
+   const Arguments &arguments;
+   nat32 sleep_seconds_adjusted;
+   nat32 estimated_runtime_seconds;
+   nat16 core_count;
+   CORN::OS::File_name_concrete *job_script_filename;
+ protected: // Scenarios lists
+   CORN::Unidirectional_list  scenarios_pending;   // Not yet started
+   // There is only one set of scenarios they are moved
+   // successfully from pending list to scheduled
+   // then started, then to etierh success or fail
+   CORN::Unidirectional_list  scenarios_scheduled; // But not yet started
+   CORN::Unidirectional_list  scenarios_started;   // but not yet completed
+   CORN::Unidirectional_list  scenarios_success;// eventually all scenarios will be moved here (unless stalled)
+   CORN::Unidirectional_list  scenarios_stalled;
+      // Scenarios that appear to be stalled
+ private: // Contributes
+   bool verbose;
+ public:
+   Scenarios_scheduler_engine(const Arguments &arguments);
+   bool initialize()                                            initialization_;
+   nat32 process()                                                modification_;
+ protected:
+   nat32 process_pending
+      (
+       nat32 limit_scenarios
+      //161212,CORN::Seconds sleep_seconds
+      );
+      // Returns the number of scenarios successfully completed.
+
+   nat32 list_penultimate_scenarios(CORN::Container &penultimate_scenarios);
+   nat32 unlist_started (CORN::Container &scenarios);
+   nat32 unlist_complete(CORN::Container &scenarios);
+   nat32 unlist_stalled (CORN::Container &scenarios);
+
+   bool schedule_scenario(const CORN::OS::Directory_name &scenario) modification_;
+   bool schedule_scenario_workload_manager(const CORN::OS::Directory_name &scenario) modification_;
+//   bool schedule_scenario_SLURM (const CORN::OS::Directory_name &scenario) modification_;
+//   bool schedule_scenario_TORQUE(const CORN::OS::Directory_name &scenario) modification_;
+   bool schedule_scenario_native(const CORN::OS::Directory_name &scenario) modification_;
+
+   bool sleep_for(CORN::Seconds seconds)                                  const;
+   bool is_started (const CORN::OS::Directory_name &scenario)      affirmation_;
+   bool is_complete(const CORN::OS::Directory_name &scenario)      affirmation_;
+   bool is_stalled (const CORN::OS::Directory_name &scenario)      affirmation_;
+   bool write_script(std::ostream &script);
+};
+//_2016-11-11___________________________________________________________________
+} // namespace CS
+#endif

@@ -1,0 +1,114 @@
+#ifndef dailyH
+#define dailyH
+#ifndef wthrbaseH
+#  include "common/weather/wthrbase.h"
+#endif
+// included because it has the super class.
+
+#include "common/weather/database/CS_weather_daily_UED.h"
+
+/*
+   This is a weather class that operates on a daily time step.
+*/
+//class Solar_irradiance_extraterrestrial_hourly;
+namespace CS
+{
+//______________________________________________________________________________
+class Weather_daily
+{
+   const Geocoordinate              &geocoordinate;
+   const CORN::Date                 &today;
+   provided_ Weather_provider       *weather_provider;
+   provided_ Sun_days               *sun_days;
+   provided_ Sun_hours              *sun_hours;
+
+   // sun_days and sun_hours should actually be cognate
+   // because these could be shared regionally
+
+   provided_ CS::Solar_irradiance_extraterrestrial_hourly *ET_solar_irrad;
+ public:
+   Weather_daily
+      (const Geocoordinate              &geocoordinate
+      ,const CORN::Date                 &today);
+   Sun_days &provide_sun_days()                                      provision_;
+   Sun_hours &provide_sun_hours()                                    provision_;
+   CS::Solar_irradiance_extraterrestrial_hourly &provide_ET_solar_irrad() provision_;
+   Weather_provider &provide_weather_provider()                      provision_;
+   virtual bool start()                                            modification_;
+};
+//_2016-07-29__________________________________________________________________/
+} // namespace CS
+
+class Weather_daily_deprecated
+: public Weather_base                                                            //011020
+{
+ public: // constructor
+   inline Weather_daily_deprecated                                                          //011020
+      (Weather_database    *_weather_database                                    //050307
+      ,modifiable_ Weather_provider &provider_                                   //151201
+      ,const CORN::Date    &_today                                               //150125
+      ,const Geocoordinate &_geocoordinate                                       //150629
+      ,float64              screening_height                                     //151128
+      //151201 moved to meteorology ,const CS::Solar_irradiance_extraterrestrial /*151028 _daily*/  &_ET_solar_irradiance_new     //150626
+      ,bool                 _treat_valid_data_as_real                            //081109
+      ,bool                 _read_only = false                                   //000711
+      //160110 snow_pack has been moved to Land_unit_meteorology ,Snow_pack_model      _snow_pack_model = NO_SNOW_PACK
+      //160110 snow_pack has been moved to Land_unit_meteorology ,float64              _soil_slope_deg = 0.0                                //991004
+      //160110 snow_pack has been moved to Land_unit_meteorology ,float64              _site_aspect_deg_from_north = 180.0                  //991004
+      //160110 snow_pack has been moved to Land_unit_meteorology ,bool                 _forest_vegetation = false
+      )                          //991004
+      :Weather_base                                                              //011020
+      (_weather_database                                                         //050307
+      ,provider_                                                                 //151201
+      ,_today                                                                    //150125
+      ,_geocoordinate                                                            //150629
+      ,screening_height                                                          //151128
+     //151201 moved to meteorology ,_ET_solar_irradiance_new                                                  //150626
+      ,_treat_valid_data_as_real                                                 //081109
+      ,_read_only                                                                //000711
+      //160110 snow_pack has been moved to Land_unit_meteorology ,_snow_pack_model
+      //160110 snow_pack has been moved to Land_unit_meteorology ,_soil_slope_deg
+      //160110 snow_pack has been moved to Land_unit_meteorology ,_site_aspect_deg_from_north
+      //160110 snow_pack has been moved to Land_unit_meteorology ,_forest_vegetation
+      ,seconds_per_day)
+      {}
+   inline virtual ~Weather_daily_deprecated() {}                                            //151204
+ public: // The following accessors get the weather data with the best quality available
+        // These are normally only used by this class when advancing the time step
+        // but may also be used to get values for non current dates
+
+   //LML 140916 added macro
+
+// #error these are implemented incorrectly I need to be able to look ahead
+/* 151119 now use provide_XXX_on(date);
+   virtual float64 get_max_temperature           (const CORN::Date  &date) const {return provider.air_temperature_max.Celcius();}         //LML 140916
+   virtual float64 get_min_temperature           (const CORN::Date  &date) const {return provider.air_temperature_min.Celcius();}         //LML 140916
+   virtual float64 get_precipitation_m           (const CORN::Date  &date) const {return provider.precipitation.get_m();}                     //LML 140916
+*/
+/*160729
+   virtual float64 get_max_temperature           (const CORN::Date  &date) const {return provider.air_temperature_max.Celcius();}         //LML 140916
+   virtual float64 get_min_temperature           (const CORN::Date  &date) const {return provider.air_temperature_min.Celcius();}         //LML 140916
+   virtual float64 get_precipitation_m           (const CORN::Date  &date) const {return provider.precipitation_actual.get_m();}   //160414_140916LML
+   inline virtual float64 get_cloud_cover_percent(const CORN::Date  &date) { return 0;} //  % not currently available but used in now test
+*/
+// #endif
+
+   // now use get_weather_provider_today()
+   //         get_weather_provider_tomorrow()
+   //         and access directly the weather elements from the provider.
+/*161009 moved
+ public:
+   float64 get_cloud_factor_for_net_rad(float64 clear_sky_solar_rad) const; //041110
+*/
+ public:  // The following are currently temporary for Weather_interface
+   // they should be overridden by derived classes a they are here
+   // to allow me to compile ClimGen while in
+   // the transition to the new weather classes
+   // These should never be reached.
+
+   inline virtual float64 get_curr_act_vapor_pressure()        const  { return 9999999.9; }
+   inline virtual float64 get_atmospheric_pressure_est_kPa()   const  { return 9999999.9; } //011008
+};
+//______________________________________________________________________________
+#endif
+

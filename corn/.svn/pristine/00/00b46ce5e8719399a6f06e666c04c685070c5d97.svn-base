@@ -1,0 +1,98 @@
+
+#include <corn/std/std_iostream.h>
+#include <corn/image/gif/common.h>
+/*______*/
+/*______*/  #define LZ_MAX_CODE	4095		/* Biggest code possible in 12 bits. */
+/*______*/  #define LZ_BITS		12
+/*______*/
+/*______*/  class LZ_decompresser
+/*______*/  {
+/*______*/   int FileState,
+/*______*/  	FileHandle,			     /* Where all this data goes to! */
+/*______*/  	BitsPerPixel,	    /* Bits per pixel (Codes uses at list this + 1). */
+/*______*/  	ClearCode,				       /* The CLEAR LZ code. */
+/*______*/  	EOFCode,				         /* The EOF LZ code. */
+/*______*/  	RunningCode,		    /* The next code algorithm can generate. */
+/*______*/  	RunningBits,/* The number of bits required to represent RunningCode. */
+/*______*/  	MaxCode1,  /* 1 bigger than max. possible code, in RunningBits bits. */
+/*______*/  	LastCode,		        /* The code before the current code. */
+/*______*/  	CrntCode,				  /* Current algorithm code. */
+/*______*/  	StackPtr,		         /* For character stack (see below). */
+/*______*/  	CrntShiftState;		        /* Number of bits in CrntShiftDWord. */
+/*______*/  	 unsigned long CrntShiftDWord,     /* For bytes decomposition into codes. */
+/*______*/  		  PixelCount;		       /* Number of pixels in image. */
+//	 FILE *File;						  /* File as stream. */
+/*______*/  	 uint8 Buf[256];	       /* Compressed input is buffered here. */
+/*______*/  	 uint8 Stack[LZ_MAX_CODE];	 /* Decoded pixels are stacked here. */
+/*______*/  	 uint8 Suffix[LZ_MAX_CODE+1];	       /* So we can trace the codes. */
+/*______*/  	 unsigned int Prefix[LZ_MAX_CODE+1];
+/*______*/  public:
+/*______*/  	LZ_decompresser(istream &in_strm);
+/*______*/
+/*______*/  	int buffered_input(istream &in_strm, uint8 *Buf,uint8 *NextByte);
+/*______*/
+/*______*/  	int decompress_input(istream &in_strm,int &Code);
+/*______*/
+/*______*/  	int decompress_line(istream &in_strm,uint8 Line[], int LineLen);
+/*______*/  	int GetPrefixChar(unsigned int *Prefix, int Code, int ClearCode);
+/*______*/
+/*______*/  };
+/*______*/
+//////////////////////////////////////////////////////
+/*______*/
+/*______*/  #define HT_SIZE			8192	   /* 12bits = 4096 or twice as big! */
+/*______*/  #define HT_KEY_MASK		0x1FFF	/* 13bits keys */
+/*______*/  #define HT_KEY_NUM_BITS		13		/* 13bits keys */
+/*______*/  #define HT_MAX_KEY		8191	/* 13bits - 1, maximal code possible */
+/*______*/  #define HT_MAX_CODE		4095	/* Biggest code possible in 12 bits. */
+/*______*/
+/* The 32 bits of the long are divided into two parts for the key & code:   */
+/* 1. The code is 12 bits as our compression algorithm is limited to 12bits */
+/* 2. The key is 12 bits Prefix code + 8 bit new char or 20 bits.	    */
+/*______*/  #define HT_GET_KEY(l)	(l >> 12)
+/*______*/  #define HT_GET_CODE(l)	(l & 0x0FFF)
+/*______*/  #define HT_PUT_KEY(l)	(l << 12)
+/*______*/  #define HT_PUT_CODE(l)	(l & 0x0FFF)
+/*______*/
+/*______*/  class GIF_hash_table
+/*______*/  {
+/*______*/      unsigned long HTable[HT_SIZE];
+/*______*/
+/*______*/  public:
+/*______*/     GIF_hash_table();
+/*______*/
+/*______*/     void clear();
+/*______*/     //clear the hash table to an empty state.
+/*______*/
+/*______*/     void insert(unsigned long Key, int Code);
+/*______*/     //insert one item into data structure.
+/*______*/
+/*______*/     int exists(unsigned long Key);
+/*______*/     //test if item exists in data structure.
+/*______*/     int KeyItem(unsigned long Item);
+/*______*/  };
+/*______*/
+//////////////////////////////////////////////////////
+/*______*/  class LZ_compresser
+/*______*/  {
+/*______*/     uint8 Buf[256];	   /* Compressed input is buffered here. */
+/*______*/     int BitsPerPixel;	/* Bits per pixel (Codes uses at list this + 1). */
+/*______*/     int ClearCode;		/* The CLEAR LZ code. */
+/*______*/     int EOFCode;		/* The EOF LZ code. */
+/*______*/     int RunningCode;	/* The next code algorithm can generate. */
+/*______*/     int RunningBits;  /* The number of bits required to represent RunningCode. */
+/*______*/     int MaxCode1;     /* 1 bigger than max. possible code, in RunningBits bits. */
+/*______*/     int CrntCode;		/* Current algorithm code. */
+/*______*/     int CrntShiftState; /* Number of bits in CrntShiftDWord. */
+/*______*/     unsigned long CrntShiftDWord;     /* For bytes decomposition into codes. */
+/*______*/  public:
+/*______*/     long PixelCount;
+/*______*/     GIF_hash_table hash_table;
+/*______*/  public:              
+/*______*/     LZ_compresser(STD_NS ostream &out_strm,int bits_per_pixel,long PixelCount);
+/*______*/     int compress_line(STD_NS ostream &out_strm, uint8 *Line, int LineLen);
+/*______*/     int buffered_output(STD_NS ostream &out_strm, uint8 *Buf, int c);
+/*______*/     int compress_output(STD_NS ostream &out_strm,int Code);
+/*______*/
+/*______*/  };
+/*______*/

@@ -1,0 +1,766 @@
+//--------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "form_update.h"
+#include <string>
+#include <io.h>
+#include <dos.h>
+#include <string>
+#include <fstream>
+#include <dir.h>
+#include "corn/OS/OS.h"
+//#include "corn/OS/file_system_engine.h"
+//#include "corn/OS/directory_entry_name_logical.h"
+#include "corn/primitive.h"
+#include "corn/string/strconv.hpp"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma link "WUpdate"
+#pragma link "WUpdateWiz"
+#pragma link "WebCopy"
+#pragma resource "*.dfm"
+
+#include "corn/OS/Windows/VCL/registry.h"
+
+#include <shlobj.h>
+//TForm *Form1;
+Tform_install_update *form_install_update;
+
+
+//Continue here dates need to be normalized to GMT Greenwich Mean Time
+extern bool reg_file_types_mode;
+//---------------------------------------------------------------------------
+__fastcall Tform_install_update::Tform_install_update(TComponent* Owner)
+   : TForm(Owner)
+{
+
+   // This sets the installation directory default to C:\Program files.
+   LPITEMIDLIST  pidl;
+   LPMALLOC      pShellMalloc;
+   char          szDir[MAX_PATH];
+   // SHGetSpecialFolderLocation generates a PIDL. The memory for the PIDL
+   // is allocated by the shell, and should be freed using the shell
+   // mallocator COM object. Use SHGetMalloc to retrieve the malloc object
+   if(SUCCEEDED(SHGetMalloc(&pShellMalloc)))
+   {   // if we were able to get the shell malloc object, then
+      // proceed by fetching the pidl for the windows desktop
+      if(SUCCEEDED(SHGetSpecialFolderLocation(NULL, CSIDL_PROGRAM_FILES, &pidl)))
+      { // return is true if success
+         if(SHGetPathFromIDList(pidl, szDir))
+         {   // set one caption to the directory path
+            program_files_path = szDir;
+//            success = true;
+         }
+         pShellMalloc->Free(pidl);
+      }
+      pShellMalloc->Release();
+   };
+
+   if(SUCCEEDED(SHGetMalloc(&pShellMalloc)))
+   {   // if we were able to get the shell malloc object, then
+      // proceed by fetching the pidl for the windows desktop
+      if(SUCCEEDED(SHGetSpecialFolderLocation(NULL, CSIDL_SYSTEM, &pidl)))
+      { // return is true if success
+         if(SHGetPathFromIDList(pidl, szDir))
+         {   // set one caption to the directory path
+            windows_system_files_path = szDir;
+//            success = true;
+         }
+         pShellMalloc->Free(pidl);
+      }
+      pShellMalloc->Release();
+   };
+/*
+   for (int i =0; i < 2; i++)
+   {
+      checklistbox_shortcut_CS_explorer->State[i] = cbGrayed;
+      checklistbox_shortcut_ClimGen    ->State[i] = cbGrayed;
+      checklistbox_shortcut_CS_suite   ->State[i] = cbGrayed;
+      checklistbox_shortcut_UED_tools  ->State[i] = cbGrayed;
+   };
+*/
+
+   tabsheet_installation_status->TabVisible = false;
+
+   if (reg_file_types_mode)
+   {
+
+      button_register_file_typesClick(0);
+      exit(EXIT_SUCCESS);
+   }
+   edit_source_URL->Text = WebUpdate_V4->URL;
+};
+//---------------------------------------------------------------------------
+const char *documentation_files[] =
+{".HTML"  ,".html"
+,".HTM"   ,".htm"
+,".GIF"   ,".gif"
+,".JPG"   ,".jpg"
+,".PNG"   ,".png"
+,".BMP"   ,".bmp"
+,".DOC"   ,".doc"
+,".XLS"   ,".xls"
+,".SDR"   ,".sdr"
+,".TXT"   ,".txt"
+,"Manual"   ,"manual"
+,"Help"     ,"help"
+,"FAQ"      ,"faq"
+,"Tutorial" ,"tutorial"
+/*
+,"Sample"   ,"sample"
+,"Format"   ,"format"
+,"dll"      ,"dll"
+,"example"   ,"sdr"
+,"Installation"   ,"installation"
+,"simple"   ,"simple"
+*/
+,0};
+
+const char *program_files[] =
+{".EXE",".exe"
+,".phr",".phr"
+
+,"UED\\simple"
+,"crop_editor\\default"
+,"UED\\convert"
+,0};
+
+const char *example_files[] =
+{"Example","example"
+,"Sample","sample"
+,0};
+
+
+void __fastcall Tform_install_update::WebUpdate_V4GetFileList(TObject *Sender,TStringList *List)
+{
+#ifdef NYI
+090909 This is when using WebUpdate, but it isn't working so now I am using WebCopy
+   bool uninstall_all = checkbox_CropSyst->Checked == false
+                     && checkbox_ClimGen->Checked == false;
+              // NYI && checkbox_CANMS->Checked == false;
+
+   // For each file in list, if the file is not part of the selected download option
+   // then delete the item from the list.
+
+   bool *install_item = new bool[List->Count];
+
+   for (int index = 0; index < List->Count; index++)
+   {  // We iterate in reverse order because Delete may reset the index
+
+      if (uninstall_all)
+         install_item[index] = false;
+      else
+      {
+
+      std::string item = List->Strings[index].c_str();
+      if (!checkbox_documentation)
+      {
+         for ( int f = 0
+               ;documentation_files[f]
+               ;f++)
+         {  if (item.find(documentation_files[f]) != -1 /*std::basic_string::npos*/)
+               install_item[index] = false;
+         }
+      }; // if !checkbox_documentation
+      if (!checkbox_programs)
+      {
+         for ( int f = 0
+               ;program_files[f]
+               ;f++)
+         {  if (item.find(program_files[f]) != -1 /*std::basic_string::npos*/)
+               install_item[index] = false;
+         }
+      }; // if !checkbox_programs
+
+      if (!checkbox_examples)
+      {
+         for ( int f = 0
+               ;example_files[f]
+               ;f++)
+         {  if (item.find(example_files[f]) !=-1 /*std::basic_string::npos*/)
+               install_item[index] = false;
+         }
+      }; // if !checkbox_examples
+
+      if (!checkbox_CropSyst)
+      {
+         if (item.find("\\CropSyst\\") != -1 /*std::basic_string::npos*/)
+               install_item[index] = false;
+      };
+      if (!checkbox_ClimGen)
+      {
+         if (item.find("\\ClimGen\\") != -1 /*std::basic_string::npos*/)
+               install_item[index] = false;
+
+      };
+      if (!checkbox_CANMS)
+      {
+         if (item.find("\\CANMS\\") != -1 /*std::basic_string::npos*/)
+               install_item[index] = false;
+      };
+      }; // if uninstall all
+   };
+   bool OK_uninstall_all = false;
+   for (int index = List->Count; index >= 0; index--)
+   {
+      if (!install_item[index])
+      {  // See if there is an existing file to uninstall.
+         if (access(List->Strings[index].c_str(), 0) == 0
+            )
+         {
+            if (OK_uninstall_all)
+            {
+               install_item[index] = false;
+            }
+            else
+            {
+               // We iterate in reverse order because Delete may reset the index
+               AnsiString delete_message = "The file: " + List->Strings[index]
+                  + " will be uninstalled.\n Do you which to uninstall this file and all other files\n in the CS suite installation not associated with the checked components?";
+               int uninstall_response = Application->MessageBox(delete_message.c_str(),"Warning CS Suite files are being uninstalled",MB_YESNOCANCEL|MB_ICONWARNING);
+               switch (uninstall_response)
+               {
+                  case IDYES    : install_item[index] = false; OK_uninstall_all = true; break;
+                  case IDNO     : install_item[index] = true; break;
+                  case IDCANCEL : return;
+               };
+            };
+            if (!install_item[index])
+               unlink(List->Strings[index].c_str());
+         }; // if File to uninstall exists
+         if (!install_item[index])
+            List->Delete(index); // don't install uninstalled item
+      }; // if uninstall item
+   };  // for each item
+
+   delete [] install_item;
+#endif
+}
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::WebUpdate_V4ProgressCancel(TObject *Sender,bool &Cancel)
+{
+   label_additive->Color = clMoneyGreen;
+}
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::button_updateClick(TObject *Sender)
+{
+   button_update->Enabled = false;
+   button_update->Caption = L"Updating";
+
+
+   installation_path = program_files_path; // (default)
+   if (radio_group_installation_directory->ItemIndex == 1)
+      installation_path = "C:";
+   suite_path = installation_path + "\\CS_suite_";
+   if (radio_group_version->ItemIndex == 0)
+      suite_path += "4";
+   else
+      suite_path += "5";
+   button_update->Caption = L"Backup existing installation";
+
+   backup_existing_installation();
+   // Continue with install.
+   // WebUpdateWizard_V4->Execute(); Web update wizard isn't working, using WebCopy instead
+   // webcopy_control_files->TargetDir = edit_installation_directory->Text;
+   // Actually I need to set the target dir for each control file
+
+   AnsiString suite_installation_path(suite_path);
+   suite_installation_path += "\\installation";   // I.e. C:\Program files\CS_suite_4\installation
+   std::wstring suite_installation_path_wstring;
+   CORN::append_ASCIIz_to_wstring(suite_installation_path.c_str(),suite_installation_path_wstring);
+   button_update->Caption = L"Downloading";
+
+   for (int i = 0; i < webcopy_control_files->Items->ActiveItems; i++)
+   {
+
+      TWebCopyItem *item =  (webcopy_control_files->Items->Items[i]);
+      item->TargetDir = suite_installation_path;
+   }
+   label_status->Caption = "Retrieving list of installation files...";
+   label_status->Color = clYellow;
+   label_status->Visible = true;
+
+   webcopy_control_files->Execute();
+   label_status->Caption = "Installation files retrieved.";
+   label_status->Color = clGreen;
+
+   AnsiString control_file_name = suite_path +  "\\installation\\";
+   switch (radiogroup_components->ItemIndex)
+   {  case 0 : // Full CS suite download
+      {
+         if (checkbox_programs->Checked && checkbox_documentation->Checked /*NYI && checkbox->examples->Checked*/)
+           control_file_name += "update_control_CropSyst_complete.inf";
+         else if (checkbox_programs->Checked)
+           control_file_name += "update_control_CropSyst_programs.inf";
+         else if (checkbox_documentation->Checked)
+           control_file_name += "update_control_CropSyst_documentation.inf";
+      } break;
+      case 1 : // ClimGen
+      {
+         control_file_name += "update_control_ClimGen_complete.inf";
+      } break;
+      case 2 : // CANMS
+      {  // NYI
+      } break;
+   } // switch components
+
+   button_update->Caption = L"Update download complete";
+//   Application->MessageBox(control_file_name.c_str(),"Control",MB_OK);
+   listbox_installation_status->AddItem(control_file_name.c_str(),0);
+   download_files(control_file_name);
+   add_buttons_to_desktop(false);
+   add_menus(false);
+   PageControl1->ActivePage = tabsheet_setup;
+
+}
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::BitBtn2Click(TObject *Sender)
+{
+   Close();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::button_install_program_filesClick(TObject *Sender)
+{
+//   edit_installation_directory->Text = "{PF}";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::button_install_CClick(TObject *Sender)
+{
+//   edit_installation_directory->Text = "C:\\";
+}
+//---------------------------------------------------------------------------
+void Tform_install_update::backup_existing_installation()
+{   // // Check if there is already an installation prompt for backup.
+   bool suite_path_exists =  access(suite_path.c_str(), 0) == 0;
+   if (suite_path_exists)
+   {
+      #if (__BCPLUSPLUS__ > 0x0590)
+      UnicodeString message = L"There currently exists a CS Suite installation folder:" + suite_path+ ".\n"
+         + "Create a backup of the current installation\n\n ([Yes] is recommended)?";
+      int response = Application->MessageBox(message.c_str(), L"CS Suite is already installed" ,MB_YESNOCANCEL);
+      #else
+      AnsiString message = "There currently exists a CS Suite installation folder:" + suite_path+ ".\n"
+         + "Create a backup of the current installation\n\n ([Yes] is recommended)?";
+      int response = Application->MessageBox(message.c_str(), "CS Suite is already installed" ,MB_YESNOCANCEL);
+
+      #endif
+      AnsiString backup_suite_path(suite_path);
+      switch (response)
+      {  case IDCANCEL  : return;
+         case IDYES     :
+         {  char year_str[10]; char month_str[10]; char dom_str[10];
+            backup_suite_path += "_";
+            struct date date_struct;
+            getdate(&date_struct);
+            itoa(date_struct.da_year,year_str,10);
+            itoa(date_struct.da_mon,month_str,10);
+            itoa(date_struct.da_day,dom_str,10);
+            backup_suite_path += year_str;
+            backup_suite_path += "-";
+            backup_suite_path += month_str;
+            backup_suite_path += "-";
+            backup_suite_path += dom_str;
+            label_status->Caption = "Backing up current installation";
+            label_status->Color = clYellow;
+            OS_copy_directory(suite_path.c_str(), backup_suite_path.c_str());
+            label_status->Caption = "Backing up complete";
+            label_status->Color = clGreen;
+            // Could also backup DLL's
+         } break;
+         case IDNO  :   ; break; // Just continue with
+      };
+   };
+};
+//---------------------------------------------------------------------------
+void Tform_install_update::download_files(const AnsiString &control_file_name)
+{
+   //create list of files that need updating
+   char get_buffer[1000];
+
+   GetPrivateProfileString("files","file:count","0",get_buffer,1000,control_file_name.c_str());
+   nat32 file_count = atol(get_buffer);
+   tabsheet_installation_status->TabVisible = true;
+
+   PageControl1->ActivePage = tabsheet_installation_status;
+//   Application->MessageBox(get_buffer,"File count",MB_OK);
+
+   TFormatSettings tfmt;
+   tfmt.DateSeparator = '/';
+   tfmt.ShortDateFormat = "yyyy/m/d";
+
+   label_status->Caption = "Identifing files to update and download ...";
+   label_status->Color = clYellow;
+
+//   AnsiString download_log_fname("C:\\temp\\");
+//   download_log_fname += "CS_Suite_download.log";
+//   ofstream download_log(download_log_fname.c_str());
+
+   for (uint32 file_i = 1; file_i <= file_count; file_i++)
+   {
+      AnsiString download_status;
+      AnsiString section = "file:";
+      itoa(file_i,get_buffer,10);
+      section += get_buffer;
+
+      GetPrivateProfileString(section.c_str(),"targetdir","0",get_buffer,1000,control_file_name.c_str());
+      AnsiString target_directory;
+      // Need to replace {PF} and {WIN} AnsiString
+      if       (strncmp(get_buffer,"{WIN}",5) == 0)
+      {  std::string target_dir(get_buffer,5,std::string::npos);
+         target_directory = windows_system_files_path; //  + target_dir.c_str();
+      }
+      else  if (strncmp(get_buffer,"{PF}" ,4) == 0)
+      {  std::string target_dir(get_buffer,4,std::string::npos);
+         target_directory = installation_path + target_dir.c_str();
+      }
+      else target_directory = get_buffer;
+
+      GetPrivateProfileString(section.c_str(),"localversion","0",get_buffer,1000,control_file_name.c_str());
+      AnsiString target_file(get_buffer);
+
+      AnsiString target_file_qual = target_directory + "\\" + target_file;
+
+      GetPrivateProfileString(section.c_str(),"date","0",get_buffer,1000,control_file_name.c_str());
+      TDateTime source_file_date = StrToDate(get_buffer,tfmt);
+       long int target_timestamp = 0;
+
+      download_status += target_file_qual;
+
+      bool source_file_later_than_target = true;
+      {
+         // get file handle, use fmOpenRead for mode
+         int FH = FileOpen(target_file_qual, fmOpenRead);
+//         FHandleLabel.Caption := IntToStr(FH);
+         if (FH > 0)
+         {
+              target_timestamp = FileGetDate(FH);
+//            if target_timestamp > 0 then
+//            {
+//               TDateTime FDateTime = FileDateToDateTime(Fdate);
+//               source_file_later_than_target =
+//            };
+               source_file_later_than_target = source_file_date.FileDate() > target_timestamp;
+               if (source_file_later_than_target)
+                  download_status += " : Updating";
+               else
+                  download_status += " : Up-to-date";
+
+         } else   // else we must get the source file because the target doesn't exist.
+         {
+            download_status += " : Not previously installed";
+         };
+         FileClose(FH);
+      }
+
+//      download_log << download_status.c_str() << endl;
+
+      listbox_installation_status->AddItem(download_status,0);
+       int displayable_items  = listbox_installation_status->Height / listbox_installation_status->ItemHeight;
+       int new_top_index =  (listbox_installation_status->Count - displayable_items + 1);
+       if (new_top_index < 0) new_top_index = 0;
+       listbox_installation_status->TopIndex = new_top_index;
+      Application->ProcessMessages();
+
+      if (source_file_later_than_target)
+      {
+      //GetPrivateProfileString(section.c_str(),"newsize","0",get_buffer,1000,control_file_name.c_str());
+      // newsize = atol(get_buffer);
+      TWebCopyItem *item = webcopy_files->Items->Add();
+      item->Protocol = wpHttp;
+      GetPrivateProfileString(section.c_str(),"url","",get_buffer,1000,control_file_name.c_str());
+      item->URL = get_buffer;
+      item->FileDate = source_file_date;
+      item->CopyNewerOnly = true;
+
+      // NYN GetPrivateProfileString(section.c_str(),"newsize","0",get_buffer,1000,control_file_name.c_str());
+//      GetPrivateProfileString(section.c_str(),"localversion","0",get_buffer,1000,control_file_name.c_str());
+      item->TargetFilename = target_file;
+
+//      GetPrivateProfileString(section.c_str(),"targetdir","0",get_buffer,1000,control_file_name.c_str());
+
+
+      item->TargetDir = target_directory;
+      };
+
+      // recognized program files
+      if (target_file_qual.Pos("CS_explorer.exe") != 0)      CS_explorer_target_file = target_file_qual;
+      if (target_file_qual.Pos("CS_suite.exe")    != 0)      CS_suite_target_file    = target_file_qual;
+      if (target_file_qual.Pos("ClimGen.")     != 0)
+            ClimGen_target_file     = target_file_qual;
+      if (target_file_qual.Pos("weather_editor.exe") != 0)   UED_weather_editor_target_file  = target_file_qual;
+
+      if (target_file_qual.Pos("project_editor.exe") != 0)   project_editor_target_file  = target_file_qual;    // V4 only
+      if (target_file_qual.Pos("location_editor.exe") != 0)  location_editor_target_file  = target_file_qual;   // V4 only
+      if (target_file_qual.Pos("format_editor.exe") != 0)    format_editor_target_file  = target_file_qual;     // V4 only
+      if (target_file_qual.Pos("scenario_editor.exe") != 0)  scenario_editor_target_file  = target_file_qual;
+      if (target_file_qual.Pos("soil_editor.exe") != 0)      soil_editor_target_file  = target_file_qual;
+      if (target_file_qual.Pos("rotation_editor.exe") != 0)  rotation_editor_target_file  = target_file_qual;
+      if (target_file_qual.Pos("crop_editor.exe") != 0)      crop_editor_target_file  = target_file_qual;
+      if (target_file_qual.Pos("management_editor.exe") != 0)management_editor_target_file   = target_file_qual;
+      if (target_file_qual.Pos("schedule_viewer.exe") != 0)  schedule_viewer_target_file= target_file_qual;
+
+      if (target_file_qual.Pos("biomatter_editor.exe") != 0) biomatter_editor_target_file  = target_file_qual; //110915
+
+
+      // recognized icons files
+      if (target_file_qual.Pos("project.ico") != 0)  project_ico_target_file = target_file_qual;// V4 only
+      if (target_file_qual.Pos("location.ico") != 0)  location_ico_target_file = target_file_qual; // V4 and ClimGen
+      if (target_file_qual.Pos("report.ico") != 0)  format_ico_target_file = target_file_qual; // V4 only
+      if (target_file_qual.Pos("scenario.ico") != 0)  scenario_ico_target_file = target_file_qual;
+      if (target_file_qual.Pos("soil.ico") != 0)  soil_ico_target_file = target_file_qual;
+      if (target_file_qual.Pos("rotation.ico") != 0)  rotation_ico_target_file = target_file_qual;
+      if (target_file_qual.Pos("crop.ico") != 0)  crop_ico_target_file = target_file_qual;
+      if (target_file_qual.Pos("management.ico") != 0)  management_ico_target_file = target_file_qual;
+      if (target_file_qual.Pos("schedule.ico") != 0)  schedule_ico_target_file = target_file_qual;
+   // The following files are identified for shortcuts and filename associations
+      if (target_file_qual.Pos("UED.ico") != 0)  UED_ico_target_file = target_file_qual;
+
+      if (target_file_qual.Pos("biomatter.ico") != 0)  biomatter_ico_target_file = target_file_qual; //110915
+
+      if (target_file_qual.Pos("Install_BPLs") != 0)  install_BPLs_exe = target_file_qual;
+      if (target_file_qual.Pos("update.exe") != 0)    update_exe = target_file_qual;
+      // If I dont get the {WIN} directory to translate correctly then continue here remember where install_BPLs file is
+
+/*
+      char buffer[100];
+      AnsiString msg = target_file_qual.c_str();
+       msg += AnsiString(" SD:");
+       msg += AnsiString(ltoa(source_file_date.FileDate(),buffer,10));
+       msg += AnsiString(" TD:");
+       msg += AnsiString(ltoa(target_timestamp,buffer,10));
+      Application->MessageBox(msg.c_str(),"target dir",MB_OK);
+*/
+   };
+   label_status->Caption = "Downloading files (this may take a few minutes) ...";
+   label_status->Color = clYellow;
+
+
+//Application->MessageBox("download disabled for debugging","",MB_OK);
+
+    webcopy_files->Execute();
+
+    WinExec(install_BPLs_exe.c_str(),SW_NORMAL);
+         // If I dont get the {WIN} directory to translate correctly then  run install BPLs
+
+   label_status->Caption = "Download complete, you can close this window now.";
+   label_status->Color = clGreen;
+
+};
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::radiogroup_componentsClick(TObject *Sender)
+{
+   groupbox_filesets->Visible =
+      radiogroup_components->ItemIndex == 0; // Applies only to CropSyst Suite
+}
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::button_register_file_typesClick(TObject *Sender)
+{
+   AnsiString registry_subkey ("CropSyst_Suite_");
+   bool setup_for_version_4 = radio_group_version->ItemIndex == 0;
+   if (setup_for_version_4)   registry_subkey += "4";
+   else                       registry_subkey += "5";
+
+   CORN::Registry *registry_CropSyst_Suite_X = new CORN::Registry(registry_subkey.c_str());
+   try
+   {
+      if (setup_for_version_4)
+      {
+         registry_CropSyst_Suite_X->register_extension("csp","CropSyst Suite project" ,project_editor_target_file.c_str()    ,project_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("loc","CropSyst location"      ,location_editor_target_file.c_str()   ,location_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("fmt","CropSyst format"        ,format_editor_target_file.c_str()     ,format_ico_target_file.c_str());
+
+         registry_CropSyst_Suite_X->register_extension("csn","CropSyst scenario"      ,scenario_editor_target_file.c_str()   ,scenario_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("sil","CropSyst soil"          ,soil_editor_target_file.c_str()       ,soil_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("crp","CropSyst crop"          ,crop_editor_target_file.c_str()       ,crop_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("mgt","CropSyst management"    ,management_editor_target_file.c_str() ,management_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("rot","CropSyst Cropping system/rotation",rotation_editor_target_file.c_str()  ,rotation_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("CS_biomatter"            ,"CropSyst biomatter"  ,biomatter_editor_target_file.c_str()  ,biomatter_ico_target_file.c_str());
+      } else  // setup for V5
+      {
+         registry_CropSyst_Suite_X->register_extension("CropSyst_scenario"      ,"CropSyst scenario"    ,scenario_editor_target_file.c_str()   ,scenario_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("CS_soil"                ,"CropSyst soil"        ,soil_editor_target_file.c_str()       ,soil_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("CS_crop"                ,"CropSyst crop"        ,crop_editor_target_file.c_str()       ,crop_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("CS_management"          ,"CropSyst management"  ,management_editor_target_file.c_str() ,management_ico_target_file.c_str());
+         registry_CropSyst_Suite_X->register_extension("CS_rotation"            ,"CropSyst Cropping system/rotation",rotation_editor_target_file.c_str()  ,rotation_ico_target_file.c_str());
+      // Currently schedule files are text files, but I may want a specified file extension for version 5
+      // registry_subkey.register_extension(????,"Schedule",schedule_viewer_target_file.c_str(),schedule_ico_target_file.c_str());
+      };
+      // Setup all versions:
+      registry_CropSyst_Suite_X->register_extension("loc"/*may change */     ,"ClimGen site"         ,ClimGen_target_file.c_str()           ,location_ico_target_file.c_str());
+      registry_CropSyst_Suite_X->register_extension("UED","Universal Environment Database",UED_weather_editor_target_file.c_str(),UED_ico_target_file.c_str());
+      registry_CropSyst_Suite_X->register_extension("CS_biomatter"            ,"CropSyst biomatter"  ,biomatter_editor_target_file.c_str()  ,biomatter_ico_target_file.c_str());
+
+      Application->MessageBox(
+         #if (__BCPLUSPLUS__ > 0x0590)
+         L"File type registration complete",L"File type registration"
+         #else
+         "File type registration complete","File type registration"
+         #endif
+         , MB_OK	);
+  }
+  __finally
+  {   delete registry_CropSyst_Suite_X; }
+
+}
+//---------------------------------------------------------------------------
+std::wstring s2ws(const std::string& s)
+{
+int len;
+int slength = (int)s.length() + 1;
+len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+wchar_t* buf = new wchar_t[len];
+MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+std::wstring r(buf);
+delete[] buf;
+return r;
+}
+//---------------------------------------------------------------------------
+void Tform_install_update::create_short_cut
+(const AnsiString &target_file
+,const char *szPath
+,const char *caption
+,const char *description
+)
+{
+
+//   std::string szLinkName(caption);
+   std::string szLinkName(szPath);
+   mkdir(szPath);
+   szLinkName += "\\";
+   szLinkName += caption;
+   szLinkName += ".lnk" ;
+
+   HRESULT hres = NULL;
+   IShellLink* shell_link = NULL;
+
+        // Get a pointer to the IShellLink interface.
+        hres = CoCreateInstance(CLSID_ShellLink, NULL,
+            CLSCTX_INPROC_SERVER, IID_IShellLink,
+            reinterpret_cast<void**>(&shell_link));
+        if (SUCCEEDED(hres))
+        {
+            IPersistFile* ppf = NULL;
+
+            // Set the path to the shortcut target
+            shell_link->SetPath(target_file.c_str());
+            shell_link->SetDescription(description); //(caption);
+
+            // Query IShellLink for the IPersistFile interface for
+            // saving the shortcut in persistent storage.
+            hres = shell_link->QueryInterface(IID_IPersistFile,reinterpret_cast<void**>(&ppf));
+
+            if (SUCCEEDED(hres))
+            {
+                WCHAR wsz[MAX_PATH];
+
+                // Ensure that the string is ANSI.
+                MultiByteToWideChar(CP_ACP, 0, szLinkName.c_str(), -1,wsz, MAX_PATH);
+
+                // Save the link by calling IPersistFile::Save.
+                hres = ppf->Save(wsz, TRUE);
+                ppf->Release();
+            }
+            shell_link->Release();
+        }
+};
+/*
+
+Windows Shortcuts
+A more commonly used name for Windows symbolic link is shortcut. Shortcut is a much more advanced version of Unix soft link - in addition to the basic link-to-file relationship you can also set a description, an icon, and so on. In addition, shortcuts can point to non-file objects like printers.
+
+A shortcut is actually a file, usually with the .lnk extension
+(any other extension can also be registered as a shortcut).
+Like any other file it can be copied, renamed, or deleted; file operations on a shortcut don't affect the object being pointed to.
+
+Programming Considerations
+In order to improve readability, the code examples below don't include any error processing.
+You should add some error checks if you want to use this code in your program.
+See the sources in the download section for an example of error handling.
+
+Creating New Shortcut
+
+
+
+*/
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::button_add_icons_all_desktopClick(TObject *Sender)
+{
+   add_buttons_to_desktop(true);
+};
+//---------------------------------------------------------------------------
+void Tform_install_update::add_buttons_to_desktop(bool all_users)
+{
+   label_status->Caption = "Adding icons to desktop...";
+   label_status->Color = clYellow;
+
+
+   int CSIDL_xxx = all_users ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_DESKTOPDIRECTORY;
+
+   LPITEMIDLIST pidl;            //File system directory that contains the directories
+   HRESULT hr = SHGetSpecialFolderLocation(NULL, CSIDL_xxx, &pidl);  // Get a pointer to an item ID list that represents the path  of a special folder
+   char szPath[_MAX_PATH];
+   BOOL f = SHGetPathFromIDList(pidl, szPath);  // Convert the item ID list's binary representation into a file system path
+   LPMALLOC pMalloc;                            // Allocate a pointer to an IMalloc interface
+   hr = SHGetMalloc(&pMalloc);                  // Get the address of our task allocator's IMalloc interface
+   pMalloc->Free(pidl);                         // Free the item ID list allocated by SHGetSpecialFolderLocation
+   pMalloc->Release();                          // Free our task allocator
+   create_short_cut(CS_explorer_target_file,szPath,"CS explorer","Launches CS explorer used to create and manage CropSyst and ClimGen projects, scenarios and parameter files");
+   create_short_cut(ClimGen_target_file,szPath,"ClimGen","Synthetic weather data generator");
+   create_short_cut(CS_suite_target_file,szPath,"CS suite","Old version CropSyst 4 start menu");
+   create_short_cut(UED_tools_target_file,szPath,"UED tools","Universal Environmental Database utilities");
+
+   label_status->Caption = "Desktop updated.";
+   label_status->Color = clGreen;
+
+}
+//---------------------------------------------------------------------------
+void __fastcall Tform_install_update::button_add_icons_all_startClick(TObject *Sender)
+{
+   add_menus(true);
+};
+//---------------------------------------------------------------------------
+void Tform_install_update::add_menus(bool all_users)
+{
+
+   label_status->Caption = "Adding programs to Start menu...";
+   label_status->Color = clYellow;
+
+   int CSIDL_xxx = all_users ? CSIDL_COMMON_PROGRAMS : CSIDL_PROGRAMS;
+
+   LPITEMIDLIST pidl;        //File system directory that contains the directories
+
+   HRESULT hr = SHGetSpecialFolderLocation(NULL, CSIDL_xxx, &pidl); // Get a pointer to an item ID list that represents the path of a special folder
+   char szPath[_MAX_PATH];
+   BOOL f = SHGetPathFromIDList(pidl, szPath); // Convert the item ID list's binary representation into a filesystem path
+
+   strcat(szPath,"\\");
+   strcat(szPath,"CS Suite ");
+   bool setup_for_version_4 = radio_group_version->ItemIndex == 0;
+   if (setup_for_version_4)   strcat(szPath,"4");
+   else                       strcat(szPath,"5");
+
+   LPMALLOC pMalloc;             // Allocate a pointer to an IMalloc interface
+   hr = SHGetMalloc(&pMalloc);   // Get the address of our task allocator's IMalloc interface
+   pMalloc->Free(pidl);          // Free the item ID list allocated by SHGetSpecialFolderLocation
+   pMalloc->Release();           // Free our task allocator
+   create_short_cut(CS_explorer_target_file  ,szPath,"CS explorer","Launches CS explorer used to create and manage CropSyst and ClimGen projects, scenarios and parameter files");
+   create_short_cut(ClimGen_target_file      ,szPath,"ClimGen","Synthetic weather data generator");
+   create_short_cut(CS_suite_target_file     ,szPath,"CS suite","Old version CropSyst 4 start menu");
+   create_short_cut(UED_tools_target_file    ,szPath,"UED tools","Universal Environmental Database utilities");
+   create_short_cut(update_exe               ,szPath,"update","Update CropSyst/ClimGen suite programs, documentation, and support files. Requires Internet connection");
+
+   label_status->Caption = "Start menu updated.";
+   label_status->Color = clGreen;
+
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall Tform_install_update::edit_source_URLChange(TObject *Sender)
+{
+   WebUpdate_V4->URL = edit_source_URL->Text;
+}
+//---------------------------------------------------------------------------
+

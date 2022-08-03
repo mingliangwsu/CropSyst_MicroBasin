@@ -1,0 +1,217 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\CS_Suite_4\CropSyst\crop_editor.exe"/>
+    <OBJFILES value="crop_editor.obj ..\crop_editor_frm.obj 
+      ..\..\..\..\..\Common\soil\SCS\SCS.obj 
+      ..\..\..\..\..\Common\residue\residue_decomposition_param.obj 
+      ..\..\..\..\..\GUI\parameter\form_param_file.obj 
+      ..\..\..\..\..\GUI\recent\recent.obj 
+      ..\..\..\..\..\common\residue\residue_const.obj 
+      ..\..\..\CropSyst_directory.obj 
+      ..\..\..\..\..\GUI\translator\translator_windows.obj 
+      ..\..\..\..\..\GUI\parameter\form_param_file_common.obj 
+      ..\..\form_crop_editor_common_VCL.obj 
+      ..\..\..\..\..\CropSyst\source\crop\crop_param_class.obj 
+      ..\..\..\..\..\CropSyst\source\crop\crop_param_struct.obj 
+      ..\..\..\..\..\CropSyst\source\crop\crop_param_V4.obj 
+      ..\..\..\..\..\CropSyst\source\static_phrases.obj 
+      ..\..\..\..\..\CropSyst\source\database_dir.obj 
+      ..\..\..\..\..\CropSyst\source\crop\crop_types.obj 
+      ..\..\..\..\..\CropSyst\source\crop\growth_stages.obj 
+      ..\..\..\..\..\corn\application\program_directory_OS_FS.obj 
+      ..\..\..\..\..\corn\application\adjunct_directory_OS_FS.obj 
+      ..\..\..\..\..\corn\OS\directory_entry_name_concrete.obj 
+      ..\..\..\..\..\corn\OS\directory_entry_name_abstract.obj 
+      ..\..\..\..\..\corn\OS\file_system_types.obj 
+      ..\..\..\..\..\corn\OS\file_system_logical.obj 
+      ..\..\..\..\..\corn\application\suite_directory_OS_FS.obj 
+      ..\..\..\..\..\corn\application\documentor.obj 
+      ..\..\..\..\..\corn\OS\Uniform_resource_identifier.obj 
+      ..\..\..\..\..\corn\OS\uniform_resource_locator.obj 
+      ..\..\..\..\..\components\AutoControls\AutoFloat32EditBar.obj 
+      ..\..\..\..\..\corn\container\container.obj 
+      ..\..\..\..\..\corn\container\unilist.obj 
+      ..\..\..\..\..\corn\container\association.obj 
+      ..\..\..\..\..\corn\container\bilist.obj 
+      ..\..\..\..\CS_application_directory.obj 
+      ..\..\..\..\..\corn\application\application_directory_OS_FS.obj 
+      ..\..\..\..\CANMS\CANMS_directory.obj 
+      ..\..\..\..\ClimGen\ClimGen_directory.obj 
+      ..\..\..\..\CS_suite_directory.obj ..\..\..\..\UED\UED_directory.obj 
+      ..\..\..\..\..\corn\application\translations.obj 
+      ..\..\..\..\..\corn\data_source\datarec.obj"/>
+    <RESFILES value="crop_editor.res ..\..\..\..\..\components\AutoControls\resources\buttons.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) ..\crop_editor_frm.dfm 
+      ..\..\..\..\..\GUI\parameter\form_param_file.dfm"/>
+    <LIBFILES value="&quot;C:\Program Files\Borland\CBuilder5\Lib\wininet.lib&quot; 
+      C:\temp\lib\BCB5\release\common_sim_static.lib 
+      C:\temp\lib\BCB5\release\corn_complete_static.lib"/>
+    <LIBRARIES value="AutoControls_2015_05.lib VCLSMP50.lib tmsc5.lib AutoControls_2014_11.lib"/>
+    <SPARELIBS value="Vcl50.lib AutoControls_2014_11.lib VCLX50.lib BCBSMP50.lib bcbie50.lib 
+      tmsc5.lib VCLDB50.lib TEE50.lib VCLSMP50.lib VCLBDE50.lib K102_R51.lib 
+      AutoControls_2015_05.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi TeeQR50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi 
+      Inet50.bpi NMFast50.bpi dclocx50.bpi bcb2kaxserver50.bpi Tee50.bpi 
+      VCLIB50.bpi K102_R51.bpi UED_components_package.bpi CORN_datasets.bpi 
+      TeeUI50.bpi TeeDB50.bpi autocontrols_simulation.bpi"/>
+    <PATHCPP value=".;..;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\Common\residue;..\..\..\..\..\GUI\parameter;..\..\..\..\..\GUI\recent;..\..\..;..\..\..\..\..\GUI\translator;..\..;..\..\..\..\..\CropSyst\source\crop;..\..\..\..\..\CropSyst\source;..\..\..\..\..\corn\application;..\..\..\..\..\corn\OS;..\..\..\..\..\components\AutoControls;..\..\..\..\..\corn\container;..\..\..\..;..\..\..\..\CANMS;..\..\..\..\ClimGen;..\..\..\..\UED;..\..\..\..\..\corn\data_source"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;..\..\..\..\..\components\AutoControls\resources"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS;TRANSLATIONS_AUTOLOAD_PHRASES;CROPSYST;CROPSYST_VERSION=4;USE_OS_FS"/>
+    <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="crop_editor.cpp"/>
+    <INCLUDEPATH value="..\..\..\..\UED;..\..\..\..\ClimGen;..\..\..\..\CANMS;..\;..;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\..\..\corn\OS;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS"/>
+    <LIBPATH value="..\..\..\..\UED;..\..\..\..\ClimGen;..\..\..\..\CANMS;..\;..;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\..\..\corn\OS;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-$YD -$W -$O- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="-D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj $(PACKAGES) sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=30
+Item0=..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\corn\OS;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS
+Item1=..\;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\corn\OS;..;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS
+Item2=C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\..\corn\OS;..\;..;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS
+Item3=..;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS
+Item4=..\;..;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS
+Item5=..\;..\..\..\..\..\corn\file_sys;..;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS
+Item6=..\..\..\..\..\corn\file_sys;..\;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\components\AutoControls;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS
+Item7=..\..\..\source;..\..\..\source\crop;..\..\..\..\CS_suite\CropSyst\crop_editor;..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item8=..\..\..\..\CS_suite\CropSyst\crop_editor;..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item9=..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item10=..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common;C:\dev\USDA\NRCS
+Item11=..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common
+Item12=..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5;C:\dev\common
+Item13=..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5
+Item14=;;..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5
+Item15=..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5
+Item16=..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5;c:\dev
+Item17=..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source_BCB5
+Item18=..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;C:\dev\components\Other\ShellShock\source_BCB5
+Item19=..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source
+Item20=..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source
+Item21=..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source
+Item22=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;..\..\..\..\components\Other\ShellShock\source
+Item23=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp;C:\dev\components\Other\ShellShock\source
+Item24=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\cpp
+Item25=$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;c:\dev\cropsyst\cpp
+Item26=$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls
+Item27=$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5;C:\dev\components\AutoControls
+Item28=$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.7\source_BCB5
+Item29=$(BCB)\include;$(BCB)\include\vcl;c:\dev;C:\dev\components\TMS_4.7\source_BCB5
+
+[HistoryLists\hlLibraryPath]
+Count=19
+Item0=..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\corn\OS;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5
+Item1=..\;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\corn\OS;..;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5
+Item2=C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\..\corn\OS;..\;..;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5
+Item3=..;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5
+Item4=..\;..;..\..\..\..\..\corn\file_sys;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5
+Item5=..\;..\..\..\..\..\corn\file_sys;..;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5
+Item6=..\..\..\..\..\corn\file_sys;..\;..\..\..\..\..\CropSyst\GUI\Builder\crop_editor;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\crop;..\..;..\..\..\..\..\corn\parameters;..\..\..\..\..\corn\container;..\..\..\..\..\corn\application;..\..\..\..\..\GUI\translator;..\..\..\..\..\corn\data_source;..\..\..\..\..\ued;..\..\..;..\..\..\..;..\..\..\..\..\Common\residue;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\common\simulation;..\..\..\..\..\CropSyst\cpp\crop;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\components\TMS_4.7\source_BCB5
+Item7=..\..\..\source;..\..\..\source\crop;..\..\..\..\CS_suite\CropSyst\crop_editor;..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\cpp;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5
+Item8=..\..\..\..\CS_suite\CropSyst\crop_editor;..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\cpp;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5
+Item9=..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\cpp;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5
+Item10=;;..\..\..\..\corn\parameters;..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\cpp;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5
+Item11=..\..\..\..\corn\container;..\..\..\..\corn\application;..\..\..\..\GUI\translator;..\..\..\..\corn\data_source;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\cpp;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5
+Item12=..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\cpp;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5
+Item13=..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\cpp;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5
+Item14=..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\components\AutoControls\resources;..\..\..\cpp;..\..\..\..\common\simulation;..\..\..\cpp\crop;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\TMS_4.7\source_BCB5
+Item15=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;C:\dev\components\TMS_4.7\source_BCB5
+Item16=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\AutoControls;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item17=$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item18=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=4
+Item0=c:\program files\borland\cbuilder5\source\vcl;C:\dev\components\TMS_4.7\source_BCB5\;C:\dev\corn\file_sys\;C:\dev\corn\measure\
+Item1=c:\program files\borland\cbuilder5\source\vcl;C:\dev\components\TMS_4.7\source_BCB5\;C:\dev\corn\file_sys\
+Item2=c:\program files\borland\cbuilder5\source\vcl;C:\dev\components\TMS_4.7\source_BCB5\
+Item3=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=11
+Item0=_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS;TRANSLATIONS_AUTOLOAD_PHRASES;CROPSYST;CROPSYST_VERSION=4;USE_OS_FS
+Item1=_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS;TRANSLATIONS_AUTOLOAD_PHRASES;CROPSYST;CROPSYST_VERSION=4;xUSE_OS_FS
+Item2=_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS;TRANSLATIONS_AUTOLOAD_PHRASES;CROPSYST;CROPSYST_VERSION=4
+Item3=_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS;TRANSLATIONS_AUTOLOAD_PHRASES;CROPSYST
+Item4=_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS;TRANSLATIONS_AUTOLOAD_PHRASES
+Item5=_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS
+Item6=_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS;_UNICODE
+Item7=_DEBUG;CS_VERSION=4;xUSE_OLD_CS_PATHS;_UNICODE 
+Item8=_DEBUG;CS_VERSION=4;USE_OLD_CS_PATHS
+Item9=_DEBUG;CS_VERSION=4
+Item10=_DEBUG
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=C:\CS_Suite_4\CropSyst\
+Item1=C:\CS_Suite_4\CropSyst
+
+[Debugging]
+DebugSourceDirs=c:\program files\borland\cbuilder5\source\vcl;C:\dev\components\TMS_4.7\source_BCB5\;C:\dev\corn\file_sys\;C:\dev\corn\measure\
+
+[Parameters]
+RunParams=&quot;P:\temp\Crop Editor Test\Winter Wheat Zone1.crp&quot;
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

@@ -1,0 +1,115 @@
+//______________________________________________________________________________
+#include <vcl.h>
+#include <cropsyst/cpp/mgmt_param.h>
+#pragma hdrstop
+#include <cropsyst/cpp/cs_paths.h>
+#include <CropSyst/GUI/help/management.h>
+#include <GUI/parameter/form_param_file.h>
+#include "form_tillage_residue.h"
+#include "cropsyst/cpp/cs_till.h"
+//______________________________________________________________________________
+#pragma package(smart_init)
+#pragma link "RNAutoCheckBox"
+#pragma link "RNAutoParameterEditBar"
+#pragma link "RNAutoParameterEditBar"
+#pragma resource "*.dfm"
+Ttillage_residue_form *tillage_residue_form;
+//______________________________________________________________________________
+__fastcall Ttillage_residue_form::Ttillage_residue_form(TComponent* Owner)
+   : TForm(Owner)
+{}
+//______________________________________________________________________________
+void Ttillage_residue_form::bind_to
+(Tillage_operation    *_tillage_op
+,unsigned char          operation_kinds
+,Tparameter_file_form *_parameter_file_form)
+{  tillage_op = _tillage_op;
+   parameter_file_form =_parameter_file_form;
+   terminate_crop_checkbox->bind_to(&(tillage_op->terminate_crop),parameter_file_form->compose_manual_subdirectory_filename_cstr/*cs_suite_paths->get_cropsyst_parameter_help*/(HELP_P_mgmt_tillage_residue_terminate));
+//unused    string description_buf;
+   char full_description[255]; // may need to be out of the stack
+   char selected_full_description[255];
+   selected_full_description[0] = 0;
+#ifdef OBSOLETE
+070107
+   // Fillup list box
+   int i;
+   int listbox_index = 0;
+   tillage_residue_selection_label->Caption = "primary Combination chisel-disc";
+   int select_index =1;
+   for (i = 1 ; operation_practices[i].kind != NO_OPERATION; i++)
+   {  if (operation_practices[i].kind & operation_kinds)
+	   {  sprintf(full_description,"%3d  %s",
+			   operation_practices[i].SCS_code,
+			   lookup_SCS_description(operation_practices[i].SCS_code));
+		   tillage_residue_ops_listbox->Items->Add(full_description);
+         if (operation_practices[i].SCS_code == tillage_op->SCS_code)
+         {  tillage_residue_selection_label->Caption = full_description;
+            select_index = listbox_index;
+      }; };
+      listbox_index ++;
+   };
+#endif
+
+   NRCS_tillage_field_op_number_combbox->Text = tillage_op->NRCS_operation_description.c_str();
+
+   dust_mulching_checkbox  ->bind_to(&(tillage_op->dust_mulch_enable)            ,parameter_file_form->compose_manual_subdirectory_filename_cstr/*cs_suite_paths->get_cropsyst_parameter_help*/(HELP_P_mgmt_tillage_dust_mulch_enable));;
+   dust_mulch_depth_edit   ->bind_to(&(tillage_op->v_dust_mulch_depth_cm)        ,parameter_file_form->compose_manual_subdirectory_filename_cstr/*cs_suite_paths->get_cropsyst_parameter_help*/(HELP_P_mgmt_tillage_dust_mulch_depth));;
+   dust_mulch_days_edit    ->bind_to(&(tillage_op->v_dust_mulch_effective_days)  ,parameter_file_form->compose_manual_subdirectory_filename_cstr/*cs_suite_paths->get_cropsyst_parameter_help*/(HELP_P_mgmt_tillage_dust_mulch_days));;
+   dust_mulch_intensity_edit->bind_to(&(tillage_op->v_dust_mulch_intensity)      ,parameter_file_form->compose_manual_subdirectory_filename_cstr/*cs_suite_paths->get_cropsyst_parameter_help*/(HELP_P_mgmt_tillage_dust_mulch_intensity));;
+
+   bool residue_mode = operation_kinds == RESIDUE;
+   dust_mulching_checkbox->Visible = !residue_mode;
+   dust_mulch_groupbox->Visible = !residue_mode && tillage_op->dust_mulch_enable;
+
+   edit_oxidation_effect_sand->bind_to(&(tillage_op->v_oxidation_effect_sand),0/*NO_HELP_YET*/);
+   edit_oxidation_effect_clay->bind_to(&(tillage_op->v_oxidation_effect_clay),0/*NO_HELP_YET*/);
+
+//   tillage_residue_ops_listbox->Selected[select_index] = true;
+};
+//______________________________________________________________________________
+void __fastcall Ttillage_residue_form::tillage_residue_ops_listbox_onclick(TObject *Sender)
+{
+#ifdef OBSOLETE
+080216 now using only the NRCS model
+   tillage_residue_selection_label->Caption = tillage_residue_ops_listbox->Items->Strings[tillage_residue_ops_listbox->ItemIndex];
+   int selected_SCS_code;
+	sscanf(tillage_residue_selection_label->Caption.c_str(),"%d",&selected_SCS_code);
+   tillage_op->description.assign(tillage_residue_selection_label->Caption.c_str());
+   tillage_op->SCS_code = selected_SCS_code;
+#endif
+}
+//______________________________________________________________________________
+void __fastcall Ttillage_residue_form::FormKeyPress(TObject *Sender,char &Key)
+{  if (Key == VK_RETURN)
+   {  Key = 0;
+      Perform(WM_NEXTDLGCTL,0,0);
+   };
+}
+//______________________________________________________________________________
+void __fastcall Ttillage_residue_form::dust_mulching_checkboxClick(TObject *Sender)
+{  if (!tillage_op) return;
+   dust_mulch_groupbox->Visible = tillage_op->dust_mulch_enable;
+}
+//______________________________________________________________________________
+void __fastcall Ttillage_residue_form::NRCS_tillage_field_op_number_combboxChange(TObject *Sender)
+{  if (!tillage_op) return;
+//   tillage_op->NRCS_SDR_operation_number  = NRCS_field_op_number_combbox->ItemIndex;
+   tillage_op->NRCS_operation_description.assign(NRCS_tillage_field_op_number_combbox->Text.c_str());
+}
+//______________________________________________________________________________
+void __fastcall Ttillage_residue_form::button_NRCS_helpxClick(TObject *Sender)
+{  parameter_file_form->view_manual("NRCS_field_operation.htm");
+}
+//______________________________________________________________________________
+void __fastcall Ttillage_residue_form::button_tillage_oxidation_lowClick(TObject *Sender)
+{  tillage_op->oxidation_effect.sand = 1.5; edit_oxidation_effect_sand->Update();
+   tillage_op->oxidation_effect.clay = 0.5; edit_oxidation_effect_clay->Update();
+}
+//---------------------------------------------------------------------------
+void __fastcall Ttillage_residue_form::button_tillage_oxidation_highClick(TObject *Sender)
+{  tillage_op->oxidation_effect.sand = 6.0; edit_oxidation_effect_sand->Update();
+   tillage_op->oxidation_effect.clay = 2.0; edit_oxidation_effect_clay->Update();
+}
+//---------------------------------------------------------------------------
+

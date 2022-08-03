@@ -1,0 +1,116 @@
+#include "surface_infiltration_green_ampt.h"
+#include "common/physics/standard_constants.h"
+
+// Warning I think this is m/hour
+
+//_____________________________________________________________________________/
+Soil_surface_infiltration_Green_Ampt::Soil_surface_infiltration_Green_Ampt
+(const Soil_hydraulic_properties_interface &_soil_hydraulic_properties           //140424
+,const Soil_hydrology_interface &_hydrology                           //140820
+,CropSyst::Soil_runoff  *_runoff                                                 //131101
+,CropSyst::Pond         &_pond)
+: first_hour_of_watering   (true)
+, wetting_front_depth      (0.0)
+, water_potential_wetting_front_avg_m(0.0)                                   //130328
+, water_potential_top_m    (0.0)
+, soil_hydraulic_properties(_soil_hydraulic_properties)                          //140424
+, hydrology               (_hydrology)                                           //140820
+{  clear_layer_array64(initial_water_potential_m);                               //140814
+}
+//_____________________________________________________________________________/
+float64 Soil_surface_infiltration_Green_Ampt::update
+(Hour hour
+,float64 water_input_hourly /* pass by value only local copy updated */ //    (ByVal Hourly_Irrigation As Single
+,float64  water_content_layer_1
+,float64 &hydraulic_conductivity_saturated_min
+,float64 &runoff_amount
+,nat8     number_layers)                                                         //140820
+{
+   /* NEW 03/16/13
+   Determine darcian infiltration rate given current water front depth.
+   Water potential of the weting front is the average of water potentials (in m)
+   immediately above and below the water front (1 J/kg = 0.102 m).
+   The saturated hydraulic conductivity is the minimum above the wetting front.
+   */
+   // Green and Ampt infiltration calculation
+   float64 water_depth_to_infiltrate = 0.0;
+   float64 surface_infiltration_capacity = 0.0;
+   if (water_input_hourly > 0)
+   {  // Note in C++ version standard hours are indexed from 0 not 1
+      if (first_hour_of_watering)
+      {
+         for (nat8 layer = 1; (layer <= number_layers) ; layer++)
+            initial_water_potential_m[layer] = J_per_kg_to_m
+               (hydrology.calc_water_potential(layer,true,false));
+               //was  (Air_Entry_Potential(Layer) * (Water_Content(Layer) / WC_Sat(Layer)) ^ (-b_Value(Layer)));
+         float64 air_entry_pot_1 =// soil_hydraulic_properties.get_air_entry_potential(1,false);
+               soil_hydraulic_properties.get_air_entry_potential(1,false);
+                 //warning, I dont know if to specifically calculate or use normals
+         float64 K_sat_pedotransfer_1 = soil_hydraulic_properties.get_sat_hydraul_cond_kg_s_m3(1);
+         hydraulic_conductivity_saturated_min = K_sat_pedotransfer_1 * (standard_gravity/water_density) * 3600.0; /* Convert kg*s/m3 to m/h  */
+         float64 water_potential_above_wetting_front_m = J_per_kg_to_m(air_entry_pot_1);
+                        //'Convert J/kg to m
+         float64 Water_Potential_Below_Wetting_Front_m = initial_water_potential_m[1]; //140814COS
+         water_potential_top_m = water_potential_above_wetting_front_m;
+         water_potential_wetting_front_avg_m =
+            (water_potential_above_wetting_front_m + Water_Potential_Below_Wetting_Front_m) / 2.0;
+         first_hour_of_watering = false;
+      }
+      if (CORN::is_approximately<float64>(wetting_front_depth,0.0,0.000000001))
+            wetting_front_depth = 0.001;
+      surface_infiltration_capacity = hydraulic_conductivity_saturated_min
+       * (water_potential_top_m - (water_potential_wetting_front_avg_m - wetting_front_depth)) / wetting_front_depth ;
+
+      surface_infiltration_capacity = CORN::must_be_greater_or_equal_to<double>(surface_infiltration_capacity,0.0); //LML 141204
+   } else
+   {  surface_infiltration_capacity = 0.0; //  'in m, actually m/h
+      first_hour_of_watering = true;
+      // Reset the boolean variable to be ready for the next watering event
+   }
+   water_depth_to_infiltrate   // in m, actually m/h
+      = std::min<float64>(surface_infiltration_capacity, water_input_hourly);
+   // Determine if there is any runoff
+   if (water_depth_to_infiltrate < water_input_hourly)
+      runoff_amount = water_input_hourly - water_depth_to_infiltrate;
+   return water_depth_to_infiltrate;
+}
+//_2013-05-03___________________________________________________________________
+bool Soil_surface_infiltration_Green_Ampt
+::update_wetting_front_when_water_depth_to_infiltrate_exceeds_available_storage_to_saturation
+(nat8 layer
+,float64 depth_layer
+,bool last_layer)
+{
+   wetting_front_depth =  depth_layer;                                           //130709
+   float64 air_entry_pot_layer = soil_hydraulic_properties.get_air_entry_potential(layer,false);
+   float64 water_potential_above_wetting_front_m = air_entry_pot_layer * 0.102;  //130709 'Convert J/kg to m
+   float64 Water_Potential_Below_Wetting_Front_m =                               //140814COS
+      (last_layer)
+      ? water_potential_above_wetting_front_m
+      : initial_water_potential_m[layer + 1];
+   water_potential_wetting_front_avg_m =
+      (water_potential_above_wetting_front_m + Water_Potential_Below_Wetting_Front_m)
+      / 2.0 ;
+   return true;
+}
+//_2014-08-20___________________________________________________________________
+bool Soil_surface_infiltration_Green_Ampt
+::update_wetting_front
+(nat8 layer
+,float64 _wetting_front_depth)
+{
+   wetting_front_depth = _wetting_front_depth;
+   float64 air_entry_pot_layer = soil_hydraulic_properties.get_air_entry_potential(layer,false);
+   float64 water_potential_above_wetting_front_m = air_entry_pot_layer * 0.102;  //130709 'Convert J/kg to m
+   float64 Water_Potential_Below_Wetting_Front_m=initial_water_potential_m[layer];//140814COS
+   water_potential_wetting_front_avg_m =
+      (water_potential_above_wetting_front_m + Water_Potential_Below_Wetting_Front_m)
+      / 2.0 ;
+   return true;
+}
+//_2014-08-20___________________________________________________________________
+bool Soil_surface_infiltration_Green_Ampt::clear_wetting_front()
+{  wetting_front_depth = 0;
+   return true;
+}
+//_2014-08-20___________________________________________________________________

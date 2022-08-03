@@ -1,0 +1,241 @@
+#ifndef CS_explorer_engineH
+#define CS_explorer_engineH
+#include "GUI/explorer/explorer_engine_abstract.h"
+#include "corn/application/user/settings.h"
+#  include "corn/application/user/appdata_directory_OS_FS.h"
+#include "CS_suite/CropSyst/export/scenario_export_engine.h"
+#include "CS_suite/file_system/CS_directory_contexts.hpp"
+#include "corn/OS/uniform_resource_locator.h"
+//______________________________________________________________________________
+namespace CORN
+{
+   class Text_list;
+   namespace OS
+   {  class File_name_concrete;
+   }
+}
+namespace CS
+{
+   class Suite_directory;
+}
+namespace CropSyst
+{  class Project_directory;
+};
+#define CropSyst_Project_directory CropSyst::Project_directory
+namespace CropSyst
+{  class Scenario_output_options;                                                //120313
+};
+using namespace CORN;
+using namespace CORN::OS_FS;
+using namespace CORN::OS;
+//______________________________________________________________________________
+class Pending_download
+: public Item
+{public:
+   CORN::OS::Uniform_resource_locator  URL; // I.e. http://modeling.bsyse.wsu.edu/xxxx/filename.exe
+      // note: I do have a URL class
+   CORN::OS::File_name_concrete         target; // where to download the file to
+   nat8                             tries_remaining;
+      // We only try to download so many times before giving up.
+ public:
+   Pending_download
+      (const std::wstring                       &_URL
+      ,const CORN::OS::Directory_name_concrete   &_target_directory
+      ,nat8                                      _tries_remaining = 3);
+   Pending_download
+      (const std::string                        &_URL
+      ,const CORN::OS::Directory_name_concrete   &_target_directory
+      ,nat8                                      _tries_remaining = 3);
+};
+//_2014-08-04___________________________________________________________________
+class CS_Explorer_engine
+: public Explorer_engine_abstract
+{
+ protected:
+   contribute_ CORN::OS::Directory_entry_name_concrete recently_selected_DEN[CS::CONTEXT_COUNT];
+   CropSyst::Project_directory *project_directory;  // null if we are not currently in a project context.
+   provided_ CropSyst::Scenario_output_options *output_options;
+   mutable CS::Directory_context           identified_context;
+   contribute_ CORN::Unidirectional_list  pending_downloads; //list of Pending_download
+ public: // temporarily public for convenience.
+   CORN::OS_FS::Application_data_directory user_application_directory;
+   CORN::User_settings         user_settings;
+ public: // public for UI binding
+   bool UED_tools_mode; // This mode will display UED tools for arbitrary directorys
+ public:
+   inline CS::Directory_context get_identified_context()                   const { return identified_context; };
+   CS::Directory_context identify_context()                                const;
+      // Identifies the current directory context by either:
+      // - The name of the directory.
+      // - The presence of key files.
+      // - The key extension of some files.
+   CS::Directory_context identify_context_of
+      (const CORN::OS::Directory_name &directory)                               const;
+   CS::Directory_context assume_context
+      (CS::Directory_context assumed_context)                      modification_;
+ public: // For arbitrary context
+   CORN_Directory_name *create_project(const STRING_WITH_FILENAME &project_name);
+      /// project_name is unqualified name of the project directory to
+      /// create in the current directory_name_qualified context.
+      ///\return the name of the successfully created project, or null if failed.
+   CORN_Directory_name *create_simulation_directory
+      (const STRING_WITH_FILENAME &simulation_folder_name
+      ,const STRING_WITH_FILENAME &projects_folder_name);
+ public: // For project context
+   const STRING_WITH_FILENAME &project_create_scenario(const std::wstring &new_scenario_name);
+      ///\return the scenarios directory the scenario was created in or null if failed
+   const STRING_WITH_FILENAME &project_GIS_simulation();
+   const STRING_WITH_FILENAME &project_watershed_simulation();
+   const STRING_WITH_FILENAME &project_carbon_sequestration_for_grazing_regimen();
+   nat32 project_combinatorial_scenario_generation_generate_all
+      (const CORN_Directory_name &template_scenario_dirname                      //111103
+      ,const CORN_Directory_name &generated_scenarios_dirname                    //111104
+      ,const std::string &prefix                                                 //111104
+      ,bool precount) modification_;
+      /// when precount is true this only counts the number of scenarios generated, without actually generating the scenarios.
+   CropSyst_Project_directory *provide_project_directory();
+      /// Although  provide_project_directory is currently usually used in the project context,
+      /// it may be useful in other contexts.
+   private:
+      void project_combinatorial_generation_initialization
+         (const CropSyst_Project_directory &project_dir
+         ,const CORN_Directory_name  &gen_scenario_without_initialization_dir
+         ,const CORN_File_name       &baseline_scenario_filename
+         ,nat32 &gen_scenario_ID_count
+         ,Text_list &initialization_dirnames
+         ,bool precount);
+ public: // For scenario context
+   const STRING_WITH_FILENAME &scenario_edit()                             const;
+   bool scenario_run
+      (bool display_runtime_graph
+      ,const CORN_File_name *report_format_optional
+      ,nat32 CPF_irrigation_percents)                                      const;
+   bool scenario_run_GIS()                                                 const;//140214
+ public: // For scenario output context
+   const STRING_WITH_FILENAME &launch_output_fast_graph()                  const;
+   const STRING_WITH_FILENAME &launch_output_schedule_viewer()             const;
+   const STRING_WITH_FILENAME &launch_output_schedule_text_viewer()        const;
+
+   const STRING_WITH_FILENAME &launch_output_harvest_report_viewer()       const;
+   bool scenario_output_has_file(const char *filename)                     const;
+   const STRING_WITH_FILENAME &output_export_UED_to_XLS_file_command_line
+      (const CORN_File_name &XXXXX_ued
+      ,const CORN_File_name &XXXXX_xxx
+      ,const CORN_File_name &XXXXX_tdf
+      ,bool include_full_year)                                             const;
+   const CropSyst::Scenario_output_options *provide_output_options()  provision_;
+ public: // For Database parameter contexts
+   CORN_Directory_name
+      *add_database_context(const STR_WITH_FILENAME parameter_file_directory_name_unqual,bool set_parameter_directory_as_current);
+   bool database_has_directory(const STR_WITH_FILENAME subdirectory_name)              const;
+   bool database_REACCH_import
+      (float32 latitude,float32 longitude
+      ,const std::string &climate_scenario
+      ,const std::string &RCP_scenario
+      ,bool from_local_server
+      ,const std::string &master_scenario_directory)               contribution_;
+
+ public: // For soil context
+   const STRING_WITH_FILENAME &launch_soil_convertor()                     const;
+ public: // For weather context
+   const STRING_WITH_FILENAME &launch_ClimGen()                            const;
+   const STRING_WITH_FILENAME &launch_UED_import()                         const;
+   const STRING_WITH_FILENAME &launch_UED_export()                         const;
+   const STRING_WITH_FILENAME &launch_UED_spatial_interpolator()           const;
+   const STRING_WITH_FILENAME &map_UED_locations()                         const;
+   const STRING_WITH_FILENAME &launch_UED_condense()                       const;
+      /// \return the respective launch command.
+   nat32 UED_file_quality_import_or_export
+      (const std::string &command // import or export
+      ,const CORN::Text_list  &selected_UED_filenames_qual_or_unqual);
+ public: // for scenarios context
+   const STRING_WITH_FILENAME &project_scenarios_create_scenario
+      (const STRING_WITH_FILENAME &new_scenario_name
+      ,const STRING_WITH_FILENAME &scenario_file_name_or_extension
+      ,const CORN::OS::File_name &scenario_editor_exe);
+   nat16 project_scenarios_run_scenarios
+      (const CORN::Text_list    &selected_scenario_file_or_dir_names_qual_or_unqual
+      ,const CORN::OS::File_name *report_format_filename
+      ,bool                     &abort_run                                       //150419
+      ,bool                      runtime_graph
+      ,bool                      run_simulateously
+      //150418 ,bool                      crop_production_function
+      ,nat32                     CPF_percents_water
+      )                       const;//150414
+      ///< \return the number of scenarios run
+/*051418 I already had CPF runner
+   nat32 generate_and_run_crop_production_function
+      (const CORN::OS::Directory_name &scenario_dirent_qual);                    //150414
+      // Returns the number of scenarios generated and run.
+*/
+ public: // CANMS Enterprises context
+   // NYN const std::string &project_create_enterprise(const char *new_scenario_name);
+      // Currently if the user wants to create an enterprise, he should do it in the enterprises folder
+   const STRING_WITH_FILENAME &CANMS_scenario_edit()                       const;
+   const STRING_WITH_FILENAME &project_enterprises_create_enterprise
+      (const STRING_WITH_FILENAME &new_enterprise_name);
+ public: // For most contexts:
+   const STRING_WITH_FILENAME &edit_parameter_file
+      (const STRING_WITH_FILENAME &name
+      ,const_ASCIIz extension
+      ,const_ASCIIz editor_name_unqual
+      ,const_Unicodez option = 0)                                          const;
+   const STRING_WITH_FILENAME &edit_context_file
+      (const STRING_WITH_FILENAME &name
+      ,const_Unicodez option = 0)                                          const;
+   const STRING_WITH_FILENAME &edit_database_parameter_file
+      (const CORN::OS::Directory_name &database_dirname // fully qualified
+      ,CS::Directory_context           parameter_context
+      ,const STRING_WITH_FILENAME     &name)                               const;//141122
+   virtual const STRING_WITH_FILENAME &edit_file_if_known_type
+      (const STRING_WITH_FILENAME &filename)                               const;
+      /// Edit the specified file using CropSyst parameter editor if it is
+      /// a recognized file type.
+      /// Returns the command if recognized.
+      /// Returns empty string if not edited.
+   virtual const STRING_WITH_FILENAME & launch_notepad() const;
+ public:
+   // response to navigator_frame actions:
+   virtual bool navigator_double_clicked_file(const STRING_WITH_FILENAME &item_path) const;
+      ///< \return true if the double click action performed something.
+   virtual bool navigator_single_clicked_file(const STRING_WITH_FILENAME &item_path) const;
+      ///< \return true if the double click action performed something.
+ public: // structors
+   CS_Explorer_engine();
+   ~CS_Explorer_engine();
+ public: // Explorer_engine_abstract overrides
+   virtual bool get_context_icon_filename(
+         CORN::OS::File_name &icon_filename,int &icon_index) const;
+      ///< The derived class should override to set the fully qualified icon file name
+      ///  that will be used to represent the folder.
+      ///   By default no icon filename is assigned.
+      /// If there are multiple icons in the file then set icon_index to the index.
+      ///\return false if this folder does not need or should not be assigned an icon.
+   virtual bool get_context_description(std::string &description)          const;
+      ///< The derived class should override to set the brief one line description. (Currently this codes in the desktop infotip).
+      ///  By default no description is assigned.
+      ///\return false if this folder does not need or should not have a description.
+   virtual bool get_context_ID(modifiable_ std::string &ID)                const;//141114
+/* moved to explorer abstract
+   virtual bool open_documentation                                               //141116
+      (CORN::OS_FS::Document_type doc_type
+      ,const std::string &context)                                         const;
+*/
+ public:
+   virtual bool update_application_suite()                                 const;//120112
+   bool translate_AgMIP_ACE
+      (const CORN_File_name &translator_exe
+      ,const CORN_File_name &JSON_filename)                                const;//130418
+   nat16 translate_AgMIP_ACE_JSON_files
+      (const CORN::Text_list &selected_JSON_filenames_presumed)            const;//130418
+   int export_scenarios
+      (const CropSyst::Scenario_export_engine::Arguments &export_args
+      ,nat8 format_index);
+      // Returns the number of scenarios exported
+   bool download_pending_URLs();
+      // might be applicable to all in Explorer_engine_abstract
+   bool launch_CropSyst_wizard()                                           const;//141022
+};
+//______________________________________________________________________________
+#endif
+

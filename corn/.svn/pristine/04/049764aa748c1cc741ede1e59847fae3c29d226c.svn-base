@@ -1,0 +1,75 @@
+#include "import_export_table.h"
+#include "corn/data_source/generic_datarec.h"
+#include "corn/container/indexer.h"
+namespace CORN { namespace MicroSoft { namespace Access {
+//___________________________________________________________________________
+Import_export_table_format::Import_export_table_format()
+{
+   detail_lines_delineation.relative_to_labeled.set(FILE_RELATIVE);
+   detail_lines_delineation.start_row_1_based = 0;
+   detail_lines_delineation.delimit_mode_labeled.set(Delineation_layout::DELIMIT_character);
+   detail_lines_delineation.continuous_delimiter = false; // don't treat continuous delimiters as one
+   detail_lines_delineation.delimiter_tab        = false;
+   detail_lines_delineation.delimiter_space      = false;
+   detail_lines_delineation.delimiter_comma      = false;
+   detail_lines_delineation.delimiter_semicolon  = false;
+   detail_lines_delineation.delimiter_other      = true;
+   detail_lines_delineation.other_delimiter_16   = '|';
+   detail_lines_delineation.other_delimiter_string = "";
+   detail_lines_delineation.text_quote_mode_labeled.set(Delineation_layout::DOUBLE_QUOTE);
+      // Warning, I don't know the quoting methodology,
+      // so far text appears to be double quote but it could be alternating
+   detail_lines_delineation.decimal_mark         = ".";
+}
+//_2017-03-28___________________________________________________________________
+/*170328
+Import_export_table_format::Import_export_table_format()
+{
+   data_line_delineation.relative_to_labeled.set(FILE_RELATIVE);
+   data_line_delineation.start_row_1_based = 0;
+   data_line_delineation.delimit_mode_labeled.set(Delineation_layout::DELIMIT_character);
+   data_line_delineation.continuous_delimiter = false; // don't treat continuous delimiters as one
+   data_line_delineation.delimiter_tab        = false;
+   data_line_delineation.delimiter_space      = false;
+   data_line_delineation.delimiter_comma      = false;
+   data_line_delineation.delimiter_semicolon  = false;
+   data_line_delineation.delimiter_other      = true;
+   data_line_delineation.other_delimiter_16   = '|';
+   data_line_delineation.other_delimiter_string = "";
+   data_line_delineation.text_quote_mode_labeled.set(Delineation_layout::DOUBLE_QUOTE);
+      // Warning, I don't know the quoting methodology,
+      // so far text appears to be double quote but it could be alternating
+   data_line_delineation.decimal_mark         = ".";
+}
+*/
+//______________________________________________________________________________
+Import_export_table_format import_export_table_format_default;
+//_2016-10_13_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+Import_export_table::Import_export_table
+(const CORN::OS::File_name &_filename
+,bool                   _keep_read_records_in_memory
+,Indexer               *_optional_indexer_known                                  //111024
+,CORN::Data_record     *_record_for_indexing_given                               //111106
+)
+:CORN::Tabular_text_file
+   (_filename
+   ,std::ios::in                                                                 //141111
+   ,_keep_read_records_in_memory
+   ,import_export_table_format_default
+   ,false // _record_data_positions  these files may be quite large and should be otherwise indexed
+   ,_optional_indexer_known)                                                     //111024
+, indexer_known(_optional_indexer_known)
+, record_for_indexing_owned(_record_for_indexing_given)                          //111106
+{}
+//______________________________________________________________________________
+Import_export_table::~Import_export_table()
+{  if (record_for_indexing_owned) delete record_for_indexing_owned;
+}
+//______________________________________________________________________________
+bool Import_export_table::goto_file_position(nat32 file_pos)        performs_IO_
+{  data_stream->goto_file_position(file_pos);
+   return true;
+}
+//_2011-11-07___________________________________________________________________
+ } } } //namespace CORN MicroSoft Access
+

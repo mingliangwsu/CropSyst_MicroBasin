@@ -1,0 +1,153 @@
+#ifndef PARAMETER_COWL_H
+#define PARAMETER_COWL_H
+#include "physics/property_cowl_T.h"
+#include "common/CS_parameter.h"
+#include "corn/const.h"
+#include "corn/quality.hpp"
+namespace CS
+{
+//______________________________________________________________________________
+template <typename Real>
+class Parameter_cowl_T                       // abstract
+: public extends_ Physical::Property_cowl<Real>
+// May want to derive from Item so it can be listed
+, public CORN::Quality_cowl                                                      //150121
+, public implements_ CS::Parameter                                               //151122
+{
+   // This is the base class for all weather parameters
+protected:  // contributes
+   mutable bool                    updating; // This is to prevent recursively updating when we are already updating
+public: //temporarily made public should use an accessor
+   mutable bool                    modified;
+public:
+   Parameter_cowl_T
+      (bool                 extensive_
+      ,Real                &amount_
+      ,CORN::Units_code    &units_
+      ,CORN::Quality_code  &quality_code_)                                       //150121
+   : Physical::Property_cowl<Real>(extensive_,amount_,units_)
+   , CORN::Quality_cowl(quality_code_)                                           //151129
+   , updating(false)
+   , modified(false)
+   {}
+   //______________________________________________________________________________
+
+   inline virtual ~Parameter_cowl_T() {}                                                  //130515
+public:
+   // The update methods reset the value only if the
+   // the new quality is superior to the old quality.
+   virtual float64 update_value_qualified
+   (float64 new_value
+   ,const CORN::Quality &new_quality
+   ,bool override_safety = false)                                 rectification_
+   {  float64 updated_value = new_value;
+      if  (!modified || (modified && new_quality.is_same_or_better_than(*this)) || override_safety )
+      {
+         updated_value = this->force_amount(new_value);
+         assume(new_quality);
+         modified = true;
+      } else updated_value = get_value();
+      return updated_value;
+   }
+   //_2015-01-23________________________________________update_value_qualified_/
+   virtual float64 update_value_qualified_code
+      (float64 new_value
+      ,CORN::Quality_code new_quality_code
+      ,bool override_safety = false)                              rectification_
+   {  CORN::Quality_clad new_quality(new_quality_code);
+      return update_value_qualified(new_value,new_quality,override_safety);
+   }
+   //_2015-01-23___________________________________update_value_qualified_code_/
+ public:
+   // The force methods reset the value irrespective of the existing quality.
+   // These should only be used when the quality and value are known/assured.
+   // I.e. when loading original source data.
+   virtual float64 force_value_qualified
+      (float64 new_value
+      ,const CORN::Quality &new_quality)                           modification_
+   {  assume(new_quality);
+      return this->force_amount(new_value);
+   }
+   //_2015-01-30_________________________________________force_value_qualified_/
+   virtual float64 force_value_qualified_code
+      (float64 new_value
+      ,CORN::Quality_code new_quality_code)                        modification_
+   {  CORN::Quality_clad new_quality(new_quality_code);
+      return force_value_qualified(new_value,new_quality);
+   }
+   //_2015-01-30____________________________________force_value_qualified_code_/
+   virtual float64 copy(const Parameter_cowl_T<Real> &copy_from) initialization_
+   {
+   // Not sure if I should get and set amount from this method
+
+      assume(copy_from.get_quality());
+      updating = false;
+      modified = true;
+      return force_amount(copy_from.get_value());
+
+      // Not sure if I should get and set amount from this method
+
+   }
+   //_2015-01-24__2014-07-17_______________________________________________________
+   float64 get_value_update_if_necessary()                        rectification_
+   {  // mechanism to get the current value checking if it is currently updating
+      // THIS IS NEEDED FOR CLIMGEN!
+      float64 value = 0.0;
+      if (updating)
+          value = 0.0;
+            // This should be NaN but I need to trace down daily update errorstd::numeric_limits<float64>::quiet_NaN();
+      else
+      {  if (!is_valid()) // We may beable to have a calculated value.
+               update();
+         value = get_value();
+      }
+      return value;
+   }
+   //______________________________________________________________________________
+   virtual void unknown()                                          modification_
+      {  force_value_qualified_code(0.0,CORN::unknown_quality);
+      }
+   //_2015-01-20________________________________________________________________
+   virtual CORN::Quality_code invalidate(bool absolutely = true)  rectification_
+   {  if (CORN::Quality_cowl::invalidate(absolutely) == CORN::not_valid_quality)
+         this->force_amount(0.0);
+            // This should be NaN but I need to trace down daily update error (std::numeric_limits<double>::quiet_NaN());
+      return get_quality_code();                                                 //
+   }
+   //_2015-01-22________________________________________________________________
+   virtual bool is_updating()                  affirmation_ { return updating; }
+   virtual bool is_modified()                  affirmation_ { return modified; }
+   //______________________________________________________________________________
+   virtual const CORN::Quality &modify_quality_code(CORN::Quality_code quality_)
+   {  modified = true; assume_code(quality_); return *this; }
+   //_2015-01-23_______________________________________________________________/
+   virtual const CORN::Quality &modify_quality(const CORN::Quality &quality_)
+   {  modified = true; assume(quality_);   return *this; }
+   //_2015-01-23_______________________________________________________________/
+   inline virtual const CORN::Quality &update()                   rectification_
+      { return (const CORN::Quality &)(*this); }
+   //_2015-01-21________________________________________________________________
+      // Derived classes must override if values are calculated as needed.
+ protected:  // These must only be called by Parameter_cowl
+   virtual float64 get_value()                                             const
+      {  return Physical::Property_cowl<Real>::get_amount(); }
+   //_2015-01-23___________________________________________________________________
+ protected: // These must only be called by Property
+   inline virtual float64 set_amount(float64 new_amount)          rectification_
+      { return this->force_amount((Real)new_amount); }
+   //___________________________________________________________________________
+   virtual float64 constrain_to_range(float64 low, float64 high)  rectification_
+   {
+      float64 curr_value = get_value();
+      float64 constrained_value = CORN::must_be_between<float64>(curr_value,low,high);
+      return this->force_amount(constrained_value);
+   }
+   //_2015-01-25___________________________________________________________________
+ public: //Property_cowl overrides
+   inline virtual float64 in_prescribed_units()                            const //150126
+      { return get_value_update_if_necessary(); }
+};
+//_2015-01-25__2014-04-16_______________________________________________________
+} // namespace CS
+
+#endif // PARAMETER_COWL_H

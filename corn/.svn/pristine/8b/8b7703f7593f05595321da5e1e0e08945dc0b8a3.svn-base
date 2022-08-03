@@ -1,0 +1,351 @@
+#  include "corn/container/container.h"
+#  include "corn/container/unilist.h"
+#  include <string.h>
+namespace CORN {
+//______________________________________________________________________________
+Container::Node::Node(Item *i_elmt_data)
+: elmt_data(i_elmt_data)
+{}
+//______________________________________________________________________________
+Container::Node::~Node()
+{  if (elmt_data) delete elmt_data;
+   elmt_data = 0;
+}
+//_1998-02-06___________________________________________________________________
+int Container::Node::compare(const Item &other)                            const
+{ return elmt_data->compare(other); }
+//_1998-02-06___________________________________________________________________
+const char *Container::Node::label_cstr(char *buffer)                      const
+{  return elmt_data->label_cstr(buffer); }
+//                For some applications, label should be overridden
+//_1997-07-20___________________________________________________________________
+void Container::Node::setup_structure(Data_record &data_rec,bool for_write) modification_
+{ elmt_data->setup_structure(data_rec,for_write); }
+//_2001-01-09___________________________________________________________________
+Item *  Container::Iterator::Nth(uint32 n)
+{  if (n == 0) n = 1;
+   return Ith((nat32)(n -1));
+}
+//_2003-07-07___________________________________________________________________
+bool Container::Iterator::delete_current()
+{  Item *detached_item = detach_current();
+   bool delete_ok = detached_item!=0;
+   if (delete_ok)
+      delete detached_item;
+   return delete_ok;
+}
+//_2003-07-07___________________________________________________________________
+nat32 Container::transfer_all_from                                               //150930
+(Container &from_container,Item::Filter filter)                    modification_
+{  nat32 transfer_count = 0;                                                     //150930
+   nat32 from_container_count = from_container.count();                          //040412
+   if (from_container_count)                                                     //040319
+   {  Unidirectional_list not_transferred;                                       //040319
+      while (!from_container.is_empty())                                         //030707
+      {  Item *popped = from_container.pop_first();                              //040318
+         if (popped)                                                             //120618
+         {
+            if ((filter == Item::filter_all) ||                                  //120618
+               popped->matches_filter(filter))                                   //040318
+            {
+               append(popped);                                                   //040318
+               transfer_count++;                                                 //150930
+            }
+            else  not_transferred.append(popped);                                //040318
+         }
+      }
+      // Put back those items not transferred
+      if (!not_transferred.is_empty())                                           //120618
+         from_container.transfer_all_from(not_transferred);                      //040318
+   }
+   return transfer_count;                                                        //150930
+}
+//_2012-06-18__1999-11-22_______________________________________________________
+/*This isn't linking, don't know why
+nat32 Container::give_to
+(Container &receiving_container
+,Item::Filter filter )                                             modification_
+{  nat32 given_count = 0;
+   FOR_EACH(item,Item,each_item)
+   {
+      if ((filter == Item::filter_all) ||
+          item->matches_filter(filter))
+      {
+         receiving_container.take(each_item->detach_current());
+         given_count++;
+      }
+   } FOR_EACH_END(each_item)
+   return given_count;
+}
+*/
+//_2016-11-01__________________________________________________________________/
+Item *Container::get_Nth(nat32 element_num)                                const
+{  if (element_num == 0) element_num = 1;
+   return get_at((nat32)(element_num -1));
+}
+//______________________________________________________________________________
+bool Container::delete_Nth(uint32 element_num)                     modification_
+{  if (element_num == 0) element_num = 1;
+   return delete_at((nat32)(element_num -1));                                    //100616
+}
+//______________________________________________________________________________
+void Container::set_checked(bool i_checked)                        contribution_ //101129
+{  FOR_EACH(item,Item,each_item)
+      item->set_checked(i_checked);
+   FOR_EACH_END(each_item)
+// This is used for Container checked list boxes. It sets the checked state of all items.
+}
+//_2002-01-25___________________________________________________________________
+void Container::set_selected(bool i_selected)                      contribution_ //101129
+{ // This is used for Container list boxes. It sets the selected state of all items.
+   FOR_EACH(item,Item,each_item)
+      item->set_selected(i_selected);
+   FOR_EACH_END(each_item)
+}
+//_2002-01-25___________________________________________________________________
+bool Container::delete_at(uint32 index)
+{  bool deleted = false;                                                         //100616
+   Container::Iterator *deleter = iterator();
+   if (deleter->Ith(index))
+   {  deleter->delete_current();
+      deleted = true;                                                            //100616
+   }
+   delete deleter;
+   return deleted;                                                               //100616
+}
+//______________________________________________________________________________
+Item* Container::detach(Item *detach_item)
+{  Iterator *iter = iterator();
+   if (iter->find(detach_item,true))
+      iter->detach_current();
+   delete iter;
+   return detach_item;
+}
+//_2003-07-09___________________________________________________________________
+void Container::remove(Item *detach_item)
+{  Iterator *iter = iterator();
+   if (iter->find(detach_item))
+      iter->delete_current();
+   set_modified(true);                                                           //060321
+   delete iter;
+}
+//_2003-07-09___________________________________________________________________
+Item *Container::add_sorted                                                      //970928
+(Item *new_element
+, Ordering /*ordering*/)                                                         //971211
+{  return append(new_element);                                                   //000211
+}
+//_1997-09-28___________________________________________________________________
+Item *Container::find_matching
+(const Item &item_to_match                                                       //030119
+ , bool from_beginning) const
+{  // Find a node with the same copy
+   FIND_FOR_EACH(found_item,local_curr,Item,from_beginning,match_finder)
+      if (local_curr->compare(item_to_match) == 0)
+          found_item = local_curr;
+   FOR_EACH_END(match_finder)
+  return(found_item);
+};
+//______________________________________________________________________________
+Item *Container::find_comparable
+(const Item &comparable_item_to_match
+, bool from_beginning) const
+{  // Find a node with the same copy
+   CORN::Container::Iterator *find_iterator = iterator();
+   Item *found_item = find_iterator->find_comparable(comparable_item_to_match,from_beginning);
+   delete find_iterator;
+   return(found_item);
+}
+//______________________________________________________________________________
+Item *Container::Iterator::find_comparable(const Item &comparable_item,bool from_beginning)
+{  if (from_beginning)  first();
+   Item * found_item =0;
+   for (Item *curr_item = from_beginning?first():current()
+       ;curr_item && !found_item
+       ;curr_item = next())
+      if (curr_item->compare(comparable_item) == 0)
+      {  found_item = curr_item;
+         return found_item;
+      }
+   return found_item;
+}
+//_2005-10-11___________________________________________________________________
+bool Container::Iterator::has(Item *item_to_find,bool from_beginning)
+{  if (from_beginning)  first();
+   Item * found_item =0;
+   for (Item *curr_item = from_beginning?first():current()
+       ;curr_item && !found_item
+       ;curr_item = next())
+      if (curr_item== item_to_find)
+      {  found_item = curr_item;
+         return found_item!=0;
+      }
+   return found_item!=0;
+}
+//_2005-10-11___________________________________________________________________
+Item *Container::Iterator::find(Item *item_to_find,bool from_beginning)
+{  if (from_beginning)  first();
+   Item * found_item =0;
+   for (Item *curr_item = from_beginning?first():current()
+       ;curr_item && !found_item
+       ;curr_item = next())
+      if (curr_item== item_to_find)
+      {  found_item = curr_item;
+         return found_item;
+      }
+   return found_item;
+}
+//______________________________________________________________________________
+nat32 Container::write(std::ostream &strm)                          performs_IO_ //150728
+{  nat32 written = 0;                                                            //150728
+   FOR_EACH(item,Item,each_item)
+   {  item->write(strm); written++;
+      if (write_delimiter)
+         strm << write_delimiter;
+   } FOR_EACH_END(each_item)
+   return written;                                                               //150728
+}
+//_2004-01-08___________________________________________________________________
+nat32 Container::write_with_format(std::ostream &strm, const Format &format,nat16 indent_level)   performs_IO_
+{  nat32 written = 0;                                                            //150728
+   if (format.initializer)
+   {  if (format.indentor)
+         for (int i = 0; i < indent_level; i++)
+            strm << format.indentor;
+      strm << format.initializer;
+   }
+   bool successive_item = false;
+   FOR_EACH(item,Item,each_item)
+   {  if (successive_item && format.items.separator) strm << format.items.separator;
+      else successive_item = true;
+      item->write_with_format(strm,format.items,indent_level+1);
+      written++;                                                                 //150728
+   } FOR_EACH_END(each_item)
+   if (format.finalizer)
+   {  if (format.indentor)
+         for (int i = 0; i < indent_level; i++)
+            strm << format.indentor;
+      strm << format.finalizer;
+   }
+   return written;                                                               //150728
+}
+//_2013-02-17___________________________________________________________________
+#ifndef _MSC_VER
+nat32 Container::write_binary(Binary_file_interface &bin_file)      performs_IO_
+{  nat32 bytes_written = 0;
+   FOR_EACH(item,Item,each_item)
+   {  bytes_written += item->write_binary(bin_file);
+   } FOR_EACH_END(each_item)
+   return bytes_written;
+}
+#endif
+//_2011-10-15___________________________________________________________________
+bool Container::get_modified(bool clear_modified)                          const
+{  bool was_modified = modified;
+   if (clear_modified)
+      modified = false;
+   return was_modified;
+}
+//_2006-03-21___________________________________________________________________
+bool Container::set_modified(bool _modified)                       contribution_
+{ return modified = _modified; }
+//_2006-03-21___________________________________________________________________
+Item *Container::find_cstr(const_ASCIIZ search_key,bool case_sensitive)    const //120921
+{  //051011 Note this could now probably simply call find_comparable() but it might be better to keep key separate
+   if (!search_key) return 0;                                                    //100518
+   if (is_empty()) return 0;                                                     //030709
+   FIND_FOR_EACH(found_item,item,Item,true,item_finder)                          //030710
+   {  const char *key = item->get_key();                                         //030117
+      //160704 if (!key) return 0;                                               //100518
+      if (key)                                                                   //160704_100518
+      {
+         int compare_result =                                                    //091031
+            #if (defined(__unix__) || defined(__linux__))
+            (case_sensitive?strcmp(key,search_key):strcasecmp(key,search_key));  //980928
+            #else
+            (case_sensitive?strcmp(key,search_key):stricmp(key,search_key));
+            #endif
+         bool keys_match = compare_result  == 0;                                 //091031
+         if (keys_match)
+            found_item = item;                                                   //030710
+      }
+      else
+      {
+//std::clog <<"reached" << std::endl;
+      }
+    } FOR_EACH_END(item_finder)
+   return found_item;
+}
+//_2014-07-16__1998-02-07___________________________________________________________________
+Item *Container::find_string(const std::string &search_key,bool case_sensitive) const //120921
+{  return find_cstr(search_key.c_str(),case_sensitive);
+}
+//_2014-07-16__2011-10-25_____________________________________________________________________________
+Item *Container::find_wstring(const std::wstring &search_key,bool case_sensitive) const //120921
+{  return find_wstr(search_key.c_str(),case_sensitive);
+}
+//_2014-07-16__2003-04-06____________________________________________________________________
+Item *Container::find_wstr(const_UnicodeZ search_key,bool case_sensitive) const //120921
+{  //051011 Note this could now probably simply call find_comparable() but it might be better to keep key separate
+   if (!search_key) return 0;
+   if (is_empty()) return 0;
+   FIND_FOR_EACH(found_item,item,Item,true,item_finder)
+   {
+      const wchar_t *key = item->get_key_wide();
+      if (!key) return 0;
+      int compare_result =
+        #if defined(__MINGW32__)
+         (case_sensitive ? wcscmp(key,search_key) : _wcsicmp(key,search_key));   //Liu.M for MinGW problem 09/20/13
+        #else
+        #if defined (__unix) || defined(unix) || defined(__GNUC__)
+         (case_sensitive ? wcscmp(key,search_key) : wcscasecmp(key,search_key));
+        #else
+         (case_sensitive ? wcscmp(key,search_key) : _wcsicmp(key,search_key));
+        #endif
+        #endif
+      bool keys_match = compare_result  == 0;
+      if (keys_match)
+         found_item = item;
+   } FOR_EACH_END(item_finder)
+   return found_item;
+}
+//_2014-07-16__2011-08-28_______________________________________________________
+Item *Container::find_nat32  (nat32 search_key)                            const
+{
+   if (is_empty()) return 0;
+   FIND_FOR_EACH(found_item,item,Item,true,item_finder)
+   {
+      if (item->get_key_nat32() == search_key)
+         found_item = item;
+   } FOR_EACH_END(item_finder)
+   return found_item;
+}
+//_2015-06-08___________________________________________________________________
+nat32 Container::remove_all_matching_key_cstr
+(const char *search_key,bool case_sensitive)                       modification_
+{  // Removes all matching entries from the list and deletes the associated data!
+   // Returns true if there was a matching deletion.
+   nat32 matching_deletions = 0;
+   for (Item *matching_item = find_cstr(search_key,case_sensitive)               //120921
+       ;matching_item // search_key                                              //010831
+      ;matching_item = find_cstr(search_key,case_sensitive))                     //120921
+   {  remove(matching_item);
+      matching_deletions++;
+   }
+   return matching_deletions;
+}
+//_2014-07-16__2001-08-14_______________________________________________________
+Item *Container::take_unique_filter(Item *new_element)            appropriation_
+{
+   Item *return_element = new_element;                                           //150818
+   {  Item *existing_element = unique_keys ? find_comparable(*new_element) : 0;  //150818
+      if (existing_element)                                                      //150818
+      {  delete new_element;                                                     //150818
+         return_element = 0;
+      }
+   }
+   return return_element;
+}
+//_2016-10-24___________________________________________________________________
+} // namespace CORN end
+

@@ -1,0 +1,56 @@
+#ifndef TIMESTATECLASS_H
+#define TIMESTATECLASS_H
+//#include "datetime/date.hpp"
+#include "corn/chronometry/date_32.h"
+
+class TimeStateClass
+{
+   #ifndef LIU_ENGINE
+   const
+   #endif
+    CORN::Date_const &today;
+    int &Hour_Of_Day;    //0-23
+    int FDHourlyCounter;
+    int Days_After_Planting;
+    int Days_After_Emergence;
+    int Days_After_Flowering;
+    int Days_After_Begin_Yield_Formation;
+    int Days_After_Physiological_Maturity;
+    int Leaf_Senescence_Day_Pointer;
+    int Last_Produced_Leaf_Day_Pointer;
+    int Days_After_Crop_Exist;
+    int Days_After_Growing_Season_Started;
+public:
+    TimeStateClass(
+   #ifndef LIU_ENGINE
+   const
+   #endif
+          CORN::Date_const &_today,int &_hour);
+    void initialize();
+    void setToday(const CORN::Date_const &_today);
+    void setDaysAfterPlanting(int DAP);
+    int getDaysAfterPlanting();
+    void setDaysAfterEmergence(int DAE);
+    int getDaysAfterEmergence();
+    void setDaysAfterFlowering(int DAF);
+    int getDaysAfterFlowering();
+    void setDaysAfterBeginYieldFormation(int DABGF);
+    int getDaysAfterBeginYieldFormation();
+    void setDaysAfterPhysiologicalMaturity(int DAPM);
+    int getDaysAfterPhysiologicalMaturity();
+    void setLeafSenescenceDayPointer(int LSDP);
+    int getLeafSenescenceDayPointer();
+    void setLastProducedLeafDayPointer(int LPLDP);
+    int getLastProducedLeafDayPointer();
+    void setDaysAfterCropExists(int DACE);
+    int getDaysAfterCropExists();
+    void setDaysAfterGrowingSeasonStarted(int DACE);
+    int getDaysAfterGrowingSeasonStarted();
+    CORN::Date_const& getToday();
+    void setHourOfDay(const int hour);
+    int getHourOfDay();
+    int getFDHourlyCounter();
+
+};
+
+#endif // TIMESTATECLASS_H

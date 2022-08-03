@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="ued_static" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="libued_static" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-Wno-unknown-pragmas" />
+					<Add option="-Wno-reorder" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="libued_static" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-I ~/dev" />
+		</Compiler>
+		<Unit filename="../../UED_fname.cpp" />
+		<Unit filename="../../UED_tuple_datasrc.cpp" />
+		<Unit filename="../../codes.cpp" />
+		<Unit filename="../../database_file.cpp" />
+		<Unit filename="../../datasetrec.cpp" />
+		<Unit filename="../../datasetrec_creation.cpp" />
+		<Unit filename="../../index.cpp" />
+		<Unit filename="../../locrec.cpp" />
+		<Unit filename="../../rec_io.cpp" />
+		<Unit filename="../../record.cpp" />
+		<Unit filename="../../std_codes.cpp" />
+		<Unit filename="../../timeqry.cpp" />
+		<Unit filename="../../units_def.cpp" />
+		<Unit filename="../../unitsrec.cpp" />
+		<Unit filename="../../varcodes.cpp" />
+		<Unit filename="../../variable.cpp" />
+		<Unit filename="../../varrec.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<envvars />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

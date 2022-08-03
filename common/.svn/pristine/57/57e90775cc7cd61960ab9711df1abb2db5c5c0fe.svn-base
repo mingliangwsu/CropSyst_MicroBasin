@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="common_sim_static" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="libcommon_sim_static" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-Wno-unknown-pragmas" />
+					<Add option="-Wno-reorder" />
+					<Add option="-DCS_VERSION=4" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="libcommon_sim_static" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-I ~/dev" />
+			<Add directory="../../../../../CropSyst/source" />
+		</Compiler>
+		<Unit filename="../../balancer.cpp" />
+		<Unit filename="../../event.cpp" />
+		<Unit filename="../../event_status.cpp" />
+		<Unit filename="../../event_types.cpp" />
+		<Unit filename="../../exit_codes.cpp" />
+		<Unit filename="../../log.cpp" />
+		<Unit filename="../../operation.cpp" />
+		<Unit filename="../../paths.cpp" />
+		<Unit filename="../../scenario.cpp" />
+		<Unit filename="../../scenario_directory.cpp" />
+		<Unit filename="../../simulation.cpp" />
+		<Unit filename="../../simulation_project_directory.cpp" />
+		<Unit filename="../../synchronization.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

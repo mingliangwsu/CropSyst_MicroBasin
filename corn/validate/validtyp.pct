@@ -1,0 +1,9 @@
+char *TL_is_not_a_reasonable_value =" translate(L_is_not_a_reasonable_value );
+char *TL_must_be_greater_than =" translate(L_must_be_greater_than );
+char *TL_must_be_less_than =" translate(L_must_be_less_than );
+char *TL_must_range_from =" translate(L_must_range_from );
+char *TL_should_be_greater_than =" translate(L_should_be_greater_than );
+char *TL_should_be_less_than =" translate(L_should_be_less_than );
+char *TL_should_range_from =" translate(L_should_range_from );
+char *TL_Valid =" translate(L_Valid );
+char *TL_Validating =" translate(L_Validating );

@@ -1,0 +1,137 @@
+#ifndef datetime64H
+#define datetime64H
+
+/*
+   This class is a time data type class based on 64 bit floating point number.
+   time is stored as a fraction of a day.
+
+   0 is midnight
+   1 second after midnight is 1/86400
+
+   1:00am is 1/24
+
+   This class can also be used increment and accumulate time.
+   The integer portion of the floating point number represents full days.
+*/
+#include "corn/datetime/date_time_interface.h"
+//170430 #include "corn/datetime/temporal_base.h"
+#include "corn/chronometry/temporal.h"
+#include "corn/datetime/time_format.h"
+#include "corn/datetime/date_format.h"
+#include "corn/datetime/date_const.hpp"
+
+namespace CORN {
+//______________________________________________________________________________
+class Date_time_64
+: public implements_ Date_time
+//170530 , public extends_    Temporal_base
+, public extends_ Temporal                                                       //170430
+{
+   Datetime64  value;
+ public: // Formats are public to simply access
+    Date_format date_format;
+    Time_format time_format;
+ public: // constructors
+   Date_time_64();  // Current computer's date and time
+   Date_time_64(float64 i_date_time);
+   Date_time_64(const Date &date, const Time &time);
+   Date_time_64(int32 date, Seconds seconds);
+   Date_time_64(const Date_time_64 &to_copy_from);
+   inline virtual ~Date_time_64() {}                                             //150317
+
+public: // Temporal_base overrides
+   virtual const std::string &append_to_string(std::string &target)        const;//140614
+   virtual Datetime64          get_time64()                    const; // Returns the time (fraction)
+   inline virtual Datetime64   get_datetime64()                const { return value; }
+   inline virtual Date32       get_date32()                    const { return (Date32) value; }   //141201_030717
+public: // The following get from the date part
+   virtual Year         get_year()                             const;
+  // extracts the year from the Date date
+   virtual DOY          get_DOY()                              const;
+   // extracts the day of year from the Date date
+   virtual Month        get_month()                            const;
+   virtual DOM          get_DOM()                              const;
+   virtual void         gregorian(Year &year, Month &month, DOM &dom) const;
+  // extracts the year month and day of month from the Date date
+public: // The following get from the time part
+	virtual int32        get_HHMMSS()                           const; // Returns a integer formatted as HHMMSS
+	virtual Hour         get_hour()                             const;
+	virtual Minute       get_minute()                           const;
+	virtual Second       get_second()                           const;
+	virtual Centisecond  get_centisecond()                      const;
+	virtual Millisecond  get_millisecond()                      const;
+	virtual Hours        get_hours_after_midnight()             const;
+	virtual Minutes      get_minutes_after_midnight()           const;
+	virtual Seconds      get_seconds_after_midnight()           const;
+
+   //inline virtual Hours get_hours()       const { return Temporal::get_hours();} //170523
+   inline virtual Minutes get_minutes() const { return Temporal::get_minutes();} //170523
+   //inline virtual Seconds get_seconds() const { return Temporal::get_seconds();} //170523
+
+public: // The following reset the entire date time value.
+   virtual Datetime64   set_now();                                               //030715
+   // Sets to and returns the computer's system date/time.
+   virtual Datetime64   set_DT(const Date &_date, const Time &_time) ;         //030717
+   inline virtual Datetime64 set_datetime64(Datetime64 _value) { return value = _value;} //030717
+   inline virtual Datetime64 set_date32(Date32 _date32)     { return value = (Datetime64)_date32; }   // add option to set the entire value?
+   virtual Datetime64 set_date(Date _date32)    ;   // add option to set the entire value?
+public: // The following methods set only the date part of the date time. The updated date time is returned.
+   virtual Datetime64   set_year(Year year);                                     //030713
+   virtual Datetime64   set_DOY(DOY doy);                                        //030713
+   virtual Datetime64   set_c_str(const char *date_str);                         //030713
+   virtual Datetime64   set_YMD(Year year,Month month,DOM dom);           // add option to set the entire value? //030713
+   virtual Datetime64   set_YD(Year year,DOY doy);                        // add option to set the entire value? //030713
+   virtual Datetime64   set_month(Month month);                                  //050406
+   virtual Datetime64   set_DOM(DOM dom);                                        //050406
+   virtual Datetime64   inc();
+      // Adds 1 to the date. Returns the new date (datetime)
+   virtual Datetime64   dec();
+      // Subtracts one from the date. Returns the new date (datetime)
+   virtual Datetime64   inc_year(int16 years);                                   //970909
+      // Adds offset years to the date.
+      // If years is negative,  years are subtracted
+   virtual Datetime64   dec_year(int16 years);                                   //970909
+      // Subtracts offset years to the date.
+      // If years is negative,  years are added
+   virtual Datetime64   inc_month(int16 months);                                 //970909
+      // Adds months to the date.
+      //   If months is negative,  months are subtracted
+   virtual Datetime64   dec_month(int16 months);                                 //970909
+      // Subtracts months from the date.
+      //   If months is negative,  months are added
+   virtual Datetime64   inc_day(int32 days);
+      // Adds days to the date incrementing the year if necessary.
+      //   If offset is negative, offset days are subtracted (D_CORN_date_date_minus)
+   virtual Datetime64   dec_day(int32 days);
+      // Subtracts days from the date decrementing the year if necessary.
+      //    If offset is negative, offset days are added (D_CORN_date_date_plus)
+public:
+   // The following methods set only the time part of the date time.
+   // The entire time part is cleared and the new time updated, the date is not changed.
+   // The updated date time is returned.
+   virtual Datetime64   set_time64(Datetime64 _time64) ;            // add option to set the entire value?
+   virtual Datetime64   set_time(const Time &_time);                // add option to set the entire value? //030717
+   virtual Datetime64   set_HHMMSS(int32 HHMMSS);
+   virtual Datetime64   set_S(Seconds i_seconds);
+   virtual Datetime64   set_HMS(Hour hour, Minute minute, Second second);
+   virtual Datetime64   set_HMSm(Hour hour, Minute minute, Second second,Millisecond millisecond);
+   virtual Datetime64   set_HMSc(Hour hour, Minute minute, Second second,Centisecond centisecond);
+public: // Time arithmetic
+    virtual Datetime64   inc_hour(Hours hours)       ;                           //030717
+    virtual Datetime64   inc_minute(Minutes minutes) ;                           //030717
+    virtual Datetime64   inc_second(Seconds seconds) ;                           //030717
+public: // Date functions
+   virtual DOY       days_in_this_year();                                        //990214_130225
+   virtual nat32     days_between(const Date_time &date2,bool inclusive) const;  //040927
+public: // utility functions
+   void split(Datetime64 &date_part, Datetime64 &time_fract)               const;//030715
+   Datetime64 join(Datetime64 date_part, Datetime64 time_fract);                 //030715
+   Datetime64 inc_time_fract(Datetime64 time_fract);                             //030715
+};
+//______________________________________________________________________________
+}; // namespace CORN
+
+#define Time_64  Date_time_64
+
+#endif
+

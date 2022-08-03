@@ -1,0 +1,99 @@
+#include "crop/thermal_time_daily.h"
+
+namespace CropSyst
+{
+// ______________________________________________________________________________
+Thermal_time_daily_linear::Thermal_time_daily_linear
+   (const CropSyst::Crop_parameters_class::Thermal_time &_parameters             //110218
+   , const Physical::Temperature &_stress_adjusted_temperature                   //150217
+   , const Air_temperature_minimum &_air_temperature_min                         //150217
+   , const Physical::Temperature &_temperature_with_est_night                    //150217
+   , const float64 &_ref_day_length_hours                                        //140812
+   , bool _cropsyst_fruit_model                                                  //041212
+   , const CropSyst::Crop_parameters_struct::Vernalization *_vernalization_parameters
+   ,const CropSyst::Crop_parameters_struct::Photoperiod *_photoperiod_parameters)
+: Thermal_time_common
+   (_parameters
+   ,_stress_adjusted_temperature
+   , _air_temperature_min
+   ,_temperature_with_est_night
+   , _ref_day_length_hours
+   ,_cropsyst_fruit_model
+   , _vernalization_parameters
+   ,_photoperiod_parameters)
+{
+   // clear_accum_degree_days();                                                    //140619
+}
+//______________________________________________________________________________
+float64 Thermal_time_daily_linear::calc_growing_degree_day_daily_resolution
+(float64 adjusted_max_temp                                                       //030610
+,float64 air_temp_min)                                              calculation_
+{ // value for a single day
+   float64 deg_day_base_temp = parameters.base_temperature;
+   float64 deg_day_cutoff_temp = parameters.cutoff_temperature;
+   // During stress conditions the plant temperature may be a higher than air temperature
+   float64 avg_plant_temp = (adjusted_max_temp + air_temp_min) / 2.0;
+   avg_plant_temp = (avg_plant_temp < deg_day_base_temp)
+      ? deg_day_base_temp : avg_plant_temp;
+   avg_plant_temp = (avg_plant_temp > deg_day_cutoff_temp)
+      ? deg_day_cutoff_temp : avg_plant_temp;
+   float64 result_growing_degree_day = avg_plant_temp - deg_day_base_temp;
+   return result_growing_degree_day;
+}
+//_2000-03-30___________________________________________________________________
+Thermal_time_daily_nonlinear::Thermal_time_daily_nonlinear
+   (const CropSyst::Crop_parameters_class::Thermal_time &_parameters             //110218
+   , const Physical::Temperature &_stress_adjusted_temperature                   //150217
+   , const Air_temperature_minimum &_air_temperature_min                         //150217
+   , const Physical::Temperature &_temperature_with_est_night                    //150217
+   , const float64 &_ref_day_length_hours                                        //140812
+   , bool _cropsyst_fruit_model                                                  //041212
+   , const CropSyst::Crop_parameters_struct::Vernalization *_vernalization_parameters
+   ,const CropSyst::Crop_parameters_struct::Photoperiod *_photoperiod_parameters)
+: Thermal_time_common
+   (_parameters
+   ,_stress_adjusted_temperature
+   , _air_temperature_min
+   ,_temperature_with_est_night
+   , _ref_day_length_hours
+   ,_cropsyst_fruit_model
+   , _vernalization_parameters
+   ,_photoperiod_parameters)
+{
+   // clear_accum_degree_days();                                                    //140619
+}
+//______________________________________________________________________________
+float64 Thermal_time_daily_nonlinear::calc_growing_degree_day_daily_resolution
+(float64 adjusted_max_temp                                                       //030610
+,float64 air_temp_min)                                              calculation_
+{ // value for a single day
+
+/*
+Simulation of Phenological Development of Wheat Crops
+Enli Wang* & Thomas Engel
+Informatics in Crop Production, Technical University of Munich, 85350 Freising, Germany
+Agricultural Systems, Vol. 58, No. 1, pp. l-24, 1998PII: SO308-521X(98)00028-6*/
+
+   float64 Tmin = parameters.base_temperature;
+   float64 Topt = parameters.opt_temperature;
+   float64 Tmax = parameters.max_temperature;
+   float64 avg_plant_temp = (adjusted_max_temp + air_temp_min) / 2.0;
+
+   float64 WEDR = 0.0;
+   float64 Topt_minus_Tmin = Topt - Tmin;
+   if (avg_plant_temp > Tmin && avg_plant_temp < Tmax)
+   {
+      float64 Tavg_minus_Tmin = avg_plant_temp - Tmin;
+      float64 beta = 1.0; // (Value of 1 is generally adequate for thermal time calculation
+      float64 alpha = logl(2) / logl((Tmax - Tmin) / Topt_minus_Tmin);
+      float64 alpha2 = 2.0 * alpha;
+      float64 numerator = 2.0 * powl(Tavg_minus_Tmin, alpha) * powl
+         (Topt_minus_Tmin, alpha) - powl(Tavg_minus_Tmin, alpha2);
+      float64 denominator = powl(Topt_minus_Tmin, alpha2);
+      WEDR = powl((numerator / denominator), beta);
+   }
+   float64 result_growing_degree_day = WEDR * Topt_minus_Tmin;
+   return result_growing_degree_day;
+}
+//_2015-11-06___________________________________________________________________
+} // namespace CropSyst

@@ -1,0 +1,31 @@
+#include "seeding_param.h"
+#include "corn/data_source/datarec.h"
+//using_namespace_CORN;
+//______________________________________________________________________________
+Seeding_parameters::Seeding_parameters()
+: rate_seeds_m2(300.0)               // This is for wheat (guess RLN)
+, emergence_rate_percent(100.0)
+, sowing_depth_cm(5.0)
+, v_rate_seeds    (rate_seeds_m2          ,UC_count_per_m2  ,"seeding_rate"   ,0,300.0,    1,1000.0,  0.0,1000000.0  ,"seeds/m²","Seed application rate")
+, v_emergence_rate(emergence_rate_percent ,UC_percent       ,"emergence_rate" ,1, 50.0,  5.0,100.0,  0.0, 100.0  ,"%","Emergence rate")
+, v_sowing_depth  (sowing_depth_cm        ,UC_cm            ,"sowing_depth"   ,2,  5.0,  0.0,50.0,  0.0, 100.0  ,"cm","Sowing depth")
+{}
+//______________________________________________________________________________
+Seeding_parameters::Seeding_parameters(const Seeding_parameters &original)
+: rate_seeds_m2            (original.rate_seeds_m2)               // This is for wheat (guess RLN)
+, emergence_rate_percent   (original.emergence_rate_percent)
+, sowing_depth_cm          (original.sowing_depth_cm)
+, v_rate_seeds    (rate_seeds_m2          ,UC_count_per_m2  ,"seeding_rate"   ,0,300.0,    1,1000.0,  0.0,1000000.0  ,"seeds/m²","Seed application rate")
+, v_emergence_rate(emergence_rate_percent ,UC_percent       ,"emergence_rate" ,1, 50.0,  5.0,100.0,  0.0,    100.0  ,"%","Emergence rate")
+, v_sowing_depth  (sowing_depth_cm        ,UC_cm            ,"sowing_depth"   ,2,  5.0,  0.0, 50.0,  0.0,    100.0  ,"cm","Sowing depth")
+{  rate_seeds_m2          =  (original.rate_seeds_m2);
+   emergence_rate_percent=   (original.emergence_rate_percent);
+   sowing_depth_cm       =   (original.sowing_depth_cm);
+}
+//______________________________________________________________________________
+void Seeding_parameters::setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_
+{  data_rec.expect_valid_float32(v_rate_seeds);
+   data_rec.expect_valid_float32(v_emergence_rate);
+   data_rec.expect_valid_float32(v_sowing_depth);
+}
+//______________________________________________________________________________

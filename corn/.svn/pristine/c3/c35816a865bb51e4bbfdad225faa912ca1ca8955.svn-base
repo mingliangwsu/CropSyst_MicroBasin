@@ -1,0 +1,573 @@
+//#ifndef units_symbologyH
+//#  include <metrology/units_symbology.h>
+//#endif
+/*
+See unidata units database
+http://www.unidata.ucar.edu/software/udunits/udunits-2/udunits2.html#Database
+and
+http://www.unidata.ucar.edu/software/udunits/udunits-2/udunits2-common.xml
+Some of these may not yet have been implemented.
+*/
+/*
+#ifndef strconvH
+#  include "corn/string/strconv.h"
+#endif
+*/
+//______________________________________________________________________________
+#ifndef __cplusplus__
+#  include "corn/metrology/units_symbology.h"
+struct
+#endif
+Units_Standard_definition units_standard_definition_table[] =
+{
+//no specific dimension
+ {UC_unitless          ,"unitless"       ,"-"}
+,{UC_1                 ,"1"              ,"1"}
+,{UC_count             ,"count"          ,"cnt"}
+,{UC_percent           ,"percent"        ,"%"}
+,{UC_unit              ,"unit"           ,"unit"}
+,{UC_decimal_percent   ,"decimal percent","decprcnt"}
+,{UC_index             ,"index"          ,"ndx"}
+,{UC_fraction          ,"fraction"       ,"fract"}
+,{UC_probability       ,"probability"    ,"prob"} // written as P(A), p(A) or Pr(A) where A is the event of measure
+,{UC_pH                ,"potential hydrogen","pH"}
+
+,{UC_radian_angle      ,"radian"         ,"rad"}
+,{UC_degree_angle      ,"degrees"        ,"°"}
+,{UC_degree_from_east  ,"degrees from east","°E"}
+,{UC_degree_from_north ,"degrees from north","°N"}
+,{UC_degrees_longitude ,"°longitude"     ,"°"}
+,{UC_degrees_latitude  ,"°latitude"      ,"°"}
+//Time units
+,{UT_date         ,"date"           ,"YYYYDDD"}
+,{UT_time         ,"time"           ,"time"}
+,{UT_day          ,"day"            ,"d"}
+,{UT_day_of_year  ,"day of year"    ,"DOY"}
+,{UT_sunday       ,"Sunday"         ,"Sun"}
+,{UT_monday       ,"Monday"         ,"Mon"}
+,{UT_tuesday      ,"Tuesday"        ,"Tue"}
+,{UT_wednesday    ,"Wednesday"      ,"Wed"}
+,{UT_thursday     ,"Thursday"       ,"Thu"}
+,{UT_friday       ,"Friday"         ,"Fri"}
+,{UT_saturday     ,"Saturday"       ,"Sat"}
+,{UT_day_of_month ,"day of month"   ,"DOM"}
+
+,{UT_week         ,"week"           ,"wk"}
+,{UT_fortnight    ,"fortnight"      ,"fn"}
+,{UT_month        ,"month"          ,"mnth"}
+,{UT_january      ,"January"        ,"Jan"}
+,{UT_february     ,"February"       ,"Feb"}
+,{UT_march        ,"March"          ,"Mar"}
+,{UT_april        ,"April"          ,"Apr"}
+,{UT_may          ,"May"            ,"May"}
+,{UT_june         ,"June"           ,"Jun"}
+,{UT_july         ,"July"           ,"Jly"}
+,{UT_august       ,"August"         ,"Aug"}
+,{UT_september    ,"September"      ,"Spt"}
+,{UT_october      ,"October"        ,"Oct"}
+,{UT_november     ,"November"       ,"Nov"}
+,{UT_december     ,"December"       ,"Dec"}
+,{UT_quarter      ,"quarter"        ,"qrtr"}
+,{UT_trimester    ,"trimester"      ,"trmstr"}
+,{UT_biannum      ,"biannum"        ,"biannum"}
+,{UT_year         ,"year"           ,"yr"}
+,{UT_decade       ,"decade"         ,"dcad"}
+,{UT_century      ,"century"        ,"cntry"}
+,{UT_millenium    ,"millenium"      ,"mllnm"}
+//,{UT_fraction_of_second,"fraction of a second","fract sec"}
+/* the following are metricable
+,{UT_second       ,"second"         ,"sec"}
+,{UT_minute       ,"minute"         ,"min"}
+,{UT_hour         ,"hour"           ,"hr"}
+,{UT_day          ,"day"            ,"day"}
+*/
+
+//,{UC_mm_water_depth,"water depth mm","mm"}
+//,{UC_inch_water_depth,"water depth inch","inch"}
+//,{UC_solar_radiation_MJ_m2,"Mega Joules per meters squared","MJ/m²"}
+,{UC_angstrom       ,"angstrom"        ,"Å"}
+,{UC_gauss          ,"gauss"            ,"G"}
+//,{UC_gamma          ,"gamma"            ,"?"}
+//NYI ,{UC_oersted        ,"oersted"          ,"Oe"}    // CGS
+//NYI ,{UC_fermi          ,"fermi"            ,"fm"}
+
+,{UC_Celcius_degree_days         ,"Celcius degree days", "°C-days"}
+,{0,0,0}
+};
+//______________________________________________________________________________
+// These following are for generalized standard units composition
+// This array is sorted by the respective upper 8bits of the numerator or denominator
+
+// ASAE indicates the units and abbreviation conform to the ASAE standards
+
+
+Units_Generalized_measure_definition units_generalized_measure_def_table[129] =
+{// Thing measured               ,metric units  ,metric abbr
+ {"unitless"                      ,"-"           ,"-"        ,false}// 0x00xx special units
+,{"temperature"                   ,"celcius"     ,"°C"       ,true }// 0x01xx       ASAE
+,{"thermaldynamic temperature"    ,"kelvin"      ,"K"        ,true }// 0x02xx       ASAE (No degree symbol!)
+,{"","",""                                                   ,false}// // 0x03xx  061019 was ,{"thermal time" ,"degree days" ,"°days"    ,false}// 0x03xx Currently we are only using degree days but this could be any time
+,{"chemical weight"               ,"equivalent"  ,"Eq"       ,true }// 0x04xx
+,{"amount of substance"           ,"mole"        ,"mol"      ,true }// 0x05xx
+,{"mass"                          ,"gram"        ,"g"        ,true }// 0x06xx
+,{"liquid weight"                 ,""            ,""         ,true }// 0x07xx may be obsolete, see liquid measure below Liquid weight is not used in metric system
+,{"dry weight"                    ,""            ,""         ,true }// 0x08xx may be obsolete, see dry liquid measure below Dry weight is not used in metric system
+,{"","",""                                                   ,false}// 0x09xx
+,{"","",""                                                   ,false}// 0x0Axx
+,{"","",""                                                   ,false}// 0x0Bxx // Not used
+,{"luminous intensity"            ,"candela"     ,"cd"       ,true }// 0x0Cxx ASAE
+,{"luminous flux"                 ,"lumen"       ,"lm"       ,true }// 0x0Dxx ASAE
+,{"illuminance"                   ,"lux"         ,"lx"       ,true }// 0x0Exx ASAE
+,{"","",""                                                   ,false}// 0x0Fxx
+,{"temporal"                     ,"date/time"    ,"date/time",false}// 0x10xx// time on a daily scale or monthly scale
+,{"week"                         ,"week"         ,"wk"       ,false}// 0x11xx
+,{"month"                        ,"month"        ,"mth"      ,false}// 0x12xx
+,{"ordinal second"               ,"ordinal second","os"      ,false}// 0x13xx
+,{"ordinal minute"               ,"ordinal minute","om"      ,false}// 0x14xx // Note can't use "m" because it conflicts with meter "m"
+,{"ordinal hour"                 ,"ordinal hour"  ,"oh"      ,false}// 0x1500
+,{"second"                       ,"second"       ,"sec"      ,true }// 0x1600 second
+,{"minute"                       ,"minute"       ,"min"      ,true }// 0x1700 minute
+,{"hour"                         ,"hour"         ,"hr"       ,true }// 0x1800 hour
+,{"day"                          ,"day"          ,"day"      ,true }// 0x1900 day
+,{"year"                         ,"year"         ,"yr"       ,true }// 0x1A00 year
+,{""                             ,""             ,""         ,false}// 0x1B00
+,{""                             ,""             ,""         ,false}// 0x1C00
+,{""                             ,""             ,""         ,false}// 0x1D00
+,{""                             ,""             ,""         ,false}// 0x1E00
+,{""                             ,""             ,""         ,false}// 0x1F00
+,{"linear"                       ,"meter"       ,"m"         ,true }// 0x20xx
+,{"","","",false}// obs{"distance"                      ,"meter"       ,"m"        }// 0x21xx
+,{"","","",false}// obs,{"width"                         ,"meter"       ,"m"        }// 0x22xx
+,{"","","",false}// obs,{"breadth"                       ,"meter"       ,"m"        }// 0x23xx
+,{"","","",false}// obs,{"height"                        ,"meter"       ,"m"        }// 0x24xx
+,{"","","",false}// obs,{"depth"                         ,"meter"       ,"m"        }// 0x25xx
+,{"","","",false}// obs,{"altitude"                      ,"meter"       ,"m"        }// 0x26xx
+,{"","","",false                                                  }// 0x27xx  reserved for future use
+,{"rectangular area"             ,"square meter","m²"          ,true }// 0x28xx
+,{"","","",false}// obs,{"surface area"                  ,"square meter","m²"       }// 0x2900
+,{"land area"                     ,"are"         ,"a"          ,true }// 0x2Axx
+,{"","","",false                                                  }// 0x2Bxx
+,{"","","",false                                                  }// 0x2Cxx
+,{"","","",false                                                  }// 0x2Dxx
+,{"","","",false                                                  }// 0x2Exx
+,{"","","",false                                                  }// 0x2Fxx
+// Reserved for future use
+,{"volume"                        ,"cubic meter"   ,"m³"       ,true }// 0x30xx
+,{"","","",false}// obs,{"solid volume"                  ,"volume"      ,"m³"       }// 0x31xx
+,{"","","",false}// obs,{"liquid volume"                 ,"volume"      ,"m³"       }// 0x32xx
+,{"","","",false}// obs,{"gas volume"                    ,"volume"      ,"m³"       }// 0x33xx
+,{"liquid volume"                 ,"liter"         ,"l"        ,true  }// 0x34xx ASAE suggests uppercase to avoid confusion with the numeral 1, but I have never seen that before
+,{"dry measure"                   ,"dry"           ,""         ,false}// 0x35xx used only for english units
+,{"","","",false                                                  }// 0x36xx
+,{"","","",false                                                  }// 0x37xx
+,{"","","",false                                                  }// 0x38xx
+,{"","","",false                                                  }// 0x39xx
+,{"","","",false                                                  }// 0x3Axx
+,{"","","",false                                                  }// 0x3Bxx
+,{"","","",false                                                  }// 0x3Cxx
+,{"","","",false                                                  }// 0x3Dxx
+,{"","","",false                                                  }// 0x3Exx
+,{"","","",false                                                  }// 0x3Fxx
+
+// Derived units with special names
+
+,{"plane angle"                   ,"radian"      ,"-"        ,false}// 0x40xx
+,{"solid angle"                   ,"steradian"   ,"sr"       ,false}// 0x41xx ASAE
+,{"frequency"                     ,"hertz"       ,"Hz"       ,true }// 0x42xx ASAE
+,{"","","",false                                                  }// 0x43xx
+,{"","","",false                                                  }// 0x44xx
+,{"","","",false                                                  }// 0x45xx
+,{"","","",false                                                  }// 0x46xx
+,{"","","",false                                                  }// 0x47xx
+,{"specific heat"                 ,""            ,""         ,true }// 0x48xx // This is complex units
+,{"","","",false                                                  }// 0x49xx
+,{"","","",false}// obs,,{"quality of heat"               ,"joule"       ,"J"        }// 0x4Axx
+,{"","","",false}// obs,,{"work"                          ,"joule"       ,"J"        }// 0x4Bxx ASAE // Also newton meter
+,{"energy"                        ,"joule"       ,"J"        ,true}// 0x4Cxx ASAE // Also watt second
+//NYI,{"energy"                        ,"watt second"   ,"Wsec"      ,true}// 0x4Dxx watt is conventionally written lower case but abbreviated uppercase
+,{"energy"                        ,"watt hour"   ,"Whr"      ,true}// 0x4Dxx watt is conventionally written lower case but abbreviated uppercase
+,{"energy"                        ,"watt day"    ,"Wday"     ,true}// 0x4Exx joule is conventionally written lower case but abbreviated uppercase
+,{"heat"                          ,"heat"        ,""         ,false}// 0x4Fxx  reserved for  posible use as thermal units (will apply to BTU)
+
+,{"force"                         ,"newton"      ,"N"        ,true}//0x50xx  ASAE
+,{""                              ,""            ,""         ,false}//0x51xx   reserved for named forces
+,{""                              ,""            ,""         ,false}//0x52xx
+,{""                              ,""            ,""         ,false}//0x53xx
+,{""                              ,""            ,""         ,false}//0x54xx
+,{"radiant flux"                  ,"watt"        ,"W"        ,true}//0x55xx ASAE   // Power
+,{""                              ,""            ,""         ,false}//0x56xx
+,{""                              ,""            ,""         ,false}//0x57xx
+
+,{"pressure"                      ,"pascal"      ,"P"        ,true}//0x58xx ASAE
+,{"","","",false} // obs,{"atmospheric pressure"          ,"pascal"      ,"P"        }//0x59xx ASAE
+,{""                              ,""            ,""         ,false}//0x5Axx obs served for named pressures
+,{"osmotic potential"             ,"osmol"       ,"osmol"    ,true}//0x5Bxx obsreserved for named stress
+,{"","","",false} // obs,{"stress"                        ,"pascal"      ,"P"        }//0x5Cxx ASAE
+,{""                              ,""            ,""         ,false}//0x5Dxx obs reserved for named stress
+,{"dynamic viscosity"             ,"pascal-second","µ"       ,true}//0x5Exx // SI KGS  Pascal.Second (= 1kg/m.s)  Some attempts in france to name this  poiseuille (PI)   (In CGS this is poise (P)
+,{"kinematic viscosity"           ,"kinematic viscosity" ,"v",true}//0x5Fxx SI KGS (m²/s).  CGS the units is stokes (St)
+
+
+,{"","","",false                                                  }//0x60xx
+,{"","","",false                                                  }//0x61xx
+,{"","","",false                                                  }//0x62xx
+,{"","","",false                                                  }//0x63xx
+,{"","","",false                                                  }//0x64xx
+,{"","","",false                                                  }//0x65xx
+,{"","","",false                                                  }//0x66xx
+,{"","","",false                                                  }//0x67xx
+,{"","","",false                                                  }//0x68xx
+,{"","","",false                                                  }//0x69xx
+,{"","","",false                                                  }//0x6Axx
+,{"","","",false                                                  }//0x6Bxx
+,{"","","",false                                                  }//0x6Cxx
+,{"","","",false                                                  }//0x6Dxx
+,{"","","",false                                                  }//0x6Exx
+,{"","","",false                                                  }//0x6Fxx
+
+// electro magnetics and radiation
+,{"electrical current"            ,"ampere"      ,"A"        ,true}// 0x70xx ASAE
+,{"electric charge"               ,"coulomb"     ,"C"        ,true}// 0x71xx ASAE
+,{"" /*quantity of electricity?*/ ,"coulomb"     ,"C"        ,true}// 0x72xx ASAE
+,{"electromotive force"           ,"volt"        ,"V"        ,true}// 0x73xx ASAE
+,{"","","",false} // obs,{"" /*electromotive force?*/     ,"volt"        ,"V"        ,true}// 0x74xx ASAE
+,{"electric capacitance"          ,"farad"       ,"F"        ,true}// 0x75xx ASAE
+,{"electric resistance"           ,"ohm"         ,"O"        ,true}// 0x76xx  (Actually Omega, but O is also used)
+,{"electric conductance"          ,"siemens"     ,"S"        ,true}// 0x77xx ASAE   (I have seen this also as Sm
+,{"electric inductance"           ,"henry"       ,"H"        ,true}// 0x78xx reserved for future used
+,{"magnetic flux"                 ,"maxwell"     ,"Mx"       ,true}// 0x79xx ASAE
+
+,{"magnetic flux density"         ,"tesla"       ,"T"        ,true}// 0x7Axx ASAE
+,{""                              ,""            ,""         ,false}// 0x7Bxx reserved for future used
+,{""                              ,""            ,""         ,false}// 0x7Cxx reserved for future used
+,{"radionuclide activity"         ,"becquerel"   ,"Bq"       ,true}// 0x7Dxx (of a radionuclide)
+,{"absorbed dose"                 ,"gray"        ,"Gy"       ,true}// 0x7Exx specific energy (imparted), kerma
+,{"dose equivalent"               ,"sievert"     ,"Sv"       ,true}// 0x7Fxx
+
+//There can be no units greater than 7Fxx
+,{0,0,0,false} // end of table
+};
+
+//______________________________________________________________________________
+/* Here I want to put special metric units
+
+,{"angstrom"         ,"Å"}
+,{"fermi"            ,"fm"}
+,{"weber"            ,"Wb"}
+
+*/
+//______________________________________________________________________________
+
+Units_Metric_system_label units_metric_system_label_table_pos[25] =
+{{ ""         ,""}   // base
+,{ "deca"     ,"D"}  // 1   // In ASAE da is used
+,{ "hecto"    ,"h"}  // 2
+,{ "kilo"     ,"k"}  // 3
+,{ "10^4"     ,"?"}  // 4   // no standard prefix
+,{ "10^5"     ,"?"}  // 5   // no standard prefix
+,{ "mega"     ,"M"}  // 6
+,{ "10^7"     ,"?"}  // 7   // no standard prefix
+,{ "10^8"     ,"?"}  // 8   // no standard prefix
+,{ "giga"     ,"G"}  // 9
+,{ "10^10"    ,"?"}  // 10  // no standard prefix
+,{ "10^11"    ,"?"}  // 11  // no standard prefix
+,{ "tera"     ,"T"}  // 12
+,{ "10^13"    ,"?"}  // 13  // no standard prefix
+,{ "10^14"    ,"?"}  // 14  // no standard prefix
+,{ "peta"     ,"P"}  // 15
+,{ "10^16"    ,"?"}  // 16  // no standard prefix
+,{ "10^17"    ,"?"}  // 17  // no standard prefix
+,{ "exa"      ,"E"}  // 18
+,{ "10^19"    ,"?"}  // 19  // no standard prefix
+,{ "10^20"    ,"?"}  // 20  // no standard prefix
+,{ "zetta"    ,"Z"}  // 21
+,{ "10^22"    ,"?"}  // 22  // no standard prefix
+,{ "10^23"    ,"?"}  // 23  // no standard prefix
+,{ "yotta"    ,"Y"}  // 24
+};
+
+Units_Metric_system_label units_metric_system_label_table_neg[25] =
+{{"base"     ,""  } // base
+,{ "deci"     ,"d"}  // -1
+,{ "centi"    ,"c"}  // -2
+,{ "milli"    ,"m"}  // -3
+,{ "10^-4"    ,"?"}  // -4    // no standard prefix
+,{ "10^-5"    ,"?"}  // -5    // no standard prefix
+,{ "micro"    ,"µ"}  // -6
+,{ "10^-7"    ,"?"}  // -7    // no standard prefix
+,{ "10^-8"    ,"?"}  // -8    // no standard prefix
+,{ "nano"     ,"n"}  // -9
+,{ "10^-10"   ,"?"}  // -10   // no standard prefix
+,{ "10^-11"   ,"?"}  // -11   // no standard prefix
+,{ "pico"     ,"p"}  // -12
+,{ "10^-13"   ,"?"}  // -13   // no standard prefix
+,{ "10^-14"   ,"?"}  // -14   // no standard prefix
+,{ "femto"    ,"f"}  // -15
+,{ "10^-15"   ,"?"}  // -16   // no standard prefix
+,{ "10^-17"   ,"?"}  // -17   // no standard prefix
+,{ "atto"     ,"a"}  // -18
+,{ "10^-19"   ,"?"}  // -19   // no standard prefix
+,{ "10^-20"   ,"?"}  // -20   // no standard prefix
+,{ "zepto"    ,"z"}  // -21
+,{ "10^-22"   ,"?"}  // -22   // no standard prefix
+,{ "10^-23"   ,"?"}  // -23   // no standard prefix
+,{ "yocto"    ,"y"}  // -24
+};
+//______________________________________________________________________________
+Units_Customary_units_definition units_customary_def_table[] =
+{
+ {UE_Farenheit                     ,"Farenheit"   ,"°F"}
+,{UE_Rankine                       ,"Rankine"     ,"°R"}         // Sometimes °Ra  to distinguish it from the Rømer and Réaumur scales
+,{UE_Farenheit_degree_days         ,"Farenheit degree days", "°F-days"}
+,{UE_grain                               ,"grain"       ,"gr"} // check abbrev
+//NYI// scrupple                          ,"scrupple"    ,"scr"} // check abbrev
+//NYI// penny                             ,"penny"       ,"pny"} // check abbrev
+,{UE_avoirdupois_dram                    ,"dram"        ,"dr"}  // check abbrev
+,{UE_avoirdupois_ounce                   ,"ounce"       ,"oz"}
+//,{UE_avoiddupois_pound                   ,"pound"       ,"lb"}
+,{UE_avoirdupois_pound                   ,"pound"       ,"lb"}
+,{UE_avoirdupois_clove                   ,"clove"       ,"clv"}  // check abbrev
+,{UE_avoirdupois_butchers_stone          ,"butchers stone", "bstn"} // check abbrev
+,{UE_avoirdupois_stone                   ,"stone"       ,"st"}
+,{UE_avoirdupois_tod                     ,"tod"         ,"tod"} // check abbrev
+,{UE_avoirdupois_quarter                 ,"quarter"     ,"qtwt"} // check abbrev
+,{UE_avoirdupois_hundredweight_US        ,"hundredweight(US)","cwt(US)"}
+//NYI ,{UED_avoirdupois_hundredweight_Imperial  ,"hundredweight(imperial)","cwt(imp)"}
+,{UE_avoirdupois_sack                    ,"sack"        ,"sack"} // check abbrev
+,{UE_avoirdupois_kip                     ,"kip"         ,"kip"} // check abbrev
+,{UE_avoirdupois_ton_US                  ,"ton(US)"     ,"tn(US)"}
+//NYI,{UED_avoirdupois_ton_Imperial            ,"ton(imperial)","tn(imp)"}
+,{UE_tower_penny                         ,"penny(tower)","pny(twr)"}  // check abbrev
+,{UE_tower_pound                         ,"pound(tower)","lb(twr)"}
+,{UE_trade_pound                         ,"pound(trade)","lb(trd)"}
+,{UE_trade_stone                         ,"stone(trade)","stn(trd)"} // check abbrev
+,{UE_troy_scruple                        ,"scruple(troy)","scr(ty)"} // check abbrev
+,{UE_troy_pennyweight                    ,"pennweight(troy)","pwt(try)"} // check abbrev
+,{UE_troy_dram                           ,"dram(troy)"  ,"dr(try)"} // check abbrev
+,{UE_troy_ounce                          ,"ounce(troy)" ,"oz(try)"}
+,{UE_troy_pound                          ,"pound(troy)" ,"lb(try)"}
+,{UE_wool_pound                          ,"pound(wool)" ,"lb(wool)"}
+,{UE_wool_clove                          ,"clove(wool)" ,"clv(wool)"}
+,{UE_wool_stone                          ,"stone(wool)" ,"stn(wool)"}
+,{UE_wool_tod                            ,"tod(wool)"   ,"tod(wool)"}
+
+,{UE_inch_linear                   ,"inch"        ,"in"}
+,{UE_nail_linear                   ,"nail"        ,"nl"} // check abbrev
+,{UE_hand_linear                   ,"hand"        ,"hnd"}// check abbrev
+,{UE_link_linear                   ,"link"        ,"lnk"}// check abbrev
+,{UE_foot_linear                   ,"foot"        ,"ft"}
+,{UE_yard_linear                   ,"yard"        ,"yd"}
+,{UE_rod_linear                    ,"rod"         ,"rod"}// check abbrev
+,{UE_pole_linear                   ,"pole"        ,"pl"}   // check abbrev
+,{UE_perch_linear                  ,"perch"       ,"pch"}  // check abbrev
+,{UE_lugg_linear                   ,"lugg"        ,"lg"}  // check abbrev
+,{UE_fathom_linear                 ,"fathom"      ,"fthm"}// check abbrev
+,{UE_chain_linear                  ,"chain"       ,"chn"} // check abbrev
+,{UE_furlong_linear                ,"furlong"     ,"flng"}// check abbrev
+,{UE_statute_mile_linear           ,"statute mile","mile"} // check abbrev
+,{UE_nautical_mile_linear          ,"nautical mile","nt.mile"}
+,{UE_acre                          ,"acre"        ,"acre"}
+,{UE_rood                          ,"rood"        ,"rood"}
+,{UE_arpent_area                   ,"arpent"      ,"arpent"}
+,{UE_virgate                       ,"virgante"    ,"virgante"}
+,{UE_hide                          ,"hide"        ,"hide"}
+,{UE_morgen_scandinavian           ,"morgen(Scandinavian)"  ,"morgen(S)"}
+,{UE_morgen_prussian               ,"morgen(Prussian)"      ,"morgen(P)"}
+,{UE_morgen_dutch                  ,"morgen(Dutch)"         ,"morgen(D)"}
+,{UE_morgen_south_african          ,"morgen(South African)" ,"morgen(SA)"}
+
+,{UE_calorie_energy                ,"calorie"     ,"cal"}
+// can't be used here because this is composite ,{UE_clausius                      ,"clausius"    ,"Cl"}
+,{UE_poundal                       ,"poundal"     ,"lbl"} // check abbrev
+
+,{UE_fluid_gallon_US               ,"gallon(US CU)"      ,"gallon(CU)"}
+,{UE_fluid_gallon_Imperial         ,"gallon(Imperial)"   ,"gallon(Imp)"}
+
+,{UE_dry_gallon_US                 ,"dry gallon(US CU)"     ,"gallon(dry CU)"}
+,{UE_dry_gallon_Imperial           ,"dry gallon(Imperial)"  ,"gallon(dry Imp)"}
+,{UE_dry_bushel_US                 ,"dry bushel(US CU)"     ,"bushel(CU)"}
+,{UE_Langley                       ,"langley"               ,"Ly"}
+,{0,0,0} // End of table
+};
+//______________________________________________________________________________
+Units_Other_definition units_other_def_table[] =
+// These are units codes with other composition
+{{UC_kilometers_per_hour           ,"kph"}
+//NYI ,{UC_gallons_per_minute            ,"gpm"}
+,{UE_miles_per_hour                ,"mph"}
+,{UC_parts_per_hundred             ,"pph"}
+,{UC_parts_per_thousand            ,"ppt"}
+,{UC_parts_per_million             ,"ppm"}
+,{UC_parts_per_billion             ,"ppb"}
+,{UE_Langley                       ,"langley"}   // This is hear because is it a composite unit
+,{UE_Langley                       ,"Langley"}   // conventionally the unit is written lowercase, this is here just incase
+,{UC_watt_second_per_m2            ,"Wsec/m²"}
+,{UC_watt_hour_per_m2              ,"Whr/m²"}
+,{UC_watt_day_per_m2               ,"Wday/m²"}
+,{UC_millibar                      ,"mbar"}
+,{UE_knots                         ,"knot"}
+,{UC_Celcius_degree_days           ,"°Cd"}                                       //140519
+,{0,0}  // End of table
+};
+
+
+nat16 U_identify_units_subcode(const char *i_subcode_label)
+{
+   // special cases
+   if (strcmp(i_subcode_label,"meters") == 0)   return UC_meter;                 //070403
+   if (strcmp(i_subcode_label,"hectare") == 0)  return UC_hectare;
+   if (strcmp(i_subcode_label,"ms") == 0)       return UT_millisecond;
+   if (strcmp(i_subcode_label,"-") == 0)        return UC_unitless;
+   // first scan the UED_standard_definition_table[] for exact matches
+   // These codes almost never have metric system prefixes.
+
+   // We mustn't start at index 0 because unitless is already checked above
+   for (int i = 1; units_standard_definition_table[i].code; i++)
+   {
+      if ((strcmp(units_standard_definition_table[i].description,i_subcode_label) == 0)
+        ||(strcmp(units_standard_definition_table[i].abbreviation,i_subcode_label) == 0))
+         return (nat16)units_standard_definition_table[i].code;
+   }
+
+   // now scan units_generalized_measure_def_table for each metric system prefix
+   for (nat8 p = 0; p < 25 ; p++)
+   {
+      nat8 pos_units_system = p;
+      nat8 neg_units_system = p | (nat8)0x0040;
+      for (int q = 0; units_generalized_measure_def_table[q].quantity; q++)
+      {  if (units_generalized_measure_def_table[q].units_name[0])
+         { {char full_pos[1000]; strcpy(full_pos,units_metric_system_label_table_pos[p].label);
+                        strcat(full_pos,units_generalized_measure_def_table[q].units_name);
+            char abbr_pos[1000]; strcpy(abbr_pos,units_metric_system_label_table_pos[p].abbreviation);
+            strcat(abbr_pos,units_generalized_measure_def_table[q].units_abbreviation);
+            nat16 pos_units_code = (nat16) U_primary(q,pos_units_system);
+            if  ((strcmp(full_pos,i_subcode_label) == 0)
+               ||(strcmp(abbr_pos,i_subcode_label) == 0))
+               return pos_units_code;
+           }
+           {
+            char full_neg[1000]; strcpy(full_neg,units_metric_system_label_table_neg[p].label);
+            strcat(full_neg,units_generalized_measure_def_table[q].units_name);
+            char abbr_neg[1000]; strcpy(abbr_neg,units_metric_system_label_table_neg[p].abbreviation);
+            strcat(abbr_neg,units_generalized_measure_def_table[q].units_abbreviation);
+            nat16 neg_units_code = (nat16)U_primary(q,neg_units_system);
+            if  ((strcmp(full_neg,i_subcode_label) == 0)
+               ||(strcmp(abbr_neg,i_subcode_label) == 0))
+               return neg_units_code;
+            }
+         }
+         // else skip the measure because the units are unknown or NYI.
+      }
+   }
+   for (int cu = 0;units_customary_def_table[cu].subcode; cu++)
+   {
+      if ((strcmp(units_customary_def_table[cu].units_name,i_subcode_label) == 0)
+        ||(strcmp(units_customary_def_table[cu].units_abbreviation,i_subcode_label) == 0))
+         return units_customary_def_table[cu].subcode;
+   }
+   {  // Here check if it is time step units (i.e.  15 minutes)
+      Units_code timestep_base = 0;
+      for (int /*size_t*/ i = 0; i < strlen(i_subcode_label); i++)
+      {  if (strncmp(i_subcode_label+i,"second",6) == 0)     timestep_base = UT_0_seconds;
+         if (strncmp(i_subcode_label+i,"sec",3) == 0)        timestep_base = UT_0_seconds;
+         if (strncmp(i_subcode_label+i,"minute",6) == 0)     timestep_base = UT_0_minutes;
+         if (strncmp(i_subcode_label+i,"min",3) == 0)        timestep_base = UT_0_minutes;
+         if (strncmp(i_subcode_label+i,"hour",4) == 0)       timestep_base = UT_0_hours;
+         if (strncmp(i_subcode_label+i,"hr",2) == 0)         timestep_base = UT_0_hours;
+         if (timestep_base)
+         {  nat32 count = cstr_to_nat32(i_subcode_label,10);
+            return (nat16)(timestep_base+count);
+         }
+      }
+   }
+   return 0xFFFF; // unable to identify units
+}
+//_2002-09-06___________________________________________________________________
+Units_code units_identify_code(const char *raw_units_label)
+{
+   char corrected_units_label[100];
+   // Some fonts incorrectly display the masculine ordinal character
+   // This supposed to look like a underlined superscript letter o.
+   // Unfortunately some fonts have omitted the underline so it
+   // looks like the degree symbol.
+   for (int i = 0; raw_units_label[i] != 0; i++)                                 //040427
+   {  corrected_units_label[i] = raw_units_label[i];
+      corrected_units_label[i+1] = 0;
+      if ((nat8)corrected_units_label[i] == 0xBA)
+          corrected_units_label[i] = (char)0xB0;                                 //070209
+   }
+   // unconventional abbreviations
+   for (int i = 0; units_other_def_table[i].code; i++)
+   {
+      if (strcmp(units_other_def_table[i].abbreviation,corrected_units_label) == 0)
+         return  units_other_def_table[i].code;
+   }
+   if ((strstr(raw_units_label,"YYYY") ||strstr(raw_units_label,"yyyy")
+       || strstr(raw_units_label,"YY") ||strstr(raw_units_label,"yy"))
+      && (strstr(raw_units_label,"MM") || strstr(raw_units_label,"mm")
+       || strstr(raw_units_label,"DDD") || strstr(raw_units_label,"ddd")))
+         return UT_date;                                                         //060220
+      // Date units YYYY/MM/DD in any order with any separator or YYYYDDD
+   if ((strstr(raw_units_label,"HH") ||strstr(raw_units_label,"hh"))
+      && (strstr(raw_units_label,"MM") || strstr(raw_units_label,"mm")))
+         return UT_time;                                                         //060220
+         // Date units YYYY/MM/DD in any order with any separator or YYYYDDD
+         //               If units label is a composition, it will have
+         //               * · . × / ÷ operators
+   bool in_sec = false;
+   char primary_label[100];   primary_label[0] = 0;     int pi = 0;
+   char secondary_label[100]; secondary_label[0] = 0;   int si = 0;
+   bool div_secondary  = false;
+   for (int li = 0; corrected_units_label[li] ; li++)
+   {  char lab_i = corrected_units_label[li];
+      if (!in_sec)
+      {  switch (lab_i)
+         {  case '*' : case '·' : case '.' : case '×' :
+            {  // The secondary is multiplied
+               in_sec = true;
+            } break;
+            case '/' : case '÷' :
+            {
+               div_secondary = true;
+               in_sec = true;
+            } break;
+            default :
+            {  primary_label[pi++] = lab_i;
+               primary_label[pi] = 0;
+            } break;
+         }
+      } else
+      {  secondary_label[si++] = lab_i;
+         secondary_label[si] = 0;
+      }
+   }
+   nat16 primary_units = U_identify_units_subcode(primary_label);
+   nat16 secondary_units = 0;
+   if (in_sec)
+      secondary_units = U_identify_units_subcode(secondary_label);
+   Units_code units = (div_secondary)
+   ? U_a_per_b(primary_units,secondary_units)                                    //040715
+   : U_a_b(primary_units,secondary_units);                                       //040715
+   if (!units || (units == 0xFFFF) /*unidentified*/ )                            //050413
+      // this may be a hexidecimal units code (I used to use in format files)
+   {  bool hex = true;                                                           //050413
+      for (size_t i = 0; i < strlen(raw_units_label); i++)                       //050413
+      {
+         char digit =  raw_units_label[i];
+         bool ishexdigit = ((digit >= '0') && (digit <='9')) || ((digit >= 'a') && (digit <= 'f')) || ((digit >= 'A') && (digit <= 'F')) ;//  isxdigit() isxdigit isn't working!;
+         if (ishexdigit == 0) hex = false; }                                     //050413
+      if (hex) units = cstr_to_nat32(raw_units_label,16);                        //050413
+   }
+   return units;
+}
+//_2002-09-06__________________________________________________________________/
+Units_code units_identify_code(const wchar_t *units_label)
+{  // Currently units labels are always ASCII, this is provided for libraries that use wide strings
+   char units_label_ASCII[100];
+   for (int i = 0; (i <= 100) && units_label[i]; i++)
+       units_label_ASCII[i] = (char)units_label[i];
+   return CORN::units_identify_code(units_label_ASCII);
+};
+//_2009-03-13__________________________________________________________________/
+
+

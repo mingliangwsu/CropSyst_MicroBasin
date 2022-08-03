@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">Default.Personality</Option>
+			<Option Name="ProjectType"></Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{A63CB03B-7379-484E-9971-7244DA240C14}</Option>
+		</Option>
+	</PersonalityInfo>
+	<Default.Personality>  <Projects>
+      <Projects Name="corn_complete_static.lib">..\..\..\corn\build\BDS\corn_complete_static.bdsproj</Projects>
+      <Projects Name="application_static.lib">..\..\..\corn\application\BDS\application_static.bdsproj</Projects>
+      <Projects Name="container_static.lib">..\..\..\corn\container\BDS\container_static.bdsproj</Projects>
+      <Projects Name="datetime_static.lib">..\..\..\corn\datetime\BDS\datetime_static.bdsproj</Projects>
+      <Projects Name="file_sys_static.lib">..\..\..\corn\file_sys\BDS\file_sys_static.bdsproj</Projects>
+      <Projects Name="format_static.lib">..\..\..\corn\format\BDS\format_static.bdsproj</Projects>
+      <Projects Name="parameters_static.lib">..\..\..\corn\parameters\BDS\parameters_static.bdsproj</Projects>
+      <Projects Name="common_sim_static.lib">..\..\..\common\simulation\BDS\common_sim_static.bdsproj</Projects>
+      <Projects Name="CS_explorer.exe">CS_explorer.bdsproj</Projects>
+      <Projects Name="Targets">corn_complete_static.lib application_static.lib container_static.lib datetime_static.lib file_sys_static.lib format_static.lib parameters_static.lib common_sim_static.lib CS_explorer.exe</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+</BorlandProject>

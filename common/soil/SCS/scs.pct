@@ -1,0 +1,17 @@
+char *TL_Hydrologic_condition =" translate(L_Hydrologic_condition );
+char *TL_Poor =" translate(L_Poor );
+char *TL_Fair =" translate(L_Fair );
+char *TL_Good =" translate(L_Good );
+char *TL_Hydrologic_group =" translate(L_Hydrologic_group );
+char *TL_Land_treatment =" translate(L_Land_treatment );
+char *TL_Fallow =" translate(L_Fallow );
+char *TL_Row_crops =" translate(L_Row_crops );
+char *TL_Small_grain =" translate(L_Small_grain );
+char *TL_Close_seed_legumes =" translate(L_Close_seed_legumes );
+char *TL_Pasture =" translate(L_Pasture );
+char *TL_Dirt_road =" translate(L_Dirt_road );
+char *TL_Paved_road =" translate(L_Paved_road );
+char *TL_Farmstead =" translate(L_Farmstead );
+char *TL_Straight_Row =" translate(L_Straight_Row );
+char *TL_Contoured =" translate(L_Contoured );
+char *TL_Terraced =" translate(L_Terraced );

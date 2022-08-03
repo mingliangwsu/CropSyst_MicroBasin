@@ -1,0 +1,97 @@
+#include "CS_suite/observation/CS_emanator.h"
+#include <assert.h>
+
+#include <iostream>
+namespace CS {
+//______________________________________________________________________________
+Emanator::Emanator
+(nat32                ID_
+,const std::string   &instance_name_
+,const std::string   &ontology_
+,bool                 ephemeral_
+,const Emanator      *context_
+,bool                 ontology_root_)                                            //160626
+: CORN::Enumeration()
+, ephemeral             (ephemeral_)                                             //160616
+, ID                    (ID_)
+, instance_name         (instance_name_)
+, ontology              (ontology_)
+, context               (context_)
+, ontology_root         (ontology_root_)                                         //160626
+, status                (normal_status)
+{
+//   assert(context != this);
+}
+//______________________________________________________________________________
+Emanator::~Emanator()
+{
+//   std::cout << "deleting:" << instance_name.c_str() << std::endl;
+}
+//______________________________________________________________________________
+nat16 Emanator::list_ontology_path(CORN::Text_list &qualified_ontology)    const
+{  if (context && !is_ontology_root())
+      context->list_ontology_path(qualified_ontology);
+   if (ontology.length())      qualified_ontology.add_string(ontology);
+   return qualified_ontology.count();
+}
+//_2016-06-10___________________________________________________________________
+nat16 Emanator::list_instance_path(CORN::Text_list &qualified_instance)    const
+{  if (context) context->list_instance_path(qualified_instance);
+   if (instance_name.length()) qualified_instance.add_string(instance_name);
+   return qualified_instance.count();
+}
+//_2016-06-10___________________________________________________________________
+Emanators::Emanators()
+: CORN::Enumeration_list(true)
+{}
+//_2015-08-18___________________________________________________________________
+Emanator &Emanators::know
+(nat32 recorder_ID
+,const std::string &instance_name
+,const std::string &ontology
+,bool  ephemeral                                                                 //160616
+,const Emanator    *context
+,bool  is_ontology_root
+)
+{  Emanator *new_emanator = new Emanator
+      (recorder_ID,instance_name,ontology,ephemeral,context,is_ontology_root);
+   take(new_emanator);
+   return *new_emanator;
+}
+//_2015-08-18___________________________________________________________________
+nat32 Emanators::know_deletion(nat32 recorder_ID)                     cognition_
+{
+   Emanator *identified_recorder = dynamic_cast<Emanator *>
+      (find_nat32(recorder_ID));
+   if (identified_recorder)
+       identified_recorder->set_status(Emanator::deleted_status);
+   return count();
+}
+//_2015-08-18___________________________________________________________________
+Emanator::Status Emanators::get_status_of(nat32 recorder_ID)               const
+{  Emanator::Status identified_status = Emanator::unknown_status;
+   const Emanator *identified_recorder = dynamic_cast<const Emanator *>
+      (find_nat32(recorder_ID));
+   if (identified_recorder)
+      identified_status = identified_recorder->get_status();
+   return identified_status;
+}
+//_2015-08-18___________________________________________________________________
+Emanators *emanators_global;
+Emanators &provide_emanators()
+{
+   if (!emanators_global)
+      emanators_global = new Emanators;
+   return *emanators_global;
+}
+//_2015-09-17_2015-08-22________________________________________________________
+Emanators *inactive_emanators_global;
+Emanators &provide_inactive_emanators()
+{
+   if (!inactive_emanators_global)
+      inactive_emanators_global = new Emanators;
+   return *inactive_emanators_global;
+}
+//_2016-06-13___________________________________________________________________
+
+} // namespace CS

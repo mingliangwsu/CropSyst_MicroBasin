@@ -1,0 +1,203 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="c:\cs_suite_4\Cropsyst\soil_convertor.exe"/>
+    <OBJFILES value="C:\temp\obj\CropSyst\GUI\bcb5\\soil_convertor.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_soil_convertor_VCL_BCB5.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\geolocation.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\layering.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\SCS.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\static_phrases.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_generator.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\texture.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\texttri.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\pedotransfer_saxton_1986.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\USDA_texture.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\USA_state_FIPS_code.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\STATSGO_soil_convertor.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\STATSGO_soil_processor.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\txtrhydr.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_param_with_STATSGO.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_param_V4.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_param_class.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_param.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_param_struct.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\domains.obj"/>
+    <RESFILES value="soil_convertor.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) form_soil_convertor_VCL_BCB5.dfm"/>
+    <LIBFILES value="..\..\..\..\..\..\ICASA\library\BCB5\ICASA_static.lib 
+      ..\..\..\..\..\..\STATSGO\library\BCB5\statsgo_static.lib 
+      C:\temp\lib\BCB5\release\corn_complete_static.lib 
+      C:\temp\lib\BCB5\release\format_static.lib"/>
+    <LIBRARIES value="K102_R51.lib"/>
+    <SPARELIBS value="Vcl50.lib K102_R51.lib VCLX50.lib tmsc5.lib VCLDB50.lib TEE50.lib 
+      VCLSMP50.lib VCLBDE50.lib AutoControls.lib BCBSMP50.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi TeeQR50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi 
+      Inet50.bpi NMFast50.bpi dclocx50.bpi bcb2kaxserver50.bpi Tee50.bpi 
+      tmsc5.bpi VCLSMP50.bpi tmsxlsc5.bpi VCLIB50.bpi TeeUI50.bpi TeeDB50.bpi 
+      AutoControls.bpi"/>
+    <PATHCPP value=".;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\USDA\NRCS\soil\survey"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="STORE_SOIL_FILES;_DEBUG;CS_VERSION=4"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="soil_convertor.cpp"/>
+    <INCLUDEPATH value="..\..\..\..\..\..\USDA\NRCS\soil\survey;..;..\..\..\..\..\..\cropsyst\cpp\soil;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\common;..\..\..\..\..\..\USDA\NRCS;..\.."/>
+    <LIBPATH value="..\..;..\..\..\..\..\..\USDA\NRCS\soil\survey;..;..\..\..\..\..\..\cropsyst\cpp\soil;$(BCB)\Projects\Bpl;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\..\..\..\components\AutoControls\combined;..\..\..\..\..\..\component;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\..\cropsyst\components\Other\ShellShock\source"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; -N0&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; 
+      -$Y+ -$W -$O- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-I&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[Excluded Packages]
+$(BCB)\Projects\Bpl\MPCommonLibC5D.bpl=Mustang Peak Common Library DesignTime Package
+$(BCB)\Projects\Bpl\ThemeManagerC5D.bpl=Soft Gems Theme Manager
+
+[HistoryLists\hlIncludePath]
+Count=30
+Item0=..\..\..\..\..\..\USDA\NRCS\soil\survey;..;..\..\..\..\..\..\cropsyst\cpp\soil;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\common;..\..\..\..\..\..\USDA\NRCS;..\..
+Item1=..;..\..\..\..\..\..\cropsyst\cpp\soil;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\common;..\..\..\..\..\..\USDA\NRCS;C:\dev\CS_suite\CropSyst\convert\soil
+Item2=..;..\..\..\..\..\..\cropsyst\cpp\soil;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\common;..\..\..\..\..\..\USDA\NRCS;..\..\..
+Item3=..;..\..\..\..\..\..\cropsyst\cpp\soil;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\common;..\..\..\..\..\..\USDA\NRCS;C:\dev\CS_suite\CropSyst\convert
+Item4=..;..\..\..\..\..\..\cropsyst\cpp\soil;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\common;..\..\..\..\..\..\USDA\NRCS
+Item5=..\;..;..\..\..\..\..\..\cropsyst\cpp\soil;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\common;C:\dev\USDA\NRCS
+Item6=..\;..;..\..\..\..\..\..\cropsyst\cpp\soil;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\common
+Item7=..\..\..\cpp\soil;..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\components\AutoControls;c:\dev\common
+Item8=..\..\..\cpp\soil;..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\components\AutoControls
+Item9=..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;C:\dev\components\Other\ShellShock\source_BCB5;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\components\AutoControls
+Item10=..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\components\AutoControls
+Item11=..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\components\AutoControls
+Item12=..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\components\AutoControls
+Item13=..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;..\..\..\..\components\AutoControls
+Item14=..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;C:\dev\components\AutoControls
+Item15=..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter
+Item16=..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter;c:\dev
+Item17=C:\dev\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter
+Item18=..\..\..\..\components\TMS_4.1\source;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter
+Item19=C:\dev\components\TMS_4.1\source;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter
+Item20=..\..\..\..\components\TMS;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\TMS_4.1\source\XlsAdapter
+Item21=..\..\..\..\components\TMS;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;C:\dev\components\TMS_4.1\source\XlsAdapter
+Item22=..\..\..\..\components\TMS;..\..\..\..\ICASA\weather;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item23=..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item24=..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item25=..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item26=$(BCB)\include;$(BCB)\include\vcl;C:\dev
+Item27=..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;..\..\..\..\Common\geolocation;..\..\..\..\IBSNAT\soil;..\..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item28=C:\dev\Common\geolocation;C:\dev\IBSNAT\soil;c:\dev\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item29=..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+
+[HistoryLists\hlLibraryPath]
+Count=20
+Item0=..\..;..\..\..\..\..\..\USDA\NRCS\soil\survey;..;..\..\..\..\..\..\cropsyst\cpp\soil;$(BCB)\Projects\Bpl;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\components\AutoControls\combined;..\..\..\..\..\..\component;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\..\cropsyst\components\Other\ShellShock\source
+Item1=..;..\..\..\..\..\..\cropsyst\cpp\soil;$(BCB)\Projects\Bpl;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\components\AutoControls\combined;..\..\..\..\..\..\component;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\..\cropsyst\components\Other\ShellShock\source
+Item2=..\;..;..\..\..\..\..\..\cropsyst\cpp\soil;$(BCB)\Projects\Bpl;..\..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\..\STATSGO\soil_processor;..\..\..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\..\..\components\AutoControls\combined;..\..\..\..\..\..\component;..\..\..\..\..\..\STATSGO\soil_generator;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\ICASA\weather;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\ICASA;..\..\..\..\..\..\ICASA\soil;..\..\..\..\..\..\components\Other\ShellShock\source;..\..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\..\Common\soil;..\..\..\..\..\..\Common\parameters;..\..\..\..\..\..\IBSNAT;..\..\..\..\..\..\IBSNAT\soil;..\..\..\..\..\..\cropsyst\cpp;..\..\..\..\..\..\Common\geolocation;..\..\..\..\..\..\cropsyst\Common\geolocation;..\..\..\..\..\..\cropsyst\IBSNAT\soil;..\..\..\..\..\..\cropsyst\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\..\cropsyst\components\Other\ShellShock\source
+Item3=..\..\..\cpp\soil;$(BCB)\Projects\Bpl;..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\components\AutoControls\combined;..\..\..\..\component;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\components\AutoControls;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item4=$(BCB)\Projects\Bpl;..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\components\AutoControls\combined;..\..\..\..\component;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\components\AutoControls;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item5=..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\components\AutoControls\combined;..\..\..\..\component;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\components\AutoControls;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item6=..\..\..\..\common\soil\hydrology;..\..\..\..\STATSGO\soil_processor;..\..\..\..\STATSGO\soil_convertor;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\components\AutoControls\combined;..\..\..\..\component;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\components\AutoControls;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item7=..\..\..\..\components\AutoControls\combined;..\..\..\..\component;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\components\AutoControls;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item8=..\..\..\..\component;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\components\AutoControls;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item9=..\..\..\..\component;..\..\..\..\STATSGO\soil_generator;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;C:\dev\components\AutoControls;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item10=C:\dev\components\TMS_4.1\source_BCB5;..\..\..\..\ICASA\weather;..\..\..\..\components\autocontrols;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item11=..\..\..\..\components\TMS_4.1\source;..\..\..\..\ICASA\weather;..\..\..\..\components\autocontrols;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item12=C:\dev\components\TMS_4.1\source;..\..\..\..\ICASA\weather;..\..\..\..\components\autocontrols;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item13=..\..\..\..\components\TMS;..\..\..\..\ICASA\weather;..\..\..\..\components\autocontrols;..\..\..\..\ICASA;..\..\..\..\ICASA\soil;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item14=..\..\..\..\components\Other\ShellShock\source;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\parameters;..\..\..\..\IBSNAT;..\..\..\..\IBSNAT\soil;..\..\..\cpp;..\..\..\..\Common\geolocation;..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item15=..\..\..\Common\geolocation;..\..\..\IBSNAT\soil;..\..\..\IBSNAT;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item16=$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\Other\ShellShock\source
+Item17=$(BCB)\lib\obj;$(BCB)\lib;components\Other\ShellShock\source
+Item18=$(BCB)\lib\obj;$(BCB)\lib;C:\dev\components\Other\ShellShock\source
+Item19=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=7
+Item0=STORE_SOIL_FILES;_DEBUG;CS_VERSION=4
+Item1=STORE_SOIL_FILES;xOLD_BINARY_FILE;_DEBUG
+Item2=STORE_SOIL_FILES;xOLD_BINARY_FILE
+Item3=_DEBUG;STORE_SOIL_FILES;xOLD_BINARY_FILE
+Item4=_DEBUG;STORE_SOIL_FILES;OLD_BINARY_FILE
+Item5=_DEBUG;STORE_SOIL_FILES
+Item6=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=2
+Item0=C:\temp\obj\CropSyst\GUI\bcb5\
+Item1=C:\temp\obj\CropSyst\GUI\bcb5
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=c:\cs_suite_4\Cropsyst\
+Item1=c:\cs_suite_4\Cropsyst
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=&quot;C:\Simulation\Projects\test\Database\Soil&quot; 
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

@@ -1,0 +1,146 @@
+#include "UED/convert/convert_response.h"
+#include "corn/OS/file_system_engine.h"
+//______________________________________________________________________________
+Convert_response_data_record::Convert_response_data_record()
+:CORN::Data_record("convert")
+,UED_filename("")
+,target_filename("")
+,format_filename("")
+,UED_filenames()
+,calculate_daily(true)
+,location_info_imported(false)
+,use_station_name(false)
+,format("")
+,subformat("")
+,units_system("intrinsic")
+,year_earliest(0)
+,year_latest(9999)
+,date_time_earliest(0.0)
+,date_time_latest(9999365.999999)
+,offset_years(0)
+,prefix("")
+,vapor_pressure_calculation(0)
+,net_radiation_option(0)
+,geolocation_is_provided_by_caller(false)
+,geolocation()
+,allow_16bit_floats_in_UED(false)                                                //150307
+{}
+//______________________________________________________________________________
+bool Convert_response_data_record::expect_structure(bool for_write)
+{
+   bool expected = CORN::Data_record::expect_structure(for_write);
+   expect_string  ("command"           ,operation,255);   // deprecated
+   expect_string  ("operation"         ,operation,255);
+   expect_file_name("UED_filename"     ,UED_filename);        // Used mainly (only?) for export (on import there could be multiple stations (each generating their own UED file)
+   expect_string  ("UED_filenames"     ,UED_filenames,2048);
+   expect_file_name("target_filename"  ,target_filename);        // Target filename (text file)
+   expect_string  ("station_ID_filter" ,station_IDs_filter,1024);
+   expect_file_name("format_filename"  ,format_filename);     // I.e. TDF file
+   expect_string  ("format"            ,format,255);
+   expect_string  ("subformat"         ,subformat,255);
+   expect_string  ("units_system"      ,units_system,20);
+   set_current_section("years");
+      expect_int16   ("earliest"          ,year_earliest);
+      expect_int16   ("latest"            ,year_latest);
+      expect_int16   ("offset"            ,offset_years);
+   set_current_section("date_times");
+      expect_float64 ("earliest"          ,date_time_earliest);
+      expect_float64 ("latest"            ,date_time_latest);
+   set_current_section("import");
+      expect_bool    ("calculate_daily"   ,calculate_daily);
+      expect_bool    ("use_station_name"  ,use_station_name);
+   set_current_section("export");
+      expect_string("prefix",prefix,255);
+      expect_bool    ("allow_16bit_floats",allow_16bit_floats_in_UED);           //150307
+   set_current_section("status");
+      expect_bool    ("location_info_imported",location_info_imported);
+   set_current_section("DYRESM");
+      expect_int16("vapor_pressure_calculation",vapor_pressure_calculation);
+      expect_int16("net_radiation_option",net_radiation_option);
+   if (!for_write || (for_write && geolocation_is_provided_by_caller))
+   {
+      set_current_section("geolocation");
+      geolocation.setup_structure(*this,for_write);
+   }
+   structure_defined = true;                                                     //120314
+   return expected;                                                              //161103
+}
+//_1998-04-05___________________________________________________________________
+nat32 Convert_response_data_record::read_from_command_line
+(int argc, const char *argv[]
+,bool &response_file_or_command_line_specified_geolocation_parameters) modification_
+{
+   nat32 parameters_encountered = 0;                                             //140614
+   expect_structure(false);
+   CORN::VV_section *current_section = set_current_section(get_primary_section_name()); // The primary section is always/usually "convert".
+   for (int argi = 1; argi < argc; argi++)
+   {  std::string key("");
+      std::string value("");
+      std::string buffer(argv[argi]);                                            //090313
+      size_t equal_pos = buffer.find("=");                                       //070424
+      if (equal_pos != std::string::npos)
+      {  key.assign(buffer,0,equal_pos);
+         value.assign(buffer,equal_pos+1,buffer.length());
+         if (current_section)
+         {  bool expected_entry = current_section->set_entry(key.c_str(),value.c_str(),false);
+            if (expected_entry)
+               parameters_encountered ++;                                        //140614
+            else
+            {  CORN::VV_section *geolocation_section = set_current_section("geolocation");
+               if (geolocation_section && geolocation_section->entries.find_string(key))
+               {  if (geolocation_section->set_entry(key.c_str(),value.c_str(),false /*must be expected entry*/))
+                  {  response_file_or_command_line_specified_geolocation_parameters = true;
+                     parameters_encountered ++;                                  //140614
+                  }
+                  else  std::cerr << "Unrecognized parameter:" << key << "=" << value << std::endl;
+                                 //090622 not sure if I want to return false in this case
+               } else
+                     std::cerr << "Unrecognized parameter:" << key << "=" << value << std::endl;
+                                 //090622 not sure if I want to return false in this case
+            } // else geolocation section has not been bound (should never happen, we should already have this setup)
+         } // else primary section has not been bound (should never happen, we should already have this setup)
+      } // else this command line parameter is not of the form:  key=value so we ignore it.
+      else
+      {  size_t lbracket_pos = buffer.find("[");
+         if (lbracket_pos == 0)
+         {  size_t rbracket_pos = buffer.find("]");
+            std::string section(buffer,lbracket_pos+1,rbracket_pos-1);
+            current_section = set_current_section(section.c_str());
+         }
+         else
+         {  CORN::OS::File_name_concrete aribtrary_filename(buffer);
+            if (aribtrary_filename.has_extension_ASCII("UED"))                   //160606
+            {
+               UED_filename.set_string(buffer);
+               if (operation.length() == 0) operation = "export";
+            }
+            else
+            if (CORN::OS::file_system_engine.exists(aribtrary_filename))
+            {
+               /*160606
+               if (aribtrary_filename.has_extension_ASCII("UED"))
+               {
+                  if (operation.length() == 0) operation = "export";             //160516
+                     // If operation is not specified assume we are emulating
+                     // the V4 export used for CropSyst V4.
+                  UED_filename.set_string(buffer);
+               }
+               else
+               */
+               if (aribtrary_filename.has_extension_ASCII("TDF"))                //160516
+               {
+                  format_filename.set_string(buffer);                            //160516
+               }
+               else // assume it is target filename
+                  target_filename.set_string(buffer);
+            } else
+            if ((operation=="export") && aribtrary_filename.has_extension_any()) //160615
+                  target_filename.set_string(buffer);
+         }
+      }
+   }
+   if (date_time_earliest == 0)                                                  //141013
+       date_time_earliest = 1;                                                   //141013
+   return parameters_encountered;
+}
+//_2014-06-14___________________________________________________________________

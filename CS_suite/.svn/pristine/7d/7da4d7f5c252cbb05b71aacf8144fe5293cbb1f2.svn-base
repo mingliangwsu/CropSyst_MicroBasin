@@ -1,0 +1,464 @@
+#include "CS_suite/simulation/CS_simulation_engine.h"
+#include "CS_suite/observation/CS_UED_recorder.h"
+#include "CS_suite/file_system/CS_file_ext.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/data_source/vv_file.h"
+#ifdef _Windows
+#  define dynamic_library_file_extension "DLL"
+#else
+#  define dynamic_library_file_extension "so"
+   // I think linux dynamic objects have so extension
+#endif
+#ifdef _DEBUG
+CORN::Date simulation_today;
+#endif
+namespace CS {
+//______________________________________________________________________________
+Simulation_engine::Simulation_engine
+(Command_options_data_source &command_line_options_)                             //160826
+: Simulation_element_composite(today_driving)                                    //150612
+, CWD                         ()                                                 //160902
+, control_filename_extension  (L"CS_control")                                    //160505
+//161116 , file_discovery              ()                                                 //160114
+, context_discovery           ()                                                 //161118
+, today_driving               (1)                                                //090309
+, simulation_units            (sub_elements)
+, databases                   (0)
+, command_line_options        (command_line_options_)                            //160826
+{  today.format.set_ordering_styles_separator(CORN_date_DEFAULT_ORDERING,CORN_date_DEFAULT_STYLES,'-',true);
+}
+//_2013-06-18___________________________________________________________________
+const char *Simulation_engine::get_key()                                   const
+{  // At this time there is not specific simulation scenario
+   // so I could return the simulation control (file) name
+   return "";
+}
+//_2015-09-17___________________________________________________________________
+bool Simulation_engine::setup_control_options()                    modification_
+{
+   find_and_compose_parameters                                                   //160308_160222
+      (get_control_data_rec(),get_control_file_name_extension());
+   return true;
+}
+//_2016-02-22___________________________________________________________________
+bool Simulation_engine::setup_scenario_options()                   modification_
+{
+   find_and_compose_parameters
+      (get_scenario_data_rec(),get_scenario_file_name_extension());
+   // setup from path is last because the scenario we loaded
+   // could be a template scenarios
+   #ifdef ABANDONED
+   //161101 the searching needed for this is taking too long.
+   define_scenario_from_start_path();                                            //161101
+   #endif
+   return true;
+}
+//_2016-02-22___________________________________________________________________
+bool Simulation_engine::initialize()                             initialization_
+{
+   /*NYI
+   if (find_and_load_plugins())
+      // Inspectors provide access the variable of other Simulation elements
+      simulation_control.inspection_levels &= INSPECTION_CONTINUOUS_BIT;
+   */
+
+   bool initialized = Simulation_element_composite::initialize();                //150929
+   // I currently assume we always want UED output.
+   // (May need to move this to start())
+   return initialized;                                                           //160222
+}
+//_2015-09-19__________________________________________________________________/
+bool Simulation_engine::start()                                    modification_
+{  bool started = true;
+   if (ref_simulation_control().UED_recording)                                   //160621
+      provide_global_UED_recorder(get_output_directory_name());                  //160614
+   // We need intialized done first in start so the output directory has been setup
+
+   // Note that the start date is always the target start date
+   const CORN::Date &start_date = ref_start_date();                              //160222
+   const CORN::Date &stop_date  = ref_stop_date();                               //160222
+   today_driving.set(start_date);                                                //160222_040510
+   Simulation_element_composite::start();
+   {  Synchronization rel_to_start_date_sync(SIMULATION_BEGIN_DATE,0);           //030605_110505 moved from run()
+      if (event_scheduler)
+      event_scheduler->synchronize(rel_to_start_date_sync,start_date);           //160222_131101_031010
+   }
+   {  Synchronization rel_to_end_date_sync(SIMULATION_END_DATE,0);               //030605
+      if (event_scheduler)
+      event_scheduler->synchronize(rel_to_end_date_sync,stop_date);              //160222_131101_031010
+   }
+   if (start_date.get_DOY() != 1)                                                //150701
+      started &= start_year();
+      // The simulation period might not actually start Jan 1
+      // but we typically will want annual setup
+
+   // At this point all subelements existing throughout the duration
+   // of the simulation should have been instanciated so we can setup
+   // their inspection.
+   // Subelements may instanciate ephemeral objects and would be responsible
+   // for initiating inspector rendition of those objects.
+   // Ephemeral objects (I.e. CropSyst Crop)
+   // generally will not be subject to annual inspection.
+
+   #if (CS_VERSION >= 5)
+   // For now I am just passing the key but this would probably
+   // be the scenario description.
+   //160606 for (nat8 level = 0; level < COUNT_inspection; level++)
+   //160606       if (inspection.inspector_tallies[level])
+
+         render_inspectors
+            (provide_examination_global().inspectors                             //161202
+            ,0 //We dont need to identify the instance but it would be the scenario name
+            ,ref_simulation_control().description.brief.c_str()
+            ,CORN::value_statistic); //The engine is the upper most context
+   #endif
+
+   // NYI inform plugins of inspectors
+
+   return started;
+}
+//_2009-04-09___________________________________________________________________
+bool Simulation_engine::stop()                                     modification_
+{  bool stopped = true;
+   stopped &= Simulation_element_composite::stop();
+   if (UED_recorder_global) stopped &= UED_recorder_global->stop();              //160621
+   return stopped;
+}
+//_2016-06-14___________________________________________________________________
+nat16 Simulation_engine::find_and_compose_parameters
+(modifiable_ CORN::Data_record &parameter_data_rec
+,const std::wstring &file_extension)                               modification_
+{
+   CORN::Unidirectional_list parameter_file_list;
+   nat16 scenario_files_count = context_discovery //161116 file_discovery
+      .find_files_with_extension_wstring
+      (file_extension
+      ,parameter_file_list
+      ,CORN::OS::File_system::superdirectory_recursion_inclusive);
+      // Starting in the leaf, directories in the path are recursively
+      // searched for files matching the specified extension.
+      // File names are appended to the file list as the function
+      // recurses back down the path from the logical root.
+      // The recursion up the path stops at the logical root.
+      // Typically one will use superdirectory_recursion_inclusive
+      // so files in the root are included in the search.
+      // \returns the number of files found with matching extension
+      // that were added to the file_list.
+      // Note that there may be multiple files matching the extension in
+      // any directory of the path.
+   nat16 parameter_files = context_discovery //161116 file_discovery
+      .compose_parameters_from_VV_files_to_data_rec
+      (parameter_data_rec,parameter_file_list);
+   return parameter_files;                                                        //160225
+}
+//_2016-03-08___________________________________________________________________
+bool Simulation_engine::apply_command_line_arguments()             modification_
+{  bool applied = true;
+   command_line_options.get(mod_simulation_control());                           //160826
+   Arguments *arguments = get_arguments();
+   if (arguments)
+   {
+      command_line_options.get(*arguments);   // get_arguments                   //160826
+//160826      arguments->get(mod_simulation_control());                                  //160621
+      verbose = arguments->verbose;                                              //160311
+   }
+   return applied;
+}
+//_2016-02-22___________________________________________________________________
+// The plugin system is currently intended for version 5
+// but I may add it also to V4
+nat8 Simulation_engine::find_and_load_plugins()                       provision_
+{
+   // plugin could be in the scenario directory or any parent directory
+   // (I.e. all scenarios is a project might want to apply the the same plugin(s).)
+
+   nat8 plugins_found = 0;
+   CORN::Unidirectional_list DLL_filenames;
+   nat32 DLLs_found = 0;
+   #ifdef _Windows
+   // In _Windows DLLs for CS simulations are likely to be shortcuts,
+   // In this case we will resolve.
+   CORN::Unidirectional_list DLL_shortcut_filenames;
+   CORN::Inclusion DLL_pattern("*.DLL*",true);
+   nat32 DLL_shortcuts_found = CORN::OS::file_system_engine.list_DENs
+      (provide_scenario_directory_name()
+      ,&DLL_shortcut_filenames,0,DLL_pattern
+      ,CORN::OS::File_system::superdirectory_recursion_inclusive);
+/*161105
+   nat32 DLL_shortcuts_found = CORN::OS::file_system_engine.list_file_names_deprecated
+      (provide_scenario_directory_name()
+      ,DLL_shortcut_filenames
+      ,CORN::OS::File_system::superdirectory_recursion_inclusive
+      ,CORN::OS::Directory_entry_name::full_qualification
+         // plugin could be in the scenario directory or any parent directory
+         // (I.e. all scenarios is a project might want to apply the
+         //  the same plugin(s).)
+      ,L"*.DLL"
+      ,L"lnk"
+      );
+*/
+   FOR_EACH_IN(DLL_shortcut,CORN::OS::File_name,DLL_shortcut_filenames,each_shortcut)
+   {
+      CORN::OS::File_name *actual_DLL_name = CORN::OS::file_system_engine.render_resolved_shortcut_or_assume_actual(*DLL_shortcut);
+      DLL_filenames.append(actual_DLL_name);
+   } FOR_EACH_END(each_shortcut)
+   #endif
+   // In Linux, dynamic libraries for CS simulations will generally be soft or hard links
+   // so it is not necessary to resolve links.
+   // In both Windows and Linux the user could have put the actual DLL file
+   // in the target directory tree although this is not recommended.
+  #ifndef __linux__
+
+   // I have not yet checked pluggins for Linux
+   // This does compile with Qt compiler but gcc has problems linking
+   // on the ThinkMates so I have disabled this until I needed it.               //151218
+   CORN::Inclusion DLL_pattern_linux("*.so*",false);
+   DLLs_found += CORN::OS::file_system_engine.list_DENs
+      (provide_scenario_directory_name(),&DLL_filenames,0
+      ,DLL_pattern_linux
+      ,CORN::OS::File_system::superdirectory_recursion_inclusive);
+         // plugin could be in the scenario directory or any parent directory
+         // (I.e. all scenarios is a project might want to apply the
+         //  the same plugin(s).)
+
+/*161105
+   std::string DLL_pattern("*"); DLL_pattern.append(dynamic_library_file_extension);
+   DLLs_found += CORN::OS::file_system_engine.list_file_names_deprecated
+      (provide_scenario_directory_name()
+      ,DLL_filenames
+      ,CORN::OS::File_system::superdirectory_recursion_inclusive
+      ,CORN::OS::Directory_entry_name::full_qualification
+      ,0 // Any filename
+      ,dynamic_library_file_extension
+      );
+*/
+   FOR_EACH_IN(DLL_filename,CORN::OS::File_name,DLL_filenames,each_DLL)
+   {  Simulation_element_plugin *plugin = new Simulation_element_plugin
+         (*DLL_filename,&provide_examination_global().inspectors,today);         //161202_150915
+         // NYI modifiers
+      if (plugin->is_valid())
+      {  simulation_units.take(plugin);
+         plugins_found++;
+      } else delete plugin;
+         //The DLL might not be a valid simulation plugin so dont install it.
+   } FOR_EACH_END(each_DLL)
+   #endif
+   return plugins_found;
+}
+//_2015-09-08___________________________________________________________________
+Simulation_run_result Simulation_engine::run()
+{
+   CORN::Time run_start_time;                                                    //120524
+   // Assuming the current working directory is the scenario directory
+   // Later we can override with scenario specified on command line
+   // (As in Version 4)
+   // file discover must be setup before setup of control and scenario options.
+   CORN::OS::Directory_name_concrete scenario_directory;                         //160222
+   context_discovery/*161116 file_discovery*/.know_leaf(scenario_directory);     //161116
+   bool can_continue
+      = setup_control_options()                                                  //160222_150617
+     && setup_scenario_options()                                                 //160308
+     && apply_command_line_arguments();                                          //160308
+      // command line arguments superceed options/parameter loaded from files.
+   bool stopped_OK = false;
+   bool started_OK = true;                                                       //150930
+   started_OK &= initialize();                                                   //150930
+   today_driving.set(ref_start_date());                                          //160120
+   started_OK &= start();                                                        //150930_150429
+   if (started_OK)
+   {
+      for (today_driving = ref_start_date()                                      //151020
+          ; (today_driving <= ref_stop_date()) && can_continue &&
+            (!event_scheduler || !event_scheduler->is_aborted() )                //151113
+            // The event scheduler is optional
+          ; today_driving.inc())
+      {  if (verbose) std::clog << today.as_string();                            //160311
+         #ifdef _DEBUG
+         // for quick and dirty outputs
+         simulation_today.set(today_driving);                                    //151210
+         #endif
+         if (today.get_DOY() == 1)
+            can_continue &= start_year();                                        //150941
+         can_continue &=   start_day();                                          //150617
+         can_continue &= process_day();                                          //050115
+         can_continue &=     end_day();
+         if (today.is_last_DOY()) end_year();                                    //140778_070228_040524
+         if (verbose) std::clog << "                  \r";                       //160603
+      }
+      stopped_OK = stop();                                                       //140728
+   }
+   Simulation_run_result result                                                  //040806
+      = (today_driving >= ref_start_date()) && stopped_OK                        //160222
+      ? RUN_SUCCESS : RUN_FAILURE;
+   if (!can_continue)result = RUN_TERMINATE;                                     //150616_040806
+   if (event_scheduler)                                                          //150930
+   {
+   if (!event_scheduler->is_viable()) result = RUN_NOT_VIABLE;                   //040816
+   if (event_scheduler->is_aborted()) result = RUN_ABORT;
+   }
+   CORN::Time run_stop_time;
+   if (verbose)
+   {  std::clog << run_stop_time.as_string() << std::endl;
+      std::clog << "info: elapsed=" << (run_stop_time.get_seconds_after_midnight() - run_start_time.get_seconds_after_midnight()) << " seconds" << std::endl;
+   }
+   return result;                                                                //040806
+}
+//_2013-06-18___________________________________________________________________
+bool Simulation_engine::start_year()                               modification_
+{  bool started = Simulation_element_composite::start_year();
+   started &= provide_examination_global().start_year();                         //161202_160613
+   return started;
+}
+//_2015-08-19___________________________________________________________________
+bool Simulation_engine::end_day()                                  modification_
+{  bool ended = Simulation_element_composite::end_day();
+   ended &= provide_examination_global().end_day();                              //161202_160614
+   if (UED_recorder_global) ended &= UED_recorder_global->end_day();             //160621_160614
+   return ended;
+}
+//_2015-08-19___________________________________________________________________
+bool Simulation_engine::end_year()                                 modification_
+{  bool ended = Simulation_element_composite::end_year();
+   if (UED_recorder_global) ended &= UED_recorder_global->end_year();            //160621_160614
+   // Examination global cleans up deletable inspections and tallies (identified by UED recorder)
+   ended &= provide_examination_global().end_year();                             //160212_160614
+   return ended;
+}
+//_2015-08-19___________________________________________________________________
+bool Simulation_engine::is_rotation_shifting_enabled()              affirmation_
+{  return ref_simulation_control().rotation_cycling;                             //160222
+}
+//_2015-10-08___________________________________________________________________
+const char *Simulation_engine::get_ontology()                              const
+{  return ref_simulation_control().description.brief.c_str();
+}
+//_2016-06-06___________________________________________________________________
+Databases &Simulation_engine::provide_databases()
+{  if (!databases)
+   {  databases = new CS::Databases(provide_scenario_directory_name());
+         // 161101 (*provide_scenario_directory());
+   }
+   return *databases;
+}
+//_2016-09-16___________________________________________________________________
+#ifdef ABANDONED
+This sort of works, I was finding it too time consuming so I abandoned it
+
+The problem is it needs to load all the scenario directories in the database
+for each search.
+
+There would need to be additional information (I.e. the database context
+directory to narrow the search, but still one would need to compose
+the qualified filename in the correct sequence.
+
+In REACCH composition was acheived by having the subscenario sequence
+encoded in the upper most scenario directory
+(I.e. RGC (RCP GCM CropSystem) or HC(historical cropping system).
+
+Now I am having the scenario generator construct fragments.
+
+nat8 Simulation_engine::define_scenario_from_start_path()          modification_
+{  nat8 identified = 0;
+   CS::Arguments *arguments = get_arguments();
+//   provide_databases().render_subdirectories(database_subdirs,CORN::Inclusion("*/",true),verbose);
+
+   if (!arguments) return 0;
+   CORN::Text_list path_items; CORN::Text_list path_items_not_in_scenarios;
+   arguments->start_directory.append_path_list_to // was get_path_list
+      (path_items
+      ,CORN::OS::Directory_entry_name::include_path
+      |CORN::OS::Directory_entry_name::include_name_extension);
+   bool in_scenarios = false;
+   while (!in_scenarios && !path_items.is_empty())
+   {
+      CORN::Text_list::Item *path_item = dynamic_cast<CORN::Text_list::Item *>(path_items.pop_first());
+      path_items_not_in_scenarios.take(path_item);
+      in_scenarios = (*path_item) == "Scenarios";
+   }
+   if (!in_scenarios)
+   {  // We didn't find the "Scenarios" landmark we are probably in
+      // In some arbitrary directory so we have to do a more exhaustive search
+      // Not linking: path_items_not_in_scenarios.give_to(path_items);
+      FOR_EACH_IN(path_item, CORN::Text_list::Item,path_items_not_in_scenarios,each_item)
+      {  path_items.add_string((*path_item));
+      } FOR_EACH_END(each_item)
+   }
+   FOR_EACH_IN(path_item,CORN::Text_list::Item,path_items,each_path_name)
+   {  find_file_ext_in_database_and_assign_to_any_parameter_filename
+         (*path_item
+         ,path_items); // used to most closely match
+   } FOR_EACH_END(each_path_name)
+   return identified;
+}
+//_2016-10-31___________________________________________________________________
+bool Simulation_engine::find_file_ext_in_database_and_assign_to_any_parameter_filename
+(const std::string      &name_ext
+,const CORN::Text_list &path_items
+)
+{  bool found = false;
+   std::size_t ext_pos = name_ext.rfind(".");
+   // If the directory name has an extension
+   // name and/or the extension or both may serve to identify scenario component
+   // For example 45.7166N_118.6333W.Pendleton
+   // the directory name is a geocoordinate
+   // the extension (after the final '.') is the extension
+   // the geocoordinate could be used as weather and/or soil filename.
+   if (ext_pos != std::string::npos)
+   {  std::string name(name_ext,0,ext_pos); found = find_name_in_database_and_assign_to_any_parameter_filename(name,path_items);
+      std::string ext (name_ext,ext_pos+1);          found = find_name_in_database_and_assign_to_any_parameter_filename(ext ,path_items);
+   }
+   if (!found)
+        found = find_name_in_database_and_assign_to_any_parameter_filename(name_ext,path_items);
+   return found;
+}
+//_2016-10-31___________________________________________________________________
+bool Simulation_engine::find_name_in_database_and_assign_to_any_parameter_filename
+(const std::string &name
+,const CORN::Text_list &path_items)
+{
+   bool assigned = false;
+   CORN::Unidirectional_list database_subdirs;
+   provide_databases().render_subdirectories_with_name(database_subdirs,name,true);
+   if (!database_subdirs.count()) return 0;
+   Simulation_control &scenario_record = mod_simulation_scenario();
+   FOR_EACH_IN(section,VV_section,scenario_record.sections,each_section)
+   {
+      FOR_EACH_IN(entry,VV_abstract_entry,section->entries,each_entry)
+      {
+         const CORN::VV_directory_entry_entry *entry_as_DEN =
+            dynamic_cast<const CORN::VV_directory_entry_entry *>(entry);
+         if (entry_as_DEN)
+         {
+            CORN::OS::Directory_entry_name &param_filename = entry_as_DEN->ref_value();
+            std::wstring param_file_extension(param_filename.get_extension());
+            #if ((CS_VERSION > 0) && (CS_VERSION <= 5))
+            // Recognize both new and old file extensions
+            Alternate_extensions *alt_exts = lookup_alternate_extensions
+               (entry->variable_name()); // This would be like soil_filename
+            if (alt_exts)
+            {
+               for (nat8 e = 0;!assigned && e < 2; e++)
+               {
+                  param_file_extension = alt_exts->extension[e];
+            #else
+               {  // Version 6 and beyond will drop support for the old extensions
+            #endif
+
+                  CORN::OS::File_name *most_appropriate_filename
+                     = databases->render_find_most_appropriate_in_any_context_string
+                     (param_filename.get_extension(),name,path_items,database_subdirs,verbose);
+                  if (most_appropriate_filename)
+                  {  assigned = true;
+                     param_filename.set_DEN(*most_appropriate_filename);
+                  }
+               }
+            }
+         }
+      } FOR_EACH_END(each_entry)
+   } FOR_EACH_END(each_section)
+   return assigned;
+}
+//_2016-10-31___________________________________________________________________
+#endif
+} // namespace CS
+

@@ -1,0 +1,66 @@
+
+
+typedef std::string  aashto_group_classification
+; /* = {
+Length of Longest Choice Value: 5
+1 No A-1 Granular materials (35% or less passing No. 200 sieve), silty or clayey gravel and sand.
+2 No A-1-a
+3 No A-1-b
+4 No A-2 Granular materials (35% or less passing No. 200), silty or clayey gravel and sand.
+5 No A-2-4
+6 No A-2-5
+7 No A-2-6
+8 No A-2-7
+9 No A-3 Granular materials (35% or less passing No. 200), fine sand.
+10 No A-4 Silt-Clay materials (more than 35% passing NO. 200), silty soils.
+11 No A-5 Silt-Clay Materials (more than 35% passing No. 200), clayey soils.
+12 No A-6 Silt-Clay materials (more than 35% passing No. 200) clayey soils.
+13 No A-7 Silt-Clay materials (more than 35% passing No. 200), clayey soils.
+14 No A-7-5
+15 No A-7-6
+16 No A-8
+*/
+//_____________________________________________________________________________
+
+typedef std::string  algorithm
+; /* = {
+Length of Longest Choice Value: 18
+1 No Dominant Condition
+2 No Dominant Soil
+3 No Most Limiting
+4 No Least Limiting
+5 No Weighted Average
+6 No All Components
+7 No Absence/Presence
+8 No No Aggregation
+SSURGO Version: 2.2.3 Page 1
+*/
+//_____________________________________________________________________________
+typedef std::string  attributetype
+; /* = {
+Length of Longest Choice Value: 14
+1 No Interpretation
+2 No Property
+*/
+//_____________________________________________________________________________
+typedef std::string  cardinality
+; /* = {
+Length of Longest Choice Value: 11
+1 No One to One
+2 No One to Many
+SSURGO Version: 2.2.3 Page 2
+*/
+//_____________________________________________________________________________
+typedef std::string  chorizon_text_kind
+; /* = {
+Length of Longest Choice Value: 24
+1 No Edit notes Text entries that describe what changes were made to the data and why those changes were made.
+2 No Miscellaneous notes Text entries not related to any of the other choices.
+3 obsolete_Certification notes Indicates records that contain notes related to certification of data objects. Typically, data elements certified in the object are listed in the text
+attached to this record.
+4 obsolete_Correlation notes
+5 obsolete_Nontechnical description
+6 obsolete_SOI5 description
+*/
+//_____________________________________________________________________________
+

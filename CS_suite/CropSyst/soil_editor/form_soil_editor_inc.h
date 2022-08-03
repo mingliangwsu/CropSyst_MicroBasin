@@ -1,0 +1,49 @@
+//Code fragments common to both the CropSyst V4 and V5 soil editor form
+#include "CS_suite/CropSyst/form_common_editor_inc.h"
+#  include "corn/OS/directory_entry_name_concrete.h"
+#include "common/soil/txtrhydr.h"
+//______________________________________________________________________________
+#define SOIL_EDITOR_INCLUDES_AND_FORWARD_DECLS                                 \
+   COMMON_EDITOR_INCLUDES_AND_FORWARD_DECLS                                    \
+   class Smart_soil_parameters;                                                \
+//______________________________________________________________________________
+#define Tsoil_editor_form_USER_DECLARATIONS                                    \
+public: /* User declarations*/                                                  \
+   void __fastcall bind_to(Smart_soil_parameters *soil,Tparameter_file_form *parameter_form);\
+   void __fastcall bind_to_V4_and_V5(Smart_soil_parameters *soil,Tparameter_file_form *parameter_form);\
+   virtual void __fastcall Invalidate(void);                                   \
+   virtual void __fastcall Update();                                           \
+private:                                                                       \
+   Smart_soil_parameters *soil;           /* owned by calling program */       \
+   Tparameter_file_form *parameter_file_form;                                  \
+   int   active_layer;                                                         \
+   CORN::OS::Directory_name_concrete   soil_directory;                         \
+   CORN::OS::File_name_concrete SoilWaterCharacteristics_exe;                  \
+   bool paste_started;  /* This is needed to validate after paste */           \
+private:                                                                       \
+   void __fastcall calculate_properties(int layer);                            \
+   void __fastcall texture_clicked(uint8 layer);                               \
+   void __fastcall calculate_clicked(uint8 layer);                             \
+   void __fastcall update_properties(int layer,bool clear_fixed_fields);       \
+private:                                                                       \
+   TColor get_status_color(Soil_texture_hydraulics::Status status);            \
+   void show_hide_controls();                                                  \
+   void update_grid(int layer);                                                \
+   void update_grid_colors(int layer);                                         \
+   void update_grids();                                                        \
+   void push_texture_order(uint8 layer,uint16 latest_texture_edited);          \
+   void update_properties_on_cell_change( int ACol, int ARow);                 \
+   void setup_hydr_prop_calc_button();                                         \
+   void clear_layer_status();                                                  \
+   void texture_grid_autodeleterow(int ARow);                                  \
+   void texture_grid_autoinsertrow(int ARow);
+//______________________________________________________________________________
+#define Tsoil_editor_form_CONSTRUCTOR_INITIALIZATION                           \
+   , parameter_file_form(0)                                                    \
+   , active_layer(1)                                                           \
+   , soil(0)                                                                   \
+   , soil_directory()                                                          \
+   , paste_started(false)                                                      \
+   , SoilWaterCharacteristics_exe("SoilWaterCharacteristics.exe")
+//______________________________________________________________________________
+//______________________________________________________________________________

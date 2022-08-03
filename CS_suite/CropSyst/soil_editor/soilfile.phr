@@ -1,0 +1,217 @@
+L_Soil_file,
+/* soilfile  PARAMS CS VALIDATE CROPSYST
+en Soil file
+fr Fichier sol
+it File suolo
+es Archivo de suelo
+ca Arxiu del sòl
+*/
+L_Soil,
+/* soilfile  PARAMS CS VALIDATE CROPSYST
+en Soil
+fr Sol
+it Suolo
+es Suelo
+ca Sòl
+*/
+L_Parameters_for_runoff,
+/* soilfile  PARAMS CS VALIDATE    it-gb
+en Parameters for runoff (curve number approach)
+fr Parametres ruissellement (méthode courbe)
+it Parametri per il ruscellamento
+es Parámetros para escorrentía superficial
+ca Paràmetres per escolament superficial
+*/
+L_Parameters_for_RUSLE,
+/* soilfile  PARAMS CS VALIDATE
+en Parameters for RUSLE:
+fr Parametres pour RUSLE:
+it Parametri per RUSLE:
+es Parámetros para RUSLE:
+ca Paràmetres per al RUSLE
+*/
+L_Parameters_for_volatilization_in_top_horizon,
+/* soilfile PARAMS CSW
+en Parameters for volatilization in top horizon
+fr Paramètres pour volatilization dans l' horizon en dessus
+it Parametri per volatilizzazione nell'strato più alto
+es Parámetros por volatilización en el capa más alto
+ca Parámetros por volatilizació en el capa más alto
+*/
+L_Bulk_density,
+/* soilfile  VALIDATE PARAMS  CROPSYST
+en Bulk Density
+fr Densité Apparenté
+it Densità apparente
+es Densidad aparente
+ca Densitat aparent
+*/
+L_Bypass_coef,
+/* soilfile  CSW ( PARAMS )
+en Layer bypass coef.
+fr Coef. par horizon infiltr
+it Coefficiente_di bypass
+es Coef. de bypass
+ca Coef. de bypass
+*/
+L_Cation_exchange_capacity,
+/* soilfile  PARAMS
+en Cation exchange capacity
+fr Cation capacité de l'échange
+it Capacità di scambio cationico
+es Cation capacidad del cambio
+ca Cation capacitat del cani
+*/
+L_P_sand,
+/* soilfile  CSW ( PARAMS )
+en % sand
+fr % sable
+it % sabbia
+es % arena
+ca % sorra
+*/
+L_P_clay,
+/* soilfile  CSW ( PARAMS )
+en % clay
+fr % argile
+it % argilla
+es % arcilla
+ca % argila
+*/
+L_P_silt,
+/* soilfile  CSW ( PARAMS )
+en % silt
+fr % limon
+it % limo
+es % limo
+cs % llim
+*/
+L_Percent_sand,
+/* soilfile  PARAMS CS VALIDATE
+en Percent sand (0-100)
+fr % sable (0-100)
+it Percentuale di sabbia (0-100)
+es Porcentaje de arena (0-100)
+ca Percentatge de sorra (0-100)
+*/
+L_Percent_clay,
+/* soilfile  PARAMS CS VALIDATE
+en Percent clay (0-100)
+fr % argile (0-100)
+it Percentuale di argilla (0-100)
+es Porcentaje de arcilla (0-100)
+ca Percentatge d'argila (0-100)
+*/
+L_Percent_silt,
+/* soilfile  PARAMS CS VALIDATE
+en Percent silt (0-100)
+fr % limon (0-100)
+it Percentuale di limo (0-100)
+es Porcentaje de limo (0-100)
+ca Percentatge de llim (0-100)
+*/
+L_pH,
+/* soilfile  PARAMS
+en pH
+fr pH
+it pH
+es pH
+ca pH
+*/
+L_Steepness,
+/* soilfile  PARAMS CS VALIDATE
+en Steepness
+fr Pente
+it Pendenza
+es Pendiente
+ca Pendent
+*/
+L_Layer,
+/* soilfile  CSW ( PARAMS )
+en Layer
+fr horizon
+it strato
+es capa
+ca capa
+*/
+L_Soil_layer,
+/* soilfile  ?  REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS    RPRTGRPH
+en Soil layer
+fr Horizon sol
+it Strato del suolo
+es Capa de suelo
+ca Capa del sòl
+*/
+L_Thickness,
+/* soilfile  ?  REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS    RPRTGRPH
+en Thickness
+fr Épaisseur
+it Spessore
+es Espesor
+ca Espessor
+*/
+L_Field_capacity,
+/* soilfile  PARAMS CS VALIDATE
+en Field capacity
+fr Capacité au champ
+it Capacità di campo
+es Capacidad de campo
+ca Capacitat de camp
+*/
+L_Vol_FC,
+/* soilfile  ?  REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS    RPRTGRPH
+en Volumetric field capacity
+fr % Capacité au champ
+it Capacità di campo volumetrica
+es Capacidad de campo
+ca Capacitat de camp
+*/
+L_Vol_PWP,
+/* soilfile  ?  REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS    RPRTGRPH
+en Volumetric permanent wilting point
+fr % Fletrissement permanent
+it Coefficiente di appassimento idrico volumetrico
+es Punto de marchitez permanent
+ca Punt de pensiment permanent
+*/
+L_Vol_WC_at_1500,
+/* soilfile  REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS  it-rn    981029
+en Vol. WC at -1500
+fr Vol. WC at -1500
+it CI Vol.  a -1500
+es Vol. WC at -1500
+ca Vol. WC at -1500
+*/
+L_Vol_WC_at_33,
+/* soilfile    REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS  it-rn    981029
+en Vol. WC at -33
+fr Vol. WC at -33
+it CI Vol.  a -33
+es Vol. WC at -33
+ca Vol. WC at -33
+*/
+L_Saturated_hydraulic_conductivity,
+/* soilfile CROPSYST VALIDATE PARAMS CS    check TRANSLATE catalan
+en Saturated hydraulic conductivity
+fr Conductivité hydraulique a la saturation
+it Conduttività idraulica a saturazione
+es Conductividad hidráulico a la saturación
+ca Conductivitat hídráulico a la saturació
+*/
+L_Air_entry_potential,
+/* soilfile CROPSYST VALIDATE PARAMS CS it-md  es-cs  check TRANSLATE fr-rn
+it-rn ca-rn
+en Air entry potential
+fr Potentiel pour l'entrée d'air
+it Potenziale per l'entrata di aria
+es Potencial para la entrada de aire
+ca Potencial per la entrada de aire
+*/
+L_Depth_where_leaching_is_recorded,
+/* soilfile CROPSYST PARAMS  es-cs it-md  check TRANSLATE   fr-rn  ca
+en Depth where leaching is recorded
+fr Profondeur où la drainage est enregistré
+it Profondità alla quale viene registrata la lisciviazione
+es Profundidad a la cual registrar lavado
+ca Depth where leaching is recorded
+*/

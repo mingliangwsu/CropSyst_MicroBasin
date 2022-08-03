@@ -1,0 +1,13 @@
+
+// http://en.wikipedia.org/wiki/Standard_gravity
+/*140506
+#if (CS_VERSION == 4)
+#define standard_gravity 9.8
+   // 9.8 is not accurate
+#else
+*/
+#define standard_gravity 9.80665
+//140506#endif
+
+#define water_density              1000.0 /* Kg/m3 */
+

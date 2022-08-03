@@ -1,0 +1,32 @@
+#ifndef date_time_interfaceH
+#define date_time_interfaceH
+#include "corn/chronometry/date_I.h"
+#include "corn/chronometry/time_I.h"
+namespace CORN
+{
+//______________________________________________________________________________
+interface_ Date_time_interface
+: public extends_interface_ Date_interface // Eventually rename to Date
+, public extends_interface_ Time_interface // Eventually rename to Time
+{
+ public: // accessors
+   inline virtual datetime64 get_datetime64()                           const=0;  // may need to move this to temporal
+ public: // assignations
+   virtual datetime64 set_now() = 0;
+   virtual datetime64 set_DT
+      (const Date_interface &date,const Time_interface &time)    assignation_=0;
+   virtual datetime64 set_date(const Date_interface &date)       assignation_=0;
+   virtual Datetime64 set_datetime64(Datetime64 value)           assignation_=0;
+ public: // modifiers
+ public: // autoincrement
+ public: // math
+ public: // affirmations
+ public: // methods for arbitrary time
+ public: // conversions
+   virtual const std::string &append_to_string(std::string &target)     const=0;
+};
+//_2017-04-26______________________________________________Date_time_interface_/
+} // namespace CORN
+// Roger Nelson rnelson@wsu.edu
+#endif
+

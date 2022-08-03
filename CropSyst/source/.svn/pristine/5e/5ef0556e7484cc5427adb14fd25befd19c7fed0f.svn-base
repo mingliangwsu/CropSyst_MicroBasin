@@ -1,0 +1,33 @@
+#ifndef soil_N_paramH
+#define soil_N_paramH
+#include "corn/primitive.h"
+namespace CropSyst {
+//______________________________________________________________________________
+struct Denitrification_parameters
+{
+   float32 scale;     // shifts line up/down
+   float32 rate_max;  // does have units   (same as potential_denitrification_rate)
+   float32 alpha;
+      // 1 indicates lower threshold (at field capacity)
+      // 0 indicates lower threshold (at PWP)
+   //160211 obsolete now always computed float32 standardized_respiration_for_potential;                               //151110
+         // mgC/kg Soil day
+ public:
+   inline Denitrification_parameters()
+      : scale     (0.0)
+      , rate_max  (1.0)
+      , alpha     (0.5) // 160323(0.8)
+   //160211 obsolete now always computed       , standardized_respiration_for_potential(67.0)                             //151110
+      {}
+   inline Denitrification_parameters(const Denitrification_parameters &copy_from)
+      : scale(copy_from.scale)
+      , rate_max(copy_from.rate_max)
+      , alpha(copy_from.alpha)
+   //160211 obsolete now always computed       , standardized_respiration_for_potential                                   //151110
+   //160211 obsolete now always computed          (copy_from.standardized_respiration_for_potential)
+      {}
+};
+//_2015-08-24___________________________________________________________________
+} // namespace CropSyst
+#endif
+

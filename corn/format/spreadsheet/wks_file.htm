@@ -1,0 +1,286 @@
+<HTML>
+<CENTER>
+<H1>
+WKS spreadsheet file I/O
+<BR>
+C++ class
+</H1>
+<H2>
+By <A HREF="http://www.bsyse.wsu.edu/~rnelson">Roger Nelson</A>
+</H2>
+<H3>
+A similar class is available for Turbo Pascal/Delphi
+<BR>
+Contact <A HREF="mailto:rnelson@mail.wsu.edu">rnelson@mail.wsu.edu</A>
+for information on that version.
+</H3>
+<H2>
+This software is provided free, but
+<A HREF="register.htm">Please register</A>
+so I can provide update notices. 
+</H2>
+</CENTER>
+
+This class can be use to output data (Text, Number and Date types)
+to WKS spreadsheet file format.
+<P>
+I use this class to output data in a report like format.
+(email me if you are interested in my report writer class
+<A HREF="mailto:rnelson@mail.wsu.edu">rnelson@mail.wsu.edu</A>).
+
+<P>
+This class is not a comprehensive spreadsheet file format class,
+It is intended to be used only to read/write Text, number and date data,
+It does not read/write printing control, windowing options,
+editing environment options, passwords, macros, formulas, graphs,
+headers, footers, etc... ONLY DATA cells.
+<P>
+Thus, while it can be used read data from WKS files,
+it must not be used to modify WKS spreadsheet files.
+
+<P>
+This format can be read by Lotus 1.2.3, Borland Quatro Pro,
+and MicroSoft Excel.
+<HR>
+<H2> Obtaining the class source code.
+</H2>
+This class is part of Roger Nelson's C++ class library.
+You will need the following source files are NOT archived.
+<P>
+Please read the <A HREF="rlib.htm">rlib</A> documentation for
+hints on downloading the rlib and using the classes with your compilter.
+<P>
+<DL>
+<DT><A HREF="ftp://C100.bsyse.wsu.edu/pub/rlib/wks_file.h">wks_file.h</A>
+<DD>WKS file format class header file.
+<DT><A HREF="ftp://C100.bsyse.wsu.edu/pub/rlib/wks_file.cpp">wks_file.cpp</A>
+<DD>WKS file format class source file.
+
+</DL>
+<HR>
+
+<H2>
+Using the class for output
+</H2>
+Use the class WKS_output_file for output.
+<P>
+
+<DL>
+
+<DT><h3>WKS_output_file::WKS_output_file(const char *filename)</H3>
+<DD>
+The WKS_output_file constructor takes the name of the file to be created.
+It opens the file and initially outputs the LOTUS 1.2.3 WKS file format header.
+
+
+<DT><H3>WKS_output_file::~WKS_output_file()</H3>
+<DD>
+The WKS_output_file destructor, writes the WKS file format EOF marker
+and closes the file.
+
+
+<DT><H3>void WKS_output_file::write_column_width(int col, int width)</H3>
+<DD>
+This function is optional, it can be used to specify the width (in characters)
+of columns in the spreadsheet.
+<BR>
+If column widths are to be specified, I would recommend putting them at
+the start of the file.
+
+<DT><H3>void WKS_output_file::write_integer_cell(byte format, int col, int row, int value)</H3>
+<DD>
+This function outputs an integer value at the specified col and row with the
+specified format.
+<BR>
+Use the <A HREF="#gen_format>gen_format method to construct the format byte.</A>
+
+<DT><H3>void WKS_output_file::write_number_cell(byte format, int col, int row, double value)</H3>
+<DD>
+This function outputs a floating point value at the specified col and row with the
+specified format.
+<BR>
+Use the <A HREF="#gen_format>gen_format method to construct the format byte.</a>
+
+<DT><H3>void WKS_output_file::write_label_cell (byte format, int col, int row, byte alignment,const char *value1,const char *value2)</H3>
+<DD>
+This function is used to output text to the specified cell (col,row).
+<BR>
+The alignment parameter is one of the following:
+<BR>
+WKS_justify_left
+WKS_justify_right
+WKS_justify_center
+WKS_justify_unknown
+<BR>
+For the respective text justification alignment.
+
+<BR>
+You can use WKS_TEXT_FORMAT for the format byte, or
+use the <A HREF="#gen_format"">gen_format method</A> to construct the format byte
+if you need to do something special.
+
+<DT><H3><A name="gen_format">byte WKS_output_file::gen_format(byte protection, byte format_type, byte decimals_special)</A></H3>
+<DD>
+This function should be used  to construct the format byte when writing cell values.
+<UL>
+<LI><B>protection</B> can be either:
+    <BR>
+    WKS_protected
+    <BR>
+    WKS_unprotected
+<LI><B>format_type</B> can be one of the following:
+    <BR>
+   WKS_gen_format_integer      (Use this for write_integer_cell())
+    <BR>
+   WKS_format_fixed
+    <BR>
+   WKS_format_sci
+    <BR>
+   WKS_format_currency
+    <BR>
+   WKS_format_percent
+    <BR>
+   WKS_format_comma
+    <BR>
+   WKS_format_unused1
+    <BR>
+   WKS_format_unused2
+    <BR>
+   WKS_format_special   (Use this for write_label_cell())
+<LI><B>decimals_special</B> can be one of the following:
+    <BR>
+WKS_special_plusminus
+    <BR>
+WKS_special_general
+    <BR>
+WKS_special_day_month_year
+    <BR>
+WKS_special_day_month
+    <BR>
+WKS_special_month_year
+    <BR>
+WKS_special_text  (Use this for write_label_cell())
+    <BR>
+WKS_special_default
+
+</UL>
+
+
+<DT><H3>void WKS_output_file::put_byte(byte value)</H3>
+<DD>
+This function is used to do low level output to the spreadsheet.
+You should not need to use this function unless extending the
+output options of this class.
+
+</DL>
+
+That is all there is to writing spreadsheet files.
+
+<HR>
+
+
+<H2>
+Using the class for input.
+</H2>
+
+   Inputting spreadsheet files is a little more tricky because the input file
+   may contain records, that the WKS_input_file class doesn't recognize.
+   These records will be skipped when encountered, that is why you should ONLY
+   use this class to extract the data from the spreadsheet.
+   <P>
+
+   <P>
+   To read the file, use  WKS_input_file::read_record()
+   This function reads the next Lotus record from the input file
+   and returns the type of record.
+
+   <P>
+   Read record is usually put inside a loop:
+
+<LISTING>
+   {
+   WKS_input_file myfile("filename.wks");
+   if (myfile.good())
+     while (!myfile.eof())
+     {
+       switch (myfile.data_type)
+       {
+         case NOT_DATA    : ; break;
+         case TYPE_STR    : use the str_value and alignment variables; break;
+         case TYPE_DATE   : use the date_value; break;
+         case TYPE_INTEGER: use the int_value ; break;
+         case TYPE_FLOAT  : use the double_value and precision variables; break;
+       };
+
+       or
+
+       switch (myfile.read_record())
+       { case WKS_CODE_xxx :  xxxx;   break;
+          .....
+       };
+     };
+   };
+</LISTING>
+
+You should only use the following functions when reading the input file.
+<DL>
+<DT><H3>WKS_input_file::WKS_input_file(const char *filename)</H3>
+<DD>This constructor opens the specified file and read the Lotus header info.
+
+<DT><H3>WKS_input_file::read_record()</H3>
+<DD>This function reads the next record in the file.
+    <B> Note that the record might not contain cell data</B>, it could be
+        a record that WKS_input_file simply skips, or may be a column width,
+        etc.
+    <P>
+    After doing a read_record(), examine the variable <B>data_type</B> to
+    determine the data type of the record.
+    If it is NOT_DATA, don't do anything and just read the next record.
+    Otherwise it will be one of:
+    <B>TYPE_STR, TYPE_DATE, TYPE_INTEGER, TYPE_FLOAT </B>.
+    You can get the cell value from the variables
+    <B>str_value, date_value, int_value and double_value</B> respectively.
+    <P>
+    For TYPE_STR cells, the variable <B>alignment</B> will contain:
+    <B>WKS_justify_left, WKS_justify_right, WKS_justify_center, WKS_justify_unknown</B>
+    <P>
+    For TYPE_FLOAT, the variable <B>precision</B> will contain the number
+    digits after the decimal point.
+    <P>
+    The variables <B>row</B> and <B>col</B> will contain the row and column of
+    the cell.
+
+<DT><H3>WKS_input_file::reset()</H3>
+<DD>This function move the record pointer to the beginning of the file.
+    If you don't store all the data in memory as your read the file,
+    you might need to reset to the beginning of the file to reread the file.
+    (I.e. if you need to sort the file etc..)
+
+<DT><H3>WKS_input_file::good()</H3>
+<DD>This function returns true if the file stream is open and working OK.
+
+<DT><H3>WKS_input_file::eof()</H3>
+<DD>This function returns true if the end fo file was encountered.
+<P>
+    After the file has been completely written:
+    <BR>The char array <B>header</B> will contain the header text.
+    <BR>The byte array <B>column_widths</B> will contain the width of each column.
+
+</DL>
+
+
+<HR>
+<H2>Tips</H2>
+<DL>
+<DT> Don't use the WKS_file base class
+<DD> The WKS_file base class, while not pure, should be treated as a pure base class
+     Only use (or derive classes from) WKS_output_file or WKS_input_file.
+
+<DT> Don't write multiple values to the same cell (column,row)
+<DD> This may have unknown effects when a spreadsheet program attempts to read the file.
+
+
+</DL>
+
+
+</HTML>

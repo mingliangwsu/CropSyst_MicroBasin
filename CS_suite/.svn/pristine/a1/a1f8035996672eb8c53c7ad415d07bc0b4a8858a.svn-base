@@ -1,0 +1,286 @@
+This file is obsolete,
+
+replaced with CS_Suite_5/conversion/crp.VV_to_YAML
+
+
+eventually delete from SVN
+
+
+
+? Not yet determined
+- defined here
+| defined in ontology
++ defined both here and ontology
+\ coded 
+/ sample (represented in sample file)
+o obsolete
+4 obsolete was in V4
+* Coded and defined both here and ontology
+
+[version]
+major=%                               o I am redoing version numbers
+release=%                             o
+minor=%                               o
+
+[crop]
+description=%                         ? description/brief: %
+
+RUSLE2_description=%                  ? description/RUSLE2: %
+wikipedia=%                           ? documentation/wikipedia: %
+details_URL=%                         ? documentation/URL: %
+
+feed_name_immature=%                  - name/feed/immature: %
+feed_name_midmature=%                 - name/feed/midmature: %
+feed_name_mature=%                    - name/feed/mature: %
+RUSLE2_name=%                         - name/RUSLE2: %
+harvested_part=%                      - harvest/part: %
+abscission=%                          ? classification/abscission: %
+linger=%                              ? classification/abscission/linger: %
+C_species=%                           ? classification/C_species: %
+photosynthetic_pathway=%              ? classification/photosynthetic_pathway: %
+life_cycle=%                          ? classification/life_cycle: %
+stem_type=%                           ? classification/stem_type: %
+land_use=%                            ? classification/land_use: %
+season_dormancy_mode=%                ? classification/season_dormancy_mode: %
+
+model=%                               ? model/CropSyst: %
+canopy_growth=%                       ? model/canopy_growth: %
+adjustment:
+grain_stress_period:
+
+
+[water_use_efficiency]
+season2_adj=%                         ? growth/adjustment: {interpolation !step: { sync: season, offset: 1, ordinate: %} } #Need to check that I can uses season index  instead of season number
+season3_adj=%                         ? growth/adjustment: {interpolation !step: { sync: season, offset: 2, ordinate: %} }
+season4_adj=%                         ? growth/adjustment: {interpolation !step: { sync: season, offset: 3, ordinate: %} }
+season5_adj=%                         ? growth/adjustment: {interpolation !step: { sync: season, offset: 4, ordinate: %} }
+
+[leaf]
+senesces=%                            ? leaf/senesces: %
+clip_newest=%                         ? leaf/clip_newest: %
+max_LAI=%                             + leaf/area/index/inactive/maximum: %
+fract_LAI_mature=%                    ? leaf/area/index/fraction/mature: %  # was fract_LAI_mature
+initial_GAI=%                         + leaf/area/index/active/initial: %
+regrowth_GAI=%                        + leaf/area/index/active/regrowth: %
+specific_leaf_area=%                  + leaf/area/specific/optimum: %
+stem_leaf_partition=%                 ? leaf/stem_leaf_partition: %
+duration=%                            ? leaf/area/duration: %
+duration_stress_sensitivity=%         ? leaf/area/duration/stress_sensitivity: %
+
+
+
+[transpiration]
+ET_crop_coef=%                        ? transpiration/ET_coef: %
+max_water_uptake=%                    ? transpiration/maximum: %
+stomatal_closure_leaf_water_pot=%     ? transpiration/LWP_stomatal_closure: %
+wilt_leaf_water_pot=%                 ? transpiration/LWP_wilt: %
+kc=%                                  ? canopy/light_extinction_coef: %
+a1=%                                  ? transpiration/a1: %
+a2=%                                  ? transpiration/a2: %
+
+[growth]
+WUE_changes=%                         o Now just once set of parameters that can be dynamic
+TUE_equation=%                        ? growth/TUE/equation: %
+RUE_basis=%                           o obsolete in V5  growth/RUE/basis: %
+TUE_scaling_coef=%                    ? growth/TUE/scaling_coef: { interpolation: { stage: end_veg_growth, offset: 0, sync: days, ordinate: % }}
+TUE_scaling_coef_veg=%                ? growth/TUE/scaling_coef: { interpolation: { stage: active_growth, offset: 0, sync: days, ordinate: % }}
+TUE_at_1pKa_VPD=%                     ? growth/TUE/at_1pKa_VPD:  { interpolation: { stage: end_veg_growth, offset: 0, sync: days, ordinate: % }}
+TUE_at_1pKa_VPD_veg=%                 ? growth/TUE/at_1pKa_VPD:  { interpolation: { stage: active_growth, offset: 0, sync: days, ordinate: % }}
+water_productivity=%                  ? growth/water_productivity: { interpolation: { stage: end_veg_growth, offset: 0, sync: days, ordinate: % }}
+water_productivity_veg=%              ? growth/water_productivity: { interpolation: { stage: active_growth, offset: 0, sync: days, ordinate: % }}
+RUE_global=%                          ? growth/RUE/global: %
+RUE_PAR=%                             ? growth/RUE/PAR: %
+biomass_transpiration_coef=%          ? growth/biomass_transpiration_coef: { interpolation: { stage: end_veg_growth, offset: 0, sync: days, ordinate: % }}
+biomass_transpiration_coef_veg=%      ? growth/biomass_transpiration_coef_veg: { interpolation: { stage: active_growth, offset: 0, sync: days, ordinate: % }}
+early_growth_limit_temp=%             ? growth/temperature_limitation/early_growth: %
+min_tolerable_temp=%                  ? growth/temperature_limitation/tolerable_temperature/minimum: %
+max_tolerable_temp=%                  ? growth/temperature_limitation/tolerable_temperature/maximum: %
+low_threshold_limit_temp=%            ? growth/temperature_limitation/threshold/low: %
+high_threshold_limit_temp=%           ? growth/temperature_limitation/threshold/high: %
+LWP_reduces_canopy_expansion=%        ? growth/canopy/expansion/leaf_water_potential/reduces: %
+LWP_stops_canopy_expansion=%          ? growth/canopy/expansion/leaf_water_potential/stops: %
+
+[morphology]
+max_canopy_height=%                   ? canopy/height/maximum: %
+
+[harvest_index]
+unstressed=%                          - yield/harvest_index/unstressed: %
+adjust_HI=%                           o Obsolete, user will introduce optional adjustment parameters as needed harvest/index/adjust_HI: %
+translocation_max=%                   - yield/translocation/maximum: %
+tuber_init_sensitivity=%              - yield/stress_sensitivity/water_nitrogen: interpolation: { stage: tuber_initiation, offset: 0, sync: degree_days, ordinate: # }
+tuber_growth_sensitivity=%            - yield/stress_sensitivity/water_nitrogen: interpolation: { stage: active_growth, offset: 0, sync: degree_days, ordinate: # }
+
+flowering_sensitivity=%               4
+filling_sensitivity=%                 4
+filling_duration=1                    4
+temperature_stress_sensitivity=%      4
+temperature_stress_sensitivity=1.0    4
+
+
+
+[emergence]
+model=%                               o Now the user simply introduces this optional model (adding this set of parameters) otherwise the model defaults to the simple thermal time
+a=%                                   ? germination/hydrothermaltime/constant/slope: %
+b=%                                   ? germination/hydrothermaltime/constant/intercept: %
+seedling_leaf_area=%                  ? germination/hydrothermaltime/seedling_leaf_area: %
+mean_base_soil_water_pot=%            ? germination/hydrothermaltime/base_SWP/mean: %
+stdev_base_soil_water_pot=%           ? germination/hydrothermaltime/base_SWP/stdev: %
+
+[hardiness]
+enabled=%                             o Now the users simply introduces the optional hardiness
+damage_cold_temp=%                    ? tolerance/temperature/cold/leaf/damage: %
+lethal_cold_temp=%                    ? tolerance/temperature/cold/leaf/lethal: %
+fruit_damage_cold_temp=%              ? tolerance/temperature/cold/fruit/damage: %
+fruit_lethal_cold_temp=%              ? tolerance/temperature/cold/fruit/lethal: %
+
+[salinity]
+osmotic_pot_50=%                      ? tolerance/salinity/van_Genuchten/Pi50: %
+tolerance_P=%                         ? tolerance/salinity/van_Genuchten/P:  % # Need to check what is P
+
+
+[nitrogen]
+nitrogen_leaf_stress_mode=%           ? nitrogen/leaf_stress_mode: %
+fixation=%                            ? nitrogen/fixation: %
+legume_fraction=%                     ? nitrogen/fixation/legume_fraction: %
+max_uptake_daily_rate=%               ? nitrogen/uptake_rate/maximum: %
+demand_adjust=%                       ? nitrogen/demand_adjustment: %
+stubble_max_conc=%                    ? nitrogen/concentration/stubble/maximum: %   Need to check if this is actually max
+root_conc=%                           ? nitrogen/concentration/root: %
+biomass_to_start_dilution_max_N_conc=%? nitrogen/concentration/maximum/biomass_to_start_dilution: % or else biomass_to_start_dilution/concentration/maximum or else  concentration/biomass_to_start_dilution/maximum
+emergence_max_conc=%                  ? nitrogen/dilution/maximum/concentration/emergence: %
+N_mature_max_conc=%                   ? nitrogen/dilution/maximum/concentration/mature: %
+emergence_crit_conc=%                 ? nitrogen/dilution/critical/concentration/emergence: %
+biomass_to_start_dilution_crit_N_conc=? nitrogen/dilution/critical/biomass_to_start:       % or else biomass_to_start_dilution/concentration/critical concentration/biomass_to_start_dilution/critical
+PAW_where_N_uptake_rate_decreases=%   ? nitrogen/PAW_decreases_uptake: %
+residual_N_not_available_for_uptake=% ? nitrogen/residual: %
+soil_N_conc_where_N_uptake_decreases=%? nitrogen/soil_conc_decreases_uptake: %
+dilution_curve_slope=%                ? nitrogen/dilution_curve/slope: %
+dilution_curve_based_on_max_conc=%    ? nitrogen/dilution_curve/based_on_max_conc: %
+end_dilution_curve=%                  ? nitrogen/dilution/end: %
+xxxx=%                                ? nitrogen/soil_conc_where_uptake_decreases
+
+[fruit]
+fract_total_solids=%                  ? fruit/total_solids_fract: %
+max_fruit_load=%                      ? fruit/load/maximum:
+initial_growth_fraction_to_fruit=%    ? fruit/fraction_to_fruit {interpolation !step: [ {sync: days, offset: 0, stage: fruit_development } ] }
+rapid_growth_fraction_to_fruit=%      ? fruit/fraction_to_fruit {interpolation !step: [ {sync: days, offset: 0, stage: rapid_fruit_development } ] }
+harvest_temperature=%                 ? harvest/temperature: %    # check this
+harvest_temperature_days=%            ? harvest/temperature_days: %  # check this
+earliest_harvest=%                    ? harvest/earliest:
+latest_harvest=%                      ? harvest/latest:
+max_water_uptake_before_fruiting=%    ? transpiration/maximum: {interpolation !step: [ { sync: days, offset: 0, stage: active_growth } ] }
+max_water_uptake_during_initial_fruit=? transpiration/maximum: {interpolation !step: [ { sync: days, offset: 0, stage: fruit_development } ] }
+max_water_uptake_during_rapid_fruit=% ? transpiration/maximum: {interpolation !step: [ { sync: days, offset: 0, stage: rapid_fruit_development } ] }
+max_water_uptake_during_veraison=%    ? transpiration/maximum: {interpolation !step: [ { sync: days, offset: 0, stage: veraison } ] }
+max_water_uptake_after_maturity=%     ? transpiration/maximum: {interpolation !step: [ { sync: days, offset: 0, stage: maturity } ] }
+
+[CO2]
+TUE_reference_conc=%                  ? CO2/reference_conc/TUE: %
+RUE_reference_conc=%                  ? CO2/reference_conc/RUE: %
+alpha=%                               ? CO2/non_rectagular_hyperbola/alpha: %   # this should be under the xxxx curve
+theta=%                               ? CO2/non_rectagular_hyperbola/theta: %
+growth_ratio_asymptotic=%             ? CO2/non_rectagular_hyperbola/growth_ratio_asymptotic: %
+
+
+[canopy_cover]
+CC_initial=%                          ? canopy/cover/initial: %  #{interpolation !step: [ { sync: days, offset: 0, stage: active_growth } ] }
+CC_maximum=%                          ? canopy/cover/maximum: %  #{interpolation !step: [ { sync: days, offset: 0, stage: end_canopy_growth } ] }
+CC_full_senescence_green=%            ? canopy/cover: {interpolation !step: [ { sync: days, offset: 0, stage: full_senescence } ] } // need to check
+CC_mature_total=%                     ? canopy/cover: {interpolation !step: [ { sync: days, offset: 0, stage: maturity } ] } // need to check
+rel_TT_at_half_CC_max=%               ? canopy/relative_thermal_time_at_half_maximum: %
+
+[phenology]
+maturity_significant=%                ? phenology/maturity_significant : %
+clipping_resets=%                     - phenology/clipping_resets: %
+emergence=%                           * phenology/initiation/emergence: %
+flowering=%                           * phenology/initiation/flowering: %
+peak_LAI=%                            * phenology/culmination/accrescence: %
+filling=%                             * phenology/initiation/filling: %
+maturity=%                            * phenology/initiation/maturity: %
+senescence=%                          * phenology/initiation/senescence: %
+full_senescence=%                     * phenology/culmination/senescence: %
+tuber_init=%                          * phenology/initiation/tuber: %
+rapid_fruit_growth=%                  * phenology/initiation/rapid_fruit_growth: %
+max_root_depth=%                      * phenology/culmination/root_depth: %  check to see if max root depth determination can be set by thermal time obviating this parameter
+water_stress_sensitivity=%            ? phenology/water_stress_sensitivity:  check, may be able to use parameter adjustment to replace this
+WUE_change=%                          o now WUE adjustment is dynamic phenology/WUE_change:
+
+resolution=%                          ? ecophysiology/resolution:
+base_temp=%                           ? ecophysiology/temperature/threshold/base:
+cutoff_temp=%                         ? ecophysiology/temperature/threshold/cutoff:
+optimal_temp=%                        ? ecophysiology/temperature/threshold/optimal:
+maximum_temp=%                        ? ecophysiology/temperature/threshold/maximum:
+
+[vernalization]
+enabled=%                             o obsolete user will introduce this set of parameters this when  applicable ? vernalization/enabled: }}
+low_temp=%                            ? ecophysiology/vernalization/temperature/low: %    #check 'temperature'
+high_temp=%                           ? ecophysiology/vernalization/temperature/high: % #check 'temperature'
+start=%                               ? ecophysiology/vernalization/day_requirement/start: %
+end=%                                 ? ecophysiology/vernalization/day_requirement/end: %
+min_factor=%                          ? ecophysiology/vernalization/factor_minimum: %
+
+[photoperiod]
+consideration=%                       ? ecophysiology/photoperiod/consideration: %
+unconstrain=%                         ? ecophysiology/photoperiod/unconstrain: %
+stop=%                                ? ecophysiology/photoperiod/stop: %
+
+[root]
+initial_depth=%                       ? root/depth/initial: %
+max_root_depth=%                      ? root/depth/maximum: %
+root_sensitivity_water_stress=%       ? root/stress_sensitivity/water: %
+surface_root_density=%                ? root/density/surface: %
+root_density_distribution_curvature=% ? root/density/distribution_curvature: %
+root_length_per_unit_mass=%           ? root/length/per_unit_mass: %
+root_length_at_emergence=%            ? root/length/emergence: % # {interpolation !linear:  [ { sync: days, offset: 0, stage: emergence, ordinate: % } ] }
+root_shoot_emergence_ratio=%          ? root/shoot_ratio/emergence: {interpolation !unknown_step_or_linear: [ { sync: days, offset: 0, stage: emergence, ordinate: % } ] }
+root_shoot_full_ratio=%               ? root/shoot_ratio/full: {interpolation !unknown_linear_or_step: [ { sync: days, offset: 0, stage: max_root_depth, ordinate: % } ] }
+#root_shoot_emergence_ratio=%         ? root/shoot_ratio: {interpolation !unknown_step_or_linear: [ { sync: days, offset: 0, stage: emergence, ordinate: % } ] }
+#root_shoot_full_ratio=%              ? root/shoot_ratio: {interpolation !unknown_linear_or_step: [ { sync: days, offset: 0, stage: max_root_depth, ordinate: % } ] }
+
+[inactive_period]
+consider_inactive_days=%              * quiescence/consider_inactive_days %
+inducement_temperature=%              * quiescence/inducement/temperature: %
+start_valid_date=%                    * quiescence/inducement/valid/start: %
+end_valid_date=%                      * quiescence/inducement/valid/end: %
+
+[dormancy]
+chill_requirement                     ? dormancy/chill/requirement/hours: %
+deg_day_bud_break_chill_req_sat       ? dormancy/chill/requirement/bud_break/not_satisfied: %
+deg_day_bud_break_chill_req_not_sat   ? dormancy/chill/requirement/bud_break/satisisfied: %
+senesce                               ? dormancy/senesce: %
+
+[residue]
+RUSLE2_type=%                         ? residue/RUSLE2_type: %
+decomposition_time=%                  o I think this was the 60% which is obsolete (need to check)
+decomposition_time_50=%               ? residue/decomposition/halflife: %
+fast_cycling_decomposition_time_50=%  ? residue/decomposition/halflife/fast_cycling: %
+slow_cycling_decomposition_time_50=%  ? residue/decomposition/halflife/slow_cycling: %
+lignified_decomposition_time_50=%     ? residue/decomposition/halflife/lignified: %
+fast_cycling_top_fraction=%           ? residue/top/fraction/fast_cycling: %
+slow_cycling_top_fraction=%           ? residue/top/fraction/slow_cycling: %
+lignified_top_fraction=%              ? residue/top/fraction/lignified: %
+fast_cycling_root_fraction=%          ? residue/root/fraction/fast_cycling: %
+slow_cycling_root_fraction=%          ? residue/root/fraction/slow_cycling: %
+lignified_root_fraction=%             ? residue/root/fraction/lignified: %
+detrition_time_50=%                   ? residue/detrition/halflife: %
+carbon_fraction=%                     ? residue/carbon_fraction: %
+stubble_area_covered_to_mass_ratio=%  ? residue/area_covered_to_mass_ratio/stubble: %
+area_covered_to_mass_ratio=%          ? residue/area_covered_to_mass_ratio/flat: % need to check if this is flat/surface
+xxx                                   ? residue/decomposition/rate/max/single
+
+
+
+[XXXX]
+branch_insertion_height=%
+
+
+
+
+
+
+
+
+
+
+
+

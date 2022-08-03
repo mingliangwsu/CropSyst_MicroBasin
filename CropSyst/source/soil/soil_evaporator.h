@@ -1,0 +1,47 @@
+#ifndef soil_evaporatorH
+#define soil_evaporatorH
+#include "common/evaporator.h"
+#include "soil/layers_interface.h"
+#include "soil/hydrology_interface.h"
+//______________________________________________________________________________
+class Evaporator_soil
+: public extends_ CS::Evaporator_intervals                                       //160717
+{
+ protected: // conditions
+   cognate_ bool fallow;
+   cognate_ bool summer_time;
+   cognate_ float64 mulch_cover_fraction;
+ protected: //
+   // Soil temperature needs  evap actual, but it is calculated before
+   // actual evap so we have been using yesterdays value
+   CORN::Dynamic_array<float64> evaporation_actual_yesterday;         // m
+   const Soil_layers_interface      &soil_layers;
+   const Soil_hydraulic_properties_interface &soil_hydraulic_properties;
+
+      // Warning soil_hydraulic_properties should actually be a pointer
+      // because these properties could change (due to soil tillage)
+
+   #ifndef __GNUC__
+   cognate_
+   #endif
+         Soil_hydrology_interface        &soil_hydrology;
+ public:
+   Evaporator_soil
+      (modifiable_ CORN::Dynamic_array<float64> &evaporation_potential_remaining_ //160717
+      ,const       Soil_layers_interface               &soil_layers_
+      ,const       Soil_hydraulic_properties_interface &soil_hydraulic_properties_
+      ,modifiable_ Soil_hydrology_interface            &soil_hydrology_);
+ public:
+   virtual float64 evaporate_interval(nat8 interval)                  modification_;
+   inline virtual float64 get_evaporation_actual_hour_yesterday(CORN::Hour hour) const
+      { return evaporation_actual_yesterday.get(hour); }
+ public:
+   bool end_day()                                                  modification_;
+ public:
+   bool know_conditions
+      (bool fallow
+      ,bool summer_time
+      ,float64 mulch_cover_fraction)                                  cognition_;
+};
+//_2016-06-06___________________________________________________________________
+#endif

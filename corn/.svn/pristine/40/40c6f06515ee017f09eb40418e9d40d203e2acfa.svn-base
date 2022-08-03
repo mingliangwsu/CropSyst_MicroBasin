@@ -1,0 +1,441 @@
+#include "corn/OS/file_system_logical.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "corn/container/text_list.h"
+#include "corn/string/strconv.hpp"
+#include <assert.h>
+#if (defined(_WIN32)  || defined(_WIN64))
+#  include "windows.h"
+#endif
+//______________________________________________________________________________
+namespace CORN { namespace OS {
+//______________________________________________________________________________
+File_system_logical::File_system_logical()
+:File_system()
+, arbitrary_directories()
+, recognized_directories()
+{
+#ifdef NYI
+   // These are file types defined by CORN
+   take_file_type_description(new File_type_description("TDF","Tabular Data Format file"));
+   take_file_type_description(new File_type_description("XLS","MicroSoft Excel"));
+#endif
+}
+//___________________________________________File_system_logical::constructor__/
+File_system_logical::~File_system_logical()
+{}
+//___________________________________________File_system_logical::destructor__/
+File_system_logical::Directory_entry::Directory_entry
+(const File_system::Directory &_parent_directory
+,const std::wstring &_name)
+: Directory_entry_name_abstract(_name)
+, parent_directory(&_parent_directory)                                           //110306
+, unresolved_parent_directory_name_owned(0)
+, mark(0)
+{  assign(_parent_directory.w_str());
+   append(DEFAULT_DIRECTORY_SEPARATORw_str);
+   append(_name);
+}
+//______________________________________________________________________________
+File_system_logical::Directory_entry::Directory_entry
+(const CORN::OS::Directory_name &directory_name_fully_qualified_name)            //101107
+:Directory_entry_name_abstract(directory_name_fully_qualified_name,include_all)
+, parent_directory(0)
+, unresolved_parent_directory_name_owned(0)
+, mark(0)
+{
+   /* 160126shouldn't be needed because Directory_entry_name_abstract copyies the string value
+   assign(directory_name_fully_qualified_name.w_str());
+   */
+   const Directory_name *parent_dir_name = directory_name_fully_qualified_name.get_path_directory_name();
+   unresolved_parent_directory_name_owned
+      = parent_dir_name
+      ? new CORN::OS::Directory_name_concrete
+         (
+         parent_dir_name->w_str()                                                //160126
+//160126 the copy constructor using components  is not working
+//         *parent_dir_name                                                       //140101
+//         ,include_all
+         )                                                           //131212
+      : 0;
+}
+//_2002-02-05__________________________________________________________________
+File_system_logical::Directory_entry::~Directory_entry()
+{  delete unresolved_parent_directory_name_owned; unresolved_parent_directory_name_owned = 0;
+}
+//_2002-02-10__________________________________________________________________
+const Directory_entry_name &File_system_logical::Directory_entry::set_cstr
+(const char *to_copy_from)                                          assignation_
+{  parent_directory = 0;  // this will be provided as needed
+   CORN::OS::Directory_entry_name_concrete entry_name(to_copy_from);
+   return Directory_entry_name_abstract::set_DEN(entry_name);
+}
+//_2012-02-09__________________________________________________________________/
+const Directory_entry_name &File_system_logical::Directory_entry::set_wstr
+(const wchar_t *to_copy_from)                                       assignation_
+{  parent_directory = 0;  // this will be provided as needed
+   CORN::OS::Directory_entry_name_concrete entry_name(to_copy_from);
+   return Directory_entry_name_abstract::set_DEN(entry_name);
+}
+//_2012-02-09__________________________________________________________________/
+void File_system_logical::Directory_entry::construction_compose()   construction_
+{  File_system_logical::Directory_entry *this_modifiable = const_cast<File_system_logical::Directory_entry *>(this);
+   if (this_modifiable)                                                          //140422
+   {
+      std::wstring composed_name;
+      if (parent_directory)                                                      //140422
+         composed_name.assign(parent_directory->w_str());
+      else if (unresolved_parent_directory_name_owned)
+         composed_name.assign(unresolved_parent_directory_name_owned->w_str());
+      composed_name.append(DEFAULT_DIRECTORY_SEPARATORw_str);
+      this_modifiable->assign(composed_name);                                    //140422
+   }
+   #ifdef NYI
+   std::wstring name_without_extension(_name);
+   if (name has dot)
+      assume we want to replace the extension in the name with
+      name_without_extension then trim from right most dot
+
+   append(name_without_extension);
+   #endif
+   Directory_entry_name_abstract::construction_compose();
+}
+//_2012-02-10___________________________________________________________________
+std::string get_key_buffer;
+const char *File_system_logical::Directory_entry::get_key()                const
+{  CORN::Unicodez_to_string(ref_designation().w_str(),get_key_buffer);
+   return get_key_buffer.c_str();
+}
+//_2003-01-09_____________________________________________________________________________
+const std::wstring &File_system_logical::Directory_entry::get_name()       const
+{  return Directory_entry_name_abstract::get_name();
+}
+//_2009-11-14___________________________________________________________________
+bool File_system_logical::Directory_entry::exists()                 affirmation_
+{  return file_system_engine.exists(ref_designation());
+}
+//______________________________________________________________________________
+bool File_system_logical::Directory::create()                              const
+{
+   if (CORN::OS::file_system_engine.exists(*this)) return true;                  //160127
+   const File_system::Directory *parent_directory = provide_parent_directory();  //140104
+   if (parent_directory && !parent_directory->is_root())                         //140104_120306
+        parent_directory->create();                                              //140104
+   // In order to create the directory we must ensure the parent directory
+   // already exists.  Also ensures this is in the logical directory tree.
+   // There may be no parent if this is a root directory.
+   if (file_system_engine.exists(ref_designation()))
+      return true; // The directory already exists and is presumably valid.
+   return file_system_engine.create_directory(ref_designation());
+}
+//______________________________________________________________________________
+bool File_system_logical::Directory::browse
+(bool open_new_window
+,bool show_directory_tree_view
+,bool show_as_apparent_root
+,bool select)                                                              const
+{  return file_system_engine.browse_directory(ref_designation(),open_new_window,show_directory_tree_view,show_as_apparent_root,select);
+}
+//_080929______________________________________________________________________________
+const File_system::Directory *File_system_logical::Directory_entry
+::provide_parent_directory()                                          provision_
+{  if (!parent_directory)
+   {  if (unresolved_parent_directory_name_owned)
+      {  parent_directory = file_system().provide_directory(*unresolved_parent_directory_name_owned);
+         assert(parent_directory); // assert is for debugging
+         delete unresolved_parent_directory_name_owned;                          //131212
+// I should delete unresolved_parent_directory_name_owned but it was crashing
+         unresolved_parent_directory_name_owned = 0;                             //131212
+      }
+   }
+   return parent_directory;                                                      //140104
+#ifdef OBSOLETE
+101024  don't delete yet, may want to move to Directory_entry_name_concrete
+
+   if (!parent_directory_known)                                                  //100103
+   {   //100103_
+      const File_system::Directory *is_this_a_directory = dynamic_cast<const File_system::Directory *>(this);
+      if (is_this_a_directory && (is_this_a_directory->is_root()))
+         parent_directory  = 0; // roots have no parent directory                //100103
+      else
+      {  // I don't know my parent directory, but maybe my designation's path does //100103
+         const Path &path = designation->ref_path();                             //100103
+         parent_directory  = path.directory_in_file_system;                      //100103
+         if (!parent_directory)                                                  //100103
+         {  // My designation might know my name                                 //100103
+            if (path.directory_name)                                             //100103
+            {  // Get my parent directory from the file system, (don't own the directory name, my designation or whoever owns my designation owns it)  //100103_
+               parent_directory = &file_system().provide_directory_with_known(*(path.directory_name)); //100103
+            }
+         }
+      }
+      parent_directory_known = true;                                             //100103
+   } // else we already known the parent directory, just return it.              //100103
+   return parent_directory;
+#endif
+}
+//_091115______________________________________________________________________________
+const CORN::OS::Directory_name *File_system_logical::Directory_entry
+::get_path_directory_name()                                                const
+{  return provide_parent_directory();                                            //140104
+}
+//_2012-02-06___________________________________________________________________
+File_system_logical::Directory::Directory
+(const File_system::Directory &_parent_directory
+,const std::wstring &_name
+,bool create_now_if_needed)                                                      //130106
+: Directory_entry(_parent_directory,_name)
+{  // name includes extension (if any)
+   if (create_now_if_needed) create();                                           //130106
+}
+//______________________________________________________________________________
+File_system_logical::Directory::Directory
+(const CORN::OS::Directory_name &directory_name_fully_qualified_name
+,bool create_now_if_needed)                                                      //130116
+: Directory_entry(directory_name_fully_qualified_name)
+{  if (create_now_if_needed) create();                                           //130106
+}
+//_2010-11-07___________________________________________________________________
+bool File_system_logical::Directory::exist_entry_matching   // was has_directory_entry
+(const Directory_entry_name &dir_entry_name_qualified
+,Inclusion inclusion)                                               affirmation_
+{  Directory_entry_name_concrete local_dir_entry_name
+      (dir_entry_name_qualified,inclusion);
+   return file_system_engine.exists(local_dir_entry_name);
+}
+//_2010-01-20___________________________________________________________________
+bool File_system_logical::Directory::exists_subdirectory
+(const std::wstring &unqualified_name)                              affirmation_
+{  Directory_entry_name_concrete local_dir_entry_name
+      (*this,unqualified_name,L"");
+   return file_system_engine.exists(local_dir_entry_name);
+}
+//_2010-01-20___________________________________________________________________
+nat32  File_system_logical::Directory::list_entry_names_deprecated
+(Container *file_name_list
+,Container *directory_name_list
+,Recursion recursion                                                             //150908
+,Directory_entry_name::Qualification qualification                               //150908
+,const wchar_t *entry_name_wild_card
+,const wchar_t *extension_filter
+,const CORN::Text_list *exclude_directories)                          rendition_ //130103
+// extension_filter can be used to limit the list to certain extensions  (without dot)
+{  nat32 entry_count = 0;
+   //First get a list of all current file and directory entry names
+   //in this directory (unqualified).
+   //We do this because
+   // List the file names in this directory applying wild card and extension filter
+   CORN::Unidirectional_list actual_FS_file_name_list;                           //150322
+   CORN::Unidirectional_list actual_FS_dir_name_list;                            //150322
+   file_system_engine.list_entry_names_deprecated
+      (ref_designation()
+      ,&actual_FS_file_name_list,&actual_FS_dir_name_list                        //150322
+      ,(Recursion)(recursion & !FILE_SYSTEM_RECURSION_SUBDIRECTORY)              //150908
+      ,qualification                                                             //150908
+         // don't recurse subdirectories , we handle subrecursion in this function     //150908
+         // WARNING I am not sure if superdirectory recursion should also be handled here
+         // Maybe so because logical file system would have alternate root.
+      ,entry_name_wild_card,extension_filter
+      ,exclude_directories);                                                     //130103
+   // List the all the directory names directory names in this directory
+   // Note that the wild card and extension are not applied to the directory
+   {  while
+         (CORN::OS::File_name *actual_FS_file_name = dynamic_cast<CORN::OS::File_name *>
+             (actual_FS_file_name_list.pop_at_head()))
+      {  // the file_system_engine returns qualified filenames with path names that a directory_entry_name
+         // we want here to have this as the directory path
+         if (file_name_list)
+         {  file_name_list->append(actual_FS_file_name);                         //150404
+            entry_count += 1;
+         } else delete actual_FS_file_name;
+      }
+   }
+   {  while
+        (CORN::OS::Directory_name *actual_FS_dir_name = dynamic_cast<CORN::OS::Directory_name *>(actual_FS_dir_name_list.pop_at_head()))
+      {  // the file_system_engine returns qualified dir names with path names that a directory_entry_name
+         // we want here to have this as the directory path
+         File_name_concrete *dirname = new File_name_concrete(*this,*actual_FS_dir_name);
+         if (directory_name_list)                                                //150420
+         {  directory_name_list->append(dirname);
+            entry_count += 1;
+         }
+         if (recursion & FILE_SYSTEM_RECURSION_SUBDIRECTORY)                     //150908
+         {  const File_system::Directory *dir = file_system().provide_directory(*dirname); //140104
+            entry_count += dir && dir->list_entry_names_deprecated
+               (file_name_list,directory_name_list
+               ,File_system::subdirectory_recursion_inclusive                    //150908
+               ,qualification                                                    //150908
+               ,entry_name_wild_card,extension_filter,exclude_directories);      //140104
+         }
+         if (!directory_name_list) delete dirname;                               //150420
+      }
+   }
+   if (recursion & FILE_SYSTEM_RECURSION_SUBDIRECTORY)                          //150908
+      // WARNING I am not sure to include superdirectories at this point
+   {  CORN::Unidirectional_list subdiretories_to_search;                         //150322
+      file_system_engine.list_entry_names_deprecated                             //150322_130825
+         (ref_designation()
+         ,0
+         ,&subdiretories_to_search
+         ,File_system::none_recursion_inclusive                                  //150909
+         ,qualification                                                          //150908
+         ,0,0
+      ,exclude_directories);                                                     //130103
+      FOR_EACH_IN(search_subdir_name,CORN::OS::Directory_name ,subdiretories_to_search,each_subdir)
+      {  CORN::OS::Directory_name_concrete search_subdir_dirname(*search_subdir_name);
+         const File_system::Directory *dir = file_system().provide_directory(search_subdir_dirname); //140104
+         entry_count += dir && dir->list_entry_names_deprecated
+            (file_name_list,directory_name_list
+            ,File_system::subdirectory_recursion_inclusive
+            ,qualification
+            //,search_subdir_name
+            ,entry_name_wild_card,extension_filter,exclude_directories); //140114
+      } FOR_EACH_END(each_subdir)
+   }
+   return entry_count;
+}
+//_100101______________________________________________________________________________
+CORN::OS::File_name *File_system_logical::Directory::find_file_name
+(const std::wstring  &target_filename
+,File_system::Recursion recursion                                                //150908
+,Directory_entry_name::Qualification qualification)                   rendition_ //150908
+{  Unidirectional_list matching_filename_list;
+   list_file_names_deprecated
+      (matching_filename_list
+      ,recursion                                                                 //150908
+      ,qualification                                                             //150908
+      ,target_filename.c_str());
+   return  dynamic_cast<CORN::OS::File_name *>(matching_filename_list.pop_at_head());
+}
+//______________________________________________________________________________
+CORN::OS::Directory_name *File_system_logical::Directory::find_directory_name
+(const std::wstring  &target_directory_name_unqualified
+,File_system::Recursion recursion
+,Directory_entry_name::Qualification qualification)                   rendition_ //150908
+{  Unidirectional_list matching_dir_name_list;
+   list_directory_names_deprecated
+      (matching_dir_name_list
+      ,recursion,qualification                                                   //150908
+      ,target_directory_name_unqualified.c_str());
+   return  dynamic_cast<CORN::OS::Directory_name *>(matching_dir_name_list.pop_at_head());
+}
+//_100107______________________________________________________________________________
+CORN::OS::File_name *File_system_logical::Directory::find_file_name_in_path
+(const std::wstring  &target_file_name_unqualified
+,bool recurse_up_the_path
+,bool inclusive) rendition_
+{
+   //150908  This method is probably obsolete because because find_file_name now can search down or up the directory tree.
+
+   CORN::OS::File_name *found_filename
+      = inclusive
+         ? find_file_name
+            (target_file_name_unqualified
+            ,none_recursion_inclusive
+            ,relative_partial_qualification                                      //150908
+               //I think in logical filesystem we would always want relative filename
+            )
+         :0;
+   if (!found_filename && recurse_up_the_path && !is_root())
+   {  const File_system::Directory *parent = provide_parent_directory();
+       if (parent)                                                               //140104
+          found_filename = parent->find_file_name_in_path
+             (target_file_name_unqualified,recurse_up_the_path,true);            //140104
+   }
+   return  found_filename;
+}
+//_2012-02-02___________________________________________________________________
+CORN::OS::Directory_name *File_system_logical::Directory::find_directory_name_in_path
+(const std::wstring   &target_dir_name_unqualified,bool recurse_up_the_path, bool inclusive)  rendition_
+{
+   //150908  This method is probably obsolete because because find_file_name now can search down or up the directory tree.
+   if (get_name() == target_dir_name_unqualified) return this;                   //160127
+   CORN::OS::Directory_name *found_dirname
+      = inclusive ?find_directory_name
+         (target_dir_name_unqualified
+         ,none_recursion_inclusive
+         ,relative_partial_qualification                                         //150908
+               //I think in logical filesystem we would always want relative filename
+         ) : 0;   //130825
+         // we don't find_directory_name recurvive because that will start
+         // searching down the path we just came up (infinite loop)
+   if (!found_dirname && recurse_up_the_path && !is_root())
+   {  const File_system::Directory *parent = provide_parent_directory();
+       if (parent)                                                               //140114
+         found_dirname = parent->find_directory_name_in_path                     //140104
+            (target_dir_name_unqualified,recurse_up_the_path,false);
+   }
+   return  found_dirname;
+}
+//_2012-02-08___________________________________________________________________
+const std::string &File_system_logical::Directory::set_desktop_context
+(const std::string &suite_name
+,const std::string &context)                                               const
+{
+   Directory_name_concrete desktop_ini_filename(*this,L"desktop.ini");
+   #if ((defined(_Windows)  || defined(_WIN32)) && !defined(__GNUC__) )
+      #ifdef _WCHAR_T_DEFINED
+      {
+         std::wstring suite_nameW; CORN::string_to_wstring(suite_name, suite_nameW);
+         std::wstring contextW; CORN::string_to_wstring(context, contextW);
+         WritePrivateProfileString("context",suite_name.c_str(),context.c_str(),desktop_ini_filename.c_str());
+         WritePrivateProfileStringW(L"context",suite_nameW.c_str(),contextW.c_str(),desktop_ini_filename.w_str());
+      }
+      #else
+         WritePrivateProfileString("context",suite_name.c_str(),context.c_str(),desktop_ini_filename.c_str());
+      #endif
+   #else
+      assert(false);  // NYI for other OS
+   #endif
+   return context;
+}
+//_2014-04-15___________________________________________________________________
+std::string File_system_logical::Directory::get_desktop_context
+(const std::string &suite_name)                                            const
+{  std::string context_return;
+   Directory_name_concrete desktop_ini_filename(*this,L"desktop.ini");
+   #ifdef WINAPI
+      char context_cstr[1024];
+      GetPrivateProfileStringA("context",suite_name.c_str(),"unknown",context_cstr,1024,desktop_ini_filename.c_str());
+      context_return =  context_cstr;
+   #else
+      assert(false);  // NYI for other OS
+   #endif
+   return context_return;
+}
+//_2014-04-15___________________________________________________________________
+const File_system::Directory *File_system_logical::provide_directory             //140104
+(const Directory_name &directory_name)                                provision_
+{  File_system::Directory *found_directory =
+      dynamic_cast<File_system::Directory *>                                     //140716
+      (arbitrary_directories.find_cstr(directory_name.get_key()));
+   if (!found_directory)
+   {  found_directory = new Directory(directory_name,false);
+      arbitrary_directories.append(found_directory);
+   }
+   return found_directory;
+}
+//_2012-02-07___________________________________________________________________
+#if (defined(_WIN32)  || defined(_WIN64))
+File_system_logical file_system_Windows;
+File_system_logical &file_system_logical = file_system_Windows;
+#else
+File_system_logical file_system_Unix;
+File_system_logical &file_system_logical = file_system_Unix;
+#endif
+//______________________________________________________________________________
+const std::string &File_system_logical::File_type_description::compose_file_type_pattern_for_Windows
+(std::string &buffer) const
+{  buffer.assign(filter_label);
+   buffer.append("(");
+   buffer.append("*.");
+   buffer.append(extension);
+   buffer.append(")");
+   buffer.append("|");
+   buffer.append("*.");
+   buffer.append(extension);
+   return buffer;
+}
+//_2013-03-10___________________________________________________________________
+} } // namespace CORN OS
+

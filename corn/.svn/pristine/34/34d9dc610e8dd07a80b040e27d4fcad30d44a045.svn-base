@@ -1,0 +1,28 @@
+#ifndef randomH
+#define randomH
+#ifndef __cplusplus
+#ifndef randomHPP
+#include <stdlib.h>
+#endif
+#ifndef primitiveH
+#  include "corn/primitive.h"
+#endif
+#endif
+// Various random number forms
+
+// These random function returns a random numbers between 0 and 1.
+// The calling program will usually want to call randomize()
+// on startup to get truely random numbers.
+
+#define CORN_uniform_random()                 ((float)rand()/(float)RAND_MAX)
+#define CORN_uniform_random_between(low,high) (CORN_uniform_random() * (high-low) + low)
+#define CORN_normal_random(mean,stddev)       (mean + (stddev * CORN_uniform_random()))
+
+extern float64 est_normal_random_between
+   (float32 low,float32 high,bool conservative = true);                          //031006
+extern float64 gasdev_normal_random();
+extern float64 Weibull_random(float64 alpha, float64 beta);                   //980315
+extern float64 triangle_random(float64 L, float64 H, float64 M );
+#endif
+//random
+

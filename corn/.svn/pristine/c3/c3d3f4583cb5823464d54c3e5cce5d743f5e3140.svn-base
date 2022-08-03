@@ -1,0 +1,265 @@
+#include <corn/image/gif/colormap.h>
+
+/*______*/  static bool deleted_colors[256];
+
+
+/*______*/  color_map::color_map(uint8 i_color_resolution,uint8 i_bits_per_pixel)
+/*______*/  :color_resolution(i_color_resolution)
+/*______*/  ,bits_per_pixel(i_bits_per_pixel)
+/*______*/  ,num_colors(1 << i_bits_per_pixel)
+/*______*/  {
+/*______*/  };
+/*______*/
+/*______*/  color_map::color_map(const CORN::Color_ramp &color_ramp)
+/*______*/  :color_resolution(4)  // I think
+/*______*/  ,bits_per_pixel(8)
+/*______*/  ,num_colors(1 << 8)
+/*______*/  {
+/*______*/     int colors_in_ramp = color_ramp.get_colors();
+/*______*/     float color_ramp_step = // float because
+/*______*/     (colors_in_ramp > num_colors)
+/*______*/     ? colors_in_ramp / num_colors
+/*______*/     : 1;
+
+/*______*/     red[0]   = 0;  // Default background color is black.
+/*______*/     green[0] = 0;
+/*______*/     blue[0]  = 0;
+
+/*______*/     float color_ramp_index = 1;
+/*______*/     for (int color_map_index = 1 // Leave index 0 for background color
+/*______*/         ;color_map_index < num_colors
+/*______*/         ;color_map_index++)
+/*______*/     {
+/*______*/        red[color_map_index] = color_ramp.get_color((uint16)color_ramp_index).Red();
+/*______*/        green[color_map_index] = color_ramp.get_color((uint16)color_ramp_index).Green();
+/*______*/        blue[color_map_index] = color_ramp.get_color((uint16)color_ramp_index).Blue();
+/*______*/        color_ramp_index += color_ramp_step;
+/*______*/     }
+/*______*/  };
+/*______*/
+/*______*/  void color_map::read(istream  &in_strm)
+/*______*/  {
+/*______*/  	for (int i = 0; i < num_colors; i++)
+/*______*/  	{ red[i]   = in_strm.get();
+/*______*/  	  green[i] = in_strm.get();
+/*______*/  	  blue[i]  = in_strm.get();
+/*______*/  	};
+/*______*/  };
+/*______*/
+/*______*/  void color_map::write(ostream &out_strm)
+/*______*/  {
+/*______*/  	for (int i = 0; i < num_colors; i++)
+/*______*/  	{ out_strm.put(red[i]);
+/*______*/  	  out_strm.put(green[i]);
+/*______*/  	  out_strm.put(blue[i]);
+/*______*/  	};
+/*______*/  };
+/*______*/
+/*______*/  int color_map::find(uint8 r, uint8 g, uint8 b)
+/*______*/  {
+/*______*/     int i;
+/*______*/  //   int min_dr = 0xff;
+/*______*/  //   int min_dg = 0xff;
+/*______*/  //   int min_db = 0xff;
+/*______*/     int min_avg = 0xff;
+/*______*/     int index = 0;
+/*______*/     for (i = 0; i < num_colors; i++)
+/*______*/     {
+/*______*/       int dr = abs(r - red[i]);
+/*______*/       int dg = abs(g - green[i]);
+/*______*/       int db = abs(b - blue[i]);
+/*______*/       int avg = (dr + dg + db) /3;
+/*______*/       if (avg < min_avg)
+/*______*/       {
+/*______*/          min_avg = avg;
+/*______*/          index = i;
+/*______*/       };
+/*______*/     };
+/*______*/     return index;
+/*______*/  };
+/*______*/
+/*______*/  void color_map::union_colors(color_map *color_map_2,uint8 recolor1[],uint8 recolor2[])
+/*______*/  {
+/*______*/    int i;
+/*______*/
+/*______*/    // At this time I am not modifying the base image's color map
+/*______*/    for (i = 0; i < num_colors; i++)
+/*______*/    {
+/*______*/  	  recolor1[i] = i;
+/*______*/  	  recolor2[i] = i;
+/*______*/    };
+/*______*/
+/*______*/
+/*______*/    if ((num_colors + color_map_2->num_colors) <= 256)
+/*______*/    {
+/*______*/  	  // Add the second color map to the end of the color map.
+/*______*/  	  for (i = 0; i < color_map_2->num_colors; i++)
+/*______*/  	  { recolor2[i] = num_colors + i;
+/*______*/         color_map_2->red[i+num_colors] = color_map_2->red[i];
+/*______*/         color_map_2->green[i+num_colors] = color_map_2->green[i];
+/*______*/         color_map_2->blue[i+num_colors] = color_map_2->blue[i];
+/*______*/         red[i+num_colors] = color_map_2->red[i];
+/*______*/         green[i+num_colors] = color_map_2->green[i];
+/*______*/         blue[i+num_colors] = color_map_2->blue[i];
+/*______*/  	  };
+/*______*/       num_colors = num_colors + color_map_2->num_colors;
+/*______*/    }
+/*______*/    else
+/*______*/    { int colors_reused = 0;
+/*______*/  	 for (i = 0; i < color_map_2->num_colors; i++)
+/*______*/  	 { recolor2[i] = 255;
+/*______*/        int min_dr = 256;
+/*______*/        int min_dg = 256;
+/*______*/        int min_db = 256;
+/*______*/        for (int j = 0; j < num_colors; j++)
+/*______*/  		{ int dr = abs(red[j]   - color_map_2->red[i]);
+/*______*/  		  int dg = abs(green[j] - color_map_2->green[i]);
+/*______*/  		  int db = abs(blue[j]  - color_map_2->blue[i]);
+/*______*/
+/*______*/  #define SAME_COLOR_RANGE 10
+/*______*/  		  if (dr < min_dr && dg < min_dg && db < min_db)
+/*______*/          {
+/*______*/  			  // If the second image color is similar to this first color
+/*______*/  			  // then substitute the color
+/*______*/  			  recolor2[i] = j;
+/*______*/             colors_reused += 1;
+/*______*/             min_dr = dr;
+/*______*/             min_dg = dg;
+/*______*/             min_db = db;
+/*______*/          };
+/*______*/  //        else // can't permit more than 255 color.
+/*______*/  //           recolor2[i] = (num_colors < 256) ? num_colors++ : 255;
+/*______*/  		};
+/*______*/  	 };
+/*______*/  //    cout << "Colors reused:" << colors_reused << endl; for debugging
+/*______*/    };
+/*______*/  };
+/*______*/
+/*______*/  void color_map::copy_from(color_map &map)
+/*______*/  {
+/*______*/     int i;
+/*______*/     for (i = 0; i < 256; i++)
+/*______*/     {
+/*______*/       red[i] = map.red[i];
+/*______*/       green[i] = map.green[i];
+/*______*/       blue[i] = map.blue[i];
+/*______*/     };
+/*______*/
+/*______*/     color_resolution = map.color_resolution;
+/*______*/     bits_per_pixel = map.bits_per_pixel;
+/*______*/
+/*______*/  	num_colors = map.num_colors;
+/*______*/     sorted = map.sorted;
+/*______*/  };
+/*______*/
+
+/*______*/  void color_map::remove_duplicate_colors(uint8 recolor[])
+/*______*/  {
+/*______*/    int i,j;
+/*______*/    for (i = 0; i < 256; i++)
+/*______*/       recolor[i] = i;
+/*______*/    int new_num_colors = num_colors;
+/*______*/    new_num_colors = 255;
+/*______*/    for (i = 0 ;i < 255; i++)
+/*______*/    {
+/*______*/       if (deleted_colors[i])
+/*______*/       {  new_num_colors -= 1;
+/*______*/          for (j = i; j <  255; j++)
+/*______*/          { red[j]   = red[j+1];
+/*______*/            green[j] = green[j+1];
+/*______*/            blue[j]  = blue[j+1];
+/*______*/            if (recolor[j] > i)
+/*______*/               recolor[j] = recolor[j] -1;
+/*______*/
+/*______*/            deleted_colors[j] = deleted_colors[j+1];
+/*______*/            deleted_colors[255] = 0;
+/*______*/
+/*______*/          };
+/*______*/          i -= 1;
+/*______*/       };
+/*______*/    };
+/*______*/    num_colors = new_num_colors;
+/*______*/  };
+/*______*/
+/*______*/  void color_map::quantize(int max_colors, uint8 recolor[])
+/*______*/  {
+/*______*/     int i,j;
+/*______*/
+/*______*/  //     not used
+/*______*/  //    static long frequency[256];
+/*______*/  //    for (i = 0; i < 256; i++)
+/*______*/  //      frequence[i] = 0;
+/*______*/  //
+/*______*/  //    for (i = 0; i < height; i++)
+/*______*/  //      for (j = 0; j < width ; j++)
+/*______*/  //         frequency[matrix[i][j]] += 1;
+/*______*/
+/*______*/
+/*______*/     for (i = 0; i < 256; i++)
+/*______*/     {
+/*______*/        deleted_colors[i] = 0;
+/*______*/        recolor[i] = i;
+/*______*/     };
+/*______*/     int num_deleted = 0;
+/*______*/     int tolerance = 10;
+/*______*/     while ((num_colors - num_deleted) > max_colors)
+/*______*/     {
+/*______*/        for (i = 0; (i < 256) ; i++)
+/*______*/        if (!deleted_colors[i])
+/*______*/        {
+/*______*/           uint8 min_dr = 255; uint8 min_dg = 255; uint8 min_db = 255;
+/*______*/           int min_index = 255;
+/*______*/           for (j = i+1; j < 256; j++)
+/*______*/           {
+/*______*/              if (i != j)
+/*______*/              { uint8 dr = abs(red[j] - red[i]);
+/*______*/                uint8 dg = abs(green[j] - green[i]);
+/*______*/                uint8 db = abs(blue[j] - blue[i]);
+/*______*/                if ((dr < min_dr) && (dg < min_dg) && (db < min_db) &&
+/*______*/                    (dr < tolerance) && (dg < tolerance) && (db < tolerance)
+/*______*/                    && (!deleted_colors[j]))
+/*______*/                {
+/*______*/                   min_dr = dr; min_dg = dg; min_db = db;
+/*______*/                   min_index = j;
+/*______*/                };
+/*______*/              };
+/*______*/           };
+/*______*/           if (min_index < 255)
+/*______*/           {
+/*______*/             deleted_colors[min_index] = 1;
+/*______*/             recolor[min_index] = i;
+/*______*/           }
+/*______*/        };
+/*______*/        tolerance += 1;
+/*______*/        num_deleted = 0;
+/*______*/        for (i = 0; i < 256; i++)
+/*______*/           num_deleted += deleted_colors[i];
+/*______*/     };
+/*______*/  };
+
+/*000129*/  void color_map::dither_safe_colors(bool unix_colors,uint start_at)
+/*______*/  {
+/*______*/     uint8 incr = unix_colors ? 0x33 : 0x40;
+/*______*/     uint8 index = 0;
+/*______*/        for (uint8 r = 0; r <= 0xff; r+=incr)
+/*______*/        {
+/*______*/           for (uint8 g = 0; g <= 0xff; g+=incr)
+/*______*/           {
+/*______*/              for (uint8 b = 0; b <= 0xff; b+=incr)
+/*______*/              {
+/*______*/                 set_color(index,r,g,b);
+/*______*/                 index ++;
+/*______*/              }
+/*______*/           }
+/*______*/        };
+/*______*/  };
+
+/*000129*/  void color_map::grayscale(uint8 colors,uint start_at)
+/*______*/  {
+/*______*/     uint8 incr = 256 / colors;
+/*______*/     for (uint8 index = start_at; index < 256; index += incr)
+/*______*/     {
+/*______*/        set_color(index,index,index,index);
+/*______*/     };
+/*______*/  };
+

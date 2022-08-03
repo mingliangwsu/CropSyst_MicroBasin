@@ -1,0 +1,264 @@
+<H1>Observation</H1>
+
+Observation is a set of classes that allows variables to be
+inspected, examined, recorded and processed
+independent of the simulation model
+with minimal impact on the simulation model and submodels objects.
+
+The inspector 
+
+
+<!-- conceptual
+Exploration look for patterns in or create new knowledge from examind outputs
+Interrogation ?
+Investigation ?investigation
+
+Perlustrate distil/clarify information to more presentable form?
+Illustrate Present information 
+
+Supervision would check that the simulation is functioning correctly
+(Could also be applicable to decision support system
+
+-->
+
+<H2>Inspector (scalar)</H2>
+
+The inspector can be used to:
+<UL>
+<LI>Record variable values for output.
+<LI>Communicate between disparate modules such as pluggins
+    that may not even be implemented in the same language.
+</UL> 
+ <P>
+ 
+Any object may add inspectors.
+Inspectors could be added at any time, but by adding
+during (initialization) this will ensure that the inspectors
+are known when any periods are added (to examination).
+<P>
+Typically inspector is given to the examination_global to maintain.
+<P>
+Conceptual:<BR>
+There may be other cases where an object would like to 
+have a private list of inspectors.
+<P>
+An object simply creates an emanator object which it gives
+to the global emanator list and implements a method
+that instanciates inspectors and gives the inspectors to the
+provided list of inspectors.
+The Object usually no longer interacts with the inspector it creates.
+Simulation elements that exist throughout the duration of the simulation
+need not maintain references to their inspectors nor emanators.
+<P>
+An object which may go out of scope (be deleted) will usually keep
+a reference to its emanator so that in the destructor 
+it can signal the emanator that it is being deleted.
+Inspectors use this to know that the inspected value reference no longer
+exists for the deleted emanating object.
+
+<P>
+The simulation engine initiates the global inspection mechanism
+Typically at the end of it's start() method,
+this allows subelements to have been instanciated, initialized
+and started .
+<FONT color="gray">
+{May want to start the inspection before starting 
+anything else (subelements)}
+</FONT>
+<P>
+A subelement may be dynamic, instanciated after global inspection has been setup.
+The element instanciating a subelement may initiate inspector rendition
+to allow the subelement to add its emanator and inspectors.
+<P>
+An element will typically add inspectors for all variables suitable
+for inspection.  The application (which instantiates the the simulation engine).
+may provide mechanism to 'prune' the global inspector list removing inspectors
+that are of no interest.  Of shunt inspectors from the global 'active'
+list to inactive lists (I.e. to temporarily disable specific inspections).
+<P>
+Simulation elements can create their own Inspections
+and or interactive with the global inspection as they may have knowledge
+about the relevence of inspection.
+
+<H2>Inspector_vector</H2>
+
+Conceptual (NYI)
+
+
+
+
+<H2>Inspector_strata</H2>
+
+The strata mechanism has some additional overhead
+Most of the processing could be perform outside of the
+model simulation run 
+
+<H2>Inspection</H2>
+
+Inspection is a mechanism that allows variables to be observed.
+
+
+<H2>Examination</H2.
+
+
+Examination is a mechanism that allows observations to be tallied and/or recorded.
+
+
+<H2>Recorder</H2>
+
+Examinations can be recorded to files is various formats using a recorder
+where the recorder outputs the Inspector  values to a file
+in the specific format.
+<P>
+Typically there would be a subdirectory for each simulation element.
+For the overall simulation scenario which is derived from 
+Simulation_engine where
+the scenario directory is typically the current working (scenario) directory.
+<P>
+Output can optionally  be written directly into the scenario directory
+or an "Output" directory:
+<TABLE BORDER=1>
+<TR><TH>Target directory mode	<TH>Advantages  <TH>Disadvantages
+<TR>
+<TD>Scenario 		
+<TD> 
+  <UL> <!--advantages -->
+  <LI>Cleaner directory structure
+  <LI>No need for extra "Output directory in the path
+      which makes paths longer.
+  </UL>
+<TD>
+  <UL> <!--disadvantages -->
+  There is not much dinstiction between input files and output files.  
+  Although UED files are typically outputs certain inputs are stored in UED files.
+  </UL>
+  
+<TR>
+<TD><B>Output</B>
+<TD> 
+  <UL> <!--advantages -->
+  <LI>All output is clearly identifiable being under the fixed
+      landmark directory name.
+  <LI>No need for extra "Output" directory in the path.
+  <LI>In CS Suite V5   
+  </UL>
+<TD>
+  <UL> <!--disadvantages -->
+  <LI>In CS Suite V5 with its new emphasis on scenario 
+      level directory generation, everything in the directory
+	  tree is essentially generated (output) directories and 
+	  files. So having an "Output" directory is  essentially superflous.
+  
+  </UL>
+  
+</TABLE>
+<P>
+
+The target directory is not specifically identified
+as the scenario directory name is the name of the scenario.
+<P>
+Subdirectories (under the target) are created for emanating subobjects.
+These may be specifically identified by the user 
+(for example crop outputs are written in a directory
+ whose name matches the crop parameter file name),
+or the emanating class may specify a fixed name.
+<P>
+
+<H3>Filename composition</H3>
+
+File names indicate the information stored in the file.
+
+<DL>
+<DT><H4>Period</H4>
+<DD>
+The period of observation is indicated with <B>@</B> character.
+followed by the period indicator
+<TABLE BORDER = 1>
+<TR><TH>Period<BR>code<TH>Duration<TD>Intepretation
+<TR><TD>@C <TD> continual
+   <TD>the record has no timestamp (perhaps should be time stamped by start year..
+<TR><TD>@A <TD> annual
+   <TD>the record is timestamped with year.
+<TR><TD>@<em>{period} <TD> named period
+where the period is specific to the period context
+(I.e. crop growth stages such as "filling" "flowering" "maturity" etc...)
+   <TD>the record is timestamped with the start of the period.
+   
+   <!-- conceptual 
+<TR><TD>@P <TD> periodic
+   <TD>the record is timestamped with the start of the period.
+-->   
+<!-- conceptual   
+<TR><TD>@S <TD> seasonal
+   <TD>This is special form of periodic 
+	the record is timestamped with season start date .
+<TR><TD>@M <TD> monthly (mensual)
+   <TD>conceptual: the record is timestamped with year and month.
+<TR><TD>@D <TD> daily (diurnal full day not daytime)
+	<TD>the records record is timestampped with date
+-->	
+</TABLE>
+
+Thus @A indicates 
+
+<DT><H4>Statistical tally</H4>
+
+Tallies are provided as a convenience.
+Although the model could easily output all the detailed data
+to be tallied externally, this could add significantly to the amount of output
+where the user would most likely be making summaries anyway.
+Using tallies, significantly reduces the amount of unecessary output.
+but may increase slightly memory requirements and there may
+be some computational overhead.
+Although there is computational overhead, since only the tallied
+values are written there is significant reduction in over all run time.
+Each variable is coded to indicate the statistical tally.
+
+<TABLE BORDER = 1>
+<TR><TH>Indicator <TH> Description 
+<TR><TD>#  
+	<TD>Time series where there is no tallying and  individual observed/inspected numbers are recorded.
+        These would be values for item in the time series of the period.
+		 (stored in UED files as time series)
+		Specific values may be  'pretallied' values by the model itself
+		(I.e. accumulations or counts) such values shouldn't really
+		be considered statistical because there where will likely
+		be some condition intrinsic to the accumulation or count.
+		(I.e. thermal time, or number of days with appreciable precipition).
+			
+<TR><TD>$  <TD> Single statistical tally summary where each tally value
+   is stored as a scalar time stamp according to the period
+   
+<!--     
+conceptual may need to have tallies of tallis
+these would be concatendated
+I.e.
+  xxx@A$A
+<TR><TD>$$ <TD> indicates tallies of tallies 
+<TR><TD>$$$<TD> Additional $ are added for  each level of tallied tallies.
+--> 
+</TABLE>
+
+<TABLE BORDER=1>
+<TR><TH>Example<BR>xxx is ontology <TD>interpretation
+<TR><TD>xxx@annual#day.UED <TD>Indicates annual period of observations where daily time series values are recorded as time series
+<TR><TD>xxx@annual$yr.UED	<TD>Indicates annual period of observations where annual tallies are recorded as scalar values
+</TABLE>
+
+The ontology domain name is prepended
+Underscores may appear in the ontology domain name (I.e. land_unit)
+The ontology domain which provides definitions of the variables.
+(The domain name may include subdomain name)
+
+</DL>
+Recorder files are written to the simulation elements
+A directory is created for each emanating object which is typically 
+a simulation element
+<P>
+File names are composed automatically.
+The primary simulation element 
+A subdirectory is created for each 
+
+<H2>UED recorder</H2>
+
+

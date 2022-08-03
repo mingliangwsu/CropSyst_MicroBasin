@@ -1,0 +1,74 @@
+#ifndef timestepH
+#   include "corn/metrology/timestep.h"
+#endif
+#define U_TIMESTEP_ORDER_COUNT 38
+Units_code U_time_step_order[U_TIMESTEP_ORDER_COUNT] =
+{0 // not used
+,UT_0_seconds
+,UT_0_minutes
+,UT_0_hours
+
+,UT_millisecond
+,UT_jiffy_real_time
+,UT_jiffy_AC
+
+,UT_second       // metric
+,UT_1_second
+// :  NYI
+,UT_second | U_metric_deca   // 10 seconds
+// :  NYI
+,UT_30_seconds
+// :  NYI
+,UT_60_seconds
+
+,UT_minute     //metric       (uint16)0x1700      // 00010111 00000000b
+//NA       (uint16)0x1400      // 00010100 00000000b
+,UT_1_minute
+// :
+,UT_5_minutes
+,UT_0_minutes + 6  // six minutes
+,UT_hour |U_metric_deci // 10th/ of an hour  (6 minutes
+// :
+,UT_10_minutes
+// :
+,UT_15_minutes
+// :
+,UT_30_minutes
+,UT_half_hour
+// :
+,UT_60_minutes
+,UT_hour         // This is metric    (uint16)0x1800      // 00011000 00000000b
+,UT_1_hour
+// :
+,UT_hour | U_metric_deca  //  10 hours
+,UT_0_hours + 10
+// :
+,UT_24_hours
+,UT_day
+,UT_week
+,UT_fortnight
+,UT_month
+,UT_quarter
+,UT_trimester
+,UT_biannum
+,UT_year
+,UT_decade
+,UT_century
+,UT_millenium
+};
+
+//______________________________________________________________________________
+/*050518_*/ int8 compare_timestep_units(Units_code TS_1, Units_code TS_2)
+/*______*/  {  int8 result = 0;
+/*______*/     uint16 TS_1_index = 0;
+/*______*/     for (uint16 i = 0; !TS_1_index && (i < U_TIMESTEP_ORDER_COUNT) ; i++)
+/*______*/        if (U_time_step_order[i] == TS_1) TS_1_index = i;
+/*______*/     uint16 TS_2_index = 0;
+/*______*/     for (uint16 i = 0; !TS_2_index && (i < U_TIMESTEP_ORDER_COUNT) ; i++)
+/*______*/        if (U_time_step_order[i] == TS_2) TS_2_index = i;
+/*______*/     if (TS_1_index > TS_2_index) result = 1;
+/*______*/     if (TS_1_index < TS_2_index) result = -1;
+/*______*/     if (TS_1_index == TS_2_index) result = 0;
+/*______*/     return result;
+/*______*/  };
+//______________________________________________________________________________

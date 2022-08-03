@@ -1,0 +1,780 @@
+#include "corn/OS/directory_entry_name_abstract.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/container/text_list.h"
+#include <algorithm>
+#include "corn/OS/directory_entry_name.h"
+#include "corn/string/strconv.hpp"
+
+// include just for debuggin
+#include "corn/OS/directory_entry_name_concrete.h"
+
+using namespace std;
+//_____________________________________________________________________________/
+namespace CORN
+{
+namespace OS
+{
+//_____________________________________________________________________________/
+Directory_entry_name_abstract::Directory_entry_name_abstract()
+:std::wstring(L"")
+,name       ()
+,extension  ()
+,root       (false)  // assigned in set()
+,preferred_separator(0)                                                          //120824
+,identified_type(unknown_entry)                                                  //131120
+{}
+//_____________________________________________________________________________/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const char *raw_name
+,Directory_entry_type entry_type)
+:std::wstring(L"")
+,name       ()
+,extension  ()
+,root       (false)  // assigned in set()
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{  CORN::ASCIIz_to_wstring(raw_name,*this);
+   CORN::strip_wstring(*this,CORN::Trailing,L'\\');                              //140121
+   CORN::strip_wstring(*this,CORN::Trailing,L'/');                               //140121
+   decompose();                                                                  //120327
+   setup_is_root();
+}
+//_____________________________________________________________________________/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const wchar_t *raw_name
+,Directory_entry_type entry_type)
+:std::wstring(raw_name)
+,name       ()
+,extension  ()
+,root       (false)  // assigned in set()
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{  decompose();                                                                  //120327
+   setup_is_root();
+}
+//_2012-02-02__________________________________________________________________/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const std::string &raw_name
+,Directory_entry_type entry_type)
+:std::wstring(L"")
+,name       ()
+,extension  ()
+,root       (false)  // assigned in set()
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{  CORN::string_to_wstring(raw_name,*this);
+   decompose();                                                                  //120327
+   setup_is_root();
+}
+//___________________________________________________________Copy constructor__/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const std::wstring &raw_name
+,Directory_entry_type entry_type)
+:std::wstring(raw_name)
+,name       ()
+,extension  ()
+,root       (false)  // assigned in set()
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{  decompose();                                                                  //120327
+   setup_is_root();
+}
+//_2012-02-09________________________________________________Copy constructor__/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const Directory_entry_name &copy_from
+,Inclusion inclusion
+,Directory_entry_type entry_type)
+:std::wstring(copy_from.w_str())                                                 //140121
+,name       ()
+,extension  ()
+,root       (false)  // assigned in set()
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{
+   if (inclusion & include_name)
+      name = copy_from.get_name();              //131120
+   if (inclusion & include_extension)
+      extension  = copy_from.get_extension();   //131120
+
+/*160126  Not needed we only need to setup the name and extension
+   and the name is getting appending so it appears twice.
+   construction_compose();
+*/
+   setup_is_root();
+}
+//_2012-02-06________________________________________________Copy constructor__/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const Directory_entry_name &copy_from
+,const Extension &_extension
+,Directory_entry_type entry_type)
+:std::wstring(copy_from.get_components                                           //131119
+      (include_all_except_extension,copy_from.get_separator()))                  //140613
+
+//140613 (copy_from.w_str())
+,root       (false)  // assigned in set()
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{  name = copy_from.get_name();                                                  //131120
+   extension = _extension;                                                       //131120
+   append(L".");                                                                 //140613
+   append(extension);                                                            //140613
+//140612    construction_compose();
+//140313 construction_compose already calls setup_is_root   setup_is_root();
+}
+//_2012-02-06________________________________________________Copy constructor__/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const std::wstring &_name,const std::wstring &_extension
+,Directory_entry_type entry_type)
+:std::wstring()
+,root       (false)   // If there is a path, then this cannot be a root
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{  name       = _name;                                                           //131120
+   extension  = _extension;                                                      //131120
+   construction_compose();
+}
+//_2009-11-07______________________________________Directory_name:constructor__/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const char *_name
+,const std::wstring &_extension
+,Directory_entry_type entry_type)
+:std::wstring()
+,root       (false)   // If there is a path, then this cannot be a root
+,preferred_separator(0)
+,identified_type(entry_type)                                                     //131120
+{
+   extension  = _extension;                                                      //131120
+   if (_name) append_ASCIIz_to_wstring(_name,name);                              //131119
+   construction_compose();
+}
+//_2013-09-05_____________________________________Directory_name:constructor__/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const wchar_t *_name
+,const wchar_t *_extension
+,Directory_entry_type entry_type)
+:std::wstring()
+,root       (false)   // If there is a path, then this cannot be a root
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{
+   name = _name;                                                                 //131120
+   extension  =_extension;                                                       //131120
+   construction_compose();
+}
+//_2009-11-07______________________________________Directory_name:constructor__/
+Directory_entry_name_abstract::Directory_entry_name_abstract
+(const char *_name
+,const char *_extension
+,Directory_entry_type entry_type)
+:std::wstring()
+,root       (false)   // If there is a path, then this cannot be a root
+,preferred_separator(0)                                                          //120824
+,identified_type(entry_type)                                                     //131120
+{  CORN::append_ASCIIz_to_wstring(_name,name);                                   //131120
+   CORN::append_ASCIIz_to_wstring(_extension,extension);                         //131120
+   construction_compose();
+}
+//_2012-02-13______________________________________Directory_name:constructor__/
+size_t Directory_entry_name_abstract::find_right_most_directory_separator_pos() const
+{  // first look for rightmost UNIX directory separator
+   size_t rightmost_forward_slash_pos = rfind(L'/');                             //120804
+   size_t rightmost_back_slash_pos = rfind(L'\\');
+   if (rightmost_back_slash_pos    != npos)  preferred_separator = L'\\';        //120824
+   if (rightmost_forward_slash_pos != npos)  preferred_separator = L'/';         //120824
+   size_t rightmost_dir_sep_pos =
+      (rightmost_forward_slash_pos == npos)
+      ? rightmost_back_slash_pos
+      : rightmost_forward_slash_pos;
+   return rightmost_dir_sep_pos;
+}
+//_2012-03-27___________________________________________________________________
+size_t Directory_entry_name_abstract::find_name_start_pos()                const
+{  size_t dir_sep_pos = find_right_most_directory_separator_pos();
+   size_t name_start_pos = 0;
+   if (dir_sep_pos != std::string::npos)
+   {  wchar_t slash_pos_char = std::wstring::at(dir_sep_pos);
+      name_start_pos =
+         ( slash_pos_char == L'\\') || ( slash_pos_char == L'/')
+         ? dir_sep_pos + 1   // case when there is directory separator
+         : 0;      // case when no directory separator
+   }
+   return name_start_pos;
+}
+//_2012-03-27__________________________________________________________________
+void  Directory_entry_name_abstract::decompose()                    contribution_
+{  size_t name_start_pos = find_name_start_pos();                                //120327
+   size_t name_end_pos   = length();                                             //120531
+   size_t ext_start_pos  = std::string::npos;
+   size_t ext_end_pos    = length();
+   size_t rightmost_dot_pos = rfind(L'.');
+   if (rightmost_dot_pos != std::string::npos)
+      if (rightmost_dot_pos > name_start_pos)                                       //120531
+      {  name_end_pos = rightmost_dot_pos;                                          //120531
+         if ((rightmost_dot_pos == 0)
+            || (at(rightmost_dot_pos-1) == L'.'))    //120531
+            //131120         || (c_str()[rightmost_dot_pos-1] == L'.'))    //120531
+         {  // The name is relative '.' or '..'                                     //120531
+            name_end_pos = length();                                                //120531
+            ext_start_pos = name_end_pos;                                           //120531
+         } else                                                                     //120531
+            ext_start_pos = rightmost_dot_pos                                       //120531
+               + ((rightmost_dot_pos < std::string::npos) ?  1 : 0);                //120531
+      }                                                                             //120531
+   std::wstring extracted_name(*this,name_start_pos,name_end_pos-name_start_pos);//131129
+   name = extracted_name;                                                        //131120
+//131120    name = new std::wstring(*this,name_start_pos,name_end_pos-name_start_pos);    //120531
+
+   if (!(  (rightmost_dot_pos == std::string::npos)                               //131129
+       || (ext_start_pos > ext_end_pos)))                                         //120531
+   {  std::wstring extracted_extension(*this,ext_start_pos,ext_end_pos-ext_start_pos+1);  //131129
+      extension = extracted_extension;       //131129
+   }
+}
+//_2012-03-27___________________________________________________________________
+/*140422
+void Directory_entry_name_abstract::compose()                      contribution_
+{  Directory_entry_name_abstract *this_modifiable = const_cast<Directory_entry_name_abstract *>(this);
+   this_modifiable->construction_compose();
+}
+*/
+//_2011-03-07__________________________________________________________________/
+void Directory_entry_name_abstract::construction_compose()         construction_
+{  /*140422 cannot clear because derived class may have already composed the path
+   clear();                                                                      //140313
+   */
+   append(name);
+   if (extension.length())
+   {  append(L".");
+      append(extension);
+   }
+   setup_is_root();
+}
+//_2012-02-10__________________________________________________________________/
+Directory_entry_name_abstract::~Directory_entry_name_abstract()
+{
+   //131120 if (name) delete name; name=0;
+   //131120   if (extension) delete extension; extension = 0;
+}
+//__________________________________________________Directory_name:destructor__/
+std::string get_key_buffer_DEA;
+const char *Directory_entry_name_abstract::get_key()                       const
+{  CORN::Unicodez_to_string(w_str(),get_key_buffer_DEA);
+   return get_key_buffer_DEA.c_str();
+}
+//_2003-01-09_________________________________________________________get_key__/
+   /*
+   Cases:
+   Case1 name.exe
+      no path
+   Case2 name
+      no path and no ext
+   Case3  .ext
+      no path not name with dot
+   Case4 C:\ancestors\parent\name.exe
+      Fully qualified name where that has more than one parent directories
+         (ancestors has one or more dirs).
+   Case5 C:\parent\name.ext
+      Single parent
+   Case6 C:\name.exe
+      file in designated root
+   */
+const std::wstring &Directory_entry_name_abstract::append_components_to       //130103 was append_to // was get_string
+(std::wstring &buffer
+,Inclusion inclusion
+,wchar_t preferred_path_separator
+,bool append_trailing_directory_separator)                                 const
+{  //We do not clear the buffer, we simply append to it.
+   if (is_root())
+   {  if ((inclusion & include_designator) && get_name().length())
+         buffer.append(get_name());
+      else buffer.append(L"/");                                                   //130103
+      // For Unix like filenames the root is empty string, so append /
+      return buffer;
+   }
+   const CORN::OS::Directory_name *path_directory_name = get_path_directory_name(); //120206
+   if (path_directory_name)
+   {  if ( (inclusion & Directory_entry_name::include_parent)
+          |(inclusion & Directory_entry_name::include_ancestors_path)
+          |(inclusion & Directory_entry_name::include_designator))
+      {  // In the case where this dir entry name has a path and we want any part of the path:
+         Inclusion next_inclusion = inclusion & Directory_entry_name::include_designator;
+         if (inclusion & include_parent)
+         {  // When we compose path's string
+            // we must enable including of name, and extension
+            next_inclusion |= Directory_entry_name::include_name|Directory_entry_name::include_extension|Directory_entry_name::include_extension_dot;
+         }
+         if (inclusion & Directory_entry_name::include_ancestors_path)
+            next_inclusion |= Directory_entry_name::include_path
+               |Directory_entry_name::include_extension|Directory_entry_name::include_extension_dot //131212
+            ;
+/*
+         next_inclusion |= Directory_entry_name::include_extension|Directory_entry_name::include_extension_dot;              //131212
+            // For parent directories we always include the extension
+            // I.e. parent.directory is a full directory name which was always include
+*/
+         path_directory_name->append_components_to
+            (buffer
+            ,next_inclusion // now that we are going into the parent, we need to include the name and the extension
+            ,preferred_path_separator);
+      }
+   }
+   bool include_name_and_or_extension = (inclusion & include_name) || (inclusion & include_extension);
+   if (include_name_and_or_extension)
+      if (buffer.length()
+          && preferred_path_separator                                            //140202
+          && buffer != L"/")/* In this case the file is in the root (will only occur in Unix*/ //130103
+      {  wchar_t sep_cstr[3];                                                    //140202
+         sep_cstr[0] = preferred_path_separator;                                 //140202
+         sep_cstr[1] = 0;                                                        //140202
+         buffer.append(sep_cstr);                                                //140202
+      }
+         //140202buffer.append(preferred_path_separator);
+   nat32 name_length = name.length();
+   if (inclusion & include_name && name_length)
+      buffer.append(name);
+   if ((inclusion & include_extension))
+   {  if (get_extension().length() && (inclusion & Directory_entry_name::include_extension_dot))
+      {  buffer.append(L".");
+         buffer.append(extension);
+   }  }
+   if (append_trailing_directory_separator)
+      append_separator_to(buffer);                                               //140202
+      //140202 buffer.append(preferred_path_separator);                                   //12021
+   return  buffer;
+}
+//_____________________________________________________________________________/
+const std::string &Directory_entry_name_abstract::append_components_to_string
+(std::string &buffer
+,Inclusion inclusion
+,wchar_t preferred_path_separator                                                //140202
+//104020 ,const wchar_t *preferred_path_separator
+,bool append_trailing_directory_separator)                                 const
+{  std::wstring buffer_w;
+   append_components_to(buffer_w,inclusion
+      ,preferred_path_separator,append_trailing_directory_separator);
+   append_wstring_to_string(buffer_w,buffer);
+   return buffer;                                                                //120804
+}
+//_2012-02-09__________________________________________________________________/
+const std::wstring &Directory_entry_name_abstract::get_Windows_representation
+(std::wstring &buffer) const
+{  return append_components_to (buffer,include_all,L'\\');
+}
+//______________________________________________________________________________/
+const std::wstring &Directory_entry_name_abstract::get_Unix_representation
+(std::wstring &buffer
+,bool represent_any_drive_designator_to_root)                              const
+{  std::wstring without_prefix;                                                  //111212
+   append_components_to(without_prefix
+      ,Directory_entry_name::include_path
+      |Directory_entry_name::include_name
+      |Directory_entry_name::include_extension_with_dot,L'/') ;
+         // May need to exclude designator
+   if (represent_any_drive_designator_to_root && is_qualified(true))             //111212
+      // if has drive designator Convert drive designator to  /
+      buffer.append(L"/");                                                       //111212
+   buffer.append(without_prefix);                                                //111212
+   return buffer;
+}
+//______________________________________________________________________________/
+const char *Directory_entry_name_abstract::c_str()                         const
+{
+/*140422 If this hasn't been composed by the constructor something is wrong!!
+   if (!length()) compose();                                                     //120210
+*/
+   //140422 wstring_to_string already clears return_buffer_ASCII.clear();                                                  //120612
+   CORN::wstring_to_string(*this,return_buffer_ASCII);
+   return return_buffer_ASCII.c_str();
+}
+//______________________________________________________________________________/
+const wchar_t *Directory_entry_name_abstract::w_str()                      const
+{
+/*140422 If this hasn't been composed by the constructor something is wrong!!
+   if (!length()) compose();                                                     //120210
+*/
+   return std::wstring::c_str();
+}
+//_2012-02-09__________________________________________________________________/
+bool Directory_entry_name_abstract::setup_is_root()
+{  wchar_t path_separator = L'/';
+   size_t path_separator_pos = find(L'\\');
+   if  (path_separator_pos != std::string::npos)  // This appears to be a windows path
+      path_separator = '\\';
+   // else default to the compiled OS path separator setup in the constructor.
+
+   path_separator_pos = find(path_separator);
+
+   // NYI extract UNC
+
+   size_t colon_pos = find(L":");    // Applies to Windows, AmigaDOS
+   if (colon_pos != std::string::npos)
+   {  nat32 len = length();
+      if (colon_pos == len-1) // 131120 (c_str()[colon_pos + 1] == 0)
+         root = true;
+         // In this case, the name is the designator
+         // The name which is a designator includes the colon.
+   }
+   // NYI   \\ In windows indicates a UNC
+   if ((path_separator_pos == 0) &&
+        (length() == 1))  // Applies to UNIX,
+      root = true;
+   if (length() == 0)
+      root = true;                                               //140201
+   return root;
+}
+//______________________________________________________________________________/
+bool  Directory_entry_name_abstract::is_qualified
+(bool and_fully_qualified_with_drive_designator)                           const
+{  const CORN::OS::Directory_name *path_directory_name = get_path_directory_name();
+   if (is_root()) return true;   // root is considered to be fully qualified;    //140424
+   bool qualified =                                                              //140424
+      (path_directory_name)                                                      //140424
+      ? (and_fully_qualified_with_drive_designator)                              //140424
+         ? path_directory_name->is_qualified()                                   //140424
+         : true                                                                  //140424
+      : false;                                                                   //140424
+   return qualified;                                                             //140424
+}
+//______________________________________________________________________________
+bool Directory_entry_name_abstract::has_extension_Unicode
+(const_Unicodez valid_ext)                                          affirmation_
+{ if (!valid_ext)
+   {  if (extension.length() == 0) return true; // In this case no extension is expected and no extension was found.
+   }
+   if (extension.length() != wcslen(valid_ext)) return false;
+   // returns true if the extension matches valid_ext.
+   // valid_ext can be either with . or without.
+   // case is not significant for OS's without case sensitive filename.
+   std::wstring compare_ext
+      (valid_ext[0] == '.' ? &valid_ext[1] : valid_ext);
+#if (!defined(__unix__) && (!defined(__GNUC__)))
+//130918 #ifndef __unix
+// UNIX already case sensitive
+#  if (__BCPLUSPLUS__ < 0x0550)
+//#     ifndef _MSC_VER
+#     if (!defined(_MSC_VER) && !defined(__MINGW_ANSI_STDIO__))
+   compare_ext.set_case_sensitive(directory_entry_name_is_case_sensitive);
+#     endif
+#  endif
+#endif
+
+#if ((__BCPLUSPLUS__ > 0) && (__BCPLUSPLUS__ < 0x0550))
+   bool result = compare_ext.compare(extension) == 0;
+#else
+   const wchar_t *ext_c_str = get_extension().c_str();
+   bool result =
+        #if (defined(WINAPI) || defined(_Windows))
+        _wcsicmp
+        #else
+        wcscmp
+        #endif
+        (compare_ext.c_str(),ext_c_str) == 0;
+#endif
+   return result;                                                                //990806
+}
+//_2012-02-09___________________________________________________________________
+bool Directory_entry_name_abstract::has_extension_ASCII
+(const_ASCIIz valid_ext)                                            affirmation_
+{  if (!valid_ext)
+   {
+      return (extension.length() == 0) ;
+         // In this case no extension is expected and no extension was found.
+         // then the extension is considered a match
+         // otherwise no match
+   }
+   if (extension.length() != strlen(valid_ext)) return false;
+   // returns true if the extension matches valid_ext.
+   // valid_ext can be either with . or without.
+   // case is not significant for OS's without case sensitive filename.
+   std::string compare_ext
+      (valid_ext[0] == '.' ? &valid_ext[1] : valid_ext);
+   std::wstring valid_ext_unicode;
+   CORN::string_to_wstring(compare_ext,valid_ext_unicode);
+   return has_extension_Unicode(valid_ext_unicode.c_str());
+}
+//_1999-07-26___________________________________________________________________
+int Directory_entry_name_abstract::compare_including
+(const Directory_entry_name &other
+,Inclusion inclusion)                                                      const
+{  ///< lexicorigraphically compares the respective selected elements specified in the inclusion.
+   std::wstring this_string;
+   std::wstring other_string;
+   append_components_to(this_string,inclusion);
+   other.append_components_to(other_string,inclusion);                           //140208
+   return this_string.compare(other_string);
+}
+//_2009-12-09___________________________________________________________________
+const std::wstring &Directory_entry_name_abstract::get_name()              const
+{  return name;
+}
+//_2005-02-07________________________________________________________get_name__/
+const std::wstring &Directory_entry_name_abstract::get_extension()         const
+{  return extension;
+}
+//_2005-02-07___________________________________________________get_extension__/
+const std::wstring &Directory_entry_name_abstract::get_name_with_extension
+(std::wstring &result)                                                     const
+{  result.clear();
+   return append_name_with_extension_to(result);                                    //1301006
+//131006   return append_components_to(result,Directory_entry_name::include_name
+//      | Directory_entry_name::include_extension_with_dot);
+}
+//_2005-02-07_________________________________________get_name_with_extension__/
+const std::wstring &Directory_entry_name_abstract::append_name_with_extension_to
+(std::wstring &result)                                                     const
+{  return append_components_to(result,Directory_entry_name::include_name
+      | Directory_entry_name::include_extension_with_dot);
+}
+//_2013-10-06________________________________________append_name_with_extension/
+const std::wstring &Directory_entry_name_abstract::append_name_to(std::wstring &result)        const
+{  return append_components_to(result,Directory_entry_name::include_name);
+}
+//_2013-10-07__________________________________________________________________/
+const Directory_entry_name &Directory_entry_name_abstract::set_DEN
+(const Directory_entry_name &to_copy_from)                         modification_
+{  name = to_copy_from.get_name();                                               //131120
+   extension = to_copy_from.get_extension();                                     //131120
+   root = to_copy_from.is_root();
+   assign(to_copy_from.w_str());
+   return *this;
+}
+//_2012-02-09__________________________________________________________________/
+#ifdef NYN
+const std::wstring &Directory_entry_name_abstract::set_cstr
+(const char *to_copy_from)                                         modification_
+{}
+//_2012-02-09__________________________________________________________________/
+const std::wstring &Directory_entry_name_abstract::set_wstr
+(const wchar_t *to_copy_from)                                      modification_
+{}
+//_2012-02-09__________________________________________________________________/
+#endif
+//______________________________________________________________________________
+const CORN::OS::Directory_name &Directory_entry_name_abstract
+::get_parent_directory_name_qualified()                                    const
+{  return *get_path_directory_name();
+}
+//_090924______________________________________________________________________________
+bool Directory_entry_name_abstract::is_root()                              const
+{
+   bool is_a_root = false;
+   size_t FN_length = length();
+   if (FN_length == 0) is_a_root = true;                                          //121204
+   else
+   {  char first_char = at(0);
+      if (FN_length == 1)
+      {  if ( (first_char == L'\\')
+            ||(first_char == L'/'))
+            is_a_root = true; // Windows root (without drive designator)
+      } else if (name.length() == 2)
+         if (name[1] == L':' )
+         //160126 if (at(1) == L':' )
+         //141016          if ((at(1) == L':') && (at(2) == L'\\'))
+            is_a_root = true;
+   }
+   return is_a_root;
+}
+//______________________________________________________________________________
+bool Directory_entry_name_abstract::has_parent_directory()          affirmation_
+{  bool isRoot = is_root();
+   bool hasPath = has_path();
+   return (!isRoot && hasPath);
+}
+//_2012-05-29___________________________________________________________________
+std::wstring *Directory_entry_name_abstract::render_relative_to_current_working_directory
+(Qualification qualification)                                         rendition_ //151221
+{  Directory_name *CWD = file_system_engine.render_current_working_directory();
+   std::wstring *relative_DEN = render_relative_to(*CWD,qualification);          //151221
+   delete CWD;
+   return relative_DEN;
+}
+//_2012-04-30___________________________________________________________________
+std::wstring *Directory_entry_name_abstract::render_relative_to_current_working_directory_on_drive
+(const Drive_designator &drive_designator
+,Qualification qualification)                                         rendition_ //151221
+{  Directory_name *CWD = file_system_engine.render_current_working_directory_on_drive (Drive_designator("D:"));
+   std::wstring *relative_DEN = render_relative_to(*CWD,qualification);          //151221
+   delete CWD;
+   return relative_DEN;
+}
+//_2012-04-30___________________________________________________________________
+std::wstring *Directory_entry_name_abstract::render_relative_to
+(const Directory_name &qualified_reference_directory_name
+,Qualification qualification)                                         rendition_ //151221
+{  if (!qualified_reference_directory_name.is_qualified()) return 0;
+   std::wstring *relative_dirent = 0;
+   if (is_qualified())
+   {  std::wstring *this_path = render_wstring(include_path_designated,L'/');
+      std::wstring *ref_path  = render_wstring(include_path_designated,L'/');
+      nat32 match_path_length = 0;
+      bool  match_path_identified = false;
+      for (size_type m = 0; m < ref_path->length() && !match_path_identified; m++)
+      {  wchar_t char_m = this_path->at(m);
+         if (char_m == ref_path->at(m))
+         {  if (char_m == L'/')
+            {  match_path_length = m;
+            }
+         } else
+         {  match_path_identified = true;
+         }
+      }
+      nat16 parent_count = 0;
+      for (size_type r = match_path_length; r < ref_path->length(); r++)
+      {  if (ref_path->at(r) == L'/')
+            parent_count ++;
+      }
+      relative_dirent = new std::wstring;
+      for (nat16 p =
+            (relative_strict_qualification ? 0 : 1)                              //151221
+            // I think this is it, not checked                                   //151221
+          ; p < parent_count
+          ; p++)
+      {
+         relative_dirent->append(L"..");
+         relative_dirent->append(DEFAULT_DIRECTORY_SEPARATORw_str);
+      }
+      relative_dirent->append(this_path->substr(match_path_length));
+      delete this_path;
+      delete ref_path;
+   } else
+   {  relative_dirent =  new std::wstring(qualified_reference_directory_name.w_str());
+      relative_dirent->append(DEFAULT_DIRECTORY_SEPARATORw_str);
+      relative_dirent->append(name);
+      if (extension.length())                                                    //131120
+      {
+      relative_dirent->append(L".");
+      relative_dirent->append(extension);
+      }
+   }
+   return relative_dirent;
+}
+//_2012-04-30___________________________________________________________________
+bool Directory_entry_name_abstract::is_in_root()                           const
+{  bool in_root = !is_root();  // roots will not be in root.
+   if (in_root)
+   {  // so far it could be in root, but need to check the path.
+      in_root = false;
+      const Directory_name *parent_path = get_path_directory_name();             //140104
+      in_root = parent_path && parent_path->is_root();                           //140114
+      //140104 get_parent_directory_name_qualified().is_root();
+   }
+   return in_root;
+}
+//_2009-09-25______________________________________________________________________________
+const std::wstring &Directory_entry_name_abstract::append_designator_to          //140202
+(std::wstring &buffer)                                                     const
+{  return append_components_to(buffer,Directory_entry_name::include_designator/*140202,L""*/);
+}
+//_____________________________________________________________get_designator__/
+const std::wstring &Directory_entry_name_abstract::append_separator_to           //140202
+(std::wstring &buffer)                                                     const
+{
+/*140202
+   if (preferred_separator)
+   {
+*/
+      wchar_t buffer_str[5];                                                     //130117
+      buffer_str[0] = get_separator(); //140202 preferred_separator
+      buffer_str[1] = 0;
+      buffer= buffer_str;                                                        //130117
+/*140202
+   }
+   else if (has_parent_directory())
+      get_parent_directory_name_qualifiedX().get_separator(buffer);
+   else buffer.assign(DEFAULT_DIRECTORY_SEPARATORw);
+*/
+   return buffer;
+}
+//_2012-08-24___________________________________________________________________
+wchar_t Directory_entry_name_abstract::get_separator()                provision_
+{  if (!preferred_separator)
+      preferred_separator =
+      (has_parent_directory())
+      ?   get_path_directory_name()->get_separator()
+      : DEFAULT_DIRECTORY_SEPARATORw_chr;
+   return preferred_separator;
+}
+//_2014-02-02___________________________________________________________________
+CORN::Text_list & Directory_entry_name_abstract::append_path_list_to
+(CORN::Text_list &buffer
+,Inclusion inclusion)                                                      const //091103
+{  if (inclusion & Directory_entry_name::include_path_designated)
+   {  // if including any part of the path
+      if (has_parent_directory())                                                //120529
+         get_parent_directory_name_qualified().
+            append_path_list_to(buffer,inclusion | include_name | include_extension);
+         // For the path we do include that name and extensions of ancestor directory names.
+   }
+   bool include_name = inclusion &Directory_entry_name::include_name;
+   bool include_ext =  inclusion &Directory_entry_name::include_extension;
+   bool include_designator = is_root() && (inclusion &Directory_entry_name::include_designator);
+   if (include_designator)
+   {  include_name = true;
+      include_ext  = true;
+   }
+   std::wstring name_and_or_extension;
+   if (include_name)
+       name_and_or_extension.append(get_name());
+   if (include_ext && get_extension().length())
+   {  // Phyiscal root directory (drive designators) usually
+         // don't have an extension
+         // however logical root directories may be a non root directory.
+         // In the case of logical roots, often directory names don't have extension,
+         // but that is perfectly acceptable in most OSs.
+         if (inclusion | Directory_entry_name::include_extension_dot)
+            name_and_or_extension.append(L".");
+         name_and_or_extension.append(get_extension());
+   }
+   if (name_and_or_extension.length())
+       buffer.add_wstr(name_and_or_extension.c_str());
+   return buffer;
+}
+//_________________________________________________________get_path (Text_list)
+wchar_t *invalid_name_component_characters = L"<>\/?%*:|\"";
+bool Directory_entry_name_abstract::is_valid_name_component
+(const std::wstring &name_component)                                affirmation_
+{
+   // NYI actually should have  get_invalid_name_component_characters
+   // so derived OS classes can specify invalid characters
+   // currently both Unix/Linux and Windows have the same invalid characters
+   wchar_t *invalid_char_found = wcspbrk(name_component.c_str(),invalid_name_component_characters);
+   return invalid_char_found == 0;
+}
+//_2016-01-20_________________________________________is_valid_name_component__/
+bool Directory_entry_name_abstract::has_extension_any(bool must_be_valid)  const
+{  ///< Returns true if the filename has a file extension .
+   bool has = get_extension().length();
+   if (must_be_valid)
+      has = is_valid_name_component(get_extension());
+   return has;
+}
+//_2016-01-20__1998-09-19___________________________________has_extension_any__/
+bool Directory_entry_name_abstract::has_name(bool must_be_valid)           const
+{  bool has = get_name().length();
+   if (has && must_be_valid)                                                     //160219
+      has = is_valid_name_component(get_name());
+   return has;
+}
+//_2016-01-20__1998-09-19____________________________________________has_name__/
+bool Directory_entry_name_abstract::has_path()                             const
+{  const CORN::OS::Directory_name *path_directory_name = get_path_directory_name();
+   return path_directory_name && path_directory_name->has_name();
+}
+//_2012-02-06________________________________________________________has_path__/
+File_system::Directory::Type Directory_entry_name_abstract::get_type()     const
+{  if (identified_type == unknown_entry)
+       identified_type = file_system_engine.identify_type(*this);
+   return identified_type;
+}
+//_2013-11-20__________________________________________________________________/
+bool Directory_entry_name_abstract::is_directory()                  affirmation_
+{  bool is_directory = get_type() == directory_entry;                                         //131120_120415
+   return is_directory;
+}
+//_2012-02-14__________________________________________________________________/
+bool Directory_entry_name_abstract::is_file()                       affirmation_
+{  return get_type() == file_entry;                                              //131120_120415
+}
+//_2012-02-14__________________________________________________________________/
+} } // namespace CORN OS
+

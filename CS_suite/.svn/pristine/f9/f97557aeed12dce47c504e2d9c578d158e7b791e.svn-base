@@ -1,0 +1,53 @@
+#include <vcl.h>
+#pragma hdrstop
+#include <tchar.h>
+//---------------------------------------------------------------------------
+USEFORM("..\..\..\..\..\GUI\parameter\form_param_file_RS.cpp", parameter_file_form);
+USEFORM("..\form_auto_NO3_appl.cpp", form_auto_NO3_application);
+USEFORM("..\form_management_editor.cpp", Management_editor_form);
+//---------------------------------------------------------------------------
+#include "CS_Suite/common_editor_main_inc.cpp"
+#include "form_management_editor.h"
+#include "CropSyst/source/mgmt_param.h"
+#include "corn/string/strconv.hpp"
+#  include "corn/application/program_directory_OS_FS.h"
+DECLARE_EDITOR_DIRECTORY
+//---------------------------------------------------------------------------
+WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
+{
+   try
+   {
+      INSTANCIATE_EDITOR_DIRECTORIES
+       Application->Initialize();
+       Application->MainFormOnTaskBar = true;
+       Application->CreateForm(__classid(Tparameter_file_form), &parameter_file_form);
+       Application->CreateForm(__classid(TManagement_editor_form), &Management_editor_form);
+       Application->CreateForm(__classid(Tform_auto_NO3_application), &form_auto_NO3_application);
+       std::wstring ParamStr_wstring(ParamStr(1).c_str());
+       std::string  ParamStr_string;
+       CORN::wstring_to_string(ParamStr_wstring,ParamStr_string);
+       MGT_filename parameter_file_name(ParamStr_string.c_str());
+       CropSyst_Management_parameters  mgmt_parameters;
+       BIND_FORM_TO_PARAMETERS(mgmt_parameters,Management_editor_form,parameter_file_name)
+
+
+       Application->Run();
+   }
+   catch (Exception &exception)
+   {
+       Application->ShowException(&exception);
+   }
+   catch (...)
+   {
+       try
+       {
+          throw Exception("");
+       }
+       catch (Exception &exception)
+       {
+          Application->ShowException(&exception);
+       }
+   }
+   return 0;
+}
+//---------------------------------------------------------------------------

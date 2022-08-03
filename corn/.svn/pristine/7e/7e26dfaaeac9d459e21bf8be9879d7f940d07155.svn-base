@@ -1,0 +1,50 @@
+#ifndef units_enumH
+#define units_enumH
+#include <corn/labeled_enum.h>
+#include <corn/measure/units.h>
+namespace CORN {
+//______________________________________________________________________________
+class Labeled_units_enum
+: public Labeled_enum
+{
+public:  // smart_units_code is temporarily public so we can access for UI it in data records,
+   mutable Units_clad   smart_units_code;                                        //111206
+private: // return buffer
+   //mutable char         return_buffer[64];
+   mutable std::string return_buffer;                                            //170423
+public: // Constructors
+   Labeled_units_enum();
+      // Note that this class does not use a fixed label table
+   Labeled_units_enum(Units_code _units);
+   virtual ~Labeled_units_enum();                                                //130515
+public: // Labeled_enum overrides
+   virtual const char *get_label()                                         const;
+   inline Units_code set(Units_code _code)                                       //060627
+      { smart_units_code.set(_code); return _code;};
+   inline Units_code get()                                                 const //060627
+      { return smart_units_code.get(); };
+      // Returns the units code abbreviation.
+   virtual int32 set_label(const char *_label);
+      // Sets the units based on the abbreviation
+   virtual int32 get_int32()                                               const;
+      // Returns the units code caste to a 32bit integer.
+   virtual int32 set_int32(int32 _value) ;
+      // This sets the value (casting)
+      // This must be overridden derived classes
+   virtual bool is_label(const char *_label)                        affirmation_;
+      // return true if the label is in the label table
+      // (used by CropSyst Crop parameter editor.
+   virtual const char *get_description()                                   const;//050929
+      // Returns the character string description associated with the current
+      // enumeration value.
+      // If it is a simple label table, the label is simply returned.
+   virtual bool is_descriptive()                                           const;//050929
+      // Returns true if this is a descriptive enumeration
+   virtual uint16 get_max_label_length()                                   const;//050929
+      // Returns the longest label length.
+      // This is used to determine the field size for Data_records enumeration attributes.
+};
+//_2006-06-26___________________________________________________________________
+}; // namespace CORN
+#endif
+

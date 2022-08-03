@@ -1,0 +1,224 @@
+#include "CS_suite/simulation/CS_simulation_element.h"
+//170319 #include "CS_suite/observation/CS_examination.h"
+#include "CS_suite/simulation/CS_event_scheduler.h"
+//______________________________________________________________________________
+namespace CS
+{
+//______________________________________________________________________________
+Simulation_element::Simulation_element()
+:CORN::Item()
+{}
+//______________________________________________________________________________
+Simulation_element_abstract::Simulation_element_abstract(const CORN::Date &today_)
+: Simulation_element()
+, today(today_)
+, event_scheduler(0)
+{}
+//_2015-06-08___________________________________________________________________
+bool Simulation_element_abstract::is_valid()                        affirmation_ { return true; } //{ return event_scheduler ? event_scheduler->is_valid()    : true; }
+bool Simulation_element_abstract::start_day()                      modification_ { return event_scheduler ? event_scheduler->start_day()   : true; }
+bool Simulation_element_abstract::process_day()                    modification_ { return event_scheduler ? event_scheduler->process_day() : true; }
+//_2015-09-30___________________________________________________________________
+nat32 Simulation_element_abstract::take_events
+(modifiable_ CORN::Container &events)                              modification_
+{  nat32 taken_count
+   = (event_scheduler)
+   ?  event_scheduler->take_events(events)
+   : 0;
+   return taken_count;
+}
+//_2015-09-30___________________________________________________________________
+bool Simulation_element_abstract::start()                          modification_
+{  bool started = true;
+   if (event_scheduler) started &= event_scheduler->start();
+   /*170319 moved to Emanators::know
+   const Emanator *emanator_continuous = get_emanator();
+   if (emanator_continuous) // observation is optional
+   {
+      CS::provide_examination_global().add_period_inspection                     //161202
+         (CS::continuous_inspection
+         ,UT_day //timestep of the inspected data                                //170319
+         ,*emanator_continuous,today.get_datetime64()
+
+         // Currently the composition of the tally filename (to include ontology affix)
+         // done by the UED recorder, but is probably could/should be done ere
+
+         ,"" //170319 ,"continual" // "continuous"
+         //170319 ,0
+         ,STAT_BASIC_ELEMENTS_INIT_FINAL_bits);
+   }
+   */
+   return started;
+}
+//_2016-06-06___________________________________________________________________
+bool Simulation_element_abstract::start_year()                    modification_
+{  bool started = true;
+   if (event_scheduler) started &= event_scheduler->start_year();
+   /*170319 moved to Examination::start_year
+   const Emanator *emanator_annual = get_emanator_annual();
+   if (emanator_annual) // observation is optional
+   {
+      //170319 std::string tally_label("annual");
+      //170319 std::string dataset_label("journal"); // ("daily");
+      //std::string ontology(get_ontology());
+      //if (ontology.length())
+      //{  // 170318 tally_label.insert(0,"_"); tally_label.insert(0,ontology);
+      //   dataset_label.insert(0,"_"); dataset_label.insert(0,ontology);
+      //}
+      CS::provide_examination_global().add_period_inspection                     //161202
+         (CS::annual_inspection
+         ,UT_day //timestep of the inspected data                                //170319
+         ,*emanator_annual,today.get_datetime64()
+         ,""
+         //170319 ,tally_label.c_str()
+         //170319 ,dataset_label.c_str()
+         ,STAT_BASIC_ELEMENTS_INIT_FINAL_bits);
+   }
+   */
+   return started;
+}
+//_2016-06-06___________________________________________________________________
+bool Simulation_element_abstract::end_year()                       modification_
+{  bool ended = true;
+   ended &= event_scheduler ? event_scheduler->end_year()    : true;
+/*170319 moved to Examination::end_year
+   const Emanator *emanator_annual = get_emanator_annual();                      //160622
+   if (emanator_annual)                                                          //160622
+      ended &= CS::provide_examination_global().complete_period_inspection       //161202_160622
+         (CS::annual_inspection,*emanator_annual);                               //160622
+*/
+   return ended;
+}
+//_2016-06-22___________________________________________________________________
+#ifdef DIDNT_IMPLEMENT
+delete this
+bool Simulation_element_abstract::start_period()                   modification_
+{  bool started = true;
+   if (event_scheduler) started &= event_scheduler->start_period();
+   return started;
+}
+#endif
+//_2016-06-09___________________________________________________________________
+bool Simulation_element_abstract::end_day()                        modification_
+{  bool ended = true;
+   if (event_scheduler) ended &= event_scheduler->end_day();
+   return ended;
+}
+//_2016-06-06___________________________________________________________________
+bool Simulation_element_abstract::stop()                           modification_
+{  bool stopped = true;
+/*170319  moved to ~Emanator()
+   const Emanator *emanator_continuous = get_emanator();
+std::clog << "ontology:" << get_ontology()<<std::endl;
+   if (emanator_continuous) // observation is optional
+   {
+      stopped &= CS::provide_examination_global().complete_period_inspection     //161202
+         (CS::continuous_inspection,*emanator_continuous);
+   }
+*/
+   if ( event_scheduler) stopped  &= event_scheduler->stop();
+   return stopped;
+}
+//_2016-06-06___________________________________________________________________
+Simulation_element_composite::Simulation_element_composite
+(const CORN::Date &today_)
+:Simulation_element_abstract(today_)
+{}
+//_2015-06-08___________________________________________________________________
+bool Simulation_element_composite::initialize()                  initialization_
+{  bool initialized = Simulation_element_abstract::initialize();
+   if (!initialized) std::clog << "Simulation_element_composite::initialize() Simulation_element_abstract::initialize failed " << std::endl;
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_element)
+   {
+      initialized &= sub_element->initialize();
+      if (!initialized) std::clog << "Simulation_element_composite::initialize() sub_element->initialize failed " << std::endl;
+   } FOR_EACH_END(each_element)
+   return initialized;
+}
+//_2015-04-29___________________________________________________________________
+bool Simulation_element_composite::start()                         modification_
+{  bool started = Simulation_element_abstract::start();
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_element)
+      started &= sub_element->start();
+   FOR_EACH_END(each_element)
+   return started;
+}
+//______________________________________________________________________________
+bool Simulation_element_composite::start_year()                    modification_
+{   bool started = Simulation_element_abstract::start_year();
+   // Balancer start_year() must be done before start_year() to
+   // make sure accumulators are clear for the start of the year.
+   // Components may then reset with any initial values.
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_element)
+   {  started &= sub_element->start_year();
+   } FOR_EACH_END(each_element)
+   return started;
+}
+//_2013-06-18___________________________________________________________________
+bool Simulation_element_composite::end_year()                      modification_
+{  bool ended = true;
+   // Balancer end_year() must be done after end_year() to make sure the components have added any
+   // last minute accumulations.
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_element)
+   {  ended &= sub_element->end_year();
+   } FOR_EACH_END(each_element)
+   return ended & Simulation_element_abstract::end_year();;
+}
+//_2013-06-18___________________________________________________________________
+bool Simulation_element_composite::start_day()                     modification_
+{  bool started = Simulation_element_abstract::start_day();
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_element)
+      started &= sub_element->start_day();
+   FOR_EACH_END(each_element)
+   return started;
+}
+//_2013-06-18___________________________________________________________________
+bool Simulation_element_composite::process_day()                   modification_
+{  bool processed = Simulation_element_abstract::process_day();
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_element)
+      processed &= sub_element->process_day();
+   FOR_EACH_END(each_element)
+   return processed;
+}
+//_2013-06-18___________________________________________________________________
+bool Simulation_element_composite::end_day()                       modification_
+{  bool ended = true;
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_element)
+      ended &= sub_element->end_day();
+   FOR_EACH_END(each_element)
+   ended &Simulation_element_abstract::end_day();
+   return ended;
+}
+//_2013-06-18___________________________________________________________________
+bool Simulation_element_composite::stop()                          modification_
+{  bool stopped = true;
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_element)
+      stopped &= sub_element->stop();
+   FOR_EACH_END(each_element)
+   return stopped &= Simulation_element_abstract::stop();
+}
+//_2014-07-14___________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Simulation_element_abstract)
+{  // 151002 now renderer must provide the instance description (it can be blank)
+   // if (instance_description)
+   //   instance_description = get_key();
+   KNOW_EMANATOR(today.get_datetime64(),false/*170321 ,CS_NOT_DOMAIN*/);         //170319_160626
+   return &emanator;
+}
+//_2015-08-21___________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Simulation_element_composite)
+{  Emanator *emanator = Simulation_element_abstract
+      ::render_inspectors(inspectors,context,instance/*170321RLN,statistic*/);
+   if (emanator)                                                                 //160616
+   FOR_EACH_IN_PARALLEL(sub_element,Simulation_element,sub_elements,each_elem)
+      sub_element->render_inspectors
+         (inspectors
+         ,emanator                                                               //160616
+         ,instance
+         /*170321RLN,statistic*/);
+   FOR_EACH_END(each_elem)
+   return emanator;
+}
+//_2015-08-19___________________________________________________________________
+} // namespace CS
+

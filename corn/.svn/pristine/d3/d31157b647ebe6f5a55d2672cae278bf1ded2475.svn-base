@@ -1,0 +1,95 @@
+#ifndef tabular_excelH
+#define tabular_excelH
+
+#ifdef USE_CORN_Excel_workbook
+   // Currently using this as default
+#ifdef USE_CDBF
+   #include "compound_document_Excel_XLS.h"
+#endif
+#else
+   // Currently using this
+   #include "corn/spreadsheet/Excel_xlslib/workbook_Excel_xlslib.h"
+#endif
+
+#include "corn/tabular/file.h"
+#include "corn/format/excel/workbook_Excel.h"
+#include "corn/spreadsheet/workbook_datasrc.h"
+#include "corn/tabular/tabular_format.h"
+namespace CORN {
+//______________________________________________________________________________
+class Tabular_file_Excel
+: public Tabular_file
+{
+ private:
+   #ifdef USE_CORN_Excel_workbook
+   CORN::Excel_workbook       workbook;
+   #else
+   //2013 Currently using this
+   Workbook_Excel_xlslib workbook;
+   #endif
+   Workbook_data_source data_source;
+   const Common_tabular_file_format &format;
+   Workbook::Sheet      *active_sheet;
+   std::ios_base::openmode openmode;                                             //130401
+public:
+   Tabular_file_Excel
+      (const CORN::OS::File_name &_filename
+      ,bool _keep_read_records_in_memory
+      ,std::ios_base::openmode _openmode                                         //130401
+      ,const Common_tabular_file_format &_format);
+   ~Tabular_file_Excel();
+public: // Item reimplementation
+      //170424 replaced with label_string virtual const char *label_cstr(char *buffer)                const;  // probably return unqualified workbook name or the fully qualified filename
+   virtual const char *label_string(std::string &buffer)                  const; //170423
+public: // Data_source reimplementation
+   inline virtual bool get(Data_record &data_rec)                                { return data_source.get(data_rec); }
+   inline virtual bool get_next(Data_record &data_rec)                           { return data_source.get_next(data_rec); }
+   inline virtual bool goto_first()                                              { return data_source.goto_first(); }
+   // Goto the first line in the text file with detail line data (not header or column header)
+   inline virtual bool goto_index(nat32 zero_based_index)                        { return data_source.goto_index(zero_based_index); }
+   virtual bool goto_last()                                                      { return false; } // NYI (/NYN)
+   inline virtual bool   goto_next(int32 skip_records = 1)                       { return data_source.goto_next(skip_records); } // NYI (/NYN)
+   // skip records is allowed to be signed
+/*161013 field type is actually format specification,
+   inline virtual nat8 get_field_type(const char *field_name)                    { return false; } // NYI (/NYN)
+   // returns the filed type corresponding to VV_entry types
+*/
+   inline virtual nat32 get_current_index_0_based()                              { return false; } // NYI (/NYN)
+   // returns the index value for the table's current position.
+   // For database tables this is the record number
+   // For memory tables, this is the memory location or object pointer);
+   inline virtual nat32 append(Data_record &data_rec)                            { return false; } // NYI (/NYN)
+   // This creates a new record at the end of the table and sets data_rec.
+   // Returns the record index of the new record that was appended.
+   inline virtual nat32 delete_record()                                          { return false; } // NYI (/NYN)
+   // This marks the current record as deleted.
+   // usually only a flag is set in the record indicating it is deleted
+   // so the record is not actually physically deleted.
+   inline virtual bool set_data(Data_record &data_rec,bool append)               { return data_source.set_data(data_rec,append); } //150503
+   virtual nat32 get_record_count();                                             //050407
+      // should be const need to check ancestors and decendents
+   virtual bool reset()                                              performs_IO_{ return true; }//111118 //NYN
+public:  // Tabular_file reimplementation
+   virtual int get_column_count()                                                { return 0; }   // Not currently needed for import utility
+   virtual int get_column_width(int column)                                      { return 0; }            // Not applicable to Excel
+   virtual bool goto_sheet(const std::string &sheet_name);                       //100110
+   virtual nat32 write_raw_string(const char *c_str)                             { return 0; } //070203
+   // This is used in text files to write static header text, it is not applicable to spreadsheets or other file formats
+   // This writes the specified string to the current position.
+   // returns the actual number of characters written including quotes
+   virtual nat32 write_field_string(const char *c_str                           //070203
+      ,Delineation_layout::Text_quote_mode quote_mode);
+   virtual nat32 write_delimitor_string(const char *c_str)                       { return 0; }//070203
+      // delimitors are not applicable to spreadsheets
+   modifiable_ CORN::Workbook &get_workbook()                      modification_;
+ public:
+   virtual const std::string &compose_formatted_string_from_cstr                          //140922
+      (std::string &formatted_string
+      ,const char *c_str
+      ,CORN::Delineation_layout::Text_quote_mode quote_mode)               const;
+      // problably should pass delimit mode
+};
+//______________________________________________________________________________
+} // namespace CORN
+#endif
+

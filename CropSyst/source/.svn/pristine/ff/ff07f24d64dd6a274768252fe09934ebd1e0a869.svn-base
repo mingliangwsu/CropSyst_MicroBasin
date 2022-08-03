@@ -1,0 +1,91 @@
+#ifndef phenology_commonH
+#define phenology_commonH
+#ifndef phenology_interfaceH
+#  include "crop/phenology_interface.h"
+#endif
+#ifndef growth_stagesHPP
+#  include "crop/growth_stages.hpp"
+#endif
+#include "crop/crop_param_struct.h"
+#include "CS_suite/observation/CS_observation.h"
+#include "corn/chronometry/date_32.h"
+
+namespace CropSyst
+{
+   class Phenology_sequencer;                                                    //140620
+   class Phenology_adjustor;                                                     //140620
+//______________________________________________________________________________
+class Phenology_common
+: public implements_ Phenology_interface
+{
+ protected: // external references
+   const Crop_parameters_struct::Phenology &phenology_parameter;
+   const float64 &thermal_time_cumulative;
+ protected: // parameters
+   friend class Phenology_sequencer;                                             //140620
+   bool  is_perennial;
+   bool  is_fruit_tree;
+ public:
+   nat16 days_in_season;
+   nat16 days_since_start_of  [NGS_COUNT];
+   nat16 duration_of          [NGS_COUNT];
+   nat16 harvest_DOY;
+   CORN::Date_32_clad /*170525 Date */ start_date     [NGS_COUNT];                                       //140620
+   CORN::Date_32_clad /*170525 Date */ start_date_tuber_initiation;                                       //141217
+   nat16 start_day_in_season  [NGS_COUNT];                                       //140620
+   nat16 start_day_in_season_senescence;                                         //160211
+   nat16 start_day_in_season_senescence_full;                                    //160211
+ public:
+   Normal_crop_event_sequence growth_stage;
+ public:
+   Phenology_common
+      (const Crop_parameters_struct::Phenology &_phenology_parameter
+      ,const float64 &thermal_time_cumulative_ref
+      ,bool  _is_perennial
+      ,bool  _is_fruit_tree);
+   virtual bool start_day()                                       modification_;
+   virtual bool start_season()                                    modification_;
+   virtual nat16 day_of_season()                                           const { return days_in_season; }
+ public:
+          virtual bool is_in_vegetative_growth()                    affirmation_;
+   virtual bool is_in_senescence()                                  affirmation_;//141125
+   virtual bool is_in_tuber_initiation()                            affirmation_;//150825
+   inline virtual Normal_crop_event_sequence get_growth_stage_sequence()   const { return growth_stage; }
+   inline virtual nat16 get_days_since_start_of(Normal_crop_event_sequence growth_stage) const { return days_since_start_of[growth_stage]; }
+   inline virtual nat16 get_duration_of(Normal_crop_event_sequence growth_stage)   const { return duration_of[growth_stage]; }
+   inline virtual const CORN::Date_const_interface /*170525 Date*/ &get_initiation_date                          //160609_151005
+      (Normal_crop_event_sequence growth_stage)                            const
+      { return start_date[growth_stage]; }
+   inline virtual CORN::Date32 get_finalization_date                       //170529_151005
+      (Normal_crop_event_sequence growth_stage)                            const
+      {  CORN::Date_32_clad /*170525 Date*/ finalization_date(start_date[growth_stage]);
+         finalization_date.inc_days(duration_of[growth_stage]);
+         return finalization_date.get_date32();                                  //170529
+      }
+   /*170529
+   inline virtual const CORN::Date_const_interface & get_finalization_date                           //151005
+      (Normal_crop_event_sequence growth_stage)                            const
+      {  CORN::Date_32_clad  finalization_date(start_date[growth_stage]);
+         finalization_date.inc_days(duration_of[growth_stage]);
+         return finalization_date;
+      }
+   */
+
+
+   inline virtual float64 get_thermal_time_cumulative(bool adjusted_for_clipping) const { return thermal_time_cumulative; } //130904
+   inline virtual void clear_days_since_start_of_harvest()           assignation_{ days_since_start_of[NGS_HARVEST] = 0; }
+   inline virtual nat16 get_start_day_in_season
+      (Normal_crop_event_sequence growth_stage)                            const//160523
+      { return start_day_in_season[growth_stage]; }
+
+ public: //141202 protected: friend class  Phenology_adjustor;
+   bool reset
+      (Normal_crop_event_sequence from = NGS_RESTART
+      ,Normal_crop_event_sequence to   = NGS_TERMINATED)           modification_;
+   inline bool initialize()                                        modification_ { return reset((Normal_crop_event_sequence)NGS_NONE,(Normal_crop_event_sequence)(NGS_COUNT-1)) ; } //141202
+   RENDER_INSPECTORS_DECLARATION;
+};
+//_2013-09-02___________________________________________________________________
+} //namespace CropSyst
+
+#endif

@@ -1,0 +1,28 @@
+Manure application #1
+NRCS field operation #2
+Used for surface residue disturbance and fate #3
+including mineralized organic N (note  changing the Consistency or Appl. method  or amounts will update a default volatilization) #11
+Selection of the biomatter/manure description will reset some default parameters #12
+Biomatter (Manure or other organic matter) description #13
+Consistency #14
+Dry matter #15
+Click here to set the corresonding percent dry matter #17
+Solid             (> 20% dry matter) #18
+Solid/Semi-solid  (16% dry matter) #19
+Semi solid        (13% dry matter) #20
+Semi solid/Slurry (11% dry matter) #21
+Slurry            (9% dry matter) #22
+Liquid slurry     (6% dry matter) #23
+Liquid            (< 4% dry matter) #24
+Application method #25
+Surface broadcast no incorporation #26
+Sprinkler #27
+Surface broadcast with incorporation #28
+Knifed #29
+Enter either N mass or  biomass (dry basis or wet basis), the other will be estimated. #30
+Organic biomass (dry matter)  #31
+Organic biomass (fresh/wet basis) #35
+Estimated from N mass #37
+Amount of nitrogen in the form of organic manure #38
+Amount of nitrogen in the form of ammonia (NH3) #42
+Long term NH3 volatilization #44

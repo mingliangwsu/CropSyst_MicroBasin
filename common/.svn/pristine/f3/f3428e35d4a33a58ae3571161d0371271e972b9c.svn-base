@@ -1,0 +1,91 @@
+#ifndef geocoordinatesH
+#define geocoordinatesH
+
+#include "corn/application/arguments.h"
+#include "corn/container/unilist.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "common/geodesy/geocoordinate.h"
+#include "common/geodesy/geolocation_item.h"
+#include "corn/data_source/dbase_datasrc.h"
+namespace CS
+{
+//______________________________________________________________________________
+
+class Geocoordinates
+: public extends_ CORN::Unidirectional_list  // of Geocooridinate
+{
+ public:
+   class Arguments
+      : public extends_ CORN::Arguments
+      {
+       public:
+          CORN::OS::File_name *geocoordinates_filename; // Could be DBF or DAT
+          Geocoordinate corner1;
+          Geocoordinate corner2;
+          float32       length_km;
+          bool          centroid;
+       public:
+         Arguments();
+         virtual ~Arguments();
+         virtual bool recognize_filename
+            (const CORN::OS::File_name &param_filename)           modification_;
+         virtual bool recognize(const std::string &paramstring)   modification_;
+         virtual bool get_end();                                                 //161023
+         bool geocoordinates_find(bool must_exist);
+         bool geocoordinates_find_file(const char *extension_raw);
+
+      };
+   //_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+   class Fields_dBase
+   {public:
+      CORN::Data_source_dBase::Field_item *geocoordinate;// not owned
+      CORN::Data_source_dBase::Field_item *latitude;     // not owned
+      CORN::Data_source_dBase::Field_item *longitude;    // not owned
+      CORN::Data_source_dBase::Field_item *elevation;    // not owned
+    public:
+      Fields_dBase()
+         : geocoordinate (0)
+         , latitude     (0)
+         , longitude    (0)
+         , elevation    (0)
+         {}
+      inline virtual ~Fields_dBase() {}
+
+
+   };
+   //_2016-10-16 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+ protected:
+   const   Arguments &arguments;
+   cognate_ bool netCDF_grid_available;
+ protected:
+    provided_ Fields_dBase *fields_dBase;                                                  //161016
+
+ public:
+   inline Geocoordinates(const Arguments &arguments_)
+      : CORN::Unidirectional_list(true) // must be unique
+      , arguments(arguments_)
+      , netCDF_grid_available(false)
+      , fields_dBase (0)
+      {}
+   inline ~Geocoordinates() {   delete fields_dBase; }
+
+   nat32 load();
+      // returns the number of (valid) coordinates loaded
+   nat32 load_from_DBF();
+   nat32 load_from_text();
+   nat32 compose_from_extent();
+   inline bool know_netCDF_grid_available(bool is_available)          cognition_
+       { netCDF_grid_available = is_available; return is_available; }
+   inline bool is_populated()                                       affirmation_
+      { return count(); }
+ protected:
+   virtual bool provide_fields_dBase(CORN::Data_source_dBase &DBF_file) provision_;
+   virtual bool setup_DBF_fields(CORN::Data_source_dBase &DBF_file)   provision_;
+   virtual bool set_from_record
+      (CORN::Generic_data_record &geocoord_rec
+      ,Geocoordinate &geocoord);
+   virtual Geocoordinate_item *render_geocoordinate()                 rendition_;
+ };
+//______________________________________________________________________________
+}
+#endif

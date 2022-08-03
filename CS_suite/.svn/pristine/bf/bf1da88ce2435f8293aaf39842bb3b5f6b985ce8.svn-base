@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">Default.Personality</Option>
+			<Option Name="ProjectType"></Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{6E21DF72-8204-47A0-9F68-8EF40859AF6D}</Option>
+		</Option>
+	</PersonalityInfo>
+	<Default.Personality>  <Projects>
+      <Projects Name="make_update_control_GUI.exe">make_update_control_GUI.bdsproj</Projects>
+      <Projects Name="make_update_control_file.exe">make_update_control_file.bdsproj</Projects>
+      <Projects Name="Targets">make_update_control_GUI.exe make_update_control_file.exe</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+	<StarTeamAssociation></StarTeamAssociation>
+	<StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>

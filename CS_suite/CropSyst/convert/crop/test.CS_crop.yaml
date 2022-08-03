@@ -1,0 +1,368 @@
+   biomass: 
+      production: 
+         continuous_cultivation_impact: 1.000
+         RUE: 
+            basis: unspecified
+            global: 4.000
+            PAR: 3.000
+            temperature: 
+               threshold: 
+                  low: 10.000
+                  high: 25.000
+
+               tolerable: 
+                  min: 3.000
+                  maximum: 45.000
+
+
+
+         TUE: 
+            equation: Tanner_Sinclair
+            at_1kPa_VPD: 2.000
+            biomass_transpiration_coef: 0.000
+            scaling_coef: 0.000
+            water_productivity: 0.000
+
+
+
+   canopy: 
+      cover: 
+         initial: 0.010
+         maximum: 
+            no_CO2_adj: 0.900
+            CO2_adj: 0.900
+
+         mature: 
+            total: 0.100
+
+
+      expansion: 
+         LWP: 
+            reduces: -800.000
+            stops: -1200.000
+
+
+      growth: 
+         cover_based: 
+            fract_season_to_reach_cover_max_half: 0.500
+
+         model: leaf_area_index_V5
+         LAI_based: 
+            fract_LAI_mature: 0.800
+
+
+      height: 
+         initial: 1.200
+         final: 1.200
+         max: 1.500
+
+      light_extinction_coef: 0.500
+      breadth: 
+         initial: 2.000
+         final: 2.000
+
+      width: 
+         initial: 1.000
+         final: 1.000
+
+      branch_insertion_height: 0.600
+
+   phenology: 
+      clipping_resets: 0
+      stress_sensitivity: 
+         water: 1.000
+
+      emergence: 
+         initiation: 100.000
+
+      tuber: 
+         initiation: 1000.000
+
+      anthesis: 
+         initiation: 1000.000
+
+      filling: 
+         initiation: 1020.000
+
+      rapid_fruit_growth: 
+         initiation: 0.000
+
+      maturity: 
+         initiation: 1500.000
+
+      senescence: 
+         initiation: 1080.000
+         culmination: 1501.000
+
+      accrescence: 
+         culmination: 1040.000
+
+      root_elongation: 
+         culmination: 1040.000
+
+      germination: 
+         model: thermal_time
+         hydrothermaltime: 
+            constant: 
+               slope: 22.350
+               intercept: 129.660
+
+            seedling_leaf_area: 2.000
+            base_temperature: -1.000
+            base_SWP: 
+               mean: -1000.000
+               stdev: 100.000
+
+
+
+
+   ecophysiology: 
+      thermal_time: 
+         response: linear
+         threshold: 
+            base: 3.000
+            cutoff: 22.000
+            optimal: 22.000
+            maximum: 35.000
+
+
+      vernalization: 
+         enabled: 0
+         temperature_optimal: 
+            low: 3.000
+            high: 10.000
+
+         day_requirement: 
+            start: 10.000
+            end: 50.000
+
+         minimum_factor: 0.000
+
+      photoperiodism: none
+      photoperiod: 
+         day_length: 
+            stop: 0.000
+            unconstrained: 0.000
+
+
+      quiescence: 
+         consider_inactive_days: 7
+         inducement: 
+            valid: 
+               start: 0
+               end: 0
+
+            temperature: 10.000
+
+
+      dormancy: 
+         chill: 
+            requirement: 
+               hours: 400.000
+               budbreak: 
+                  satisfied: 100.000
+                  unsatisfied: 150.000
+
+
+
+         senesce: 100.000
+
+      tolerance: 
+         temperature: 
+            cold: 
+               fruit: 
+                  damage: -5.000
+                  lethal: -10.000
+
+               leaf: 
+                  damage: -5.000
+                  lethal: -10.000
+
+               yield: 
+                  salvageable: 1200.000
+
+
+            heat: 
+               tuber: 
+                  critical: 17.000
+
+
+
+         salinity: 
+            van_Genuchten: 
+               Pi50: -0.000
+               P: 0.000
+
+
+
+
+   transpiration: 
+      ET_coef: 1.000
+      LWP_wilt: -1600.000
+      LWP_stomatal_closure: -700.000
+      maximum: 10.000
+
+   yield: 
+      harvest_index: 
+         apply_adjustments: 1
+         extreme_heat_sensitivity: 0
+         unstressed: 0.500
+
+      stress_sensitivity: 
+         accrescence: 0.000
+         tuber_initiation: 0.000
+         tuber_filling: 0.000
+
+      translocation: 
+         maximum: 0.400
+
+
+   root: 
+      depth: 
+         initial: 0.200
+         maximum: 1.500
+
+      length: 
+         emergence: 2.000
+         per_unit_mass: 90.000
+
+      density: 
+         surface: 3.000
+         distribution_curvature: 0.100
+
+      shoot_ratio: 
+         emergence: 2.000
+         culmination: 0.100
+
+      stress_sensitivity: 
+         water: 0.000
+
+
+   leaf: 
+      clip_newest_first: 1
+      area: 
+         index: 
+            GAI: 
+               initial: 0.011
+               regrowth: 0.011
+
+            LAI: 
+               maximum: 5.000
+
+
+         specific: 
+            optimum: 22.000
+
+         duration: 800.000
+
+      stem_leaf_partition: 3.000
+
+   layout: 
+      spacing: 
+         row: 2.700
+         col: 2.500
+
+      azimuth: 
+         row: 0.000
+
+
+   fruit: 
+      grape: 0
+      harvest_condition: management_scheduled
+      fract_total_solids: 0.350
+      load_maximum: 20000.000
+      mass_initial: 0.020
+      reserves_release_rate: 
+         initial: 0.020
+
+      clusters_per_vine: 30
+      berries_per_cluster: 25
+      fruits_per_tree: 250
+      harvest: 
+         temperature: 15.000
+         temperature_days: 5
+
+      growth_fraction_to_fruit: 0.900
+
+   harvest: 
+      earliest: 258
+      latest: 275
+
+   nitrogen: 
+      fixation: 0
+      legume_fraction: 1.000
+      leaf_stress: none
+      uptake_rate: 
+         maximum: 5.000
+
+      residual: 1.000
+      soil_conc_decreases_uptake: 5.000
+      PAW_decreases_uptake: 0.500
+      concentration: 
+         stubble: 
+            maximum: 0.007
+
+         root: 0.007
+
+      dilution: 
+         maximum: 
+            concentration: 
+               mature: 0.023
+               emergence: 0.007
+
+
+         critical: 
+            concentration: 
+               emergence: 0.007
+
+            biomass_to_start: 1.500
+
+         end: 0
+
+
+   CO2: 
+      reference_conc: 
+         TUE: 350.000
+         RUE: 350.000
+
+      non_rectagular_hyperbola: 
+         alpha: 0.003
+         theta: 0.942
+         growth_ratio_asymptotic: 1.277
+
+
+   residue: 
+      RUSLE2_type: unknown
+      decomposition: 
+         decompose_senesced_canopy: 78
+         halflife: 40
+         rate: 
+            max: 
+               single: 0.100
+
+
+
+      top: 
+         fast_cycling: 0.500
+         slow_cycling: 0.400
+         lignified: 0.100
+
+      root: 
+         fast_cycling: 0.500
+         slow_cycling: 0.300
+         lignified: 0.200
+
+      detrition: 
+         halflife: 720.000
+
+      CN_ratio: 
+         fast_cycling: 50.000
+         slow_cycling: 50.000
+         lignified: 50.000
+
+      carbon_fraction: 0.460
+      area_covered_to_mass_ratio: 
+         stubble: 2.000
+         flat: 4.000
+
+

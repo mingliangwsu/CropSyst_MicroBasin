@@ -1,0 +1,526 @@
+#include "YAML_stream.h"
+#include "YAML_document.h"
+#include "corn/string/strconv.hpp"
+#include <assert.h>
+#include <ctype.h>
+#include <iostream>
+#include <sstream>
+
+namespace YAML
+{
+//______________________________________________________________________________
+Stream::Stream(const CORN::OS::File_name &filename)
+: CORN::Structural_ifstream_Unicode(filename)
+{}
+//______________________________________________________________________________
+Stream::~Stream()
+{}
+//______________________________________________________________________________
+struct Parse_location
+{
+   nat32 col;  // 0 indexed
+   nat32 row;  // 0 indexed
+   nat32 pos;  // 0 indexed
+ public:
+   inline Parse_location
+      (nat32 _col
+      ,nat32 _row
+      ,nat32 _pos)
+      :col(_col)
+      ,row(_row)
+      ,pos(_pos)
+      {}
+   inline Parse_location
+      (const Parse_location &copy_from)
+      :col(copy_from.col)
+      ,row(copy_from.row)
+      ,pos(copy_from.pos)
+      {}
+   };
+//______________________________________________________________________________
+nat8 Stream::parse_document
+(structural::Construct &document)
+{
+   structural::Mapping *doc_mapping = dynamic_cast<structural::Mapping *>(&document);
+   parse_construct(*this,doc_mapping,document,0,0,0);
+   return ERROR_none;
+}
+//______________________________________________________________________________
+structural::Construct * // returns promoted context
+Stream::parse_construct
+(std::wistream &strm
+,structural::Mapping        *in_mapping
+,structural::Construct       &context_construct
+,structural::Pair_key_value  *in_key_value_pair_unused
+,nat16                        indentation
+,nat16                        leading_space_count
+)
+{
+   structural::Construct *promoted_context = 0;
+   // The Node structure contents are necessarily owned by the stream
+   // once nodes are resolved they are generally relinquished
+   // to the document.
+
+   YAML::Parsing_element *current_parsing_element= 0;
+   structural::Sequence       *in_sequence= dynamic_cast<structural::Sequence *>(&context_construct);
+   start_line_strm_pos = strm.tellg();
+   std::clog << "{pc_slsp:" << start_line_strm_pos << "}";
+   while (strm.good())
+   {
+      bool line_essentially_empty = false;
+      if (!current_parsing_element)
+          current_parsing_element = new YAML::Parsing_element();
+      wchar_t chr0 = strm.get();
+      wchar_t chr1 = 0; if (strm.good()) chr1 = strm.peek();
+      if (chr0 == '\r')                                                          //150830
+      {  // Files from Windows have \r at end of line.
+         chr0 = strm.get();
+         if (strm.good()) chr1 = strm.peek();
+         leading_space_count = 0;
+      }
+      if (chr0 == '\n')                                                          //150830
+      {  //151020
+         leading_space_count = 0;
+         start_line_strm_pos = strm.tellg();                                     //151026
+         if (indentation && current_parsing_element->text)
+         {
+            context_construct.set_text_wstring(*(current_parsing_element-> text));
+            return promoted_context;                                             //151025
+         }
+         else
+         {  // This was just a blank line, eat up successive blank lines.
+            start_line_strm_pos = strm.tellg();                                     //151020
+            chr0 = strm.get();
+            while ((chr0 == '\n') && strm.good())
+            {
+               start_line_strm_pos = strm.tellg();                                     //151026
+               chr0 = strm.get();
+//               line_essentially_empty = true;
+
+            }
+            if (strm.good()) chr1 = strm.peek();
+         }
+      }
+      if ((chr0 == L'.') && (chr1 == L'.'))
+      {  std::streampos strm_pos = strm.tellg();
+         std::wstring potential_end_document_line;
+         std::getline(strm,potential_end_document_line);
+         if (potential_end_document_line.find(L"...") == 0)
+         {  return 0; // end of document no error
+            // Presuming document suffix is always  at the beginning of the line.
+            // The suffix is optional.
+            // It is only needed if there will be directive before the next document in the stream
+            // Anything else on the line is assumed to be comment
+         } else strm.seekg(strm_pos);
+      }
+
+/*
+      if (chr0 == L'#')                                                          //160222
+         // Actually In the YAML spec # should be followed by a space
+         // but it is too each to forget this
+            {  // The rest of the line is comment
+               // The comment could be stored so we can rewrite the file preserving comment.
+               // Would need to store row and leading space count
+               current_parsing_element->comment = new std::wstring;
+               getline(strm,*(current_parsing_element->comment));
+               CORN::strip_wstring(*(current_parsing_element->comment),CORN::Both,L' ');
+               //chr0_consumed = true;                                             //150525
+               start_line_strm_pos = strm.tellg();                               //151020
+               std::clog << "{end#_slsp:" << start_line_strm_pos << "}";
+               leading_space_count = 0;
+                  // promoted_context may be 0 if there was just a comment
+            }
+*/
+
+      // Not sure if space after --- is considered leading spacing indentation
+      // I don't think so
+
+      while (chr0 == L' ' )
+      {  leading_space_count ++;
+         chr0 = strm.get(); if (strm.good()) chr1 = strm.peek();
+         switch (chr0)
+         { case '#' :
+            {  read_remainder_of_line_to_comment(strm,*current_parsing_element);
+
+               std::string debug_comment; CORN::wstring_to_string(*current_parsing_element->comment,debug_comment);
+               std::clog << '#' << debug_comment << '#';
+               leading_space_count = 0;
+               line_essentially_empty = true;
+            //chr0_consumed = true;                                             //150525
+//            return 0; // no error    I think return, need to check
+            } break;
+            case '\n' :
+            {
+               leading_space_count = 0;
+               line_essentially_empty = true;
+            } break;
+         }
+         //chr0 = ' ';
+         if (strm.good()) chr1 = strm.peek();
+      }
+      if (!line_essentially_empty)
+      {
+         if (leading_space_count > indentation)
+         {
+            indentation = leading_space_count;
+         }
+         if ((leading_space_count < indentation))                                   //150831
+         {
+            std::clog << "{back:" << start_line_strm_pos << "}";
+            strm.seekg(start_line_strm_pos); //we need to reread lines              //150830
+            return 0; // no error
+         }
+      // A line containing only white space characters is taken to be a comment line. view-source:http://www.yaml.org/spec/1.2/spec.html#id2780485
+      bool chr1_is_white_space = isspace(chr1);
+      bool chr0_consumed = false;                                                //150525
+      if (chr1_is_white_space || chr1 == 0)                                      //150527
+      {  //see if chr0 is indicator
+         switch(chr0)
+         {
+            case L'#' :
+            {  // The rest of the line is comment
+               // The comment could be stored so we can rewrite the file preserving comment.
+               // Would need to store row and leading space count
+
+               read_remainder_of_line_to_comment(strm,*current_parsing_element);
+               leading_space_count = 0;
+
+               chr0_consumed = true;                                             //150525
+                  // promoted_context may be 0 if there was just a comment
+            }  break;
+            case L'-' :
+
+               /*160222 Sequence *curr_construct_as_sequence = dynamic_cast<Sequence *>(current_construct);
+               if (!curr_construct_as_sequence)
+               {  // this appear to be the first item of a sequence
+                  current_construct = curr_construct_as_sequence = new Sequence(current_construct,false);
+               }
+               */
+               if (!in_sequence)                                                 //160222
+                  promoted_context = in_sequence = new Sequence();               //160222
+               while ((chr1 == L' ' || chr1 == L'\t') ) //eat any spaces or tabs //160222
+                  { chr0 = strm.get(); if (strm.good()) chr1 = strm.peek(); }    //160222
+            break;
+
+            case L':' :
+            {
+               YAML::Node *key = promote(current_parsing_element); current_parsing_element = 0; // relinquished
+
+std::string keystr; CORN::append_UnicodeZ_to_string(key->text->c_str(),keystr);
+std::clog << keystr << std::endl;
+
+               structural::Pair_key_value *key_value_pair = 0;
+               //bool KV_pair_preexists = false;
+               // This key may have been previously encountered:
+               if (!in_mapping)
+               {
+                  promoted_context = in_mapping = new Mapping();
+               }
+
+
+                  key_value_pair = in_mapping->find_key_value_pair(*key);
+                  if (key_value_pair) // Perhaps this is a known key for this document structure
+                  {
+                     delete key;
+                   }
+                  else
+                  {
+                     key_value_pair = in_mapping->instanciate_key_value_pair(key);
+                     in_mapping->get_key_value_pairs().take(key_value_pair);
+                  }
+               if (!key_value_pair)                                              //150830
+               {  // The document didn't recognize the key
+                  // Presume this is arbitrary YAML
+                  key_value_pair = new structural::Pair_key_value_clad(key); //150830
+                  in_mapping->get_key_value_pairs().take(key_value_pair);
+               }
+               key = 0;
+               // At this poing KV_pair either existed or was instanciated
+               //151025 if (key_value_pair)
+               {
+                  // Do nothing with popped element because it was the key
+                  // and it has been given to instanciated key_value_pair.
+
+                  while ((chr1 == L' ' || chr1 == L'\t') )  // eat any spaces or tabs
+                     {  chr0 = strm.get(); if (strm.good()) chr1 = strm.peek(); }
+
+                  if (key_value_pair->is_value_set_with_remaining_text())
+                  {  // I.e. a scaler and or specialized construct
+                     std::wstring value; std::wstring comment;
+                     read_value(strm,value,comment);
+                     // consumes newline
+                     leading_space_count = 0;
+                     if (comment.length())
+                     {
+                        // Currently not storing comments
+                        // To store comments add provide_comment() to key_value_pair classes
+                     }
+                     key_value_pair->set_value_wchr(value.c_str());
+                     start_line_strm_pos = strm.tellg();                         //151026
+                     std::clog << "{endvalue_slsp:" << start_line_strm_pos << "}";
+
+                     // stay in in_key_value_pair
+                  } else
+                  {
+                     if (chr1 == '\r')
+                     {  //we are at the end of the line
+                        chr0 = strm.get(); chr1 = strm.peek();
+                     }
+                     if (chr1 == '\n')
+                     {
+                        /*checking if this cause space count
+                        chr0 = strm.get(); chr1 = strm.peek();
+                        */
+                        start_line_strm_pos = strm.tellg();                      //151026
+                        std::clog << "{newline_slsp:" << start_line_strm_pos << "}";
+                        leading_space_count = 0;                                 //151026
+                     } // else the remainder of the line could be a Node
+                     structural::Construct *value_construct = dynamic_cast<structural::Construct *>
+                        (key_value_pair->get_value());
+                     if (!value_construct)
+                     {
+                          value_construct = new YAML::Node;
+                          key_value_pair->take_value(value_construct);
+                     }
+/*
+                    150830 continue here:
+                     need to handle case
+                     where key_value_pair is not identified by the
+                     docoument so the value would be arbitrary YAML
+                     The problem identifieds is that parse_construct
+                     local leading_space_count is 0 which is less
+                     than indentation, probably need a flag to
+                     indicate if the appears to be value remaining on the line.
+*/
+                     structural::Construct * context_promoted                     //151025
+                        //151025 error =
+                        = parse_construct
+                        (strm
+                        ,in_mapping
+                        ,*value_construct
+                        ,key_value_pair
+                        ,indentation
+                        ,leading_space_count);
+                     std::clog << "{return_slsp:" << start_line_strm_pos << "}";
+                     leading_space_count = 0;
+                  }
+               }
+               chr0_consumed = true;                                             //150525
+            } break;
+            /*nyi
+            case L'?' :
+               current_parsing_element->is_key = true;
+            break;
+            */
+
+         } // switch chr0
+      } // if next char is space
+      if (!chr0_consumed)                                                        //150525
+      {
+         switch(chr0)
+         {
+            case L'{' :
+            {   // When we are in a resolved key value pair we would already know
+               // that the value is a mapping
+               // an arbitrary key value pair will not have known that
+               // the value is a mapping
+
+               if (!in_mapping)
+               {
+                  promoted_context = in_mapping = new Mapping();
+               }
+               while ((chr1 == L' ' || chr1 == L'\t') )  // eat any spaces or tabs
+                  {  chr0 = strm.get(); if (strm.good()) chr1 = strm.peek(); }
+               std::wstring remainder_as_inline;
+               std::getline(strm,remainder_as_inline);
+               // Warning this reads the entire remainder of the line
+               // but it should only read up to the next unescaped }
+               std::wstringstream inline_text(remainder_as_inline);
+               structural::Construct * context_promoted                     //151025
+                = parse_construct
+                  (inline_text
+                  ,in_mapping
+                  ,context_construct
+                  ,in_key_value_pair_unused
+                  ,0
+                  ,leading_space_count);
+               std::clog << "{mapping_return_slsp:" << start_line_strm_pos << "}";
+            } break;
+            case L'}' :
+               return 0; //ERROR_none;
+            //break;
+            case L'[' :
+            {
+               // When we are in a resolved key value pair we would already know
+               // that the value is a sequence
+               // an arbitrary key value pair will not have known that
+               // the value is a sequence
+               if (!in_sequence)
+               {
+                  promoted_context = in_sequence = new Sequence();
+               }
+               while ((chr1 == L' ' || chr1 == L'\t') )  // eat any spaces or tabs
+                  {  chr0 = strm.get(); if (strm.good()) chr1 = strm.peek(); }
+               std::wstring remainder_as_inline;
+               std::getline(strm,remainder_as_inline);
+               std::wstringstream inline_text(remainder_as_inline);
+               // Warning this reads the entire remainder of the line
+               // but it should only read up to the next unescaped ]
+               //error =
+                  parse_construct
+                  (inline_text
+                  ,in_mapping
+                  ,context_construct
+                  ,in_key_value_pair_unused
+                  ,0
+                  ,leading_space_count);
+                  std::clog << "{seq_return_slsp:" << start_line_strm_pos << "}";
+            } break;
+            case L']' :
+               return 0 ; //ERROR_none;                                                //150904
+            //break;
+
+
+
+            /*NYI  also note that YAML directives occur at the top of the document
+            std::wstring potential_tag;
+            if (char_at_pos == L'%')
+            {  char_at_pos++;
+               std::wstring directive;
+               for (char_at_pos = text[pos]
+                  ; char_at_pos && !isspace(char_at_pos)
+                  ; pos++) // Eat white space (space or tab)
+                  directive += char_at_pos;
+               directives.add_wstring(directive);
+            }
+            */
+            case '\r' :
+               leading_space_count = 0;
+            break; //eat carridge return
+            case '\n':
+               leading_space_count = 0;
+               start_line_strm_pos = strm.tellg();                               //151026
+               std::clog << "{newline2_slsp:" << start_line_strm_pos << "}";
+            break; //eat newline
+            default:
+               current_parsing_element->take_char(chr0);
+            break;
+         } // switch chr0
+      } // if (!chr0_consumed)
+      }
+   } // while strm.good
+   return promoted_context;
+}
+//______________________________________________________________________________
+bool Stream::read_remainder_of_line_to_comment
+(std::wistream &strm
+,modifiable_ YAML::Parsing_element &current_parsing_element)
+{
+   if (current_parsing_element.comment)
+      current_parsing_element.comment->append(L"\n");
+   else
+      current_parsing_element.comment = new std::wstring;
+   std::getline(strm,*(current_parsing_element.comment));
+   CORN::strip_wstring(*(current_parsing_element.comment),CORN::Both,L' ');
+   start_line_strm_pos = strm.tellg();                               //151020
+   std::clog << "{end#_slsp:" << start_line_strm_pos << "}";
+   return true;
+}
+//______________________________________________________________________________
+YAML::Node *Stream::promote(YAML::Parsing_element *element_given)          const
+{
+   const std::wstring &kind_or_type = element_given->kind_or_type;
+
+   YAML::Node *promoted_node
+      = (kind_or_type == L"map")   ? (YAML::Node *)new Mapping()
+      : (kind_or_type == L"seq")   ? (YAML::Node *)new Sequence()
+      //NYI : (arbitrary_node.kind_or_type == L"set" )  ? new Set(child)
+      //NYI : (arbitrary_node.ind_or_type == L"omap")  ? new Omap(child);
+      : (kind_or_type == L"str")   ? (YAML::Node *)new String()
+      : (kind_or_type == L"null")  ? (YAML::Node *)new Null()
+      : (kind_or_type == L"int")   ? (YAML::Node *)new Int()
+      : (kind_or_type == L"bool")  ? (YAML::Node *)new Bool()
+      : (kind_or_type == L"float") ? (YAML::Node *)new Float()
+      : (YAML::Node *)new Node(); // <- arbitrary node
+   promoted_node->promote_from(element_given); // always promoted
+   return promoted_node;
+}
+//______________________________________________________________________________
+nat8 Stream::get(structural::Construct &document)                  modification_
+{  return parse_document_known(document);
+}
+//______________________________________________________________________________
+Parse_error_code Stream::parse_document_known
+(
+//170128 std::wistream &strm,
+ structural::Construct          &document)
+{
+   return parse_to_start_of_document(/*strm*/)
+      ? parse_document(/*strm,*/document)
+      : ERROR_document_start_not_found;
+}
+//______________________________________________________________________________
+bool Stream::parse_to_start_of_document()
+//170128 (std::wistream &strm)
+{
+   //std::wstreampos start_file_pos= 0;
+   bool at_start = false;
+   // My need to read BOM
+   std::wstring text;
+   const wchar_t *text_remainder = 0;
+   while (/*strm.*/good() && !at_start)
+   {
+
+      std::wstreampos currpos  = /*strm.*/tellg();
+      std::getline(*this/*strm*/,text);
+      text_remainder = text.c_str();
+
+      if (text.find(L"---") == 0)
+         // Presuming that document separator is always at the beginning of the line.
+         // It is unclear from the YAML documentation
+      {
+         currpos += 3;
+         //curr_document->know_anchors(&anchors);
+         // The document starts immediately after ---,
+         // This is because there may be a block literal
+
+         text_remainder = text.c_str() + 3;
+         for (wchar_t next_char =(*text_remainder)
+             ;next_char && (next_char == L'.')
+             ;next_char = (*text_remainder++))
+         {
+             currpos += 1;
+         }
+         at_start = true;
+         /*strm.*/seekg(currpos);
+      } else
+      {
+         /*strm.*/seekg(currpos);
+         at_start=true;
+      };
+   }
+   return at_start;
+}
+//______________________________________________________________________________
+nat32 Stream::read_value(std::wistream &strm,std::wstring &value, std::wstring &comment)    const
+{  nat32 consumed = 0;
+   wchar_t chr1 = strm.peek();
+   while (strm.good() && (chr1 != '\n'))
+   {
+      wchar_t chr0 = strm.get(); chr1 = strm.peek();
+      switch (chr0)
+      {
+         case L',' : strm.get(); consumed+=2; return consumed; // break; // eat the , and there will always be a space after ,
+         case L'#' : std::getline(strm,comment); consumed += comment.length(); return consumed; //break;
+         case '}' : return consumed;  //break; // dont eat the } it is needed for further parsing by the stream
+         default :
+         {  value += chr0;
+            consumed += 1;
+         } break;
+      }
+   }
+   return consumed;
+}
+//______________________________________________________________________________
+} // namespace YAML
+

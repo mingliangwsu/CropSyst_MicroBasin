@@ -1,0 +1,60 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{37804E99-92D3-40B7-BDCC-770B3FE9D473}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="..\..\..\..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="STATSGO2_SSURGO_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\..\..\..\..\CS_suite\CS_explorer\RS\2010\CS_explorer.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="corn_complete_static">
+			<MSBuild Projects="..\..\..\..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="STATSGO2_SSURGO_static">
+			<MSBuild Projects="STATSGO2_SSURGO_static.cbproj"/>
+		</Target>
+		<Target Name="STATSGO2_SSURGO_static:Clean">
+			<MSBuild Targets="Clean" Projects="STATSGO2_SSURGO_static.cbproj"/>
+		</Target>
+		<Target Name="STATSGO2_SSURGO_static:Make">
+			<MSBuild Targets="Make" Projects="STATSGO2_SSURGO_static.cbproj"/>
+		</Target>
+		<Target Name="CS_explorer">
+			<MSBuild Projects="..\..\..\..\..\..\..\..\CS_suite\CS_explorer\RS\2010\CS_explorer.cbproj"/>
+		</Target>
+		<Target Name="CS_explorer:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\..\..\..\CS_suite\CS_explorer\RS\2010\CS_explorer.cbproj"/>
+		</Target>
+		<Target Name="CS_explorer:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\..\..\..\CS_suite\CS_explorer\RS\2010\CS_explorer.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="corn_complete_static;STATSGO2_SSURGO_static;CS_explorer"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="corn_complete_static:Clean;STATSGO2_SSURGO_static:Clean;CS_explorer:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="corn_complete_static:Make;STATSGO2_SSURGO_static:Make;CS_explorer:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

@@ -1,0 +1,408 @@
+#  include "corn/measure/measures.h"
+#  include "common/weather/database/weather_DAT_GEN_database.h"
+#  include "common/weather/weather_provider.h"
+#  include "UED/library/std_codes.h"
+#include "corn/datetime/time.h"
+#include "corn/data_source/vv_file.h"
+#include "corn/OS/file_system_engine.h"
+
+#include "corn/OS/file_system_engine.h"
+#ifndef CLIMGEN
+#  ifdef APPTYPE_CONSOLE
+#     include <iostream>
+      // for cerr
+#  endif
+#endif
+#include <assert.h>
+
+//I am requiring the input to be in UED format, it will be too slow to access from ORACLE.
+//______________________________________________________________________________
+Weather_data_text::Weather_data_text
+(Location_parameters  &_location_params                                          //000313
+,CORN::OS::File_name &_template_filename)                                        //130828
+:Weather_database()
+,template_filename(_template_filename)
+,for_write(false)
+,format_to_write(Weather_text_file::UNKNOWN_format)                              //021218
+,current(0)
+,aux(0)
+,pref_ext("dat")                                                                 //001010
+,allow_missing_dates(false)                                                      //040427
+,location_parameters(_location_params) // (i_template_filename.c_str(),true,VERSION_NUMBERS)
+,need_to_write_column_headers(false)                                             //060221
+,single_outfile(0)                                                               //060221
+{}
+//______________________________________________________________________________
+Weather_data_text::~Weather_data_text()
+{  reset_buffers();                                                              //000519
+   if (single_outfile) delete single_outfile; single_outfile = 0;
+}
+//______________________________________________________________________________
+const Location_parameters *Weather_data_text::get_location_parameters()    const
+{  return &location_parameters;
+}
+//_2005-05-25___________________________________________________________________
+const Geolocation         *Weather_data_text::get_geolocation_constant()   const
+{  return (location_parameters.geolocation);
+}
+//_2005-05-25___________________________________________________________________
+const char *Weather_data_text::get_description(std::string &return_buffer) const
+{  return  location_parameters.description.brief.c_str();                        //150112
+}
+//_2005-05-25___________________________________________________________________
+void Weather_data_text::setup_to_write(Weather_text_file::Format_old desired_format)
+{  for_write = true;
+   format_to_write = desired_format;
+   if (!single_outfile && desired_format == Weather_text_file::V4_format)  // this format stores all data in a single file //060221_
+   {   single_outfile = new std::ofstream(template_filename.c_str());
+       need_to_write_column_headers = true;
+   }
+}
+//_2002-12-16___________________________________________________________________
+void Weather_data_text::setup_current(Year year) mutates_
+{
+   if (aux && (aux->year == year))
+   {  Weather_text_file *hold = current;
+      current = aux;
+      aux = hold;
+      return;
+   }
+   GEN_DAT_UED_filename curr_filename(template_filename.c_str());
+
+   Year template_year = curr_filename.get_year();
+   if (template_year)
+   {  curr_filename.set_year(year);                                              //040427
+      curr_filename.set_ext(pref_ext.c_str());                                   //001010
+      if (for_write)
+      { /* The year is always set
+         curr_filename.set_year(year);
+      */
+      } else
+      {  if ((int)year != MAXINT)        // We now need to allow year 0
+         {
+            if (!CORN::OS::file_system_engine.exists(curr_filename))   // If file with .DAT does not exist
+               curr_filename.set_ext("gen");// Try .GEN file
+         } else
+         {
+#  ifndef CLIMGEN
+#     ifdef APPTYPE_CONSOLE
+            std::cerr << "Unable to open file" << ':'  << curr_filename.c_str() << std::endl;
+#     else
+#        ifdef _Windows
+             MessageBox(0,curr_filename.c_str(),"Unable to open file",MB_ICONEXCLAMATION	);
+#        endif
+#     endif
+#endif
+        // Here we show throw an exception indicating that
+        // The file doesn't exist
+            return; //
+         }
+      }
+   }
+   if (aux)                                                                      //990831
+      delete aux;
+   aux = current;
+   current = new Weather_text_file
+      (curr_filename
+      ,year
+      ,for_write
+      ,format_to_write
+      ,allow_missing_dates
+      ,need_to_write_column_headers
+      ,single_outfile);
+   need_to_write_column_headers = false;                                         //060221
+
+}
+//______________________________________________________________________________
+void Weather_data_text::set_today(const CORN::Date & _date)
+{  current_date.set(_date);                                                      //091217
+   if (!current ||(current->year != _date.get_year()))
+      setup_current(_date.get_year());                                           //990831
+}
+//______________________________________________________________________________
+void Weather_data_text::invalidate(bool absolutely)
+{  select_buffer(current_date.get_year())->invalidate_DOY(current_date.get_DOY());
+}
+//_2009-12-16_1999-10-12________________________________________________________
+/*170111
+float64 Weather_data_text::get_max_temperature(weather_database_get_formals) const
+{  DOY doy = i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());           //991012
+   float64 value =  buffer->get_max_temperature(doy,attribute);                  //000908
+   return value;                                                                 //991012
+}
+//_1997-10-13___________________________________________________________________
+float64 Weather_data_text::get_min_temperature(weather_database_get_formals) const
+{  DOY doy = i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());           //991012
+   float64 value = buffer->get_min_temperature(doy,attribute);
+   return value; }
+//_1997-10-13___________________________________________________________________
+float64 Weather_data_text::get_solar_radiation
+(Solar_radiation &solar_rad, const CORN::Date_time &date_time)                      const
+{
+   DOY doy = date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(date_time.get_year());             //991012
+   return buffer->get_solar_radiation(doy,solar_rad);                            //991012
+}
+//_2014-07-16_1997-10-13_______________________________________________________/
+float64 Weather_data_text::get_max_relative_humidity(weather_database_get_formals) const
+{  DOY doy = i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());           //991012
+   return buffer->get_max_relative_humidity(doy,attribute); }                   //991012
+//_1998-03-06___________________________________________________________________
+float64 Weather_data_text::get_min_relative_humidity(weather_database_get_formals) const
+{  DOY doy = i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());           //991012
+   return buffer->get_min_relative_humidity(doy,attribute); }                   //991012
+//_1998-03-06___________________________________________________________________
+float64 Weather_data_text::get_precipitation_m(weather_database_get_formals) const
+{  DOY doy = i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());           //991012
+   return buffer->get_precipitation_m(doy,attribute); }                         //991012
+//_1998-03-06___________________________________________________________________
+float64 Weather_data_text::get_pot_evapotranspiration_m(weather_database_get_formals) const
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());           //991012
+   return buffer->get_pot_evapotranspiration_m(doy,attribute); }                //991012
+//_1999-11-09___________________________________________________________________
+float64 Weather_data_text::get_avg_daytime_vapor_pressure_deficit_kPa(weather_database_get_formals) const
+{  DOY doy = i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());           //991012
+   return buffer->get_avg_daytime_vapor_pressure_deficit_kPa(doy,attribute); }  //010125
+//_2001-01-25___________________________________________________________________
+float64 Weather_data_text::get_avg_fullday_vapor_pressure_deficit_kPa(weather_database_get_formals) const
+{   DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());           //991012
+   return buffer->get_avg_fullday_vapor_pressure_deficit_kPa(doy,attribute); }  //010125
+//_2001-01-25___________________________________________________________________
+#ifdef NYI
+float64 Weather_data_text::get_max_vapor_pressure_deficit_kPa(weather_database_get_formals) const
+{   DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());
+   return buffer->get_max_vapor_pressure_deficit_kPa(doy,attribute); }
+//_1999-11-09___________________________________________________________________
+#endif
+//______________________________________________________________________________
+float64 Weather_data_text::get_wind_speed_m_d(weather_database_get_formals) const
+{   DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());
+   return buffer->get_wind_speed_m_d(doy,attribute); }
+//_1999-10-12_1998-03-06________________________________________________________
+float64 Weather_data_text::get_max_dew_point_temperature(weather_database_get_formals) const // yes only pass by value!
+{   DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());
+   return  buffer->get_max_dew_point_temperature(doy,attribute); }
+//_1999-10-12_1998-03-05________________________________________________________
+float64 Weather_data_text::get_min_dew_point_temperature(weather_database_get_formals) const // yes only pass by value!
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buffer =  select_buffer(i_date_time.get_year());
+   return  buffer->get_min_dew_point_temperature(doy,attribute); }
+//_1999-10-12_1998-03-05________________________________________________________
+float64 Weather_data_text::get_avg_dew_point_temperature(weather_database_get_formals) const // yes only pass by value!
+{
+// NYI This format does not currently support average dewpoint temperature
+//NYI   UED_time_query_single_date time_qry(i_date_time.get_datetime64(),(UED_units_code)UT_day);
+   UED_units_code actual_units = UC_Celcius;
+
+   attribute.assume_code(CORN::missing_quality);                                 //050619
+    return  0.0;
+// NYITHIS_DATABASE get_no_create(UED_record_type_distinguisher::UED_data_set_year_var_units ,UED_STD_VC_avg_dew_point_temperature.get(),time_qry,actual_units,attribute);
+}
+//_2005-06-03___________________________________________________________________
+float64 Weather_data_text::get_cloud_cover_percent(weather_database_get_formals) const
+{  // The text file format doesn't have cloud cover
+   attribute.assume_code(CORN::not_valid_quality);                               //150811
+   return 0.0;
+}
+//_1999-10-22___________________________________________________________________
+*/
+Weather_text_file *Weather_data_text::select_buffer(Year i_date_year) mutates_
+{  if (current && (current->year == i_date_year))  return current;
+   if (aux && (aux->year == i_date_year))          return aux;
+   setup_current(i_date_year);
+   return current;
+}
+//_1999-08-31___________________________________________________________________
+/*
+float64 Weather_data_text::set_precipitation_mm
+(const CORN::Date_time &i_date_time
+,float64 precip_mm
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_precip_m(doy,mm_to_m(precip_mm),attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_pot_evapotranspiration_mm
+(const CORN::Date_time &i_date_time
+,float64 pot_ET_mm
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_pot_ET_m(doy,mm_to_m(pot_ET_mm),attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_avg_daytime_vapor_pressure_deficit_kPa
+(const CORN::Date_time &i_date_time
+,float64 avg_VPD_kPa
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_daytime_VPD_kPa(doy,avg_VPD_kPa,attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_avg_fullday_vapor_pressure_deficit_kPa
+(const CORN::Date_time &i_date_time
+,float64 avg_VPD_kPa
+,CORN::Quality &attribute
+)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_fullday_VPD_kPa(doy,avg_VPD_kPa,attribute);
+}
+//_2001-10-09___________________________________________________________________
+float64 Weather_data_text::set_max_temperature
+(const CORN::Date_time &i_date_time
+, float64 degrees_C
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_max_temp(doy,degrees_C,attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_min_temperature
+(const CORN::Date_time &i_date_time
+,float64 degrees_C
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_min_temp(doy,degrees_C,attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_solar_radiation
+(const CORN::Date_time &i_date_time
+, float64 solar_rad_MJ_m2
+,CORN::Quality &attribute) mutates_ // this const is just a hack because wthr class uses set during load
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_solar_rad(doy,solar_rad_MJ_m2,attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_max_relative_humidity
+(const CORN::Date_time &i_date_time
+, float64 max_rel_humid_percent
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_max_rel_humid(doy,max_rel_humid_percent,attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_min_relative_humidity
+(const CORN::Date_time &i_date_time
+, float64 min_rel_humid_percent
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_min_rel_humid(doy,min_rel_humid_percent,attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_max_dew_point_temperature
+(const CORN::Date_time &i_date_time
+, float64 max_dew_point_temp
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_max_dew_point(doy,max_dew_point_temp,attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_min_dew_point_temperature
+(const CORN::Date_time &i_date_time
+, float64 min_dew_point_temp
+,CORN::Quality &attribute)
+{  DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_min_dew_point(doy,min_dew_point_temp,attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_data_text::set_avg_dew_point_temperature
+(const CORN::Date_time &i_date_time
+,float64 min_dew_point_temp
+,CORN::Quality &attribute)
+{
+   attribute.assume_code(CORN::missing_quality); // NYI
+   return 0.0; // NYI
+}
+//_2005-06-19___________________________________________________________________
+float64 Weather_data_text::set_wind_speed_m_d
+(const CORN::Date_time &i_date_time
+, float64 wind_speed_m_d
+,CORN::Quality &attribute)
+{   DOY doy= i_date_time.get_DOY();
+   Weather_text_file *buff = select_buffer(i_date_time.get_year());
+   return buff->set_wind_speed_m_d(doy,wind_speed_m_d,attribute);
+}
+//_1999-04-24___________________________________________________________________
+*/
+void Weather_data_text::set_precipitation_intervals_mm
+(const CORN::Date &i_date
+,const CORN::Time &i_time
+,const CORN::Dynamic_array<float32>&precip_in_intervals
+,CORN::Minutes interval_time_minutes
+,CORN::Quality &attribute)
+{  // NYI  we have never had a 30 weather text file format
+}
+//_1999-04-25___________________________________________________________________
+void Weather_data_text::set_temperature_intervals
+   ( const Date &i_date
+   ,const CORN::Dynamic_array<float32>&temperature_in_intervals
+   ,CORN::Minutes interval_time_minutes                                          //990425
+   ,CORN::Quality &attribute)
+{  // NYI  we have never had a 30 weather text file format
+}
+//_2002-11-24___________________________________________________________________
+bool Weather_data_text::get_to(Weather_provider& provider)
+{
+   CORN::Year year   = provider.date.get_year();
+   CORN::DOY  doy    = provider.date.get_DOY();
+   Weather_text_file *buffer =  select_buffer(year);           //991012
+
+   CORN::Quality_clad precipitation_attribute;  provider.precipitation_actual       .set_m                        (buffer->get_precipitation_m           (doy,precipitation_attribute  ),precipitation_attribute);
+   CORN::Quality_clad Tmax_attribute;           provider.air_temperature_max        .update_value_qualified       (buffer->get_max_temperature           (doy,Tmax_attribute           ),Tmax_attribute);
+   CORN::Quality_clad Tmin_attribute;           provider.air_temperature_min        .update_value_qualified       (buffer->get_min_temperature           (doy,Tmin_attribute           ),Tmin_attribute);
+   //CORN::Quality_clad srad_attribute;           provider.solar_radiation            .set_MJ_m2                    (buffer->get_solar_radiation           (doy,srad_attribute           ),srad_attribute);
+   Solar_radiation Srad;                        provider.solar_radiation            .set_MJ_m2                    (buffer->get_solar_radiation           (doy,Srad                     ),Srad);
+   CORN::Quality_clad TdewMax_attribute;        provider.dew_point_temperature_max  .update_value_qualified       (buffer->get_max_dew_point_temperature (doy,TdewMax_attribute        ),TdewMax_attribute);
+   CORN::Quality_clad TdewMin_attribute;        provider.dew_point_temperature_min  .update_value_qualified       (buffer->get_min_dew_point_temperature (doy,TdewMin_attribute        ),TdewMin_attribute);
+   CORN::Quality_clad RHmax_attribute;          provider.relative_humidity_max      .set_value_quality            (buffer->get_max_relative_humidity     (doy,RHmax_attribute          ),RHmax_attribute);
+   CORN::Quality_clad RHmin_attribute;          provider.relative_humidity_min      .set_value_quality            (buffer->get_min_relative_humidity     (doy,RHmin_attribute          ),RHmin_attribute);
+   CORN::Quality_clad wind_attribute;           provider.wind_speed                 .set_m_d                      (buffer->get_wind_speed_m_d            (doy,wind_attribute           ),wind_attribute);
+   return true;
+}
+//_2017-01-11___________________________________________________________________
+bool Weather_data_text::set_from  (Weather_provider& provider)
+{
+   CORN::Year year   = provider.date.get_year();
+   CORN::DOY  doy    = provider.date.get_DOY();
+   Weather_text_file *buffer =  select_buffer(year);           //991012
+   bool sat = true;
+   buffer->set_precip_m         (doy,provider.precipitation_actual        .get_m          (),provider.precipitation_actual);
+   buffer->set_max_temp         (doy,provider.air_temperature_max         .Celcius        (),provider.air_temperature_max);
+   buffer->set_min_temp         (doy,provider.air_temperature_min         .Celcius        (),provider.air_temperature_min);
+   buffer->set_solar_rad        (doy,provider.solar_radiation             .get_MJ_m2      (),provider.solar_radiation);
+   buffer->set_max_rel_humid    (doy,provider.relative_humidity_max       .in_preset_units(),provider.relative_humidity_max);
+   buffer->set_min_rel_humid    (doy,provider.relative_humidity_min       .in_preset_units(),provider.relative_humidity_min) ;
+   buffer->set_wind_speed_m_d   (doy,provider.wind_speed                  .get_m_d        (),provider.wind_speed);
+   buffer->set_max_dew_point    (doy,provider.dew_point_temperature_max   .Celcius        (),provider.dew_point_temperature_max);
+   buffer->set_min_dew_point    (doy,provider.dew_point_temperature_min   .Celcius        (),provider.dew_point_temperature_min);
+   return sat;
+}
+//_2017-01-11___________________________________________________________________
+void Weather_data_text::reset_buffers()
+{  //110822 We delete aux first because when writing,
+   // we want the older data written first
+   delete aux;       aux=0;
+   delete current;   current =0;
+}
+////////////////////////////////////////////////////////////////////////////////
+

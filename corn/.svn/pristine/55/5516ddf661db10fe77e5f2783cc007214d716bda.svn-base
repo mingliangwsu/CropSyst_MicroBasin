@@ -1,0 +1,64 @@
+#ifndef CORN_GIF_ANIM_H
+#define CORN_GIF_ANIM_H
+
+//#include <corn/image/gif/gif.h>
+#include <corn/image/gif/gif_file.h>
+#include <corn/image/gif/gif_image.h>
+
+/*000129*/  class GIF_animation_frame
+/*______*/  : public GIF_image
+/*______*/  {
+/*______*/  protected:
+/*______*/     bool new_scene;   //  it true this frame will be used as the base (background)
+//                                  for the optimization of the following frames.
+/*______*/
+/*______*/  public:
+/*______*/     GIF_animation_frame
+/*______*/     (uint16     i_width
+/*______*/     ,uint16     i_height
+/*______*/  	,color_map *i_global_color_map // Animations must all share a common color table
+/*______*/     ,uint16 delay_time
+/*______*/     ,bool       new_scene
+/*______*/  	);
+/*______*/
+/*______*/     inline bool is_new_scene() { return new_scene; };
+/*______*/     inline void copy_from(const GIF_animation_frame &to_be_copied)
+/*______*/     {
+/*______*/        GIF_image::copy_from(to_be_copied);
+/*______*/        new_scene = to_be_copied.new_scene;
+/*______*/     };
+/*______*/  };
+
+/*______*/  class GIF_animation : public GIF_file
+/*______*/  {
+/*______*/  public:
+/*______*/
+/*______*/     // Open an existing file
+/*______*/  	inline GIF_animation(const char *i_filename)
+/*______*/     : GIF_file(i_filename)
+/*______*/     {};
+/*______*/
+/*______*/     // Create a new file
+/*______*/     inline GIF_animation
+/*______*/     (const char *i_filename
+/*______*/     ,color_map *i_color_map        // The color map is relinquished to the GIF object
+/*______*/                                    // Do not try to delete/free it.
+/*______*/     ,unsigned int i_screen_width   // should be int16
+/*______*/     ,unsigned int i_screen_height  // should be int16
+/*______*/     ,uint16 i_iterations = 0        // The number of times to repeat the display of the animation (0 indicates continuous looping)
+/*______*/     )
+/*______*/     : GIF_file(i_filename,i_screen_width,i_screen_height)
+/*______*/     {
+/*______*/        animation = true;
+/*______*/        animation_iterations = i_iterations;
+/*______*/        global_color_table = i_color_map;
+/*______*/     };
+/*______*/
+/*000129*/     virtual void optimize();
+/*______*/     //  This will modify the images to optimize the overlay images
+/*______*/
+/*______*/     GIF_animation_frame &append_frame(uint16 delay_time,bool new_scene);
+/*______*/     // Returns a reference to the current frame
+/*______*/  };
+
+#endif

@@ -1,0 +1,855 @@
+#include "YAML_document.h"
+#include <iostream>
+//#include <stdlib.h>
+#include <ctype.h>
+#include "corn/const.h"
+#include <assert.h>
+
+namespace YAML
+{
+   Node *anchors[1000]; nat16 anchor_count;// Need to use dynamic structure
+//______________________________________________________________________________
+#ifdef OBSOLETE simply use structural::Pair_key_value_concrete
+Pair_key_value::Pair_key_value
+(
+//NYN Mapping &in_mapping
+structural::Construct *_key/*,Node *_value*/)
+: structural::Pair_key_value()
+, key    (key   ? _key   : new YAML::Node(/*this,0*/))
+/*
+continue here
+there will probably always be a key
+the value will be instanciated here as unresolved node
+(specialized key value structures might not need a value.
+*/
+, value  (/*value ? _value :*/ new YAML::Node(/*0,0*/))
+
+{
+   //NYN key->appears_to_be_key = true;
+}
+#endif
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+bool Pair_key_value::resolve()                                     modification_
+{
+
+// resolve_node checks resolved state
+//   if (key->resolved && value->resolved) return true;
+//   if (!key->resolved)
+//      key = resolve_key(key); // key is given
+//   if (!value->resolved)
+      //value = resolve_value(value); // value is given
+//   return key->resolved && value->resolved;  // A little redundent, both the key and value will always have been resolved
+   return resolve_key() && resolve_value();
+}
+*/
+//______________________________________________________________________________
+/*NYN
+bool Pair_key_value::resolve_key()                                             modification_
+{
+
+   if (!key->is_resolved())
+   {
+      YAML::Node *promoted_key = promote(key);
+      if (promoted_key)
+      {
+         // promote deletes key if promoted delete key;
+         key = promoted_key;
+      }
+   } //151017 else key->resolved = true;
+   return key->is_resolved();
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+YAML::Node *Pair_key_value::take_value(YAML::Node *value_relinquished)  modification_
+{
+   if (value)
+   {
+      if (!(value->is_resolved()))
+      {
+         delete value;
+         value = value_relinquished;
+      } else delete value_relinquished;  // This case probably shouldn't happen
+   } else value = value_relinquished;
+   return value;
+}
+*/
+//______________________________________________________________________________
+void clear_anchors()
+{  anchor_count = 0;
+   for (int a = 0; a < 1000 ; a++)
+      anchors[a] = 0;
+}
+//______________________________________________________________________________
+Node::Node
+(
+/*NYN checking if need to reimplement
+Node *_in_collection
+,Node  *_key_of
+*/
+)
+: structural::Construct   ()
+
+/*NYN checking if need to reimplement
+
+, unresolved_text(new std::wstring)
+, in_collection(_in_collection)
+, key_of       (_key_of)
+, anchors      (0)
+, anchor_name  ()
+, parsed       (false)
+//150119 , resolved     (false)
+, appears_to_be_key       (_key_of != NULL)
+, inline_style(false)
+, comment(0)
+*/
+
+{
+}
+//_2015-03-01___________________________________________________________________
+
+/*150301 may be obsolete
+bool Node::set_comment_wstr(const wchar_t *_comment)               modification_
+{
+   comment = new std::wstring(_comment);
+   return true;
+}
+*/
+//_2015-02-24_________________________________________________set_comment_wstr_/
+
+
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+bool Node::is_resolved()                                            affirmation_
+{  return unresolved_text == NULL;
+}
+//______________________________________________________________________________
+bool String::is_resolved()                                          affirmation_
+{  return string_value != NULL;
+}
+*/
+//______________________________________________________________________________
+/*
+std::wstring *Node::relinquish_unresolved_text()
+{
+   std::wstring *relinqushed_unresolved_text = unresolved_text;
+   unresolved_text = 0;
+   return relinqushed_unresolved_text;
+}
+*/
+//______________________________________________________________________________
+/*
+bool Node::is_parsed()                                             contribution_
+{  return parsed;
+}
+*/
+//______________________________________________________________________________
+/*
+Collection::Collection
+(YAML::Node *_in_collection
+,YAML::Node  *_key_of
+)
+:YAML::Node(_in_collection,_key_of)
+,CORN::Unidirectional_list()
+,curr_node(0)
+{
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+bool Collection::is_parsed()                                       contribution_
+{
+   if (parsed) return true;
+   bool appears_to_be_parsed = parsed;
+   FOR_EACH(node,YAML::Node,each_node);
+   {
+      appears_to_be_parsed &= node->is_parsed();
+   } FOR_EACH_END (each_node)
+   parsed = appears_to_be_parsed;
+   return parsed;
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+Mapping::Mapping
+(given_ YAML::Node *_specifier_given
+,YAML::Node  *_in_collection
+,YAML::Node  *_key_of)
+: Collection(_in_collection,_key_of)
+, specifier(_specifier_given)
+, curr_key_value_pair(0)
+, curr_key_node_pending(0)
+, generic_map_item_value(0)                                                      //150219
+{  delete unresolved_text; unresolved_text = 0;
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+Mapping::Mapping(given_ YAML::Node *promote_from_node)
+: Collection(promote_from_node)
+, specifier(0)
+, curr_key_value_pair(0)
+, curr_key_node_pending(0)
+, generic_map_item_value(0)                                                      //150219
+{}
+*/
+//______________________________________________________________________________
+      // copy constructor for resolving a node
+/*
+Mapping::~Mapping() { delete specifier; }
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+bool Mapping::is_parsed()                                       contribution_
+{
+   if (parsed) return true;
+   bool appears_to_be_parsed = parsed;
+   appears_to_be_parsed =
+      !specifier | specifier->is_parsed()
+     && Collection::is_parsed();
+   parsed = appears_to_be_parsed;
+   return parsed;
+}
+*/
+//______________________________________________________________________________
+
+
+#ifdef NYN
+checking if need to reimplement
+
+
+wchar_t *Node::parse_text(wchar_t *text)
+{
+   error = ERROR_none;
+
+   /* NYI
+   if (indentation has non space characters)
+      return indentation error code
+   */
+//   char potential_indicator      =indented.c_str()[0];
+//   char potential_indicator_space=indented.c_str()[1];
+//   const wchar_t *text_remaining =text+1;
+   Node *curr_construct_parses_remaining_text = 0;
+   Node *new_construct = 0;
+   Node *unknown_construct = 0;
+   std::wstring anchor_ID;
+   wchar_t *remaining_text = text;
+
+   while (remaining_text && !parsed)
+   {
+
+
+std::string text_string; CORN::wstring_to_string(remaining_text,text_string);
+
+
+
+      wchar_t chr0 = remaining_text[0];
+//      wchar_t chr1 = remaining_text[1];
+      if (chr0 == 0)
+      {
+         parsed = true;
+            // I think this will be the case for everything
+            // but may be only for scalars and inline structures, need to check
+         remaining_text = 0;
+         error = ERROR_none;
+      } else if  (chr0 == '\r')
+      {
+         parsed = newline_ends_node();
+         remaining_text = 0;
+         error = ERROR_none;
+      }
+      else
+      {  nat8 recognized_char_count = recognize_structure_indicator(chr0,chr1);
+         if (recognized_char_count)
+         {
+            remaining_text += recognized_char_count;
+            // Eat any additional spaces
+            while ((remaining_text[0] == L' ') || (remaining_text[0] == L'\t'))
+               remaining_text += 1;
+         }
+         else
+         {
+
+            switch (chr0)
+            {
+               //Collection indicators:
+               // indicators followed by space
+
+
+               case L'-' : // Nested series entry indicator.
+
+                  // NYI
+
+               break;
+               case L',' : // Separate in-line branch entries.
+                  if (iswspace(chr1))
+                     parsed = true;
+                  // else assume , is part of arbitrary text
+                  // but it may be a syntax error
+
+               break;
+               // Start of collection
+               case L'['  : // Surround in-line series branch.
+               {
+                  //NYI  new_construct = render_sequence();
+                  inline_style = true;
+                  parsed = true;
+                  kind_or_type = "seq";
+
+               } break;
+               case L']'  :
+               {
+                  const Sequence *in_sequence = dynamic_cast<const Sequence *>(in_collection);
+                  if (in_sequence && in_sequence->inline_style)
+                  {
+                     remaining_text = text + 1;
+                     parsed = true;
+                     //parent_sequence->parsed = true;
+                  }
+               } break;
+
+               case '}'  :
+               {
+                  const Mapping *in_mapping = dynamic_cast<const Mapping *>(in_collection);
+                  if (in_mapping && in_mapping->inline_style)
+                  {
+                     remaining_text = text + 1;
+                     parsed = true;
+                     //parent_mapping->parsed = true;
+                  }
+               } break;
+             //Scalar indicators:
+               case L'\'': //  ''''  // Surround in-line unescaped scalar ('' escaped ').
+                  // NYI
+               break;
+               case L'"'  : // Surround in-line escaped scalar (see escape codes below).
+                  // NYI
+               break;
+               case L'|'  : // Block scalar indicator.
+               {  Block_literal_style *block =  render_block_literal_style();
+                  curr_construct_parses_remaining_text = new_construct = block;
+                  remaining_text = text + 1;
+                  remaining_text += block->parse_header(remaining_text);
+               } break;
+               case L'>'  : // Folded scalar indicator.
+               {  Block_folded_style *folded = render_block_folded_style();
+                  curr_construct_parses_remaining_text = new_construct =  folded;
+                  remaining_text = text + 1;
+                  remaining_text += folded->parse_header(remaining_text);
+               } break;
+
+               /*
+                1-9  : Explicit indentation modifier ('|1' or '>2').
+                    # Modifiers can be combined ('|2-', '>+1').
+               */
+             //Alias indicators:
+               case L'&'  : // Achor property.
+               {
+
+                  nat8 c = 0;
+                  for (wchar_t chr = remaining_text[c]
+                      ;(chr != 0) && (chr != ' ')
+                      ;c++)
+                  {  anchor_ID += chr;
+                  }
+                  remaining_text += c;
+                  // It is unclear if there can be multiple anchors
+               } break;
+               case L'*'  : // Alias indicator.
+               {
+                  std::wstring alias_ID; // anchor
+                  nat8 c = 0;
+                  for (char chr = remaining_text[c]
+                      ;(chr != 0) && (chr != ' ')
+                      ;c++)
+                  {  alias_ID += chr;
+                  }
+                  remaining_text += c;
+                  // NYI probably append pointer to the nane construct
+                  const Anchor *anchor =
+                     anchors
+                     ? dynamic_cast<const Anchor *>(anchors->find_wstring(alias_ID))
+                     : 0;
+                  if (anchor)
+                  {
+                     /*NYI
+                     Alias *alias = new Alias(anchor);
+                     new construct = anchor(alias);
+                     */
+                  }
+               }
+               case L'!' :
+               {
+                  remaining_text += 1;
+
+                  if (chr1 == L'!') //secondary tag
+                  {
+                     remaining_text += 1;
+                     while (remaining_text && (!iswspace(*remaining_text)))
+                     {
+                        kind_or_type += (*remaining_text);
+                        remaining_text++;
+                     }
+
+                  }
+                  else
+                     while (remaining_text && !iswspace(*remaining_text))
+                     {
+                        user_defined_type += (*remaining_text);
+                        remaining_text++;
+                     }
+               } break;
+               case L'#' :
+               {
+                  remaining_text = 0;
+
+               } break;
+
+
+
+             //Tag property: # Usually unspecified.
+             // none    : Unspecified tag (automatically resolved by application).
+             /* NYI
+             '!'     : Non-specific tag (by default, "!!map"/"!!seq"/"!!str").
+             '!foo'  : Primary (by convention, means a local "!foo" tag).
+             '!!foo' : Secondary (by convention, means "tag:yaml.org,2002:foo").
+             '!h!foo': Requires "%TAG !h! <prefix>" (and then means "<prefix>foo").
+             '!<foo>': Verbatim tag (always means "foo").
+             */
+               /*
+               case ' ' :
+               {
+
+                  //Could be start of new indentation level or spaces of text continuation.
+
+               }
+               */
+               break;
+               default :
+               {
+                  //NYN if (!unresolved_text) unresolved_text = new std::wstring; shouldn't be needed
+                  (*unresolved_text)  += chr0;
+                  remaining_text++;
+               } break;
+            }
+         }
+      }
+      /* obsolete
+      if (!error)
+      {
+         if (new_construct)
+         {
+
+            curr_node = new_construct;
+            // append(new_construct);
+
+            // should call virtual function  take_construct
+            // so collections would append
+
+            new_construct->know_anchors(anchors);
+
+         }
+         if (curr_construct_parses_remaining_text)
+             curr_construct_parses_remaining_text->parse_text(remaining_text);
+         if (!anchor_ID.empty())
+         {
+
+            Anchor *anchor = new Anchor(anchor_ID,curr_node);
+            // instanciate new anchors
+            // append to anchors
+
+         }
+      }
+      */
+   }
+   return remaining_text; // 0
+}
+#endif
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+nat8 Node::recognize_structure_indicator
+(wchar_t chr0, wchar_t chr1)
+{
+   nat8 chars = 0;
+   switch (chr0)
+   {
+
+      break;
+
+      case L':' : // Value indicator.(key terminator)
+                  if (iswspace(chr1))
+                  {  chars = chr1 == '\r' ? 1 : 2; //eat colon and space
+                     appears_to_be_key = true;
+                     error = appears_to_be_key ? ERROR_none : ERROR_colon_encountered_but_not_key;
+                  }
+                  else
+                  {
+                     error = ERROR_value_colon_space_expected;
+                  }
+                  parsed = error == ERROR_none;
+      break;
+
+
+
+
+   } // switch
+   return chars;
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+nat8 Sequence::recognize_structure_indicator(wchar_t chr0, wchar_t chr1)
+{
+   nat8 chars = 0;
+   switch (chr0)
+   {
+
+      case L']'  :
+      {
+         chars = 1;
+         parsed = true;
+               //NYI
+               //   Sequence *curr_sequence = dynamic_cast<Sequence *>(curr_node);
+                //  if (curr_sequence) curr_node = 0;
+                //  remaining_text = text + 1;
+
+      } break;
+
+   } // switch
+   return chars;
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+Node *Node::resolve_node(given_ YAML::Node *child) // child is given
+{
+   // Called when the parser has found the termination
+   // of the node text
+   // (either the stream indentation) or the current text line is at key value separator or end of line with no expected continuation.
+   // Derived classes will override this method and render
+   // a more specialized node.
+
+   YAML::Node *resolved_node = promote(child);
+// promote always returns a promoted node (or the child)
+//   if (resolved_node)
+//   {
+//      // promote deletes childeif (resolved_node != child) delete child;
+//      // at this point resolved_node parent_node should  still point to this
+//   } else resolved_node = child;
+
+   //150119 resolved_node->resolved = true;
+//   resolved_node->parent_node = this;  WARNING caller should set in_collection
+   return resolved_node;
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+nat16 Block_scalar::parse_header(const wchar_t *text)
+{
+   nat16 consumed = 0;
+   nat8 indent = 0;
+   nat16 c = 0;
+   wchar_t chr = text[c];
+   switch (chr)
+   {  case '-' : chomp = strip_chomp;  consumed++; break;
+      case '+' : chomp = keep_chomp ;  consumed++; break;
+      default :
+         if (isdigit(chr))
+         {
+             nat16 digit = chr - 48;
+             indent *= 10 + digit;
+             consumed += 1;
+         }
+      break;
+   }
+   return consumed;
+}
+*/
+//______________________________________________________________________________
+
+/*
+wchar_t *Mapping::parse_text(wchar_t *text)
+{
+
+   wchar_t *remaining_text = text;
+
+   //if (!curr_key_value_pair)
+   //   curr_key_value_pair = new Pair_key_value;
+   if (curr_key_value_pair) // Then the key node will have been previously parsed
+   {  // we must be parsing in the value node
+      if (!curr_key_value_pair->get_value()->is_parsed())
+         remaining_text = curr_key_value_pair->get_value()->parse_text(remaining_text);
+      if (curr_key_value_pair->get_value()->is_parsed())
+      {
+         if (curr_key_value_pair->resolve())
+            append(dynamic_cast<Pair_key_value *>(curr_key_value_pair));
+         curr_key_value_pair = 0;
+      }
+   }
+   else
+   {
+      if (specifier)                                                             //150219
+      {
+         // If this node has been identified as a generic mapping,
+         // then the specifier will have been set and there will be no need for curr_key_node_pending
+         generic_map_item_value = new YAML::Node(this,0);                        //150219
+         remaining_text = generic_map_item_value->parse_text(remaining_text);    //150219
+         parsed = generic_map_item_value->is_parsed();                           //150219
+      }
+      else
+      {
+         if (!curr_key_node_pending
+            )
+         {
+            curr_key_node_pending = new YAML::Node(0,this); // Provide the key
+            //curr_key_node_pending->key_of = this;
+            //curr_key_node_pending->appears_to_be_key = true;
+         }
+         if (!curr_key_node_pending->is_parsed())
+               remaining_text = curr_key_node_pending->parse_text(remaining_text);
+            // else continue to the next line to resolved
+         if (curr_key_node_pending->is_parsed())
+         {
+            resolve_node(curr_key_node_pending);
+
+            curr_key_node_pending = 0;
+         }
+      }
+   }
+   return remaining_text;
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+Node *Mapping::resolve_node(given_  YAML::Node *key_child_given)
+{  // Derived classes may override either this method
+   // and/or  instanciate_key_value_pair to provide more specialized
+   // resolved or partially resolved nodes
+   YAML::Node *promoted_child = promote(key_child_given); // key
+
+   promoted_child->resolve();                                                              //150205
+   if (!curr_key_value_pair)
+   {  // The element of map is key
+      curr_key_value_pair = instanciate_key_value_pair
+         (promoted_child,0);
+      promoted_child = 0; // was consumed
+   }
+   return curr_key_value_pair->get_map_key();
+}
+*/
+//______________________________________________________________________________
+/*
+YAML::Node *Mapping::get_current_value()
+{
+   return curr_key_value_pair->get_value();
+}
+//______________________________________________________________________________
+YAML::Mapping *Mapping::get_current_mapping()
+{
+   return dynamic_cast<YAML::Mapping *>(curr_key_value_pair);
+}
+//______________________________________________________________________________
+*/
+structural/*151019 YAML*/::Pair_key_value *Mapping::instanciate_key_value_pair
+(YAML::Node *key_given
+//NYN ,YAML::Node *value_given
+)
+{
+/*NYN checking if need to reimplement
+   Mapping *key_value_pair_asummed_to_be_mapping = new Mapping(key_given,this,this); //150219
+*/
+/*
+   key_value_pair_asummed_to_be_mapping->generic_map_item_value = (value_given)
+      ? value_given // probably never occurs
+      : new YAML::Node(this,0);
+*/
+
+//   assert(!value_given);
+   // I think generic mappings will not have values, the assert
+   // is to check this.
+/*
+   return key_value_pair_asummed_to_be_mapping;
+*/
+/*
+   return new YAML::Pair_key_value
+      (
+         // by default assume the key starts a mapping
+         new Mapping (key_given,this,this) // Not sure if this is key of
+
+      // 150219 key_given
+
+      ,value_given
+         ? value_given
+         : new YAML::Node(this,0)); // I think all members are in_collection
+*/
+}
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+YAML::Node *Mapping::take_value(YAML::Node *value_relinquished)     modification_
+{
+   if (curr_key_value_pair->get_value() && !curr_key_value_pair->get_value()->is_resolved())
+   {
+      delete curr_key_value_pair->get_value();
+      curr_key_value_pair->take_value(value_relinquished);
+   } else delete value_relinquished;
+   return curr_key_value_pair->get_value();
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+wchar_t *String::parse_text(wchar_t *text)
+{
+   // NYI
+   return Node::parse_text(text);
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+bool Pair_key_value_interface::is_resolved()                        affirmation_
+{  // This is a valid interface method because is only uses interface methods
+   const YAML::Node *key = get_map_key();
+   const YAML::Node *value = get_value();
+   bool resolved = key && key->is_resolved();
+   resolved &=
+      (!value)
+      ? true // mappings don't necessarily have a scalar value
+      : value->is_resolved();
+   return resolved;
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+bool Mapping::is_resolved()                                         affirmation_
+{
+   bool resolved = // get_map_key() && get_map_key()->is_resolved();
+      Pair_key_value_interface::is_resolved();
+   resolved &= is_parsed();
+      // We don't care about value which will be null because
+      // the value is the associated collection
+      // (Probably should check that the collection is not null)
+   resolved &= count();
+      // according to http://www.yaml.org/spec/1.2/spec.html'
+      // there must be at least one key value pair.
+      // Having now pairs is probably an error but not an indicator of
+      // not resolved.
+
+   return resolved;
+}
+*/
+//______________________________________________________________________________
+/*NYN checking if need to reimplement
+bool Scalar::resolve()                                             modification_
+{  return unresolved_text
+      ? resolve_unresolved_text()
+      : true;
+}
+*/
+//_2015-02-05___________________________________________________________________
+bool Node::promote_from(modifiable_ YAML::Parsing_element *element) modification_
+{
+   comment = element->comment; element->comment = 0; // takes the element comment
+   bool was_set = set_text_wstring(*element->text);
+   if (!was_set) // the text wasn't resolved so this is just an arbitrary node.
+      { text = element->text;  element->text = 0; } // takes the element text
+   return was_set;
+}
+
+/*
+, unresolved_text(0)                                                             //150119
+, in_collection      (promote_from->in_collection)
+, key_of             (promote_from->key_of)
+, anchors            (promote_from->anchors)
+, anchor_name        (promote_from->anchor_name)
+, user_defined_type  (promote_from->user_defined_type)
+, kind_or_type       (promote_from->kind_or_type)
+, tag                (promote_from->tag)
+, error              (promote_from->error)
+, parsed             (true)
+//150119 , resolved           (promote_from->resolved)
+, appears_to_be_key  (promote_from->appears_to_be_key)
+, inline_style(false)
+, comment(0)
+*/
+
+/*
+   promote_from->anchors = 0;
+   promote_from->tag     = 0;
+*/
+
+
+//_2015-03-01___________________________________________________________________
+bool String::promote_from(modifiable_ YAML::Parsing_element *element) modification_
+{
+   string_value = element->text; element->text =0; // takes the element text
+   return Node::promote_from(element);
+}
+//_2015-03-01___________________________________________________________________
+
+bool Bool::set_text_wstring(const std::wstring &_text)            modification_
+{
+   if      (_text == L"true")  bool_value = true;
+   else if (_text == L"True")  bool_value = true;
+   else if (_text == L"TRUE")  bool_value = true;
+   else if (_text == L"yes")   bool_value = true;
+   else if (_text == L"Yes")   bool_value = true;
+   else if (_text == L"YES")   bool_value = true;
+   else if (_text == L"false") bool_value = false;
+   else if (_text == L"False") bool_value = false;
+   else if (_text == L"FALSE") bool_value = false;
+   else if (_text == L"no")    bool_value = false;
+   else if (_text == L"No")    bool_value = false;
+   else if (_text == L"NO")    bool_value = false;
+   return true;
+}
+//_2015-02-05___________________________________________________________________
+bool Int::set_text_wstr(const wchar_t *_text)                      modification_
+{  int_value = CORN::wstr_to_int32(_text,10);
+   return true;
+}
+//_2015-02-05___________________________________________________________________
+bool Float::set_text_wstr(const wchar_t *_text)                    modification_
+{  float_value = CORN::wstr_to_float64(_text);
+   return true;
+}
+//_2015-02-05___________________________________________________________________
+
+/*
+Document indicators:
+    '%'  : Directive indicator.
+    '---': Document header.
+    '...': Document terminator.
+Misc indicators:
+    ' #' : Throwaway comment indicator.
+    '`@' : Both reserved for future use.
+Special keys:
+    '='  : Default "value" mapping key.
+    '<<' : Merge keys from another mapping.
+Core types: # Default automatic tags.
+    '!!map' : { Hash table, dictionary, mapping }
+    '!!seq' : { List, array, tuple, vector, sequence }
+    '!!str' : Unicode string
+More types:
+    '!!set' : { cherries, plums, apples }
+    '!!omap': [ one: 1, two: 2 ]
+Language Independent Scalar types:
+    { ~, null }              : Null (no value).
+    [ 1234, 0x4D2, 02333 ]   : [ Decimal int, Hexadecimal int, Octal int ]
+    [ 1_230.15, 12.3015e+02 ]: [ Fixed float, Exponential float ]
+    [ .inf, -.Inf, .NAN ]    : [ Infinity (float), Negative, Not a number ]
+    { Y, true, Yes, ON  }    : Boolean true
+    { n, FALSE, No, off }    : Boolean false
+    ? !!binary >
+        R0lG...BADS=
+    : >-
+        Base 64 binary value.
+Escape codes:
+ Numeric   : { "\x12": 8-bit, "\u1234": 16-bit, "\U00102030": 32-bit }
+ Protective: { "\\": '\', "\"": '"', "\ ": ' ', "\<TAB>": TAB }
+ C         : { "\0": NUL, "\a": BEL, "\b": BS, "\f": FF, "\n": LF, "\r": CR,
+               "\t": TAB, "\v": VTAB }
+ Additional: { "\e": ESC, "\_": NBSP, "\N": NEL, "\L": LS, "\P": PS }
+*/
+
+
+} // namespace YAML

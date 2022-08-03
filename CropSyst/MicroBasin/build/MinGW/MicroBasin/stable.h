@@ -1,0 +1,55 @@
+#ifndef STABLE_H
+#define STABLE_H
+#include "physics/mass.h"
+#include "physics/property.h"
+#include "physics/mass_common.h"
+#include "common/soil/layering.h"
+#include "soil/txtrhydr.h"
+#include "soil/SCS/SCS.h"
+#include "soil/survey/domains.h"
+#include "weather/parameter/weather_parameter.h"
+#include "weather/parameter/WP_wind_speed.h"
+#include "corn/primitive.h"
+#include <corn/quality.hpp>
+#include <corn/labeled_enum.h>
+#include "corn/OS/OS.h"
+#include "corn/OS/directory_entry_name.h"
+#include "corn/validate/validtyp.h"
+#include "corn/measure/measures.h"
+#include "corn/measure/unitconv.h"
+#include "corn/math/compare.hpp"
+#include "corn/math/moremath.h"
+#include "corn/math/statistical/statistics_types.hpp"
+#include "corn/math/statistical/stats.h"
+#include "corn/container/association.h"
+#include "corn/container/bilist.h"
+#include "corn/container/container.h"
+#include "corn/container/unilist.h"
+#include "corn/container/item.h"
+#include "corn/container/text_list.h"
+#include "corn/string/strconv.hpp"
+#include "corn/data_source/datasrc.h"
+#include "corn/data_source/datarec.h"
+#include "corn/data_source/vv_datasrc.h"
+#include "corn/data_source/vv_file.h"
+#include "corn/data_source/vv_entry.h"
+#include "corn/tabular/tabular.h"
+#include "corn/datetime/date_format.h"
+#include "corn/datetime/temporal_base.h"
+#include "corn/datetime/datetime64.h"
+#include "corn/datetime/date.hpp"
+#include "corn/measure/measures.h"
+#include "corn/measure/unitconv.h"
+#include <corn/measure/units_enum.h>
+#include "corn/measure/units.h"
+#include "corn/metrology/units_clad.h"
+#include "corn/metrology/units_symbology.h"
+#include "corn/parameters/number_keyed.h"
+#include "corn/parameters/parameter.h"
+#include "corn/parameters/parameters.h"
+#include "corn/parameters/parameters_directory_OS_FS.h"
+#include <corn/parameters/parameters_datarec.h>
+
+
+#endif // STABLE_H
+

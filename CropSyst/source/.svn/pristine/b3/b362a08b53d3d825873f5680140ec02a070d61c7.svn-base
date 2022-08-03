@@ -1,0 +1,1348 @@
+#ifdef OLD_MGMT_PARAM
+#error check obsolete
+#include "mgmt_param.h"
+#include "mgmtevnt.h"
+#include "CropSyst/phrases/mgmtfile.ph"
+#include "CropSyst/phrases/cropfile.ph"
+#include "CropSyst/phrases/cs_crops.ph"
+#include "CropSyst/phrases/mgmtdlg.ph"
+#include "CropSyst/phrases/rptoptns.ph"
+#include "static_phrases.h"
+
+#include "cs_till.h"
+#include "common/biomatter/decomposition_const.h"
+#include "corn/math/moremath.h"
+#include "corn/math/compare.hpp"
+#include "corn/measure/measures.h"
+#include "corn/data_source/vv_file.cpp"
+
+using namespace std;
+
+#define LABEL_auto_N_1 "auto_N_1"
+namespace CropSyst {
+//______________________________________________________________________________
+Automatic_irrigation_mode::Automatic_irrigation_mode()
+: Irrigation_operation(CS_OP_MGMT_AUTO_IRRIGATION)                               //040511
+{ }
+//_2002-03-13__________________________________________________________________/
+const char *Automatic_irrigation_mode::label_cstr(char *buffer) const
+{  CropSyst::Field_operation /*CropSyst_field_operation*/::label_cstr(buffer);
+   strcat(buffer,TL_Automatic_irrigation);
+   return buffer;
+}
+//_2002-03-13__________________________________________________________________/
+} // namespace CropSyst
+DECLARE_CONTAINER_ENUMERATED_SECTION(Tillage_event            ,tillage_operation_section_VV,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(Harvest_or_clipping_event,harvest_or_clipping_operation_section_VV,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(Irrigation_event         ,irrigation_operation_section_VV,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(Inorganic_nitrogen_event ,inorganic_nitrogen_operation_section_VV,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(Biomatter_application_event ,biomatter_application_operation_section_VV,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(Chemical_event           ,chemical_operation_section_VV,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(Automatic_N_event      ,auto_N_appl_section_VV,true);
+//060804 obs DECLARE_CONTAINER_ENUMERATED_SECTION(Automatic_N_mode_event   ,auto_N_mode_section_vv,true);
+//060803obs DECLARE_CONTAINER_ENUMERATED_SECTION(Automatic_NO3_appl_mode_event,auto_NO3_appl_mode_section_vv,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(Automatic_clip_biomass_mode_event,auto_clip_biomass_section_VV,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(Automatic_irrigation_mode_event,auto_irrigation_section_VV,true);
+
+#if (MANAGEMENT==4)
+DECLARE_CONTAINER_ENUMERATED_SECTION(Residue_event            ,residue_operation_section_VV,true);
+#endif
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+DECLARE_CONTAINER_ENUMERATED_SECTION(Organic_nitrogen_event   ,organic_nitrogen_operation_section_VV,true);
+DECLARE_CONTAINER_ENUMERATED_SECTION(V3_clipping_event       ,V3_clipping_operation_section_VV,true);
+#endif
+
+// Currently they can only be one harvest event specified in management file so no need for enumerated section.
+
+#define LABEL_automatic_irrigation_period_1 "automatic_irrigation_period_1"
+#define LABEL_start_date      "start_date"
+#define LABEL_start_phen_sync "start_phen_sync"
+#define LABEL_start_offset    "start_offset"
+#define LABEL_end_date        "end_date"
+#define LABEL_end_phen_sync   "end_phen_sync"
+#define LABEL_end_offset      "end_offset"
+//______________________________________________________________________________
+class Version3_automatic_irrigation_mode
+: public Automatic_irrigation_mode_event
+{  // This class is used only for version 3 import compatibility
+public:
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write)
+   {  if (for_write) data_rec.set_current_section("automatic_irrigation_1");
+      else           data_rec.set_current_section(LABEL_automatic_irrigation_period_1);
+      Automatic_irrigation_mode_event::setup_parameters(data_rec,for_write);
+   }
+};
+//______________________________________________________________________________
+Version3_automatic_irrigation_mode *V3_auto_irrig = 0;
+//______________________________________________________________________________
+
+//#if (CROPSYST_VERSION >= 5)
+namespace CropSyst {
+//#endif
+
+#error reached
+Management_parameters::Management_parameters()
+:Common_parameters_data_record         (NO_ASSOCIATED_DIRECTORY,CS_VERSION_NUMBERS,LABEL_management)  //050323
+,crop_management                       (true)                                    //030606
+,land_treatment_labeled                (DEFAULT_land_treatment)                  //020322
+,irrigation_operations                 ()                                        //981007
+,inorganic_nitrogen_operations         ()                                        //981007
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+#ifndef linux
+,V3_auto_irrig_enabled                 (0)                                       //020922
+,V3_clipping_operations                ()                                        //040524
+,V3_harvest_date(0) // used only for V3 import (will be 0 if not V3)             //040524
+,V3_auto_clip_biomass_event(0)                                                   //040701
+,V3_latest_date_to_harvest_relative((Year)0,(CORN::DOY)0,D_YMD,D_YY| D_lead_zero | D_Mmm|D_relative,'/')  //990421P
+#endif
+,organic_nitrogen_operations           ()                                        //981228
+#endif
+,biomatter_application_operations           ()                                   //080902
+,tillage_operations                    ()                                        //981007
+,residue_operations                    ()                                        //981007
+,harvest_or_clipping_operations        ()                                        //031014
+,chemical_operations                   ()                                        //981007
+,auto_irrigation_mode_operations       ()                                        //020313
+,auto_clip_biomass_mode_operations     ()                                        //011207
+,automatic_nitrogen                    (false)                                   //060810
+,soil_conservation_factor_32(DEFAULT_soil_conservation_factor)   ,v_soil_conservation_factor         (soil_conservation_factor_32,UC_factor ,  LABEL_soil_conservation_factor ,3,DEFAULT_soil_conservation_factor , 0.0,1.0, 0.0,1.0 ,TU_0_1,TL_RUSLE_soil_conservation_practice_factor)
+,CANMS_support(false)                                                            //060103
+,seasonal_carbon_footprint_kgCO2e_ha(0)                                          //120430
+,seasonal_irrigation_carbon_footprint_kgCO2e_ha(0)                               //120430
+,irrigation_application_carbon_footprint_kgCO2e_ha_mm(0)                         //120430
+/* NYI
+,recommended_automatic_irrigation(false)                                         //110718
+,irrigation_system_labeled(other_irrigation)                                     //110718
+*/
+{  N_application_soil_observation_event = new N_application_soil_observation_mode_event;  //060804
+//             This is for V3 compatilbility
+//             Eventually automatic NO3 application mode will be fully an event period.
+}
+//_____________________________________________________________________________/
+Management_parameters::~Management_parameters()
+{}
+//_2002-04-02__________________________________________________________________/
+void Management_parameters::expect_structure(bool for_write)
+{
+   Common_parameters_data_record::expect_structure(for_write);                   //040614
+   structure_defined = false; //120314
+   set_current_section(LABEL_management);
+   expect_enum(LABEL_land_treatment,land_treatment_labeled);
+   expect_bool("crop_management",crop_management);                               //030606
+   expect_bool("automatic_nitrogen",automatic_nitrogen);                         //060804
+
+   set_current_section("carbon_footprint");                                      //120430
+   expect_float32("seasonal",seasonal_carbon_footprint_kgCO2e_ha);               //120430
+   expect_float32("seasonal_irrigation",seasonal_irrigation_carbon_footprint_kgCO2e_ha); //120430
+   expect_float32("irrigation_application",irrigation_application_carbon_footprint_kgCO2e_ha_mm); //120430
+   
+/* NYI
+   expect_bool("recommended_automatic_irrigation",recommended_automatic_irrigation); //110719
+   expect_enum("irrigation_system", irrigation_system_labeled);
+*/
+   #if ((CS_VERSION > 0) && (CS_VERSION <= 4))
+   #ifndef linux
+   // g++ compiler is having problems with friendship so prior version importing is not supported in Linux
+   if (!for_write)                                                               //020922
+   {
+      // The following are provided for version 3 auto irrig import capability
+      expect_bool(LABEL_automatic_irrigation,V3_auto_irrig_enabled);
+      V3_auto_irrig = new Version3_automatic_irrigation_mode;
+      V3_auto_irrig->setup_structure(*this,for_write);
+      // The following are provided for version 3 auto clip biomass import capability 040701
+      set_current_section(LABEL_management);
+      V3_auto_clip_biomass_event = new Automatic_clip_biomass_mode_event;        //040701
+      expect_enum(LABEL_automatic_clipping,V3_auto_clip_biomass_event->V3_automatic_clipping_mode_labeled);    //040701
+      expect_enum(LABEL_V3_clipping_fate,V3_auto_clip_biomass_event->V3_biomass_fate_labeled);      //040701
+      expect_valid_float32(V3_auto_clip_biomass_event->v_adjust_relative_growth_rate_for_clipping); //040701
+      expect_valid_float32(V3_auto_clip_biomass_event->v_min_biomass_required_kg_ha); //040701
+      expect_valid_float32(V3_auto_clip_biomass_event->v_reserve_biomass_kg_ha); //040807
+      expect_valid_float32(V3_auto_clip_biomass_event->v_LAI_forces_clipping);   //040830
+      expect_valid_float32(V3_auto_clip_biomass_event->v_biomass_forces_clipping);//040701
+      expect_valid_int16(V3_auto_clip_biomass_event->v_flowering_forces_clipping);//040701
+      expect_valid_int16(V3_auto_clip_biomass_event->v_V3_trim_biomass_removed); //040701
+   }
+   #endif
+   #endif
+   set_current_section(LABEL_management);
+   expect_valid_float32(v_soil_conservation_factor);
+   #if ((CS_VERSION > 0) && (CS_VERSION <= 4))
+   #ifndef linux
+   expect_date(LABEL_latest_date_to_harvest,V3_latest_date_to_harvest_relative,false);     //990421P
+// g++ compiler is having problems with friendship so prior version importing is not supported in Linux
+   if (!for_write)                                                               //040523
+   {
+      V3_harvest_date = new Harvest_or_clipping_event;                           //040524
+      set_current_section(LABEL_management);                                     //040524
+      set_current_section(LABEL_harvest);                                        //000120
+      #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+      expect_enum(LABEL_phen_sync_obsolete,V3_harvest_date->begin_sync.sync_labeled_V3); //040524
+      expect_int16(LABEL_offset,V3_harvest_date->begin_sync.days_offset); // eventually will be CORN_days   040524
+      expect_int16(LABEL_thermal_time,V3_harvest_date->begin_sync.thermal_time); // eventually will be CORN_days  040524
+      expect_date(LABEL_date,(CORN::Date &)(V3_harvest_date->begin_sync),false);  ///* make sure any date is clear because it will override.  040524
+      #endif
+   }
+   #endif
+   #endif
+   set_current_section(LABEL_management);                                        //990225
+   EXPECT_ENUMERATED_SECTION(LABEL_tillage              ,tillage_operation_section_VV             ,tillage_operations);     //020617
+   EXPECT_ENUMERATED_SECTION(LABEL_harvest               ,harvest_or_clipping_operation_section_VV ,harvest_or_clipping_operations);    //020617
+   EXPECT_ENUMERATED_SECTION(LABEL_irrigation            ,irrigation_operation_section_VV          ,irrigation_operations);       //020617
+   EXPECT_ENUMERATED_SECTION(LABEL_fertilization         ,inorganic_nitrogen_operation_section_VV  ,inorganic_nitrogen_operations);        //020617
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   EXPECT_ENUMERATED_SECTION(LABEL_residue               ,residue_operation_section_VV             ,residue_operations);    //020617
+   EXPECT_ENUMERATED_SECTION(LABEL_organic_fertilization ,organic_nitrogen_operation_section_VV    ,organic_nitrogen_operations);       //020617
+#endif
+   EXPECT_ENUMERATED_SECTION("biomatter_application"     ,biomatter_application_operation_section_VV    ,biomatter_application_operations);      //080902
+   EXPECT_ENUMERATED_SECTION(LABEL_chemical              ,chemical_operation_section_VV            ,chemical_operations);         //020617
+   EXPECT_ENUMERATED_SECTION(LABEL_auto_clip_biomass     ,auto_clip_biomass_section_VV             ,auto_clip_biomass_mode_operations);       //020617
+   EXPECT_ENUMERATED_SECTION(LABEL_automatic_irrigation  ,auto_irrigation_section_VV               ,auto_irrigation_mode_operations);         //020617
+#ifndef linux
+   if (!for_write)  // for V3 import                                             //040523
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+      EXPECT_ENUMERATED_SECTION(LABEL_clipping           ,V3_clipping_operation_section_VV         ,V3_clipping_operations);      //040523
+#endif
+#endif
+#ifdef NYI
+   {  // Automatic NO3 applicaiton mode:
+      auto_N_appl_mode_section_VV *auto_N_appl_mode_section = new
+      auto_N_appl_mode_section_VV(LABEL_automatic_irrigation,auto_N_application_mode_operations);
+      expect_enumerated_section(auto_N_appl_mode_section);
+      // relinquish auto_irrigation_section  to VV file DONT DELETE IT
+   }
+#endif
+   {
+      set_current_section("automatic_nitrogen");                                 //040712
+         expect_enum(LABEL_automatic_N_mode /*120712 LABEL_automatic_NO3_mode*/, N_application_soil_observation_event->automatic_N_mode_labeled);
+         expect_valid_float32(N_application_soil_observation_event->v_target_yield_N_uptake);
+         expect_valid_float32(N_application_soil_observation_event->v_estimated_mineralization); //120712
+         expect_valid_float32(N_application_soil_observation_event->v_critical_soil_N_for_no_response);
+         expect_valid_float32(N_application_soil_observation_event->v_fertilizer_use_efficiency);
+         expect_bool("split_N_applications",N_application_soil_observation_event->split_applications);
+         if (!for_write)
+            expect_bool("split_auto_N_applications",N_application_soil_observation_event->split_applications);
+            //120712 expect_bool("split_auto_NO3_applications",N_application_soil_observation_event->split_applications);
+
+      set_current_section("soil_N_sampling");                                    //040712
+         N_application_soil_observation_event->begin_sync.setup_structure(*this,for_write,0); //120625
+         /* 120625
+         if (!for_write)
+            expect_enum(LABEL_sync_old,N_application_soil_observation_event->begin_sync.sync_labeled_V3); //for version 3 import
+         expect_enum("event_synchronization",N_application_soil_observation_event->begin_sync.sync_mode_labeled);
+         expect_int16(LABEL_offset,N_application_soil_observation_event->begin_sync.days_offset); // eventually will be CORN_days
+         expect_date(LABEL_date,N_application_soil_observation_event->date,false);  // make sure any date is clear because it will override //120314
+         */
+         expect_valid_float32(N_application_soil_observation_event->v_soil_N_sampling_depth);
+   }
+   EXPECT_ENUMERATED_SECTION(LABEL_auto_N_application  ,auto_N_appl_section_VV ,auto_N_applications);  //020617_
+//120712    EXPECT_ENUMERATED_SECTION(LABEL_auto_NO3_application  ,auto_N_appl_section_VV ,auto_N_applications);  //020617_
+   set_current_section("CANMS");                                                 //060103
+      expect_bool("CANMS_support",CANMS_support);                                //060103
+   // currently we only have one period, but we may add more.
+   Common_parameters_data_record ::expect_structure(for_write);                  //020922
+   structure_defined = true; //120314
+
+   set_current_section(LABEL_management);                                        //990225
+}
+//______________________________________________________________________________
+void Management_parameters::get_end()
+{
+
+#ifndef linux
+#if ((CROPSYST_VERSION >0) && (CROPSYST_VERSION < 5))
+// g++ compiler is having problems with friendship so prior version importing is not supported in Linux
+
+//             Take version 3 auto irrig parameters to create a new event
+//             compatible with version 4.
+   if (V3_auto_irrig_enabled && V3_auto_irrig)
+   {
+      auto_irrigation_mode_operations.append(V3_auto_irrig);
+//                Do not delete V3_auto_irrig we just don't keep the global pointer set.
+   }
+   V3_auto_irrig = 0;
+#endif
+#if (CROPSYST_VERSION >= 5)
+/*
+When we go to version 5 SCS codes will be obsolete but
+but I need to
+convert the SCS_code to NRCS field operation
+I haven't implemented this yet because I don't yet know what are the
+corresponding operations.
+
+if there is SCS_code and new NRCS field operation
+*/
+#endif
+   #if ((CROPSYST_VERSION >0) && (CROPSYST_VERSION < 5))
+   FOR_EACH_IN(harvest_or_clipping_event,Harvest_or_clipping_event,harvest_or_clipping_operations,each_clip_event) //060310
+   {  // To read parameters from old param files (These are all from V4)
+         if (harvest_or_clipping_event->harvest_amount_mode_labeled.get() == HARVEST_RETAIN_GAI_obsolete)
+            if (harvest_or_clipping_event->retain_GAI_obsolete_V4_3!=0.0)
+               harvest_or_clipping_event->min_retain_GAI = harvest_or_clipping_event->retain_GAI_obsolete_V4_3;
+   } FOR_EACH_END(each_clip_event);
+   #endif
+   if (data_source_version.major < 4)                                                             //040511
+   {  // may need to convert from V3
+#if ((CROPSYST_VERSION >0) && (CROPSYST_VERSION < 5))
+   FOR_EACH_IN(event,Tillage_event,tillage_operations,tillage_iterate)           //030606
+      #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+      event->begin_sync.convert_from_CropSystV3();
+      #endif
+      event->set_description(lookup_SCS_description_deprecated_V4_7(event->get_SCS_code()));
+   FOR_EACH_END(tillage_iterate)
+   FOR_EACH_IN(event,Residue_event,residue_operations,residue_iterate)           //030606
+      #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+      event->begin_sync.convert_from_CropSystV3();
+      #endif
+      event->set_description(lookup_SCS_description_deprecated_V4_7(event->get_SCS_code()));
+   FOR_EACH_END(residue_iterate)
+   #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+   V3_clipping_event *V3_clip_event = 0;                                         //040524
+   while ((V3_clip_event = dynamic_cast<V3_clipping_event *>(V3_clipping_operations.pop_at_head())) != 0)   //040524
+   {  V3_clip_event->begin_sync.convert_from_CropSystV3();
+      V3_clip_event->terminate_crop = false; // V3 clip events never terminated
+      V3_clip_event->min_LAI_required = 0.0; // V3 Clipping events had no minimum
+      V3_clip_event->min_biomass_required_kg_ha = 0.0; // V3 Clipping events had no minimum
+      V3_clip_event->reserve_biomass_kg_ha = 0.0; // V3 Clipping events had no minimum
+      switch (V3_clip_event->V3_biomass_fate_labeled.get())                      //040628
+      {  case BIOMASS_TO_HARVEST :
+            V3_clip_event->harvest_fate_mode_labeled.set(HARVEST_ONCE);
+            V3_clip_event->biomass_fate_percents.remove_for_use      =   0;
+            V3_clip_event->biomass_fate_percents.remove_for_grazing  =   0;
+            V3_clip_event->biomass_fate_percents.remain_as_residue   = 100;
+                     // usually this would be to standing stubble, but previous versions put everything to surface residue
+            V3_clip_event->biomass_fate_percents.remove_for_disposal =   0;
+            V3_clip_event->biomass_fate_percents.remain_as_dead      =   0;
+            V3_clip_event->biomass_fate_percents.remain_as_live      =   0;
+         break;
+         case CLIPPING_REMOVE    :                                               //040628
+            V3_clip_event->harvest_fate_mode_labeled.set(HARVEST_CLIPPING);
+            V3_clip_event->biomass_fate_percents.remain_as_live       = (int16)(100-V3_clip_event->V3_trim_biomass_removed);
+            V3_clip_event->biomass_fate_percents.remove_for_use       =   0;
+            V3_clip_event->biomass_fate_percents.remove_for_grazing   =   0;
+            V3_clip_event->biomass_fate_percents.remain_as_residue    =   0;
+            V3_clip_event->biomass_fate_percents.remove_for_disposal  = (int16)(100 - V3_clip_event->biomass_fate_percents.remain_as_live);
+            V3_clip_event->biomass_fate_percents.remain_as_dead       =   0;
+         break;
+         case CLIPPING_TO_RESIDUE :                                              //040628
+         {
+            V3_clip_event->harvest_fate_mode_labeled.set(HARVEST_CLIPPING);
+            V3_clip_event->biomass_fate_percents.remain_as_live       = (int16)(100-V3_clip_event->V3_trim_biomass_removed);
+            V3_clip_event->biomass_fate_percents.remove_for_use       =   0;
+            V3_clip_event->biomass_fate_percents.remove_for_grazing   =   0;
+            V3_clip_event->biomass_fate_percents.remain_as_residue    = (int16)(V3_clip_event->V3_trim_biomass_removed * V3_clip_event->V3_trim_removed_to_surface / 100);
+            V3_clip_event->biomass_fate_percents.remove_for_disposal  = (int16)(100 - V3_clip_event->biomass_fate_percents.remain_as_live - V3_clip_event->biomass_fate_percents.remain_as_residue );
+            V3_clip_event->biomass_fate_percents.remain_as_dead       =   0;
+         } break;
+         case CLIPPING_GRAZE      :                                              //040628
+         {
+            V3_clip_event->harvest_fate_mode_labeled.set(HARVEST_GRAZE);
+            int16 remain_as_live = (int16)(100-V3_clip_event->V3_trim_biomass_removed);
+            int16 remove_for_grazing = V3_clip_event->V3_trim_biomass_removed;
+            V3_clip_event->biomass_fate_percents.remain_as_live = remain_as_live;
+            V3_clip_event->biomass_fate_percents.remove_for_use  =   0;
+            V3_clip_event->biomass_fate_percents.remove_for_grazing      = remove_for_grazing;
+            V3_clip_event->biomass_fate_percents.remain_as_residue       =   0;
+            V3_clip_event->biomass_fate_percents.remove_for_disposal          =   0;
+            V3_clip_event->biomass_fate_percents.remain_as_dead =   0;
+         }
+         break;
+      }
+      V3_clip_event->set_description("Clipping (no terminate)");                 //040614
+      harvest_or_clipping_operations.append(V3_clip_event);                      //040524
+   }
+   V3_Automatic_clipping_mode auto_clip_mode = V3_auto_clip_biomass_event ? V3_auto_clip_biomass_event->V3_automatic_clipping_mode_labeled.get() : AUTO_CLIP_DISABLED;   //040701
+#endif
+
+//#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+
+   if (V3_harvest_date && (auto_clip_mode != AUTO_CLIP_BIOMASS))                 //040524
+   {  // Version 3 used to have a single harvest date event
+      V3_harvest_date->begin_sync.convert_from_CropSystV3();
+      harvest_or_clipping_operations.append(V3_harvest_date);
+      V3_harvest_date->set_description("Harvest (and terminate)");
+      V3_harvest_date = 0;
+   }
+   {
+// NYI                   V3_latest_date_to_harvest_relative
+/*
+ Warning, not yet implemented
+ Create a harvest or clipping event (if V3_latest_date_to_harvest_relative not 0)
+ that terminates the crop 95% biomass removed I think.
+*/
+/*040510_*/    }
+#endif
+#endif
+   #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+   FOR_EACH_IN(event,Irrigation_event,irrigation_operations,irrigation_op_iterate)      //030606
+      event->begin_sync.convert_from_CropSystV3();
+      event->set_description("Irrigation");
+   FOR_EACH_END(irrigation_op_iterate)
+   FOR_EACH_IN(event,Inorganic_nitrogen_event,inorganic_nitrogen_operations,inorganic_n_iterate)    //030606
+      event->begin_sync.convert_from_CropSystV3();
+      event->set_description("Inorganic fertilization");
+   FOR_EACH_END(inorganic_n_iterate)
+   #endif
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   FOR_EACH_IN(event,Organic_nitrogen_event,organic_nitrogen_operations,organic_n_iterate) //030606
+      #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+      event->begin_sync.convert_from_CropSystV3();
+      #endif
+      if (((event->decomposition_time_50 == 0)) &&(event->decomposition_time_63 > 0)) //040830
+          event->decomposition_time_50 = convert_decomposition_time_63_to_50(event->decomposition_time_63);
+      event->set_description("Organic fertilization");
+   FOR_EACH_END(organic_n_iterate)
+#endif
+   #ifdef REACCH_VERSION
+   //120530 Note that this will eventually be permanent in all versions of CropSyst
+   // I just need to test it with REACCH first
+   FOR_EACH_IN(event,Biomatter_application_event,biomatter_application_operations,manure_appl_iterate)    //030606
+      event->begin_sync.convert_from_CropSystV3();
+      event->set_description("Biomatter application");
+
+         continue here resolve .LNK and relative filename
+
+
+   FOR_EACH_END(manure_appl_iterate)
+   #endif
+
+
+   FOR_EACH_IN(event,Chemical_event,chemical_operations,chemical_iterate)        //030606
+      #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+      event->begin_sync.convert_from_CropSystV3();
+      #endif
+      event->set_description("Chemical application");
+   FOR_EACH_END(chemical_iterate)
+   FOR_EACH_IN(event,Automatic_clip_biomass_mode_event,auto_clip_biomass_mode_operations,auto_clip_iterate)     //030606
+      #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+      event->begin_sync.convert_from_CropSystV3();
+      #endif
+      event->set_description("Automatic clipping enabled");
+      event->update_considerations(); // Keep this, even when eliminating old version import compatibility 040830
+   FOR_EACH_END(auto_clip_iterate)
+   FOR_EACH_IN(event,Automatic_irrigation_mode_event,auto_irrigation_mode_operations,auto_irrigation_iterate)   //030606
+      #if ((CS_VERSION > 0) && (CS_VERSION <= 3))
+      event->begin_sync.convert_from_CropSystV3();
+      #endif
+      event->set_description("Automatic irrigation enabled");
+   FOR_EACH_END(auto_irrigation_iterate)
+
+#if (CROPSYST_VERSION == 3) //130510 #if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   { // Convert old single auto clipping parameter to new auto clipping event period
+      if (V3_auto_clip_biomass_event)                                            //040701
+      {  if (auto_clip_mode == AUTO_CLIP_BIOMASS)
+         {  // should default to beginning to end of season
+            V3_auto_clip_biomass_event->set_description("Automatic biomass based clipping");
+            V3_auto_clip_biomass_event->harvest_fate_mode_labeled.set(HARVEST_CLIPPING);
+            V3_auto_clip_biomass_event->biomass_fate_percents.remain_as_live      = (int16)(100-V3_auto_clip_biomass_event->V3_trim_biomass_removed);
+            V3_auto_clip_biomass_event->biomass_fate_percents.remove_for_use      =   0;
+            V3_auto_clip_biomass_event->biomass_fate_percents.remove_for_grazing  =   0;
+            V3_auto_clip_biomass_event->biomass_fate_percents.remain_as_residue   =   0;
+            V3_auto_clip_biomass_event->biomass_fate_percents.remove_for_disposal = (int16)(100 - V3_auto_clip_biomass_event->biomass_fate_percents.remain_as_live);
+            V3_auto_clip_biomass_event->biomass_fate_percents.remain_as_dead      =   0;
+            auto_clip_biomass_mode_operations.append(V3_auto_clip_biomass_event);
+         }
+         else  // Currently not importing auto periodic mode
+            delete V3_auto_clip_biomass_event;
+         V3_auto_clip_biomass_event = 0;
+      }
+    }
+#endif
+      ensure_at_least_one_harvest(CROP_MODEL_UNKNOWN);                           //031203
+
+//080227          It would be better to call ensure_at_least_one_harvest this when the management is loaded and when the crop type is known
+//080227          because we don't want the harvest to kill perennials and fruit crops
+
+   }
+#endif
+}
+//_2001-01-09___________________________________________________________________
+bool Management_parameters::ensure_at_least_one_harvest(Crop_model crop_model)
+{
+   bool harvest_added = false;
+#ifndef linux
+// g++ compiler is having problems with friendship
+// I am not sure what is wrong, but this is not critical
+   if ( (harvest_or_clipping_operations.count() == 0)                            //030606
+      &&(auto_clip_biomass_mode_operations.count() == 0))                        //040512
+   {  harvest_added = true;
+      if ((crop_model == CROPSYST_CROP_MODEL) || (crop_model == CROPGRO_MODEL) ||(crop_model == CROP_MODEL_UNKNOWN))  //031203
+      { // add harvest event for normal crop model if not provided
+         Harvest_or_clipping_event *event = new Harvest_or_clipping_event();     //030606
+         event->harvest_fate_mode_labeled.set(HARVEST_ONCE);                     //040610
+         event->biomass_fate_percents.remove_for_use =   0;                      //040610
+         event->biomass_fate_percents.remove_for_grazing     =   0;              //040610
+         event->biomass_fate_percents.remain_as_residue      =   0;              //040610
+         event->biomass_fate_percents.remove_for_disposal         =   0;         //040610
+         event->biomass_fate_percents.remain_as_dead=  100;                      //040610
+         event->biomass_fate_percents.remain_as_live=   0;
+         event->begin_sync.sync_mode_labeled.set(AFTER_NORMAL_CROP_GROWTH_STAGE_MODE);  //030606
+         event->begin_sync.normal_crop_event_sequence_labeled/*130510 normal_crop_growth_stage_labeled */
+            .set(NGS_MATURITY);  //030606
+         event->begin_sync.days_offset = 10;                                     //030606
+         event->V3_biomass_fate_labeled.set(BIOMASS_TO_HARVEST);                 //030606
+         event->set_description("Single harvest based on harvest index");        //030606
+         event->terminate_crop = true;                                           //080227
+         harvest_or_clipping_operations.append(event);                           //030606
+      }
+      if ((crop_model == CROPSYST_ORCHARD_MODEL) || (crop_model == CROP_MODEL_UNKNOWN)) //031203
+      { // add harvest event for fruit crop model if not provided
+         Harvest_or_clipping_event *event = new Harvest_or_clipping_event();     //030606
+         event->harvest_fate_mode_labeled.set(HARVEST_ONCE);                     //040610
+         event->biomass_fate_percents.remove_for_use =   0;                      //040610
+         event->biomass_fate_percents.remove_for_grazing  =   0;                 //040610
+         event->biomass_fate_percents.remain_as_residue   =   0;                 //040610
+         event->biomass_fate_percents.remove_for_disposal =   0;                 //040610
+         event->biomass_fate_percents.remain_as_dead=   0;                       //040610
+         event->biomass_fate_percents.remain_as_live=  100; // all remaining biomass remains on the plant //040610
+         event->begin_sync.sync_mode_labeled.set(AFTER_FRUIT_TREE_GROWTH_STAGE_MODE);   //030606
+         event->begin_sync.fruit_tree_event_sequence_labeled.set(FGS_MATURITY);  //130510_030606 was fruit_tree_growth_stage_labeled
+
+         event->begin_sync.days_offset = 10;                                     //030606
+         event->period = new Common_event::Period;                               //030606
+         event->period->repeat_event = true;                                     //030606
+         event->period->event_repetitions= MAX_REPETITIONS; // 9999;             //040720
+         event->set_description("Harvest event for fruit crop");                 //030606
+         event->terminate_crop = false;                                          //080227
+#ifdef NYI
+Not sure how to set up for repetition
+         event->period->end_sync.sync_mode_labeled.set(AFTER_FRUIT_TREE_GROWTH_STAGE_MODE); //030606
+         event->period->end_sync.fruit_tree_growth_stage_labeled.set(FGS_DORMANT); //030606
+         event->period->end_sync.days_offset = 1;                                //030606
+         event->period->period_cycle_years = 1;                                  //030606
+         event->period->period_repetitions = 9999;                               //030606
+#endif
+         harvest_or_clipping_operations.append(event);                           //030606
+      }
+   }
+#endif
+   return harvest_added;
+}
+//_2003-12-03__________________________________________________________________/
+Tillage_operation::Tillage_operation()
+:CropSyst_field_operation_VX(CS_OP_MGMT_TILLAGE/*,UNKNOWN_NRCS_SDR_operation_number,UNKNOWN_SCS_CODE*/)
+,dust_mulch_enable         (false)                                               //051206
+,dust_mulch_depth_cm       (10)  ,v_dust_mulch_depth_cm        (dust_mulch_depth_cm       ,UC_cm        ,"dust_mulch_depth"       ,1,10.0,0,100,0,300,"cm"  ,"Dust mulching depth") //051206
+,dust_mulch_effective_days (30)  ,v_dust_mulch_effective_days  (dust_mulch_effective_days ,              "dust_mulch_effective_days",30  ,0, 60,0,365,"days","Number of days until mulch effect subsides","Without precipitation") //051206_
+,dust_mulch_intensity      (0)   ,v_dust_mulch_intensity       (dust_mulch_intensity      ,UC_adjustment,"dust_mulch_intensity"   ,2,0.0,0,0.9,0,1.0,"intensity"  ,"Dust mulching intensity","(0.0 = no effect, 1.0 = sever)") //051212_
+,v_oxidation_effect_sand      (oxidation_effect.sand     ,UC_multiplier,"sand_oxidation"        ,3,1.5,0.0,10.0,0.0,100.0,"multiplier","sand","tillage oxidation effect") //100121
+,v_oxidation_effect_clay      (oxidation_effect.clay     ,UC_multiplier,"clay_oxidation"        ,3,0.5,0.0,10.0,0.0,100.0,"multiplier","clay","tillage oxidation effect") //100121
+{  oxidation_effect.sand     =1.5;
+   oxidation_effect.clay     =0.5;
+}
+//______________________________________________________________________________
+Residue_operation::Residue_operation()
+:Tillage_operation()
+{  op_labeled.set(CS_OP_MGMT_RESIDUE);                                           //030824
+}
+//______________________________________________________________________________
+Harvest_or_clipping_operation::Harvest_or_clipping_operation(const Harvest_or_clipping_operation &to_be_copied)
+: CropSyst_field_operation_VX(to_be_copied)                                      //100323
+//110428 moved , terminate_crop              ((V3_Biomass_fate)to_be_copied.terminate_crop)     //031008
+, harvest_amount_mode_labeled (to_be_copied.harvest_amount_mode_labeled.get())   //050822
+//090316 /*040825_*/ , V4_1_44_remove_fixed_amount (to_be_copied.V4_1_44_remove_fixed_amount) // becoming obsolete
+//090316        V4_1_44_remove_fixed_amount only occured in a version used by Luca and Elisenda, g++ is complaining about it so it is now obosolete
+, remove_amount_kg_ha         (to_be_copied.remove_amount_kg_ha)                 //050825
+, accept_less                 (to_be_copied.accept_less)                         //051020
+, min_retain_GAI              (to_be_copied.min_retain_GAI)                      //051103
+#ifndef linux
+, retain_GAI_obsolete_V4_3    (to_be_copied.retain_GAI_obsolete_V4_3)            //050825
+, max_retain_GAI_obsolete     (to_be_copied.max_retain_GAI_obsolete)             //051105
+, V3_biomass_fate_labeled     ((V3_Biomass_fate)to_be_copied.V3_biomass_fate_labeled.get()) //020322
+, V3_trim_biomass_removed     (to_be_copied.V3_trim_biomass_removed)
+, V3_trim_removed_to_surface  (to_be_copied.V3_trim_removed_to_surface)
+, v_V3_trim_biomass_removed               (V3_trim_biomass_removed                         ,LABEL_trim_biomass_removed     ,90 ,0  ,100    ,0  ,100     ,TU_percent,TL_Percent_biomass_to_remove) // WARNING need translation
+, v_V3_trim_removed_to_surface            (V3_trim_removed_to_surface                      ,LABEL_trim_removed_to_surface  ,90 ,0  ,100    ,0  ,100     ,TU_percent,"Percent of the removed biomass add to surface residue") // WARNING need translation
+#endif
+, min_LAI_required            (to_be_copied.min_LAI_required)
+, min_biomass_required_kg_ha  (to_be_copied.min_biomass_required_kg_ha)
+, reserve_biomass_kg_ha       (to_be_copied.reserve_biomass_kg_ha)               //040807
+, v_min_LAI_required                      (min_LAI_required          ,U_units_not_specified,LABEL_min_LAI                ,2,0.0,0.0,6.0    ,0.0,30.0    ,TU_m2_m2  ,TL_Minimum_LAI_required_for_clipping) //980826p
+, v_min_biomass_required_kg_ha            (min_biomass_required_kg_ha,UC_kg_ha             ,LABEL_min_biomass            ,2,0.0,0.0,30000.0,0.0,100000.0,TU_kg_ha  ,"Minimum biomass required for clipping/harvest") //980826p
+, v_reserve_biomass_kg_ha                 (reserve_biomass_kg_ha     ,UC_kg_ha             ,"reserve_biomass"            ,2,0.0,0.0,10000.0,0.0,100000.0,TU_kg_ha  ,"Reserve biomass","(unavailable for clipping)") //040807_
+, grazing_percent_N_as_OM(50)                                                    //040126
+, grazing_percent_N_as_NH3(50)                                                   //040126
+, pasture_composition_legumes_percent(0.0)                                       //040917
+, v_grazing_percent_N_as_OM               (grazing_percent_N_as_OM ,LABEL_percent_N_as_OM        ,50,0,100,0,100,TU_percent,"Percent of manure nitrogen as organic matter")   //040126
+, v_grazing_percent_N_as_NH3              (grazing_percent_N_as_NH3,LABEL_percent_N_as_NH3       ,50,0,100,0,100,TU_percent,"Percent of manure nitrogen as ammonia (NH3)") //040126
+, v_remove_amount_kg_ha                   (remove_amount_kg_ha       ,UC_kg_ha                 ,"remove_amount"  ,  2,0.0,0.0,10000.0,0.0,1000000.0,TU_kg_ha,"Fixed amount of biomass to remove")  //050822
+, v_min_retain_GAI                        (min_retain_GAI,            U_units_not_specified   ,"min_regain_GAI",              2,  0.0,0.01,  30.0,0.0, 40.0,TU_m2_m2  ,"Minimum GAI to be retained")  //051103
+#ifndef linux
+, v_retain_GAI_obsolete                   (retain_GAI_obsolete_V4_3  ,U_units_not_specified     ,"retain_GAI"   ,2,  0,0,  8,0, 10,TU_m2_m2  ,"GAI to leave remaining on the field after harvest") //050822
+, v_max_retain_GAI_obsolete               (max_retain_GAI_obsolete   ,U_units_not_specified     ,"max_retain_GAI"   ,2, 20.0,5.0,  30.0,0.0, 40.0,TU_m2_m2  ,"Maximum GAI retained after biomass is removed")     //051105_
+#endif
+, v_remove_for_use_percent                (biomass_fate_percents.remove_for_use               ,"use"            ,  0,0,100,0,100,TU_percent,"Removed and designated for beneficial use (clipped fodder, silage, etc.)","portion of above ground biomass") //050822_
+, v_remove_for_grazing_percent            (biomass_fate_percents.remove_for_grazing           ,"graze"          ,  0,0,100,0,100,TU_percent,"remove for grazing","portion of above ground biomass")                                                       //050822_
+, v_remove_for_disposal_percent           (biomass_fate_percents.remove_for_disposal          ,"dispose"        ,  0,0,100,0,100,TU_percent,"Removed from the field and disposed (unused)","portion of above ground biomass")                             //050822_
+, v_remain_as_residue_percent             (biomass_fate_percents.remain_as_residue            ,"residue"        ,  0,0,100,0,100,TU_percent,"Remains in the field laying as surface residue","portion of above ground biomass")                           //050822_
+, v_remain_standing_live_percent          (biomass_fate_percents.remain_as_live               ,"live"           ,  0,0,100,0,100,TU_percent,"Remains as live standing plant tissue ","portion of above ground biomass")                                    //050822_
+, v_remain_standing_dead_percent          (biomass_fate_percents.remain_as_dead               ,"dead"           ,100,0,100,0,100,TU_percent,"Remains in the field as dead standing stubble/residue","portion of above ground biomass")                     //050822_
+, v_remain_roots_as_dead_residue_percent  (biomass_fate_percents.remove_roots_to_dead_residue ,"root_dead"      ,100,0,100,0,100,TU_percent,"Remains as dead root residue","portion of subsurface biomass")                                                //050822_
+, v_remove_roots_as_loss_percent          (biomass_fate_percents.remove_roots_as_loss         ,"root_loss"      ,  0,0,100,0,100,TU_percent,"Removed as loss","portion of subsurface biomass (usually 0.0)")                                               //050822_
+, v_remain_roots_live_percent             (biomass_fate_percents.remain_roots_live            ,"root_live"      ,  0,0,100,0,100,TU_percent,"Remains as live roots","portion of subsurface biomass")                                                       //050822_
+, v_biomass_returned_as_manure            (biomass_fate_percents.return_as_manure             ,"return_as_manure",80,0,100,0,100,TU_percent,"Percent of grazed biomass returned to field as manure","portion of grazing manure production")                //050822_
+{  clear_biomass_fate_parameters(biomass_fate_percents);                         //050718
+}
+//______________________________________________________________________________
+Harvest_or_clipping_operation::Harvest_or_clipping_operation()
+: CropSyst_field_operation_VX             (CS_OP_MGMT_HARVEST_OR_CLIPPING/*,UNKNOWN_NRCS_SDR_operation_number,UNKNOWN_SCS_CODE*/)
+//110428 moved , terminate_crop                 (true)                                          //031008
+, harvest_amount_mode_labeled    (HARVEST_CROP_PARAMETER_BASED)                  //050822
+, remove_amount_kg_ha(0)
+, accept_less(false)                                                             //051020
+, min_retain_GAI(0.0)                                                            //051103
+#ifndef linux
+, retain_GAI_obsolete_V4_3(0)                                                    //050825
+, max_retain_GAI_obsolete        (20.0) // large number disabled the max         //051105
+, V3_trim_biomass_removed        (0)
+, V3_biomass_fate_labeled        (BIOMASS_TO_HARVEST)                            //031014
+, V3_trim_removed_to_surface     (0)
+, v_V3_trim_biomass_removed      (V3_trim_biomass_removed    ,LABEL_trim_biomass_removed,0,0,100,0,100,TU_percent,TL_Percent_biomass_to_remove) // WARNING need translation
+, v_V3_trim_removed_to_surface   (V3_trim_removed_to_surface ,LABEL_trim_removed_to_surface,0,0,100,0,100,TU_percent,"Percent of the removed biomass add to surface residue") // WARNING need translation
+#endif
+, min_LAI_required               (0.0)                                           //020314
+, min_biomass_required_kg_ha     (0.0)                                           //020314
+, reserve_biomass_kg_ha          (0.0)                                           //040807
+, v_min_LAI_required             (min_LAI_required, U_units_not_specified,     LABEL_min_LAI /* LABEL_minimum_LAI_required_for_clipping  */              ,2,0.0,0.0,6.0,0.0,30.0,TU_m2_m2,TL_Minimum_LAI_required_for_clipping)   //020314_
+, v_min_biomass_required_kg_ha  (min_biomass_required_kg_ha  ,   UC_kg_ha,   LABEL_min_biomass /* LABEL_minimum_biomass_required_for_clipping  */     ,2,0.0,0.0,30000.0,0.0,100000.0,TU_kg_ha,"Minimum biomass required for clipping")   //980826p
+, v_reserve_biomass_kg_ha        (reserve_biomass_kg_ha,UC_kg_ha             ,"reserve_biomass",2,0.0,0.0,10000.0,0.0,100000.0,TU_kg_ha,"Reserve biomass (unavailable for clipping)")   //040807
+, grazing_percent_N_as_OM        (50)                                            //040126
+, grazing_percent_N_as_NH3       (50)                                            //040126
+, pasture_composition_legumes_percent(0.0)                                       //040917
+, v_grazing_percent_N_as_OM      (grazing_percent_N_as_OM ,LABEL_percent_N_as_OM        ,50,0,100,0,100,TU_percent,"Percent of manure nitrogen as organic matter")   //040126
+, v_grazing_percent_N_as_NH3     (grazing_percent_N_as_NH3,LABEL_percent_N_as_NH3       ,50,0,100,0,100,TU_percent,"Percent of manure nitrogen as ammonia (NH3)")     //040126
+, v_remove_amount_kg_ha                   (remove_amount_kg_ha,UC_kg_ha ,"remove_amount"  ,  2,0.0,0.0,10000.0,0.0,1000000.0,TU_kg_ha,"Fixed amount of biomass to remove")  //050822
+, v_min_retain_GAI                        (min_retain_GAI           ,U_units_not_specified     ,"min_retain_GAI"   ,2,  0.0,0.01,  30.0,0.0, 40.0,TU_m2_m2  ,"Minimum GAI to be retained") //051103
+#ifndef linux
+, v_retain_GAI_obsolete                   (retain_GAI_obsolete_V4_3  ,U_units_not_specified     ,"retain_GAI"   ,2,  0,0,  8,0, 20,TU_m2_m2  ,"GAI to leave remaining on the field after harvest")             //050822_
+, v_max_retain_GAI_obsolete               (max_retain_GAI_obsolete   ,U_units_not_specified     ,"max_retain_GAI"   ,2, 20.0,5.0,   30.0,0.0, 40.0,TU_m2_m2  ,"Maximum GAI retained after biomass is removed") //050822_
+#endif
+, v_remove_for_use_percent                (biomass_fate_percents.remove_for_use               ,"use"            ,  0,0,100,0,100,TU_percent,"Removed and designated for beneficial use (clipped fodder, silage, etc.)","portion of above ground biomass") //050822_
+, v_remove_for_grazing_percent            (biomass_fate_percents.remove_for_grazing           ,"graze"          ,  0,0,100,0,100,TU_percent,"Removed for grazing or other animal consumption","portion of above ground biomass")                          //050822_
+, v_remove_for_disposal_percent           (biomass_fate_percents.remove_for_disposal          ,"dispose"        ,  0,0,100,0,100,TU_percent,"Removed from the field and disposed (unused)","portion of above ground biomass")                             //050822_
+, v_remain_as_residue_percent             (biomass_fate_percents.remain_as_residue            ,"residue"        ,  0,0,100,0,100,TU_percent,"Remains in the field laying as surface residue","portion of above ground biomass")                           //050822_
+, v_remain_standing_live_percent          (biomass_fate_percents.remain_as_live               ,"live"           ,100,0,100,0,100,TU_percent,"Remains as live standing plant tissue ","portion of above ground biomass")                                   //050822_
+, v_remain_standing_dead_percent          (biomass_fate_percents.remain_as_dead               ,"dead"           ,100,0,100,0,100,TU_percent,"Remains in the field as dead standing stubble/residue","portion of above ground biomass")                    //050822_
+, v_remain_roots_as_dead_residue_percent  (biomass_fate_percents.remove_roots_to_dead_residue ,"root_dead"      ,100,0,100,0,100,TU_percent,"Remains as dead root residue","portion of subsurface biomass")                                               //050822_
+, v_remove_roots_as_loss_percent          (biomass_fate_percents.remove_roots_as_loss         ,"root_loss"      ,100,0,100,0,100,TU_percent,"Removed as loss","portion of subsurface biomass (usually 0.0)")                                              //050822_
+, v_remain_roots_live_percent             (biomass_fate_percents.remain_roots_live            ,"root_live"      ,100,0,100,0,100,TU_percent,"Remains as live roots","portion of subsurface biomass")                                                      //050822_
+, v_biomass_returned_as_manure            (biomass_fate_percents.return_as_manure      ,"return_as_manure",80,0,100,0,100,TU_percent,"Percent of grazed biomass returned to field as manure","portion of grazing manure production")                      //050822_
+{  clear_biomass_fate_parameters(biomass_fate_percents);                         //050718
+}
+//______________________________________________________________________________
+Auto_clip_biomass_mode::Auto_clip_biomass_mode()
+: Harvest_or_clipping_operation()
+, adj_relative_growth_rate    (1.0)                                              //970521
+, LAI_forces_clipping         (0.0)  // 0.0 = option disabled                    //040830
+, biomass_forces_clipping     (4000.0)
+, flowering_forces_clipping(0)                                                   //040830
+, v_LAI_forces_clipping                      (LAI_forces_clipping       ,UC_kg_ha                  ,LABEL_max_LAI          ,2,5.0, 2.0,10.0, 0.0,15.0,TU_m2_m2,"Maximum LAI that forces clipping")               //040830_
+, v_biomass_forces_clipping                  (biomass_forces_clipping   ,UC_kg_ha                  ,LABEL_max_biomass      ,2,4000.0,2000.0,6000.0,0.0,100000.0,TU_kg_ha,TL_Maximum_biomass_that_forces_clipping)//970522p
+, v_flowering_forces_clipping                (flowering_forces_clipping /*UC_Days*/                ,LABEL_after_flowering  ,0,0,365,0,366,"Days","Number of days after flowering forces clipping")               //040830_
+, v_adjust_relative_growth_rate_for_clipping (adj_relative_growth_rate  ,U_units_not_specified     ,LABEL_adj_rel_growth   ,2,1.0,0.5,1.5,0.0,2.0,TU_0_2,TL_Clipping_relative_growth_rate_adjustment)            //040914_
+{  op_ID = CS_OP_MGMT_AUTO_CLIP_BIOMASS;
+   terminate_crop = false;                                                       //040701
+}
+//_2001-10-27___________________________________________________________________
+Auto_clip_biomass_mode::Auto_clip_biomass_mode
+(const Auto_clip_biomass_mode& to_be_copied)                                     //020314
+: Harvest_or_clipping_operation  (to_be_copied)                                  //040204
+, adj_relative_growth_rate       (to_be_copied.adj_relative_growth_rate)         //011208
+, LAI_forces_clipping            (to_be_copied.LAI_forces_clipping)
+, biomass_forces_clipping        (to_be_copied.biomass_forces_clipping)
+, flowering_forces_clipping      (to_be_copied.flowering_forces_clipping)        //040830
+, v_adjust_relative_growth_rate_for_clipping (adj_relative_growth_rate  ,U_units_not_specified     ,LABEL_adj_rel_growth /*LABEL_adjust_relative_growth_rate_for_clipping*/,2,NO_adj_relative_growth_rate,0.5,1.5,0.0,2.0,TU_0_2,TL_Clipping_relative_growth_rate_adjustment) //040914p
+, v_LAI_forces_clipping                      (LAI_forces_clipping       ,UC_kg_ha                  ,LABEL_max_LAI             ,2,5.0, 2.0,10.0, 0.0,15.0,TU_m2_m2,"Maximum LAI that forces clipping")                                                                         //040830_
+, v_biomass_forces_clipping                  (biomass_forces_clipping   ,UC_kg_ha                  ,LABEL_max_biomass /*LABEL_biomass_forces_clipping_old  */  ,2,4000.0,2000.0,6000.0,0.0,100000.0,TU_kg_ha,TL_Maximum_biomass_that_forces_clipping)                         //970522p
+, v_flowering_forces_clipping                (flowering_forces_clipping ,                           LABEL_after_flowering              ,NO_flowering_forces_clipping,0,365,0,366,"Days","Number of days after flowering forces clipping")                                     //040830_
+{  op_ID = CS_OP_MGMT_AUTO_CLIP_BIOMASS;                                         //040204
+   terminate_crop = false;                                                       //040701
+}
+//_2002-03-14___________________________________________________________________
+void Auto_clip_biomass_mode::update_considerations()
+{  consider_adjust_rate = !CORN::is_approximately<float32>(adj_relative_growth_rate ,NO_adj_relative_growth_rate,0.0001);
+   consider_LAI         = !CORN::is_approximately<float32>(LAI_forces_clipping      ,NO_LAI_forces_clipping,0.0001);
+   consider_biomass     = !CORN::is_approximately<float32>(biomass_forces_clipping  ,NO_biomass_forces_clipping,0.000001);
+   consider_flowering   = flowering_forces_clipping !=  NO_flowering_forces_clipping;
+}
+//_2004-08-31___________________________________________________________________
+void Auto_clip_biomass_mode::set_considerations()
+{  if (!consider_adjust_rate) adj_relative_growth_rate =NO_adj_relative_growth_rate;
+   if (!consider_LAI)         LAI_forces_clipping      =NO_LAI_forces_clipping;
+   if (!consider_biomass)     biomass_forces_clipping  =NO_biomass_forces_clipping;
+   if (!consider_flowering)   flowering_forces_clipping =  NO_flowering_forces_clipping;
+}
+//_2004-08-31__________________________________________________________________/
+void Harvest_or_clipping_operation::setup_parameters(CORN::Data_record &data_rec,bool for_write)
+{  CropSyst_field_operation_VX::setup_parameters(data_rec, for_write);           //970709
+   if (get_type() == CS_OP_MGMT_AUTO_CLIP_BIOMASS)                               //110808 teminate does not apply to auto clip mode    //040204
+   {  terminate_crop = false;                                                    //110428
+//110428      data_rec.expect_bool("terminate_crop",terminate_crop);             //031008
+   }
+   data_rec.expect_valid_float32(v_min_LAI_required);                            //040204
+   data_rec.expect_valid_float32(v_min_biomass_required_kg_ha);                  //040204
+   data_rec.expect_valid_float32(v_reserve_biomass_kg_ha);                       //040204
+#ifndef linux
+   if (!for_write)                                                               //050822
+   {  data_rec.expect_valid_int16(v_V3_trim_biomass_removed);
+      data_rec.expect_enum(LABEL_V3_clipping_fate,V3_biomass_fate_labeled);      //020322
+      data_rec.expect_valid_int16(v_V3_trim_removed_to_surface);
+   }
+#endif
+   data_rec.expect_enum("biomass_fate",harvest_fate_mode_labeled);               //050822
+   data_rec.expect_valid_int16(v_grazing_percent_N_as_OM);                       //040126
+   data_rec.expect_valid_int16(v_grazing_percent_N_as_NH3);                      //040126
+   data_rec.expect_float32("legumes",pasture_composition_legumes_percent);       //040917
+
+// The following line if for reading old files (only Elisenda and Luca had the version that did this).
+//                   if (!for_write) data_rec.expect_bool("remove_fixed_amount",V4_1_44_remove_fixed_amount);   //becoming obsolete
+
+   data_rec.expect_enum("harvest_amount_mode",harvest_amount_mode_labeled);   //050822
+   data_rec.expect_valid_float32(v_remove_amount_kg_ha);                      //050822
+   data_rec.expect_bool("accept_less",accept_less);                           //051020
+   data_rec.expect_valid_float32(v_min_retain_GAI);                           //051103
+#ifndef linux
+   if (!for_write) data_rec.expect_valid_float32(v_retain_GAI_obsolete); // becoming obsolete 4.3.0  keeping this only to import old files     //060310_
+   data_rec.expect_valid_float32(v_max_retain_GAI_obsolete);                  //051105
+#endif
+   data_rec.expect_valid_int16(v_remove_for_use_percent);                     //050822
+   data_rec.expect_valid_int16(v_remove_for_grazing_percent);                 //050822
+   data_rec.expect_valid_int16(v_biomass_returned_as_manure);                 //005082
+   data_rec.expect_valid_int16(v_remove_for_disposal_percent);                //050822
+   data_rec.expect_valid_int16(v_remain_as_residue_percent);                  //050822
+   data_rec.expect_valid_int16(v_remain_standing_live_percent);               //050822
+   data_rec.expect_valid_int16(v_remain_standing_dead_percent);               //050822
+   data_rec.expect_valid_int16(v_remain_roots_as_dead_residue_percent);       //050822
+   data_rec.expect_valid_int16(v_remove_roots_as_loss_percent);               //050822
+   data_rec.expect_valid_int16(v_remain_roots_live_percent);                  //050822
+}
+//_2003-10-14__________________________________________________________________/
+void Auto_clip_biomass_mode::setup_parameters(Data_record &data_rec,bool for_write)
+{  Harvest_or_clipping_operation::setup_parameters(data_rec, for_write);
+      data_rec.expect_valid_float32(v_adjust_relative_growth_rate_for_clipping);
+      data_rec.expect_valid_float32(v_LAI_forces_clipping);
+      data_rec.expect_valid_float32(v_biomass_forces_clipping);
+      data_rec.expect_valid_int16(v_flowering_forces_clipping);
+}
+//_2002-03-14__________________________________________________________________/
+void Auto_clip_biomass_mode::log(std::ostream &log_file)                 const
+{  CropSyst_field_operation_VX::log(log_file);
+   char buffer[255];                                                             //031023
+   log_file << v_adjust_relative_growth_rate_for_clipping.log_cstr(buffer);      //031023
+   log_file << v_biomass_forces_clipping.log_cstr(buffer);                       //031023
+   log_file << v_flowering_forces_clipping.log_cstr(buffer);                     //040830
+}
+//_2002-08-10___________________________________________________________________
+Irrigation_operation::Irrigation_operation(CropSyst_Op  irrig_or_auto_irrig_code )
+:CropSyst_field_operation_VX(irrig_or_auto_irrig_code/*,UNKNOWN_NRCS_SDR_operation_number,UNKNOWN_SCS_CODE*/)   //040511
+,chemical_name             ("") // In the case of pesticides (NYI)
+,amount_mm_32                 (0)                                                //020313
+,salinity_32               (0)                                                   //020313
+,ECw_to_TDS                (0.64) // Usually this value, previously hardcoded    //080402
+,NO3_N_concentration       (0)                                                   //080213
+,NH4_N_concentration       (0)                                                   //080213
+,net_irrigation_mult_32    (1.0)                                                 //051227
+,refill_point_32           (1.0)  // default refill to field capacity            //051228
+,max_allowable_depletion_32(0.5)                                                 //051227
+,depletion_observe_depth_m (1.0)                                                 //051227
+,depletion_observe_root_zone_fract(1.0)                                          //070606
+,leaf_water_potential(-1000)                                                     //091201
+,min_application_mm        (0.0)                                                 //060719
+,max_application_mm        (200.0)                                               //051227
+,v_amount                  (amount_mm_32                 ,UC_mm/*_depth */       ,LABEL_amount              ,3,0   , 0.0,1000.0, 0.0,1000.0,TU_mm   ,TL_Total_irrigation)   //040715
+,v_net_irrigation_mult     (net_irrigation_mult_32    ,U_units_not_specified  ,LABEL_net_irrigation_mult ,2,1.0 , 0.0,2.0, 0.0,10.0,TU_unitless,TL_Net_irrigation_multiplier) //
+,v_refill_point            (refill_point_32           ,UC_decimal_percent     ,LABEL_refill_point        ,2,1.0 ,0.0,1.0,0.0,2.0,TU_0_1,"Refill point")  //051228
+,v_NO3_N_concentration     (NO3_N_concentration       ,UC_kg_m3               ,"NO3_N_concentration"     ,3,0.0 ,0.0,99999.9,0.0,99999.9,TU_kg_m3,"Nitrate NO3 N concentration",TL_Irrigation )  //080213
+,v_NH4_N_concentration     (NH4_N_concentration       ,UC_kg_m3               ,"NH4_N_concentration"     ,3,0.0 ,0.0,99999.9,0.0,99999.9,TU_kg_m3,"Ammonium NH4 N concentration",TL_Irrigation )  //080213
+,v_salinity                (salinity_32               ,UC_dS_m                ,LABEL_salinity            ,3,0.0 ,0.0,20.0,0.0,50.0 ,TU_dS_m,TL_Salinity,TL_Irrigation )  //
+,v_ECw_to_TDS              (ECw_to_TDS                ,UC_factor              ,"ECw_to_TDS"              ,3,0.64,0.0, 1.0,0.0, 2.0 ,"factor","ECw (dS/m) -> TDS (kg/m³) conversion factor", "Eletrical conductivity in water (dS/m) to total dissolved solids (l/g or kg/m³). Usually about 0.64." )
+,v_max_allowable_depletion (max_allowable_depletion_32,U_units_not_specified  ,LABEL_max_allowable_depletion ,3,0.5, 0.0,1.0, 0.0,1.0 ,TU_0_1,TL_Maximum_allowable_depletion) //041028
+,v_depletion_observe_depth (depletion_observe_depth_m ,UC_meter               ,LABEL_depletion_observe_depth ,2,1.0, 0.0,2.0, 0.0,4.0,TU_m ,TL_Depletion_observation_depth)  //041028
+,v_depletion_observe_root_zone_fract(depletion_observe_root_zone_fract,UC_fraction,"depletion_observe_root_zone_fract",2,1.0,0.0,2.0,0.0,4.0,"TU_0_2","Fraction of current root depth") //070606
+,v_min_application         (min_application_mm        ,UC_mm                  ,"min_application"         ,2,    0.0,0.0,200.0,0.0,1000.0,TU_mm,"Irrigation system minimum application capacity")  //060719
+,v_max_application         (max_application_mm        ,UC_mm                  ,LABEL_max_application     ,2,99999.0,0.0,200.0,0.0,1000.0,TU_mm,"Irrigation system maximum application capacity") //041028
+,v_leaf_water_potential    (leaf_water_potential      ,UC_J_kg                ,"leaf_water_potential"    ,1,-1000.0,-5000.0,0.0,-10000.0,0.0,"-J/kg","Leaf water potential") /* Hint: Irrigation will occur when the leaf water potential becomes more negative than this value. */  //091201_
+,v_surface_evaporation_area_fraction (soil_wetting.surface_evaporation_area_fraction,UC_fraction,"surface_evaporation_area",3,1.0,0.0,1.0,0.0,1.0,"fraction","Soil surface subject to soil evaporation") //130321
+,v_profile_volume_fraction           (soil_wetting.profile_volume_fraction          ,UC_fraction,"profile_volume"          ,3,1.0,0.0,1.0,0.0,1.0,"fraction","Soil profile volume")                      //130321
+{ }
+//_2004-05-11__________________________________________________________________/
+#ifdef OBSOLETE
+120711
+Inorganic_nitrogen_operation::Inorganic_nitrogen_operation()
+:CropSyst_field_operation_VX(CS_OP_MGMT_INORGANIC_NITROGEN/*,UNKNOWN_NRCS_SDR_operation_number,UNKNOWN_SCS_CODE*/)
+,NO3_N_kg_ha           (0)
+,NH4_N_kg_ha           (0)
+,NH4_source_labeled      (UREA)                                                  //020322
+,NH4_appl_method_labeled (SURFACE_BROADCAST)                                     //020322
+,NH4_volatilization_calculated(true)                                             //990227
+,NH4_volatilization_32   (0.0)
+,v_NO3_N                 (NO3_N_kg_ha              ,UC_kg_ha  ,"NO3_N" /*110818 LABEL_NO3_amount*/        ,3,0, 0.0,1000.0, 0.0,1000.0,TU_kg_ha  ,TL_Amount_N_form_of_nitrate)
+,v_NH4_N                 (NH4_N_kg_ha              ,UC_kg_ha  ,"NH4_N" /*110818 LABEL_NH4_amount*/        ,3,0, 0.0,1000.0, 0.0,1000.0,TU_kg_ha  ,TL_Amount_N_form_of_ammonium)
+,v_NH4_volatilization    (NH4_volatilization_32      ,UC_percent,LABEL_NH4_volatilization,3,0, 0.0, 100.0, 0.0, 100.0,TU_percent,TL_Volatilization_loss,TL_CropSyst_will_calculate)
+{}
+#endif
+//______________________________________________________________________________
+Organic_nitrogen_operation_abstract::Organic_nitrogen_operation_abstract(CropSyst_Op cs_op)
+:CropSyst_field_operation_VX(cs_op/*,UNKNOWN_NRCS_SDR_operation_number,UNKNOWN_SCS_CODE*/)
+//110831,org_N_source_labeled      (SWINE)                                       //110104
+,organic_matter_source_labeled      (swine_manure)                               //110831
+,org_N_kg_ha               (0) ,v_org_N                   (org_N_kg_ha            ,UC_kg_ha                     ,LABEL_org_N            ,3    ,0  , 0.0, 400.0, 0.0,2000.0,TU_kg_ha  ,TL_Amount_N_form_of_organic_manure)
+,NH3_N_kg_ha               (0) ,v_NH3_N                   (NH3_N_kg_ha            ,UC_kg_ha                     ,"NH3_N" /*110818 LABEL_NH3_amount*/       ,3    ,0  , 0.0,1000.0, 0.0,1000.0,TU_kg_ha  ,TL_Amount_N_form_of_ammonia)
+,org_N_appl_method_labeled(SURFACE_BROADCAST_NO_INCORPORATION)                   //020322
+,total_solids_kg_ha        (0)
+,dry_matter_percent       (13), v_dry_matter              (dry_matter_percent     ,UC_percent                   ,"dry_matter"           ,1    ,13 ,3.0,  20.0, 0.0, 100.0,"%"       ,"Dry matter of fresh manure (percent not water)")
+,long_term_org_N_volatilization_loss_percent(0.0)                                //020525
+,v_long_term_org_N_volatilization_loss_percent(long_term_org_N_volatilization_loss_percent,UC_percent ,LABEL_long_term_org_N_volatilization  ,3,0, 0.0, 100.0, 0.0, 100.0,TU_percent,"Long term NH3 volatilization (including mineralized organic N)")   //020525
+,water_depth_mm(0)                                                               //110816 added for CAFE dairy
+,water_volume_m3(0)                                                              //110816 added for CAFE dairy
+{}
+//_____________________________________________________________________________/
+bool Organic_nitrogen_operation_abstract::is_liquid()  const
+{  bool liquid = false;
+   return dry_matter_percent < 20;
+}
+//_2002-03-22__________________________________________________________________/
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+Organic_nitrogen_operation::Organic_nitrogen_operation()
+:Organic_nitrogen_operation_abstract(CS_OP_MGMT_ORGANIC_NITROGEN)                //080902
+//110104 moved to org_N_op_abstract/*020322_*/ ,org_N_source_labeled      (SWINE)
+,org_N_volatilization_calculated(true)                                           //020525
+,carbon_fraction           (0.5)                                                 //080225
+,decomposition_time_calculated(true)                                             //990227
+,decomposition_time_63     (0)
+,decomposition_time_50     (0)                                                   //040628
+,solid_liquid_form_labeled (solid_form)                                          //020322
+,v_carbon_fraction         (carbon_fraction        ,UC_fraction                  ,"carbon_fraction"      ,3    ,0.5, 0.0,1.0   , 0.0,1.0   ,"fraction","Carbon fraction of biomass") //080225
+,v_decomposition_time_63   (decomposition_time_63                                ,LABEL_decomposition_time     ,60 , 0  ,1000  ,   0,3000  ,"Days"    ,TL_Decomposition_time_constant)
+,v_decomposition_time_50   (decomposition_time_50                                ,LABEL_decomposition_time_50  ,80 , 0  ,1000  ,   0,3000  ,"Days"    ,"Time to decompose 50%") //040826
+{}
+//______________________________________________________________________________
+bool Organic_nitrogen_operation::is_liquid()  const
+{  bool liquid = false;
+   if ((dry_matter_percent > 0.0) || (dry_matter_percent < 100.0))               //080903
+      liquid = Organic_nitrogen_operation_abstract::is_liquid();
+   else
+   {  // if we don't have a value for dry_matter_percent
+      // The parameter file is earlier the version 4.12.04
+      // In earlier version the user selected the form of manure not the DryMatter %
+      liquid =  solid_liquid_form_labeled.get() > solid_form;
+   }
+   return liquid;
+}
+//_2002-03-22___________________________________________________________________
+#endif
+//______________________________________________________________________________
+Biomatter_application_operation::Biomatter_application_operation()
+:Organic_nitrogen_operation_abstract(CS_OP_MGMT_BIOMATTER_APPLICATION)           //080902
+,biomatter_param_filename("\\Simulation\\Database\\biomatter\\swine.CS_manure")
+//110817,decomposition_parameters(0)                                             //100216
+,decomposition_parameters(dairy_anaerobic_lagoon_storage_manure)                 //110817
+{ // Probably should set the path to the simulation directory
+}
+//_2008-08-29__________________________________________________________________/
+/*110817
+Biomatter_application_operation::~Biomatter_application_operation()
+{ // Probably should set the path to the simulation directory
+   if (decomposition_parameters) delete decomposition_parameters; decomposition_parameters = 0;
+}
+//_2010-02-16___________________________________________________________________
+*/
+/*110817
+bool Biomatter_application_operation
+::take_decomposition_parameters(Biomass_decomposition_parameters *_parameters) contribution_
+{ // Probably should set the path to the simulation directory
+   if (decomposition_parameters) delete decomposition_parameters;
+   decomposition_parameters = _parameters;
+   return true; // always takes
+}
+//_2010-02-16___________________________________________________________________
+*/
+const Biomass_decomposition_parameters &Biomatter_application_operation
+::provide_decomposition_parameters(Organic_matter_source source)      provision_
+{
+   //110817 now composite member if (!decomposition_parameters)
+   //110817 {
+   //110817 decomposition_parameters = new Biomass_decomposition_parameters(source);
+   // The biomatter_param_filename does not have to exist in this
+   // case just use the default parameters of the source.  //110104
+   //110817 no need to check for existance (get will check)
+   if (biomatter_param_filename.exists())                                        //110104
+   {  VV_File decomp_param_file(biomatter_param_filename.c_str());
+      decomp_param_file.get(decomposition_parameters);
+   } else
+      decomposition_parameters.setup_default(source);
+   return decomposition_parameters;
+}
+//_2010-02-16___________________________________________________________________
+Chemical_operation::Chemical_operation()
+:CropSyst_field_operation_VX(CS_OP_MGMT_CHEMICAL)
+,chemical_name             ("")
+,chemical_concentration_32 (0)
+,v_chemical_concentration  (chemical_concentration_32  ,UC_kg_m3,LABEL_concentration     ,3,0, 0.0,  10.0, 0.0, 100.0,TU_kg_m3,TL_Concentration  )
+{}
+//______________________________________________________________________________
+void Tillage_operation::setup_parameters(Data_record &data_rec,bool for_write)
+{
+   CropSyst_field_operation_VX::setup_parameters(data_rec, for_write);
+   data_rec.expect_bool(LABEL_terminate_crop,terminate_crop,CROPSYST_VV_BOOL_FORM);//970616
+   data_rec.expect_bool("dust_mulch",dust_mulch_enable,CROPSYST_VV_BOOL_FORM);   //051206
+   data_rec.expect_valid_float32(v_dust_mulch_depth_cm);                         //051206
+   data_rec.expect_valid_int16(v_dust_mulch_effective_days);                     //051206
+   data_rec.expect_valid_float32(v_dust_mulch_intensity);                        //051212
+   data_rec.expect_valid_float32(v_oxidation_effect_sand);                       //100121
+   data_rec.expect_valid_float32(v_oxidation_effect_clay);                       //100121
+}
+//_1998-10-07___________________________________________________________________
+void Residue_operation::setup_parameters(Data_record &data_rec,bool for_write)
+{  CropSyst_field_operation_VX::setup_parameters(data_rec, for_write);
+   data_rec.expect_bool(LABEL_terminate_crop,terminate_crop,CROPSYST_VV_BOOL_FORM); //970616
+}
+//_1998-10-07___________________________________________________________________
+void Irrigation_operation::setup_parameters(Data_record &data_rec,bool for_write)
+{  CropSyst_field_operation_VX::setup_parameters(data_rec, for_write);
+      data_rec.expect_float32(LABEL_amount,amount_mm_32);                        //030213
+      data_rec.expect_string(LABEL_chemical,chemical_name,CROPSYST_VV_BOOL_FORM);
+      data_rec.expect_enum("application_mode",application_mode_labeled);         //041106
+      data_rec.expect_valid_float32(v_net_irrigation_mult);                      //020313
+      data_rec.expect_valid_float32(v_refill_point);                             //051228
+      data_rec.expect_valid_float32(v_salinity);                                 //020113
+      data_rec.expect_valid_float32(v_NO3_N_concentration);                      //080313
+      data_rec.expect_valid_float32(v_NH4_N_concentration);                      //080313
+      data_rec.expect_enum("consideration_mode",consideration_mode_labeled);     //091201
+      data_rec.expect_valid_float32(v_leaf_water_potential);                     //091201
+      data_rec.expect_valid_float32(v_max_allowable_depletion);
+      data_rec.expect_enum("depletion_observation_depth_mode",depletion_observation_depth_mode_labeled); //070606
+      data_rec.expect_valid_float32(v_depletion_observe_depth);
+      data_rec.expect_valid_float32(v_depletion_observe_root_zone_fract);        //070606
+      data_rec.expect_valid_float32(v_min_application        );                  //060719
+      data_rec.expect_valid_float32(v_max_application        );
+
+      data_rec.expect_valid_float32(v_surface_evaporation_area_fraction);        //130321
+      data_rec.expect_valid_float32(v_profile_volume_fraction);                  //130321
+}
+//_1998-10-07___________________________________________________________________
+float64 Irrigation_operation::get_min_application_m()          const { return (application_mode_labeled.get()==irrigate_fixed_amount) ? 0.0      : mm_to_m(min_application_mm); } //060719
+float64 Irrigation_operation::get_max_application_m()          const { return (application_mode_labeled.get()==irrigate_fixed_amount) ? 999999.0 : mm_to_m(max_application_mm); } //981212
+//_2006-07-19___________________________________________________________________
+bool Irrigation_operation::multiply_amount_by(float32 multiplier) modification_
+{  amount_mm_32 *= multiplier;
+   return true;
+}
+//_2007-07-16______________________________________________multiply_amount_by__/
+#ifdef OBSOLETE
+120711
+bool Inorganic_nitrogen_operation::multiply_amount_by(float32 multiplier) modification_
+{  NO3_N_kg_ha*= multiplier;
+   NH4_N_kg_ha*= multiplier;
+   return true;
+}
+#endif
+//_2007-07-16______________________________________________multiply_amount_by__/
+bool Organic_nitrogen_operation_abstract::multiply_amount_by(float32 multiplier)  modification_
+{  org_N_kg_ha*= multiplier;
+   NH3_N_kg_ha*= multiplier;
+   water_depth_mm *= multiplier;
+   water_volume_m3 *= multiplier;
+   return true;
+}
+//_2007-07-16______________________________________________multiply_amount_by__/
+void Automatic_irrigation_mode::setup_parameters(Data_record &data_rec,bool for_write)
+{
+   Irrigation_operation::setup_parameters(data_rec, for_write);
+}
+//_1997-07-09________________________________________________setup_parameters__/
+void Automatic_irrigation_mode::log(std::ostream &log_file) const
+{  CropSyst_field_operation_VX::log(log_file);
+   char buffer[255];                                                             //030123
+   { log_file << v_max_allowable_depletion.log_cstr(buffer);
+     log_file << v_depletion_observe_depth.log_cstr(buffer);
+   }
+   log_file << v_min_application.log_cstr(buffer);
+   log_file << v_max_application.log_cstr(buffer);
+}
+//_2002-08-10___________________________________________________________________
+void Organic_nitrogen_operation_abstract::setup_parameters(Data_record &data_rec,bool for_write)
+{  CropSyst_field_operation_VX::setup_parameters(data_rec, for_write);
+   data_rec.expect_valid_float32(v_org_N);
+   data_rec.expect_valid_float32(v_NH3_N);                                       //981226
+   #if ((CROPSYST_VERSION >0) && (CROPSYST_VERSION < 5))
+   if (!for_write)                                                               //110818
+      data_rec.expect_float32(LABEL_NH3_amount,NH3_N_kg_ha); /*This is to read older V4 and V3 */ //110818
+   #endif
+   data_rec.expect_float32("total_solids",total_solids_kg_ha);
+   data_rec.expect_valid_float32(v_dry_matter);                                  //981226
+   data_rec.expect_enum(LABEL_org_N_appl_method,org_N_appl_method_labeled);      //020322
+//110831   data_rec.expect_enum(LABEL_org_N_source,org_N_source_labeled);        //020322
+   data_rec.expect_enum("source",organic_matter_source_labeled);                 //110831
+   data_rec.expect_float32(LABEL_long_term_org_N_volatilization,long_term_org_N_volatilization_loss_percent);  //020525
+   data_rec.expect_float32("water_depth",water_depth_mm);                        //110816
+   data_rec.expect_float32("water_volume",water_volume_m3);                      //110816
+}
+//_1998-12-28___________________________________________________________________
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+void Organic_nitrogen_operation::setup_parameters(Data_record &data_rec,bool for_write)
+{  Organic_nitrogen_operation_abstract::setup_parameters(data_rec,for_write);    //080902
+   //110810 moved to Organic_nitrogen_operation_abstract data_rec.expect_enum(LABEL_org_N_source,org_N_source_labeled);                //020322
+   data_rec.expect_float32("carbon_fraction",carbon_fraction);                   //080225
+   data_rec.expect_bool(LABEL_decomposition_time_calculated,decomposition_time_calculated,CROPSYST_VV_BOOL_FORM); //990227
+   data_rec.expect_int16(LABEL_decomposition_time,decomposition_time_63);
+   data_rec.expect_int16(LABEL_decomposition_time_50,decomposition_time_50);     //040826
+   data_rec.expect_bool(LABEL_org_N_volatilization_calculated,org_N_volatilization_calculated,CROPSYST_VV_BOOL_FORM);   //020525
+   data_rec.expect_enum(LABEL_liquid,solid_liquid_form_labeled);                 //020322
+}
+//_1998-12-28___________________________________________________________________
+#endif
+//______________________________________________________________________________
+void Biomatter_application_operation::setup_parameters(Data_record &data_rec,bool for_write)
+{  Organic_nitrogen_operation_abstract::setup_parameters(data_rec,for_write);    //080902
+   data_rec.expect_file_name("biomatter",biomatter_param_filename);
+}
+//_1998-12-28___________________________________________________________________
+void Chemical_operation::setup_parameters(Data_record &data_rec,bool for_write)
+{  CropSyst_field_operation_VX::setup_parameters(data_rec, for_write);
+   data_rec.expect_string(LABEL_chemical,chemical_name,32);
+   data_rec.expect_float32(LABEL_concentration,chemical_concentration_32);
+}
+//_1998-10-07___________________________________________________________________
+void N_application_soil_observation_mode::Split_application::setup_parameters
+(Data_record &data_rec,bool for_write)
+{  CropSyst_field_operation_VX::setup_parameters(data_rec, for_write);
+   data_rec.expect_int16(LABEL_percent,percent_of_application);
+}
+//_1999-11-22___________________________________________________________________
+const char *Tillage_operation::label_cstr(char *result) const
+{  // returns text representation of operation
+   CropSyst_field_operation_VX::label_cstr(result);
+   strcat(result,": ");                                                          //020507
+//   CropSyst_field_operation_VX::label_cstr(result);
+   if (terminate_crop)                                                           //981007
+   {  strcat(result," ");
+      strcat(result,TL_Terminate_crop);
+                  // NYI   dust mulch parameters
+   }
+   return result;
+}
+//______________________________________________________________________________
+void Tillage_operation::log(std::ostream &log_file) const
+{  CropSyst_field_operation_VX::log(log_file);
+   log_file << LABEL_terminate_crop << "="
+   << ((terminate_crop) ? "true" : "false") << endl;
+}
+//______________________________________________________________________________
+const char *Residue_operation::label_cstr(char *result) const
+{  CropSyst_field_operation_VX::label_cstr(result);
+   strcat(result,NRCS_operation_description.c_str());                           //060725
+   #if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   strcat(result,lookup_SCS_description_deprecated_V4_7(get_SCS_code()));        //040505
+   #endif
+   return result;
+}
+//______________________________________________________________________________
+void Residue_operation::log(std::ostream &log_file) const
+{  CropSyst_field_operation_VX::log(log_file);
+   log_file << "NRCS_SDR_operation=" << NRCS_operation_description << endl;      //040506
+   #if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   log_file << "SCS_practice=" << lookup_SCS_description_deprecated_V4_7(SCS_code) << endl;  //040506
+   #endif
+}
+//______________________________________________________________________________
+const char *Harvest_or_clipping_operation::label_cstr(char *result) const
+{  CropSyst_field_operation_VX::label_cstr(result);
+   strcat(result," ");
+   strcat(result,TL_Remove_from_field);
+   char percent_str[10];
+   strcat(result," ");
+   strcat(result,percent_str);
+   strcat(result,"%");
+   return result;
+}
+//_2003-10-14__________________________________________________________________/
+void Harvest_or_clipping_operation::log(std::ostream &log_file) const
+{  CropSyst_field_operation_VX::log(log_file);
+}
+//_2003-10-14__________________________________________________________________/
+// returns text representation of operation
+const char *Irrigation_operation::label_cstr(char *result) const
+{  CropSyst_field_operation_VX::label_cstr(result);
+   Ustring buffer1(TL_Refill_plant_available_water);
+   Ustring buffer2(Ustring(CORN::float32_to_cstr(amount_mm_32,3)) + Ustring(" mm "));
+   Ustring practice((amount_mm_32 == 0.0) ? buffer1 : buffer2);
+   practice += Ustring(CORN::float32_to_cstr(  salinity_32 ,3));
+   practice += " (dS/m) ";
+   practice += Ustring(CORN::float32_to_cstr( NO3_N_concentration,3));
+   practice += " (kgN/m³H2O) ";
+   practice += Ustring(CORN::float32_to_cstr(  NH4_N_concentration,3));
+   practice += " (kgN/m³H2O) ";
+               // 080402 New ECw to TDS conversion factor is not currently output here.
+   #ifdef NYI
+   buffer2.assign(Ustring(" kg ") +chemical_name + Ustring("/m3 water"));
+   #endif
+   practice += (chemical_name == LABEL_salt) ? buffer1 : buffer2;
+   strcat(result,TL_Irrigation);
+   strcat(result," ");
+   strcat(result,practice.c_str());
+   return result;
+}
+//______________________________________________________________________________
+void Irrigation_operation::log(std::ostream &log_file) const
+{  CropSyst_field_operation_VX::log(log_file);
+   char buffer[255];                                                             //030123
+   log_file << v_amount.log_cstr(buffer);                                        //030123
+   if (amount_mm_32 == 0.0) log_file << "refill_PAW=true" << endl;
+   log_file << v_salinity.log_cstr(buffer);                                      //030123
+   log_file << v_NO3_N_concentration.log_cstr(buffer);                           //080213
+   log_file << v_NH4_N_concentration.log_cstr(buffer);                           //080213
+   log_file << v_net_irrigation_mult.log_cstr(buffer);                           //030123
+   log_file << v_refill_point.log_cstr(buffer);                                  //051228
+}
+//______________________________________________________________________________
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+const char *Organic_nitrogen_operation::label_cstr(char *result)           const
+{  CropSyst_field_operation_VX::label_cstr(result);
+   strcat(result,TL_Organic_N);
+   strcat(result,":");
+   strcat(result,CORN::float32_to_cstr(org_N_kg_ha,3));
+   strcat(result," kg N/ha");
+   return result;
+}
+//_1998-12-28___________________________________________________________________
+#endif
+const char *Biomatter_application_operation::label_cstr(char *result)      const
+{  CropSyst_field_operation_VX::label_cstr(result);
+   strcat(result,biomatter_param_filename.c_str());
+   strcat(result,":");
+   strcat(result,CORN::float32_to_cstr(org_N_kg_ha,3));
+   strcat(result," kg N/ha");
+   return result;
+}
+//_1998-12-28___________________________________________________________________
+void Organic_nitrogen_operation_abstract::log(std::ostream &log_file)    const
+{  CropSyst_field_operation_VX::log(log_file);
+   char buffer[255];                                                             //030123
+   log_file << v_org_N.log_cstr(buffer);
+   log_file << LABEL_org_N_appl_method << '=' << org_N_appl_method_labeled.get_label() << endl; //021105
+   log_file << v_NH3_N.log_cstr(buffer);                                         //030123
+   log_file << v_dry_matter.log_cstr(buffer);                                    //021105
+   log_file << v_long_term_org_N_volatilization_loss_percent.log_cstr(buffer);   //030123
+   log_file << "water_depth=" <<water_depth_mm << " mm" << std::endl;            //110816 added for CAFE dairy
+   log_file << "water_volume=" << water_volume_m3 << " m3" << std::endl;          //110816 added for CAFE dairy
+   log_file << "source=" << organic_matter_source_labeled.get_label() << std::endl;          //110816 added for CAFE dairy
+}
+//______________________________________________________________________________
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+void Organic_nitrogen_operation::log(std::ostream &log_file)             const
+{  Organic_nitrogen_operation_abstract::log(log_file);                           //080902
+   char buffer[255];                                                             //030123
+   //110831 moved to Organic_nitrogen_operation_abstract log_file << LABEL_org_N_source << '=' << org_N_source_labeled.get_label() << endl;     //021105
+   log_file << LABEL_org_N_volatilization_calculated <<'='  << org_N_volatilization_calculated << endl;
+   log_file << "carbon fraction" <<'=' << carbon_fraction << endl;
+   if (!decomposition_time_calculated)
+      log_file << v_decomposition_time_50.log_cstr(buffer);                      //030123
+   log_file << "form" << '=' << solid_liquid_form_labeled.get_label() << endl;   //021105
+}
+#endif
+//______________________________________________________________________________
+void Biomatter_application_operation::log(std::ostream &log_file)        const
+{  Organic_nitrogen_operation_abstract::log(log_file);
+   log_file << "biomatter="<<biomatter_param_filename<< endl;
+}
+//_2008-09-02___________________________________________________________________
+const char *Chemical_operation::label_cstr(char *result)                   const
+{  CropSyst_field_operation_VX::label_cstr(result);
+   // Not currently implemented
+   return result;
+}
+//______________________________________________________________________________
+void Chemical_operation::log(std::ostream &log_file)                     const
+{  CropSyst_field_operation_VX::log(log_file);
+}
+//______________________________________________________________________________
+ const char *N_application_soil_observation_mode::Split_application::label_cstr(char *result) const
+{  CropSyst_field_operation_VX::label_cstr(result);
+   strcat(result,TL_Percent_of_seasonal_application);                            //000613
+   char percent_str[10];
+   strcat(result," NO3: ");                                                      //000613
+   CORN_int16_to_str(percent_of_application,percent_str,10);
+   strcat(result," ");
+   strcat(result,percent_str);
+   strcat(result,"%");
+   // During runtime we will calculate the actual amount (this will not be printed in the parameter editor).
+   if (!CORN::is_approximately<float32>(actual_amount_NO3_kg_m2,0.0,0.000001))   //020314
+   {  strcat(result," (");
+      strcat(result,CORN::float32_to_cstr((float32)per_m2_to_per_ha(actual_amount_NO3_kg_m2),1));
+      strcat(result,") ");
+      strcat(result,TU_kg_ha);
+   }
+   strcat(result," NH4: ");                                                      //000613
+   CORN_int16_to_str(percent_of_application,percent_str,10);
+   strcat(result," ");
+   strcat(result,percent_str);
+   strcat(result,"%");
+   // During runtime we will calculate the actual amount (this will not be printed in the parameter editor).
+   if (!CORN::is_approximately<float32>(actual_amount_NH4_kg_m2,0.0,0.000001))   //020314
+   {  strcat(result," (");
+      strcat(result,CORN::float32_to_cstr((float32)per_m2_to_per_ha(actual_amount_NH4_kg_m2),1));
+      strcat(result,") ");
+      strcat(result,TU_kg_ha);
+   }
+
+   return result;
+}
+//______________________________________________________________________________
+void N_application_soil_observation_mode::Split_application::log(std::ostream &log_file) const
+{  CropSyst_field_operation_VX::log(log_file);
+   log_file << "percent_of_application=" << get_percent_of_application() << endl;
+   log_file << "amount" << per_m2_to_per_ha(actual_amount_NO3_kg_m2 + actual_amount_NH4_kg_m2) << " " << TU_kg_ha << endl;
+}
+//______________________________________________________________________________
+N_application_soil_observation_mode::N_application_soil_observation_mode()
+: N_application_soil_observation_mode_class()                                    //120711
+//CropSyst_field_operation_VX(CS_OP_MGMT_SOIL_N_SAMPLING /*120625 CS_OP_MGMT_AUTO_NO3_APPL*/)                          //120625_030824
+,automatic_N_mode_labeled(AUTO_NITRO_DISABLED)                                   //120711_020322
+,target_yield_N_uptake_kg_ha(0.0)                                                //990208
+,estimated_mineralization_kg_ha(0.0)                                             //120712
+,critical_soil_N_for_no_response_kg_ha(0.0)                                      //990208
+,fertilizer_use_efficiency(100.0)                                                //990208
+,soil_N_sampling_depth(1.0)                                                      //990208
+,split_applications(false)                                                       //020511
+,total_NO3_application_kg_m2(0.0)                                                //020314
+,v_target_yield_N_uptake(target_yield_N_uptake_kg_ha            ,UC_kg_ha    ,LABEL_target_yield_N_uptake              ,2,  0.0,0.0,99999.9,0.0,99999.9,TU_kg_ha,TL_Crop_N_uptake_for_target_yield)  //   kg/ha  Crop N uptake for target yield //990208
+,v_critical_soil_N_for_no_response(critical_soil_N_for_no_response_kg_ha,UC_kg_ha    ,LABEL_critical_soil_N_for_no_response  ,2,  0.0,0.0,99999.9,0.0,99999.9,TU_kg_ha,TL_Critical_soil_N)  //990208_
+,v_estimated_mineralization                (estimated_mineralization_kg_ha          ,UC_kg_ha    ,"estimated_mineralization",2,  0.0,0.0,99999.9,0.0,99999.9,TU_kg_ha,"Estimated mineralization during season") //120712
+,v_fertilizer_use_efficiency               (fertilizer_use_efficiency              ,UC_percent  ,LABEL_fertilizer_use_efficiency          ,1,100.0,0.0,  100.0,0.0,  100.0,TU_percent,TL_Fertilizer_use_efficiency)//        % 0-100 //990208
+,v_soil_N_sampling_depth                   (soil_N_sampling_depth                  ,UC_meter    ,LABEL_sampling_depth                     ,2,  1.0,0.0,    3.0,0.0,    4.0,TU_m,TL_Soil_N_sampling_depth)//040715
+{}
+//______________________________________________________________________________
+void N_application_soil_observation_mode::setup_parameters(CORN::Data_record &data_rec,bool for_write)
+{  CropSyst_field_operation_VX::setup_parameters(data_rec,for_write);
+   data_rec.expect_valid_float32(v_target_yield_N_uptake);                 //990208
+   data_rec.expect_valid_float32(v_estimated_mineralization);                    //120712
+   data_rec.expect_valid_float32(v_critical_soil_N_for_no_response);     //990208
+   data_rec.expect_valid_float32(v_fertilizer_use_efficiency);                   //990208
+/*120712
+   data_rec.expect_bool(LABEL_split_auto_NO3_applications_obsolete
+      ,split_applications,CROPSYST_VV_BOOL_FORM,"Obsolete, now using split_applications");   //020611
+*/
+   data_rec.expect_bool(LABEL_split_applications,split_applications,CROPSYST_VV_BOOL_FORM); //020611
+
+//021001      NOTE THIS IS NOT YET IMPLEMENTED, currently we only allow one set of split applications (for easy V3 compatibility)
+
+////*020617_*/    EXPECT_ENUMERATED_SECTION(LABEL_auto_NO3_application  ,auto_N_appl_section_VV                 ,auto_NO3_applications);
+}
+//_1997-07-09___________________________________________________________________
+const char *N_application_soil_observation_mode::label_cstr(char *buffer)  const
+{  strcat(buffer,TL_Soil_N_sampling_depth);
+   strcat(buffer," ");
+   strcat(buffer,CORN::float32_to_cstr(soil_N_sampling_depth,1));
+   strcat(buffer,". ");
+   strcat(buffer,TL_Total_seasonal_application);                                 //000613
+   strcat(buffer,": ");
+   if (CORN::is_approximately<float32>(total_NO3_application_kg_m2,0.0,0.000001))
+      strcat(buffer,"calculated when sampling is performed at runtime.");
+   else
+   {  strcat(buffer,CORN::float32_to_cstr(per_m2_to_per_ha(total_NO3_application_kg_m2),1));
+      strcat(buffer," ");
+      strcat(buffer,TU_kgN_ha);                                                  //000613
+   }
+   return buffer;
+}
+//_2002-03-11___________________________________________________________________
+void N_application_soil_observation_mode::log(std::ostream &log_file)    const
+{  CropSyst_field_operation_VX::log(log_file);
+   log_file << LABEL_automatic_N_mode /*"automatic_N_mode"*/ /*120711 LABEL_automatic_NO3_mode*/ << '=' << automatic_N_mode_labeled.get_label() << endl; //021105
+   char buffer[255];                                                             //030123
+   log_file << v_target_yield_N_uptake.log_cstr(buffer);                         //030123
+   log_file << v_estimated_mineralization.log_cstr(buffer);                     //120710
+
+
+   log_file << v_critical_soil_N_for_no_response.log_cstr(buffer);       //030123
+   log_file << v_soil_N_sampling_depth.log_cstr(buffer);                         //030123
+   log_file << v_fertilizer_use_efficiency.log_cstr(buffer);                     //030123
+   log_file << "total_NO3_application=" << per_m2_to_per_ha(total_NO3_application_kg_m2) << endl;
+   log_file << "total_NO3_application_units=" <<  TU_kgN_ha << endl;
+}
+//_2002-03-11___________________________________________________________________
+void Management_parameters::associate_with_crop(const void *crop)
+{  irrigation_operations             .associate_with((void *)crop);
+   inorganic_nitrogen_operations     .associate_with((void *)crop);
+   #if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   organic_nitrogen_operations       .associate_with((void *)crop);
+   #endif
+   biomatter_application_operations       .associate_with((void *)crop);         //080902
+   tillage_operations                .associate_with((void *)crop);
+   residue_operations                .associate_with((void *)crop);
+   chemical_operations               .associate_with((void *)crop);
+   harvest_or_clipping_operations    .associate_with((void *)crop);              //031414
+
+   auto_N_applications               .associate_with((void *)crop);
+   auto_irrigation_mode_operations   .associate_with((void *)crop);              //020313
+   auto_clip_biomass_mode_operations .associate_with((void *)crop);
+   #ifdef LADSS_MODE
+   LADSS_operations.associate_with((void *)crop);                                //030810
+   #endif
+}
+//_2001-01-09___________________________________________________________________
+int16 Management_parameters::total_automatic_N_applications()            const
+{  int16 total = 0;
+   FOR_EACH_IN(auto_N_split_event,Automatic_N_event,auto_N_applications,each_appl)   //030709
+      total += auto_N_split_event->get_percent_of_application();
+   FOR_EACH_END(each_appl);
+   return total;
+}
+//_2002-04-03___________________________________________________________________
+#define MANAGEMENT_PARAMETER_CHANGE_COUNT 4
+Section_entry_change management_parameter_changes[MANAGEMENT_PARAMETER_CHANGE_COUNT] =
+{  // NC indicates no change yet.
+   {CHANGE_V4,LABEL_automatic_nitrogen,LABEL_automatic_N_mode                ,LABEL_auto_N_1,LABEL_mode}
+,  {CHANGE_V4,LABEL_automatic_nitrogen,LABEL_target_yield_N_uptake             ,LABEL_auto_N_1,LABEL_target_yield_N_uptake}
+,  {CHANGE_V4,LABEL_automatic_nitrogen,LABEL_critical_soil_N_for_no_response ,LABEL_auto_N_1,LABEL_critical_soil_N_for_no_response}
+,  {CHANGE_V4,LABEL_automatic_nitrogen,LABEL_depth_obsolete                    ,LABEL_auto_N_1,LABEL_sampling_depth}
+}
+//______________________________________________________________________________
+Section_entry_change * Management_parameters::get_section_entry_changes(uint16 &count) const
+{  count = MANAGEMENT_PARAMETER_CHANGE_COUNT;
+  // The the file read is the current version, no need to set up changes (return 0 count)
+  uint8 option_version[3] = {  CS_VERSION_NUMBERS }
+  if ((option_version[0] == data_source_version.major)
+      && (option_version[1] == data_source_version.release)
+      && (option_version[2] == data_source_version.minor))
+      count = 0;
+   return management_parameter_changes;
+}
+//_2002-01-10___________________________________________________________________
+uint32 Management_parameters::irrigation_multiply_by(float32 multiplier)       modification_
+{  // This is used by Management generation when
+   // generating adjusted irrigation amounts
+   uint32 count = 0;
+   FOR_EACH_IN(irrig,Irrigation_operation,irrigation_operations,each_irrig)
+       count += irrig->multiply_amount_by(multiplier);
+   FOR_EACH_END(each_irrig);
+   FOR_EACH_IN(auto_irrig,Automatic_irrigation_mode,auto_irrigation_mode_operations,each_irrig)
+       count += auto_irrig->multiply_amount_by(multiplier);
+   FOR_EACH_END(each_irrig);
+   return count;
+}
+//_2007-07-16___________________________________________________________________
+uint32 Management_parameters::fertilization_nitrogen_multiply_by(float multiplier) modification_
+{  uint32 count = 0;
+   FOR_EACH_IN(inorg_N,Inorganic_nitrogen_operation,inorganic_nitrogen_operations,each_inorg_N)
+       count += inorg_N->multiply_amount_by(multiplier);
+   FOR_EACH_END(each_inorg_N);
+   #if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+   FOR_EACH_IN(org_N,Organic_nitrogen_operation,organic_nitrogen_operations,each_org_N)
+       count += org_N->multiply_amount_by(multiplier);
+   FOR_EACH_END(each_org_N);
+   #endif
+   FOR_EACH_IN(biomatter_op,Biomatter_application_operation,biomatter_application_operations,each_biomatter_op)   //080902
+       count += biomatter_op->multiply_amount_by(multiplier);                    //080902
+   FOR_EACH_END(each_biomatter_op);                                              //080902
+//080829 NYI   May need to do this also for new manure application
+   return count;
+}
+//_2007-07-16___________________________________________________________________
+} // namespace CropSyst
+
+//060306 1353 lines
+//060322 1166 lines
+#endif
+

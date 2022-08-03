@@ -1,0 +1,642 @@
+
+#  ifndef compareHPP
+#     include "corn/math/compare.hpp"
+#  endif
+//170525 #  include "corn/datetime/date.hpp"
+//170525 #  include "corn/datetime/datetime64.h"
+#include "corn/chronometry/date_time_64.h"
+#  include "corn/OS/directory_entry_name.h"
+#  include "corn/metrology/units_symbology.h"
+#include <stdlib.h>
+#include "corn/data_source/vv_entry.h"
+#include "corn/tabular/tabular.h"
+
+namespace CORN {
+//______________________________________________________________________________
+VV_entry_item::VV_entry_item()
+: Association()
+, encountered(false)
+{}
+//_2009-04-14___________________________________________________________________
+VV_base_entry::VV_base_entry
+(const char *_key
+,nat16 _max_strlen                                                               //010104
+,const char * _annotation1
+,const char * _annotation2)
+:variable(_key)                                                                  //980209
+,max_strlen(_max_strlen)                                                         //010103
+,annotation1(_annotation1 ? _annotation1 : "")
+,annotation2(_annotation2 ? _annotation2 : "")
+,validation_status(0)                                                            //050517
+{}
+//______________________________________________________________VV_base_entryX__/
+void append_annotation_to(const std::string &annotation,std::string &buffer)
+{  if (annotation.length())
+   {  buffer.append(" ");
+      buffer.append(annotation);
+   }
+}
+//_2015-07-31___________________________________________________________________
+
+//130217 continue here, should be able to use the new Container::Format
+/*170424
+const char *VV_base_entry::label_cstr(char *buffer)                        const
+{  // this function is obsolete, caller should be using label_string
+   strcpy(buffer,variable.c_str());                                              //981011
+   strcat(buffer,"=");                                                           //981011
+   std::string value_buffer;                                                     //150731
+   append_to_string(value_buffer);                                               //150731
+   append_annotation_to(annotation1,value_buffer);                               //150731_981011
+   append_annotation_to(annotation2,value_buffer);                               //150731_981011
+   strcat(buffer,value_buffer.c_str());                                           //150803
+   return buffer;
+}
+//______________________________________________________________________________
+*/
+const char *VV_base_entry::label_string(std::string &buffer)               const
+{  buffer += variable;
+   buffer += "=";
+   append_to_string(buffer);
+   append_annotation_to(annotation1,buffer);
+   append_annotation_to(annotation2,buffer);
+   return buffer.c_str();
+}
+//_2017-04-23___________________________________________________________________
+bool VV_base_entry::write(std::ostream &f)                         modification_ //150728
+{
+   /*170424
+   char buffer[1000]; buffer[0] = 0;                                            //150909
+   f << label_cstr(buffer)
+   */
+   std::string buffer;                                                           //170424
+   f << label_string(buffer)
+    //160602 shouldn't be needed because entries container already has new line delimiter << std::endl
+     ;
+    return true;                                                                 //150728
+}
+//______________________________________________________________________________
+const char *VV_base_entry::get_key()                                       const
+{   return variable.c_str();
+}
+//_2003-01-17_________________________________________________________get_key__/
+const char *VV_Section::get_key()                                          const
+{   return section_label.c_str();
+}
+//_2003-01-17___________________________________________________________________
+VV_unexpected_entry::VV_unexpected_entry
+(const char *_key
+,const std::string &_value
+,const char * _annotation1
+,const char * _annotation2)
+: VV_base_entry(_key
+,0 // This does not apply. In the future this may be a blob though which we
+   // could expect a length //010104
+,_annotation1,_annotation2)
+, value(_value)
+{}
+//_1997-06-22______________________________________________VV_unexpected_entry_/
+const std::string &VV_unexpected_entry::append_to_string(std::string &buffer)         const
+{  buffer = value;
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_string_entry::VV_string_entry
+(const char *_key
+,modifiable_ std::string &_value                                                 //111104
+,nat16 _max_strlen                                                               //010104
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry (_key,_max_strlen,_annotation1 ,_annotation2 )                   //970622
+, value(_value)                                                                  //970622
+{}
+//_1997-06-22__________________________________________________VV_string_entry_/
+const std::string &VV_string_entry::append_to_string(std::string &buffer)        const
+{  buffer.append(value);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_directory_entry_entry::VV_directory_entry_entry
+(const char *_key
+,modifiable_ OS::Directory_entry_name &_value
+,nat16 _max_strlen
+,const char * _annotation1
+,const char * _annotation2)
+: VV_base_entry(_key,_max_strlen,_annotation1 ,_annotation2 )
+, value(_value)
+{}
+//_2012-04-13___________________________________________________________________
+#ifndef _MSC_VER
+VV_char_array_entry::VV_char_array_entry
+(const char *_key
+,modifiable_ char *_value
+,nat16 _max_strlen                                                               //010104
+,const char * _annotation1
+,const char * _annotation2)
+: VV_base_entry (_key,_max_strlen,_annotation1 ,_annotation2 )                   //970622
+, value(_value)                                                                  //970622
+{}
+//_1997-09-30______________________________________________VV_char_array_entry_/
+const std::string &VV_char_array_entry::append_to_string(std::string &buffer) const
+{  buffer.append(value);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+#endif
+//______________________________________________________________________________
+VV_int8_entry::VV_int8_entry
+(const char *_key
+,modifiable_ int8 &_value
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,4,_annotation1 ,_annotation2 )
+, value(_value)
+{}
+//_1998-04-05____________________________________________________VV_int8_entry_/
+bool VV_int8_entry::set_str(const char *value_str)
+{  int value_32 = atoi(value_str);                                               //020329
+   value = (int8)value_32;                                                       //020329
+   return true;
+}
+//_2001-01-03__________________________________________________________________/
+const std::string &VV_int8_entry::append_to_string(std::string &buffer)    const
+{  if (tabular_column)
+         append_int8_to_string
+         (value,buffer,10,tabular_column->get_field_width(),' ');
+   else  append_int8_to_string(value,buffer,10);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_nat8_entry::VV_nat8_entry
+(const char *_key,modifiable_ nat8 &_value,nat8 _radix
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,5,_annotation1 ,_annotation2 )
+, value(_value)
+, radix(_radix)
+{}
+//_1997-06-22___________________________________________________VV_nat8_entry__/
+bool VV_nat8_entry::set_str(const char *value_str)
+{  nat8  temp8= (nat8)cstr_to_nat32(value_str,get_radix());
+   value = temp8;                                                                //010623
+   return true;
+}
+//_2001-01-03__________________________________________________________________/
+const std::string &VV_nat8_entry::append_to_string(std::string &buffer)    const
+{  if (tabular_column)                                                           //070524
+      append_nat8_to_string                                                      //140210
+      ((nat32) value,buffer,radix,tabular_column->get_field_width(),' ');        //140529_070524
+   else  append_nat8_to_string((int32)value,buffer,radix);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_byte_entry::VV_byte_entry
+(const char *_key, modifiable_ unsigned char &_value
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,1,_annotation1 ,_annotation2 )
+, value(_value)
+{}
+//______________________________________________________________VV_byte_entry__/
+bool VV_byte_entry::set_str(const char *value_str)
+{  value = (unsigned char)(value_str[0]);
+   return true;
+}
+//_2001-01-03__________________________________________________________________/
+const std::string &VV_byte_entry::append_to_string(std::string &buffer)    const
+{  char result_str[2];
+   result_str[1] = 0; result_str[0] = value;
+   buffer.append(result_str);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_bool_entry::VV_bool_entry
+(const char *_key
+,modifiable_ bool &_value
+,Form    _text_form                                                              //010104
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,1,_annotation1 ,_annotation2 )
+, value(_value)
+, text_form(_text_form)                                                          //010104
+{}
+//_1997-06-22___________________________________________________VV_bool_entry__/
+bool VV_bool_entry::set_str(const char *value_str)
+{  value = false;
+   size_t value_length = strlen(value_str);
+   if (value_length)
+   {  switch (value_str[0])
+      {  case 't' : case 'T' : // Handles "t" "T" "true" "True" "TRUE"
+            value = true; break;
+         case 'f' : case 'F' : // Handles "f" "F" "false" "False" "FALSE"
+            value = false; break;
+         case 'o' : case 'O' : // Handles "on" "On" "ON" "off" "OFF" "Off"
+            value = (value_str[1] == 'n') || (value_str[1] == 'N'); break;
+         default : // Handles 0 1
+            value = atoi(value_str); break;
+      }
+   }
+   return true;
+}
+//_2001-01-03_1998-05-11_______________________________________________________/
+const std::string &VV_bool_entry::append_to_string(std::string &buffer)    const
+{  std::string bool_value;
+   bool_value = value ? "1" : "0";
+      switch (text_form)
+      {  case form_1    : bool_value =(value? "1" : "0"); break;
+         case form_t    : bool_value =(value? "t" : "f"); break;
+         case form_T    : bool_value =(value? "T" : "F"); break;
+         case form_true : bool_value=(value? "true" : "false"); break;
+         case form_True : bool_value=(value? "True" : "False"); break;
+         case form_TRUE : bool_value=(value? "TRUE" : "FALSE"); break;
+      }
+   buffer.append(bool_value);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_int16_entry::VV_int16_entry
+(const char *_key,modifiable_ int16 &_value
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,6,_annotation1 ,_annotation2 )
+, value(_value)
+{}
+//_1997-06-22__________________________________________________VV_int16_entry__/
+bool VV_int16_entry::set_str(const char *value_str)
+{  value = (int16)atoi(value_str);
+   // this won't work if we allow other radix/*050517*/     if (!is_number(value_str)) valid = false;
+   return true;
+}
+//_2001-01-03__________________________________________________________________/
+const std::string &VV_int16_entry::append_to_string(std::string &buffer)   const
+{  if (tabular_column)
+         append_int16_to_string
+         ((int32) value,buffer,10,tabular_column->get_field_width(),' ');
+   else  append_int16_to_string(value,buffer,10);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_nat16_entry::VV_nat16_entry
+(const char *_key,modifiable_ nat16 &_value,nat8 _radix
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,5,_annotation1 ,_annotation2 )
+, value(_value)
+, radix(_radix)
+{}
+//_1997-06-22__________________________________________________VV_nat16_entry__/
+bool VV_nat16_entry::set_str(const char *value_str)
+{  nat32  temp32 = cstr_to_nat32(value_str,get_radix());
+   set((nat16)temp32);                                                           //000926
+   // this won't work if we allow other radix  if (!is_number(value_str)) valid = false;
+   return true;
+}
+//_2001-01-03_________________________________________VV_nat16_entry::set_str__/
+const std::string &VV_nat16_entry::append_to_string(std::string &buffer)   const
+{  if (tabular_column)
+      append_nat16_to_string
+      ((nat32) value,buffer,radix,tabular_column->get_field_width(),' ');
+   else
+      append_nat16_to_string((int32)value,buffer,radix);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_int32_entry::VV_int32_entry
+(const char *_key,modifiable_ int32 &_value
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,11,_annotation1 ,_annotation2 )
+, value(_value)
+{}
+//_________________________________________________VV_int32_entry_constructor__/
+bool VV_int32_entry::set_str(const char *value_str)
+{  value = atol(value_str);
+   // this won't work if we allow other radix/*050517*/     if (!is_number(value_str)) valid = false;
+   return true;                                                                  //090414
+}
+//_2001-01-03_________________________________________VV_int32_entry::set_str__/
+const std::string &VV_int32_entry::append_to_string(std::string &buffer)   const
+{  if (tabular_column)
+      append_int32_to_string
+      (value,buffer,10,tabular_column->get_field_width(),' ');
+   else append_int32_to_string(value,buffer,10);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_nat32_entry::VV_nat32_entry
+(const char *_key,modifiable_ nat32 &_value,nat8 _radix
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,10,_annotation1 ,_annotation2 )
+, value(_value)
+, radix(_radix)                                                                  //000926
+{}
+//_________________________________________________VV_nat32_entry_constructor__/
+bool VV_nat32_entry::set_str(const char *value_str)
+{  value = cstr_to_nat32(value_str,get_radix());
+// this won't work if we allow other radix/*050517*/     if (!is_number(value_str)) valid = false;
+   return true;
+}
+//_2001-01-03________________________________________VV_nat32_entry::set_str__/
+const std::string &VV_nat32_entry::append_to_string(std::string &buffer)   const
+{  if (tabular_column)
+      append_nat32_to_string
+        ((nat32) value,buffer,radix ,tabular_column->get_field_width(),' ');
+   else append_nat32_to_string(value,buffer,radix);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_float32_entry::VV_float32_entry
+(const char *_key,modifiable_ float32 &_value
+,const char * _annotation1,const char * _annotation2)
+: VV_base_entry(_key,10,_annotation1 ,_annotation2 )
+, value(_value)
+{}
+//_1997-06-22________________________________________________VV_float32_entry__/
+bool VV_float32_entry::set_str(const char *value_str)
+{  value = (float32)atof(value_str);
+   set_validation_status(!is_number_cstr(value_str) ? missing_status : good_status);  //160215_050517
+   return true;                                                                  //090414
+}
+//_2001-01-03_______________________________________VV_float32_entry::set_str__/
+const std::string &VV_float32_entry::append_to_string(std::string &buffer)         const
+{  char result_str[50];
+   if (tabular_column)
+      float32_to_cstr_formated(value, result_str
+         ,tabular_column->get_field_width(),tabular_column->get_precision(),'.',false);
+   else strcpy(result_str,float32_to_cstr(value,8));
+       // float32 is precise to only about 7 digits
+   buffer.append(result_str);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_float64_entry::VV_float64_entry
+(const char *_key,modifiable_ float64 &_value
+,const char * _annotation1,const char * _annotation2 )
+: VV_base_entry(_key,16,_annotation1 ,_annotation2 )
+, value(_value)
+{}
+//_1997-06-22_________________________________________________VV_float64_entry_/
+bool VV_float64_entry::set_str(const char *value_str)
+{  value = cstr_to_float64(value_str);
+   set_validation_status(!is_number_cstr(value_str) ? missing_status : good_status);  //160214050517
+   return true;                                                                  //090414
+}
+//_2001-01-03________________________________________VV_float64_entry::set_str_/
+const std::string &VV_float64_entry::append_to_string(std::string &buffer) const
+{  char result_str[20]; result_str[0] = 0;                                       //140909
+   if (tabular_column)
+       float64_to_cstr_formated(value, result_str
+       , tabular_column->get_field_width(),  tabular_column->get_precision(),'.' ,false);
+   else
+       strcpy(result_str,float32_to_cstr(value,10));
+   buffer.append(result_str);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+
+VV_date_entry::VV_date_entry
+(const char *_key,modifiable_ CORN::/*Date*/Date_32_clad &_value,bool _formatted,sint16 _year_offset
+, const char * _annotation1 ,const char * _annotation2 )
+: VV_base_entry (_key,_value.as_string().length(),_annotation1,_annotation2)     //140615_030801
+, value(_value)                                                                  //021212
+, formatted(_formatted)                                                          //050412
+, year_offset(_year_offset)
+{}
+//_1997-06-22___________________________________________________VV_date_entry__/
+bool VV_date_entry::set_str(const char *value_str)
+{  if (formatted) value.set_c_str(value_str);
+   else           value.set_date32(atol(value_str));                             //050412
+   if (year_offset)                                                              //120331
+      value.set_year(value.get_year()%100 + year_offset);                        //120331
+   return true;
+}
+//_2001-01-03__________________________________________VV_date_entry::set_str__/
+const std::string &VV_date_entry::append_to_string(std::string &buffer)    const
+{  append_int32_to_string(value.get_date32(),buffer);       //170601
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+long VV_date_entry::get_days_between(const CORN::Date_const_interface /*170601 Date */ &date2,bool inclusive) const
+{   return value.days_between(
+    //170601  #ifndef OLD_DATE
+    //  (const Date_time &)
+    //  #endif
+      date2,inclusive);               //170430
+}
+//_2003-04-28___________________________________________________________________
+const Date_format &VV_date_entry::set_cstr(const char *format_string) modification_
+{  //170601 TODO: Roger check //value.format.set_cstr(format_string);
+   return *value.format;
+}
+// 2014-11-20__2011-08-12__________________________________________________________________/
+VV_datetime64_entry::VV_datetime64_entry
+(const char *_key,modifiable_ CORN::Date_time_64_clad /*170525 Date_time_64*/ &_value,bool _formatted,sint16 _year_offset
+,const char * _annotation1 ,const char * _annotation2 )
+: VV_base_entry
+   (_key
+   ,30                                                                           //140616
+   ,_annotation1,_annotation2 )                                                  //030801
+, value(_value)                                                                  //021212
+, formatted(_formatted)                                                          //050412
+, year_offset(_year_offset)
+{}
+//_1997-06-22_____________________________________________VV_datetime64_entry__/
+bool VV_datetime64_entry::set_str(const char *value_str)
+{  if (formatted) value.set_c_str(value_str);
+   else           value.set_datetime64(atof(value_str));  // atof converts to double (might not be the case in old compilers!)   //050411
+   if (year_offset)                                                              //120331
+      value.set_year(value.get_year()%100 + year_offset);                        //120331
+   set_validation_status(!is_number_cstr(value_str) ? missing_status : good_status);  //160215_050517
+   return true;                                                                  //090414
+}
+//_2001-01-03____________________________________VV_datetime64_entry::set_str__/
+bool VV_datetime64_entry::set_cstr
+(const char *date_format_string
+,const char *time_format_string)                                   modification_
+{
+/*170525
+   return value.date_format.set_cstr(date_format_string)                         //141120
+      ||  value.time_format.set_cstr(time_format_string);                        //141120
+*/
+          date_format.set_cstr(date_format_string)                         //170525_141120
+      ||  time_format.set_cstr(time_format_string);                        //170525_141120
+   value.prefer_date_format(&date_format);                                        //170525
+   value.prefer_time_format(&time_format);                                        //170525
+   return true;
+}
+// 2011-08-12__________________________________________________________________/
+const std::string &VV_datetime64_entry::append_to_string(std::string &buffer) const
+{  append_float64_to_string(value.get_datetime64(), 30,buffer);
+   buffer.append(" (");
+   value.append_to_string(buffer);
+   buffer.append(")");
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+
+VV_enum_entry::VV_enum_entry
+(const char* _key,Labeled_enum &_labeled_enum
+,const char* _annotation1, const char* _annotation2)
+: VV_base_entry(_key,80,_annotation1, _annotation2)
+, labeled_enum(_labeled_enum)
+{   // Now determine the actual max_strlen from the label table
+    max_strlen = labeled_enum.get_max_label_length();                            //050929
+}
+//_1997-07-09___________________________________________________VV_enum_entry__/
+void VV_enum_entry::set(const char *_value_label)
+{   labeled_enum.set_label(_value_label);                                        //020322
+}
+//_1997-07-09___________________________________________________________________
+bool VV_enum_entry::set_str(const char *value_str)
+{  set(value_str);
+   return true;
+}
+//_2001-01-03__________________________________________VV_enum_entry::set_str__/
+const std::string &VV_enum_entry::append_to_string(std::string &buffer)    const
+{  buffer.append(labeled_enum.get_label());
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_units_entry::VV_units_entry(const char *_key,Units_clad &_units_code)
+: VV_base_entry(_key,80,"","")
+, units_code(_units_code)
+{}
+//_____________________________________________________________VV_units_entry__/
+void VV_units_entry::set(Units_code _code)
+{  units_code.set(_code);
+}
+//______________________________________________________________________________
+bool VV_units_entry::set_str(const char *_units_text)
+{  units_code.set(CORN::units_identify_code(_units_text));
+   return true;
+}
+//____________________________________________________VV_units_entry::set_str__/
+const std::string &VV_units_entry::append_to_string(std::string &buffer)   const
+{  char description_cstr[100];
+   char abbreviation_cstr[100];
+   bool composed = units_code.compose_description(description_cstr,abbreviation_cstr);
+   if (composed)
+      buffer.append(abbreviation_cstr);
+   else
+   {  // use hexidecimal  Actually would prefer a descriptive units abbreviation
+      // but this is a stop gap measure
+      description_cstr[0] = '0';
+      description_cstr[1] = '0';
+      CORN::nat32_to_cstr(units_code.get(),description_cstr+2,16);
+      buffer.append(description_cstr);
+   }
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+VV_Section::VV_Section(const std::string &_section_label)
+:Association()
+,section_label(_section_label)                                                   //980209
+,entries()
+{}
+//______________________________________________________________________________
+/*170424
+const char *VV_Section::label_cstr_deprecated(char *buffer)                           const
+{
+  // caller should now be using label_string
+  strcpy(buffer,"[");
+  strcat(buffer,section_label.c_str());
+  strcat(buffer,"]");
+  return buffer;
+}
+//______________________________________________________________________________
+*/
+const char *VV_Section::label_string(std::string &buffer)                  const
+{ buffer += "[";
+  buffer += section_label;
+  buffer += "]";
+  return buffer.c_str();
+}
+//______________________________________________________________________________
+bool VV_Section::write(std::ostream &f)                            modification_ //150728
+{  nat32 written = 0;                                                            //150728
+   if (!entries.is_empty())                                                      //040109
+   {
+//170423 #ifdef __unix
+//170423      // Not sure why label is not working in UNIX
+     f << '[' <<  section_label << ']' << std::endl;
+//170423 #else
+//170423      char buffer[255];
+//170423      f << label_cstr(buffer) << std::endl;
+//170423 #endif
+     written = entries.write(f);                                                 //150728
+   }
+   return written;                                                               //150728
+}
+//______________________________________________________________________________
+VV_base_entry *VV_Section::set_entry
+(const char *key                                                                 //030117
+,const char *value                                                               //030117
+,bool unexpected_only)
+{  VV_base_entry *expected_entry = (VV_base_entry *)(entries.find_cstr(key));
+   if (expected_entry)
+   {  if (!unexpected_only)
+         expected_entry->set_str(value);                                         //030117
+   } else entries.append(expected_entry = (new VV_unexpected_entry(key,value))); //090306
+   expected_entry->set_encountered(true);                                        //121221
+   return expected_entry;                                                        //090306
+}
+//_1998-04-26___________________________________________________________________
+bool VV_Section::was_entry_encountered(const char *entry_name)             const
+{  VV_base_entry *entry = (VV_base_entry *)entries.find_cstr(entry_name);
+   bool entry_encountered = (entry && entry->was_encountered());
+   return entry_encountered;
+}
+//_2005-09-27___________________________________________________________________
+void VV_directory_entry_entry::set
+(const OS::File_name &_value)
+{ value.set_cstr(_value.c_str()); }
+//______________________________________________________________________________
+void VV_directory_entry_entry::set(const std::string &_value)
+{  value.set_cstr(_value.c_str());
+}
+//_1999-08-24___________________________________________________________________
+bool VV_directory_entry_entry::set_str(const char *value_str)
+{ value.set_cstr(value_str); return true;}
+//_2001-01-03___________________________________________________________________
+const std::string &VV_directory_entry_entry::append_to_string(std::string &buffer)         const
+{  value.append_to_string(buffer);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+
+void VV_date_entry::set(const CORN::Date_const_interface /*170525 Date */ &_value)
+{ value.set(_value);}
+//______________________________________________________________________________
+void VV_datetime64_entry::set(const CORN::Date_time_interface /*170601 Date_time_64*/ &_value)
+{ value.set_datetime64(_value.get_datetime64()); }
+//______________________________________________________________________________
+
+#if (!__BCPLUSPLUS__ || (__BCPLUSPLUS__ > 0x340))
+VV_parameter_entry::VV_parameter_entry(Parameter_abstract &_parameter)
+: VV_abstract_entry()
+, parameter(_parameter)
+{}
+//______________________________________________________________________________
+const char *VV_parameter_entry::get_key()                                  const
+{ return parameter.properties.name_long; }
+//______________________________________________________________________________
+bool VV_parameter_entry::set_str(const char *value_cstr)           modification_
+{ return parameter.set_str(value_cstr); }
+//______________________________________________________________________________
+bool VV_parameter_entry::write(std::ostream &  f)                   performs_IO_ //150728
+{  std::string buffer;
+   parameter.append_VV_to(buffer); // Buffer will include endl;                      //170523
+   f << buffer;
+   return true;                                                                  //150728
+}
+//______________________________________________________________________________
+nat16 VV_parameter_entry::get_max_strlen()                                 const
+{ return parameter.format.field_width; }
+//_2011-11-07___________________________________________________________________
+unsigned char VV_parameter_entry::get_type()                               const
+{  const Parameter_number *parameter_number
+      = dynamic_cast<const Parameter_number *>(&parameter);
+   return                                                                        //120723
+      (parameter_number)
+      ? parameter_number->get_mode()
+      : DT_not_assigned;
+}
+//_2011-11-07___________________________________________________________________
+const std::string &VV_parameter_entry::append_to_string(std::string &buffer) const
+{  parameter.get_value_as_string(buffer);
+   return buffer;
+}
+//_2014-06-15___________________________________________________________________
+#endif
+} // namespace CORN

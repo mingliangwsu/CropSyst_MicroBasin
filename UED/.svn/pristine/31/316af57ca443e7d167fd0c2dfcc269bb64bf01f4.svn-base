@@ -1,0 +1,96 @@
+#include "UED/library/record.h"
+//170525 #include "corn/datetime/datetime64.h"
+#include "corn/chronometry/date_time_64.h"
+#include "corn/format/binary/binary_file_interface.h"
+namespace UED {
+//______________________________________________________________________________
+bool Smart_record_code::get_timestamp
+   (CORN::Datetime64 target_date_time_64
+   ,CORN::Datetime64 &timestamp_date_time)
+{  CORN::Date_time_64_clad /*170525 Date_time_64*/ target_date_time(target_date_time_64);                     //030714
+   CORN::Date_time_64_clad /*170525 Date_time_64*/ time_stamp(0);                                             //030714
+   // Given a date/tim this method deterines a record time stamp for the specified record_type
+   bool result = false;
+   if (has_year_time_stamp())
+   {  time_stamp.set_year(target_date_time.get_year());
+      time_stamp.set_DOY(1);
+      result = true;
+   } else if (has_date_time_stamp())
+   {  time_stamp.set_YD(target_date_time.get_year(),target_date_time.get_DOY()); //030714
+      result = true;
+   } else if (has_time_time_stamp())
+      time_stamp.set_datetime64(target_date_time_64);                            //030714
+   timestamp_date_time = time_stamp.get_datetime64();                            //030714
+   return result;
+};
+//_1998-01-14___________________________________________________get_timestamp__/
+bool Record_base::read_body(CORN::Binary_file_interface &parent_database)
+{  if (rec_length)        // This is the default read_body that simply reads an arbitrary blob
+   {  std::string buffer;
+      parent_database.read_string(buffer,CORN::ASCII_string,rec_length);
+      unknown_data.assign(buffer);
+   }
+   return true;
+}
+//_2003-01-25__1997-11-04___________________________________________read_body__/
+void Record_base::write_body(CORN::Binary_file_interface&parent_database)
+{  //050601  May need to always recompute rec_length (because we may add things in Geolocation record
+   rec_length=compute_record_body_size() ;              // This line probably not needed because we should have already updated record_length when writing the header
+   if (rec_length)
+   {  // Make sure data is no more or no less than specified length
+     parent_database.write_string(unknown_data,CORN::ASCII_string);              //100114
+   }
+}
+//_1997-11-04______________________________________________________write_body__/
+Record_base::Record_base(CORN::Record_code record_type_code)
+:Record_type_distinguisher_interface()
+,CORN::Binary_record(record_type_code,0)
+,unknown_data()
+{  // Since we are creating a record, we presume it to be modified so it will be written when disposed.
+   set_modified(true);                                                           //000711
+   in_memory_ = true;                                                            //100202
+}
+//______________________________________________________________________________
+Record_base::Record_base(const Record_base &from_copy)
+:Record_type_distinguisher_interface(from_copy)
+,CORN::Binary_record(from_copy)
+,unknown_data(from_copy.unknown_data)
+{  // Since we are creating a record, we presume it to be modified so it will be written when disposed.
+    set_modified(true);
+   in_memory_ = true;                                                            //100202
+}
+//_2005-01-28___________________________________________________________________
+Record_base::~Record_base()
+{}
+//_1997-11-04___________________________________________________________________
+Record_base *Record_base::clone()                                          const
+{  return new Record_base(*this); }
+//_2014-01-16___________________________________________________________________
+#ifdef UED_DUMP
+using namespace std;
+void Record_base::dump(std::ostream &txt_strm)
+{
+   CORN::Binary_record::dump(txt_strm);
+   if (is_standard())            txt_strm << "| standard";
+   if (is_control())
+   {                             txt_strm << "| is control";
+      if (is_global_control())   txt_strm << "| global control";
+   }
+   if (has_data())
+   {  if (is_data_set())         txt_strm << "| data set record ";
+      if (is_data_scalar())      txt_strm << "| data scalar";
+      if (is_data_vector())      txt_strm << "| data vector";
+      /* if (is????())*/         txt_strm << "| time stamped";
+      if (get_time_stamp_code()) txt_strm << "| time stamp code";
+      if (has_year_time_stamp()) txt_strm << "| has year time stamp";
+      if (has_date_time_stamp()) txt_strm << "| has date time stamp";
+      if (has_time_time_stamp()) txt_strm << "| has time time stamp";
+      if (has_variable_code())   txt_strm << "| has_variable code";
+      if (has_units_code())      txt_strm << "| has units code";
+   }
+   txt_strm << std::endl;
+}
+#endif
+//_______________________________________________________________________dump__/
+} // namespace UED
+

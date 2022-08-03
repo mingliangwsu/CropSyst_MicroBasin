@@ -1,0 +1,203 @@
+#ifndef directory_entry_name_abstractH
+#define directory_entry_name_abstractH
+#include <string>
+#include "corn/OS/directory_entry_name.h"
+#include "corn/OS/file_system_types.h"
+#include "corn/string/strconv.hpp"
+//_Forward declarations_________________________________________________________
+namespace CORN {
+   class Text_list;
+namespace OS {
+//______________________________________________________________________________
+class Extension
+: public std::wstring
+{public:
+   inline Extension(const char *ext)
+      {  CORN::string_to_wstring(ext,*this); }
+   inline Extension(const wchar_t *ext)
+      : std::wstring(ext)
+      {}
+   inline Extension(const std::string &ext)
+      : std::wstring()
+      {  CORN::string_to_wstring(ext,*this); }
+   inline Extension(const std::wstring &ext)
+      : std::wstring(ext)
+      {  }
+};
+//_2012-03-21__________________________________________________________________/
+class Drive_designator
+: public std::wstring
+{public:
+   inline Drive_designator(const char *drive_designator)
+      {  CORN::string_to_wstring(drive_designator,*this); }
+   inline Drive_designator(const wchar_t *drive_designator)
+      : std::wstring(drive_designator)
+      {}
+   inline Drive_designator(const std::string &drive_designator)
+      : std::wstring()
+      {  CORN::string_to_wstring(drive_designator,*this);
+      }
+};
+//_2012-04-30__________________________________________________________________/
+class Directory_entry_name_abstract    
+: public implements_ Directory_entry_name
+, public extends_ std::wstring
+{  // Implements/Recognizes file and directory names from various OS.
+/*
+consider making this a recursive definition
+where the directory will either have a directory entry name path (owned or unowned), or
+it will have a designator and rooted or not
+*/
+ protected:
+   // In the case of the derived class Directory_entry_name_concrete
+   // The name and ext  will be 0 until the path is extracted (they are contributes)
+   // And the superclass wstring is the store of the fully qualified name.
+   // In the case of Directory_entry_name these are the store of the name
+   // and extension (contributes) and the superclass wstring is composition buffer.
+   contribute_ std::wstring  name; // A valid filename or a special indicator I.e. <unnamed>
+   contribute_ std::wstring  extension; // without .
+   contribute_ bool           root;
+   provided_   wchar_t        preferred_separator;                               //140202
+   contribute_ Directory_entry_type identified_type;                             //131120
+ protected:
+   contribute_ std::string return_buffer_ASCII;
+ protected:
+   Directory_entry_name_abstract();
+      // The default constructor is used only by derived class
+ public: // 'structors
+   Directory_entry_name_abstract
+      (const char         *raw_name
+      ,Directory_entry_type type = unknown_entry);
+   Directory_entry_name_abstract
+      (const wchar_t      *raw_name /*130821 =0*/
+      ,Directory_entry_type type = unknown_entry);//120202
+   Directory_entry_name_abstract
+      (const std::string  &raw_name
+      ,Directory_entry_type type = unknown_entry);
+   Directory_entry_name_abstract
+      (const std::wstring &raw_name
+      ,Directory_entry_type type = unknown_entry);
+//NYN   Directory_entry_name_abstract(const std::string  *raw_name);                  //120
+//NYN   Directory_entry_name_abstract(const std::wstring &raw_name);
+   Directory_entry_name_abstract                                                 //091107
+      (const std::wstring &_name
+      ,const std::wstring &_extension
+      ,Directory_entry_type = file_entry);
+   Directory_entry_name_abstract                                                 //100214
+      (const wchar_t *_name
+      ,const wchar_t *_extension
+      ,Directory_entry_type = file_entry);
+   Directory_entry_name_abstract                                                 //100214
+      (const char *_name
+      ,const char *_extension
+      ,Directory_entry_type = file_entry);
+   Directory_entry_name_abstract                                                 //130905
+      (const char *_name
+      ,const std::wstring &_extension
+      ,Directory_entry_type = file_entry);
+   Directory_entry_name_abstract
+      (const Directory_entry_name &raw_name
+      ,Inclusion inclusion = CORN::OS::Directory_entry_name::include_copy
+      ,Directory_entry_type type = unknown_entry);
+   Directory_entry_name_abstract                                                 //120321
+      (const Directory_entry_name &raw_name
+      ,const Extension &extension
+      ,Directory_entry_type = file_entry);
+      //< Use this constructor to create an copy of the name replacing the extension.
+   virtual ~Directory_entry_name_abstract();
+public:
+   virtual const std::wstring &get_Windows_representation(std::wstring &buffer) const;
+   virtual const std::wstring &get_Unix_representation
+      (std::wstring &buffer,bool represent_any_drive_designator_to_root)   const;
+   virtual const char *c_str()                                             const;
+   virtual const wchar_t *w_str()                                          const;
+   virtual const char *get_key()                                           const;//030109
+public: // queries
+   virtual bool has_name(bool must_be_valid = false)                affirmation_;//160121_980919
+   virtual bool has_extension_any(bool must_be_valid = false)       affirmation_;//160121_980919
+   virtual bool has_path()                                          affirmation_;//980919
+      ///< Returns true if the filename has a path
+   virtual bool has_extension_ASCII(const_ASCIIz valid_ext)          affirmation_;//990726
+   virtual bool has_extension_Unicode(const_Unicodez valid_ext)      affirmation_;//120209
+   virtual bool is_valid_name_component(const std::wstring &name_component) affirmation_; //160121
+public: // Queries
+   virtual bool is_in_root()                                        affirmation_;//090925
+   virtual bool is_root()                                           affirmation_;//090925
+   virtual bool has_parent_directory()                              affirmation_;//120529
+   virtual bool is_qualified                                                     //020503
+      (bool and_fully_qualified_with_drive_designator = true)       affirmation_;
+      ///< Returns true if the filename has a path with drive designator
+   virtual int compare_including
+      (const Directory_entry_name &other
+      ,CORN::OS::Inclusion inclusion = include_all )                       const;
+      /// < lexicorigraphically compares the respective selected elements specified in the inclusion.
+   virtual Directory_entry_type get_type()                                 const;
+   virtual bool is_directory()                                      affirmation_;//120214
+   virtual bool is_file()                                           affirmation_;//120212
+public: // name composition  (implements Directory_entry_name)
+   virtual CORN::Text_list & append_path_list_to
+      (CORN::Text_list &buffer
+      ,Inclusion inclusion = include_path_designated)                      const;//091103
+      // This is used by File_systems to find and Directories in memory.
+   virtual const std::wstring &append_components_to
+      (std::wstring &buffer
+      ,Inclusion inclusion = include_all
+      ,wchar_t preferred_seperator = DEFAULT_DIRECTORY_SEPARATORw_chr
+      ,bool append_trailing_directory_separator = false)                   const;//091103
+   virtual const std::string &append_components_to_string
+      (std::string &buffer
+      ,Inclusion inclusion = include_all
+      ,wchar_t preferred_seperator = DEFAULT_DIRECTORY_SEPARATORw_chr            //140202
+      ,bool append_trailing_directory_separator = false)                   const;//120209
+   virtual const std::wstring & append_name_with_extension_to (std::wstring &buffer) const;
+   virtual const std::wstring &append_name_to(std::wstring &result)        const; //131007
+   virtual const std::wstring &append_designator_to(std::wstring &buffer)  const; //140202_980919
+   virtual const std::wstring &append_separator_to(std::wstring &buffer)   const; //140202_120824
+   virtual wchar_t get_separator()                                         const; //140202
+   virtual const std::wstring &get_name()                                  const;
+   virtual const std::wstring &get_extension()                             const;
+   virtual const std::wstring &get_name_with_extension(std::wstring &result)const;
+public:  //
+   virtual const CORN::OS::Directory_name &get_parent_directory_name_qualified()  const;
+   virtual std::wstring *render_relative_to_current_working_directory
+      (Qualification qualification = relative_strict_qualification)   rendition_;//151221
+   virtual std::wstring *render_relative_to_current_working_directory_on_drive
+      (const Drive_designator &drive_designator
+      ,Qualification qualification = relative_strict_qualification)        const;//151221
+   virtual std::wstring *render_relative_to
+      (const Directory_name &reletive_to_qualified_directory_name
+      ,Qualification qualification = relative_strict_qualification)   rendition_;//151221
+      /**<
+         Creates a version of this directory entry name relative to the
+         specified directory or file name.
+         \return the rendered relative file name if the filename could be rendered.
+         NULL is returned if this name is already relative,
+         or if the relative path is not valid in the file system.
+      **/
+ protected:
+   virtual const CORN::OS::Directory_name *get_path_directory_name()       const=0;
+ protected: // name assignment
+   // These sets should only be used in construction.
+   virtual bool setup_is_root()                                    modification_;
+   virtual const Directory_entry_name & set_DEN
+      (const Directory_entry_name &to_copy_from)                   modification_;
+   size_t find_right_most_directory_separator_pos()                        const;//120327
+   size_t find_name_start_pos()                                            const;//120327
+   virtual void  decompose()                                       contribution_;//120327
+ protected:
+   virtual void construction_compose()                             construction_;
+};
+//___________________________________________ Directory_entry_name_abstract __/
+#if (defined (__MSDOS__) || defined(_WIN32)  || defined(_WIN64))
+#  define directory_entry_name_is_case_sensitive false
+#else
+#  ifdef AMIGADOS
+#     define directory_entry_name_is_case_sensitive false
+#  else
+#     define directory_entry_name_is_case_sensitive true
+#  endif
+#endif
+//______________________________________________________________________________
+} }; // namespace CORN OS
+#endif
+

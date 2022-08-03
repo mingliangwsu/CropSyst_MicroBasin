@@ -1,0 +1,71 @@
+#ifndef event_typesH
+#define event_typesH
+//______________________________________________________________________________
+#include "corn/labeled_enum.h"
+//#  include "corn/OS/file_system_logical.h"
+//______________________________________________________________________________
+enum Interval_timestep
+{  TS_DAY
+,  TS_WEEK
+,  TS_FORTNIGHT
+,  TS_MONTH
+,  TS_TRIMESTER
+,  TS_QUARTER
+,  TS_BIANNUM
+,  TS_YEAR
+,  TS_SUNDAY
+,  TS_MONDAY
+,  TS_TUESDAY
+,  TS_WEDNESDAY
+,  TS_THURSDAY
+,  TS_FRIDAY
+,  TS_SATURDAY
+,  TS_NEVER
+, TS_COUNT
+};
+extern const char *interval_timestep_label_table[];
+DECLARE_LABELED_ENUM(Interval_timestep_labeled,Interval_timestep,interval_timestep_label_table);
+//______________________________________________________________________________
+// 040806 In the case an event cannot be performed there are
+// optional contigencies
+// NONE/IGNORE  simply does not process the event with no error and it is not rescheduled
+// POSTPONE reschedules the event for the next day.
+// STOP     shut down the simulation nicely (saving outputs as if the stop date had been reached), user may interpret this case as a non viable simulation.
+// ABORT    immediately terminates the simulation
+enum Contingency
+{ NONE_CONTINGENCY        //180104 rename to CONTINUE_CONTIGENCY or IGNORE
+//NYI , PARTIAL_CONTIGENCY    may need to add this for grazing model
+, POSTPONE_CONTINGENCY
+, STOP_CONTINGENCY // NOT_VIABLE_CONTINGENCY  //180104 rename to STOP_CONTIGENCY
+, ABORT_CONTIGENCY
+, CONTINGENCY_COUNT
+};
+extern const char *contingency_label_table[];
+DECLARE_LABELED_ENUM(Contingency_labeled,Contingency,contingency_label_table);
+//______________________________________________________________________________
+enum Enable_for_model
+{  SECONDARY_ONLY
+,  PRIMARY_AND_SECONDARY
+,  SECONDARY_OVER_PRIMARY
+,  model_precedence_count
+};
+extern const char *enable_for_model_label_table[];
+DECLARE_LABELED_ENUM(Enable_for_model_labeled,Enable_for_model,enable_for_model_label_table);
+//______________________________________________________________________________
+/*121126 This was used mainly for CANMS I need to redo
+'the Filtered_file_name concept for the new CORN::OS classes
+class OP_filename
+: public CORN::Filtered_file_name                                                //000211
+{
+ public:
+    inline OP_filename(const char *i_filename = 0)
+      : CORN::Filtered_file_name(i_filename ? i_filename : "noname","op","Operation file","*.op")  //000211
+      {};
+   inline OP_filename(const CORN::Filtered_file_name &i_filename)                //000110
+      : CORN::Filtered_file_name(i_filename.length() ? i_filename.c_str() : "noname","op","Operation file","*.op")   //00211_
+      {};
+};
+*/
+//_2000-01-10___________________________________________________________________
+#endif
+

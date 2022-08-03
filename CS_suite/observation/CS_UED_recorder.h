@@ -1,0 +1,103 @@
+#ifndef CS_UED_recorderH
+#define CS_UED_recorderH
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "corn/container/unilist.h"
+#include "CS_suite/observation/CS_examination.h"
+#include "UED/library/varcodes.h"
+//______________________________________________________________________________
+namespace UED
+{
+   class Database_file;
+}
+//______________________________________________________________________________
+namespace CS
+{
+//______________________________________________________________________________
+class Recorder_abstract
+{
+ protected:
+   CS::Examination &examination;
+      // Currently this is always the global examination, but it
+      // could be other specialized examination.
+   contribute_ bool ended_year;                                                  //170413
+ public:
+   Recorder_abstract();
+   const char *compose_conventional_name
+      (std::string &composed
+      ,const std::string      &ontology
+      ,nat8                    level_or_period
+      ,const std::string      &period_name // optional may be empty
+      ,bool                    stats
+      ,const CORN::Units_clad &timestep)                                  const;
+ public:
+   virtual bool start_year()                                      modification_;
+   virtual bool end_year()                                        modification_;
+};
+//_2017-03-19___________________________________________________________________
+class Recorder_UED // rename to Recorder_UED
+: public extends_ Recorder_abstract
+{
+ public: // currently public only because  Land_unit_output::start_year() currently uses this
+   class UED_File_association
+   : public implements_ CORN::Item
+   {
+    public:
+      CORN::OS::File_name *UED_filename; //owned
+      UED::Database_file  *UED_file    ; //owned
+      CORN::Dynamic_array<nat32> committed_variables;
+         //List of variable codes whose definitions have already been committed.
+    public:
+      inline UED_File_association
+      (CORN::OS::File_name   *UED_filename_given
+         ,UED::Database_file *UED_file_given)
+         : CORN::Item()
+         , UED_filename(UED_filename_given)
+         , UED_file    (UED_file_given)
+         {}
+      inline virtual ~UED_File_association()
+         {  delete UED_file;
+            delete UED_filename;
+         }
+   inline virtual bool is_key_wstring(const std::wstring &key)              affirmation_  //180820
+      { return key.compare(UED_filename->w_str()) ==0; }
+
+/*180820  was probably only used for find_cstr now using is_key
+         
+      inline virtual const wchar_t *get_key_wide()                         const
+         { return UED_filename->w_str(); }
+*/         
+      bool append_variable_definition
+         (UED::Variable_code  var_code
+         ,CORN::Units_code    units_code
+         ,const std::string  &ontology);
+   };
+//_2016-06-16___________________________________________________________________
+   const CORN::OS::Directory_name &output_directory;
+ public: // could be protected.
+   contribute_ CORN::Unidirectional_list UED_files; //list of UED_File_association
+ public:
+   Recorder_UED(const CORN::OS::Directory_name  &output_directory);              //171114
+   //virtual ~Recorder_UED();
+   virtual bool end_day()                                         modification_;
+   virtual bool end_year()                                        modification_;
+   virtual bool stop()                                            modification_;
+ protected:
+   bool commit_inspections (CORN::Container &inspections);
+   bool commit_tallies     (CORN::Container &tallies);
+ private:
+   UED_File_association &provide_UED_file_association
+      (CORN::OS::File_name_concrete *target_UED_filename_given)      provision_;
+   UED_File_association &provide_inspection_UED_file_association
+      (const Inspection &inspection);
+   UED_File_association &provide_tally_UED_file_association
+      (const Examination::Inspection_tally_store &inspection_tally);
+};
+//_2016-06-14___________________________________________________________________
+extern Recorder_UED *UED_recorder_global;
+extern Recorder_UED &provide_global_UED_recorder
+   (const CORN::OS::Directory_name  &output_directory);                          //171114
+extern Recorder_UED &ref_global_UED_recorder();
+//______________________________________________________________________________
+} // namespace CS
+#endif
+

@@ -1,0 +1,52 @@
+#ifndef canopy_cover_curveH
+#define canopy_cover_curveH
+#include "corn/primitive.h"
+#include "corn/const.h"
+namespace CropSyst
+{
+//______________________________________________________________________________
+class Canopy_cover_curve
+{private: // references to state variables from crop model
+   contribute_ float64 cumulative_thermal_time;                                  //130703
+ private: // parameters
+   float64 thermal_time_end_vegetative_growth;
+   float64 thermal_time_beginning_senescence;
+   float64 thermal_time_full_senescence;                                         //14112
+   float64 thermal_time_maturityX;
+   float64 thermal_time_start_season;
+   float64 fract_season_to_reach_half_max_cover;
+   float64 CO2_adj_maximum_cover;                                                //141123
+ private: // calculated parameters
+   float64 b_Coefficient;
+   float64 asym_CC;
+   float64 asym_CC_senescence;
+   float64 shape_factor;
+   float64 C_low;
+   float64 actual_CC_max;
+   contribute_ float64 CC_at_max_canopy;                                         //141124
+   bool in_senescence;                                                           //141124
+public:
+   bool parameterize
+      (float64 CO2_adj_maximum_cover
+      ,float64 initial_cover);
+   bool start_senescence()                                         modification_;//141124                                                   
+ public:
+   float64 calculate(float64 cumulative_thermal_time)                      const;//130703
+   float64 calc_during_cresence()                                          const;//141123 was calc_during_vegetative_growth
+   float64 calc_during_culminescence()                                     const;
+   float64 calc_during_senescence()                                        const;
+   inline float64 set_CC_at_max_canopy(float64 _CC_at_max_canopy)
+      { CC_at_max_canopy = _CC_at_max_canopy; return CC_at_max_canopy; }
+ public: // structors
+   Canopy_cover_curve
+      (//float64 &cumulative_thermal_time,
+       float64 thermal_time_end_vegetative_growth
+      ,float64 thermal_time_beginning_senescence
+      ,float64 thermal_time_full_senescence                                     //1411125
+      ,float64 thermal_time_maturity
+      ,float64 thermal_time_start_season
+      ,float64 fract_season_to_reach_half_max_cover);
+};
+//_2013-06-11_______________________________________________Canopy_cover_curve_/
+} // namespace CropSyst
+#endif

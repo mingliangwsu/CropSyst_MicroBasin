@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\temp\lib\BCB5\release\corn_complete_static.lib"/>
+    <OBJFILES value="..\..\measure\common_units.obj ..\..\data_type_enum.obj 
+      ..\..\labeled_enum.obj ..\..\measure\measures.obj ..\..\math\moremath.obj 
+      ..\..\quality.obj ..\..\datetime\date.obj ..\..\datetime\datetime64.obj 
+      ..\..\datetime\date_format.obj ..\..\datetime\date_time_format.obj 
+      ..\..\datetime\date_translator.obj ..\..\datetime\temporal_base.obj 
+      ..\..\datetime\time.obj ..\..\datetime\time_format.obj 
+      ..\..\container\search_tree.obj ..\..\container\SDF_list.obj 
+      ..\..\container\item.obj ..\..\container\indexer.obj 
+      ..\..\container\enumlist.obj ..\..\container\container.obj 
+      ..\..\container\binary_tree.obj ..\..\container\bilist.obj 
+      ..\..\container\unilist.obj ..\..\container\text_list.obj 
+      ..\..\data_source\vv_file.obj ..\..\data_source\vv_entry.obj 
+      ..\..\data_source\datasrc.obj ..\..\data_source\datarec.obj 
+      ..\..\measure\units.obj ..\..\measure\units_enum.obj 
+      ..\..\validate\validtyp.obj ..\..\OS\OS.obj 
+      ..\..\parameters\parameters_datarec.obj ..\..\parameters\parameters.obj 
+      ..\..\parameters\parameter.obj ..\..\application\project.obj 
+      ..\..\container\association.obj ..\..\measure\unitconv.obj 
+      ..\..\string\strconv.obj ..\..\application\user\settings.obj 
+      ..\..\math\compare.obj ..\..\metrology\units_symbology.obj 
+      ..\..\metrology\units_clad.obj ..\..\math\statistical\stats.obj 
+      ..\..\math\statistical\stats_best.obj 
+      ..\..\math\statistical\statistics_recorder.obj 
+      ..\..\application\translations.obj ..\..\tabular\tabular_format.obj 
+      ..\..\tabular\tabular.obj ..\..\format\binary\binary_file_fstream.obj 
+      ..\..\format\binary\binary_record_file.obj 
+      ..\..\format\binary\binary_record.obj ..\..\OS\directory_entry_name.obj 
+      ..\..\OS\directory_entry_name_abstract.obj ..\..\OS\file_system_engine.obj 
+      ..\..\OS\file_system_engine_common.obj 
+      ..\..\OS\file_system_engine_Windows.obj ..\..\OS\file_system_logical.obj 
+      ..\..\data_source\vv_datasrc.obj 
+      ..\..\math\statistical\distribution_normal.obj 
+      ..\..\math\statistical\statistics_types.obj 
+      ..\..\OS\uniform_resource_locator.obj 
+      ..\..\OS\uniform_resource_identifier.obj ..\..\application\documentor.obj 
+      ..\..\application\program_directory_OS_FS.obj 
+      ..\..\application\suite_directory_OS_FS.obj 
+      ..\..\application\documentation_directory_OS_FS.obj 
+      ..\..\application\project_directory_OS_FS.obj 
+      ..\..\application\adjunct_directory_OS_FS.obj 
+      ..\..\application\user\appdata_directory_OS_FS.obj 
+      ..\..\parameters\parameters_directory_OS_FS.obj 
+      ..\..\OS\filtered_filename.obj ..\..\OS\file_type_description.obj 
+      ..\..\OS\file_system_types.obj ..\..\string\ustring.obj 
+      ..\..\OS\directory_entry_name_concrete.obj 
+      ..\..\application\application_directory_OS_FS.obj ..\..\float16.obj"/>
+    <RESFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..\measure;..\..;..\..\math;..\..\datetime;..\..\container;..\..\data_source;..\..\validate;..\..\OS;..\..\parameters;..\..\application;..\..\string;..\..\application\user;..\..\metrology;..\..\math\statistical;..\..\tabular;..\..\format\binary"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="BUILDER_API;USE_OS_FS"/>
+    <SYSDEFINES value="NO_STRICT;_RTLDLL"/>
+    <MAINSOURCE value="corn_complete_static.bpf"/>
+    <INCLUDEPATH value="$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\format\binary;..\..\tabular;..\..\math\statistical;..\..\metrology;..\..\application\user;..\..\application;..\..\parameters;..\..\OS;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\math;..\..;..\..\measure"/>
+    <LIBPATH value="..\..\format\binary;..\..\metrology;..\..\application\user;..\..;..\..\application;..\..\parameters;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\OS;..\..\math\statistical;..\..\math\numerical;..\..\tabular;..\..\dynamic_array;..\..\math;..\..\measure;..\..\image;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+    <LISTFILE value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-O2 -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <PFLAGS value="-$Y- -$L- -$D- -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="/P16384 /0"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=14
+Item0=$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\format\binary;..\..\tabular;..\..\math\statistical;..\..\metrology;..\..\application\user;..\..\application;..\..\parameters;..\..\OS;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\math;..\..;..\..\measure
+Item1=$(BCB)\include;$(BCB)\include\vcl;c:\dev;..\..\format\binary;..\..\tabular;..\..\math\statistical;..\..\metrology;..\..\application\user;..\..\application;..\..\parameters;..\..\OS;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\math;..\..;..\..\measure
+Item2=$(BCB)\include;$(BCB)\include\vcl;..\..\format\binary;..\..\tabular;..\..\math\statistical;..\..\metrology;..\..\application\user;..\..\application;..\..\parameters;..\..\OS;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\math;..\..;..\..\measure
+Item3=..\..\format\binary;..\..\tabular;..\..\math\statistical;..\..\metrology;..\..\application\user;..\..\application;..\..\parameters;..\..\OS;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\math;..\..;..\..\measure;$(BCB)\include;$(BCB)\include\vcl
+Item4=$(BCB)\include;$(BCB)\include\vcl
+Item5=$(BCB)\include;$(BCB)\include\vcl;..\..\format\binary;..\..\metrology;..\..\application\user;..\..;..\..\application;..\..\parameters;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\OS;..\..\math\statistical;..\..\math\numerical;..\..\tabular;..\..\dynamic_array;..\..\math;..\..\measure;..\..\image;..\..\..
+Item6=..\..\format\binary;..\..\metrology;..\..\application\user;..\..;..\..\application;..\..\parameters;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\OS;..\..\math\statistical;..\..\math\numerical;..\..\tabular;..\..\dynamic_array;..\..\math;..\..\measure;..\..\image;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item7=..\;..;..\application;..\parameters;..\validate;..\string;..\data_source;..\file_sys;..\container;..\datetime;..\OS;..\math\statistical;..\math\numerical;..\tabular;..\dynamic_array;..\math;..\measure;..\image;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item8=..\;..\application;..\parameters;..\validate;..\string;..\data_source;..\file_sys;..\container;..\datetime;..;..\OS;..\math\statistical;..\math\numerical;..\tabular;..\dynamic_array;..\math;..\measure;..\image;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item9=..\application;..\parameters;..\validate;..\string;..\data_source;..\file_sys;..\container;..\datetime;..\;..;..\OS;..\math\statistical;..\math\numerical;..\tabular;..\dynamic_array;..\math;..\measure;..\image;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item10=..\;C:\dev\corn\OS;C:\dev\corn\math\statistical;C:\dev\corn\math\numerical;C:\dev\corn\tabular;C:\dev\corn\dynamic_array;C:\dev\corn;C:\dev\corn\math;C:\dev\corn\measure;C:\dev\corn\image\;$(BCB)\include;$(BCB)\include\vcl;c:\dev\
+Item11=C:\dev\corn\image\;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item12=C:\dev\corn\image\;$(BCB)\include;$(BCB)\include\vcl
+Item13=C:\dev\corn\image;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=7
+Item0=..\..\format\binary;..\..\metrology;..\..\application\user;..\..;..\..\application;..\..\parameters;..\..\validate;..\..\string;..\..\data_source;..\..\file_sys;..\..\container;..\..\datetime;..\..\OS;..\..\math\statistical;..\..\math\numerical;..\..\tabular;..\..\dynamic_array;..\..\math;..\..\measure;..\..\image;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\;..;..\application;..\parameters;..\validate;..\string;..\data_source;..\file_sys;..\container;..\datetime;..\OS;..\math\statistical;..\math\numerical;..\tabular;..\dynamic_array;..\math;..\measure;..\image;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\;..\application;..\parameters;..\validate;..\string;..\data_source;..\file_sys;..\container;..\datetime;..;..\OS;..\math\statistical;..\math\numerical;..\tabular;..\dynamic_array;..\math;..\measure;..\image;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\application;..\parameters;..\validate;..\string;..\data_source;..\file_sys;..\container;..\datetime;..\;..;..\OS;..\math\statistical;..\math\numerical;..\tabular;..\dynamic_array;..\math;..\measure;..\image;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\;C:\dev\corn\OS;C:\dev\corn\math\statistical;C:\dev\corn\math\numerical;C:\dev\corn\tabular;C:\dev\corn\dynamic_array;C:\dev\corn;C:\dev\corn\math;C:\dev\corn\measure;C:\dev\corn\image\;$(BCB)\lib\obj;$(BCB)\lib
+Item5=C:\dev\corn\image\;$(BCB)\lib\obj;$(BCB)\lib
+Item6=C:\dev\corn\image;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=6
+Item0=BUILDER_API;USE_OS_FS
+Item1=BUILDER_API;xUSE_OS_FS
+Item2=BUILDER_API
+Item3=BUILDER_API;_DEBUG
+Item4=_DEBUG;BUILDER_API
+Item5=_DEBUG
+
+[HistoryLists\hlFinalOutputDir]
+Count=1
+Item0=C:\temp\lib\BCB5\release\
+
+[HistoryLists\hlTlibPageSize]
+Count=8
+Item0=0x4000
+Item1=0x2000
+Item2=0x1000
+Item3=0x0800
+Item4=0x0400
+Item5=0x0200
+Item6=0x0100
+Item7=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

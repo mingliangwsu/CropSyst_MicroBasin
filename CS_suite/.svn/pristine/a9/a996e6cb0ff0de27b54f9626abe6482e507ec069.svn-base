@@ -1,0 +1,1 @@
+#include "CS_suite/application/monument.h"

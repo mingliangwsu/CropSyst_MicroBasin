@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CropSyst_LCA_Carbon_footprint", "CropSyst_LCA_Carbon_footprint.vcxproj", "{563A66D8-6FE7-4418-9609-3C3BBF810185}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UED_static", "..\..\..\..\..\..\..\..\..\UED\library\build\VS\2010\UED_static\UED_static.vcxproj", "{12C359FC-F989-4B96-A4AA-60523692C6D1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "corn_complete_static", "..\..\..\..\..\..\..\..\..\CORN\build\VS\2010\corn_complete_static\corn_complete_static.vcxproj", "{7DC4707D-A556-490C-A72A-225A2FEFBA3E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{563A66D8-6FE7-4418-9609-3C3BBF810185}.Debug|Win32.ActiveCfg = Debug|Win32
+		{563A66D8-6FE7-4418-9609-3C3BBF810185}.Debug|Win32.Build.0 = Debug|Win32
+		{563A66D8-6FE7-4418-9609-3C3BBF810185}.Release|Win32.ActiveCfg = Release|Win32
+		{563A66D8-6FE7-4418-9609-3C3BBF810185}.Release|Win32.Build.0 = Release|Win32
+		{12C359FC-F989-4B96-A4AA-60523692C6D1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{12C359FC-F989-4B96-A4AA-60523692C6D1}.Debug|Win32.Build.0 = Debug|Win32
+		{12C359FC-F989-4B96-A4AA-60523692C6D1}.Release|Win32.ActiveCfg = Release|Win32
+		{12C359FC-F989-4B96-A4AA-60523692C6D1}.Release|Win32.Build.0 = Release|Win32
+		{7DC4707D-A556-490C-A72A-225A2FEFBA3E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7DC4707D-A556-490C-A72A-225A2FEFBA3E}.Debug|Win32.Build.0 = Debug|Win32
+		{7DC4707D-A556-490C-A72A-225A2FEFBA3E}.Release|Win32.ActiveCfg = Release|Win32
+		{7DC4707D-A556-490C-A72A-225A2FEFBA3E}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

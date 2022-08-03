@@ -1,0 +1,643 @@
+#ifndef structuralH
+#define structuralH
+
+#include "corn/parameters/number_keyed.h"
+#include "corn/container/unilist.h"
+#include "corn/string/strconv.hpp"
+#include "corn/labeled_bitmask.h"
+#include "corn/container/text_list.h"
+#include <assert.h>
+#ifdef __GNUC__
+#include <typeinfo>
+#endif
+//______________________________________________________________________________
+namespace structural
+{
+//______________________________________________________________________________
+class Pair_key_value;
+class Mapping;
+//______________________________________________________________________________
+interface_ Construct
+: public extends_interface_ CORN::Item
+{
+   virtual Pair_key_value *instanciate_key_value_pair
+      (given_ Construct *key_given
+      )                   //
+      { return 0; }
+      // I think node is abstract class so this should never get called.
+     /*
+   virtual  Pair_key_value *render_key_value_pair
+      (given_ Construct *key_given);
+     */
+
+   inline virtual const wchar_t *get_text_wstr()                           const { return 0; }
+   inline virtual bool set_text_wstr(const wchar_t *)              modification_ { return 0; }
+   inline virtual bool set_text_wstring(const std::wstring &_text) modification_ { return set_text_wstr(_text.c_str()); }
+   inline virtual bool set_comment_wstr(const wchar_t *comment)    modification_ { return false; }
+      ///< \return true if the comment is actually recognized by derived implementations.
+ public: // Item implementations
+   inline virtual bool is_case_sensitive()                                 const { return true; }
+   inline virtual bool is_scalar()                                  affirmation_ { return true; }
+//   inline virtual bool is_vector()                                  affirmation_ { return !is_scalar(); }
+};
+//______________________________________________________________________________
+class Scalar_string // Key_string
+: public implements_ Construct
+{  // Simple key as text
+   bool is_Unicode;
+   union
+   {  std::string *ASCII;
+      // Note that this could be an Text_list::Item
+      std::wstring *Unicode;                                                     //170128
+   } text; //owned
+ public:
+   inline Scalar_string(std::string *text_ASCII_given)
+      : Construct()
+      , is_Unicode(false)                                                        //170129
+      {  text.ASCII = text_ASCII_given;
+      }
+   inline Scalar_string(std::wstring *text_Unicode_given)                           //170128
+      : Construct()
+      , is_Unicode(true)                                                         //170129
+      {  text.Unicode = text_Unicode_given;
+      }
+   inline Scalar_string(const char *text_ASCIIZ)                                    //170305
+      : Construct()
+      , is_Unicode(false)
+      {  text.ASCII = new std::string(text_ASCIIZ);
+      }
+   inline Scalar_string(const wchar_t *text_UnicodeZ)                                //170305
+      : Construct()
+      , is_Unicode(true)
+      {  text.Unicode = new std::wstring(text_UnicodeZ);
+      }
+
+   inline virtual ~Scalar_string()
+      {  if (is_Unicode)   delete text.Unicode;
+         else              delete text.ASCII;
+      }
+
+   inline virtual const std::string &append_to_string(std::string &buffer) const
+      {  if (is_Unicode)
+            CORN::wstring_to_string(*(text.Unicode),buffer);
+         else buffer = (*text.ASCII);
+         return buffer;
+      }
+   inline virtual bool is_scalar()                  affirmation_ { return true;}
+};
+//______________________________________________________________________________
+#define Key_string Scalar_string
+//______________________________________________________________________________
+interface_ Collection
+: public extends_interface_ Construct
+{
+ public:
+   virtual nat32 count()                                                  const=0;
+   inline virtual bool is_scalar()                 affirmation_ { return false;}
+};
+//______________________________________________________________________________
+class Collection_clad
+: public extends_interface_ Collection
+{
+ private:
+   mutable CORN::Container *contents; bool contents_owned;
+ protected:
+   mutable CORN::Container &items; // reference to contents
+ public:
+   inline Collection_clad()
+      : contents(new CORN::Unidirectional_list)
+      , contents_owned(true)
+      , items(*contents)
+      {}
+   inline Collection_clad(modifiable_ CORN::Container &items_)
+      : contents(&items_)
+      , contents_owned(false)
+      , items(items_)
+      {}
+   virtual inline ~Collection_clad()
+      {  if (contents_owned)
+            delete contents;
+      }
+   inline virtual nat32 count()                                            const
+      { return items.count(); }
+};
+//_2017-02-12____________________________________________________________________
+interface_ Sequence
+: public extends_interface_ Collection  // of Constructs
+{
+   class Item
+      :  public extends_interface_ Construct
+      {};
+//   virtual bool take_text_list(CORN::Text_list &values)      appropriation_ = 0;
+   virtual bool append_text_list(CORN::Text_list &values)      appropriation_ = 0;
+
+      // Simple assignment of values
+};
+//______________________________________________________________________________
+class Sequence_clad
+: public implements_ Collection_clad
+{
+ public:
+   virtual bool append_text_list(CORN::Text_list &values)          appropriation_;
+
+};
+//______________________________________________________________________________
+interface_ Pair_key_value
+: public extends_interface_ CORN::Item
+{
+   inline virtual const Construct *get_specifier()                         const { return 0; }
+   inline virtual       Construct *get_value()   { return 0; }
+          virtual const Mapping  *in_mapping()   { return 0; }
+   //inline virtual bool is_value_set_with_remaining_text()           affirmation_ = 0; // { return false; }
+   inline virtual bool set_value_wstring
+      (const std::wstring &value_as_wstring)                       modification_
+      { return false; }
+   inline virtual bool set_value_wchr
+      (const wchar_t *value_as_wstring)                            modification_
+      { return false; }
+   inline virtual int compare(const CORN::Item &key_to_compare)            const
+      {  // interface method uses interface methods.
+         const Construct *specifier = get_specifier();
+         return specifier ? specifier->compare(key_to_compare) : -1;
+      }
+   inline virtual bool is_key_string(const std::string &key)              affirmation_  //180820
+         {
+            assert(false); // NYI
+/*
+            const Construct *specifier = get_specifier();
+            return specifier ? specifier->compare(key) ==0 : 0;
+*/
+        }
+/*180820 if still needed, use key_wstring
+   inline virtual const char *get_key()                                    const
+      {  // When the key is a simple string.
+         // Note that in YAML the key can be any structure.
+         const Construct *specifier = get_specifier();
+         return specifier ? specifier->get_key() : 0;
+      }
+*/
+   virtual const structural::Construct *take_value(structural::Construct *value_given) appropriation_
+      { return value_given; }
+   inline virtual bool is_value_set_with_remaining_text()           affirmation_ {return false; }
+   inline virtual bool is_scalar()                 affirmation_ { return false;}
+};
+//______________________________________________________________________________
+class Pair_key_value_abstract
+: public implements_ Pair_key_value
+{
+ protected:
+   structural::Construct *specifier; // owned  (key)
+ public:
+   Pair_key_value_abstract
+      (structural::Construct *specifier_given);
+   inline virtual ~Pair_key_value_abstract()
+      { delete specifier; }
+   inline virtual const Construct *get_specifier()                         const
+      { return specifier; }
+   virtual bool  write(std::ostream &strm)                         performs_IO_;
+
+};
+//______________________________________________________________________________
+class Pair_key_value_clad
+: public extends_ Pair_key_value_abstract
+{
+ protected:
+   structural::Construct *value; //owned
+ public:
+   inline Pair_key_value_clad
+      (structural::Construct *specifier_given
+      ,structural::Construct *value_given = 0)
+      : Pair_key_value_abstract(specifier_given)
+      , value     (value_given)
+      {}
+   inline virtual       Construct *get_value()                                   { return value; }
+   inline virtual bool is_value_set_with_remaining_text()           affirmation_ { return false; }
+   inline virtual const structural::Construct *take_value(structural::Construct *value_given) appropriation_
+      {  delete value; value = value_given; return value; }
+   virtual bool  write(std::ostream &strm)                       performs_IO_;
+
+};
+//______________________________________________________________________________
+class Pair_key_scalar
+: public extends_ Pair_key_value_abstract
+{
+ public:
+   inline Pair_key_scalar
+      (structural::Construct *specifier_given)
+      : Pair_key_value_abstract(specifier_given)
+      {}
+   inline virtual bool is_value_set_with_remaining_text()           affirmation_ { return true; };
+};
+//______________________________________________________________________________
+extern std::string  dummy_ASCII;
+extern std::wstring dummy_Unicode;
+class Pair_key_string
+: public implements_ Pair_key_scalar //: public extends_ Parameter
+{
+   bool as_ASCII;
+//   #ifdef __GNUC__
+   // gcc doesnt like ref in union
+   struct Value
+   {
+      std::string  &ASCII;
+      std::wstring &Unicode;
+    public:
+      Value(std::string &ASCII_)
+         : ASCII(ASCII_)
+         , Unicode(dummy_Unicode)
+         {}
+      Value(std::wstring &Unicode_)
+         : ASCII(dummy_ASCII)
+         , Unicode(dummy_Unicode)
+         {}
+   } value;
+/*
+   #else
+   union
+   {
+      std::string  &ASCII;
+      std::wstring &Unicode;
+   } value;
+   #endif
+*/
+   // Not really needed Construct *key_given;             // owned by this
+ public:
+   inline Pair_key_string
+      (std::string &value_
+      ,given_ Construct *key_given = 0
+      ,given_ Construct *value_given = 0)
+      : Pair_key_scalar(key_given)
+      , as_ASCII(true)
+      //#ifdef __GNUC__
+      , value(value_)
+      //#endif
+      {
+         value.ASCII = value_;
+         if (value_given)
+         {
+            //_value_given->append_to_string(value_string);
+            value_given->append_to_string(value.ASCII);
+            delete value_given;
+         }
+      }
+   inline Pair_key_string
+      (std::wstring &value_
+      ,given_ Construct *key_given = 0
+      ,given_ Construct *value_given = 0)
+      : Pair_key_scalar(key_given)
+      , as_ASCII(false)
+      //#ifdef __GNUC__
+      , value(value_)
+      //#endif
+      {
+         value.Unicode = value_;
+         if (value_given)
+         {
+            value_given->append_to_wstring(value.Unicode);
+            delete value_given;
+         }
+      }
+ public: // Pair_key_value implementations
+   inline virtual bool set_value_wstring
+      (const std::wstring &value_as_wstring)                       modification_
+      {
+         if (as_ASCII) CORN::wstring_to_string(value_as_wstring,value.ASCII );
+         else          value.Unicode.assign(value_as_wstring);
+         return true; }
+   inline virtual bool set_value_wchr
+      (const wchar_t *value_as_wstr)                               modification_
+      {
+         if (as_ASCII)  CORN::UnicodeZ_to_string(value_as_wstr,value.ASCII);
+         else           value.Unicode.assign(value_as_wstr);
+         return true; }
+   virtual bool  write(std::ostream &strm)                         performs_IO_;
+
+};
+//___________________________________________________________________________
+class Pair_key_number       // was Parameter_number
+: public extends_ Pair_key_scalar //: public extends_ Parameter
+{
+   //CORN::Number_keyed *number_keyed_known; // not owned
+   // Construct *key_given;             // owned by this
+      // Also need to check if Pair_key_value could take key_given
+
+   CORN::Data_type mode;    // Not only the primitive numeric (and date time types are considered here)
+   union
+   {
+      nat8    *as_nat8;
+      nat16   *as_nat16;
+      nat32   *as_nat32;     // Time32 times may also be stored as nat32
+      int8    *as_int8;
+      int16   *as_int16;
+      int32   *as_int32;      // Date32 dates may also be stored as int32
+      float32 *as_float32;
+      float64 *as_float64;    // time and datetime are stored as float64
+
+      void    *as_any_number;                                                     //170305
+      /*NYN
+      const nat8    *as_const_nat8;
+      const nat16   *as_const_nat16;
+      const nat32   *as_const_nat32;     // Time32 times may also be stored as nat32
+      const int8    *as_const_int8;
+      const int16   *as_const_int16;
+      const int32   *as_const_int32;      // Date32 dates may also be stored as int32
+      const float32 *as_const_float32;
+      const float64 *as_const_float64;    // time and datetime are stored as float64
+      */
+
+      //CORN::Date         *as_date;
+      //CORN::Time         *as_time;
+      //CORN::Date_time_64 *as_date_time;
+   } value;
+ public:
+   template <typename Value_T>
+   Pair_key_number(Value_T  &value_,given_ Construct *key_given = 0)
+   : Pair_key_scalar(key_given)
+      {
+         value.as_any_number = (void *)(&value_);
+      }
+   /*170305 now using template
+   Pair_key_number(int8    &value_,given_ Construct *key_given = 0);
+   Pair_key_number(nat8    &value_,given_ Construct *key_given = 0);
+   Pair_key_number(int16   &value_,given_ Construct *key_given = 0);
+   Pair_key_number(nat16   &value_,given_ Construct *key_given = 0);
+   Pair_key_number(int32   &value_,given_ Construct *key_given = 0);
+   Pair_key_number(nat32   &value_,given_ Construct *key_given = 0);
+   Pair_key_number(float32 &value_,given_ Construct *key_given = 0);
+   Pair_key_number(float64 &value_,given_ Construct *key_given = 0);
+   */
+   /*170129
+   Pair_key_number
+      (CORN::Number_keyed *number_keyed_known_
+      ,given_ Construct *key_given_ = 0
+      )
+      : Pair_key_scalar(key_given) //(_key,new YAML::Float)
+      , number_keyed_known(number_keyed_known_)
+      , key_given    (key_given_)
+      {}
+   */
+   /*
+   inline virtual ~Pair_key_number()
+      { delete key_given; }
+   */
+ public: // Pair_key_value implementations
+   virtual bool set_value_wstring(const std::wstring &value_as_wstring) modification_;
+   virtual bool set_value_wchr   (const wchar_t *value_as_wstr)         modification_;
+   virtual bool write(std::ostream &strm)                          performs_IO_;
+ public:
+   float64 set_value_as_float64(float64 new_value)                modification_;
+   /* NYN
+   float32 set_value_as_float32(float32 new_value)                modification_;
+
+   float64 get_value_as_float64()                                         const;
+   float32 get_value_as_float32()                                         const;
+   */
+
+   const char *append_value_in_radix_to_string
+      (std::string &buffer,nat8 precision,nat8 radix)                     const;
+};
+//___________________________________________________________________________
+class Pair_key_bool
+: public implements_ Pair_key_scalar //: public extends_ Parameter
+{
+   bool &value;
+   Construct *key_given;             // owned by this
+ public:
+   Pair_key_bool
+      (bool &_value
+      ,given_ Construct *key_given_ = 0
+      ,given_ Construct *value_given_ = 0
+      );
+  // inline virtual bool is_value_set_with_remaining_text()        affirmation_{ return true; };
+ public: // Pair_key_value implementations
+   inline virtual bool set_value_wstring
+      (const std::wstring &value_as_wstring)                      modification_
+      {  return set_value_wchr(value_as_wstring.c_str()); }                   //150830
+   virtual bool set_value_wchr
+      (const wchar_t *value_as_wstr)                              modification_;
+   virtual bool  write(std::ostream &strm)                         performs_IO_;
+};
+//___________________________________________________________________________
+class Pair_key_enum
+: public extends_ Pair_key_scalar
+{
+   Labeled_enum &labeled_enum;
+   Construct *key_given;
+ public:
+   //NYI add constructor that take reference labeled enum
+   Pair_key_enum
+      (Labeled_enum &labeled_enum_
+      ,given_ Construct *key_given_ = 0
+      ,given_ Construct *value_given_ = 0);
+  public: // Pair_key_value implementations
+   inline virtual bool set_value_wstring
+      (const std::wstring &value_as_wstring)                       modification_
+      {
+         std::string value_as_string; CORN::wstring_to_string(value_as_wstring,value_as_string);
+         labeled_enum.set_label(value_as_string.c_str());
+         return true;
+      };
+   virtual bool  write(std::ostream &strm)                         performs_IO_;
+};
+//___________________________________________________________________________
+class Pair_key_bitmask
+: public extends_ Pair_key_scalar
+{
+  CORN::Labeled_bitmask &labeled_bitmask;
+  // NYI
+ public:
+   inline Pair_key_bitmask
+      (CORN::Labeled_bitmask &_labeled_bitmask
+      ,given_ Construct *key_given = 0
+      ,given_ Construct *value_given = 0)
+      : Pair_key_scalar(key_given)
+      , labeled_bitmask(_labeled_bitmask)
+      {
+         // NYI Need to setup if value_given
+      }
+ public: // Pair_key_value implementations
+};
+//_2015-09-04________________________________________________________________
+interface_ Mapping
+: public extends_interface_ Collection // of Pair_key_value
+//170212 , public extends_interface_  Pair_key_value // I think collection could be keyvalue par
+{
+ public:
+   inline virtual ~Mapping() { }
+   virtual modifiable_ CORN::Container &get_key_value_pairs()         const = 0; //151018
+   virtual modifiable_  Pair_key_value *find_key_value_pair
+      (const structural::Construct &key_construct)                    const = 0;
+      // Note that YAML keys are not necessarily simple strings
+   virtual bool expect_mapping(modifiable_ structural::Mapping &mapping) provision_ = 0;
+};
+//______________________________________________________________________________
+class Mapping_clad   // was  Mapping_abstract
+: public extends_interface_ structural::Mapping
+, public extends_ Collection_clad
+//, public implements_interface_
+{protected:
+   structural::Construct *ref_specifier;
+      // not owned (owned by key value pair of which this mapping is the value).
+      // may be 0 if uppermost structure
+      // usually a Key_string for CS_Documents.
+ public:
+ protected:
+   //170212 mutable CORN::Unidirectional_list key_value_pairs;
+   mutable CORN::Unidirectional_list key_value_pairs;
+ public:
+   inline Mapping_clad(structural::Construct *_specifier)
+      : Collection_clad()
+      , ref_specifier(_specifier)
+      {}
+   inline Mapping_clad
+      (structural::Construct *_specifier
+      ,modifiable_ CORN::Container &items_)
+      : Collection_clad(items)
+      , ref_specifier(_specifier)
+      {}
+   inline virtual ~Mapping_clad() { /* specifier not owned dont delete */ }
+ public: // Item implementations
+   inline virtual bool is_key_wstring(const std::wstring &key)              affirmation_  //180820
+      { return  key == ref_specifier->get_text_wstr(); }
+
+/*180820  was probably only used for find_cstr now using is_key
+
+   inline virtual const wchar_t  *get_key_wide()                           const
+         { return ref_specifier->get_text_wstr(); }
+*/         
+   inline virtual const Construct *get_specifier()                         const { return ref_specifier; }     //151018
+   inline virtual modifiable_ CORN::Container &get_key_value_pairs()       const { return key_value_pairs; }   //151018
+   virtual modifiable_  Pair_key_value *find_key_value_pair
+      (const structural::Construct &key_construct)                         const;//151018
+   virtual int compare(const CORN::Item &mapping_to_compare)               const;//151018
+   inline virtual nat32 count()                                            const { return key_value_pairs.count(); }
+/*180820 if still needed implement key_string
+   inline   virtual const char *get_key()                                  const //160704
+      {  return ref_specifier ? ref_specifier->get_key() : 0;
+      }
+*/
+   virtual bool  write(std::ostream &strm)                         performs_IO_;
+   inline virtual Construct *get_value()                        { return this; }
+
+   inline bool take(Pair_key_value *pair_KV) appropriation_ { key_value_pairs.take(pair_KV); return true; }
+ public: // parameter providers
+   template <typename KV_pair_scalar_T, typename Key_stringT, typename Value_T>
+   KV_pair_scalar_T &provide_KV_pair_scalar(const Key_stringT key,Value_T &value) provision_
+      {  KV_pair_scalar_T *specific_KV_pair = 0;
+         std::wstring *key_wstring = new std::wstring;
+         if      (typeid(key) == typeid(std::wstring))key_wstring->assign(key);
+         else if (typeid(key) == typeid(std::string)) CORN::string_to_wstring(key,key_wstring);
+         else if (typeid(key) == typeid(wchar_t *) )   key_wstring = key; // CORN::Unicode_to_wstring(key,key_wstring);
+         else if (typeid(key) == typeid(char *) )      CORN::ASCIIZ_to_wstring(key,key_wstring);
+         Key_string *key_construct = new Key_string(key_wstring);
+         Pair_key_value *KV_pair = find_key_value_pair(*key_construct);
+         if (KV_pair)
+         {
+            specific_KV_pair = dynamic_cast<KV_pair_scalar_T *>(KV_pair);
+            delete key;
+         } else
+         {  specific_KV_pair = new KV_pair_scalar_T(key_construct,value);
+         }
+         assert (specific_KV_pair);
+         return *specific_KV_pair;
+      }
+   Mapping &provide_KV_pair_mapping(structural::Construct *key) provision_
+      {  Mapping *specific_KV_pair = 0;
+         Pair_key_value *KV_pair = find_key_value_pair(*key);
+         if (KV_pair)
+         {  specific_KV_pair = dynamic_cast<Mapping *>(KV_pair);
+            delete key;
+         } else
+         {  // Not sure what to instanciate return in this case.
+            specific_KV_pair = new Mapping_clad(key);
+         }
+         assert (specific_KV_pair);
+         return *specific_KV_pair;
+      }
+   Mapping &provide_KV_pair_mapping_wstring(const std::wstring &key)  provision_
+      {
+         std::wstring *key_wstring = new std::wstring(key);
+         Key_string *key_construct = new Key_string(key_wstring);
+         return provide_KV_pair_mapping(key_construct);
+      }
+   Mapping &provide_KV_pair_mapping_string(const std::string &key)    provision_
+      {
+         std::wstring *key_wstring = new std::wstring;
+         CORN::string_to_wstring(key,*key_wstring);
+         Key_string *key_construct = new Key_string(key_wstring);
+         return provide_KV_pair_mapping(key_construct);
+      }
+   Mapping &provide_KV_pair_mapping_wstr(const wchar_t *key)          provision_
+      {
+         Mapping *specific_KV_pair = 0;
+         std::wstring *key_wstring = new std::wstring(key);
+         Key_string *key_construct = new Key_string(key_wstring);
+         return provide_KV_pair_mapping(key_construct);
+      }
+   Mapping &provide_KV_pair_mapping_str(const char *key)              provision_
+      {
+         std::wstring *key_wstring = new std::wstring;
+         CORN::ASCIIZ_to_wstring(key,*key_wstring);
+         Key_string *key_construct = new Key_string(key_wstring);
+         return provide_KV_pair_mapping(key_construct);
+      }
+
+
+ public: // Methods used for defining structures these work.
+   #define ONTOLOGY_NAME
+   // Eventually provide optional ontology #define const wchar_T *ontology_name
+   template <typename Key_stringT, typename Value_T>
+   bool expect(const Key_stringT key,modifiable_ Value_T &value)      provision_
+   {  provide_KV_pair_scalar(key,value);
+      return true;
+   }
+
+
+   inline virtual bool expect_mapping(modifiable_ structural::Mapping &mapping) provision_
+      { return false; } // derived classes must implement
+
+   template <typename Key_T, typename Value_T>
+   structural::Pair_key_string &expect_string
+      (const Key_T *key_label, modifiable_ Value_T &value)            provision_
+   {
+      Key_string *key = new Key_string(key_label);
+      items.append(new Pair_key_string(value,key));
+   }
+   template <typename Key_T, typename Value_T>
+   structural::Pair_key_number &expect_number
+      (const Key_T *key_label, modifiable_ Value_T &value)            provision_
+   {
+      Key_string *key = new Key_string(key_label);
+      items.append(new Pair_key_number(value,key));
+   }
+   //_2017-02-12___________________________________________________________________
+
+   // NYI expect_bool  expect_enum  bitmask
+
+
+   //structural::Pair_key_string &expect_string   (const char *key, modifiable_ std::string &value           ,const char *ontology_name = 0) provision_;
+
+
+   /* now using template
+   structural::Pair_key_string &expect_wstring  (const char *key, modifiable_ std::wstring &value          ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_int8     (const char *key, modifiable_ int8    & value              ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_int16    (const char *key, modifiable_ int16   & value              ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_int32    (const char *key, modifiable_ int32   & value              ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_nat16    (const char *key, modifiable_ nat16   & value, nat8 _radix ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_nat8     (const char *key, modifiable_ nat8    & value, nat8 _radix ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_nat32    (const char *key, modifiable_ nat32   & value, nat8 _radix ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_float32  (const char *key, modifiable_ float32 & value              ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_float64  (const char *key, modifiable_ float64 & value              ONTOLOGY_NAME) provision_;
+   structural::Pair_key_bool   &expect_bool     (const char *key, modifiable_ bool    & value              ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_date      (const char *_key, modifiable_ Date         & value       ONTOLOGY_NAME) provision_;
+   structural::Pair_key_number &expect_datetime64(const char *_key, modifiable_ Date_time_64 & value       ONTOLOGY_NAME) provision_;
+   */
+};
+//____________________________________________________________Mapping_abstract_/
+
+
+
+
+} // namespace structural
+
+#endif // STRUCTURAL_H

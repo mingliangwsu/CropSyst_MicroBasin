@@ -1,0 +1,459 @@
+
+
+// The following are specialized astronomical units which I have not yet assigned codes
+
+// astronomical_unit
+// lightyear
+// parsec
+
+
+
+
+
+x joule  unit of work done by force of one newton over distance of one meter
+ karat  unit of fineness of gold equal to 1/24 part of pure gold
+X kelvin  unit of temperature based on absolute zero, equal to 1 degree Celsius
+ kilderkin  old unit of capacity equal to 1/2 barrel or 18 gallons
+ kilobase  unit of measure of length of nucleic acid chain equal to 1000 base pairs
+X kip  unit of weight equivalent to 1000 pounds
+ league  unit of distance of between 2.4 and 4.6 miles
+ link  unit of length used by surveyors, equal to 7.92 inches
+ magneton  unit of the quantized magnetic moment of a particle
+ megadeath  unit of fatality equal to one million deaths
+ mil  unit of 1/1000 inch used for measuring thickness of wire
+X minim  unit of liquid volume equal to 1/480 fluid ounces
+ mnemon  unit of memory, largely hypothetical
+x mole  unit of substance equal to number of atoms as 12 grams of carbon-12
+ morgan  unit of inferred distance between genes on a chromosome
+x mutchkin  old unit of liquid measurement equal to 3/4 of an imperial pint
+
+ palm  unit of length equivalent to width or length of the hand
+ parsec  unit of interstellar distance equal to 3.26 light-years
+X peck  unit of dry measure equal to 8 quarts
+ phon  unit of loudness of sound as heard by listeners
+ photon  unit of brightness of light as received at the retina
+ pica  unit of typeface equal to about 1/6 of an inch
+ pipe  unit of liquid capacity equal to two hogsheads
+ pitch  unit of typeface equal to number of characters per inch
+ point  unit of typeface equal to 1/72 of an inch
+
+ pole  unit of area equal to a square rod
+ probit  unit of measurement of statistical probability
+ quad  unit of energy equal to one quadrillion British thermal units
+
+ rad  unit of absorbed dose of ionizing radiation
+ radian  unit of plane angular measurement, approximately 57.3 degrees
+x rod  unit of length equal to 1/320 of a mile
+ rundlet  old liquid measure equal to about 15 gallons
+ rutherford  unit of radioactive decay equal to 1 million disintegrations per second
+ sabin  unit of acoustic absorption of one square foot of a perfect absorber
+ scruple  unit of weight used by apothecaries equal to 1/24 of an ounce
+ slug  unit of gravitational mass of approximately 32.174 pounds
+ sone  unit of loudness on a scale based on subjective or perceived loudness
+ span  unit of distance equal to handspread or nine inches
+ stack  old unit of measure for firewood equal to 108 cubic feet
+X stone  unit of weight equal to 14 pounds
+
+ svedberg  unit of time used to measure sedimentation velocity
+ therblig  unit of work for quantifying industrial operations
+ therm  unit of quantity of heat equal to 100,000 British thermal units
+ tog  unit of measurement for insulation properties of fabric
+X tun  unit of liquid capacity of 252 gallons
+ vara  unit of linear measure of between 33 and 43 inches
+ verst  unit of distance equal to approximately 2/3 of a mile
+
+
+unit symbol person quantity measured value
+
+baud - Jean-Maurice-Émile Baudot signal transmission speed 1 unit per second
+becquerel Bq  Antoine-Henri Becquerel  disintigration rate one disintigration per second
+bel B  Alexander Graham Bell  power comparison  dimensionless
+
+blondel  - André-Eugène Blondel  luminence  p-1 cd·m-2
+Bubnoff unit - Bubnoff speed 10e-6 m/year
+
+curie Ci Marie and Pierre Curie  disintigrtion rate 3.7e10 Bq
+dalton - John Dalton mass  1/16 the mass of an oxygen-16 atom
+darwin - Charles Darwin evolutionary change
+debey  D  Peter Joseph Wilhelm Debey  electric dipole moment (10e-19/c) C·m
+einstein  E Albert Einstein  quanity of light  one mole of photons
+Eotvos unit E  Roland, Baron von Eötvös  gradient of acceleration  10e-9 s-2
+
+franklin Fr Benjamin Franklin electric charge  3.33564e-10 C
+gal  - Galileo Galilei  acceleration  cm·s-2
+gilbert - William Gilbert electromotive force  10/4p A·turns
+gray  Gy  L. H. Gray radiation dose  J/kg
+hartree - Douglas Rayner Hartree energy approximately 27.21 eV
+hefner candle  - Friedrich Franz von Hefner-Alteneck  luminous intensity 0.903 candle
+
+
+jansky  Jy Karl C. Jansky  radio source strength  10e-26 J/m2·
+
+kayser  K  Heinrich Gustav Johannes Kayser wave number  wavelength/cm
+
+
+mach  M, Ma Ernst Mach  speed [depends on the medium]
+
+neper Np John Napier amplitude comparison  dimensionless
+
+planck  - Max K. E. L. Planck action  J·s
+
+reyn  - Osborne Reynolds  dynamic viscosity  10e4·(1.45)-1 Pa·s
+rutherford  rd  Ernst Rutherford  disintigration rate 10e6 Bq
+rydberg  Ry Johannes Robert Rydberg  energy  approx. 2.425e-28 J
+sabin - Wallace Clement Sabine  sound absorption
+savart  - Félix Savart  pitch interval  1/300 of an octave
+
+stokes St George Stokes kinematic viscosity  10e-4 m2/s
+Svedberg  S Theodor S. Svedberg  sedimentation coefficient (time)  10e-13 s
+sverdrup - Harald Ulrich Sverdrup  flow  10e6 m3/s
+talbot  - William Henry Fox Talbot  quantity of light  lm·s
+*/
+
+/* The following are units of measure that I need to check are implemented
+
+acceleration
+activity (of a radioactive source)     disintegration per second
+angular acceleration
+angular velocity
+density                                kg/m3
+electrical field strength              volt/meter
+
+
+
+X viscosity, dynamic
+X viscosity, kinematic
+
+X volume
+wave number
+*/
+
+/* Japanese measures
+koku **
+sho **
+go **
+*/
+
+/* Old russian liquid measure
+vedro
+shtoff
+vinebottle
+vodkabottle
+charka
+shkalik
+*/
+/* old russian dry measure
+cetverik (mera)
+vedro
+garnetz
+*/
+/* Ancient roman liquid measure
+kulee (dolee)
+amphora
+urn
+kognee
+sextarium
+gemin
+quart
+acetabul
+ciate
+*/
+/* Ancient roman dry measure
+cubic ped (quadrantal)
+modium
+semodium
+sextarium
+quartarium
+*/
+/* biblical dry measure
+cor (homer) *
+lethek *
+ephah *
+seah *
+omer *
+cab *
+*/
+/* biblical liquid measure
+bath *
+hin *
+log *
+
+*/
+
+/*
+http://www.geocities.com/jusjih//si-en.html
+
+
+(US) The United States uses different names for certain units and prefixes.
+
+Sources:
+International Bureau of Weights and Measures (BIPM): SI
+United States: National Institute of Standards and Technology: SI
+SI units
+SI base units
+SI base unit
+Symbol
+	Name
+			Base quantity
+m	metre; US: meter
+			length
+kg	kilogram
+			mass
+s	second
+			time
+A	ampere
+			electrical current
+K	kelvin
+			thermodynamic temperature
+mol	mole
+			amount of substance
+cd	candela
+			luminous intensity
+
+The mass is commonly called the weight in people's daily life and trade.
+ (The word weight denotes a quantity of the same nature as a force.)
+Examples of SI derived units expressed in terms of SI base units
+SI derived unit
+Symbol Name
+					Derived quantity
+m2     square metre
+					area
+m3     cubic metre
+					volume
+m/s    metre per second
+					speed, velocity
+m/s2   metre per second squared
+					acceleration
+m-1    reciprocal metre
+					wavenumber
+kg/m3  kilogram per cubic metre
+					density, mass density
+m3/kg  cubic metre per kilogram
+					specific volume
+A/m2   ampere per square metre
+					current density
+A/m    ampere per metre
+					magnetic field strength
+mol/m3 mole per cubic metre
+					concentration (of amount of substance)
+cd/m2  candela per square metre
+					luminance
+1      (the number) one
+					refractive index
+m3/s   cubic metre per second
+					volume flow rate
+kg/s   kilogram per second
+					mass flow rate
+m2/s   square metre per second
+					kinematic viscosity
+m3     metre to the power of three
+					section modulus
+m3/mol cubic metre per mole
+					molar volume
+SI derived units with special names and symbols
+SI derived unit
+Symbol
+	Name
+			Derived quantity
+rad	radian
+			plane angle
+sr	steradian
+			solid angle
+Hz	hertz
+			frequency
+N	newton
+			force
+Pa	pascal
+			pressure,
+			stress
+J	joule
+			energy,
+			work,
+			quantity of heat
+W	watt
+			power,
+			radiant flux
+C	coulomb
+			electric charge,
+			quantity of electricity
+V	volt
+			electric potential difference,
+			electromotive force
+F	farad
+			capacitance
+O	ohm
+			electric resistance
+S	siemens
+			electric conductance
+Wb	weber
+			magnetic flux
+T	tesla
+			magnetic flux density
+H	henry
+			inductance
+°C	degree Celsius
+			Celsius temperature
+lm	lumen
+			luminous flux
+lx	lux
+			illuminance
+Bq	becquerel
+			activity (referred to a radionuclide)
+Gy	gray
+			absorbed dose,
+			specific energy (imparted),
+			kerma
+Sv	sievert
+			dose equivalent,
+			ambient dose equivalent,
+			directional dose equivalent,
+			personal dose equivalent,
+			organ equivalent dose
+kat	katal
+			catalytic activity
+Examples of SI derived units whose names and symbols include SI derived units with special names and symbols
+SI derived unit
+Symbol      Name
+					Derived quantity
+Pa . s      pascal second
+					dynamic viscosity
+N . m       newton metre
+					moment of force
+N/m         newton per metre
+					surface tension
+rad/s       radian per second
+					angular velocity
+rad/s2      radian per second squared
+					angular acceleration
+W/m2        watt per square metre  heat flux density,
+					irradiance
+J/K         joule per kelvin
+					heat capacity,
+					entropy
+J/(kg . K)  joule per kilogram kelvin
+					specific heat capacity,
+					specific entropy
+J/kg        joule per kilogram
+					specific energy
+W/(m . K)   watt per metre kelvin
+					thermal conductivity
+J/m3        joule per cubic metre
+					energy density
+V/m         volt per metre
+					electric field strength
+C/m3        coulomb per cubic metre
+					electric charge density
+C/m2        coulomb per square metre
+					electric flux density
+F/m         farad per metre
+					permittivity
+H/m         henry per metre
+					permeability
+J/mol       joule per mole
+					molar energy
+J/(mol . K) joule per mole kelvin
+					molar entropy,
+					molar heat capacity
+C/kg        coulomb per kilogram
+					exposure (x and ? rays)
+Gy/s        gray per second
+					absorbed dose rate
+W/sr        watt per steradian
+					radiant intensity
+W/(m2 . sr) watt per square metre steradian
+					radiance
+kat/m3      katal per cubic metre
+					catalytic (activity) concentration
+C/(kg . s)  coulomb per kilogram second
+					exposure rate
+Sv/s        sievert per second
+					dose equivalent rate
+S/m         siemens per metre
+					electrical conductivity
+S . m2/mol  siemens square metre per mole
+					molar conductivity
+SI prefixes
+Factor
+	Symbol
+		Prefix
+
+1024	Y	yotta
+1021	Z	zetta
+1018	E	exa
+1015	P	peta
+1012	T	tera
+109	G	giga
+106	M	mega
+103	k	kilo
+102	h	hecto
+101	da	deca; US: deka
+10-1	d	deci
+10-2	c	centi
+10-3	m	milli
+10-6	µ	micro
+10-9	n	nano
+10-12	p	pico
+10-15	f	femto
+10-18	a	atto
+10-21	z	zepto
+10-24	y	yocto
+Units outside the SI
+Symbol
+	Name
+
+Non-SI units accepted for use with the International System
+
+min	minute
+h	hour
+d	day
+°	degree
+'	minute
+"	second
+l, L	litre; US: liter
+t	tonne; US: metric ton
+Np	neper
+B	bel
+dB	decibel
+
+Non-SI units accepted for use with the SI, whose values in SI units are obtained experimentally
+
+eV	electronvolt
+u	unified atomic mass unit
+ua	astronomical unit
+
+Other non-SI units currently accepted for use with the International System
+
+	nautical mile
+	knot
+a	are
+ha	hectare
+bar	bar
+Å	ångstöm
+b	barn
+
+Other non-SI units
+
+erg	erg
+dyn	dyne
+P	poise
+St	stokes
+G	gauss
+Oe	oersted
+Mx	maxwell
+sb	stilb
+ph	phot
+Gal	gal
+Ci	curie
+R	röntgen
+rad	rad
+rem	rem
+	X unit
+?	gamma
+Jy	jansky
+	fermi
+	metric carat
+Torr	torr
+atm	standard atmosphere
+cal	calorie
+µ	micron
+*/

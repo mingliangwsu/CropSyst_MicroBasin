@@ -1,0 +1,78 @@
+
+Roger Nelson's date module.
+
+
+Purpose
+
+   This module provides a date class.
+
+Features
+
+   - This date class can use the
+
+   - The class uses a novel approach for specifying the format of the text
+     representation, that allows the date to be output in almost any imaginable
+     format.
+
+   - This date class properly handles all leap years.
+
+   - Other date classes are limited to some arbitrary date.
+
+   - The date value is stored as a long integer.
+     The long integer representation used makes examining the
+     date value with a debugger very easy since the year
+     is simply the integer portion of the date value divided by
+     1000 and the day of year is the date value modulo 1000
+     I.e.  1990001 is January 1, 1990.
+
+   - Date arithmetic if simple and efficient.
+
+Limitations
+
+   - The date class is similar to other date classes such as the
+     Borland date class, but is not call compatible.
+
+   - This date class, doesn't support true Julian date.
+
+   - This date class does not account for the 15 days lost when
+     the modern calendar was corrected by Pope Urban.
+
+   - This date class doesn't support time (Hours/minus/seconds).
+     Another class for time is envisioned.
+     A separate class derived from the date and time class would
+     be used for date and time as a single unit.
+
+   - This class is intended for any OS, but currenlty the
+     function computers_date() is defined only for MS-DOS/Windows.
+     I do have the info to implement this function for
+     AmigaDOS and UNIX, but just haven't gotten around to it.
+
+Required modules
+
+   Standard C libraries  math, stdio, and string.
+
+Optional modules
+
+   language.c language.h  (Roger Nelson's)
+
+      This module provides foreign language translation and/or message
+      cataloging for optimal memory usage.
+
+      Inorder to use translations, #define LANGUAGE_TRANSLATION
+
+      Under Borland C++ set the language.c compile attributes to C++ compile.
+
+   cstring.h   (Borland C++)
+
+      Required only to use the text_string() function.
+      Will automatically be use if compiled under Borland C++.
+
+Other
+
+   A Pascal version version is also available.
+   A C version is also available, but that version
+     is considered obsolete and does not have as many
+     feature as the C++ version.
+
+   The date library is used by Roger Nelson's date requestor
+   class for Borlands OWL base applications. 

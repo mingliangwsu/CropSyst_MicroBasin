@@ -1,0 +1,348 @@
+#include "crop/crop_interfaced_cropsyst.h"
+#ifdef CROP_ROWS_OBSOLETE
+#error obsolete
+#include "crop/crop_rows.h"
+#endif
+#include "organic_matter/OM_residues_profile_abstract.h"
+#include "crop/crop_orchard_common.h"
+#if (CROPSYST_VERSION==4)
+#     include "common/weather/weather.h"
+#endif
+#ifdef DEBUG_ROW_INTERCEPT
+ofstream debug_row_intercept("row_intercept.dat");
+#endif
+#include "UED/library/std_codes.h"
+namespace CropSyst {
+//______________________________________________________________________________
+Crop_interfaced_complete::Crop_interfaced_complete
+(Crop_parameters  *_parameters_given
+,const CORN::Date             &_today                                            //110824
+,CORN::Unidirectional_list             &performable_operations_                  //151004
+,modifiable_ Crop_CO2_response         *Crop_CO2_response_given_optional         //151201
+
+,const Air_temperature_maximum         &_air_temperature_max                     //140916
+,const Air_temperature_minimum         &_air_temperature_min                     //140916
+,const Air_temperature_average         &_air_temperature_avg                     //140916
+,const Solar_radiation                 &_solar_radiation                         //140916
+
+,const Vapor_pressure_deficit_daytime  &_vapor_pressure_deficit_daytime          //140916
+,const Vapor_pressure_deficit_max      &_vapor_pressure_deficit_max              //140916
+,const Psychrometric_constant          &_psychrometric_constant                  //140508
+  //161111,const float64                         &_snow_pack_thickness_m                   //141205
+,const Weather_spanning_interface      &weather_                                 //151201
+,const CORN::Local_time       &_ref_sun_rise_time                                //150907
+,const float64                &_ref_day_length_hours                             //140812
+,Soil_interface               *_soil                                             //050721
+,Soil_nitrogen_interface      *_soil_chem                                        //050721
+,modifiable_ Soil_salt_interface  *_soil_salinity                                //051118
+,Seeding_parameters        *_seeding_parameters                                  //041201
+,Crop_nitrogen_model        _nitrogen_model                                      //050722
+#ifdef NITROGEN
+,const Slope_saturated_vapor_pressure_plus_psychrometric_resistance            //referenced
+      *slope_saturated_vapor_pressure_plus_psychrometric_resistance_reference
+#endif
+,Orchard_interface         *_orchard                                             //071117
+)
+: Crop_interfaced(&_air_temperature_avg)                                         //141208RLN_131008NS
+,
+   Crop_complete
+   (_parameters_given                                                            //050721
+   #ifdef OLD_ORCHARD
+   ,_orchard
+   #endif
+   ,true 
+   ,_today                                                                       //110824
+   ,performable_operations_                                                      //151004
+   ,Crop_CO2_response_given_optional                                             //151201
+   //140916 I want this in all versions, just need to check that it is hooked up in V4
+   ,_air_temperature_max                                                         //140916
+   ,_air_temperature_min                                                         //140916
+   ,_air_temperature_avg                                                         //140916
+   ,_solar_radiation                                                             //140916
+   ,_vapor_pressure_deficit_daytime                                              //140916
+   ,_vapor_pressure_deficit_max                                                  //140916
+   ,_psychrometric_constant                                                      //140508
+  //161111 ,_snow_pack_thickness_m                                                       //141205
+   ,weather_
+   ,_ref_sun_rise_time                                                           //150907
+   ,_ref_day_length_hours                                                        //140812
+   ,_seeding_parameters
+   ,_soil
+   ,_nitrogen_model                                                              //050722
+   #ifdef NITROGEN
+   ,slope_saturated_vapor_pressure_plus_psychrometric_resistance_reference       //150602
+   #endif
+   )
+, orchard(_orchard)                                                              //071117
+{}
+//______________________________________________________________________________
+Crop_interfaced_complete::~Crop_interfaced_complete()
+{
+#ifdef CROP_ROWS
+090316 obs I am pretty sure this had been replaced with orchard submodel
+   if (crop_row)
+      delete crop_row;
+   crop_row = 0;
+#endif
+}
+//______________________________________________________________________________
+float64   Crop_interfaced_complete::get_act_transpiration_m()              const
+{  return act_transpiration_m;}
+//______________________________________________________________________________
+float64   Crop_interfaced_complete::get_act_uptake_m()                     const
+{  return transpiration->get_uptake_actual(); }
+//_2016-04-14___________________________________________________________________
+float64 Crop_interfaced_complete::est_degree_days_X_days_from_now                //000330
+(const CORN::Date & today, CORN::Days days_from_now)                       const //010202
+{  // This is used when looking for planting conditions.
+   float64 accum_deg_days_from_now = 0;
+   accum_deg_days_from_now = thermal_time->get_accum_degree_days(false);         //040830
+   CORN::Date date_from_now(today);
+   for (nat16 day_from_now = 0
+       ;day_from_now <= (nat16)days_from_now
+       ;day_from_now++)
+   {
+      weather.get_parameter_on(air_temp_max,UED::STD_VC_max_temperature.get(),date_from_now); //151124
+      weather.get_parameter_on(air_temp_min,UED::STD_VC_min_temperature.get(),date_from_now); //151124
+      float64 air_temp_max_forecasted = air_temp_max.Celcius();                  //151124
+      float64 air_temp_min_forecasted = air_temp_min.Celcius();                  //151124
+      float64 deg_day_x = thermal_time->calc_growing_degree_day_daily_resolution
+        (air_temp_max_forecasted
+        ,air_temp_min_forecasted);                                               //010202
+      float64 limited_deg_day_x = thermal_time->calc_limited_growing_degree_day  //010723
+        (deg_day_x
+         ,1.0 // No vernalization factor because we dont want to start vernalization period.
+         ,phenology.growth_stage);                                               //020629
+      accum_deg_days_from_now +=  limited_deg_day_x;
+      date_from_now.inc();
+   }
+   return accum_deg_days_from_now;
+}
+//______________________________________________________________________________
+void Crop_interfaced_complete::restart_after_inactive_period()
+{  Crop_complete::restart_after_inactive_period();
+}
+//_1997-02-19___________________________________________________________________
+void Crop_interfaced_complete::restart(float64 initial_biomass,float64 restart_GAI,bool use_clumping_factor, bool after_dormancy)
+{  Crop_complete::restart(initial_biomass,restart_GAI,use_clumping_factor,after_dormancy);
+   automatic_clipping_enabled = true;
+}
+//_1998-07-24___________________________________________________________________
+bool Crop_interfaced_complete::sow(bool fall_sowing)  // plant_crop
+{  bool sowed = Crop_complete::sow(fall_sowing);                                 //140813
+   return sowed;
+}
+//_2002-02-20___________________________________________________________________
+Crop_mass_fate_biomass_and_nitrogen *
+Crop_interfaced_complete::process_biomass_fate
+   (Biomass_fated_cause fated_cause
+   ,Harvest_amount_mode harvest_amount_mode                                      //050822
+   ,float64 remove_amount_kg_m2                                                  //050822
+   ,float64 retain_GAI                                                           //050822
+   ,float64 retain_biomass                                                       //110603
+   ,const Biomass_fate_parameters  &biomass_fate_parameters
+   ,bool terminate,float64 yield_now)
+{  // This moves plant biomass to various pools, harvest yield, residue, loss etc..
+   return Crop_complete::process_biomass_fate(fated_cause
+   ,harvest_amount_mode,remove_amount_kg_m2,retain_GAI                           //050822
+   ,retain_biomass                                                               //110603
+   ,biomass_fate_parameters,terminate,yield_now);
+}
+//_2007-06-25__2004-06-21_______________________________________________________
+float64 Crop_interfaced_complete::get_accum_degree_days(bool adjusted_for_clipping) const
+{  return thermal_time->get_accum_degree_days(adjusted_for_clipping);}
+//_2004-08-03___________________________________________________________________
+const float64 &Crop_interfaced_complete::ref_thermal_time_cumulative()     const
+{  return thermal_time->ref_thermal_time_cumulative();}
+//2013-06-13___________________________________________________________________/
+float64 Crop_interfaced_complete::get_live_green_canopy_biomass_kg_ha()    const
+{  return  over_m2_to_ha * (Crop_complete::get_live_green_canopy_biomass_kg_m2(include_vital|include_effete));
+   //fruit_dry_biomass is for the fruit model only otherwize this is 0
+}
+//______________________________________________________________________________
+float64 Crop_interfaced_complete::get_act_root_biomass_kg_ha()             const
+{  return over_m2_to_ha * act_root_biomass; }
+//______________________________________________________________________________
+float64 Crop_interfaced_complete::calc_root_biomass
+   (float64 *output_root_biomass_by_layer)                                 const
+{  return (roots_current) ? roots_current->calc_root_biomass(output_root_biomass_by_layer) : 0.0;
+}
+//_2007-12-15___________________________________________________________________
+#ifdef CROP_ORCHARD
+#ifdef OLD_ORCHARD
+//071120
+float64 Crop_interfaced_complete::get_fruit_dry_biomass_kg_ha()            const {  return over_m2_to_ha * fruit_dry_biomass; }
+float64 Crop_interfaced_complete::get_orchard_solid_canopy_interception()  const { return Crop_complete::get_orchard_solid_canopy_interception(); }  //081020
+float64 Crop_interfaced_complete::get_orchard_shaded_area_GAI()            const { return Crop_complete::get_orchard_shaded_area_GAI(); }            //081020
+float64 Crop_interfaced_complete::get_orchard_canopy_porosity()            const { return Crop_complete::get_orchard_canopy_porosity(); }            //081020
+#else
+float64 Crop_interfaced_complete::get_fruit_dry_biomass_kg_ha()            const { return 0.0;}   //071120
+float64 Crop_interfaced_CropSyst_orchard_fruit::get_fruit_dry_biomass_kg_ha() const {  return over_m2_to_ha * fruit_dry_biomass; }
+float64 Crop_interfaced_CropSyst_orchard_fruit::get_orchard_solid_canopy_interception() const { return NYI::get_orchard_solid_canopy_interception();}//081020
+float64 Crop_interfaced_CropSyst_orchard_fruit::get_orchard_shaded_area_GAI() const { return NYI::get_orchard_shaded_area_GAI(); }                   //081020
+float64 Crop_interfaced_CropSyst_orchard_fruit::get_orchard_canopy_porosity() const { return NYI::get_orchard_canopy_porosity(); }                   //081020
+#endif
+#endif
+//______________________________________________________________________________
+float64  Crop_interfaced_complete::get_dry_biomass_kg_ha()                 const
+{  return  over_m2_to_ha * (
+#ifdef OLD_ORCHARD
+//071120 overrided by Crop_interfaced_CropSyst_fruit
+   fruit_dry_biomass +  //    fruit_dry_biomass is for the fruit model only otherwize this is 0
+#endif
+   get_canopy_biomass_kg_m2());
+}
+//______________________________________________________________________________
+#ifdef FRUIT_CROP_MODEL
+#ifndef OLD_ORCHARD
+//071120 this is the new fruit model dont delete
+float64  Crop_interfaced_CropSyst_orchard_fruit::get_dry_biomass_kg_ha()   const
+{  return  over_m2_to_ha *
+      (fruit_dry_biomass
+      + fruit_reserves_biomass
+      + fruit_root_turnover_biomass
+      + get_canopy_biomass_kg_m2());
+}
+//_2007-11-20___________________________________________________________________
+#endif
+#endif
+//______________________________________________________________________________
+float64  Crop_interfaced_complete::get_canopy_biomass_kg_ha()              const
+{  return over_m2_to_ha * get_canopy_biomass_kg_m2(); }
+//______________________________________________________________________________
+float64  Crop_interfaced_complete::get_VPD_daytime()                       const
+{  return
+      daytime_vapor_pressure_deficit.get_kPa();                                  //140813
+}
+//______________________________________________________________________________
+float64  Crop_interfaced_complete::get_intercepted_PAR_MJ_m2()             const  // 080429 Warning this needs to be renamed to get_intercepted_radiation_MJ_m2 !
+{  return intercepted_radiation;
+}
+//_2008-04-29___________________________________________________________________
+float64  Crop_interfaced_complete::get_intercepted_PAR_accum_MJ_m2()       const  // 080429 warning this needs to be renamed to get_intercepted_radiation_accum_MJ_m2
+{  return intercepted_radiation_accum;
+}
+//_2008-04-29___________________________________________________________________
+float64  Crop_interfaced_complete::get_intercepted_PAR_season_accum_MJ_m2()const  // 080429 warning this needs to be renamed to get_intercepted_radiation_season_accum_MJ_m2
+{  return intercepted_radiation_season_accum;
+}
+//_2008-04-29___________________________________________________________________
+float64  Crop_interfaced_complete::get_peak_LAI(bool recorded)             const
+{  return Crop_complete::get_peak_LAI(recorded); } // recorded? recorded_peak_LAI : peak_LAI;
+//______________________________________________________________________________
+float64  Crop_interfaced_complete::get_total_season_collected_biomass_kg_m2() const
+{  return biomass_fate_season ?  biomass_fate_season->useful : 0.0; }
+//_2005-08-22___________________________________________________________________
+float64  Crop_interfaced_complete::get_total_season_biomass_production_kg_m2() const
+{  return total_season_biomass_production_output; }
+//_2004-07-19___________________________________________________________________
+float64  Crop_interfaced_complete::get_VPD_daytime_mean()                  const
+{  return vapor_pressure_deficit_stats.get_mean(); }
+//______________________________________________________________________________
+bool Crop_interfaced_complete::initialize()
+{  return                                                                        //140808
+      CropSyst::Crop_interfaced::initialize()                                    //131008_NS
+    &&Crop_complete::initialize();
+}
+//______________________________________________________________________________
+bool Crop_interfaced_complete::initiate_emergence()
+{  bool result = Crop_complete::initiate_emergence();
+   days_since_last_clipping = 0;                                                 //970305
+
+   // I might be able to simply clear days_since_last_clipping then
+   // call and return  Crop_complete::initiate_emergence()
+   // but I need to check if  days_since_last_clipping is used 
+
+   return result;
+}
+//______________________________________________________________________________
+bool Crop_interfaced_complete::process_day()                                     //150611
+{
+   #ifdef OLD_ORCHARD
+   #ifdef CROP_ROWS
+   // becoming obsolete
+   if (crop_row)crop_row->
+   #else
+   if (orchard) orchard->                                                        //071116
+   #endif
+   expand_canopy
+   (thermal_time->get_accum_degree_days(true));   // not sure if to adjust for clipping (I think so because the biomass is cut back) //040830
+   update_solid_canopy_interception();                                           //151128
+   #endif
+   return Crop_complete::process_day();
+}
+//_2002-07-11___________________________________________________________________
+#ifdef CROP_ORCHARD
+#ifndef OLD_ORCHARD
+// this is new dont delete
+bool Crop_interfaced_CropSyst_orchard_fruit::process_day()
+{
+#ifdef CROP_ROWS
+// becoming obsolete
+   if (crop_row)crop_row->
+#else
+   if (orchard) orchard->                                                        //071116
+#endif
+      expand_canopy
+      (thermal_time.get_accum_degree_days(true));   // not sure if to adjust for clipping (I think so because the biomass is cut back) //040830
+   float64 weather_cloud_cover_fraction = weather.get_cloud_cover_fraction();
+   update_solid_canopy_interception();                                           //151129
+   return Crop_interfaced_complete::process_day();
+}
+#endif
+#endif
+//_2002-07-11___________________________________________________________________
+#if (CROPSYST_VERSION==4)
+void Crop_interfaced_complete::setup_structure(CORN::Data_record &data_rec
+,bool for_write,const CS::Desired_variables &desired_vars)
+{
+#ifndef REACCH_VERSION
+   Crop_complete::setup_structure(data_rec,for_write,desired_vars); structure_defined = true;
+#endif
+}
+#endif
+//______________________________________________________________________________
+float64 Crop_interfaced_complete::update_solid_canopy_interception() modification_
+{
+#ifdef CROP_ROWS
+   //071116 being replaced with orchard
+   // already initialized default  solid_canopy_interception = 1.0;
+   if (crop_row)
+   {  switch (get_parameters()->row_type_labeled.get())                          //071114
+      {  case HEDGE_ROWS :                                                       //071114
+         {  float64 direct_row_int = 0;
+            float64 diffuse_row_int = 0;
+            crop_row->get_daily_interception(doy,direct_row_int,diffuse_row_int);
+            float64 diffuse_rad_fract = CORN_must_be_between((0.3+0.7*cloud_fraction),0.0,1.0);
+            solid_canopy_interception = direct_row_int * (1.0 - diffuse_rad_fract) + diffuse_row_int * diffuse_rad_fract;
+//debug_row_intercept << (int)doy << '\t' << solid_canopy_interception << '\t'<< direct_row_int << '\t'<< diffuse_rad_fract<<'\t'<< cloud_fraction << endl;
+         } break;
+
+      } // switch
+   } // if (crop_row)
+#else                                                                          
+   if (orchard)                                                                  //071117
+       orchard->update_solid_canopy_interception();                              //071117
+#endif
+   return  0.0; //No longer using the daily exept maybe for Kemanian model solid_canopy_interception;
+}
+//_2000-06-23___________________________________________________________________
+bool Crop_interfaced_complete::track_nitrogen_mass_balance
+(CropSyst::Crop_nitrogen_mass_balancer *_mass_balance)                 mutation_
+{  return nitrogen ? nitrogen->track_mass_balance(_mass_balance) : 0;
+}
+//_2007-02-20___________________________________________________________________
+#ifdef CROP_ORCHARD
+bool Crop_interfaced_complete::is_fruit_harvestable()               affirmation_
+{ return  Crop_complete::is_fruit_harvestable(); }
+//_2008-12-04___________________________________________________________________
+#endif
+#ifdef DIRECTED_IRRIGATION
+bool Crop_interfaced_complete::know_directed_irrigation_soil_wetting
+(const Directed_irrigation_soil_wetting *_soil_wetting)               cognition_
+{  return transpiration && transpiration->know_directed_irrigation_soil_wetting(_soil_wetting);
+}
+#endif
+//_2013_________________________________________________________________________
+} // namespace CropSyst
+

@@ -1,0 +1,40 @@
+#ifndef seasonsH
+#define seasonsH
+#include "corn/datetime/date.hpp"
+#include "common/weather/weather_types.h"
+namespace CS
+{
+//______________________________________________________________________________
+   extern bool is_fall_or_winter_time  (CORN::DOY doy,bool southern_hemisphere);
+   extern bool is_spring_or_summer_time(CORN::DOY doy,bool southern_hemisphere);
+   extern nat8 get_season_S_S_F_W      (CORN::DOY doy,bool southern_hemisphere);
+
+   // Returns
+   // 0 = unknown
+   // 1 = spring
+   // 2 = summer
+   // 3 = fall
+   // 4 = winter
+
+//______________________________________________________________________________
+class Seasons
+{
+   const CORN::Date_time &today;
+   bool southern_hemisphere;
+ public:
+   inline Seasons (const CORN::Date_time &_today,bool _southern_hemisphere)
+      : today(_today)
+      , southern_hemisphere(_southern_hemisphere)
+      {}
+   inline virtual ~Seasons() {}                                                  //151204
+           bool is_spring_or_summer_time(CORN::DOY doy = 0)         affirmation_;//980302
+           bool is_summer_time(CORN::DOY doy = 0)                   affirmation_;//151028
+           bool is_winter_time(CORN::DOY doy = 0)                   affirmation_;//151028
+   inline  bool is_fall_or_winter_time(CORN::DOY doy=0)             affirmation_ //980302
+      { return !is_spring_or_summer_time(doy);}
+   virtual nat8 get_season_S_S_F_W(CORN::DOY doy=0)                        const;//040914
+};
+//______________________________________________________________________________
+//______________________________________________________________________________
+} // namespace CS
+#endif

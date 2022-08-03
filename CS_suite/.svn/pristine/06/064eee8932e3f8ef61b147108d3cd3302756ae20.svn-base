@@ -1,0 +1,43 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+//101124 obs #include <cropsyst/cpp/cs_paths.h>
+#include "common/simulation/paths.h"
+#include "CropSyst/source/options.h"
+USERES("CS_suite.res");
+USEFORM("..\cs_suite_frm.cpp", CS_suite_form);
+USEUNIT("..\..\Common\simulation\paths.cpp");
+USELIB("C:\temp\lib\BCB5\release\common_sim_static.lib");
+USELIB("C:\temp\lib\BCB5\release\CS_directory.lib");
+USELIB("C:\temp\lib\BCB5\release\corn_complete_static.lib");
+USEUNIT("..\..\corn\OS\Windows\VCL\registry.cpp");
+USEUNIT("..\..\corn\file_sys\smart_dirname.cpp");
+USEUNIT("..\..\CropSyst\source\database_dir.cpp");
+USEUNIT("..\..\CropSyst\source\project_types.cpp");
+//---------------------------------------------------------------------------
+#include "CS_suite/common_program_main_inc.cpp"
+
+bool reg_file_types_mode = false;
+
+WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+   try
+   {
+      INSTANCIATE_CS_SUITE_DIRECTORY
+      if (ParamStr(1) == "reg_file_types")
+         reg_file_types_mode = true;
+
+      setup_simulation_paths(CS_VERSION_NUMBERS,"CS_suite");
+      Application->Initialize();
+      Application->CreateForm(__classid(TCS_suite_form), &CS_suite_form);
+      Application->Run();
+      setdown_simulation_paths();
+   }
+   catch (Exception &exception)
+   {
+      Application->ShowException(&exception);
+   }
+   return 0;
+}
+//---------------------------------------------------------------------------

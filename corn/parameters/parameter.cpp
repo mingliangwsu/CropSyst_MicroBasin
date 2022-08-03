@@ -1,0 +1,526 @@
+#include "corn/parameters/parameter.h"
+#include "corn/measure/units.h"
+//---------------------------------------------------------------------------
+#include <stdlib.h>
+#include <string.h>
+#include <float.h>
+#ifndef compareHPP
+#  include "corn/math/compare.hpp"
+#endif
+#include "corn/validate/validtyp.ph"
+#include "corn/parameters/parameter.h"
+#include "corn/data_source/datarec.h"
+
+namespace CORN {
+//______________________________________________________________________________
+Parameter_properties_interface::~Parameter_properties_interface()
+{}
+//______________________________________________________________________________
+Parameter_abstract::Parameter_abstract
+(const Parameter_properties_literal &_properties
+,const Parameter_format             &_format)                                    //140131
+:properties(_properties)
+,format(_format)                                                                 //140131
+,status(ready_status)
+{}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(int8    &_value
+,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                  //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_int8 = &_value;
+   initial_value = _value;
+   mode          = DT_int8;                                                      //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(nat8    &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                  //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_nat8 = &_value;
+   initial_value = _value;
+   mode          = DT_nat8;                                                      //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(int16   &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range, const Parameter_format &_format)                 //140131
+
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_int16 = &_value;
+   mode            = DT_int16;
+   initial_value = _value;
+   mode          = DT_int16;                                                     //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(nat16   &_value
+,const Parameter_properties_literal &_properties
+,const Parameter_range &_range ,const Parameter_format &_format)                 //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_nat16 = &_value;
+   initial_value = _value;
+   mode          = DT_nat16;                                                     //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(int32   &_value
+,const Parameter_properties_literal &_properties
+,const Parameter_range &_range, const Parameter_format &_format                  //140131
+)
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_int32 = &_value;
+   initial_value = _value;
+   mode          = DT_int32;                                                     //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(nat32   &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                  //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_nat32 = &_value;
+   initial_value = _value;
+   mode          = DT_nat32;                                                     //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(float32 &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                  //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_float32 = &_value;
+   initial_value = _value;
+   mode          = DT_float32;                                                      //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number(float64 &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format            //140131
+)
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_float64 = &_value;
+   initial_value = _value;
+   mode          = DT_float64;                                                   //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(const int8    &_value
+,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                  //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_const_int8 = &_value;
+   initial_value = _value;
+   mode          = DT_int8;                                                      //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(const nat8    &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                  //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_const_nat8 = &_value;
+   initial_value = _value;
+   mode          = DT_nat8;                                                      //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(const int16   &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range, const Parameter_format &_format)                 //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_const_int16 = &_value;
+   initial_value = _value;
+   mode          = DT_int16;                                                     //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(const nat16   &_value
+,const Parameter_properties_literal &_properties
+,const Parameter_range &_range, const Parameter_format &_format)                 //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_const_nat16 = &_value;
+   initial_value = _value;
+   mode          = DT_nat16;                                                     //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(const int32   &_value
+,const Parameter_properties_literal &_properties
+,const Parameter_range  &_range, const Parameter_format &_format                 //140131
+)
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_const_int32 = &_value;
+   initial_value = _value;
+   mode          = DT_int32;                                                     //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(const nat32   &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                  //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_const_nat32 = &_value;
+   initial_value = _value;
+   mode          = DT_nat32;                                                     //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(const float32 &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                  //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_const_float32 = &_value;
+   initial_value = _value;
+   mode          = DT_float32;                                                   //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+Parameter_number::Parameter_number
+(const float64 &_value,const Parameter_properties_literal &_properties
+,const Parameter_range &_range,const Parameter_format &_format)                   //140131
+:Parameter_abstract  (_properties,_format)
+,range               (_range)                                                    //140131
+,shown_units_code    (_properties.units_code)
+,alt_units_codes(0)
+{  value.as_const_float64 = &_value;
+   initial_value = _value;
+   mode          = DT_float64;                                                   //150103
+   know_key_cstr(_properties.name_long);                                         //150103
+}
+//______________________________________________________________________________
+void Parameter_number::reset_to_initial_value()                    modification_
+{  switch (mode)
+   {  case DT_int8:   *(value.as_int8)   = (int8)   initial_value; break;
+      case DT_int16:  *(value.as_int16)  = (int16)  initial_value; break;
+      case DT_int32:  *(value.as_int32)  = (int32)  initial_value; break;
+      case DT_nat8:   *(value.as_nat8)   = (nat8)   initial_value; break;
+      case DT_nat16:  *(value.as_nat16)  = (nat16)  initial_value; break;
+      case DT_nat32:  *(value.as_nat32)  = (nat32)  initial_value; break;
+      case DT_float32:*(value.as_float32)= (float32)initial_value; break;
+      case DT_float64:*(value.as_float64)= (float64)initial_value; break;
+   }
+}
+//______________________________________________________________________________
+void Parameter_number::compose_range_message
+(std::string             &message_text
+,bool HTML_format
+,bool must
+,float64 low
+,float64 high
+,float64 value
+,const char *  units
+,const char *  //label1
+,const char *  //label2
+,const char *  label3)
+{  if (!HTML_format)
+   {  if (strlen(label3))
+         message_text.append(" ("); message_text.append(label3); message_text.append(")");
+      message_text.append("\n = ");
+      message_text.append(float64_to_cstr(value,format.precision));
+      message_text.append(" "); if (units) message_text.append(units);message_text.append(" ");
+      message_text.append(TL_is_not_a_reasonable_value);
+      message_text.append(", \n");
+   }
+   if (!CORN::is_approximately<float64>(low,DBL_MIN,0.0000001) && !CORN::is_approximately<float64>(high, DBL_MAX,0.0000001))
+   {  const char * should_must = (must) ? TL_must_range_from : TL_should_range_from;
+      message_text.append(should_must);
+      message_text.append(" ");
+      message_text.append(float64_to_cstr(low,format.precision));
+      message_text.append(" - ");
+      message_text.append(float64_to_cstr(high,format.precision));
+      message_text.append("\n");
+   }
+   else if (! CORN::is_approximately<float64>(high,DBL_MAX,0.0000001))
+   { const char * should_must = (must) ? TL_must_be_less_than : TL_should_be_less_than;
+      message_text.append(should_must);
+      message_text.append(" ");
+      message_text.append(float64_to_cstr(high,format/*number_properties*/.precision));
+      message_text.append("\n");
+   }
+   else
+   { const char * should_must = (must) ? TL_must_be_greater_than : TL_should_be_greater_than;
+      message_text.append(should_must);
+      message_text.append(" ");
+      message_text.append(float64_to_cstr(low,format/*number_properties*/.precision));
+      message_text.append("\n");
+   }
+
+   // NYI want to add parameter explaination/description URL
+}
+//______________________________________________________________________________
+const char *HTML_quality_colors[] =
+{"limegreen"   // inviolate ready_status
+,"lightgreen"  // ready_status
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"green"       // reserved
+,"GRAY"        // disabled_status
+,"BLUE"   // unavailable_status
+,"RED"         // not valid
+,"RED"         // RESERVED
+,"MAGENTA"     // missing_status
+,"YELLOW"      // warning_low_status
+,"YELLOW"      // warning_status
+,"YELLOW"      // warning_high_status
+,"ORANGE"      // pot_error_low_status
+,"ORANGE"      // pot_error_status
+,"ORANGE"      // pot_error_high_status
+,"RED"         // error_low_status
+,"RED"         // error_status
+,"RED"         // error_high_status
+};
+//______________________________________________________________________________
+const char *Parameter_number::get_units_label(std::string &units_description) const
+{  char component_description [256];
+   char component_abbr        [100];
+   CORN::Units_clad smart_units(properties.units_code);
+   smart_units.compose_description(component_description, component_abbr);
+   units_description.assign(component_abbr);
+   return  units_description.c_str();
+}
+//______________________________________________________________________________
+Parameter_abstract::Validation_status Parameter_number::validate(std::string &message_text,bool HTML_format)
+{  return validate_value(message_text,HTML_format);
+}
+//______________________________________________________________________________
+Parameter_abstract::Validation_status Parameter_number::validate_value
+(std::string &message_text,bool HTML_format )
+{  status = Parameter_abstract::inviolate_status;
+   std::string range_message;
+   float32 _value = (float32)get_value_as_float64();
+   if (HTML_format)
+      message_text.append("<TR><TD>");
+//   else
+//      { message_text.append((TL_Validating)); message_text.append(":"); } ;
+   if (properties.caption)
+        message_text.append(properties.caption);
+   if (HTML_format)
+      message_text.append("<BR>");
+   else
+      message_text.append(" ");
+//   message_text.append(properties.hint);
+   if (!CORN::is_approximately<float32>(range.min_warning, std::numeric_limits<float32>::min(),0.0000001) && (_value < range.min_warning))
+      status = Parameter_abstract::warning_low_status;
+   if (!CORN::is_approximately<float32>(range.max_warning,std::numeric_limits<float32>::max(),0.0000001) && (_value > range.max_warning))
+      status = Parameter_abstract::warning_high_status;
+   if (!CORN::is_approximately<float32>(range.min_error,std::numeric_limits<float32>::min(),0.0000001) && (_value < range.min_error))
+      status = Parameter_abstract::error_low_status;
+   if (!CORN::is_approximately<float32>(range.max_error,std::numeric_limits<float32>::max(),0.0000001) && (_value > range.max_error))
+      status = Parameter_abstract::error_high_status;
+   if ((status == Parameter_abstract::error_low_status) || (status == Parameter_abstract::error_high_status))
+    compose_range_message(range_message,HTML_format,true,range.min_error,range.max_error,_value,properties.prefered_units_caption,properties.caption,properties.hint,"");
+   else
+      if ((status == Parameter_abstract::warning_low_status) || (status == Parameter_abstract::warning_high_status))
+         compose_range_message(range_message,HTML_format,false,range.min_warning,range.max_warning,_value,properties.prefered_units_caption,properties.caption,properties.hint,"");
+   if (HTML_format)
+      { message_text.append("<TD BGCOLOR=\""); message_text.append(HTML_quality_colors[status]); message_text.append("\">"); }
+   else
+      message_text.append(" = ");
+   message_text.append(float64_to_cstr(_value,format.precision));
+   if (HTML_format)
+      message_text.append("<TD>");
+   if (properties.prefered_units_caption!=NULL) {message_text.append(" "); if (properties.prefered_units_caption) message_text.append(properties.prefered_units_caption); }
+   if (HTML_format)
+   {
+      message_text.append("<TD BGCOLOR=YELLOW>");
+      message_text.append(float32_to_cstr(range.min_warning,format.precision));
+      message_text.append("<TD BGCOLOR=YELLOW>");
+      message_text.append(float32_to_cstr(range.max_warning,format.precision));
+      message_text.append("<TD BGCOLOR=RED>");
+      message_text.append(float32_to_cstr(range.min_error,format.precision));
+      message_text.append("<TD  BGCOLOR=RED>");
+      message_text.append(float32_to_cstr(range.max_error,format.precision));
+      message_text.append("<TD>");
+   }
+   if (status >= Parameter_abstract::not_valid_status)
+         message_text.append(range_message);
+   else   message_text.append((TL_Valid));
+
+   if (!HTML_format)
+      message_text.append(":");
+   message_text.append("\n");
+   return status;
+}
+//______________________________________________________________________________
+const char *Parameter_abstract::append_VV_to(std::string &buffer) const
+{  buffer.append(properties.name_long);
+   buffer.append("=");
+   append_value(buffer);
+   if (properties.prefered_units_caption)
+   {
+      buffer.append(" ");
+      buffer.append(properties.prefered_units_caption);
+   }
+  return buffer.c_str();
+}
+//______________________________________________________________________________
+const char *Parameter_abstract::log(std::string &buffer) const
+{  buffer.append(properties.name_long);
+   buffer.append("=");
+   append_value(buffer);
+   buffer.append(" ");
+   if (properties.prefered_units_caption)
+      buffer.append(properties.prefered_units_caption);
+   buffer.append(" ");
+   if (properties.hint)
+      buffer.append(properties.hint);
+//NYI add here explaination
+  buffer.append("\n");
+  return buffer.c_str();
+}
+//______________________________________________________________________________
+const char *Parameter_number::log(std::string &buffer)                     const
+{ Parameter_abstract::log(buffer);
+  buffer.append(properties.name_long);
+  buffer.append("_units=");
+  if (properties.prefered_units_caption)buffer.append(properties.prefered_units_caption);
+  buffer.append("\n");
+  return buffer.c_str();
+}
+//______________________________________________________________________________
+const char *Parameter_number::append_value(std::string &buffer)            const
+{  return append_value_in_radix_to(buffer,(nat8)format.precision,(nat8)format.radix);
+}
+//______________________________________________________________________________
+bool Parameter_properties_string::setup_structure(Data_record &data_rec,bool for_write )
+{  data_rec.expect_string("name"                ,name_long,255);
+   data_rec.expect_string("name_short"          ,name_short,255);
+   data_rec.expect_string("name_subsection"     ,name_subsection,255);
+
+//140131  Warning field_width is moved, need to make sure it is accomodated everywhere
+// I was going to move width, but the other Parameter_format vars are not applicable
+
+   data_rec.expect_string("caption"             ,caption,255);
+   data_rec.expect_string("hint"                ,hint,1023);
+   data_rec.expect_string("description_URL"     ,description_URL,1023);
+   data_rec.expect_enum  ("units"               ,units);
+   data_rec.expect_string("units_caption"       ,units_caption,255);
+   return true;
+}
+//______________________________________________________________________________
+Parameter_number_properties::Parameter_number_properties()
+{  min_warning  =(-999999);
+   max_warning  =( 999999);
+   min_error    =(-999999);
+   max_error    =( 999999);
+   precision    =(3)      ;
+   radix        =(10)     ;
+   field_width  =(0);                                                            //150405_141014
+      //150405 was 8 but using 0 to allow free form
+}
+//______________________________________________________________________________
+bool Parameter_number_properties::setup_structure(Data_record &data_rec,bool for_write )
+{  data_rec.expect_float32("min_warning",min_warning);
+   data_rec.expect_float32("max_warning",max_warning);
+   data_rec.expect_float32("min_error"  ,min_error);
+   data_rec.expect_float32("max_error"  ,max_error);
+   data_rec.expect_uint16  ("precision"  ,precision,10);
+   data_rec.expect_uint16  ("radix"      ,radix,10);
+   data_rec.expect_uint16  ("width"      ,field_width,10);                       //141014
+   return true;
+}
+//______________________________________________________________________________
+Units_code  Parameter_properties_string::get_units_code()                  const
+{  Units_code U_code = units.smart_units_code.get();
+   if (U_code == 0)  // it could be unit less, but maybe we can derive it from the caption
+   {  units.smart_units_code.set_label(units_caption.c_str());
+      U_code = units.smart_units_code.get();
+   }
+   return U_code;
+}
+//_2011-12-06___________________________________________________________________
+bool Parameter_properties_interface::is_key_string(const std::string &key_) affirmation_  //180820
+{  const char *key  = get_name_long();
+   if (!strlen(key))
+   {  key = get_name_long();
+      if (!strlen(key))
+         key = get_caption_SDF();
+   }
+   return key_ == key;
+}
+//_is_key_string____________________________________________________2018-08-20_/
+const char* Parameter_properties_interface::get_key()                      const
+{  const char *key  = get_name_long();                                           //130915
+   if (!strlen(key))
+   {  key = get_name_long();
+      if (!strlen(key))
+         key = get_caption_SDF();
+   }
+   return key;
+}
+//______________________________________________________________________________
+Parameter_range  parameter_range_arbitrary = {-999999.99,999999.99,-999999.99,999999.99};
+Parameter_format parameter_format_arbitrary = {10,4,10};
+
+Parameter_format PPF_8_0_10={8, 0,10 };
+Parameter_format PPF_8_1_10={8, 1,10 };
+Parameter_format PPF_8_2_10={8, 2,10 };
+Parameter_format PPF_8_4_10={8, 4,10 };
+//______________________________________________________________________________
+} // namespace CORN
+
+

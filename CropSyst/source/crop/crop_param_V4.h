@@ -1,0 +1,624 @@
+#ifndef crop_param_V4H
+#define crop_param_V4H
+#include "crop/crop_param_class.h"
+#include "corn/validate/validtyp.h"
+#include "corn/OS/filtered_filename.h"
+#include "common/residue/residue_decomposition_param.h"
+#include "crop/crop_types.hpp"
+// These classes are used only in version 4.
+// Do not include this in version 5 projects.
+using namespace CORN;
+//______________________________________________________________________________
+namespace CropSyst {                                                             //140318
+//______________________________________________________________________________
+class Crop_parameters      // Move some of these to Crop_classification_parameters
+: public Crop_parameters_class                                                   //110121
+{
+public:
+class Thermal_time
+: public Crop_parameters_class::Thermal_time
+{
+ public:                                                                         //020629
+   Thermal_time_resolution  resolution_deprecatedX;                               //021124
+   Resolution_cowl  resolution_labeled_deprecatedX;                               //021124
+      // In version 4, resolution is an enumeration.
+      // replaced with thermal_response                                          //151109
+ public:                                                                         //020629
+   Valid_float32  v_base_temperature;
+   Valid_float32  v_cutoff_temperature;
+   Valid_float32  v_opt_temperature;
+   Valid_float32  v_max_temperature;
+ public: // constructor
+   Thermal_time();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+   inline virtual bool is_hourly_resolution_obsolete()                              const { return resolution_deprecatedX==HOURLY;}//110218
+};
+//_2002-06-28___________________________________________________________________
+ class Phenology
+: public Crop_parameters_class::Phenology
+{
+ public: // parameters specific to V4
+    //float32 WUE_change_deg_day;
+      // Degree days to crop change in water use efficiency for WUE_changes mode.//080510
+      // In version 5 WUE will be a temporaly adjustable parameters.
+ public:                                                                         //020629
+   Valid_float32    v_emergence_deg_day;
+   Valid_float32    v_tuber_initiation_deg_day;
+   Valid_float32    v_end_canopy_growth_deg_day;
+   Valid_float32    v_max_root_depth_deg_day;
+   Valid_float32    v_begin_flowering_deg_day;
+   Valid_float32    v_begin_filling_deg_day;
+   Valid_float32  v_begin_maturity_deg_day;
+   Valid_float32  v_begin_senescence_deg_day;
+   Valid_float32  v_full_senescence_deg_day;                                     //131024
+   Valid_float32  v_begin_rapid_fruit_growth_deg_day;
+   Valid_float32  v_WUE_change_deg_day;
+   Valid_float32  v_phenologic_sensitivity_water_stress;
+ public:  // constructor
+   Phenology();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//_2008-07-22___________________________________________________________________
+class Transpiration
+: public Crop_parameters_class::Transpiration
+{public:
+   Valid_float32  v_ET_coef;
+   Valid_float32  v_max_water_uptake;
+   Valid_float32  v_LWP_stomatal_closure;
+   Valid_float32  v_LWP_wilt_point;    // rename to v_wilt_LWP
+ public:  // constructor
+   Transpiration();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//_2011-02-08___________________________________________________________________
+class Biomass_production
+: public Crop_parameters_class::Biomass_production
+{public:
+
+/*140317 Eventually these will be in V4 only but VIC crop it still using
+this so I am still providing this in crop_param_struct
+We are going to have a meeting with Jenny to decide if the crop files need to be redone
+
+   float32 opt_mean_temperature_for_growth;                // C
+         //Optimum mean daily temperature for growth (was temp limit).           //080725
+*/
+   #define  early_growth_limit_temp  opt_mean_temperature_for_growth_V4
+      // In CropSyst  early_growth_limit_temp used to be opt_mean_temperature_for_growth
+      // VIC uses opt_mean_temperature_for_growth
+      // Need to check with Claudio what he would prefer.
+
+
+   Valid_float32 v_TUE_at_1kPa_VPD;
+   Valid_float32 v_TUE_at_1kPa_VPD_vegetative;
+   Valid_float32 v_TUE_scaling_coef;               Valid_float32 v_TUE_scaling_coef_vegetative;
+   Valid_float32 v_water_productivity;             Valid_float32 v_water_productivity_vegetative;
+   Valid_float32 v_biomass_transpiration_coef;     Valid_float32 v_biomass_transpiration_coef_vegetative;     // eventually rename these to V_Tanner_Sinclair_k_X
+   Valid_float32 v_RUE_global;                                                   //110825
+   Valid_float32 v_RUE_PAR_deprecated;                                           //110825
+
+   Valid_float32 v_season_biomass_adjustment_2;
+   Valid_float32 v_season_biomass_adjustment_3;
+   Valid_float32 v_season_biomass_adjustment_4;
+   Valid_float32 v_season_biomass_adjustment_5;
+
+   Valid_float32  v_min_tolerable_temp;                                          //130531
+   Valid_float32  v_max_tolerable_temp;                                          //130508
+   Valid_float32  v_low_threshold_limit_temp;                                    //130508
+   Valid_float32  v_high_threshold_limit_temp;                                   //130508
+
+ public:  // constructor
+   Biomass_production();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//_2011-02-08___________________________________________________________________
+class Vernalization
+: public Crop_parameters_class::Vernalization
+{                                                                
+   friend class Crop_thermal_time;
+ public:  // Vernalization
+   Valid_float32  v_low_temp;
+   Valid_float32  v_high_temp;
+   Valid_float32  v_start;
+   Valid_float32  v_end;
+   Valid_float32  v_min_factor;
+ public:
+   Vernalization();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//_2002-04-05___________________________________________________________________
+class Photoperiod
+: public Crop_parameters_class::Photoperiod
+{
+ public:
+   contribute_ Valid_float32  v_stop;
+   contribute_ Valid_float32  v_unconstrain;
+ public:
+   Photoperiod();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//______________________________________________________________________________
+class Emergence_hydro_thermal
+: public Crop_parameters_class::Emergence_hydro_thermal
+{
+public:
+   Valid_float32  v_a;
+   Valid_float32  v_b;
+   Valid_float32  v_seedling_leaf_area;
+   Valid_float32  v_germination_base_temperature;
+   Valid_float32  v_mean_base_soil_water_pot;
+   Valid_float32  v_stdev_base_soil_water_pot;
+public:
+   Emergence_hydro_thermal();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//______________________________________________________________________________
+class Quiescence
+: public Crop_parameters_class::Quiescence
+{public:  // Inactive period parameters
+   Valid_float32  v_inducement_temperature;
+   Valid_int16    v_consider_inactive_days;
+ public:
+   Quiescence();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//______________________________________________________________________________
+class Dormancy
+: public Crop_parameters_class::Dormancy
+{  // Only applies to fruit trees
+ public:  // Dormancy (specific)
+   Valid_float32  v_chill_hours;
+   Valid_float32  v_deg_day_bud_break_chill_req_sat;
+   Valid_float32  v_deg_day_bud_break_chill_req_not_sat;
+   Valid_float32  v_senesce_percent;
+ public:
+   Dormancy();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//_2002-04-08___________________________________________________________________
+class Root
+: public Crop_parameters_class::Root
+{
+ public:
+   Valid_float32  v_max_depth;
+   Valid_float32  v_surface_density;
+   Valid_float32  v_density_distribution_curvature;
+   Valid_float32  v_sensitivity_to_water_stress;
+   Valid_float32  v_length_at_emergence;
+   Valid_float32  v_root_shoot_emergence_ratio;                                  //130624
+   Valid_float32  v_root_shoot_full_ratio;                                       //130624
+
+   // Deprecated in 4.18.10
+   Valid_float32  v_length_per_unit_mass;
+ public:
+   Root();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//______________________________________________________________________________
+class Morphology
+: public Crop_parameters_class::Morphology
+{
+ public:
+   Valid_float32 v_reduce_canopy_expansion_LWP;
+   Valid_float32 v_stop_canopy_expansion_LWP;
+   Valid_float32 v_max_canopy_height;
+   Valid_float32 v_kc;                                                           //110528
+ public:
+   Morphology();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//______________________________________________________________________________
+class Canopy_growth_cover_based
+: public Crop_parameters_class::Canopy_growth_cover_based
+{
+ public:
+   Valid_float32  v_canopy_cover_initial;
+   Valid_float32  v_canopy_cover_maximum;
+   Valid_float32  v_canopy_cover_total_season_end;
+   //171221 Valid_float32  v_canopy_cover_mature_total;
+   Valid_float32  v_relative_thermal_time_at_half_canopy_cover_maximum;
+ public:
+   Canopy_growth_cover_based();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//______________________________________________________________________________
+class Canopy_growth_LAI_based
+: public Crop_parameters_class::Canopy_growth_LAI_based
+{
+ public:
+   Valid_float32  v_initial_GAI;
+   Valid_float32  v_regrowth_GAI;
+   Valid_float32  v_max_LAI;
+   Valid_float32  v_specific_leaf_area;
+   Valid_float32  v_fract_LAI_mature;
+   Valid_float32  v_stem_leaf_partition;
+   Valid_float32  v_leaf_duration_deg_day;
+   Valid_float32  v_leaf_duration_sensitivity_stress;
+ public:
+   Canopy_growth_LAI_based();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//______________________________________________________________________________
+class Tolerance //150913 Hardiness
+: public Crop_parameters_class::Tolerance //150913 Hardiness
+//NYN               : public Hardiness_class
+{
+ public:  // Hardiness
+   Valid_float32  v_leaf_damage_cold_temp;
+   Valid_float32  v_leaf_lethal_cold_temp;
+   Valid_float32  v_fruit_damage_cold_temp;
+   Valid_float32  v_fruit_lethal_cold_temp;
+   // NYI  Valid_float32 v_tuber_critical_temperature
+ public:
+   Tolerance();
+   virtual bool setup_structure(CORN::Data_record &record,bool for_write,Harvested_part harvested_part) modification_;
+};
+//_2002-04-08___________________________________________________________________
+class Harvest// _index
+: public Crop_parameters_class::Harvest
+// in this case we dont have Harvest_index_class superclass
+{
+ public:
+   // Filling senesitivy and duration have been removed in V5
+   // and deprecated in V4
+   /*170523 obsolete
+   float32  flowering_sensitivity;  // 0-1          (CropSyst
+   float32  filling_sensitivity;    // 0-1                                       //101018
+   int16    filling_duration;       // 30 days                                   //081125
+   float32  temperature_stress_sensitivity;  // 0.7-1.3                          //081121
+   */
+
+   Valid_float32  v_unstressed;
+   /*170524 obsolete
+   Valid_float32  v_flowering_sensitivity;
+   Valid_float32  v_filling_sensitivity;                                         //101015
+   Valid_int16    v_filling_duration;
+   Valid_float32  v_temperature_stress_sensitivity;
+   */
+   Valid_float32  v_growth_sensitivity;
+   Valid_float32  v_tuber_init_sensitivity;
+   Valid_float32  v_tuber_growth_sensitivity;
+   Valid_float32  v_translocation_fraction;                                      //110907
+
+   // Currently these are only used in the parameter editor for editing the current stress period
+   Valid_float32  v_cold_stress_no_stress_threshold_temperature;                 //120416
+   Valid_float32  v_cold_stress_max_stress_threshold_temperature;                //120416
+   Valid_float32  v_cold_stress_sensitivity;                                     //120416
+   Valid_float32  v_cold_stress_exposure_damaging_hours;                         //120416
+   Valid_int16    v_cold_exposure_initial_hour;                                  //130628
+
+   Valid_float32  v_heat_stress_no_stress_threshold_temperature;                 //120416
+   Valid_float32  v_heat_stress_max_stress_threshold_temperature;                //120416
+   Valid_float32  v_heat_stress_sensitivity;                                     //120416
+   Valid_float32  v_heat_stress_exposure_damaging_hours;                         //120416
+   Valid_int16    v_heat_exposure_initial_hour;                                  //130628
+ public:
+   Harvest();
+   virtual bool setup_structure
+      (CORN::Data_record &record,bool for_write
+      ,Harvested_part harvested_part)                             modification_; //171122
+};
+//_2002-04-08___________________________________________________________________
+class Fruit
+:public Crop_parameters_class::Fruit
+{
+ public:
+   Valid_float32  v_fract_total_solids;
+   Valid_float32  v_max_fruit_load_kg_ha;
+   /*180601 never implemented
+   Valid_float32  v_initial_fruit_mass;
+   Valid_float32  v_initial_reserves_release_rate;
+   Valid_int16    v_clusters_per_vine;
+   Valid_int16    v_berries_per_cluster;
+   Valid_int16    v_fruits_per_tree;
+   */
+   Valid_float32  v_harvest_temperature;
+   Valid_int16    v_harvest_temperature_days;
+   Valid_int16    v_harvest_DOY_earliest;
+   Valid_int16    v_harvest_DOY_latest;
+   Valid_float32  v_initial_growth_fraction_to_fruit;
+   Valid_float32  v_rapid_growth_fraction_to_fruit;
+   Valid_float32  v_max_water_uptake_before_fruiting;
+   Valid_float32  v_max_water_uptake_during_initial_fruit;
+   Valid_float32  v_max_water_uptake_during_radid_fruit;
+   Valid_float32  v_max_water_uptake_during_veraison;
+   Valid_float32  v_max_water_uptake_after_maturity;
+ public:
+   Fruit();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//_2011-01-21___________________________________________________________________
+class Nitrogen
+: public Crop_parameters_class::Nitrogen
+{
+ public:
+   Valid_float32  v_max_uptake_daily_rate;
+   Valid_float32  v_residual_N_not_available_for_uptake;
+   Valid_float32  v_soil_N_conc_where_N_uptake_decreases;
+   Valid_float32  v_PAW_where_N_uptake_rate_decreases;
+
+   // Deprecated in V 4.17
+   #if (CROPSYST_VERSION==4)
+   Valid_float32  v_demand_adjust;
+   Valid_float32  v_biomass_to_start_dilution_max_N_conc;                        //120505
+   #endif
+
+
+   Valid_float32  v_emergence_max_conc;                                          //121219
+   Valid_float32  v_emergence_crit_conc;                                         //121219
+   Valid_float32  v_biomass_to_start_dilution_crit_N_conc;                       //121219
+   Valid_float32  v_stubble_max_conc;
+   Valid_float32  v_root_conc;
+   Valid_float32  v_N_mature_max_conc;                                           //120505
+   Valid_float32  v_dilution_curve_slope;                                        //121219_120505 was conc_slope
+   Valid_int16    v_end_dilution_curve;                                          //130408
+ public:
+   Nitrogen();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//_2001-01-22___________________________________________________________________
+class Salinity
+: public Crop_parameters_class::Salinity // currently no Salinity_class
+{public:
+   Valid_float32 v_osmotic_pot_50;
+   Valid_float32 v_salt_tolerance_P;
+ public:
+   Salinity();
+};
+//_2002-04-05___________________________________________________________________
+class Canopy_characteristics_hedge_row // vineyard       // 0701116 now for both orchards and vinyards
+: public Crop_parameters_class::Canopy_characteristics_hedge_row
+{public: // RLN I believe theys are annual values.
+   Valid_float32 v_initial_width;
+   Valid_float32 v_final_width;
+   Valid_float32 v_initial_breadth;
+   Valid_float32 v_final_breadth;
+   Valid_float32 v_initial_height;
+   Valid_float32 v_final_height;
+   Valid_float32 v_branch_insertion_height;
+ public:
+   Canopy_characteristics_hedge_row();
+};
+//_2002-04-05___________________________________________________________________
+struct Layout         // rename to tree layout
+: public Crop_parameters_class::Layout
+{ public: //
+   Valid_float32 v_row_spacing;
+   Valid_float32 v_row_azimuth;
+   Valid_float32 v_col_spacing;
+ public:
+   Layout();
+};
+//_2002-04-05___________________________________________________________________
+class CO2_Response
+: public Crop_parameters_class::CO2_Response
+{public:  // CO2 specific parameters
+   Valid_float32  v_TUE_reference_conc;                                          //131206
+   Valid_float32  v_RUE_reference_conc;                                          //131206
+   Valid_float32  v_alpha;                                                       //131206
+   Valid_float32  v_theta;                                                       //131206
+   Valid_float32  v_growth_ratio_asymptotic;                                     //131206
+ public:
+   CO2_Response();
+   VIRTUAL_BOOL_SETUP_STRUCTURE;
+};
+//_2002-04-08___________________________________________________________________
+#ifdef CROP_ROWS_OBSOLETE
+check
+/*020405_*/    class Canopy_characteristics_standard_row // orchard
+/*020405_*/    {  public: //
+/*020405_*/       float32  initial_canopy_diameter;      Valid_float32  v_initial_canopy_diameter;    // m
+/*020405_*/       float32  final_canopy_diameter;        Valid_float32  v_final_canopy_diameter;      // m
+/*020405_*/       float32  max_LAI_of_canopy_projection; Valid_float32  v_max_LAI_canopy_projection;  // ???
+/*020405_*/    public:
+/*020405_*/       Canopy_characteristics_standard_row();
+/*020405_*/    };
+/*020405_*/    Canopy_characteristics_standard_row *canopy_characteristics_standard_row;
+#endif
+//______________________________________________________________________________
+class CropGro
+{
+ public:  // CropGro specific parameters
+   CORN::Filtered_file_name  model_input_file;
+ public:
+   CropGro();
+};
+//_2003-11-21___________________________________________________________________
+//151006RLN restored for VIC also #ifndef VIC_CROPSYST
+//#ifndef YAML_PARAM_VERSION
+/*151016 temporarily moved to crop_param_class once I implement parameter adjustment idiom, this will be restored only for V4
+class Adjustment
+{
+ public:
+   std::string parameter;
+   std::string value;
+      // value is store as a string because we could potentially
+      // adjust/reset any parameter including enums and text fields
+ public:
+   inline Adjustment()
+      : parameter("")
+      , value("")
+      {}
+   virtual bool setup_structure(CORN::Data_record &data_rec,bool for_write) modification_;
+};
+//______________________________________________________________________________
+
+class Adjustment_event
+: public extends_ Simple_event
+, public extends_ Adjustment
+{public:
+   inline Adjustment_event()
+      : Simple_event()
+      , Adjustment()
+      {}
+   inline Adjustment_event(const Synchronization &i_date_phen_sync)
+      : Simple_event(i_date_phen_sync)
+      , Adjustment()
+      {}
+   inline bool setup_structure
+      (Data_record &data_rec ,bool for_write)                       modification_
+      {  return Simple_event::setup_structure(data_rec,for_write);
+         &&     Adjustment::setup_structure(data_rec,for_write);
+      }
+   virtual const char *label_cstr_deprecat4d(char *buffer)                const;   //130423
+   virtual const char *label_string(cstd::string &buffer)                 const;   //130423
+};
+*/
+//_2012-07-16___________________________________________________________________
+
+ public:
+   Thermal_time                thermal_time;                                     //020628
+   Phenology                   phenology;                                        //080722
+   Transpiration               transpiration;                                    //110208
+   Biomass_production          biomass_production;                               //110218
+   Morphology                  morphology;                                       //110219
+   Canopy_growth_LAI_based     canopy_growth_LAI_based;                          //080725
+   Canopy_growth_cover_based   canopy_growth_cover_based;                        //080725
+   Root                        root;                                             //061212
+   Quiescence                  quiescence;                                       //160326
+   // quiescence was inactive_period                                             //160326_080401
+   Dormancy                    dormancy;                                         //080331
+   Tolerance                   tolerance;                                        //150913_020408_110606 was pointer
+   //150913    Hardiness                   hardiness;                                        //020408 //110606 was pointer
+   Residue_decomposition_parameters residue_decomposition;                       //020408 //110606 was pointer
+   Vernalization               vernalization;                                    //020405 //110606 was pointer
+   Photoperiod                 photoperiod;                                      //020405 //110606 was pointer
+   Emergence_hydro_thermal     emergence;                                        //041201
+   Salinity                    salinity;                                         //020405 //110606 was pointer
+   Layout                      layout;                                           //020405 //110606 was pointer
+   Harvest                     harvest;                                          //020408_110218 was Harvest_index //110606 was pointer
+   Fruit                       fruit;                                            //020408
+   Nitrogen                    nitrogen;  //Nitrogen is optional (not used by fruit crops) //110606 was pointer
+   Canopy_characteristics_hedge_row canopy_characteristics_hedge_row;            //020405 //110606 was pointer
+   CO2_Response                CO2_response;
+   CropGro                     cropgro;
+public:  // The following apply only to version 4
+   float32 reference_light_to_biomass_kg_MJ_old;
+   bool                        deciduous_obsolete;  //141121                                      //020405
+   Senesced_biomass_fate_labeled senesced_biomass_fate_labeled_obsolete;                  //060817
+      // Retained until V5
+ public: // validators
+
+// This mode is for compatibility with previous versions
+// These parameters are deprecated and is be removed in version 5
+
+   Valid_int16    v_linger_days;                                                 //080910
+    // This is the amount of time scenesced leaves linger with (remain attached to) the plant.
+//020505       Although Claudio doesn't want residues to show up in the file for orchard model
+//             there has to be a residue in order to preserve the balance in the event crop terminates.
+ public: // Data record overrides
+    /*180626 format upgrade now handled externally.
+   virtual Section_entry_change *get_section_entry_changes(uint16 &count) const; //020408
+   */
+   /* temporarily moved to Crop_parameters_class
+   Common_event_list       adjustments;                                          //120716
+   */
+   /*170524 moved to Crop_parameters_class
+   contribute_ bool has_max_water_uptake_adjustments;                            //120725
+   */
+ public: // Constructor and initialization
+   Crop_parameters
+      (bool nitrogen_simulation  = true
+      ,bool salinity_simulation  = true
+      ,bool residue_simulation   = true
+      ,bool CO2_simulation       = true);                                        //020408
+   virtual ~Crop_parameters();                                                   //020409
+   virtual void initialize_fallow();                                             //990217
+   virtual void initialize_after_load() {}                                      //010109
+//             CropSyst Crop class needs to be initialized after loading,
+//             Other crop file/parameter users may not need to initialize
+//             So this method does not have to be abstract.
+ public:
+   // Enabled for parameter editor
+   bool validate(std::ofstream &validation_file);
+   virtual bool expect_structure(bool for_write = false);                        //161023
+   virtual bool set_start();                                                     //161023
+      // Override VV file because we want to setup the stages set.               //980801
+   virtual bool get_end();                                                       //161023_980801
+   void setup_optional_parameters();                                             //020419
+public:
+   inline  virtual Crop_parameters_struct::Quiescence &ref_quiescence()          { return quiescence; }
+   //160326 inline  virtual Crop_parameters_struct::Inactive_period  &ref_inactive_period()           { return inactive_period;}
+   inline  virtual Crop_parameters_struct::Thermal_time                &ref_thermal_time()              { return thermal_time;}
+   inline  virtual Crop_parameters_struct::Phenology                   &ref_phenology()                 { return phenology;}
+   inline  virtual Crop_parameters_struct::Transpiration               &mod_transpiration()             { return transpiration; }
+   inline  virtual const Crop_parameters_struct::Transpiration         &ref_transpiration()       const { return transpiration; }
+   //NYI inline  virtual Crop_parameters_struct::Transpiration               &ref_transpiration()             { return transpiration; }
+   inline  virtual Crop_parameters_struct::Biomass_production          &ref_biomass_production()        { return biomass_production; }
+   inline  virtual Crop_parameters_struct::Vernalization               &ref_vernalization ()            { return vernalization;}
+   inline  virtual Crop_parameters_struct::Photoperiod                 &ref_photoperiod ()              { return photoperiod;}
+   inline  virtual Crop_parameters_struct::Emergence_hydro_thermal     &ref_emergence ()                { return emergence;}
+   inline  virtual Crop_parameters_struct::Morphology                  &ref_morphology()                { return morphology;}
+   inline  virtual Crop_parameters_struct::Canopy_growth_LAI_based     &ref_canopy_growth_LAI_based ()  { return canopy_growth_LAI_based;}
+   inline  virtual Crop_parameters_struct::Canopy_growth_cover_based   &ref_canopy_growth_cover_based() { return canopy_growth_cover_based;}
+   inline  virtual Crop_parameters_struct::Root                        &ref_root()                      { return root;}
+   inline  virtual const Crop_parameters_struct::Fruit                 &ref_fruit()               const { return fruit; }
+   inline  virtual Crop_parameters_struct::Fruit                       &mod_fruit()                     { return fruit; }
+   inline  virtual Crop_parameters_struct::Dormancy                    &ref_dormancy()                  { return dormancy; } //110504
+
+//NYN inline virtual const Crop_parameters_struct::Inactive_period             &ref_inactive_period()           const { return inactive_period;}
+   inline virtual const Crop_parameters_struct::Thermal_time           &ref_thermal_time()              const { return thermal_time;}
+   inline virtual const Crop_parameters_struct::Phenology              &ref_phenology()           const { return phenology;}
+   inline virtual const Crop_parameters_struct::Biomass_production     &ref_biomass_production()  const { return biomass_production; }
+//NYN inline virtual const Crop_parameters_struct::Vernalization               *ref_vernalization ()            const { return vernalization;}
+//NYN inline virtual const Crop_parameters_struct::Photoperiod                 *ref_photoperiod ()              const { return photoperiod;}
+//NYN inline virtual const Crop_parameters_struct::Emergence_hydro_thermal     &ref_emergence ()                const { return emergence;}
+   inline const virtual Crop_parameters_struct::Morphology             &ref_morphology()          const { return morphology;}
+//NYN inline virtual const Crop_parameters_struct::Canopy_growth_LAI_based     &ref_canopy_growth_LAI_based ()  const { return canopy_growth_LAI_based;}
+   inline virtual const Crop_parameters_struct::Canopy_growth_cover_based   &ref_canopy_growth_cover_based() const { return canopy_growth_cover_based;}
+//NYN inline virtual const Crop_parameters_struct::Root                        &ref_root()                      const { return root;}
+ public:
+   virtual Crop_parameters_class::Transpiration &ref_transpiration_class()       {return transpiration;}
+   virtual Crop_parameters_class::Biomass_production &ref_biomass_production_class() { return biomass_production;}
+   virtual Crop_parameters_class::Tolerance     &ref_tolerance_class()           { return tolerance; }
+   virtual Crop_parameters_class::Morphology    &ref_morphology_class()          { return morphology; }
+   virtual Crop_parameters_class::Harvest       &ref_harvest_class()             { return harvest;}
+   virtual Crop_parameters_class::Nitrogen      &ref_nitrogen_class()            { return nitrogen;}
+   virtual Crop_parameters_class::CO2_Response  &ref_CO2_response_class()        { return CO2_response;}
+   virtual Crop_parameters_class::Fruit         &ref_fruit_class()               { return fruit; }
+   virtual Crop_parameters_class::Emergence_hydro_thermal &ref_emergence_class() { return emergence;}
+ public:
+   inline virtual float64 param_base_temp()                                const { return  thermal_time.base_temperature      ;}
+   inline virtual float64 param_cutoff_temp()                              const { return  thermal_time.cutoff_temperature    ;}
+   inline virtual float64 param_opt_temp()                                 const { return  thermal_time.opt_temperature       ;}   //021124
+   inline virtual float64 param_max_temp()                                 const { return  thermal_time.max_temperature       ;}   //021124
+#ifdef NYI
+020628 these needed to be made relative to Thermal_time_parameters
+   inline virtual float64 param_phenologic_sensitivity_water_stress()
+                                                                           const { return phenologic_sensitivity_water_stress}
+#endif
+/*160624 eliminating param_XXX() methods because now passing the parameter data structures to the classes where used
+   inline virtual float64 param_max_root_depth()                           const { return root.max_depth             ;}
+*/
+   inline virtual float64 param_max_canopy_height()                        const { return morphology.max_canopy_height        ;} // 110218  //990213
+   /*170524 moved to crop param class
+          virtual float64 param_max_water_uptake_m
+      (Normal_crop_event_sequence growth_stage)                            const;//091208
+   */
+   inline virtual float64 param_ET_crop_coef()                             const { return  transpiration.ET_coef               ;}
+   //170524obs inline virtual float64 param_early_growth_limit_temp_V4()                  const { return  biomass_production.early_growth_limit_temp_V4;} // C  was temp limit //110218
+   inline virtual float64 param_fruit_damage_cold_temp()                   const { return tolerance.temperature_cold_fruit_damage/*150913 hardiness.fruit_damage_cold_temp*/; }  //991029
+   inline virtual float64 param_fruit_lethal_cold_temp()                   const { return tolerance.temperature_cold_fruit_lethal/*150913 hardiness.fruit_lethal_cold_temp*/; }  //991029
+   inline virtual float64 param_quiescence_inducement_temp()               const { return quiescence.inducement_temperature  ;} //    'C //160326
+   inline virtual float64 param_stomatal_closure_leaf_water_pot()          const { return transpiration.LWP_stomatal_closure;}  // stomatal closure leaf water pot  was xylem //110208
+   inline virtual float64 param_wilt_leaf_water_pot()                      const { return transpiration.LWP_wilt_point;}  //110218
+   inline virtual float64 param_kc()                                       const { return morphology.kc                         ;} //110218
+   /*170523 obsolete
+   inline virtual float64 param_harvest_ndx_filling_sensitivity()          const { return harvest.filling_sensitivity;    } // 0-1  //101018
+   */
+   inline virtual float64 param_vernalization_low_temp()                   const { return  vernalization.low_temp     ;} // -4 - 5
+   inline virtual float64 param_vernalization_high_temp()                  const { return  vernalization.high_temp    ;} // 7 - 12
+   inline virtual float64 param_vernalization_start()                      const { return  vernalization.start        ;} // 0 - vernReq C
+   inline virtual float64 param_vernalization_end()                        const { return  vernalization.end          ;} //0 - 50 C
+   inline virtual float64 param_vernalization_min_factor()                 const { return  vernalization.min_factor   ;} // 0-1
+
+   // Salinity specific parameters for water uptake:
+   inline virtual float64 param_osmotic_pot_50()                           const { return  salinity.osmotic_pot_50           ;}    // osmotic potential at 50% yield reduction KPa, J/Kg.For the Saturation extract
+   inline virtual float64 param_salt_tolerance_P()                         const { return  salinity.salt_tolerance_P         ;}  // p_value. p exponent for the Van-Genucht"salinity tolerance exp
+   inline virtual Land_use  param_land_use()                               const { return (Land_use)land_use_labeled.get(); }   //020324_
+   virtual bool is_deciduous()                                             const
+      { return abscission_labeled.get() == deciduous; }                          //141121
+};
+//______________________________________________________________________________
+} // namespace CropSyst
+#endif
+

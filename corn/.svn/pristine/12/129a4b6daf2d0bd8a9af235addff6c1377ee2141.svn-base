@@ -1,0 +1,54 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+USEUNIT("..\..\image\clrramp.cpp");
+USEUNIT("..\..\math\moremath.cpp");
+USEUNIT("..\..\math\random.cpp");
+USEUNIT("..\..\math\numerical\interpolate.cpp");
+USEUNIT("..\..\math\numerical\linrregr.cpp");
+USEUNIT("..\..\math\numerical\nonlinearfit.cpp");
+USEUNIT("..\..\math\numerical\numeric.cpp");
+USEUNIT("..\..\math\numerical\solver.cpp");
+USEUNIT("..\..\string\strconv.cpp");
+USEUNIT("..\..\validate\validtyp.cpp");
+USEUNIT("..\..\tabular\delineation.cpp");
+USEUNIT("..\..\tabular\tabular.cpp");
+USEUNIT("..\..\labeled_enum.cpp");
+USEUNIT("..\..\OS\OS.cpp");
+USEUNIT("..\..\math\statistical\stats.cpp");
+USEUNIT("..\..\math\statistical\stats_best.cpp");
+USEUNIT("..\..\quality.cpp");
+USEUNIT("..\..\dynamic_array\da_common.cpp");
+USEUNIT("..\..\dynamic_array\da_float32.cpp");
+USEUNIT("..\..\dynamic_array\da_uint8.cpp");
+USEUNIT("..\..\dynamic_array\da_uint32.cpp");
+USEUNIT("..\..\measure\measures.cpp");
+USEUNIT("..\..\measure\common_units.cpp");
+USEUNIT("..\..\measure\unitconv.cpp");
+USEUNIT("..\..\measure\units.cpp");
+USEUNIT("..\..\measure\units_enum.cpp");
+USEUNIT("..\..\tabular\tabular_format.cpp");
+USEUNIT("..\..\data_type_enum.cpp");
+USEUNIT("..\..\math\compare.c");
+USEUNIT("..\..\metrology\units_clad.cpp");
+USEUNIT("..\..\metrology\units_symbology.cpp");
+USEUNIT("..\..\metrology\timestep.cpp");
+USEUNIT("..\..\math\statistical\distribution_normal.cpp");
+USEUNIT("..\..\OS\directory_entry_name.cpp");
+USEUNIT("..\..\OS\directory_entry_name_abstract.cpp");
+USEUNIT("..\..\OS\directory_entry_name_logical.cpp");
+USEUNIT("..\..\OS\file_system.cpp");
+USEUNIT("..\..\OS\file_system_engine.cpp");
+USEUNIT("..\..\OS\file_system_engine_common.cpp");
+USEUNIT("..\..\OS\file_system_engine_Windows.cpp");
+USEUNIT("..\..\OS\file_system_logical.cpp");
+USEUNIT("..\..\OS\file_type_description.cpp");
+USEUNIT("..\..\OS\filtered_filename.cpp");
+USEUNIT("..\..\OS\uniform_resource_locator.cpp");
+USEUNIT("..\..\OS\Uniform_resource_identifier.cpp");
+//---------------------------------------------------------------------------
+#define Library
+
+// To add a file to the library use the Project menu 'Add to Project'.
+

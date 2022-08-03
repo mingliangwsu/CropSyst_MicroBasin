@@ -1,0 +1,155 @@
+#ifndef CS_examinationH
+#define CS_examinationH
+//______________________________________________________________________________
+#include "corn/math/statistical/statistics_types.hpp"
+#include "corn/seclusion.h"
+#include "CS_suite/observation/CS_inspection.h"
+#include "CS_suite/observation/CS_desired_vars.h"
+#include <ostream>
+//#define DEBUG_INSPECTORS
+
+//______________________________________________________________________________
+namespace CS
+{
+extern Emanators &provide_inactive_emanators();
+//______________________________________________________________________________
+struct Examination
+{  // singleton
+ public:
+   class Inspection_tally_store
+   : public implements_ CORN::Item
+      {  // This is used to tally inspection tally statistical descriptors
+         // (tallies of tallies)
+       public:
+         const Inspector  &inspector;
+         CORN::Datetime64  inception_date;
+         nat8              level_or_period;
+         CORN::Units_clad  timestep;                                             //170318
+         std::string       period_name;                                          //170318
+         // NYI even though we specify what stats are applicable
+         // for tallying when the inspector is created
+         // the user may further control what is actually to be examined/reported
+         std::string       tally_nameX;
+            // we dont keep reference to the inspection because
+            // the inspection could be deleted (I.e. Annual)
+            // We need the inspector to find/index and compose recording target filename.
+         CORN::Statistical_sample_with_dataset<float64,float32,float32>
+            *stat_tally[CORN::statistic_COUNT];
+         // We can have tallies of tallies, but that is not currently used
+            // Of the tallied elements
+       public:
+         Inspection_tally_store
+            (const Inspector  &inspector
+            ,CORN::Datetime64  inception_date
+            ,nat8              level_or_period
+            ,CORN::Units_code   timestep_code
+            ,const std::string &period_name                                      //170318
+            //170319,const std::string &tally_name
+            //170319,CORN::Units_code   timestep
+            );                                       //170318
+         bool commit(const Inspection &Inspection) modification_;
+         virtual int compare(const CORN::Item &)                          const;
+      };
+ protected:
+   CS::Desired_variables     *desired_variables_daily; // not owned
+ public:
+   CORN::Seclusion seclusion;
+   nat32 desired_stats;
+      // There might be 2 (or more) levels of stats
+      // one for basic inspections and one for
+      // tallies of tallies (or even tallies of tallied tallies)
+
+   modifiable_ CORN::Unidirectional_list  singles;
+      // Single events  for which there would not
+      // be daily inspection (I.e. Crop season output).
+   modifiable_ CORN::Unidirectional_list  inspectors;
+   modifiable_ CS::Inspections            inspections;
+
+   modifiable_ CORN::Unidirectional_list  inspectors_completed;
+   modifiable_ CORN::Unidirectional_list  inspections_completed_periodic;
+   modifiable_ CORN::Unidirectional_list  inspections_completed_annual;
+      // During the run there may be ephemeral inspections
+      // I.e. for crop growing season tallies.
+      // as the periods finish the inspections are moved to inspections_completed
+      // The consumer of the inspections will moved the completed inspections
+      // to the deleted lists when the inspection when no longer needed
+      // The annual list is used by recorders to optimize annual processing.
+
+/*160619
+only need one deletable list for inspectors, inspections and inspection_tallies
+
+   modifiable_ CORN::Unidirectional_list inspectors_deletable;
+   modifiable_ CORN::Unidirectional_list inspections_deletable;
+*/
+   modifiable_ CORN::Unidirectional_list deletable;
+
+      // Inspector and Inspection consumers may moved completed items
+      // to deleted lists indicating that everything has been recorded
+      // and may be deleted.
+      // The Examination will clear these lists at it leisure.
+      // Because there will usually not be too many large items in these
+      // lists these are only cleared each year.
+
+   mutable modifiable_ CORN::Unidirectional_list  inspection_tallies;
+      // inspection_tallies are not separated periodic and annual
+      // because currently UED recorder only outputs these at the end.
+      // this list is unique.
+   /*NYN
+     modifiable_ CORN::Unidirectional_list  inspector_tallies_annual;
+     modifiable_ CORN::Unidirectional_list  inspector_tallies_periods;
+   */
+   #ifdef DEBUG_INSPECTORS
+   CORN::Text_list debug_unique_inspector_instances;
+   CORN::Text_list debug_unique_inspector_ontologies;
+   #endif
+ public:
+   Examination();
+   Examination(const Inspection &copy_from);
+   virtual ~Examination();
+   inline nat32 desire_tally_statistics(nat32 desired_stats_)
+      { return desired_stats = desired_stats_; }
+      // This allows the user to control which statistics to actually maintain.
+      // This is checked (XOR) against what statistics in a period are applicable
+   inline bool know_desired_variables_daily                                      //170319
+      (CS::Desired_variables *desired_variables_daily_)
+      { desired_variables_daily = desired_variables_daily_; return true;}
+   bool add_period_inspection
+      (nat8               period // or level
+      ,CORN::Units_code   timestep_code                                          //170319
+      // already had this ,nat32             record_options                      //170318
+      ,const Emanator    &context
+      ,CORN::Datetime64   period_start_date
+      ,const std::string &period_name_                                           //170319
+      /*170319
+      ,const char       *tally_name       // I.e. annual
+      ,const char       *dataset_name = 0 // I.e. daily
+      */
+      ,nat32 applicable_descriptive_summary_elements=STAT_BASIC_ELEMENTS_INIT_FINAL_bits);  //160613
+      // Any object can inform the Examination that there is a new
+      // period in effect that should have its own tally (for the object's emanator).
+   bool complete_period_inspection(nat32 period,const Emanator &context);        //160613
+      // When an object end its current period,
+      // commit the tally (I.e. to output) and remove from inspector_tallies
+   virtual bool start_year()                                      modification_;
+   virtual bool end_day()                                         modification_;
+   virtual bool end_year()                                        modification_;
+   virtual bool filter()                                          modification_;
+      // Applies filters specified with seclusion
+      // to remove inspectors (and inspections)
+      // so only relevent/desired observation occurs.
+ protected:
+   Inspection_tally_store &provide_inspection_tally_store
+      (const Inspection &inspection
+      ,CORN::Units_code  timestep)                                   provision_;
+   bool inspection_tally_commit(const Inspection &inspection)     modification_;
+};
+//______________________________________________________________________________
+//161202 extern Examination examination_global;  // singleton
+   // Currently instance, but should be provided
+extern Examination &provide_examination_global();                                //161202
+}
+//______________________________________________________________________________
+#endif
+
+// Classes that render inspectors need to include this file
+// #include "CS_suite/simulation/CS_inspection.h"

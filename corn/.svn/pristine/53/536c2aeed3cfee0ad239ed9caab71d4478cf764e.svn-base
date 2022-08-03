@@ -1,0 +1,575 @@
+#ifndef YAML_documentH
+#define YAML_documentH
+
+#include "corn/format/structural.h"
+//#include "corn/const.h"
+#include "corn/container/item.h"
+//#include "corn/container/container.h"
+#include "corn/container/unilist.h"
+#include "corn/string/strconv.hpp"
+#include <assert.h>
+
+namespace YAML
+{
+   //interface_ Pair_key_value_interface;
+   class Node;
+}
+
+
+namespace YAML
+{
+   class Collection;
+   class Mapping;
+//______________________________________________________________________________
+enum Parse_error_code
+{ ERROR_none
+, ERROR_unknown
+, ERROR_indentation_unexpected_character
+, ERROR_value_question_space_expected
+, ERROR_value_colon_space_expected
+, ERROR_colon_encountered_but_not_key
+, ERROR_document_start_not_found
+};
+//______________________________________________________________________________
+enum Chomp
+{  no_chomp
+,  strip_chomp
+,  keep_chomp
+};
+//______________________________________________________________________________
+/*
+enum Node_type
+{  unknown_node_type
+,  scalar_node_type
+,  sequence_node_type
+,  mapping_node_type
+, NODE_TYPE_COUNT
+};
+*/
+//_Forward declarations_________________________________________________________
+class Collection;
+class Sequence;
+class Mapping;
+//class Sequence;
+class Block_literal_style;
+class Block_folded_style;
+//151019 class Pair_key_value;
+class Node;
+//______________________________________________________________________________
+class Tag
+{
+};
+//______________________________________________________________________________
+class Parsing_element  // YAML extension
+: public implements_ CORN::Item
+//: public implements_ structural::Construct
+{public:
+   //structural::Construct *parent_construct;
+//150528    nat16             indentation; // leading space count
+   std::wstring     *text;
+   std::wstring     *comment;
+//150530   structural::Construct *context;
+   std::wstring kind_or_type;
+   bool is_key;
+
+   inline Parsing_element
+      (
+//150808      nat16 _indentation,
+//150530      structural::Construct *_context
+      )
+      : CORN::Item()
+      //:  structural::Construct()
+//150528       , indentation(_indentation)
+      , text(0)
+      , comment(0)
+//150530       , context(_context)
+      , kind_or_type()
+      , is_key(false)
+      {}
+   //NYN bool take(modification_ Construct *sub_construct);
+   inline bool take_char(wchar_t given_char)
+      {  if (!text) text = new std::wstring;
+         (*text) += given_char;
+         return true;
+      }
+};
+//______________________________________________________________________________
+
+class Node
+: public implements_ structural::Construct
+{
+
+ public:
+   std::wstring *text;
+   std::wstring *comment;
+
+/* check if still needed
+   std::wstring              *unresolved_text; // was arbitrary_text;
+ public: // temporarily public while I develop this class
+   YAML::Node     *in_collection; // cognate
+   YAML::Mapping  *key_of; // cognate
+   CORN::Container *anchors; // owned by stream //cognate
+   std::wstring anchor_name;
+   std::wstring user_defined_type;
+   Tag *tag; // optional
+   Parse_error_code error;
+ public:
+   bool inline_style;
+
+ protected:
+   contribute_ bool parsed;
+      //Initially false
+      //set true when the construct has been fully input
+ public:
+   bool appears_to_be_key;
+*/
+ public:
+/* NYI
+   Node
+      (Node *_in_collection
+      ,Node  *_key_of
+      );
+   //(modifiable_ YAML::Node *parent_node=0);
+   Node (YAML::Node *promote_from);
+*/
+   Node();
+   virtual bool promote_from(modifiable_ YAML::Parsing_element *element) modification_;
+      // Cannibalizes element
+   inline virtual bool is_key_wstring(const std::wstring &key)              affirmation_  //180820
+      { return (*text) == key; }
+
+/*180820  was probably only used for find_cstr now using is_key
+   inline virtual const wchar_t  *get_key_wide()                           const { return  text->c_str(); }
+   */
+
+   //virtual bool set_comment_wstr(const wchar_t *comment)           ;
+
+
+/*NYN checking if need to reimplement
+   virtual wchar_t *parse_text(wchar_t *text);
+   virtual YAML::Node *resolve_node(given_  YAML::Node *child_given);
+      // Called when the parser has found the termination
+      // of the node text
+      // (either the stream indentation) or the current text line is at key value separator or end of line with no expected continuation.
+   inline virtual bool resolve() { return true; }
+      // Derived classes may override this method to do any conversion
+      // and commit the parsed value to the specific context
+      // (I.e. covert unresolved text to scalar data value.
+
+
+
+
+   nat16 scan_for_tag(modifiable_ std::wstring &tag)  const;
+   virtual Sequence             *render_sequence()                         rendition_ { return 0; }
+   virtual Mapping              *render_mapping()                          rendition_ { return 0; }
+//   Sequence             *render_sequence()                               rendition_;
+   virtual Block_literal_style  *render_block_literal_style()              rendition_ { return 0; }
+   virtual Block_folded_style   *render_block_folded_style()               rendition_ { return 0; }
+   //virtual Pair_key_value *instanciate_key_value_pair(const YAML::Node &key) rendition_ { return 0; }
+
+   //inline const std::wstring &get_arbitrary_text() const { return arbitrary_text ; }
+
+   virtual bool is_parsed()                                        contribution_;
+*/
+/* check if still needed
+   std::wstring *relinquish_unresolved_text();
+   inline virtual wchar_t *get_text_wstr() { return unresolved_text ? unresolved_text->c_str() : L"" ; }
+   inline bool matches_wstr(const wchar_t *other_text) const
+      { return unresolved_text ? (*unresolved_text) == other_text : 0; }
+   virtual bool is_resolved()                                       affirmation_;
+   inline virtual bool newline_ends_node()                          affirmation_ { return true; }
+   inline virtual bool leave_context()                             modification_ { return true; };
+*/
+#ifdef TEMP_DISABLED
+ public:
+   virtual wchar_t *parse_text_indented(wchar_t *text);
+      /// \return 0 if the character is consumed
+      /// \return error code if the character is unexpected/recognized.
+
+   virtual wchar_t *parse_text_unindented(wchar_t *text);
+
+
+
+
+   inline void know_anchors(CORN::Container *_anchors) cognition_
+      {  anchors = _anchors;
+      }
+
+   nat16 get_indentation_total()                                           const;
+   virtual bool expect_structure() modification_ {}
+      // Derived classes may define an expected structure
+      // of recognized constructs.
+      // This is an optional
+#endif
+};
+//______________________________________________________________________________
+class Scalar
+: public extends_ YAML::Node
+{
+   //The content of a scalar node is an opaque datum that can be presented as a series of zero or more Unicode characters.
+
+ public:
+   Scalar()
+      : YAML::Node(/*0,0*/)
+      {}
+/*NYN checking if need to reimplement
+   virtual bool resolve()                                          modification_;//510205
+   virtual bool resolve_unresolved_text()                          modification_=0;//150205
+*/
+};
+//______________________________________________________________________________
+class String
+: public extends_ Scalar
+{
+   std::wstring *string_value;
+ public:
+   inline String()
+      : Scalar()
+      , string_value(0)
+      {}
+   virtual bool promote_from(modifiable_ YAML::Parsing_element *element) modification_;
+
+   //150205 virtual wchar_t *parse_text(wchar_t *text);
+/*NYN checking if need to reimplement
+   inline virtual wchar_t *get_text_wstr()
+      {
+         assert(is_parsed()); // for debugging
+         return string_value ? string_value->c_str()
+         : Scalar::get_text_wstr(); // Actually we should always have string_value once parsed
+      }
+   inline bool matches_wstr(const wchar_t *other_text) const
+      { return string_value ? (*string_value) == other_text
+         :  Scalar::matches_wstr(other_text); // Actually we should always have string_value once parsed
+      }
+   virtual bool is_resolved()                                       affirmation_;
+*/
+
+
+};
+//______________________________________________________________________________
+class Block_scalar
+: public extends_ Scalar  // May be string
+{
+   nat16 indent;
+   Chomp chomp;
+ public:
+/*NYN checking if need to reimplement
+   nat16 parse_header(const wchar_t *text);
+      // returns the number of characters recognized by text
+*/
+};
+//______________________________________________________________________________
+class Block_literal_style
+: public extends_ Block_scalar
+{
+ public:
+   inline virtual bool newline_ends_node()                          affirmation_ { return false; }
+
+};
+//______________________________________________________________________________
+class Block_folded_style
+: public extends_ Block_scalar
+{
+ public:
+   inline virtual bool newline_ends_node()                          affirmation_ { return false; }
+
+};
+//______________________________________________________________________________
+class Null
+: public extends_ Scalar
+{
+ public:
+   inline Null()
+      : Scalar()
+      {}
+/*NYN checking if need to reimplement
+   inline virtual bool resolve_unresolved_text()                   modification_ //150205
+      {
+
+         delete unresolved_text; unresolved_text = 0;
+
+      }
+*/
+};
+//______________________________________________________________________________
+class Bool
+: public extends_ Scalar
+{
+   bool bool_value;
+ public:
+   inline Bool()
+      : Scalar()
+      , bool_value(false)
+      {}
+   virtual bool set_text_wstring(const std::wstring &_text)        modification_;
+//   virtual bool resolve();
+/*NYN checking if need to reimplement
+   virtual bool resolve_unresolved_text()                                  modification_;//150205
+*/
+ };
+//______________________________________________________________________________
+class Int
+: public extends_ Scalar
+{
+   int int_value;
+ public:
+   inline Int()
+      : Scalar()
+      , int_value(0)
+      {}
+   virtual bool set_text_wstr(const wchar_t *_text)                modification_;
+
+/*NYN checking if need to reimplement
+   virtual bool resolve_unresolved_text()                          modification_;//150205
+*/
+};
+//______________________________________________________________________________
+class Float
+: public extends_ Scalar
+{
+   float float_value;
+ public:
+   inline Float()
+      : Scalar()
+      , float_value(0.0) // Might want to use NAN
+      {}
+   virtual bool set_text_wstr(const wchar_t *_text)                modification_;
+
+
+/*NYN checking if need to reimplement
+   virtual bool resolve_unresolved_text()                          modification_;//150205
+*/
+};
+//______________________________________________________________________________
+/*
+class Collection
+: public extends_ Node
+, public extends_ CORN::Unidirectional_list
+{
+ protected:
+   YAML::Node *curr_node;
+      // current_content could be referencing self
+ public:
+   Collection
+      (YAML::Node *_in_collection
+      ,YAML::Node  *_key_of);
+   inline Collection(YAML::Node *promote_from_node)
+      : YAML::Node(promote_from_node)
+      {}
+   virtual wchar_t *parse_text(wchar_t *text);
+
+   virtual bool is_parsed()                                        contribution_;
+
+};
+//______________________________________________________________________________
+*/
+class Sequence
+: public extends_ structural::Sequence
+, public extends_ YAML::Node
+{
+   //The content of a sequence node is an ordered series of zero or more nodes.
+   //In particular, a sequence may contain the same node more than once.
+   //It could even contain itself (directly or indirectly).
+
+ public:
+   inline Sequence
+      (
+      // check if need to reimplement const YAML::Node  *_in_collection
+      //,YAML::Node  *_key_of
+      )
+      //: Collection(_in_collection/*,_key_of*/)
+      {}
+   inline Sequence(YAML::Node &promote_from_node)
+//      : Collection(promote_from_node)
+      {}
+/*NYN checking if need to reimplement
+   virtual wchar_t *parse_text(wchar_t *text);
+ protected:
+   virtual nat8 recognize_structure_indicator(wchar_t chr0, wchar_t chr1) ;
+*/
+   inline virtual bool is_case_sensitive()                const { return true; }
+   inline virtual nat32 count()                              const { return 0; } // place holder
+   inline virtual bool append_text_list(CORN::Text_list &values)  appropriation_
+      { return false; } // NYI
+
+};
+//______________________________________________________________________________
+class Mapping
+: public extends_ structural::Mapping_clad
+, public extends_ YAML::Node
+
+//, public extends_ virtual Pair_key_value
+//, public implements_ YAML::Pair_key_value_interface
+{
+   //___________________________________________________________________________
+   /* The content of a mapping node is an unordered set of key: value node pairs,
+    with the restriction that each of the keys is unique.
+    YAML places no further restrictions on the nodes.
+    In particular, keys may be arbitrary nodes, the same node may be used as
+    the value of several key: value pairs, and a mapping could even contain itself
+    as a key or a value (directly or indirectly).
+   */
+/*NYN checking if need to reimplement
+   YAML::Node *specifier;
+*/
+      /* May be 0 for the upper most document level
+        For example:
+
+        ---
+        one: 1
+        two: 2
+        three: 3
+        ...
+        The document itself is a mapping but it has no specific sections
+
+        ---
+        sectionA:
+          one: 1
+          two: 2
+          three: 3
+        ...
+        Here the document itself is a mapping,
+        sectionA is a mapping specified by simple string scalar "sectionA"
+        This is the most common usage.
+
+
+        ---
+        [ A 1 ]:
+          one: 1
+          two: 2
+          three: 3
+        ...
+        In this case the first mapping is specfied by a Sequence with values "A" 1
+
+        The specifier may itself serve as a key when the mapping is
+        itself a member of a mapping.
+
+        The spacifier can be any kind of node, even a complex collection.
+       */
+
+/*NYN checking if need to reimplement
+
+   contribute_ YAML::Node *curr_key_node_pending;
+
+ public: // should have setter
+   YAML::Node *generic_map_item_value;
+
+ public: // temporarily public, should create accessor
+   contribute_ Pair_key_value *curr_key_value_pair;
+
+/*NYN checking if need to reimplement
+ public: // structors
+/*NYN checking if need to reimplement
+   Mapping
+      (given_ YAML::Node *_specifier_given
+      ,YAML::Node  *_in_collection
+      ,YAML::Node *_key_of);
+
+   Mapping(given_ YAML::Node *promote_from_node);
+      // copy constructor for resolving a node
+   virtual ~Mapping();
+   virtual bool is_parsed()                                        contribution_;
+   virtual bool is_resolved()                                       affirmation_;
+*/
+ public:
+/*NYN checking if need to reimplement
+   virtual wchar_t *parse_text(wchar_t *text);
+*/
+   inline Mapping()
+      :structural::Mapping_clad(0)
+      {}
+   virtual structural::Pair_key_value *instanciate_key_value_pair
+      (YAML::Node *key_given
+      /*,YAML::Node *value_given = 0*/
+      );
+   inline virtual bool is_key_wstring(const std::wstring &key)              affirmation_  //180820
+      { return (*YAML::Node::text) == key; }
+
+/*180820  was probably only used for find_cstr now using is_key
+      
+   inline virtual const wchar_t  *get_key_wide()                           const { return  YAML::Node::get_key_wide() ; }
+*/   
+
+/*NYN checking if need to reimplement
+   virtual YAML::Node *resolve_node(given_ YAML::Node *child_given);
+   inline virtual YAML::Node *get_map_key()                            modification_ { return specifier; }
+   inline virtual YAML::Node *get_value()                          modification_
+      {return 0; }
+      //{ return generic_map_item_value; }                                         //150219
+   virtual YAML::Node *take_value(YAML::Node *value_relinquished)  modification_;
+   virtual bool resolve()                                          modification_  { return true;}  // NYN
+   YAML::Node *get_current_value()                                 modification_;
+   YAML::Mapping *get_current_mapping()                            modification_;
+
+   inline virtual bool leave_context()                             modification_ //150213
+      { curr_key_value_pair = 0; return true; }
+   inline bool clear_current_key_value_pair()                      contribution_ //150213
+      { curr_key_value_pair = 0; return true; }
+
+
+
+ private:
+   virtual nat8 recognize_structure_indicator(wchar_t chr0, wchar_t chr1) ;
+*/
+   inline virtual bool is_case_sensitive()                                 const { return true;}
+ private:
+   inline Mapping *abstract_check() const { return new Mapping(); }
+};
+//______________________________________________________________________________
+
+//______________________________________________________________________________
+/*obsolete a Document can be a scalar node or sequence or mapping
+ *only when the nodes are resolved can the exact structure be determined
+ *Document for a specific context however can define the expect overall structure
+ * (I.e. a sequence or mapping)
+class Document
+: public extends_ Collection
+{
+ public:
+   Document(); //  (CORN::Container &anchors);
+   nat16 take_line(const std::wstring &indented_content);
+      // returns 0 if accepted
+      // returns document error code:
+      // obsolete indentation handled by YAML_stream // 1 indentation mismatch
+      // 2 no object
+#ifdef NYI
+   virtual wchar_t *parse_text(wchar_t *text);
+#endif
+
+};
+*/
+//______________________________________________________________________________
+class Anchor
+: public implements_ CORN::Item
+{
+   std::wstring ID;
+   const YAML::Node  *associated_construct;
+ public:
+   Anchor
+      (const std::wstring &_ID
+      ,const YAML::Node  *_associated_construct)
+      : ID(_ID)
+      , associated_construct(_associated_construct)
+      {}
+   // Need to override get key
+};
+//______________________________________________________________________________
+/*170128 moved to structural_stream.h
+struct Error
+: public extends_ CORN::Item
+{
+   Parse_error_code   code;
+   YAML::Node         *in_construct;
+   nat32              line;
+};
+*/
+//______________________________________________________________________________
+
+void clear_anchors();
+//______________________________________________________________________________
+
+
+} //namespace YAML
+//______________________________________________________________________________
+
+#endif

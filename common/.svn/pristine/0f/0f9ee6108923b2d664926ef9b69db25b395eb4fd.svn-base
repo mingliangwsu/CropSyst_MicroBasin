@@ -1,0 +1,21 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+USEUNIT("..\..\synchronization.cpp");
+USEUNIT("..\..\scenario.cpp");
+USEUNIT("..\..\simulation.cpp");
+USEUNIT("..\..\event.cpp");
+USEUNIT("..\..\operation.cpp");
+USEUNIT("..\..\log.cpp");
+USEUNIT("..\..\event_status.cpp");
+USEUNIT("..\..\exit_codes.cpp");
+USEUNIT("..\..\event_types.cpp");
+USEUNIT("..\..\simulation_project_directory.cpp");
+USEUNIT("..\..\scenario_directory.cpp");
+USEUNIT("..\..\balancer.cpp");
+//---------------------------------------------------------------------------
+#define Library
+
+// To add a file to the library use the Project menu 'Add to Project'.
+

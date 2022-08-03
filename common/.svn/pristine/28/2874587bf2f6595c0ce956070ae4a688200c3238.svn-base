@@ -1,0 +1,168 @@
+L_hours,
+/* weather/units  PARAMS CS VALIDATE
+en hours
+fr heures
+it ore
+es horas
+ca hores
+*/
+L_Degree_days,
+/* weather/units  VALIDATE PARAMS   it-gb
+en Degree days
+fr Somme des températures journalières.
+it Gradi-giorno
+es Grados-día
+ca Graus-dia
+*/
+U_1_day,
+/* weather/units  CSW PARAMS
+en 1/Day
+fr 1/Jour
+it 1/Giorno
+es 1/Día
+ca 1/Dia
+*/
+U_g_MJ,
+/* weather/units  CSW PARAMS
+* g/MJ
+*/
+U_kg_MJ,
+/* weather/units  CSW PARAMS    020205
+* kg/MJ
+*/
+U_m_H2O_m_soil,
+/* weather/units  CSW
+en m H2O/m soil
+fr m H2O/m sol
+it m H2O/m suolo
+es m H2O/m suelo
+ca m H2O/m sòl
+*/
+U_ml_gram,
+/* weather/units  CSW PARAMS
+* ml/gr
+*/
+U_mm_day_moved_to_corn_units,
+/* weather/units  CSW PARAMS
+en mm/day
+fr mm/jour
+it mm/giorno
+es mm/día
+ca mm/dia
+*/
+U_dS_m,
+/* weather/units  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+* dS/m
+*/
+U_degrees_C_days,
+/* weather/units  CSW PARAMS  it-gb
+en °C-days
+fr °C-jours
+it °C-giorno
+es °C-días
+ca °C-dias
+*/
+U_g_cm3_moved_to_corn_units,
+/* weather/units  PARAMS
+* g/cm³
+*/
+U__J_kg,
+/* weather/units  CSW PARAMS
+* -J/kg
+*/
+U_kgN_kgDM,
+/* weather/units  CSW PARAMS
+* kgN/kgDM
+*/
+U_kgN_kgsoil,
+/* weather/units  CSW PARAMS
+en kg N/kg soil
+fr kg N/kg sol
+it kg N/kg suolo
+es kg N/kg suelo
+ca kg N/kg sòl
+*/
+U_kg_ha,
+/* weather/units  RPRTGRPH CROPSYST CSW ( REPORT PARAMS ) PARMSPAW
+* kg/ha
+*/
+U_kg_m2,
+/* weather/units  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+* kg/m²
+*/
+U_kg_m3,
+/* weather/units  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+* kg/m³
+*/
+U_kg_kg,
+/* weather/units  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+* kg/kg
+*/
+U_kJ_mole,
+/* weather/units  PARAMS
+* kJ/mole
+*/
+U_kPa,
+/* weather/units  CSW PARAMS
+* kPa
+*/
+U_kPa_kg_m3,
+/* weather/units  CSW PARAMS
+* kPa kg/m³
+*/
+U_meq_100g,
+/* weather/units  PARAMS CSW
+* meq/100g
+*/
+U_m3_kg,
+/* weather/units  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+* m³/kg
+*/
+U_tn_ha,
+/* weather/units  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+* tn/ha
+*/
+U_tonne_ha,
+/* weather/units  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+* tonne/ha
+*/
+U_0_2,
+/* weather/units  CSW PARAMS
+* 0-2
+*/
+U_0_3,
+/* weather/units  CSW PARAMS
+* 0-3
+*/
+U_0_0_0_4,
+/* weather/units  CSW PARAMS
+* 0.0-0.4
+*/
+U_0_0_0_01,
+/* weather/units  CROPSYST PARAMS
+* 0.0-0.01
+*/
+U_0_0_0_5,
+/* weather/units  CLIMGEN CROPSYST PARAMS
+* 0.0-0.1
+*/
+U_0_2_0_4,
+/* weather/units  CSW PARAMS
+* 0.2-0.4
+*/
+U_0_8_1_4,
+/* weather/units  CSW PARAMS
+* 0.8-1.4
+*/
+U_1_5,
+/* weather/units  CSW PARAMS
+* 1-5
+*/
+U_1_10,
+/* weather/units  CSW PARAMS
+* 1-10
+*/
+U_500_1000,
+/* weather/units  CSW PARAMS
+* 500-1000
+*/

@@ -1,0 +1,206 @@
+//______________________________________________________________________________
+#include <vcl.h>
+#include "CropSyst/source/mgmt_param.h"
+#include "corn/math/moremath.h"
+#include "common/biomatter/decomposition_const.h"
+#include "common/biomatter/manure_form.h"
+#include "GUI/parameter/form_param_file.h"
+#include "corn/data_source/vv_file.h"
+#  include "CropSyst/source/organicn.h"
+#ifdef USE_OLD_CS_PATHS
+#  include "CropSyst/source/cs_paths.h"
+#else
+//#  include <CS_suite/CropSyst/CropSyst_directory.h>
+#  include <CS_suite/application/CS_suite_directory.h>
+#endif
+
+#pragma hdrstop
+#include "form_manure_appl.h"
+//______________________________________________________________________________
+#pragma package(smart_init)
+#pragma link "AutoCheckBox"
+#pragma link "AutoFloat32EditBar"
+#pragma link "AutoInt16EditBar"
+#pragma link "AutoRadioGroup"
+#pragma link "AutoFloat32Edit"
+#pragma link "AutoFileEditBar"
+#pragma resource "*.dfm"
+Tmanure_application_form *manure_application_form;
+//______________________________________________________________________________
+__fastcall Tmanure_application_form::Tmanure_application_form(TComponent* Owner)
+   : TForm(Owner)
+   , operation(0)
+   , est_org_drymatter(0)
+   , est_org_wetmatter(0)
+   , decomposition_parameters(default_source)
+{}
+//______________________________________________________________________________
+void Tmanure_application_form::bind_to
+(CropSyst::Biomatter_application_operation *_operation
+,Tparameter_file_form       *_parameter_file_form)
+{  operation = _operation;
+   parameter_file_form = _parameter_file_form;
+
+   fileeditbar_biomatter         ->bind_to(&(_operation->biomatter_param_filename)  ,0/* No help yet*/);
+   DragAcceptFiles(fileeditbar_biomatter->Handle,true);
+   fileeditbar_biomatter->set_editor(CS::Suite_directory->CropSyst(). /*CS::CropSyst_directory->*/
+            biomatter_editor_executable().c_str(),"");
+
+   load_manure_description(0);
+
+   edit_dry_matter            ->bind_to(&(operation->v_dry_matter)                       ,0/* No help yet*/);
+   org_N_amount_edit          ->bind_to(&(operation->v_org_N)                       ,0/* No help yet*/);
+   org_appl_method_radiogroup ->bind_to(&(operation->
+      #ifdef OLD_MGMT_PARAM
+      org_N_appl_method_labeled
+      #else
+      org_N_appl_method_cowl
+      #endif
+      )                    ,0/* No help yet*/);
+   NH3_ammonia_edit           ->bind_to(&(operation->v_NH3_N)                       ,0/* No help yet*/);
+
+   NH3_volatil_loss_edit      ->bind_to(&(operation->v_long_term_org_N_volatilization_loss_percent),0/* No help yet*/);
+
+//   org_drymatter_label->Caption = org_drymatter_label->Caption; //  + " (estimated from N mass)";
+//   est_org_drymatter = operation->org_N_kg_ha * 100.0 / N_in_manure_percent_dry_wt[operation->org_N_source_labeled.get()];
+   recalculate_dry_biomass_from_Nmass();
+   recalculate_wet_biomass_from_drybiomass();
+
+   edit_est_org_drymatter->bind_to(&(est_org_drymatter),2,0/* No help yet*/);
+   edit_est_org_wetmatter->bind_to(&(est_org_wetmatter),2,0/* No help yet*/);
+
+   NRCS_org_N_field_op_number_combbox->Text=operation->NRCS_operation_description.c_str();
+   show_hide_controls();
+};
+//______________________________________________________________________________
+void Tmanure_application_form::show_hide_controls()
+{
+#ifdef OBSOLETE
+080905 now all inputs are shown.
+   if (operation)
+   {  org_N_decomp_time_63_edit->Enabled =!operation->decomposition_time_calculated;
+      org_N_decomp_time_50_edit->Enabled =!operation->decomposition_time_calculated;
+// Must be always visible, the type specifies the biomass conversion     manure_type_radiogroup->Visible = operation->decomposition_time_calculated;
+      NH3_volatil_loss_edit->Enabled      =!operation->org_N_volatilization_calculated;
+      org_appl_method_radiogroup->Visible = operation->org_N_volatilization_calculated;
+      orgN_form_radiogroup->Visible       = operation->org_N_volatilization_calculated;
+   };
+#endif
+};
+//______________________________________________________________________________
+void __fastcall Tmanure_application_form::NRCS_org_N_field_op_number_combboxChange(TObject *Sender)
+{  operation->NRCS_operation_description.assign(NRCS_org_N_field_op_number_combbox->Text.c_str());
+}
+//______________________________________________________________________________
+void __fastcall Tmanure_application_form::recalculate_dry_biomass_from_Nmass()
+{  float64 N_fraction = decomposition_parameters.composition_decomposition.nitrogen_percent_DryWt/100.0;
+   if (N_fraction == 0.0) N_fraction = 1.0;
+   est_org_drymatter = operation->org_N_kg_ha / N_fraction /*fraction*/; // N_in_manure_percent_dry_wt[operation->org_N_source_labeled.get()];
+}
+//______________________________________________________________________________
+void __fastcall Tmanure_application_form::recalculate_wet_biomass_from_drybiomass()
+{
+//090909   est_org_wetmatter = est_org_drymatter * (1.0 - operation->dry_matter_percent/100.0);
+   est_org_wetmatter = est_org_drymatter * 100.0 / operation->dry_matter_percent;
+};
+//______________________________________________________________________________
+void __fastcall Tmanure_application_form::recalculate_Nmass_from_dry_biomass()
+{  operation->org_N_kg_ha = est_org_drymatter * decomposition_parameters.composition_decomposition.nitrogen_percent_DryWt/100.0 /*fraction*/; // N_in_manure_percent_dry_wt[operation->org_N_source_labeled.get()];
+}
+//______________________________________________________________________________
+void __fastcall Tmanure_application_form::edit_est_org_drymatterExit(
+      TObject *Sender)
+{
+   label_estimated->Caption = "Wet BM and N mass calc'd from dry mass";
+   recalculate_Nmass_from_dry_biomass();
+   org_N_amount_edit->Update();
+   recalculate_wet_biomass_from_drybiomass();
+   edit_est_org_wetmatter->Update();
+}
+//______________________________________________________________________________
+void __fastcall Tmanure_application_form::edit_est_org_wetmatterExit(TObject *Sender)
+{
+   est_org_drymatter = est_org_wetmatter * (operation->dry_matter_percent / 100);
+//090909   est_org_drymatter = est_org_wetmatter / (1.0 - operation->dry_matter_percent/100.0);
+   edit_est_org_drymatter->Update();
+   recalculate_Nmass_from_dry_biomass();
+   org_N_amount_edit->Update();
+   label_estimated->Caption = "Dry BM and N mass calc'd from wet mass";
+//   edit_est_org_drymatter_onexit(TObject *Sender);
+}
+//______________________________________________________________________________
+void __fastcall Tmanure_application_form::org_N_amount_editExit(TObject *Sender)
+{  //org_N_amount_edit->Description_label = "Amount of nitrogen in the form of organic manure";
+   recalculate_dry_biomass_from_Nmass();
+   recalculate_wet_biomass_from_drybiomass();
+   label_estimated->Caption = "Wet & Dry BM calc'd from N mass";
+//   est_org_drymatter = operation->org_N_kg_ha  100.0 / N_in_manure_percent_dry_wt[operation->org_N_source_labeled.get()];
+   edit_est_org_drymatter->Update();
+   edit_est_org_wetmatter->Update();
+}
+//______________________________________________________________________________
+#ifdef OBSOLETE
+void __fastcall Tmanure_application_form::manure_type_radiogroupClick(TObject *Sender)
+{  operation->decomposition_time_50 = convert_decomposition_time_63_to_50
+      (manure_decomp_time_coef[operation->org_N_source_labeled.get()]);
+   org_N_decomp_time_50_edit->Update();
+   org_N_amount_editExit(Sender);
+}
+#endif
+//______________________________________________________________________________
+void __fastcall Tmanure_application_form::button_NRCS_helpClick(TObject *Sender)
+{  parameter_file_form->view_manual("NRCS_field_operation.htm");
+}
+//---------------------------------------------------------------------------
+void __fastcall Tmanure_application_form::load_manure_description(TObject *Sender)
+{
+   //150403 if (operation->biomatter_param_filename.exists())
+
+   if (CORN::OS::file_system_engine.exists(operation->biomatter_param_filename)) //150403
+   {  VV_File biomatter_file(operation->biomatter_param_filename.c_str());
+      biomatter_file.get(decomposition_parameters);
+   };
+   // open the optional manure file (if exists)
+   //get the nitrogen fraction    and recalculate  biomass dry basis and wet basis
+   // and the default NH3 content and recalculate NH3  and recalc volatilization
+}
+//---------------------------------------------------------------------------
+void __fastcall Tmanure_application_form::edit_dry_matterExit(TObject *Sender)
+{
+   recalculate_dry_biomass_from_Nmass();
+   recalculate_wet_biomass_from_drybiomass();
+   label_estimated->Caption = "Wet & Dry BM calc'd from N mass";
+   edit_est_org_drymatter->Update();
+   edit_est_org_wetmatter->Update();
+   recalculate_volatilization();
+   NH3_volatil_loss_edit->Update();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tmanure_application_form::listbox_formClick(TObject *Sender)
+{
+   // set dry matter based on form section
+   int index = listbox_form->ItemIndex;
+   if (index >= 0)
+   {  operation->dry_matter_percent =  100.0 - manure_moisture_percent[index];
+      edit_dry_matter->Update();
+      edit_dry_matterExit(Sender);
+   };
+}
+//---------------------------------------------------------------------------
+void __fastcall Tmanure_application_form::org_appl_method_radiogroupClick(TObject *Sender)
+{
+   recalculate_volatilization();
+   NH3_volatil_loss_edit->Update();
+   including_mineralized_org_n_label->Caption = "including mineralized organic N (recalculated for application method)";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tmanure_application_form::recalculate_volatilization()
+{
+   bool is_liquid_manure = operation->is_liquid();
+   operation->long_term_org_N_volatilization_loss_percent =
+      (1.0 - get_long_term_fraction_N_retained
+      ((Org_N_appl_method)operation->org_N_appl_method_cowl_or_labeled.get()/*110114 _labeled.get()*/
+      ,is_liquid_manure)) * 100.0;
+}
+//---------------------------------------------------------------------------
+

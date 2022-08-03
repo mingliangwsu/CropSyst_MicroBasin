@@ -1,0 +1,1 @@
+#include "globalvariable.h"

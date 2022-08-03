@@ -1,0 +1,173 @@
+#ifndef tabular_formatH
+#define tabular_formatH
+
+// Identifiers columns
+// Knows about
+//    header lines may precede the data lines, but doesn't know what data is stored there,
+//    column header captions
+//    column header units
+//    detail lines.
+// Doesn't attempt to associated data with columns except date fields.
+// Doesn't assume detail line are time series (Doesn't know which column is the data/time).
+#ifndef dateHPP
+#  include "corn/datetime/date.hpp"
+#endif
+#include "corn/labeled_enum.h"
+#ifndef parameters_datarecH
+#include "corn/parameters/parameters_datarec.h"
+#endif
+#include "corn/format/html/form_IO/content.h"
+
+#include "corn/data_source/datarec.h"
+#ifndef primitiveH
+#  include "corn/primitive.h"
+#endif
+#include "corn/math/statistical/stats.h"
+
+#include "corn/tabular/tabular_text.h"
+#include "corn/tabular/tabular.h"
+#include "corn/container/bilist.h"
+#define LABEL_variable_code   "variable_code"
+
+#define LABEL_units_code      "units_code"
+#define LABEL_UED_record_code    "UED_record_code"
+
+class Desired_variables; // forward declaration
+
+namespace CORN {
+
+//_2000-01-10___________________________________________________________________
+enum Format_file_type {FILE_TYPE_unknown,FILE_TYPE_text,FILE_TYPE_binary, FILE_TYPE_dBase, FILE_TYPE_lotus123, FILE_TYPE_Excel};
+extern const char *format_file_type_label_table[];
+DECLARE_LABELED_ENUM(Format_file_type_labeled,Format_file_type,format_file_type_label_table)
+extern const char *variable_order_label_table[];
+//______________________________________________________________________________
+class Common_tabular_file_format
+: public Common_parameters_data_record                                              //040925
+
+   // Probably should not be derived from Common_parameters_data_record
+   // because it probably is to used to get the field names.
+   // Instead, should have fields class (List of fields)
+
+, public Extent_layout
+{public:
+   //______________________________________________________________________________
+   // Column headers can be delineated different from the data rows/detail lines
+   class Column_headers_delineation
+   : public Delineation_layout
+   {public:
+      int16 rows;                                                                //990507
+         // Does not include the units rows
+      int16 units_row_offset; // Number of rows below the column header start row where units start (relative to column header start row_ //010725
+      int16 units_rows;                                                          //010725
+      bool  units_parenthesis;  // True if the units are surrounded by parenthesis //060323
+      // May need an options to omit parenthesis if units are not specified for a column I.e. don't print ()
+    public: // constructor
+      inline Column_headers_delineation()                                        //060626
+         : Delineation_layout()
+         , rows(0)
+         , units_row_offset(0)
+         , units_rows(0)
+         , units_parenthesis(false)
+         {}
+      inline virtual bool default_R_text()                         modification_
+         {  rows = 1;
+            return Delineation_layout::default_R_text();
+         }
+      inline bool copy_from(const Column_headers_delineation &from)modification_
+         {
+            rows              = from.rows;
+            units_row_offset  = from.units_row_offset;
+            units_rows        = from.units_rows;
+            units_parenthesis = from.units_parenthesis;
+            return Delineation_layout::copy_from(from);
+         }
+      //_2014-10-8______________________________________________________________
+   };
+   //_______________________________________________________________
+   class Detail_lines_delineation
+   : public Delineation_layout
+   { public:
+      int16                   time_step;  // Not sure if I need this I thought I had removed it may have tried to do this with units only but not sure I can do that   //060223
+      Labeled_units_enum      time_step_units_enum; // The time step between each record  may be time step units
+     public:
+      inline Detail_lines_delineation()
+         : Delineation_layout()
+         ,time_step (1)
+         ,time_step_units_enum(UT_day)                                           //060626
+         {}
+   };
+   //______________________________________________________________
+   class Column
+   : public Association
+   , public CORN::Tabular_column
+   {
+    public:
+      inline Column()
+        : Association()
+        , CORN::Tabular_column()                                                //040925
+        {}
+     virtual void setup_structure(CORN::Data_record &data_rec,bool for_write) modification_;
+     virtual const char *get_key()                                         const;//030109
+   };
+   // ______________________________________________________________
+ public:
+    Format_file_type_labeled format_file_type_labeled;
+    bool big_endian;    // for binary format   (intel processors use little endian, units process use big endian)
+    bool carriage_return_line_feed;
+    bool paginated; // True if the (text) file has pagination form_feed_page_break with ASCII code 12 //070925
+    // NYI column_footers_every_page
+    bool FORTRAN_carriage_control;                                               //020525
+    // The number of variable codes is fix (determined by column delineation step or the format of the table).
+
+   std::string                defined_by; // user who created the format file    //990307
+   CORN::Date                 defined_date; // version date                      //990307
+   int16                      header_terminator;  // terminator character  ASCII code stored as an integer  //990507
+   // Columns section:
+   // Column headers section
+   bool                          column_headers_every_page; // True if headers/footers appear on every paginated page   //070925
+   Column_headers_delineation    column_headers_delineation;
+   std::string                   column_header_static/*[10]*/;   // Some times is is preferable to override the column header captioning with a static text (this is necessary when the column headers don't match with columns, where the caption is not fully within the fixed column width of the data) //100104
+   Detail_lines_delineation      detail_lines_delineation;                       //050411
+       //             column_headers can have a delineation layout different from the detail lines, but the same options are available
+   Association_list              columns_1based;          // list of Column      //040925
+   enum Variable_order {fixed_order,variable_order};                             //020505
+   DECLARE_LABELED_ENUM(Variable_order_labeled,Variable_order,variable_order_label_table)
+   Variable_order_labeled variable_order_labeled;                                //990507
+   //The following codes are used to denote missing/erroneous data
+   std::string                missing_data_marker;  // any codes I.e. -9999 or MISSING used to denote missing data //050516
+   sint16                     year_offset_for_dates_with_only_two_digits;
+   //The following are used for download options
+   std::string                cgi_form_server;                                   //050516
+   std::string                cgi_form_action;                                   //050516
+   Request_method_labeled     cgi_form_method;            // I.e. POST GET?      //050516
+ public: // Constructors
+   Common_tabular_file_format
+      (Format_file_type format_file_type);
+   Common_tabular_file_format
+       (const std::string &description                                           //040909
+       ,Format_file_type   format_file_type);
+       // This constructor is for loading from a data file
+    Common_tabular_file_format();
+       // This constructor is used by UED_export file
+   bool copy_from(const Common_tabular_file_format& source);                     //141008
+ public:  // VV_file overrides
+   virtual bool expect_structure(bool for_write = false);                        //161023
+   virtual bool set_start();                                                     //161023_050405
+   virtual bool get_end();                                                       //161023_010109
+   inline virtual const char *get_primary_section_name()                   const
+      { return "format"; }
+   inline virtual const char *get_type_label()                             const
+      { return "Tabular data file format";}//051011
+ public:
+   void reset_for_file_type();                                                   //060626
+   // In the user interface, when the file type is change
+   // we can set up some options that we know are not relevent for the file type.
+   virtual bool default_R_text()                                   modification_;
+      // Sets up format for R import/export text files.
+};
+//______________________________________________________________________________
+} // namespace CORN
+#endif
+//filefmt
+

@@ -1,0 +1,66 @@
+
+Crop parameter file syntax has the basic form
+similar to .INI files with sections.
+
+
+consider using  libconfig  
+http://www.hyperrealm.com/libconfig/libconfig_manual.html#Why-Another-Configuration-File-Library_003f
+(this appears to allow user extended syntax
+
+
+<P>
+[<em>section name</em>]
+<P>
+ and variable value pairs
+<P>
+<em>variable</em>=<em>value</em>  <em>units</em>
+<P>
+
+<H3>Interpolation curves</H3>
+
+Over the years it has been found that some parameters need to be adjusted during the growing season
+by stepped interpolation (as the crop enters a phenologic growth stage)
+or by interpolation (thermal time basis) .
+Currently linear interpolation (eventually curvilinear (spline?) interpolation may be supported)
+In this case the variable in a section will have a subsection denoted by <B> ( ) </B>.
+<P>
+<PRE>
+<B>(</B><em>variable name</em><B>)</B>
+<B>value=</B><em>value</em>
+<B>units=</B><em>units</em>
+<B>curve=</B><B>constant</B> <em> or </em> <B>linear</B>  <FONT color="gray"> <em>or</em> <B>spline</B> </FONT>
+</PRE>
+The value for the parameter will be initialized to the specified value.
+<UL>
+<LI>
+In the case of the constant curve option, the value and will persist until the 
+the next point on the curve is encountered.
+<LI>
+In the case of linear option, the current values will be linearly interpolated.
+<LI>
+<FONT COLOR="GRAY">
+Not yet implemented: In the case of spline the current values will be interpolated 
+curvilinearly using a spline function.
+</FONT>
+</UL>
+
+<H3>Optional parameter sets</H3>
+
+For selected simulation submodel options specified by some variable value pair 
+(usually in the current section, but may be another section such as the common [crop] section)
+there is often a  set of parameters specific to a submodel or otherwise optional
+these are stored in a subsection denoted  by  <B> < > </B>
+<P>
+
+<B> < </B> <em>option</em><B>=</B><em>value-1 value-n</em> <B> > </B>
+<P>
+The section specifies which of the options the following variables are applicable to.
+<P>
+All the parameters for all the optional subsections,
+this will allow the user to switch between submodel options without having to 
+reenter all the values when switching back.
+
+
+
+
+

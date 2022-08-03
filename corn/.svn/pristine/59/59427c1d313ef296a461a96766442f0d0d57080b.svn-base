@@ -1,0 +1,418 @@
+#include "corn/application/arguments.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/container/text_list.h"
+#include "corn/data_source/vv_file.h"
+#include "corn/data_source/command_options_datasrc.h"
+#include "corn/seclusion.h"
+#include <iostream>
+namespace CORN
+{
+//______________________________________________________________________________
+Arguments::Arguments()
+: CORN::Data_record("arguments")
+, recognized_count     (0)
+, verbose                  (false)
+, quiet                    (false)
+, help                     (false)
+, prompts_shown            (false)
+, start_directory          () // defaults to CWD
+{}
+//_2016-08-25___________________________________________________________________
+bool Arguments::recognize
+      (const std::string &paramstring)                             modification_
+{  bool recognized = false;
+   if (paramstring[0] == '-')
+   {
+      std::size_t option_pos = 1;
+      if (paramstring[1] == '-')  // -- form
+         option_pos = 2;
+      std::string option(paramstring,option_pos);
+      recognized = recognize_option(option);
+   }
+   if (! recognized)
+   {  std::size_t equal_pos = paramstring.find('=');
+      if (equal_pos != std::string::npos)
+      {  // Appears to be an assignment argument
+         std::string variable (paramstring,0,equal_pos);
+         std::string value    (paramstring,equal_pos+1);
+         recognized = recognize_assignment(variable,value);
+      }
+   }
+   return recognized;
+}
+//_2016-03-11___________________________________________________________________
+bool Arguments::recognize_option(const std::string &paramstring)   modification_
+{
+   bool recognized = false;
+   if (  (paramstring == "verbose")
+       ||(paramstring == "v"))
+      { verbose = true; recognized = true; recognized_count++; }
+   else if (  (paramstring == "quiet")
+       ||(paramstring == "q"))
+      { quiet   = true; recognized = true; recognized_count++; }
+   else if (paramstring == "help")
+      { help = true; recognized = true; recognized_count++; }
+   else if (paramstring == "responses")
+      {  find_and_read_response_files();
+         recognized = true;
+      }
+   return recognized;
+}
+//_2016-10-13___________________________________________________________________
+// we read the response when encountered on the command line
+// option values will be loaded (overriding any currently set values)
+// but any options still on the command line would superceed what is loaded.
+// There are two modes for recognizing response file name
+// There may be multiple occurances of response files.
+// either a unary filename having a recognized reponse file extension,
+// or --response={filename} where the {filename} with no or any extension
+// is presumed to be a response file.
+bool Arguments::recognize_assignment
+(const std::string &variable
+,const std::string &value)                                         modification_
+{  bool recognized = false;
+   if (  (variable == "--response"))
+   {
+      CORN::OS::File_name_concrete response_filename(value);
+      recognized = read_response_file(response_filename);
+   }
+   return recognized;
+}
+//_2016-10-13___________________________________________________________________
+bool Arguments::recognize_filename  // probably should be recognize_DEN
+(const CORN::OS::File_name &param_filename)                        modification_
+{  bool recognized = false;
+   bool response_filename_encountered =
+      param_filename.has_extension(response_filename_extension);
+   if (response_filename_encountered)
+   {  read_response_file(param_filename);
+      recognized = true;
+   }
+   return recognized;
+}
+//_2016-10-15___________________________________________________________________
+bool Arguments::read_response_file                                 modification_
+(const OS::File_name &response_filename)
+{
+   Command_options_data_source response_file(response_filename);
+   return response_file.get(*this); // get_arguments
+}
+//_2016-10-15___________________________________________________________________
+nat32 Arguments::find_and_read_response_files()
+{
+   Unidirectional_list response_files_accessible;
+   OS::Directory_name_concrete CWD;
+   if (verbose) std::clog << "info: Searching for accessible response files." << std::endl;
+   nat32 response_file_count = OS::file_system_engine.list_DENs
+      (CWD,&response_files_accessible,0,Inclusion("*.response",true)
+      ,OS::File_system::superdirectory_recursion_inclusive);
+   //161021 warning should have a virtual method to get the response filename pattern from derived classes
+
+   nat8 hold_find_responses = find_responses;
+   find_responses = false;
+   // while reading the response files disable find otherwise infinite loop.
+   if (verbose && response_file_count) std::clog << "info: loading response accessible response files." << std::endl;
+   FOR_EACH_IN(response_file,CORN::OS::File_name
+              ,response_files_accessible,each_response_file)
+   {  read_response_file(*response_file);
+   } FOR_EACH_END(each_response_file)
+   find_responses = hold_find_responses;
+   return response_file_count;
+}
+//_2016-10-21___________________________________________________________________
+bool Arguments::get_start()
+{
+   if (find_responses & FIND_RESPONSES_FIRST)
+      find_and_read_response_files();
+   return true;
+}
+//_2016-10-21___________________________________________________________________
+bool Arguments::get_end()
+{
+   if (find_responses & FIND_RESPONSES_LAST)                                    //161021
+       find_and_read_response_files();
+   if (help) write_help();
+   /*moved response files are processed as encountered
+   if (response_filename.length())
+   {
+      std::ifstream response_file(response_filename.c_str());
+      std::string response_content;
+      getline(response_file,response_content);
+      if (is_response_file_enabled())
+      {  // Continue here, need to use command line options data source
+      CORN::Text_list argument_list(response_content.c_str(),' ');
+      FOR_EACH_IN(argument,Text_list::Item, argument_list, each_arg)
+         recognize(*argument);
+      FOR_EACH_END(each_arg)
+      }
+   }
+   */
+   if (!quiet && has_interactive_prompts() && prompts_shown)
+   {  // must be after loading response file
+      interactive_prompt();
+      std::string command_line;
+      if (compose_command_line(command_line))
+      {  std::string continue_enter;
+         std::clog
+            << "These options can be specified on the command line as:"
+            << std::endl << command_line << std::endl
+            << std::endl
+            << "Press [Enter] to continue" << std::endl;
+         std::getline(std::cin,continue_enter);
+      }
+   }
+   if (!quiet && has_interactive_prompts() && is_response_file_enabled())
+   {
+      std::clog
+      << "Write command line and prompted (and loaded response file) options to a response file?" << std::endl;
+      if (verbose)
+         std::clog
+         << "This will allow restarting the program with the same set of options." << std::endl;
+      std::clog << "Enter response file name:" << std::endl;
+      std::string response_filename;
+      std::getline(std::cin,response_filename);
+      /* conceptual:
+      if CORN::OS::file_system_engine.exists(response_filename);
+      if (!yes)
+         std::clog << "Replace the response file that already exists (y/n)?"
+         replace = get y/n yes/no
+      if (replace)
+      else response_filename.clear()
+      */
+      if (response_filename.length())
+      {  std::string response_content;
+         compose_command_line(response_content);
+         std::ofstream response_file(response_filename.c_str());
+         response_file << response_content << std::endl;
+
+         // NYI Don't forget unary options
+      }
+   }
+   return true;
+}
+//_2016-08-25___________________________________________________________________
+bool Arguments::write_help()                                               const
+{
+   std::string author_mailto_URI;
+   if (get_author_mailto_URI(author_mailto_URI))
+      std::clog
+      << "author: " << author_mailto_URI                          << std::endl;
+   std::string manual_URI;
+   if (manual_URI.length())
+      std::clog
+      << "manual: " << manual_URI                                 << std::endl;
+   std::clog
+      << "general options:"                                       << std::endl
+      << "-v or --verbose  enables verbose output"                << std::endl
+      << "-q or --quite    disables verbose output"               << std::endl
+      << "-h or --help     displays brief help"                   << std::endl
+      << "--response={filename} load arguments from response file"<< std::endl
+      << "--responses find accessible response files and loads them"<< std::endl
+      /* conceptual
+
+      */
+      ;
+   std::clog
+      << "variable assigments:"                                   << std::endl;
+   FOR_EACH_IN(section,VV_section,sections,each_section)
+   {
+      std::clog << "[" << section->get_section_label() << "]" << std::endl;
+      FOR_EACH_IN(entry,VV_base_entry,section->entries,each_entry)
+      {
+         std::string value;
+         entry->append_to_string(value);
+         std::clog
+            << entry->get_key() << "=" << value // at this point this should be the default value
+            << " {"
+            << data_type_label_table[entry->get_type()]
+            << "}"
+            << std::endl;
+      } FOR_EACH_END(each_entry)
+   } FOR_EACH_END(each_section)
+   return true;
+}
+//_2016-08-25___________________________________________________________________
+void Arguments::display_interactive_instructions()
+{
+   std::clog
+   << "Expected arguments where not given on the command line or response file." << std::endl
+   << "Interactive mode will prompt for required arguments." <<std::endl
+   << "The command line option: --quite or -q will disabled prompts" << std::endl << std::endl
+   << "A prompt is displayed for each option assignment with type and default value." << std::endl
+   << "Press [Enter] to accept default value or enter a new value." << std::endl
+   << "Enter [,] to accept the current entry even if it is flagged as invalid." << std::endl
+   << "Enter [.] to stop prompts (the default values will be retained)";
+   if (sections.count() > 1)
+   {
+      std::clog << " for the current section." << std::endl
+      << "enter [:] to stop remaining prompts." << std::endl;
+   }
+   std::clog
+   << std::endl
+   << "Dates are entered with format YYYYDDD (year and day of year)" << std::endl
+   << "Filenames may be fully qualified or omit the path in the working directory." << std::endl << std::endl;
+}
+//_2016-10-16___________________________________________________________________
+bool Arguments::interactive_prompt()                               modification_
+{
+   if (quiet) return false;
+
+   // Currently this only prompts for Data record assignments
+   // but should provide a list of option
+
+   bool interactive_instructions_displayed = false;
+
+
+   FOR_EACH_IN(section,VV_section,sections,each_section)
+   {
+      bool skip_section = false;
+      std::clog << "section: " << section->get_section_label() << std::endl;
+      /* Conceptual
+      if ((section->encountered) and any entries not encountered
+      {
+         std::clog << "Some of the parameter related to this section have already been encountered (on the command line or from a file)
+
+         prompt to display current values
+         if (display_current_values)
+            section->write(clog);
+
+
+         prompt the user to skip this section
+
+         skip_section = xxxx
+      }
+      */
+      if (!skip_section)
+      FOR_EACH_IN(entry,VV_base_entry,section->entries,each_entry)
+      {
+         if (!entry->was_encountered())
+         {
+            if (!interactive_instructions_displayed)
+            {
+               display_interactive_instructions();
+               interactive_instructions_displayed = true;
+            }
+            prompts_shown = true;
+            if (entry->annotation1.length())
+               std::clog << entry->annotation1 << std::endl;
+            if (entry->annotation2.length())
+               std::clog << entry->annotation2 << std::endl;
+            std::string value;
+
+            VV_Data_type date_type = entry->get_type();
+            if (date_type < DT_COUNT)
+               std::clog << "data type:" << data_type_label_table[date_type] << std::endl;
+            else
+            {
+            }
+            // Should also display units
+            bool validated = true;
+            bool accepted = true;
+            do
+            {
+               entry->append_to_string(value);
+               std::clog << entry->get_key() << "=" << value << std::endl;
+
+               std::getline(std::cin,value);
+               CORN::strip_string(value,CORN::Both);
+               if (value == ".") {each_entry->end(); break; }
+               if (value == ":") {each_entry->end(); each_section->end(); break; }
+               if (value == ",") { accepted = true; }
+               if (value.length())
+                  entry->set_str(value.c_str());
+               else
+               {
+                  entry->set_encountered(true);
+                  std::clog << "\r" << value << std::endl; // echo the current/default value
+               }
+
+               if (date_type == VV_DEN)
+               {  // check file/directory existance
+                  entry->append_to_string(value);
+                  CORN::OS::Directory_entry_name_concrete value_DEN(value);
+                  validated = CORN::OS::file_system_engine.exists(value_DEN);
+               }
+
+
+               /*
+               conceptual entries may have validation
+               valudation status and is not valid continue prompting
+               {
+                  show validation status
+                  show curent value
+
+               }
+            */
+            } while (!validated && !accepted);
+         }
+      } FOR_EACH_END(each_entry)
+   } FOR_EACH_END(each_section)
+   return true;
+}
+//_2016-10-14___________________________________________________________________
+nat16 Arguments::compose_command_line(std::string &command)
+{  nat16 count = 0;
+   FOR_EACH_IN(section,VV_section,sections,each_section)
+   {
+      if (sections.count() > 1)
+      {  // We only need section tags if there are multiple sections
+         command += "[" + section->get_section_label() + "]" + " ";
+      }
+      FOR_EACH_IN(entry,VV_base_entry,section->entries,each_entry)
+      {
+         std::string value;
+         entry->append_to_string(value);
+         command.append(entry->get_key());
+         command += "=" + value + " ";
+         count++;
+      } FOR_EACH_END(each_entry)
+   } FOR_EACH_END(each_section)
+   return count;
+}
+//_2016-10-14___________________________________________________________________
+
+/**  conceptual
+
+   Arguments currently has a simple set of prompts but it would be nice
+   to have a more complete editors like this.
+
+   This could be a general data record editor
+   that could be expanded for options/arguments/flags
+
+
+      For each data entry item in the options record that
+      has not yet been set either on the command line or
+      response file(s) the user will be prompted for data item value.
+      If selected_options cstring arrays are provided then
+      only those items which match the selected options will be prompted
+      (all others will retain the default value).
+      The prompt displays the caption, units the hint, and an indicator if
+      documentation/help text/URL is available.
+      The user can either enter the data value, or press enter to accept the default value.
+      The following control keys presses have special functions
+      [Esc] to cancel (and return false)
+         The caller would then likely exit the program.
+      [Backspace] to display previous prompt (only one previous)
+      [Tab] or [Space] or [Return] to accept default value and advance to next prompt
+      [Home] to prompt all options
+         (even if the had been entered on the command line or response file(s)).
+      [End] or [Close] discontinue prompts and retain the remaining options with default values.
+
+      [F1] (See help)
+      [Ctrl C]  Copies the current item's (default) value to the clipboard.
+      [Ctrl V]  Enters the current item values from the clipboard.
+
+      // The following special keys may be avaiable on some keyboard
+      [Help] (See help)
+      [Open] prompts for a (resonse) file to load additional options.
+      [New]  Reset/clears all values (including command line and response file
+         and previously entered values) to defaults and starts prompting all options again.
+
+
+      Help Displays the help context page document (If any) for the current parameter item.
+**/
+
+//_2016-10-16___________________________________________________________________
+
+} // namespace CS
+

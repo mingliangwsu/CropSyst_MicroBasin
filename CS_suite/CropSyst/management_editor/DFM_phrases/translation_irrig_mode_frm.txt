@@ -1,0 +1,8 @@
+Automatic irrigation mode #1
+This input box is obsolete, all irrigation ops and modes now can have this constraints #2
+Maximum allowable depletion #3
+Depletion observation depth #5
+Net irrigation multiplier #7
+Maximum irrigation application #9
+
+

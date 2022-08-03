@@ -1,0 +1,105 @@
+#include "corn/container/text_list.h"
+#include "corn/string/strconv.hpp"
+namespace CORN {
+//______________________________________________________________________________
+Text_list::Text_list
+(const char *initial_text
+, char separator_character)                                                      //090919
+{
+   // This constructor takes all_text which contains \n separates text strings and composes
+   // an initial list of text.
+   if (initial_text && (initial_text[0] != 0))                                   //050618
+   {  size_t start_pos = 0;
+      size_t run_length = 0;
+      for (int i = 0; initial_text[i] != 0; i++)
+      {  if ((initial_text[i] == separator_character) || (initial_text[i+1] == 0))
+         {  if (initial_text[i+1] == 0) run_length +=1; /*at the end of the string*/ //130103
+            if (run_length)
+            {
+            Item *item = new Item(initial_text, start_pos, run_length );
+            append(item);                                                        //090922
+            }
+            start_pos = i+1;
+
+            run_length = 0;
+         } else
+            run_length += 1;
+      }
+   }
+}
+//______________________________________________________________________________
+bool Text_list::Item::write(std::ostream &strm)                     performs_IO_ //150728
+{  strm << c_str(); //151002 delimiting has beend moved to container write() << std::endl;
+   return true;                                                                  //150728
+}
+//_2009-12-22___________________________________________________________________
+Text_list::Item *Text_list::find(const char *search_key,bool case_sensitive) const
+{  if (is_empty()) return 0;                                                     //030709
+   FIND_FOR_EACH(found_item,item,Text_list::Item,true,item_finder)               //030709
+   {  const char *key = item->c_str();                                           //030117
+      bool keys_match
+       #if defined(__unix)
+       = ((case_sensitive ? strcmp(key,search_key) : strcasecmp(key,search_key)) == 0);   //980928
+       #else
+       = ((case_sensitive ? strcmp(key,search_key) : stricmp(key,search_key)) == 0);
+       #endif
+      if (keys_match)
+         found_item = item;                                                      //030710
+   } FOR_EACH_END(item_finder)                                                   //030707
+   return found_item;
+}
+//_______________________________________________________________________find__/
+Text_list::Item *Text_list::add_cstr(const char *text_to_add)
+{  Text_list::Item *added = 0;
+   if (!unique_keys || !find(text_to_add))                                       //110228
+   {  added = new Text_list::Item(text_to_add);
+      append(added);
+   }
+   return added;
+}
+//_2006-09-10_____________________________________________________________add__/
+std::string &Text_list::string_items(std::string &string_buffer,  char separator)  const
+{  bool first = true;
+   char separator_str[2];  separator_str[1] = 0; separator_str[0] = separator;
+   FOR_EACH(item,Text_list::Item,each_item)
+   {  if (!first) string_buffer.append(separator_str);
+      first = false;
+      string_buffer.append(*item);
+   } FOR_EACH_END(each_item)
+   return  string_buffer;
+}
+//_2009-09-18___________________________________________________________________
+Text_list::Item *Text_list::add_wstr(const wchar_t *text_to_add)
+{
+   // This is currently just a hack
+   // It is used by Directory_entry_name_abstract which supports
+   // Unicode
+   // Text_list currently does not support Unicode, so this current
+   // implementation has a potential loss of data
+   std::string text_to_add_ASCII;
+   CORN::Unicodez_to_string(text_to_add,text_to_add_ASCII);
+   return add_cstr(text_to_add_ASCII.c_str());
+}
+//_2012-02-09___________________________________________________________________
+Text_list::Item *Text_list::add_string (const std::string &text_to_add)          //130123
+{  return add_cstr(text_to_add.c_str()); }
+//_2012-01-23___________________________________________________________________
+Text_list::Item *Text_list::add_wstring(const std::wstring &text_to_add)         //130123
+{  return add_wstr(text_to_add.c_str()); }
+//_2012-01-23___________________________________________________________________
+Text_list::Item *Text_list::find_wstring(const std::wstring &search_key,bool case_sensitive) const
+{  // This is currently just a hack until I have created wide version
+   // of text list
+   std::string search_key_string;
+   CORN::wstring_to_string(search_key,search_key_string);
+   return find(search_key_string.c_str(),case_sensitive);
+}
+//_2013-03-04___________________________________________________________________
+Text_list::Item *Text_list::find_string(const std::string &search_key,bool case_sensitive) const
+{  // This is currently just a hack until I have created wide version
+   // of text list
+   return find(search_key.c_str(),case_sensitive);
+}
+//_2013-03-10___________________________________________________________________
+} // namespace CORN
+

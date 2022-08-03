@@ -1,0 +1,200 @@
+
+// This file should actually be named Crop_orchard_fruit
+
+#ifndef crop_fruitH
+#define crop_fruitH
+#include "common/weather/parameter/WP_psychrometric_const.h"
+#include "corn/primitive.h"
+#include "crop/crop_cropsyst.h"
+#ifdef NITROGEN
+#include "common/biometeorology/parameter/slope_SVP_curve_psychrometric_resistance.h"
+#endif
+
+#include "crop/yield.h"
+class ET_reference_interface;
+class Weather_provider;
+class Sun;
+namespace CropSyst {
+
+class Orchard_interface;
+//______________________________________________________________________________
+class Fruit_chill_requirement
+{
+   int  chill_hours_remaining;  // rename name this to chill units
+public:
+   inline Fruit_chill_requirement(float64 chill_hours_needed)
+      : chill_hours_remaining(chill_hours_needed)
+      {}
+   inline bool is_satisfied()  affirmation_ { return chill_hours_remaining < 0;}
+public:
+   void add_hour_temperature(float64 temperature);
+   inline int get_chill_hours_remaining() const { return chill_hours_remaining;}
+   // convert temperature to chill units and deduct
+   //chill units from chill_hours remaining.
+};
+//_2002-11-24___________________________________________________________________
+class Fruit_bud_break_requirement
+{private:
+   float32 deg_day_bud_break_chill_req_sat;     //copy from crop parameter       //030515
+   float32 deg_day_bud_break_chill_req_not_sat; //copy from crop parameter       //030515
+ public:
+   inline Fruit_bud_break_requirement
+      (float32 deg_day_bud_break_chill_req_sat_                                 //030515
+      ,float32 deg_day_bud_break_chill_req_not_sat_)                            //030515
+      : deg_day_bud_break_chill_req_sat(deg_day_bud_break_chill_req_sat_)
+      , deg_day_bud_break_chill_req_not_sat(deg_day_bud_break_chill_req_not_sat_)
+      {}
+   bool satisfied(bool chill_req_satisfied,float32 accum_deg_days) mutates_;
+};
+//_2002-11-24___________________________________________________________________
+class Fruit_harvest_requirements
+{public:
+   const CropSyst::Crop_parameters::Fruit &parameters;
+   mutable CORN::Days consecutive_days_below_threshold_temperature;
+ public:
+   Fruit_harvest_requirements(const CropSyst::Crop_parameters::Fruit &_parameters);
+   bool satisfied(DOY doy,float64 min_temp,float64 avg_temp) mutates_;
+};
+//_2008-12-04___________________________________________________________________
+class Crop_orchard_fruit // was Crop_CropSyst_orchard_fruit
+: public Crop_complete
+{public:
+   //___________________________________________________________________________
+   class Yield
+   : public implements_ CropSyst::Yield
+   {public:
+      /*cognate_*/ float64 &fruit_dry_biomass;
+    public:
+      inline Yield(float64 &fruit_dry_biomass_)
+         : CropSyst::Yield()
+         , fruit_dry_biomass(fruit_dry_biomass_)
+         {}
+      virtual float64 calculate(float64 canopy_biomass_kg_m2)      calculation_;
+      virtual float64 get_reported_harvest_index()                        const
+         { return 0; }
+         // harvest index not applicable to fruit model
+         // but could be calculated for completeness
+   };
+   //_2017-02-20________________________________________________________________
+ private:
+   const CS::Weather_hours     *ref_hourly_weather;                              //180612
+
+   Orchard_interface *orchard;                                                   //071116
+   CropSyst::Crop_parameters::Fruit *fruit_adjusted_parameters;                  //081103
+      // deleted and reset each season.
+   bool limit_max_LAI;                                                           //081103
+   float64                day_length_hours_unused;                               //140812
+         // day_length_hours are used for photoperiod which is not appicable to fruit crops //140812
+ public:
+   mutable float64  fruit_dry_biomass;    // kg/m2  dry basis                    //000616
+   float64  fruit_reserves_biomass;       // kg/m2  dry basis                    //071117
+   float64  fruit_root_turnover_biomass;  // kg/m2  dry basis                    //071117
+ public: // for fruit growth mass calculations:
+   float64  current_fruit_count;                                                 //071122
+      // I think this is the number of fruits per tree/plant
+      //(I don't think per hectare)  (could be a crop parameter)
+   CORN::Date_clad_32 initial_fruit_growth_date ;                                //030521
+   CORN::Date_clad_32 veraison_date ;                                            //030521
+   CORN::Date_clad_32 rapid_fruit_growth_date ;                                  //030521
+   CORN::Date_clad_32 bud_break_date;                                            //081013
+   CORN::Date_clad_32 chill_requirement_satisfied_date;                          //081013
+ private:
+   virtual void setup_inactive_period_end_requirement(CORN::DOY doy);            //080401
+   Fruit_chill_requirement       *fruit_chill_requirement;                       //021125
+      // This is 0 when the crop does not have chill requirement
+      // (applies only to fruit crops)
+   Fruit_bud_break_requirement   *fruit_bud_break_requirement;                   //021125
+      // This is 0 when the crop does not have bud_break_requirement
+      // (applies only to fruit crops)
+   Fruit_harvest_requirements       *fruit_harvest_requirements;                 //180612
+
+ public: // 'structor
+   Crop_orchard_fruit // was Crop_CropSyst_orchard_fruit
+      (CropSyst::Crop_parameters    *_parameters                                 //020409
+      ,float64 param_dry_soil_root_activity_coef_                                //170518
+      ,float64 param_saturated_soil_root_activity_coef_                          //170518
+      ,bool                          _owns_parameters                            //040121
+      ,const CORN::date32 &today_                                                //170525
+      ,CORN::Unidirectional_list             &performable_operations_            //151004
+      ,const CS::CO2_atmospheric_concentration *atmospheric_CO2_conc_ppm_optional//180122
+      ,modifiable_ Crop_CO2_response         *Crop_CO2_response_given_optional   //151201
+      ,const Air_temperature_maximum         &air_temperature_max_               //151201
+      ,const Air_temperature_minimum         &air_temperature_min_               //151201
+      ,const Air_temperature_average         &air_temperature_avg_               //151201
+      ,const Solar_radiation                 &solar_radiation_                   //151201
+      ,const Vapor_pressure_deficit_daytime  &vapor_pressure_deficitdaytime_     //151201
+      ,const Vapor_pressure_deficit_max      &vapor_pressure_deficit_max_        //151201
+      ,const Psychrometric_constant          &_psychrometric_constant            //140508
+      ,const float64                         &_aerodynamic_resistance_ref_plants //140508
+      ,const Sun &_sun                                                           //151128
+      ,Weather_spanning_interface            &_weather                           //151201_130901
+      ,Weather_provider             &_weather_provider                           //110826
+      ,CS::Weather_hours                &_hourly_weather                         //080908
+      ,Soil_interface               *_soil                                       //050721
+      ,Soil_nitrogen_interface      *_soil_chem                                  //050721
+      ,modifiable_ Soil_salt_interface *_soil_salinity                           //051118
+      ,Crop_nitrogen_model           _nitrogen_model                             //050722
+      #ifdef NITROGEN
+      ,const Slope_saturated_vapor_pressure_plus_psychrometric_resistance        //referenced
+         *slope_saturated_vapor_pressure_plus_psychrometric_resistance_reference
+      ,ET_reference_interface       *_ET
+      #endif
+      ,Orchard_interface *_orchard);
+   virtual ~Crop_orchard_fruit(); //180619  was ~Crop_CropSyst_orchard_fruit
+ private :
+   virtual bool initialize();
+   virtual bool start();                                                         //140916_071120
+#ifdef OLD_ORCHARD
+#else
+
+   virtual bool process_day();                                    modification_; //180622
+#endif
+   virtual void senesce_at_dormancy();                                           //071120
+   virtual void restart
+      (float64 initial_biomass,float64 restart_GAI
+      ,bool use_clumping_factor, bool after_dormancy);
+   void potential_fruit_biomass_growth()                                  const; //050818
+   /*170220 replaced with Yield model
+   virtual float64 determine_yield()                                       const;//071120
+   */
+#ifdef OLD_ORCHARD
+#else
+   virtual float64 distribute_todays_non_leaf_stem_growth(float64 todays_growth) modification_; //071120
+      // returns todays growth that is available to goto leaf and stem           //071120
+   virtual bool initiate_fruit_growth ()                          modification_; //030521
+   virtual bool initiate_veraison             ()                  modification_; //000625
+   virtual bool initiate_rapid_fruit_growth   ()                  modification_; //030521
+#endif
+   virtual void thermal_time_event()                              modification_;
+ protected:
+   virtual void update_lingers()                                  modification_; //071120
+   virtual void consider_inactive_period                                         //020626
+      (float64 avg_temperature                                                   //021202
+      ,float64 temperature_with_est_night);   // daily temp with est. night time temps.
+   #ifdef NYI
+   // Never implemented, probably abandoned
+   float64 calc_fruit_biomass_growth(float64 available_biomass_for_fruit_growth) const;//071120
+ private: // fruit growth methods
+   float64 get_colimitation_curvature()                                   const;
+   #endif
+ public: // accessors
+#ifndef OLD_ORCHARD
+   virtual bool respond_to_freezing_damage
+      (float64 fract_reduction_due_to_freezing)                   modification_; //081103
+   virtual bool get_limit_max_LAI()                                       const; //081103
+   virtual bool is_at_max_fruit_load()                                    const; //081103
+#endif
+   inline virtual const CORN::Date_const &get_bud_break_date()                   const { return bud_break_date;}                   //081013
+   inline virtual const CORN::Date_const &get_initial_fruit_growth_date()        const { return initial_fruit_growth_date;}        //081013
+   inline virtual const CORN::Date_const &get_rapid_fruit_growth_date()          const { return rapid_fruit_growth_date;}          //081013
+   inline virtual const CORN::Date_const &get_chill_requirement_satisfied_date() const { return chill_requirement_satisfied_date;} //081013
+ public: // Special events and conditions
+   inline bool get_fruit_harvested()           const { return fruit_harvested; }
+ protected:
+   RENDER_INSPECTORS_DECLARATION;                                                //180612
+};
+//_2007-11-20___________________________________________________________________
+} // namespace CropSyst
+
+#endif
+

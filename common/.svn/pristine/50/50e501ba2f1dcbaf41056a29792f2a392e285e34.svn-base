@@ -1,0 +1,39 @@
+#include "weather/weather.h"
+#include "common/weather/weather.h"
+#include "common/weather/hour/weather_hours.h"
+#include "common/weather/database/weather_database.h"
+#include "solar/irradiance_extraterrestrial.h"
+
+//______________________________________________________________________________
+Weather::Weather
+(Weather_database   *_weather_database                                           //050307
+,modifiable_ Weather_provider &provider_                                         //151201
+,const Geocoordinate &_geocoordinate                                             //150627
+,float64              screening_height_                                          //151128
+,const CORN::Date    &_today                                                     //150125
+,Sun_days           *_sun_days                                                   //041112
+,bool                _enable_hourly
+,bool                _treat_valid_data_as_real                                   //081109
+,bool                _read_only)                                                 //000711
+: Weather_day(_weather_database
+   ,provider_                                                                    //151202
+   ,_geocoordinate
+   ,screening_height_                                                            //151120
+   ,_today
+   ,_treat_valid_data_as_real,_read_only
+   )
+{}
+//______________________________________________________________________________
+Weather::~Weather()
+{}
+//______________________________________________________________________________
+bool Weather::update()
+{  bool updated = Weather_day::update();
+   return updated;
+}
+//______________________________________________________________________________
+Weather_day &Weather::provide_daily()
+{  return (Weather_day &)*this;
+}
+//______________________________________________________________________________
+

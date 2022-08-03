@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{9AA65E08-9019-46CE-A7CD-03B152761F29}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="..\..\..\..\build\RS\2010\corn_complete_V5_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="OS_test.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="corn_complete_V5_static">
+			<MSBuild Projects="..\..\..\..\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_V5_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_V5_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="OS_test">
+			<MSBuild Projects="OS_test.cbproj"/>
+		</Target>
+		<Target Name="OS_test:Clean">
+			<MSBuild Targets="Clean" Projects="OS_test.cbproj"/>
+		</Target>
+		<Target Name="OS_test:Make">
+			<MSBuild Targets="Make" Projects="OS_test.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="corn_complete_V5_static;OS_test"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="corn_complete_V5_static:Clean;OS_test:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="corn_complete_V5_static:Make;OS_test:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

@@ -1,0 +1,63 @@
+#ifndef LADSS_databaseH
+#define LADSS_databaseH
+#  include "corn/OS/directory_entry_name_concrete.h"
+
+#ifndef LADSS_ORACLE
+#  ifndef unix
+#     include "corn/data_source/dbase_datasrc.h"
+#  endif
+#endif
+#ifndef    datarecH
+#	include "corn/data_source/datarec.h"
+#endif
+#ifndef LADSS_DATASRC_H
+#	include "LADSS_datasrc.h"
+#endif
+
+#define LABEL_proj_ID            "proj_ID"
+#define LABEL_alloc_ID           "alloc_ID"
+
+using namespace CORN;
+//______________________________________________________________________________
+class LADSS_database_parameters
+: public CORN::Data_record
+{
+ public: // LADSS mode
+   std::string user_ID;
+   std::string password;
+   int32       proj_ID;                                                          //020611
+   int32       alloc_ID;                                                         //020611
+   std::string SR_xxx;                                                           //040217
+   CORN::OS::Directory_name_concrete scenarios_dir; // This is at the same level as the scenarios directory LADSS mode creates the scenario directory the same name as the allocation dir 040617
+   CORN::OS::Directory_name_concrete weather_dir;                                       //040618
+   CORN::OS::Directory_name_concrete projects_dir; // This is where the project and its allocation simulation will be generated for LADSS import_allocation program 071022_
+   bool daily_output;                                                            //030415
+#ifdef NYI
+// Currently these table names will be hardcoded
+   std::string /*131008 CORN::Ustring*/     LBF_table_name;
+   std::string /*131008 CORN::Ustring*/     rotation_table_name;
+   std::string /*131008 CORN::Ustring*/     soil_table_name;
+   std::string /*131008 CORN::Ustring*/     location_table_name;
+   std::string /*131008 CORN::Ustring*/     crop_table_name;
+#endif
+ public:
+   LADSS_database_parameters();                                                  //030109
+   virtual void expect_structure(bool for_write);                                //981208
+};
+//_2001-03-16___________________________________________________________________
+extern LADSS_database_parameters *LADSS_database;                                //021211
+// Note Jun 13 2002 Kevin decided to put output with input in the LADSS database name/schema
+//______________________________________________________________________________
+class LADSS_output_data_source
+: public Database_data_source
+{public:
+   inline LADSS_output_data_source(const char *table_name, const char *key_field_name )
+      : Database_data_source(LADSS_database_schema table_name,key_field_name database_session,std::ios_base::out)
+      {};
+   bool delete_allocation(int32 alloc_ID);                                       //030331
+};
+//_2002-09-23___________________________________________________________________
+
+#endif
+//  LADSS_DATABASE_H
+

@@ -1,0 +1,178 @@
+#include "CS_suite/observation/CS_emanator.h"
+#include "CS_suite/observation/CS_examination.h"
+#include <assert.h>
+
+#include <iostream>
+namespace CS {
+CORN::Unidirectional_list inactive_emanators_global;
+//______________________________________________________________________________
+Emanator::Emanator
+(nat32                ID_
+,const std::string   &instance_name_
+,const std::string   &ontology_
+,bool                 ephemeral_
+,const Emanator      *context_)
+: CORN::Enumeration()
+, ephemeral             (ephemeral_)                                             //160616
+, ID                    (ID_)
+, instance_name         (instance_name_)
+, ontology_domain       (ontology_)
+, context               (context_)
+, status                (normal_status)
+{}
+//______________________________________________________________________________
+Emanator::~Emanator()
+{
+   // Since we are going out of scope make sure any
+   // continuous inspections are closed.
+   CS::provide_examination_global().complete_period_inspection        //170319
+         (CS::continuous_inspection,*this);
+}
+//______________________________________________________________________________
+/*170322 currently just listing the current domain, although I may need to restore this
+nat16 Emanator::list_ontology_path(CORN::Text_list &qualified_ontology)    const
+{  if (context)
+       context->list_ontology_path(qualified_ontology);
+   if (ontology_domain.length())      qualified_ontology.add_string(ontology_domain);
+   return qualified_ontology.count();
+}
+*/
+//_2016-06-10___________________________________________________________________
+const char *Emanator::append_ontology_domain_name_to
+(std::string &append_to,char delimiter)                                    const
+{  if (!ontology_domain.empty())
+   {  append_to.append(ontology_domain);
+      if (delimiter) append_to += delimiter;
+   }
+   return append_to.c_str();
+}
+//_2017-03-22___________________________________________________________________
+nat16 Emanator::list_instance_path(CORN::Text_list &qualified_instance)    const
+{
+   if (context) context->list_instance_path(qualified_instance);
+   if (instance_name.length()) qualified_instance.add_string(instance_name);
+   return qualified_instance.count();
+}
+//_2016-06-10___________________________________________________________________
+Emanators::Emanators()
+: CORN::Enumeration_list(true)
+{}
+//_2015-08-18___________________________________________________________________
+Emanator &Emanators::know
+(nat32              emanator_ID
+,const std::string &instance_name
+,const std::string &ontology
+,bool               ephemeral                                                    //160616
+,const Emanator    *context
+,CORN::Datetime64   inception_date)                                              //170319
+{  Emanator *new_emanator = new Emanator
+      (emanator_ID,instance_name,ontology,ephemeral,context);
+   take(new_emanator);
+   // It is presumed that all emanators on becoming known
+   // will be inspected continuously through out the duration.
+   CS::provide_examination_global().add_period_inspection                        //170319
+         (CS::continuous_inspection
+         ,UT_day //timestep of the inspected data
+            // Currently only daily emanators
+            // but should be parameter
+         ,*new_emanator
+         ,inception_date // today.get_datetime64()
+         // Currently the composition of the tally filename (to include ontology affix)
+         // done by the UED recorder, but is probably could/should be done ere
+         ,"" //170319 ,"continual" // "continuous"
+         //170319 ,0
+         ,STAT_BASIC_ELEMENTS_INIT_FINAL_bits);
+   return *new_emanator;
+}
+//_2015-08-18___________________________________________________________________
+bool Emanators::forget(nat32 emanator_ID)                             //cognition_
+{  bool forgot = false;
+   Emanator *identified_emanator = dynamic_cast<Emanator *>
+      (find_nat32(emanator_ID));
+   if (identified_emanator)
+   {
+      forgot = CS::provide_examination_global().complete_period_inspection       //170521
+         (ANY_INSPECTION,*identified_emanator);                                  //170521
+      identified_emanator->set_status(Emanator::deleted_status);
+      Emanator *detached_emanator = dynamic_cast<Emanator *>(detach(identified_emanator)); //170521
+      inactive_emanators_global.take(detached_emanator);                         //170522
+   }
+   return forgot;
+}
+//_2015-08-18___________________________________________________________________
+Emanator::Status Emanators::get_status_of(nat32 emanator_ID)               const
+{  Emanator::Status identified_status = Emanator::unknown_status;
+   const Emanator *identified_emanator = dynamic_cast<const Emanator *>
+      (find_nat32(emanator_ID));
+   if (identified_emanator)
+      identified_status = identified_emanator->get_status();
+   return identified_status;
+}
+//_2015-08-18___________________________________________________________________
+Emanators *emanators_global;
+Emanators &provide_emanators()
+{
+   if (!emanators_global)
+      emanators_global = new Emanators;
+   return *emanators_global;
+}
+//_2015-09-17_2015-08-22________________________________________________________
+bool Emanators::start_year(CORN::Datetime64 inception_date)        modification_
+{  bool started = true;
+   FOR_EACH(emanator,Emanator,each_emanator)
+   {
+      if (emanator->is_relevant_annually())
+        started &= CS::provide_examination_global().add_period_inspection
+         (CS::annual_inspection
+         ,UT_day //timestep of the inspected data
+         ,*emanator,inception_date
+         ,""
+         ,STAT_BASIC_ELEMENTS_INIT_FINAL_bits);
+   } FOR_EACH_END(each_emanator)
+   return started;
+}
+//_2017-3-19____________________________________________________________________
+bool Emanators::end_year()                                         modification_
+{  bool ended = true;
+   FOR_EACH(emanator,Emanator,each_emanator)
+   {
+      if (emanator->is_relevant_annually())
+        ended &= CS::provide_examination_global().complete_period_inspection
+         (CS::annual_inspection,*emanator);
+   } FOR_EACH_END(each_emanator)
+   return ended;
+}
+//_2017-3-19____________________________________________________________________
+bool Emanators::start(CORN::Datetime64 inception_date)             modification_
+{  bool started = true;
+   FOR_EACH(emanator,Emanator,each_emanator)
+   {
+        started &= CS::provide_examination_global().add_period_inspection
+         (CS::continuous_inspection
+         ,UT_day //timestep of the inspected data
+         ,*emanator,inception_date
+         ,""
+         ,STAT_BASIC_ELEMENTS_INIT_FINAL_bits);
+   } FOR_EACH_END(each_emanator)
+   return started;
+}
+//_2017-04-14____________________________________________________________________
+bool Emanators::stop()
+{  bool stopped = true;
+
+//if (not year ended)
+//   end_year();
+   FOR_EACH(emanator,Emanator,each_emanator)
+   {
+      /* Probably don't need this because all periods should be stopped at this piont
+      if (emanator->! is_relevant_annually())
+      */
+        stopped &= CS::provide_examination_global().complete_period_inspection
+         (ANY_INSPECTION/*170521 CS::continuous_inspection*/,*emanator);
+      emanator->set_status(Emanator::stopped_status);
+   } FOR_EACH_END(each_emanator)
+   return stopped;
+}
+//_2017-03-24___________________________________________________________________
+} // namespace CS
+

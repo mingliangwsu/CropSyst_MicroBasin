@@ -1,0 +1,259 @@
+#ifndef clssoilH
+#define clssoilH
+//#include "soil/complete.h"
+//140214 RLN NYN #include "soil/soil_base.h"
+#ifdef MBVC_INFILTRATION
+#include "soil/soilprofileclass2.h"
+#endif
+#include "soilstateclass.h"
+#include "soilprocessesclass.h"
+#ifdef CROPSYST_VERSION
+#else
+#include "organicresidual/organicresidueclass.h"
+#include "organicresidual/organicresiduestateclass.h"
+#include "organicresidual/soilomandresiduemasterclass.h"
+#include "soil/soilnitrogentransformationclass.h"
+#endif
+#ifdef MBVB_SOIL_TEMPERATURE
+#  include "soil/soiltemperatureclass.h"
+#endif
+#ifdef CHEMICAL_TRANSPORT
+#include "soil/soilchemicaltransportclass.h"
+#endif
+#ifdef CROPSYST_VERSION
+   class CropSyst_Model_options;
+#  include "soil.h"
+#else
+#  include "soil/soilabioticfunctionsclass.h"
+#  include "management/clsmanagement.h"
+#  include "control/debugstateclass.h"
+#  include "control/clssimulation.h"
+#  include "crop/clscrop.h"
+#endif
+#ifdef CROPSYST_PROPER_CROP
+#include "crop/crop_interfaced.h"
+#include "crop/phenology_interface.h"
+#endif
+
+#ifdef CROPSYST_WEATHER
+#else
+#include "weather/weatherstatedailyclass.h"
+#include "snow/clssnow.h"
+#endif
+
+class clsManagement;
+class SoilOMAndResidueMasterClass;
+class OrganicResidueStateClass;
+class SoilProcessesClass;
+class SoilNitrogenTransformationClass;
+#ifdef MBVB_SOIL_TEMPERATURE
+class SoilTemperatureClass;
+#endif
+#ifndef CROPSYST_VERSION
+class SoilAbioticFunctionsClass;
+#endif
+class clsSnow;
+class WeatherStateDailyClass;
+class SoilChemicalTransportClass;
+class clsSimulation;
+class BasinCellClass;                                                            //160211LML
+//______________________________________________________________________________
+class clsSoil
+#ifdef CROPSYST_VERSION
+: public extends_ CropSyst::Soil
+#endif
+{
+private:
+    double WaterPotential(double Water_Content,double Saturation,
+         double Air_Entry, double b_Value);
+public:
+    //Soil_complete *pSoilComplete;
+    SoilProfileClass *pSoilProfile;         //a reference
+    SoilProcessesClass *pSoilProcesses;     //a reference
+    SoilStateClass *pSoilState;
+    #ifdef CROPSYST_VERSION
+    #else
+    SoilOMAndResidueMasterClass *pSOMResidueMaster;
+    OrganicResidueClass *pOrganicResidue;
+    OrganicResidueStateClass *pOrganicResidueState;
+    SoilNitrogenTransformationClass *pSoilNTransformation_optional;
+    SoilAbioticFunctionsClass *pAbioticFunctions;
+    #endif
+    SoilChemicalTransportClass *pChemTransport_optional;
+    #ifdef MBVB_SOIL_TEMPERATURE
+    mutable SoilTemperatureClass *pSoilTemperature;
+    #endif
+    AllControlClass &ControlRef;
+    #ifdef CROPSYST_WEATHER
+    #else
+    #ifdef MBVB_SOIL_TEMPERATURE
+    WeatherStateDailyClass &weather;
+    #endif
+    #endif
+    #ifdef MBVB_SNOW
+    clsSnow &clsSnowRef;
+    #else
+    mutable bool has_snow_cover;                                                 //160721
+    #endif
+    const Organic_matter_residues_profile_abstract *OM_residues_profile_kg_m2;   //160224RLN
+    //160225RLN BasinCellClass &BasinCellRef;                                       //160211LML
+public:
+    clsSoil
+      (AllControlClass              &ControlRef_
+      //160608 #ifdef OLD_EVAPORATE
+      //160608 ,modifiable_ Physical::Water_depth  &evaporation_potential_remaining       //160412
+      //160608 #endif
+      ,const CORN::Date             &today_                                      //150630RLN
+      //160721 #ifdef CROPSYST_WEATHER
+      //160721 ,const Weather                &weather_                                    //140218RLN
+      #ifdef MBVB_SNOW
+      ,clsSnow                      &clsSnowRef_
+      #endif
+      //160721 #else
+      #ifdef CROPSYST_WEATHER
+      //RLN NYI WARNING need to determine exactly what soil needs of weather
+      #else
+      #ifdef MBVB_SOIL_TEMPERATURE
+      ,WeatherStateDailyClass       &weather_
+      #endif
+      #endif
+      //160721 #endif
+      #ifdef CROPSYST_VERSION
+      ,const CS::Annual_temperature &annual_temperature_                         //150724_141222RLN
+      #endif
+      #ifdef PROVIDES_SOIL_TEMPERATURE_PROFILE
+      ,const CS::Land_unit_meteorological &meteorological_                      //151022
+      #endif
+      ,const Organic_matter_residues_profile_abstract *OM_residues_profile_kg_m2_//160224RLN
+      //160225RLN,BasinCellClass               &BasinCellRef_                               //160211LML
+      );
+    ~clsSoil();
+    /*160324LML obs.
+    void instantiateSoil
+            (SoilProfileClass *_pSoilProfile,
+             SoilStateClass *_pSoilState,SoilProcessesClass *_pSoilProcesses
+             #ifndef CROPSYST_VERSION
+             //150723 Actually this can be moved to constructor in all versions but need to check
+             ,const CS::Annual_temperature &annual_temperature                   //141222RLN
+             #endif
+            );
+    */
+    void instantiateSoilReferenceAndTemperature
+            (SoilProfileClass *_pSoilProfile,
+             SoilStateClass *_pSoilState,SoilProcessesClass *_pSoilProcesses
+            );                                                                   //160324LML
+    void instantiateSoilChemicalTransport();                                     //160324LML
+    void DailySoilProcesses
+        (
+         #ifndef CROPSYST_VERSION
+         WeatherStateDailyClass &Weather
+         , clsSimulation &Simulation
+         #ifdef CROPSYST_PROPER_CROP
+         , const CropSyst::Crop_interfaced &crop                                 //140502
+         #else
+         , clsCrop &Crop
+         #endif
+         , DebugStateClass &DebugState
+        #endif
+        );
+    #ifdef CROPSYST_VERSION
+    virtual bool start_day()                                       modification_;//141221RLN
+    #ifdef MBVB_SOIL_TEMPERATURE
+    inline virtual bool know_has_snow_cover(bool has_snow_cover_)     cognition_//160721RLN
+       {  has_snow_cover = has_snow_cover_;
+          pSoilTemperature ->know_has_snow_cover(has_snow_cover_);
+          return true;
+       }
+    #endif
+    #else
+    bool initializeNewDay
+        (clsSimulation &Simulation
+        #ifdef CROPSYST_PROPER_CROP
+        ,const CropSyst::Crop_interfaced &crop                                   //140502
+        #else
+        ,clsCrop &Crop
+        #endif
+        ,clsManagement &Management
+        //140820RLN  No longer used in this function , clsSnow &Snow
+        );
+    #endif
+    bool initialize_parameters                                                   //150723RLN
+       #ifdef CROPSYST_VERSION
+       (const CORN::OS::File_name &soil_filename
+       ,CropSyst::Scenario &initial_profile);
+       #else
+       (int soil_ID,clsSimulation &Simulation);
+       #endif
+    void HourlySoilProcesses
+        (
+        #ifndef CROPSYST_VERSION
+         clsSimulation &Simulation,
+        #endif
+        #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_CROP))
+        /*160606RLN  CropSyst handles transipration
+        float64 fract_canopy_cover,                                               //141212
+        */
+        #ifdef MBVB_SOIL_TEMPERATURE
+        float64 crop_height,                                                     //160217
+        #endif
+        #else
+        clsCrop &crop,
+        #endif
+        #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_MANAGEMENT))
+        #else
+        clsManagement &Management,
+        #endif
+        #ifndef CROPSYST_WEATHER
+        //160808    WeatherStateDailyClass &Weather,
+            #ifndef CROPSYST_VERSION
+            clsSnow &Snow,
+            #endif
+        #endif
+        //160812 unused was for debug  int cellid
+        );
+   #ifdef CROPSYST_HYDROLOGY
+      virtual unmodifiable_ Soil_hydrology_interface *ref_hydrology()      const;//160412
+   #endif
+#ifdef CROPSYST_VERSION
+   #ifdef MBVB_SOIL_TEMPERATURE
+   inline virtual unmodifiable_ Soil_temperature_interface *ref_temperature_profile() const //160412_150813RLN
+      { return (const Soil_temperature_interface *)pSoilTemperature; }
+   inline virtual Soil_temperature_interface 	*provide_temperature_profile()   const //150813RLN
+      { return (Soil_temperature_interface *)pSoilTemperature; }
+   inline virtual Soil_temperature_profile_hourly_interface *provide_temperature_profile_hourly() provision_  //150810RLN
+      { return (Soil_temperature_profile_hourly_interface *)pSoilTemperature; }
+   #else
+   // Now using soil temperature from CropSyst proper                            //160721RLN
+   #endif
+   virtual unmodifiable_ Soil_layers_interface                 *ref_layers()                      const { return pSoilProfile; } //160412
+   virtual   modifiable_ Soil_layers_interface                 *mod_layers()               modification_{ return pSoilProfile; } //160412
+   virtual unmodifiable_ Soil_texture_interface                *ref_texture()                     const { return pSoilProfile; } //160412
+   virtual   modifiable_ Soil_texture_interface                *mod_texture()              modification_{ return pSoilProfile; } //160412
+   virtual unmodifiable_ Soil_hydraulic_properties_interface   *ref_hydraulic_properties()        const { return pSoilProfile; } //160412
+   virtual   modifiable_ Soil_hydraulic_properties_interface   *mod_hydraulic_properties() modification_{ return pSoilProfile; } //160412
+   virtual unmodifiable_ Soil_structure_interface              *ref_structure()                   const { return pSoilProfile; } //160412
+   virtual   modifiable_ Soil_structure_interface              *mod_structure()            modification_{ return pSoilProfile; } //160412
+   virtual   modifiable_ Soil_hydrology_interface              *mod_hydrology()            modification_{ return pSoilState->hydrology; }
+   inline virtual float64 get_pH                                (nat8 layer)      const { return pSoilProfile->get_pH(layer); } //150813LML talk with Roger
+   inline virtual float64 get_cation_exchange_capacity          (nat8 layer)      const { return pSoilProfile->get_cation_exchange_capacity(layer);}  //150820LML talk with Roger
+   inline virtual modifiable_ float64 &mod_act_water_entering_soil() modification_ { return pSoilState->Daily_Infiltration; } ////160412RLN_150930RLN
+   virtual float64 get_act_water_entering_soil()                           const { return pSoilState->Daily_Infiltration; } //150930RLN
+
+/* Some of the following methods may need to be implemented here but currently not needed.
+   virtual float64 get_temperature_C                      (nat8 layer)     const { assert(false); return 0; }
+   virtual float64 get_act_evaporation()                                   const { assert(false); return 0; }
+   virtual float64 get_pot_evaporation()                                   const { assert(false); return 0; }
+   virtual bool end_day()                                           modification_{ assert(false); return 0; }
+   virtual bool process_day()                                       modification_{ assert(false); return 0; }
+   virtual Seconds   get_hydrology_timestep_resolution_today()             const { assert(false); return 0; }
+   virtual float64 distribute_amount
+      (const soil_horizon_array32(from_horizon_amount)
+      ,soil_sublayer_array_64(to_layer_amount))                            const { assert(false); return 0; }
+*/
+
+//150813RLN   virtual Soil_temperature_interface 	*provide_temperature_profile()      const { assert(false); return 0; }
+
+#endif
+};
+//______________________________________________________________________________
+#endif // CLSSOIL_H

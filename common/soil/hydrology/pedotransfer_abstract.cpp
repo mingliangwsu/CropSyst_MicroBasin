@@ -1,0 +1,188 @@
+#include "pedotransfer_abstract.h"
+//______________________________________________________________________________
+Pedotransfer_functions_abstract::Pedotransfer_functions_abstract                 //080419
+(float32 & _sand, float32 &_clay, float32 &_silt
+,float32 & _saturation                  ,bool saturation_fixed
+,float32 & _vol_WC_at_1500              ,bool vol_WC_at_1500_fixed
+,float32 & _vol_WC_at_FC                ,bool vol_WC_at_FC_fixed
+,float32 & _sat_hydraul_cond_m_d        ,bool sat_hydraul_cond_m_d_fixed
+,float32 & _bulk_density                ,bool bulk_density_fixed
+,float32 & _soil_b                      //140416 ,bool soil_b_fixed
+,float32 & _air_entry_pot               //140416 ,bool air_entry_pot_fixed
+,float32 & _porosity                    ,bool porosity_fixed
+,float32 & _water_pot_at_FC             ,bool water_pot_at_FC_fixed              //140416
+)
+: sand(_sand)
+, clay(_clay)
+, silt(_silt)
+, saturation                  (_saturation)
+, vol_WC_at_1500              (_vol_WC_at_1500)
+, vol_WC_at_FC                (_vol_WC_at_FC)
+//140416 , vol_WC_at_33                (_vol_WC_at_33)
+, sat_hydraul_cond_m_d        (_sat_hydraul_cond_m_d)
+, bulk_density                (_bulk_density)
+, geometric_mean_particle_size(0)// i_geometric_mean_particle_size)
+, soil_b                      (_soil_b)
+, air_entry_pot               (_air_entry_pot)
+, porosity                    (_porosity)                                        //080419
+, water_pot_at_FC             (_water_pot_at_FC)                                 //140416
+, saturation_quality          (saturation_fixed          ?measured_quality:unknown_quality)
+, vol_WC_at_1500_quality      (vol_WC_at_1500_fixed      ?measured_quality:unknown_quality)
+, vol_WC_at_FC_quality        (vol_WC_at_FC_fixed        ?measured_quality:unknown_quality)
+//140416 , vol_WC_at_33_quality        (vol_WC_at_33_fixed        ?measured_quality:unknown_quality)
+, sat_hydraul_cond_m_d_quality(sat_hydraul_cond_m_d_fixed?measured_quality:unknown_quality)
+, bulk_density_quality        (bulk_density_fixed        ?measured_quality:unknown_quality)
+, GM_particle_size_quality    (unknown_quality)//geometric_mean_particle_size_fixed)
+/*140416 claudio says B and AEP will always be computed
+, soil_b_quality              (soil_b_fixed              ?measured_quality:unknown_quality)
+, air_entry_pot_quality       (air_entry_pot_fixed       ?measured_quality:unknown_quality)
+*/
+, FC_quality                  (vol_WC_at_FC_fixed        ?measured_quality:unknown_quality)  //040912
+, PWP_quality                 (vol_WC_at_1500_fixed      ?measured_quality:unknown_quality)  //040912
+, porosity_quality            (porosity_fixed            ?measured_quality:unknown_quality)
+, water_pot_at_FC_quality     (water_pot_at_FC_fixed     ?measured_quality:unknown_quality) //140416
+{}
+//______________________________________________________________________________
+float32 Pedotransfer_functions_abstract::set_porosity
+(float32 new_porosity,CORN::Quality &new_quality)
+{  if (new_quality.is_better_than(porosity_quality))
+   {  porosity = new_porosity;
+      porosity_quality.assume(new_quality);
+   } else new_quality.assume(porosity_quality);
+   return porosity;
+}
+//_2008-04-19___________________________________________________________________
+float32 Pedotransfer_functions_abstract::set_bulk_density
+(float32 new_bulk_density,CORN::Quality &new_quality)
+{  if (new_quality.is_better_than(bulk_density_quality))
+   {  bulk_density = new_bulk_density;
+      bulk_density_quality.assume(new_quality);
+   } else new_quality.assume(bulk_density_quality);
+   return bulk_density;
+}
+//_2008-04-19___________________________________________________________________
+float32 Pedotransfer_functions_abstract::set_saturation
+(float32 new_saturation,CORN::Quality &new_quality)
+{  if (new_quality.is_better_than(saturation_quality))
+   {  saturation = new_saturation;
+      saturation_quality.assume(new_quality);
+   } else new_quality.assume(saturation_quality);
+   return saturation;
+}
+//_2008-04-19___________________________________________________________________
+float32 Pedotransfer_functions_abstract::set_air_entry_pot(float32 air_entry_pot_)
+{  air_entry_pot = air_entry_pot_;
+   return air_entry_pot;
+}
+//______________________________________________________________________________
+float32 Pedotransfer_functions_abstract::set_sat_hydraul_cond_m_d
+(float32 new_sat_hydraul_cond_m_d,CORN::Quality &new_quality)
+{  if (new_quality.is_better_than(sat_hydraul_cond_m_d_quality))
+   {  sat_hydraul_cond_m_d = new_sat_hydraul_cond_m_d;
+      sat_hydraul_cond_m_d_quality.assume(new_quality);
+   } else new_quality.assume(sat_hydraul_cond_m_d_quality);
+   return sat_hydraul_cond_m_d;
+}
+//______________________________________________________________________________
+float Pedotransfer_functions_abstract::set_vol_WC_at_1500
+(float new_vol_WC_at_1500,CORN::Quality &new_quality)
+{  if (new_quality.is_better_than(vol_WC_at_1500_quality))
+   {  vol_WC_at_1500 = new_vol_WC_at_1500;
+      vol_WC_at_1500_quality.assume(new_quality);
+   } else // we do not modify
+     new_quality.assume(vol_WC_at_1500_quality);
+   return vol_WC_at_1500;
+}
+//______________________________________________________________________________
+float Pedotransfer_functions_abstract::set_vol_WC_at_FC
+(float new_vol_WC_at_FC,CORN::Quality &new_quality)
+{  if (new_quality.is_better_than(vol_WC_at_FC_quality))
+   {  vol_WC_at_FC = new_vol_WC_at_FC;
+      vol_WC_at_FC_quality.assume(new_quality);
+   } else // we do not modify
+     new_quality.assume(vol_WC_at_FC_quality);
+   return vol_WC_at_FC;
+}
+//______________________________________________________________________________
+/*140416
+float Pedotransfer_functions_abstract::set_vol_WC_at_33(float new_vol_WC_at_33,CORN::Quality &new_quality)
+{  if (new_quality.is_better_than(vol_WC_at_33_quality))
+   {  vol_WC_at_33 = new_vol_WC_at_33;
+      vol_WC_at_33_quality= new_quality;
+   } else // we do not modify
+     new_quality = vol_WC_at_33_quality;
+   return vol_WC_at_33;
+}
+//______________________________________________________________________________
+*/
+float Pedotransfer_functions_abstract::get_porosity_with_quality
+(CORN::Quality &quality_got)
+{  float32 calced_porosity = 0.0;                                                //180121
+   quality_got.invalidate(true);                                                 //180121
+   CORN::Quality_clad bulk_density_qual_local;                                   //180121
+   if (bulk_density_quality.is_valid())                                          //180121
+   {
+      calced_porosity = 1.0 - get_bulk_density(bulk_density_qual_local) / normal_particle_density_g_cm3;  //  2.65 is normal particle density
+      quality_got.assume_code(quality_calculated_from_quality(bulk_density_quality));
+      set_porosity(calced_porosity,quality_got);
+   }
+   return calced_porosity;
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_abstract::get_bulk_density(CORN::Quality &quality_returned)
+{  quality_returned.assume(bulk_density_quality);
+   if (bulk_density_quality.is_worse_than(measured_quality))
+   {  CORN::Quality_clad calced_bulk_density_quality;
+      float32 calced_bulk_density = calc_bulk_density_based_on_best_saturation(quality_returned); // 080313 was get_bulk_density_based_on_texture();
+      set_bulk_density(calced_bulk_density,quality_returned);
+   }
+   return bulk_density;
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_abstract::calc_bulk_density_based_on_best_saturation(CORN::Quality &calced_bulk_density_quality)
+{  CORN::Quality_clad saturation_quality_got;
+   float32 saturation_got =  get_saturation(saturation_quality_got);
+   calced_bulk_density_quality.assume_code(quality_calculated_from_quality(saturation_quality_got));
+   return (1.0 - saturation_got ) * normal_particle_density_g_cm3/*2.65*/;
+}
+//_2008-04-18___________________________________________________________________
+float Pedotransfer_functions_abstract::est_saturation_as_porosity
+   (CORN::Quality &saturation_quality) // const
+{  CORN::Quality_clad porosity_quality;
+   float porosity = get_porosity_with_quality(porosity_quality);
+   saturation_quality.assume_code(quality_calculated_from_quality(porosity_quality));
+   return porosity; // In this case saturation is taken as quality.
+}
+//_2008-04-30___________________________________________________________________
+float Pedotransfer_functions_abstract::get_porosity() // In this case the normal porosity
+{  float normal_porosity = 1.0 - (bulk_density/ normal_particle_density_g_cm3);
+   return normal_porosity;
+}
+//_2008-04-30___________________________________________________________________
+float Pedotransfer_functions_abstract::get_saturation(CORN::Quality &quality_returned)
+{
+   if (saturation_quality.is_worse_than(fixed_quality)) // was  computed_from_fixed)
+   {
+      {  CORN::Quality_clad calced_saturation_quality;
+         float32 calced_saturation = calc_saturation_based_on_texture(calced_saturation_quality);
+         set_saturation(calced_saturation,calced_saturation_quality);
+      }
+      {  CORN::Quality_clad porosity_quality;
+          saturation = get_porosity_with_quality(porosity_quality);  // Rolf says that there could be some adjustment from the porosity.   //080418
+         set_saturation(saturation,porosity_quality);
+      }
+   }
+   quality_returned.assume(saturation_quality);
+   return saturation;
+}
+//_1998-10-30___________________________________________________________________
+void Pedotransfer_functions_abstract::reset_questionable_states()
+{  saturation_quality           .assume_code ((saturation_quality          .get_quality_code() == fixed_quality) ? fixed_quality : unknown_quality);
+   vol_WC_at_1500_quality       .assume_code ((vol_WC_at_1500_quality      .get_quality_code() == fixed_quality) ? fixed_quality : unknown_quality);
+   vol_WC_at_FC_quality         .assume_code ((vol_WC_at_FC_quality        .get_quality_code() == fixed_quality) ? fixed_quality : unknown_quality);
+   bulk_density_quality         .assume_code ((bulk_density_quality        .get_quality_code() == fixed_quality) ? fixed_quality : unknown_quality);
+   GM_particle_size_quality     .assume_code ((GM_particle_size_quality    .get_quality_code() == fixed_quality) ? fixed_quality : unknown_quality);
+   sat_hydraul_cond_m_d_quality .assume_code ((sat_hydraul_cond_m_d_quality.get_quality_code() == fixed_quality) ? fixed_quality : unknown_quality);
+}
+//______________________________________________________________________________
+

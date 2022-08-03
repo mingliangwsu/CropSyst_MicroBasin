@@ -1,0 +1,116 @@
+#ifndef param_storesH
+#define param_storesH
+//______________________________________________________________________________
+//#include "CS_suite/file_system/CS_database_directory.h"
+#include "CS_suite/file_system/CS_databases.h"
+#include "corn/data_source/vv_file.h"
+#include "soil/soil_param.h"
+#include "corn/container/unilist.h"
+//______________________________________________________________________________
+namespace CS {
+
+//______________________________________________________________________________
+template <typename P>
+class Store
+: public CORN::Unidirectional_list
+{
+   class Store_item
+   : public implements_ CORN::Item
+   {public:
+      CORN::OS::File_name_concrete filename_qualified;
+      P parameters;
+   };
+   //___________________________________________________________________________
+   std::wstring context_name; // I.e. soil, rotation, crop, management, biomatter
+   // Conceptual: format (I.e. VV YAML UED)
+   CORN::OS::Extension    context_extension; // I.e. sil CS_soil rot CS_rotation
+ private:
+   const CS::Databases &databases;
+ public:
+   Store
+      (const std::wstring &context_name_
+      ,const std::wstring &context_extension_
+      ,const CS::Databases &databases_)
+      : context_name       (context_name_)
+      , context_extension  (context_extension_)
+      , databases          (databases_)
+      {}
+   const P *provide(nat32 number)                                     provision_
+      {
+         std::wstring file_name;
+         CORN::append_nat32_to_wstring(number,file_name);
+         return provide(file_name.c_str());
+      }
+   const P *provide(const char *file_name)                            provision_
+      {
+         std::wstring wide_file_name;
+         CORN::append_ASCIIZ_to_wstring(file_name,wide_file_name);
+         return provide(wide_file_name);
+      }
+   const P *provide(const wchar_t *file_name_unqual)                   provision_
+      {
+         CORN::OS::File_name *found_file_name = databases.render_find_in_context_wstring
+		    //actually returns DEN
+            (context_name,file_name_unqual,context_extension);
+         return provide(found_file_name);
+      }
+   const P *provide(const CORN::OS::File_name *filename_qualified_given) provision_
+      {
+         if (filename_qualified_given)
+         {
+            Store_item *item = dynamic_cast<Store_item *>
+               (find_wstring(filename_qualified_given->w_str(),false));
+            if (!item)
+            {
+               item = new Store_item;
+               CORN::VV_File param_file(filename_qualified_given->c_str());
+               param_file.get(item->parameters);
+               append(item);
+            }
+            return &item->parameters;
+         }
+         else return 0;
+      }
+};
+//_2016-09-16___________________________________________________________________
+
+
+struct Parameter_stores
+//: public extends_ CORN::Unidirectional_list // list of stores
+{
+   // Maintains parameter files loaded in memory and shared with landunits.
+   // This is used by REACCH and VIC-CropSyst where there may be multiple grid
+   // cells that have common soils, cropping systems etc..
+   // To reduce file openning, the parameters are openned once, stored in
+   // memory and the references shared with the land units.
+   // This will also reduce memory since each land unit doesn't need
+   // to have it own copied of parameters
+ public:
+   Store<Smart_soil_parameters>  soils;
+   // NYI currently some crop parameters are augmented
+   // during the simulation run so it is not yet possible to share
+   // parameters,  I need to modify CropSyst to eliminate the augmentation.
+   // NYI CORN::Unidirectional_list  provided_ rotations
+   // NYI CORN::Unidirectional_list  provided_ crops
+   // NYI CORN::Unidirectional_list  provided_ management
+   // NYI CORN::Unidirectional_list  provided_ weather
+   // NYI CORN::Unidirectional_list  provided_ biomatter
+ public:
+   Parameter_stores(const CS::Databases &databases);
+   // Each parameter file type there are optional methods to
+   // For GIS grids, parameter files are named using a numeric code
+   // For GIS Polygon Attribute Tables, parameter files are named
+/*   //    using any code (which must be a valid filename)
+   const Smart_soil_parameters &provide(const char *store, nat32 number)         provision_;
+   const Smart_soil_parameters &provide(const char *store, const char *name)     provision_;
+   const Smart_soil_parameters &provide(const char *store, const wchar_t *name)  provision_;
+   const Smart_soil_parameters &provide
+      (const char *store, const CORN::OS::File_name &filename_qualified)         provision_;
+*/
+};
+//______________________________________________________________________________
+
+} // namespace CS
+#endif
+
+

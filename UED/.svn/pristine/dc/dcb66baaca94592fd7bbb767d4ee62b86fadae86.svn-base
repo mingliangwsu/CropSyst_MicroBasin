@@ -1,0 +1,7 @@
+
+####### Compiler, tools and options
+CC            = gcc
+CXX           = g++
+include ../../Xcc/Release/Makefile
+LIBS          = $(SUBLIBS) -L../../../../../corn/build/icc/Release -lcorn_complete_static  -L../../../../library/build/icc/Release -lUED_static -lpthread 
+

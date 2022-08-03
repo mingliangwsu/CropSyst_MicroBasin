@@ -1,0 +1,75 @@
+Harvest/Clipping #1
+Biomass removal mode and constraints #2
+With this mode, all the removed amount is divided into the specified biomatter fate pools and any remainder (biomass associated with the GAI retained) is left as standing biomatter (dead residue if terminate crop is enabled). #3
+With this mode, the current above ground biomass is divied up according to the biomass fate percentages.  The amount removed for beneficial use is considered the yield of the clipping event. #4
+When you change the biomass removal mode you need to make sure biomass fate sums to 100% #5
+Mode selection #6
+Single harvest event with primary yield  based harvest index, or harvestable biomatter such as fruits #7
+Remove fixed amout of biomass (suitable for clipping, grazing). #8
+Remove biomass based on percentages #9
+Removed fixed amount of biomass #10
+When a fixed amount is removed, all the  removed amount is divided into the specified biomass fate pools and any remainder (reserve) is left as standing biomass (dead residue if terminate crop is enabled). #11
+This is the fixed amount of material to remove #12
+Fixed amount to remove #13
+Primarily for grazing operations, this is used to indicate that some biomass cannot or should not be removed. #15
+Reserve biomass (unavailable for clipping/grazing) #16
+If this box is not check, the operation will fail and not be performed if there is insufficient biomass. #18
+Accept a lesser amount of biomass removed if there is enough biomass to meet the reserve #19
+Biomass fate must be set #20
+These parameters ensure that the green area index is consistent with the biomass removed. #21
+This parameter ensures that sufficient green area index is maintained for regrowth when the biomass is removed. Actual biomass removal may be limited to presure the GAI. #23
+This value insures that a minimal amount of GAI is retained in the field, this is to prevent the operation from removing so much green foliage that the crop is unable to recover.  (This may limit biomass removal) #24
+Minimum GAI to be retained #25
+NRCS field operation #27
+Used for surface residue disturbance and fate #28
+Biomass fate #69
+Select one of these biomass fate modes. The parameters specific to the mode will be displayed. #70
+Grain, tuber, leaf, fruit or root yield #71
+For crop where the yield biomass is grain, fruit, flower or leaf head, roots or tubers; crop parameters specify the primary harvested biomatter based on harvest index or the accumulation of the yield biomass.  #72
+Remaining biomass (excluding yield) will be disposed as specified below.  If the crop does not have harvest index or no available yield, all above ground biomass is disposed thusly.  For most crops, enable "Terminate crop". #73
+This harvest mode is intended for such crops and is usually scheduled to harvest when the crop reachs physiological maturity.  #74
+Enter suggested values #75
+Clipping #76
+This option is used primarily for crops where there may be multiple clipping events during the growing season. #77
+Reminder: You can schedule clipping as a repeated event if it is to occur at fixed intervals, or add multiple clipping events to the schedule.  This mode is usually not used to terminate the crop. #78
+ In this case all biomass is removed as specified below overriding any harvest index or other crop harvest parameters. #79
+This mode can be used with crops that are normally harvested for primary yield, but are are sometimes harvested prior to physiological maturity for fodder, silage or other uses.  #80
+All of the clipped (actually removed from the plant) #81
+Enter suggested values #82
+Last clipping #83
+This option is used for crops with multiple other clipping events.  One last clipping will be attempted on the scheduled date, harvest will occur only if there is sufficient biomass and the crop has not already entered dormancy. #84
+Normally, with this mode, the crop will continue into dormancy and restart in the spring.  Some times it may be appropriate to also terminate the crop at this time  (I.e. to kill a perennial).  In this case enable "Terminate crop". #85
+All of the clipped (actually removed from the plant) #86
+Enter suggested values #87
+Grazing #88
+This option is used for forage crops.  It activates the grazing submodel.  #89
+Including the percent biomass grazed specified above, #90
+The grazed amount will be applied to the soil surface as an organic fertilizer application. (harvest index will not be applied even if the crop has harvest index parameters). #91
+Consumed by animals #92
+Percent Nitrogen in produced manure (These must sum to 100%) #94
+from organic matter #95
+from ammonia (NH3) #97
+The portion of manure production actually deposited to the field (the remainder is loss) #99
+Consumed biomass returned to the field as manure #100
+Enter suggested values #102
+Defoliation #103
+This option is used to remove most (or all) above ground biomass,  biomatter may be removed, or usually it is applied to the soil surface and/or left as standing stubble, either allowing the crop to restart or terminate. #104
+All above ground #105
+Enter suggested values #106
+biomass has the following disposition  #107
+This accounts for biomatter that is removed from the field (in addition to or in lieu of any harvest index yield) that may be consumed for other purposes. #108
+Removed and designated for beneficial use (clipped fodder, silage, etc.) #109
+Remains in the field laying as surface residue0-100% #111
+This is used to account for biomatter that is not harvested yield, otherwise consumed or applied to the soil), such as prunings, chaff or corn cobs that are collected but removed during processing. #112
+Removed from the field and disposed (unused) #113
+Remains in the field as dead standing stubble/residue #115
+This reserves a portion of the plant as live and potentially regeneratable plant parts) #117
+Remains as live standing plant tissue  #118
+<-- Select one of these modes #120
+Terminating the crop kills the crop, and any remaining live biomatter will be added to dead standing residue. #121
+Terminate crop #123
+Require conditions for Grazing/Clipping  #125
+This parameter is used for repeated clipping operations. #126
+Minimum LAI required for clipping #127
+This parameter is used for repeated clipping operations. #129
+Minimum biomass required for clipping #130

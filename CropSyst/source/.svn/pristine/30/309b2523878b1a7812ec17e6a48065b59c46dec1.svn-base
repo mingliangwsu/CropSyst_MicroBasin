@@ -1,0 +1,673 @@
+
+// This module only needs to be included if using variable recorders
+
+// This file uses 8 bit characters in literal text strings
+
+#include "csvc.h"
+#include "CS_suite/observation/CS_inspector.h"
+#include "CS_suite/observation/CS_examination.h"
+
+#include "crop/crop_cropsyst.h"
+#include "crop/crop_interfaced_cropsyst.h"
+#include "crop/crop_root_V4.h"
+#include "crop/crop_N_common.h"
+#include "crop/phenology_common.h"
+#include "crop/transpiration.h"
+
+#include "soil/chemicals_profile.h"
+#include "soil/nitrogen_profile.h"
+#include "soil/infiltration.h"
+#include "soil/hydrology.h"
+#include "soil.h"
+#include "organic_matter/OM_pools_common.h"
+#include "organic_matter/OM_residues_profile_common.h"
+#include "cs_ET.h"
+#include "UED/library/std_codes.h"
+
+#include "land_unit_sim.h"
+#include "soil/soil_evaporator.h"
+
+#define CSVC_UNKNOWN 0
+
+// template
+// inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));
+
+
+/* NYI
+Annual
+
+[ ]CSVC_mgmt_N_organic_gaseous_loss_period_sum          ,UC_kg_ha}
+[ ]CSVC_mgmt_N_inorganic_gaseous_loss_period_sum        ,UC_kg_ha}
+
+[ ]CSVC_soil_C_SOM_profile                              ,UC_kg_ha}
+[ ]CSVC_soil_C_SOM_30cm                                 ,UC_kg_ha}
+
+Seasonal
+
+[ ]Duration
+
+*/
+//_____________________________________________________________________________/
+
+namespace CropSyst {
+RENDER_INSPECTORS_DEFINITION(Crop_complete)
+{
+
+   CS::Emanator *emanator =
+      Crop_common::render_inspectors(inspectors,context,instance,statistic);
+      //150915       render_listeners(recorders,desired_descriptive_summary_elements)
+   //thermal_time_CURR    .render_inspectors(inspectors,&emanator,"thermal_time",statistic);
+
+   roots_current  ->render_inspectors(inspectors,emanator,"root",statistic);
+   phenology       .render_inspectors(inspectors,emanator,"phenology",statistic);
+   if (nitrogen) nitrogen->render_inspectors(inspectors,emanator,"nitrogen",statistic);
+
+   inspectors.append(new CS::Inspector(reported_canopy_biomass,UC_kg_m2 ,*emanator,"canopy/biomass"    ,value_statistic,CSVC_crop_biomass_canopy));
+/* NYI
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));,CSVP_crop_base_green_biomass                                     ,PP_crop_base_green_biomass                                            ,desired_descriptive_summary_elements));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));,CSVP_crop_base_fruit_biomass                                     ,PP_crop_base_fruit_biomass                                            ,desired_descriptive_summary_elements));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));,CSVP_crop_base_fruit_canopy_biomass                              ,PP_crop_base_fruit_canopy_biomass                                     ,desired_descriptive_summary_elements));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));,CSVP_crop_base_orchard_solid_canopy_interception                 ,PP_crop_base_orchard_solid_canopy_interception                        ,desired_descriptive_summary_elements));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));,CSVP_crop_base_orchard_shaded_area_GAI                           ,PP_crop_base_orchard_shaded_area_GAI                                  ,desired_descriptive_summary_elements));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));,CSVP_crop_base_orchard_canopy_porosity                           ,PP_crop_base_orchard_canopy_porosity                                  ,desired_descriptive_summary_elements));
+*/
+   inspectors.append(new CS::Inspector(reported_LAI   ,UC_index   ,*emanator,"leaf/area/index/LAI"    ,value_statistic,CSVP_crop_base_leaf_area_index));
+   inspectors.append(new CS::Inspector(reported_GAI   ,UC_index   ,*emanator,"leaf/area/index/GAI"    ,value_statistic,CSVP_crop_base_green_area_index));
+   inspectors.append(new CS::Inspector(temperature_stress_stats.ref_current() ,UC_factor  ,*emanator,"stress/temperature/factor"  ,value_statistic,CSVP_crop_base_temperature_stress_factor));
+   inspectors.append(new CS::Inspector(temperature_stress_stats.index         ,UC_index   ,*emanator,"stress/temperature/index"   ,value_statistic,CSVP_crop_base_water_stress_index));
+
+/*NYI
+   inspectors.append(new CS::Inspector(member_variable   ,UC_index   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_tuber_init_temp_stress_index
+   inspectors.append(new CS::Inspector(member_variable   ,UC_index   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_tuber_fill_temp_stress_index
+   inspectors.append(new CS::Inspector(member_variable   ,UC_index   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_flower_temperature_stress_index
+   inspectors.append(new CS::Inspector(member_variable   ,UC_index   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_flower_water_stress_index
+   inspectors.append(new CS::Inspector(member_variable   ,UC_index   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_flower_N_stress_index
+   inspectors.append(new CS::Inspector(member_variable   ,UC_index   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_filling_duration_index
+*/
+   inspectors.append(new CS::Inspector(reported_fract_canopy_cover      ,UC_fraction,*emanator,"ground_cover"        ,value_statistic,CSVP_crop_base_fract_canopy_cover));
+   inspectors.append(new CS::Inspector(intercepted_precipitation_m_today,UC_meter   ,*emanator,"water/interception"  ,sum_statistic,CSVC_crop_base_water_intrcpt_time_step_sum));
+/*
+   // NYI inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_growth_stage
+
+/* NYI seasonal
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_planting_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_emergence_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_flowering_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_tuber_init_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_grain_filling_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_peak_LAI_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_maturity_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_harvest_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_restart_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_bud_break_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_initial_fruit_growth_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_rapid_fruit_growth_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_inactive_begin_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_inactive_end_date_YD
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_base_chill_requirement_satisfied_date_YD
+*/
+   inspectors.append(new CS::Inspector(intercepted_radiation   ,UC_MJ_m2   ,*emanator,"PAR/intercepted"    ,sum_statistic,CSVP_crop_base_intercepted_PAR));
+/* NYI
+   // NYI inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_P_mass_uptake
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_C_mass_canopy
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_C_mass_roots_live
+*/
+   // Special outputs
+   inspectors.append(new CS::Inspector(output_transpiration_use_eff        ,UC_kg_kg                  ,*emanator,"WUE"               ,value_statistic,GENERATE_VARIABLE_CODE)); //CSVC_crop_WUE));
+   inspectors.append(new CS::Inspector(output_degree_hours_above_30_today  ,UC_Celcius_degree_hours   ,*emanator,"DegHr_above_30"    ,sum_statistic,GENERATE_VARIABLE_CODE)); //CSVC_crop_degree_hours_above_30));
+   inspectors.append(new CS::Inspector(output_degree_hours_above_34_today  ,UC_Celcius_degree_hours   ,*emanator,"DegHr_above_34"    ,sum_statistic,GENERATE_VARIABLE_CODE)); //CSVC_crop_degree_hours_above_34));
+
+   #ifdef OLD_PHENOLOGY_SEQUENCER
+   thermal_time->render_inspectors(inspectors,emanator,"thermal_time",statistic);
+   #else
+   // NYI need to setup new phenology sequencer thermal time output
+   #endif
+   return emanator;
+}
+} //namespace CropSyst
+//_2013-07-30_______________________________________________render_inspectors_/
+
+namespace CropSyst {
+RENDER_INSPECTORS_DEFINITION(Crop_common)
+{
+   //160614 KNOW_EMANATOR_LITERAL_ONTOLOGY("crop");
+   KNOW_EMANATOR(true,true);
+   emanator_known = &emanator;                                                   //160613
+   inspectors.append(new CS::Inspector(pot_transpiration_m[false/*unadjusted */] ,UC_meter,  emanator,"transpiration/potential/unadjusted"   ,sum_statistic,CSVC_crop_base_transp_pot_time_step_sum));
+   inspectors.append(new CS::Inspector(pot_transpiration_m[true /*CO2adjusted*/] ,UC_meter,  emanator,"transpiration/potential/CO2_adjusted" ,sum_statistic,GENERATE_VARIABLE_CODE));
+   inspectors.append(new CS::Inspector(recorded_act_transpiration_m              ,UC_meter,  emanator,"transpiration/actual"                 ,sum_statistic,CSVC_crop_base_transp_act_time_step_sum));
+
+   inspectors.append(new CS::Inspector(water_stress_stats.ref_current() ,UC_factor  ,emanator,"water/stress/factor"     ,value_statistic,CSVP_crop_base_water_stress_factor));
+   inspectors.append(new CS::Inspector(water_stress_stats.index         ,UC_index   ,emanator,"water/stress/index"      ,value_statistic,CSVP_crop_base_water_stress_index));
+
+   return emanator_known;
+}
+//______________________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Thermal_time_common)
+{
+   // uses crop emenator KNOW_EMANATOR_LITERAL_ONTOLOGY("thermal_time");
+   inspectors.append(new CS::Inspector(accum_degree_days_clipped[0]  ,UC_Celcius_degree_days ,*context, "growing_degree_days/clipped",sum_statistic,CSVP_crop_base_growing_degree_days));
+   inspectors.append(new CS::Inspector(accum_degree_days_normal[0]   ,UC_Celcius_degree_days ,*context, "growing_degree_days/normal" ,sum_statistic,CSVP_crop_base_seasonal_thermal_time));
+   /* replaced
+   inspectors.append(new CS::Inspector(accum_degree_days_clipped[0]  ,emanator,PP_crop_base_growing_degree_days   ,UC_Celcius_degree_days,inspectors.desired_descriptive_summary_elements&STAT_value_bit,value_statistic)); //CSVP_crop_base_growing_degree_days
+   inspectors.append(new CS::Inspector(accum_degree_days_normal[0]   ,emanator,PP_crop_base_seasonal_thermal_time ,UC_Celcius_degree_days,inspectors.desired_descriptive_summary_elements&STAT_value_bit,value_statistic)); //CSVP_crop_base_seasonal_thermal_time
+   */
+   return 0;
+}
+//_2013-09-09__________________________________________________________________/
+} // namespace CropSyst
+
+//_2013-07-30_______________________________________________render_inspectors_/
+/*
+nitrogen
+
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_yield));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_useful));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_disposal));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_chaff));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_stubble));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_grazing_to_manure));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_grazing_to_disposal));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_uncut_canopy));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_canopy));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_removed_canopy));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_removed_non_yield));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_removed_residue));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_removed_grazing));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_roots_live));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_roots_dead));
+*/
+/*
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_removed_above_ground));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_removed_grazing));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_mass_removed_residue));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_yield));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_useful));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_disposal));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_chaff));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_stubble));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_grazing_to_manure));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_grazing_to_disposal));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_uncut_canopy));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_canopy));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_removed_canopy));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_removed_non_yield));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_removed_residue));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_removed_grazing));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_roots_live));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_roots_dead));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_produced_above_ground));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_removed_above_ground));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_removed_grazing));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_crop_N_conc_removed_residue));
+*/
+
+//______________________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Crop_transpiration_2)
+{  // sharing parent's emanator
+   inspectors.append(new CS::Inspector(leaf_water_pot ,UC_J_per_kg,*context,"leaf/water_potential"    ,value_statistic  ,CSVP_crop_base_leaf_water_pot));
+   inspectors.append(new CS::Inspector(uptake_act_m   ,UC_m       ,*context,"transpiration/uptake/act",sum_statistic    ,GENERATE_VARIABLE_CODE));
+   return 0;
+}
+//_2016-06-27___________________________________________________________________
+namespace CropSyst {
+RENDER_INSPECTORS_DEFINITION(Crop_nitrogen_common)
+{
+   // Note sure if I need to create a new report or simply use context
+   //160616 uses crop emanator context because the nitrogen is static member KNOW_EMANATOR_LITERAL_ONTOLOGY("nitrogen");
+   //   recorders.append(new CS::Variable_recorder(daily.uptake, CSVP_crop_N_uptake, PP_crop_N_uptake,UC_kg_ha,desired_descriptive_summary_elements&(STAT_sum_bit|STAT_value_bit),sum_statistic));
+
+   inspectors.append(new CS::Inspector(stress_factor_stats.ref_current()   ,UC_factor  ,*context,"nitrogen/stress/factor"           ,value_statistic  ,CSVP_crop_N_stress_factor));
+   inspectors.append(new CS::Inspector(stress_factor_stats.index           ,UC_index   ,*context,"nitrogen/stress/index"            ,value_statistic  ,CSVP_crop_N_stress_index));
+   inspectors.append(new CS::Inspector(reported_canopy_mass_current        ,UC_kg_m2   ,*context,"nitrogen/canopy/mass"             ,sum_statistic    ,CSVC_crop_N_mass_canopy_current));             //CSVP_crop_N_mass_canopy_current
+   inspectors.append(new CS::Inspector(daily.gaseous_loss                  ,UC_kg_m2   ,*context,"nitrogen/canopy/gaseous_loss"     ,sum_statistic    ,CSVC_crop_N_canopy_gaseous_loss));             //CSVP_crop_N_canopy_gaseous_loss
+   inspectors.append(new CS::Inspector(daily.fertilization_requirements    ,UC_kg_m2   ,*context,"nitrogen/requirements/additional" ,sum_statistic    ,CSVC_crop_N_automatic_uptake_time_step_sum));  //CSVP_crop_N_automatic_uptake
+   inspectors.append(new CS::Inspector(daily.fixation                      ,UC_kg_m2   ,*context,"nitrogen/fixation"                ,sum_statistic    ,CSVP_crop_N_fixation));
+   //NYI (seasonal) inspectors.append(new CS::Inspector(member_variable                     ,UC_kg_kg   ,*context,"nitrogen/flower_mature_conc_ratio",value_statistic  ,CSVP_crop_N_flower_mature_conc_ratio));
+   inspectors.append(new CS::Inspector(daily.uptake                        ,UC_kg_m2   ,*context,"nitrogen/uptake"                  ,sum_statistic    ,CSVP_crop_N_uptake)); //,CSVC_crop_N_uptake_time_step_sum));
+   //NYI (seasonal?) inspectors.append(new CS::Inspector(report_excess_or_deficit            ,UC_kg_m2   ,*context,"nitrogen/uptake_excess_or_deficit",sum_statistic    ,CSVP_crop_N_uptake_excess_or_deficit,CSVC_UNKNOWN)); // sum? diff?
+   inspectors.append(new CS::Inspector(N_min_concentration                 ,UC_kg_kg   ,*context,"nitrogen/min/conc"                ,value_statistic  ,CSVP_crop_N_conc_min));
+   inspectors.append(new CS::Inspector(N_max_concentration                 ,UC_kg_kg   ,*context,"nitrogen/max/conc"                ,value_statistic  ,CSVP_crop_N_conc_max));
+   inspectors.append(new CS::Inspector(N_crit_concentration                ,UC_kg_kg   ,*context,"nitrogen/crit/conc"               ,value_statistic  ,CSVP_crop_N_conc_critical));
+
+   inspectors.append(new CS::Inspector(reported_root_conc                  ,UC_kg_kg   ,*context,"nitrogen/root/conc"               ,value_statistic  ,CSVC_crop_N_conc_roots_live)); //CSVP_crop_N_conc_roots_live
+
+   // reported_uptake_accum
+
+   return 0; // emanator;
+}
+}
+//______________________________________________________________________________
+/*template
+namespace CropSyst {
+RENDER_INSPECTORS_DEFINITION(XXXXX)
+{
+// inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));
+// inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));
+// inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));
+   return 0; // emanator;
+}
+
+//______________________________________________________________________________
+} // namespace CropSyst
+*/
+//_2013-07-30_________________________________Crop_nitrogen::render_inspectors_/
+
+/* NYI
+
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_water_drainage));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_water_depletion));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_water_balance));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_erosion_clod_rate));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_erosion_loss));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_erosion_loss));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_erosion_index));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_erosion_RUSLE_C_factor));
+
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_runoff_surface_water_runon));
+CSVP_soil_C_SOM_profile
+CSVP_soil_C_SOM_5cm
+CSVP_soil_C_SOM_10cm
+CSVP_soil_C_SOM_15cm
+CSVP_soil_C_SOM_30cm
+CSVP_soil_C_SOM_60cm
+CSVP_soil_C_SOM_90cm
+CSVP_soil_C_microbial_profile
+CSVP_soil_C_microbial_5cm
+CSVP_soil_C_microbial_10cm
+CSVP_soil_C_microbial_15cm
+CSVP_soil_C_microbial_30cm
+CSVP_soil_C_microbial_60cm
+CSVP_soil_C_microbial_90cm
+CSVP_soil_C_labile_profile
+CSVP_soil_C_labile_5cm
+CSVP_soil_C_labile_10cm
+CSVP_soil_C_labile_15cm
+CSVP_soil_C_labile_30cm
+CSVP_soil_C_labile_60cm
+CSVP_soil_C_labile_90cm
+CSVP_soil_C_metastable_profile
+CSVP_soil_C_metastable_5cm
+CSVP_soil_C_metastable_10cm
+CSVP_soil_C_metastable_15cm
+CSVP_soil_C_metastable_30cm
+CSVP_soil_C_metastable_60cm
+CSVP_soil_C_metastable_90cm
+CSVP_soil_C_passive_profile
+CSVP_soil_C_passive_5cm
+CSVP_soil_C_passive_10cm
+CSVP_soil_C_passive_15cm
+CSVP_soil_C_passive_30cm
+CSVP_soil_C_passive_60cm
+CSVP_soil_C_passive_90cm
+CSVP_soil_C_residues_surface
+CSVP_soil_C_residues_profile
+CSVP_soil_C_residues_5cm
+CSVP_soil_C_residues_10cm
+CSVP_soil_C_residues_15cm
+CSVP_soil_C_residues_30cm
+CSVP_soil_C_residues_60cm
+CSVP_soil_C_residues_90cm
+CSVP_soil_C_residues_surface
+CSVP_soil_C_residues_profile
+CSVP_soil_C_residues_5cm
+CSVP_soil_C_residues_10cm
+CSVP_soil_C_residues_15cm
+CSVP_soil_C_residues_30cm
+CSVP_soil_C_residues_60cm
+CSVP_soil_C_residues_90cm
+CSVP_soil_C_decomposed_residue_profile
+CSVP_soil_C_decomposed_residue_5cm
+CSVP_soil_C_decomposed_residue_10cm
+CSVP_soil_C_decomposed_residue_15cm
+CSVP_soil_C_decomposed_residue_30cm
+CSVP_soil_C_decomposed_residue_60cm
+CSVP_soil_C_decomposed_residue_90cm
+CSVP_soil_C_decomposed_residue_flat
+CSVP_soil_C_decomposed_residue_stubble
+CSVP_soil_C_decomposed_residue_attached
+CSVP_soil_C_incorporated_by_tillage
+CSVP_soil_C_removed_by_harvest
+CSVP_soil_C_decomposed_SOM_profile
+CSVP_soil_C_decomposed_SOM_5cm
+CSVP_soil_C_decomposed_SOM_10cm
+CSVP_soil_C_decomposed_SOM_15cm
+CSVP_soil_C_decomposed_SOM_30cm
+CSVP_soil_C_decomposed_SOM_60cm
+CSVP_soil_C_decomposed_SOM_90cm
+
+// soil nitrogen
+
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_available));
+
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_input));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_output));
+// Soil pond
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_pond_water_depth));
+
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_water_content)); 1-31
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_plant_avail_water)); 1-31
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_water_potential)); 1-31
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_lateral_in_flow_depth)); 1-31
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_lateral_out_flow_depth)); 1-31
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_temperature));   1-31
+
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_mineralization)); 1-31));
+
+
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_P_P_amount)); 1-31
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_salinity)); 1-31
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_base_salt)); 1-31
+*/
+//_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+RENDER_INSPECTORS_DEFINITION(Soil_base)
+{
+   //KNOW_EMANATOR_LITERAL_ONTOLOGY("soil");
+   KNOW_EMANATOR(CS_NOT_EPHEMERAL,CS_ONTOLOGY_ROOT);
+   emanator_known = &emanator;
+
+//160804   #ifdef OLD_EVAPORATE
+//160804   inspectors.append(new CS::Inspector(act_evaporation,UC_meter,emanator,"evaporation/act" ,sum_statistic,CSVC_soil_base_evap_act_time_step_sum));
+//160804   #else
+   evaporator->render_inspectors(inspectors,&emanator,"evaporation",statistic);
+   // Should call the evaporator
+//160804   #endif
+
+
+//150925 moved to infiltration   inspectors.append(new CS::Inspector(act_water_entering_soil ,emanator,/*CSVP_soil_base_water_entering*/PPL_act_water_entering_soil  ,UC_mm,inspectors.desired_descriptive_summary_elements&(STAT_sum_bit|STAT_value_bit),sum_statistic));
+   const Soil_hydrology_interface *hydrology = ref_hydrology();                  //160412
+   if (hydrology) hydrology->render_inspectors(inspectors,&emanator,"hydrology",statistic);
+   return emanator_known; // NYI
+}
+//_2013-09-09___________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Soil_hydrology_abstract)
+{
+   // uses soil emanator KNOW_EMANATOR_LITERAL_ONTOLOGY("soil/hydrology");
+   // for start of period
+   inspectors.append(new CS::Inspector(depth_profile_water[1],UC_meter,*context,"water_depth/profile/LEQ",initial_statistic,CSVC_UNKNOWN));
+   //for end of period
+   inspectors.append(new CS::Inspector(depth_profile_water[1],UC_meter,*context,"water_depth/profile/LEQ",final_statistic,CSVC_UNKNOWN)); // NYI actually final_statistic
+   return 0; // emanator_known; // NYI
+}
+//_2013-09-30___________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Soil_chemicals_profile)
+{  bool rendered = true;
+   //uses soil emanator KNOW_EMANATOR_LITERAL_ONTOLOGY("soil/chemicals");
+   inspectors.append(new CS::Inspector( reported_daily_N_leached      ,UC_kg_m2 ,*context,"leach/N/total",sum_statistic,CSVC_soil_N_leached_time_step_sum));  // sum?
+   /*NYI
+   inspectors.append(new CS::Inspector( reported_daily_NO3_N_leached      ,UC_kg_m2 ,*context,"N_leached/NO3"           ,sum_statistic,??CSVC_soil_NO3_N_leached_time_step_sum));  // sum?
+   inspectors.append(new CS::Inspector( reported_daily_NH4_N_leached      ,UC_kg_m2 ,*context,"N_leached/NH4"           ,sum_statistic,??CSVC_soil_NH4_N_leached_time_step_sum));  // sum?
+   */
+   inspectors.append(new CS::Inspector((denitrification_N_E_output[0]),UC_kg_m2 ,*context,"denitrification/N"   ,sum_statistic,CSVC_soil_N_denitrification_time_step_sum));       // sum?
+   // For start of period Not we will want initial and final for the period
+   inspectors.append(new CS::Inspector(total_N_E[0]     ,UC_kg_m2,*context/*emanator*/ ,"N_total/profile"   ,sum_statistic,CSVC_UNKNOWN));   //CSVP_soil_N_N_amount      // sum?
+   inspectors.append(new CS::Inspector(NO3_N_E_output[0],UC_kg_m2,*context/*emanator*/ ,"N_NO3/profile"     ,sum_statistic,CSVC_UNKNOWN));   //CSVP_soil_N_NO3_amount    // sum?
+   inspectors.append(new CS::Inspector(NH4_N_E_output[0],UC_kg_m2,*context/*emanator*/ ,"N_NH4/profile"     ,sum_statistic,CSVC_UNKNOWN));   //CSVP_soil_N_NH4_amount    // sum?
+   return 0; // emanator;
+}
+//_2013-09-11___________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(CropSyst::Crop_root_common)
+{
+/*NYI
+CSVP_crop_base_root_fraction   1-31
+*/
+   //160616 KNOW_EMANATOR_LITERAL_ONTOLOGY("root");
+   // Now the root object simply uses the context emenator because
+   // the root is instanciated with the
+
+   inspectors.append(new CS::Inspector(biomass,UC_kg_m2,*context,"root/biomass" ,value_statistic,CSVC_crop_base_root_biomass_current));
+   return 0;
+}
+//_2013-09-09__________________________________________________________________/
+RENDER_INSPECTORS_DEFINITION(CropSyst::Crop_root_vital)
+{
+   //160616 CS::Emanator &emanator = Crop_root_common::render_inspectors(inspectors,context,"root",statistic);
+   //160616 Crop_root_vital uses the crop's emanator.
+   inspectors.append(new CS::Inspector(apparent_root_depth,UC_meter,*context,"root/depth",value_statistic,CSVC_crop_base_root_depth));
+   return 0;
+}
+//_2013-09-09__________________________________________________________________/
+RENDER_INSPECTORS_DEFINITION(Soil_infiltration_nominal)
+{
+   // uses soil emanator KNOW_EMANATOR_LITERAL_ONTOLOGY("infiltration"); // May need to be "soil/infiltration"
+   inspectors.append(new CS::Inspector(reported_drainage       ,UC_meter   ,*context,"drainage"  ,sum_statistic,CSVC_soil_base_water_drainage_time_step_sum)); // accum
+   inspectors.append(new CS::Inspector(act_water_entering_soil ,UC_meter   ,*context,"entering"  ,sum_statistic,CSVC_soil_base_water_entering_time_step_sum)); // accum
+   return 0; // emanator;
+}
+//_2013-07-30_______________________________________render_variable_recorders__/
+RENDER_INSPECTORS_DEFINITION(CropSyst::Soil)
+{
+   //CS::Emanator &emanator
+   emanator_known
+      = Soil_base::render_inspectors(inspectors,context,instance,statistic);
+   if (chemicals) chemicals->render_inspectors(inspectors,emanator_known/*&emanator*/,"chemical",statistic);
+   //NYI if (erosion) erosion->render_inspectors(inspectors,&emanator,"erosion",statistic);
+   //NYI if (tillage_effect) tillage_effect->render_inspectors(inspectors,&emanator,"tillage_effect",statistic);
+   return emanator_known; // emanator;
+}
+//_2013-09-11___________________________________________________________________
+namespace CropSyst {
+RENDER_INSPECTORS_DEFINITION(Crop_interfaced_complete)
+{
+   //160616 CS::Emanator &emanator = Crop_complete::render_inspectors(inspectors,context,instance,statistic);
+   //160616 return emanator;
+   return Crop_complete::render_inspectors(inspectors,context,instance,statistic);
+}
+} //namespace CropSyst
+//______________________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(NO3_with_CO2_Profile)
+{
+   //160616 uses soil emanator KNOW_EMANATOR_LITERAL_ONTOLOGY("NO3"); // may be soil/NO3
+   inspectors.append(new CS::Inspector(N2O_N_loss_daily,UC_kg_m2,*context,"N_N2O_emission/denitrification",sum_statistic,CSVC_soil_N_N2O_loss_denitrification_time_step_sum));
+   return 0; // emanator;
+}
+//______________________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(NH4_Profile_with_pH)
+{
+   //160616 uses soil emanator    KNOW_EMANATOR_LITERAL_ONTOLOGY("NH4");   // may be soil/NH4
+   inspectors.append(new CS::Inspector(N2O_N_loss_daily,UC_kg_m2,*context,"N_N2O_emission/nitrification", sum_statistic,CSVC_soil_N_N2O_loss_nitrification_time_step_sum));
+   return 0; // emanator;
+}
+//______________________________________________________________________________
+/* NYI
+CSVP_organic_matter_percent     1-31
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_organic_matter_N_mineralization_5cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_organic_matter_N_mineralization_10cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_organic_matter_N_mineralization_15cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_organic_matter_N_mineralization_30cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_organic_matter_N_mineralization_60cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_organic_matter_N_mineralization_90cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_immobilization_5cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_immobilization_10cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_immobilization_15cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_immobilization_30cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_immobilization_60cm));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVC_XXXX));CSVP_soil_N_immobilization_90cm));
+*/
+RENDER_INSPECTORS_DEFINITION(Organic_matter_residues_profile_common)
+{
+   //160616 uses LBF contextKNOW_EMANATOR_LITERAL_ONTOLOGY("organic"); //160610 Not sure what to use
+   if (organic_matter_pools_profile_owned) organic_matter_pools_profile_owned->render_inspectors(inspectors,context,"SOM",sum_statistic);
+   residues.render_inspectors(inspectors,context,"residues",statistic);
+   return 0; // emanator;
+}
+//______________________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Organic_matter_pools_common)
+{
+   //16616 KNOW_EMANATOR_LITERAL_ONTOLOGY("organic_matter");
+   KNOW_EMANATOR(CS_NOT_EPHEMERAL,CS_ONTOLOGY_ROOT);
+   emanator_known = &emanator;
+   inspectors.append(new CS::Inspector(today_OM_mineralized_kgN_m2,UC_kg_m2,emanator,"N_mineralization/profile"   ,sum_statistic,CSVC_organic_matter_N_mineralization_profile_time_step_sum)); // Need to verify variable code
+   // Currently there is only mineralization from SOM
+/*
+   inspectors.append(new CS::Inspector(today_N_immobilized        ,UC_kg_m2,emanator,"N_immobilization/residue/plant/profile"   ,sum_statistic,CSVC_soil_N_immobilization_time_step_sum));
+   inspectors.append(new CS::Inspector(today_N_immobilized        ,UC_kg_m2,emanator,"N_immobilization/residue/manure/profile"   ,sum_statistic,CSVC_soil_N_immobilization_time_step_sum));
+*/
+   inspectors.append(new CS::Inspector(CO2_C_loss_daily[0]        ,UC_kg_m2,emanator,"CO2_C_loss/OM"              ,sum_statistic,CSVC_organic_matter_CO2_C_loss_residue_time_step_sum));
+   inspectors.append(new CS::Inspector(CO2_C_loss_daily[1]        ,UC_kg_m2,emanator,"CO2_C_loss/SOM"             ,sum_statistic,CSVC_organic_matter_CO2_C_loss_SOM_time_step_sum));
+   inspectors.append(new CS::Inspector(CO2_C_loss_daily[2]        ,UC_kg_m2,emanator,"CO2_C_loss/residue"         ,sum_statistic,CSVC_organic_matter_CO2_C_loss_residue_time_step_sum));
+   return emanator_known;
+}
+//______________________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Residues_common)
+{
+   CS::Evaporator_intervals::render_inspectors(inspectors,context,"residue",statistic); // may be sum statistic
+      // the evaporation/actual and evaporation/potential
+      // CSV were  CSVP_residue_pot_evap  CSVP_residue_act_evap
+
+   // Residue
+   inspectors.append(new CS::Inspector(report_ground_cover  ,UC_fraction,*context,"residue/ground_cover"    ,value_statistic  ,CSVP_residue_ground_cover));
+   inspectors.append(new CS::Inspector(report_water_storage ,UC_m       ,*context,"residue/water_storage"   ,sum_statistic    ,CSVP_residue_water_storage));
+   inspectors.append(new CS::Inspector(report_surface_biomass,UC_kg_m2  ,*context,"residue/biomass/surface" ,sum_statistic    ,CSVP_residue_surface_biomass));
+   inspectors.append(new CS::Inspector(interception         ,UC_m       ,*context,"residue/interception"    ,sum_statistic    ,CSVC_residue_water_intrcpt_time_step_sum));
+/*
+CSVP_residue_incorporated 1-31
+
+// Plant residue
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,*context,"XXX/XXX"    ,XXX_statistic,CSVP_residue_plant_surface));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,*context,"XXX/XXX"    ,XXX_statistic,CSVP_residue_plant_flat));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,*context,"XXX/XXX"    ,XXX_statistic,CSVP_residue_plant_stubble));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,*context,"XXX/XXX"    ,XXX_statistic,CSVP_residue_plant_incorporated)); 1-31
+
+// Manure
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,*context,"XXX/XXX"    ,XXX_statistic,CSVP_residue_manure_mineralized));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,*context,"XXX/XXX"    ,XXX_statistic,CSVP_residue_manure_surface));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,*context,"XXX/XXX"    ,XXX_statistic,CSVP_residue_manure_incorporated));  1-31
+*/
+}
+//_2016-06-27___________________________________________________________________
+
+namespace CropSyst {
+RENDER_INSPECTORS_DEFINITION(Land_unit_simulation_VX)
+{
+
+/*At this time I am not using instance description because
+ * in MicroBasin it generates a inspector label for every cell.
+ *
+ * I should add an optional disambituation label to inspector
+ * (Which would also be used by Crop
+ *
+   if (!instance_description)
+      instance_description = get_key();
+*/
+   char cycle_cstr[5];
+   CORN::nat8_to_cstr(cycle_shift,cycle_cstr,10,1,0);
+   std::string new_instance(cycle_cstr);
+   CS::Emanator &emanator  = CS::provide_emanators()                             //160612
+      .know((nat32)this,new_instance,get_ontology(),false,context,CS_ONTOLOGY_ROOT);
+   // KNOW_EMANATOR_LITERAL_ONTOLOGY(""); // Currently this class is terminal emanator, but may want to use Land_unit and/or Simulation element
+   /* nolonger needed because now using examination_global
+   REMEMBER_INSPECTION;
+   */
+   emanator_known = &emanator;                                                   //160614
+
+   if (runoff) // Eventually move this to runoff
+      inspectors.append(new CS::Inspector(runoff->estimated_runoff                     ,UC_m       ,emanator,"runoff/surface_water"    ,sum_statistic,CSVC_soil_runoff_surface_water_runoff_time_step_sum));
+   inspectors.append(new CS::Inspector(nitrogen_daily_output.volatilization_loss_NH3   ,UC_kg_m2   ,emanator,"volatilization/N_NH3"    ,sum_statistic,CSVC_soil_N_NH3_volatilization_time_step_sum));
+   inspectors.append(new CS::Inspector(nitrogen_daily_output.volatilization_total      ,UC_kg_m2   ,emanator,"volatilization/N_total"  ,sum_statistic,CSVC_soil_N_volatilization_total_time_step_sum));
+   inspectors.append(new CS::Inspector(nitrogen_daily_output.applied_total             ,UC_kg_m2   ,emanator,"application/N_total"     ,sum_statistic,CSVC_mgmt_N_applied_time_step_sum));
+
+//NYI CSVP_soil_C_all_surface
+   inspectors.append(new CS::Inspector(profile_carbon_output.sum_profile  ,UC_kg_m2   ,emanator,"OM/C/profile" ,sum_statistic,CSVC_soil_C_all_profile)); //PP_C_profile  ,UC_kg_ha,inspectors.desired_descriptive_summary_elements&(STAT_sum_bit|STAT_value_bit),sum_statistic));  // WARNING verify statistics to use
+//NYI inspectors.append(new CS::Inspector(XXXXX                           ,UC_kg_m2   ,emanator,//PP_C_5cm      ,UC_kg_ha,inspectors.desired_descriptive_summary_elements&(STAT_sum_bit|STAT_value_bit),sum_statistic));  // WARNING verify statistics to use
+//NYI inspectors.append(new CS::Inspector(XXXXX                           ,UC_kg_m2   ,emanator,//PP_C_10cm     ,UC_kg_ha,inspectors.desired_descriptive_summary_elements&(STAT_sum_bit|STAT_value_bit),sum_statistic));  // WARNING verify statistics to use
+//NYI inspectors.append(new CS::Inspector(XXXXX                           ,UC_kg_m2   ,emanator,/PP_C_15cm     ,UC_kg_ha,inspectors.desired_descriptive_summary_elements&(STAT_sum_bit|STAT_value_bit),sum_statistic));  // WARNING verify statistics to use
+   inspectors.append(new CS::Inspector(profile_carbon_output.sum_30cm     ,UC_kg_m2   ,emanator,"OM/C/30cm"    ,sum_statistic,CSVC_soil_C_all_30cm));
+//NYI CSVP_soil_C_all_60cm
+//NYI CSVP_soil_C_all_90cm
+
+//NYI CSVP_mgmt_N_organic_applied
+//NYI CSVP_mgmt_N_inorganic_applied
+
+   // Reference ET
+      #if ((CROPSYST_PROPER == 4) && !defined(VIC_CROPSYST_VERSION))
+   inspectors.append(new CS::Inspector(
+      ET_ref->ref_applicable_mm(),UC_mm   ,emanator,"biometeorology/ET/potential/reference"    ,sum_statistic,CSVC_weather_ET_ref_time_step_sum));
+      #else
+      //160731 NYI
+      #endif
+
+   // These are ET adjusted for actual crop cover
+   inspectors.append(new CS::Inspector(output_act_crop_evapotransp_m,UC_m,emanator,"ET/crop/act",sum_statistic,CSVC_weather_ET_act_time_step_sum));
+   inspectors.append(new CS::Inspector(output_pot_crop_evapotransp_m,UC_m,emanator,"ET/crop/pot",sum_statistic,CSVC_weather_ET_pot_time_step_sum));
+
+   // Management
+
+   inspectors.append(new CS::Inspector(total_irrigation_today   ,UC_m    ,emanator,"management/irrigation/applied"    ,sum_statistic,CSVP_mgmt_irrig_applied));
+   /*
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_mgmt_biomass_grazed));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_mgmt_biomass_unsatisfied));
+   */
+
+   // Nitrogen management
+   /* NYI
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_mgmt_P_applied));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_mgmt_N_organic_gaseous_loss));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_mgmt_N_inorganic_gaseous_loss));
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_misc_N_total_mineralization));
+   */
+
+   // Water table
+   /*NYI
+   inspectors.append(new CS::Inspector(member_variable   ,UC_xxxxx   ,emanator,"XXX/XXX"    ,XXX_statistic,CSVP_water_table_depth));
+   */
+
+
+
+   meteorology.render_inspectors(inspectors,emanator_known,"meteorology",statistic); //160626
+      // Warning     meteorology.render_inspectors should be
+      // iniciated by    CropSyst::version5::Simulation_engine
+
+   if (soil) soil->render_inspectors(inspectors,emanator_known,soil->get_ontology(),statistic);//160616
+   if (organic_matter_residues_profile_kg_m2) organic_matter_residues_profile_kg_m2->render_inspectors(inspectors,emanator_known,"OM_and_residues",statistic);//160626
+
+   /*160622 moved to Simulation_element_abstract::start() but need to check calling sequence
+   if (emanator_known)                                                           //160614
+      CS::examination_global.add_period_inspection
+         (CS::continuous_inspection
+         ,*emanator_known,today.get_datetime64()
+         ,"continuous"
+         ,0
+         );
+   */
+   return emanator_known; //emanator;
+}
+} // namespace CropSyst
+//______________________________________________________________________________
+namespace CS
+{
+RENDER_INSPECTORS_DEFINITION(Land_unit_meteorological)
+{
+
+   CS::Emanator &emanator = CS::provide_emanators().know
+      ((nat32)this,"meteorology",get_ontology(),CS_NOT_EPHEMERAL
+      ,0 // Currently rendering is propogating though land unit sim but we dont want that as the context (otherwise it get replicated)
+      // the Simulation
+      ,CS_ONTOLOGY_ROOT);
+
+   inspectors.append(new CS::Inspector(ref_precipitation_actual()                ,emanator,"precipitation/actual"             ,sum_statistic ,UED::STD_VC_precipitation.get()));   // UED::STD_VC_precipitation
+   inspectors.append(new CS::Inspector(ref_precipitation_effective()             ,emanator,"precipitation/effective"          ,sum_statistic ,GENERATE_VARIABLE_CODE)); //  rename this is liquid precipitation plus snow melt
+   inspectors.append(new CS::Inspector(ref_vapor_pressure_deficit_max()          ,emanator,"vapor_pressure"                   ,max_statistic ,UED::STD_VC_vapor_pressure_actual.get()));
+   inspectors.append(new CS::Inspector(ref_vapor_pressure_daytime()              ,emanator,"vapor_pressure/daytime"           ,mean_statistic,GENERATE_VARIABLE_CODE));  //avg? sum?
+   inspectors.append(new CS::Inspector(ref_vapor_pressure_nighttime()            ,emanator,"vapor_pressure/nighttime"         ,mean_statistic,GENERATE_VARIABLE_CODE));  //avg? sum?
+   inspectors.append(new CS::Inspector(ref_air_temperature_max()                 ,emanator,"temperature/air"                  ,max_statistic ,UED::STD_VC_max_temperature.get()));
+   inspectors.append(new CS::Inspector(ref_air_temperature_min()                 ,emanator,"temperature/air"                  ,min_statistic ,UED::STD_VC_min_temperature.get()));
+   inspectors.append(new CS::Inspector(ref_air_temperature_avg()                 ,emanator,"temperature/air"                  ,mean_statistic,UED::STD_VC_avg_temperature.get()));
+   inspectors.append(new CS::Inspector(ref_solar_radiation()                     ,emanator,"solar_radiation"                  ,sum_statistic ,UED::STD_VC_solar_radiation_global.get()));
+   inspectors.append(new CS::Inspector(ref_dew_point_temperature_max()           ,emanator,"temperature/dew_point"            ,max_statistic ,UED::STD_VC_max_dew_point_temperature.get()));
+   inspectors.append(new CS::Inspector(ref_dew_point_temperature_min()           ,emanator,"temperature/dew_point"            ,min_statistic ,UED::STD_VC_min_dew_point_temperature.get()));
+   inspectors.append(new CS::Inspector(ref_dew_point_temperature_avg()           ,emanator,"temperature/dew_point"            ,mean_statistic,UED::STD_VC_avg_dew_point_temperature.get()));
+   inspectors.append(new CS::Inspector(ref_relative_humidity_max()               ,emanator,"relative_humidity"                ,max_statistic ,UED::STD_VC_max_relative_humidity.get()));
+   inspectors.append(new CS::Inspector(ref_relative_humidity_min()               ,emanator,"relative_humidity"                ,min_statistic ,UED::STD_VC_min_relative_humidity.get()));
+   //NYN    inspectors.append(new CS::Inspector(ref_vapor_pressure_actual()      ,emanator,"vapor_pressure/actual",UNKNOWN_statistic));
+   inspectors.append(new CS::Inspector(ref_vapor_pressure_deficit_fullday_avg()  ,emanator,"vapor_pressure_deficit/fullday"  ,mean_statistic ,UED::STD_VC_avg_daytime_vapor_pressure_deficit.get())); //avg? sum?
+   inspectors.append(new CS::Inspector(ref_vapor_pressure_deficit_daytime()      ,emanator,"vapor_pressure_deficit/daytime"  ,mean_statistic ,UED::STD_VC_avg_fullday_vapor_pressure_deficit.get())); //avg? sum?
+   inspectors.append(new CS::Inspector(ref_wind_speed()                          ,emanator,"wind_speed"                      ,sum_statistic  ,UED::STD_VC_wind_speed.get()));
+
+   inspectors.append(new CS::Inspector(reported_snow_storage                ,UC_m,emanator,"snow_storage"                    ,sum_statistic  ,GENERATE_VARIABLE_CODE));
+   return &emanator;
+}
+//_2016-06-26_____________________________________________________________________________
+} // namespace CS
+//______________________________________________________________________________
+

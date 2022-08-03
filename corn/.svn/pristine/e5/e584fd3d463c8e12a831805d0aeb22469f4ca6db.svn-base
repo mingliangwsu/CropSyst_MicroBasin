@@ -1,0 +1,367 @@
+#include "corn/string/strconv.h"
+#include "stdio.h"
+#include <string.h>
+#ifdef __cplusplus
+namespace CORN {
+#endif
+//______________________________________________________________________________
+nat32 cstr_to_nat16
+(const char *str,nat8 radix)
+{  return  (nat16)strtoul(str, 0 ,(int)radix); }
+//_2016-10-10___________________________________________________________________
+nat32 cstr_to_nat32
+(const char *str,nat8 radix)
+{  return  strtoul(str, 0 ,(int)radix); }
+//_2012-03-14__2000-09-26_______________________________________________________
+int32 cstr_to_int32
+(const char *str,nat8 radix)
+{  return  strtol(str, 0 ,(int)radix); }
+//_2015-01-03___________________________________________________________________
+int32 wstr_to_int32
+(const wchar_t *str,nat8 radix)
+{  return  wcstol(str, 0 ,(int)radix); }
+//_2015-01-11___________________________________________________________________
+nat32 wstr_to_nat32
+(const wchar_t *str,nat8 radix)
+{  return  wcstoul(str, 0 ,(int)radix); }
+//_201602-14____________________________________________________________________
+char *float32_to_cstr
+(float32 value, int decimals)
+{  static char valuestr[30];
+   sprintf(valuestr,"%.*f",decimals,value);
+   return(valuestr);
+}
+//______________________________________________________________________________
+char *float64_to_cstr
+(float64 value, int decimals)
+{  static char valuestr[30];
+   float64 value64 = value; // Outputing 32bit is sufficient,
+   sprintf(valuestr,"%.*lf",decimals,value64);
+   return(valuestr);
+}
+//______________________________________________________________________________
+extern char *float32_to_cstr_formated(float32 value, char *result_str,uint8 width, nat8 precision_decimals,char decimal_mark,bool allow_scientific_notation)
+{  if (allow_scientific_notation)
+      sprintf(result_str,"%*f",(int)width,value);
+   else sprintf(result_str,"%*.*f",(int)width,(int)precision_decimals,value);
+   nat8 actual_width = strlen(result_str);                                       //150405
+   for (int i = 0; i < actual_width; i++)                                        //150405
+      if (result_str[i] == '.') result_str[i] = decimal_mark;
+   return(result_str);
+}
+//_2007-05-24___________________________________________________________________
+extern char *float64_to_cstr_formated(float64 value, char *result_str,uint8 width, nat8 precision_decimals,char decimal_mark,bool allow_scientific_notation)
+{
+   float64 value64 = value; // Outputing 32bit is sufficient,
+   if (allow_scientific_notation)
+        sprintf(result_str,"%*lf",(int)width,value64);
+   else sprintf(result_str,"%*.*lf",(int)width,(int)precision_decimals,value64);
+   for (int i = 0; i < width; i++)
+      if (result_str[i] == '.') result_str[i] = decimal_mark;
+   return(result_str);
+}
+//_2007-05-24___________________________________________________________________
+#ifndef __BCPLUSPLUS__
+#include <ctype.h>
+#endif
+char *int8_to_cstr(int8 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  return int32_to_cstr((int32)value,str,radix,str_width_optional,leading_char);
+}
+//_1998-04-02___________________________________________________________________
+char *nat8_to_cstr(nat8 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  return nat32_to_cstr((int32)value,str,radix,str_width_optional,leading_char);
+}
+//_2013-01-29___________________________________________________________________
+char *int16_to_cstr(int16 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  return int32_to_cstr((int32)value,str,radix,str_width_optional,leading_char);
+}
+//_1998-04-02___________________________________________________________________
+char *nat16_to_cstr(nat16 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  return nat32_to_cstr((nat32)value,str,radix,str_width_optional,leading_char);
+}
+//_2012-03-14___________________________________________________________________
+char *int32_to_cstr(int32 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{
+   char digit_stack[20];
+   int digits=0;
+   bool negative = value < 0;
+   while (value)
+   {  int digit = value % radix;
+      digit_stack[digits] = (digit < 10) ? (digit +48) : digit - 10 + 65;
+      value /= 10;
+      digits += 1;
+   }
+   if (!digits) { digit_stack[0] = '0';  digits += 1; }             //010928
+   int j = 0;
+   if (negative)
+      str[j++] = '-';
+   for (int i = 0; i< digits ; i++)
+      str[j++] = digit_stack[digits-i - 1];
+   str[j] = 0;
+   if (str_width_optional)
+   {
+      char lead_str[1024]; // 1024 is an arbitrary length
+      int num_leading_zeros = str_width_optional - strlen(str);
+      if (num_leading_zeros < 0) num_leading_zeros = 0;
+      for (int i = 0; i < num_leading_zeros; i++)
+         lead_str[i] = leading_char;
+      lead_str[num_leading_zeros] = 0;
+      strcat(lead_str,str);
+      strcpy(str,lead_str);
+   }
+   return str;
+}
+//_2014-02-10__1998-04-02_______________________________________________________
+char *nat32_to_cstr
+(uint32 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  char digit_stack[20];
+   int digits=0;
+   while (value)
+   {  int digit = value % radix;
+      digit_stack[digits] = (digit < 10) ? (digit +48) : digit - 10 + 65;
+      value /= radix; //140529 10;
+      digits += 1;
+   }
+   if (!digits) { digit_stack[0] = '0';  digits += 1; }             //010928
+   int j = 0;
+   for (int i = 0; i< digits ; i++)
+      str[j++] = digit_stack[digits-i - 1];
+   str[j] = 0;
+   if (str_width_optional)
+   {
+      char lead_str[1024]; // 1024 is an arbitrary length
+      int num_leading_zeros = str_width_optional - strlen(str);
+      if (num_leading_zeros < 0) num_leading_zeros = 0;
+      for (int i = 0; i < num_leading_zeros; i++)
+         lead_str[i] = leading_char;
+      lead_str[num_leading_zeros] = 0;
+      strcat(lead_str,str);
+      strcpy(str,lead_str);
+   }
+   return str;
+}
+//_2001-09-17___________________________________________________________________
+wchar_t *nat32_to_wstr(nat32 value,wchar_t *str,int8 radix,nat16 str_width_optional,char leading_char)
+{
+   char as_cstr[1024];
+   nat32_to_cstr(value,as_cstr, radix, str_width_optional,leading_char);
+   ASCIIz_to_Unicodez(as_cstr,str);
+
+   if (str_width_optional)
+   {
+      wchar_t lead_str[1024]; // 1024 is an arbitrary length
+      int num_leading_zeros = str_width_optional - strlen(as_cstr);
+      if (num_leading_zeros < 0) num_leading_zeros = 0;
+      for (int i = 0; i < num_leading_zeros; i++)
+         lead_str[i] = leading_char;
+      lead_str[num_leading_zeros] = 0;
+      wcscat(lead_str,str);
+      wcscpy(str,lead_str);
+   }
+/*120411
+   wchar_t digit_stack[20];
+   int digits=0;
+   while (value)
+   {  int digit = value % radix;
+      digit_stack[digits] = (digit < 10) ? (digit +48) : digit - 10 + 65;
+      value /= 10;
+      digits += 1;
+   }
+   if (!digits) { digit_stack[0] = '0';  digits += 1; }             //010928
+   int j = 0;
+   for (int i = 0; i< digits ; i++)
+      str[j++] = digit_stack[digits-i - 1];
+   str[j] = 0;
+*/
+   return str;
+}
+//_2012-02-09___________________________________________________________________
+
+
+//140210 #endif
+#ifdef unix
+// Note, unix might have _strupr as in MSC
+char *strupr(char *s)
+{  for (size_t i = 0; i < (size_t)strlen(s); i++)
+      s[i] = toupper(s[i]);
+   return s;
+}
+//_1998-04-04_____________________________________________________________________________
+#endif
+bool isvowel(char ch)
+{  char *result = strchr(
+#ifdef unix
+// UNIX strchr takes 'char *' instead of 'const char *'
+       (char *)
+#endif
+       (char *)
+       "aeiouAEIOU"
+       ,ch)  ;
+   return result != 0;
+}
+//______________________________________________________________________________
+#include <ctype.h>
+//______________________________________________________________________________
+void shrink_to(uint16  max_size
+, const char *long_name
+, char *short_name)
+{  char working[100];
+   short_name[0] = 0;                                                            //030120
+   int j = 0;
+   // First try to remove non alpha characters
+   for (uint16 i = 0; i <= (uint16)                                              //010307
+      strlen(long_name)                                                          //030120
+     ; i++)
+   {  char ch = long_name[i];
+      if (isalpha(ch) || isdigit(ch))
+         working[j++] = ch;
+   }
+   working[j] = 0;
+   strcpy(short_name,working);                                                   //030120
+   if ((uint16)strlen(working) > max_size)
+   {  j = 0;
+      // Now try removing vowels
+      for (uint16 i =0; i < (uint16)strlen(working); i++)
+      {  char ch = working[i];
+         if (!isvowel(ch))
+           working[j++] = ch;
+      }
+      working[j] = 0;
+   }
+   uint16 working_len = (uint16)strlen(working);                                 //980926
+   if (working_len > max_size)                                                   //980926
+   {
+      int to_remove = working_len - max_size;
+      int interval = working_len / to_remove;
+      j = 0;
+      for (int i = 0; i < working_len; i++)
+      {  working[i] = working[j];
+         if ((i % interval) == 0)   j += 2;
+         else                       j += 1;
+      }
+   }
+   // Now try truncating
+   working[max_size] = 0;
+   for (int i = 0; i <= (int)strlen(working); i++)                               //030120
+      short_name[i] = (char)toupper(working[i]);
+}
+//_2001-03-07___________________________________________________________________
+#define is_number_Xstr(number_str)                                             \
+{  bool result = true;                                                         \
+   bool digit_reached = false;					               \
+   for (int i_=0; (int)number_str[i_]; i_++)                                   \
+   {  char ch_i = number_str[i_];                                              \
+      if (isdigit(ch_i))                                                       \
+         digit_reached = true;                                                 \
+      if (digit_reached && isspace(ch_i))                                      \
+        return true;                                                           \
+      if (isalpha(ch_i) ) result = false;                                      \
+   }                                                                           \
+   return result;                                                              \
+}
+//__2016-02-15__2005-05-17______________________________________________________
+bool is_number_cstr(const char *number_str_)
+{
+    is_number_Xstr(number_str_)
+}
+bool is_number_wstr(const wchar_t *number_str_)
+{
+    is_number_Xstr(number_str_)
+}
+//_2016-02-15___________________________________________________________________
+/*160215 now using macro
+bool is_number(const char *number_str)
+{  bool result = true;
+   bool digit_reached = false;													 //130117
+   for (int i=0; number_str[i]; i++)
+   {  char ch_i = number_str[i];
+      if (isdigit(ch_i))
+         digit_reached = true;
+      if (digit_reached && isspace(ch_i))
+        return true;  // Once we've encountered some digits a white space can terminate the number and we ignore any extra text
+      if (isalpha(ch_i) ) result = false;
+   }
+   return result;
+}
+//_2005-05-17___________________________________________________________________
+bool is_number_wstr(const wchar_t *number_str)
+{  bool result = true;
+   bool digit_reached = false;													 //130117
+   for (int i=0; number_str[i]; i++)
+   {  char ch_i = number_str[i];
+      if (isdigit(ch_i))
+         digit_reached = true;
+      if (digit_reached && isspace(ch_i))
+        return true;  // Once we've encountered some digits a white space can terminate the number and we ignore any extra text
+      if (isalpha(ch_i) ) result = false;
+   }
+   return result;
+}
+*/
+//_2016-02-15___________________________________________________________________
+#if (__BCPLUSPLUS__ <= 0x340)
+// Borland C++ 5.0 does not have iswspace  (Might only be available in builder
+bool iswspace(char ch)
+{  bool it_is = false;
+   switch (ch)
+   {  case ' ' : it_is = true; break;
+      case '\t': it_is = true; break;
+      case '\n': it_is = true; break;
+      case 13  : it_is = true; break;
+      case 12  : it_is = true; break;
+   }
+   return it_is;
+}
+//_2006-07-19___________________________________________________________________
+#endif
+/*130211 now uint32_to_str takes optional leading options
+char *uint32_to_str_leading(uint32 value,char *str,int8 radix,char leading_char,nat8 str_width_optional)
+{  char value_cstr[30];
+   uint32_to_str(value,value_cstr, radix);
+   int num_leading_zeros = str_width_optional - strlen(value_cstr);
+   if (num_leading_zeros < 0) num_leading_zeros = 0;
+   for (int i = 0; i < num_leading_zeros; i++)
+      str[i] = leading_char;
+   str[num_leading_zeros] = 0;
+   strcat(str,value_cstr);
+   return str;
+}
+// This does uint32_to_str but will set leading zeros  giving str_width_optional or more characters
+//_2006-07-24___________________________________________________________________
+char *int32_to_str_leading(int32 value,char *str,int8 radix,char leading_char,uint8 str_width_optional)
+{
+   char value_cstr[30];
+   int32_to_str(value,value_cstr, radix);
+   int num_leading_zeros = str_width_optional - strlen(value_cstr);
+   if (num_leading_zeros < 0) num_leading_zeros = 0;
+   for (int i = 0; i < num_leading_zeros; i++)
+      str[i] = leading_char;
+   str[num_leading_zeros] = 0;
+   strcat(str,value_cstr);
+   return str;
+}
+// This does uint32_to_str but will set leading zeros  giving str_width_optional or more characters
+*/
+//_2006-07-24___________________________________________________________________
+wchar_t *ASCIIz_to_Unicodez(const_ASCIIz astr, Unicodez wstr)
+{  for (int i = 0; astr[i]; i++)
+      wstr[i] = astr[i];
+   return wstr;
+}
+//_2014-02-11___________________________________________________________________
+float32 cstr_to_float32(const char *str)
+{  return (float32)atof(str);
+}
+//_2016-09-26___________________________________________________________________
+float64 cstr_to_float64(const char *str)
+{  return atof(str);
+}
+//_2015-01-03___________________________________________________________________
+float64 wstr_to_float64(const wchar_t *str)
+{  return wcstod(str,0);
+}
+//_2015-01-11___________________________________________________________________
+
+#ifdef __cplusplus
+} //namespace CORN
+#endif

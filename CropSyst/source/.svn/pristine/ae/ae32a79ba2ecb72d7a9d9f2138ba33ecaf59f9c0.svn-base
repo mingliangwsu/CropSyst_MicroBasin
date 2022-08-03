@@ -1,0 +1,389 @@
+#include "crop/canopy_cover_continuum.h"
+#include "crop/phenology_interface.h"
+#include <math.h>
+#ifndef compareHPP
+#  include "corn/math/compare.hpp"
+#endif
+#include "corn/math/moremath.h"
+#include <iostream>
+namespace CropSyst
+{
+//______________________________________________________________________________
+Canopy_cover_abstract::Canopy_cover_abstract
+(const Crop_parameters_struct::Canopy_growth_cover_based &_canopy_parameter
+,const Crop_parameters_struct::Morphology  &_canopy_growth_common_parameter
+,const Crop_parameters_struct::Phenology   &_phenology_parameter
+,const Phenology_interface    &_phenology                                        //110824
+,bool                          _is_fruit_tree)                                   //110422
+:canopy_parameter    (_canopy_parameter)
+,parameter_begin_maturity_deg_day(_phenology_parameter.initiation.maturity)      //141106
+,canopy_growth_common_parameter(_canopy_growth_common_parameter)
+,phenology_parameter (_phenology_parameter)
+,phenology           (_phenology)
+,is_fruit_tree       (_is_fruit_tree)                                            //220422
+,global_solar_rad_intercepted_green_canopy(0.0)                                  //110906
+,global_solar_rad_intercepted_green_canopy_yesterday(0.0)                        //110906
+, PAR_solar_rad_intercepted_green_canopy(_canopy_parameter.initial_cover)
+{
+   if (!_phenology_parameter.maturity_significant                                //141106
+      && (parameter_begin_maturity_deg_day < 10000.0))                           //141106
+   {      parameter_begin_maturity_deg_day = 10000.0;                            //141106
+      // Need to confirm this with Claudio, there may be a better way to handle this case
+   }
+}
+//_____________________________________________________________________________/
+bool Canopy_cover_abstract::start_day()                            modification_
+{  global_solar_rad_intercepted_green_canopy_yesterday = global_solar_rad_intercepted_green_canopy; //110906
+   return true;
+}
+//_2011-06-01_______________________________________________________start_day__/
+bool Canopy_cover_abstract::start_season()
+{  global_solar_rad_intercepted_green_canopy = 0;
+   global_solar_rad_intercepted_green_canopy_yesterday= 0;
+   PAR_solar_rad_intercepted_green_canopy= canopy_parameter.initial_cover;
+   return true;
+}
+//_2011-08-30____________________________________________________start_season__/
+float64 Canopy_cover_abstract::set_global_solar_rad_intercepted_green_canopy
+(float64 _global_solar_rad_intercepted_green_canopy)               modification_
+{  global_solar_rad_intercepted_green_canopy = _global_solar_rad_intercepted_green_canopy;
+   global_solar_rad_intercepted_green_canopy_yesterday = _global_solar_rad_intercepted_green_canopy;
+   return global_solar_rad_intercepted_green_canopy;
+}
+//_2013-05-20____________________set_global_solar_rad_intercepted_green_canopy_/
+Canopy_cover_reference::Canopy_cover_reference
+(const Crop_parameters_struct::Canopy_growth_cover_based &_canopy_parameter
+,const Crop_parameters_struct::Morphology  &_canopy_growth_common_parameter
+,const Crop_parameters_struct::Phenology   &_phenology_parameter
+,const Phenology_interface       &_phenology                                     //110824
+,bool                             _is_fruit_tree)                                //120510_110422
+
+: Canopy_cover_abstract
+   (_canopy_parameter,_canopy_growth_common_parameter,_phenology_parameter
+   ,_phenology,_is_fruit_tree)
+, canopy_cover_curve                                                             //130613
+   ((float64)_phenology_parameter.culmination.accrescence //initiation.max_canopy
+   ,(float64)_phenology_parameter.initiation.senescence
+   ,(float64)_phenology_parameter.culmination.senescence        //141125
+   ,(float64)parameter_begin_maturity_deg_day
+   ,(float64)(is_fruit_tree // may need to be all is_perennial()
+         ? 0.0: _phenology_parameter.initiation.emergence)
+   ,(float64)_canopy_parameter.fract_season_to_reach_cover_max_half)
+, canopy_senescence_rate(0.0)                                                    //100720
+, cover_unstressed_green(0.0)                                                    //110513
+, expansion_potential_yesterday(0.0)                                             //110901
+{}
+//_________________________________________Canopy_cover_reference::constructor_/
+bool Canopy_cover_reference::initialize()                         initialization_//131206
+{  return canopy_cover_curve.parameterize
+      (canopy_parameter.maximum_cover_CO2_adj
+      ,canopy_parameter.initial_cover);
+}
+//_2011-06-28__________________________________________________________________/
+bool Canopy_cover_reference::start_day()                           modification_
+{  expansion_potential_yesterday = expansion_potential_today;
+   expansion_potential_today = 0;
+   return Canopy_cover_abstract::start_day();
+}
+//_2011-09-01_______________________________________________________start_day__/
+float64 Canopy_cover_reference::calc_canopy_cover                                      // was CC
+(float64 _cumulative_thermal_time)                                          const
+{  return
+      phenology.has_emerged()
+      ? canopy_cover_curve.calculate(_cumulative_thermal_time)
+      : 0.0;
+}
+//________________________________________Canopy_cover_reference::calc_canopy_cover__/
+bool Canopy_cover_reference::update_cover
+(float64 leaf_water_potential_yesterday_NA_this_version)           modification_ //100505 was UnstressedCanopyCover
+{  Normal_crop_event_sequence crop_event = phenology.get_growth_stage_sequence();//   Cumulative_Thermal_Time = CropState.CumulativeThermalTime(DACE)
+      if ((crop_event >= NGS_MATURITY) && (is_fruit_tree))                                                         //    If CropParameters.TreeFruitCrop Then
+      {  nat16 days_since_start_of_maturity = phenology.get_days_since_start_of(NGS_MATURITY);
+         if (days_since_start_of_maturity == 1)                                  //         If CropState.FirstDayOfMaturity Then
+            // Reduce canopy 80% at the time of tree fruit maturity              //                'Reduce canopy 80% at the time of tree fruit maturity
+            unstressed_global_solar_rad_intercepted_green_canopy *= 0.2;                               //                CropState.PotentialFractionSolarRadiationIntercepted(DACE) = CropState.PotentialFractionSolarRadiationIntercepted(DACE - 1) * 0.2
+         /*else no change in interception*/                                      //         Else
+                                                                                 //                CropState.PotentialFractionSolarRadiationIntercepted(DACE) = CropState.PotentialFractionSolarRadiationIntercepted(DACE - 1)
+                                                                                 //         End If
+      }
+/*141125
+      else                                                                     //      Else
+      {  unstressed_global_solar_rad_intercepted_green_canopy
+            += canopy_senescence_rate;               //          CropState.PotentialFractionSolarRadiationIntercepted(DACE) = CropState.PotentialFractionSolarRadiationIntercepted(DACE - 1) + Canopy_Senescence_Rate
+         unstressed_global_solar_rad_intercepted_green_canopy                    //110906
+         = CORN::must_be_greater_or_equal_to<float64>
+            (unstressed_global_solar_rad_intercepted_green_canopy,0.0);                                //    If CropState.PotentialFractionSolarRadiationIntercepted(DACE) < 0 Then CropState.PotentialFractionSolarRadiationIntercepted(DACE) = 0
+      }                                                                          //  End If
+*/
+//141125     }
+//141125   else                                                                        // Else
+
+   {  cover_unstressed_green = calc_canopy_cover(phenology.get_thermal_time_cumulative(true/*130821*/));             //110902
+      unstressed_global_solar_rad_intercepted_green_canopy
+         = cover_unstressed_green;                  //    CropState.PotentialFractionSolarRadiationIntercepted(DACE) = cover_unstressed_green
+      // Allow for continuation of canopy senescence between maturity and harvest or dormancy
+      if ((phenology.get_thermal_time_cumulative(true)) > phenology_parameter.initiation.senescence) //      If Cumulative_Thermal_Time > CropParameters.ThermalTimeAtTheBeginningOfCanopySenescence Then      If Cumulative_Thermal_Time > CropParameters.ThermalTimeAtTheBeginningOfCanopySenescence Then //110902
+         canopy_senescence_rate = unstressed_global_solar_rad_intercepted_green_canopy
+            - unstressed_global_solar_rad_intercepted_green_canopy_yesterday;                                //        Canopy_Senescence_Rate = CropState.PotentialFractionSolarRadiationIntercepted(DACE) - CropState.PotentialFractionSolarRadiationIntercepted(DACE - 1)
+                                                                                 //      End If
+   }                                                                             //End If
+   //'PAR canopy interception assume that PAR extinction coefficient is 1.4 times greater than solar extinction coefficient
+   PAR_solar_rad_intercepted_green_canopy                                                      // was CropState.PotentialFractionPARIntercepted(DAP)
+      = 1.0 - exp(1.4 * log(1.0 - cover_unstressed_green));                     // RLN log appears to be natural log
+   if (phenology.is_in_vegetative_growth())                                             //141125
+   {
+         // set_CC_at_max_canopy is called every day just so that
+         // we have a values at start of quiesence
+         // because otherwise update_cover is called before quiesence is identified
+      expansion_potential_today
+         = unstressed_global_solar_rad_intercepted_green_canopy                  // CropState.PotentialFractionSolarRadiationIntercepted(DAP)  //110901
+         - unstressed_global_solar_rad_intercepted_green_canopy_yesterday;       // CropState.PotentialFractionSolarRadiationIntercepted(DAP - 1); //110901
+   }
+   else                                                                          //141125
+   {  global_solar_rad_intercepted_green_canopy =  cover_unstressed_green;       //141125
+      unstressed_global_solar_rad_intercepted_green_canopy_yesterday = cover_unstressed_green;   //141125
+      expansion_potential_today = 0;                                             //141125
+   }
+   return true;                                                                  //110906
+}
+//_____________________________________Canopy_cover_reference::update_cover()__/
+Canopy_cover_actual::Canopy_cover_actual
+(const Crop_parameters_struct::Canopy_growth_cover_based &_canopy_parameter
+,const Crop_parameters_struct::Morphology  &_canopy_growth_common_parameter
+,const Crop_parameters_struct::Phenology              &_phenology_parameter
+,const Phenology_interface    &_phenology                                        //110824
+,bool                          _is_fruit_tree                                    //110422
+,const float64                &_water_stress_index_yesterday                     //110902
+, Canopy_cover_reference      &_canopy_cover_reference)
+: Canopy_cover_abstract(_canopy_parameter,_canopy_growth_common_parameter,_phenology_parameter,_phenology,_is_fruit_tree)
+,global_solar_rad_intercepted_total_canopy(0)                                    //110910
+, canopy_cover_reference(_canopy_cover_reference)
+, water_stress_index_yesterday(_water_stress_index_yesterday)
+, first(false)  // RLN I think this is false but the logic seems odd to me.
+, cover_attained_max(0.0)
+, cover_to_lose_total(0.0)
+{}
+//_________________________________________________Canopy_cover_actual::constructor__/
+bool Canopy_cover_reference::start_season()
+{  cover_unstressed_green = 0.0;
+   expansion_potential_yesterday = 0.0;                                          //110901
+   expansion_potential_today = 0.0;                                              //110901
+   return Canopy_cover_abstract::start_season();
+}
+// 2011-08-30________________________________________________________________________
+bool Canopy_cover_actual::start_season()
+{
+   cover_attained_max = 0.0;
+   cover_to_lose_total= 0.0;
+   global_solar_rad_intercepted_green_canopy=0;                                  // was    FractionSolarRadInterceptedGreenCanopy
+   global_solar_rad_intercepted_green_canopy_yesterday=0;
+   global_solar_rad_intercepted_total_canopy = 0;                                //110910
+   first = false;
+   return Canopy_cover_abstract::start_season();
+}
+// 2011-08-30________________________________________________________________________
+bool Canopy_cover_actual::start_day()                                    modification_
+{  global_solar_rad_intercepted_green_canopy_yesterday = global_solar_rad_intercepted_green_canopy;
+   return Canopy_cover_abstract::start_day();
+}
+//_2011-06-01_______________________________________________________start_day__/
+bool Canopy_cover_actual::update_cover(float64 leaf_water_potential_yesterday) modification_   //in VB is ActualCanopyCover
+{  // Determine green canopy cover
+   float64 reduce_canopy_expansion_LWP  = canopy_growth_common_parameter.reduce_canopy_expansion_LWP;
+   float64 actual_canopy_expansion_today = 0;
+   float64 thermal_time_beginning_canopy_senescence
+      = phenology_parameter.initiation.senescence;
+   float64 max_canopy_deg_day = phenology_parameter.culmination.accrescence; //150913 initiation.max_canopy;          //141125
+   float64 current_thermal_time = (phenology.get_thermal_time_cumulative(true)); //110902
+   Normal_crop_event_sequence crop_event = phenology.get_growth_stage_sequence();
+   if ((crop_event >= NGS_MATURITY) && (is_fruit_tree))
+   {  actual_canopy_expansion_today =
+      (is_fruit_tree)                                                            //     If CropParameters.TreeFruitCrop Then
+         ?  (phenology.get_days_since_start_of(NGS_MATURITY) == 1)               //         If CropState.FirstDayOfMaturity Then
+            // 'Reduce canopy 80% at the time of tree fruit maturity
+            ?  - global_solar_rad_intercepted_green_canopy_yesterday * 0.8       //             Today_Actual_Canopy_Expansion = -CropState.FractionSolarRadInterceptedGreenCanopy(DACE - 1) * 0.8
+                //101030 WARNING confirm this with Claudio,  the negative value looks odd and
+                // doesn't match above, why not actual_canopy_expansion_today = solar_rad_intercepted_green_canopy_yesterday * 0.2;
+                                                                                 //             CropState.FirstDayOfMaturity = False
+             :                                                                   //             Else
+               0.0                                                               //             Today_Actual_Canopy_Expansion = 0
+                                                                                 //         End If
+          :                                                                      //         Else
+             canopy_cover_reference.expansion_potential_yesterday;               //            Today_Actual_Canopy_Expansion = expansion_potential_yesterday  //110901
+      /* fruit tree */                                                           //     End If
+      if (is_fruit_tree)                                                         //    If CropParameters.TreeFruitCrop Then   //110513
+         if (phenology.get_days_since_start_of(NGS_MATURITY) == 1)               //         If CropState.FirstDayOfMaturity Then //110513
+            // Reduce canopy 80% at the time of tree fruit maturity              //                'Reduce canopy 80% at the time of tree fruit maturity//110513
+           global_solar_rad_intercepted_green_canopy *= 0.2;                     //                CropState.PotentialFractionSolarRadiationIntercepted(DACE) = CropState.PotentialFractionSolarRadiationIntercepted(DACE - 1) * 0.2//110513
+         /*else no change in interception*/                                      //         Else//110513
+   } // mature
+   else /* crop not mature */                                                    //     Else 'crop not mature
+   {
+      float64 today_LWP = leaf_water_potential_yesterday;                        // CropState.LeafWaterPotential(DAP - 1);
+      // RLN today_LWP looks odd the name implies today but the value is from yesterday.
+      float64 stop_canopy_expansion_LWP    = canopy_growth_common_parameter.stop_canopy_expansion_LWP;     // was MinimumLeafWaterPotentialForCanopyExpansion;
+      if (current_thermal_time > max_canopy_deg_day)                             //     If Current_Thermal_Time > Thermal_Time_Beginning_Canopy_Senescence Then ' negative canopy expansion - senescence
+      {
+         // Claudio say's there is no more expansion after senescence            //141125
+         actual_canopy_expansion_today = 0.0;                                    //141125
+         float64 cover_unstressed_green = canopy_cover_reference.get_global_solar_rad_intercepted_green_canopy();       //141125
+         global_solar_rad_intercepted_green_canopy = cover_unstressed_green;     //141125
+
+         global_solar_rad_intercepted_green_canopy_yesterday = cover_unstressed_green; //141125
+
+         global_solar_rad_intercepted_total_canopy = cover_unstressed_green;     //141125
+         actual_canopy_expansion_today = 0;                                      //141125
+         //141125 actual_canopy_expansion_today = canopy_cover_reference.expansion_potential_today;       //         Today_Actual_Canopy_Expansion = Today_Potential_Canopy_Expansion
+      } else                                                                     //         Else
+      {  actual_canopy_expansion_today =
+            (canopy_cover_reference.expansion_potential_today > 0)               //         If Today_Potential_Canopy_Expansion > 0 Then
+            ?  (today_LWP >= reduce_canopy_expansion_LWP )                       //             If Today_Leaf_Water_Potential >= Leaf_Water_Potential_That_Reduces_Canopy_Expansion Then
+                ? canopy_cover_reference.expansion_potential_today               //                 Today_Actual_Canopy_Expansion = Today_Potential_Canopy_Expansion
+                :                                                                //                 Else
+                    (today_LWP > stop_canopy_expansion_LWP)                      //                 If Today_Leaf_Water_Potential > Leaf_Water_Potential_That_Stops_Canopy_Expansion Then
+                     ? canopy_cover_reference.expansion_potential_today
+                           * (today_LWP - stop_canopy_expansion_LWP)             //                     Today_Actual_Canopy_Expansion = Today_Potential_Canopy_Expansion * (Today_Leaf_Water_Potential - Leaf_Water_Potential_That_Stops_Canopy_Expansion) _
+                           / (reduce_canopy_expansion_LWP - stop_canopy_expansion_LWP) //                                                 / (Leaf_Water_Potential_That_Reduces_Canopy_Expansion - Leaf_Water_Potential_That_Stops_Canopy_Expansion)
+                     :                                                           //                     Else
+                        0.0                                                      //                     Today_Actual_Canopy_Expansion = 0
+                                                                                 //                 End If
+                                                                                 //             End If
+            : canopy_cover_reference.expansion_potential_today                   //             Else
+               * (1.0 +  (water_stress_index_yesterday));                        //             Today_Actual_Canopy_Expansion = Today_Potential_Canopy_Expansion * (1 + CropState.WaterStressIndex(DACE - 1)) //110902
+
+         canopy_cover_reference.canopy_cover_curve.set_CC_at_max_canopy(global_solar_rad_intercepted_green_canopy_yesterday);
+
+      }                                                                          //         End If
+   } /* endif mature */                                                          // End If
+   float64 actual_canopy_cover_green        //same as fraction global solar radiation interception (green))
+      = global_solar_rad_intercepted_green_canopy_yesterday                      // CropState.FractionSolarRadInterceptedGreenCanopy(DAP - 1)
+      + actual_canopy_expansion_today;
+   actual_canopy_cover_green = CORN::must_be_between<float64>
+      (actual_canopy_cover_green,0.001,0.9999);
+   global_solar_rad_intercepted_green_canopy  = actual_canopy_cover_green;       // CropState.FractionSolarRadInterceptedGreenCanopy(DAP) = actual_canopy_cover_green;
+   // PAR canopy interception assume that PAR extinction coefficient
+   // is 1.4 times greater than solar extinction coefficient.
+   PAR_solar_rad_intercepted_green_canopy                                        // CropState.FractionPARIntercepted(DAP)
+      = 1.0 - exp(1.4 * log(1.0 - actual_canopy_cover_green));
+   //'Determine total canopy cover
+   if (current_thermal_time > thermal_time_beginning_canopy_senescence)
+   {  if (!first)
+      {  float64 actual_total_canopy_cover_at_maturity
+            = actual_canopy_cover_green
+            * canopy_parameter.mature_total_cover                                // TotalCanopyCoverAtMaturity
+            / canopy_parameter.maximum_cover_CO2_adj;                            //131206
+            // scales down the value at maturity
+         cover_attained_max = actual_canopy_cover_green;
+         cover_to_lose_total
+            = cover_attained_max - actual_total_canopy_cover_at_maturity;
+         first = true;
+         global_solar_rad_intercepted_total_canopy = actual_canopy_cover_green;  // CropState.FractionSolarRadInterceptedTotalCanopy(DAP)
+      } else
+      {
+         float32 X =  (cover_to_lose_total
+               * (current_thermal_time - thermal_time_beginning_canopy_senescence)
+               / (  parameter_begin_maturity_deg_day
+                  - phenology_parameter.initiation.senescence));
+         global_solar_rad_intercepted_total_canopy
+            = cover_attained_max
+            - X;
+      }
+   } else // before senescence
+      global_solar_rad_intercepted_total_canopy = actual_canopy_cover_green;     // CropState.FractionSolarRadInterceptedTotalCanopy(DAP)
+   global_solar_rad_intercepted_total_canopy =                                   //140225
+      CORN::must_be_greater_or_equal_to<float64>
+      (global_solar_rad_intercepted_total_canopy,0.0);
+   return true;
+}
+//________________________________________________Canopy_cover_actual::update_cover__/
+bool Canopy_cover_abstract::start_dormancy()                       modification_
+{  // In VB Version this is done in Crop Development class when entering dormancy
+   global_solar_rad_intercepted_green_canopy = 0;                                           // CropState.PotentialFractionSolarRadiationIntercepted(DACE) = 0 '110325
+   global_solar_rad_intercepted_green_canopy_yesterday = 0;                      //110512
+   PAR_solar_rad_intercepted_green_canopy = 0;                                   //110512
+   return true;
+}
+//_2011-04-05__________________________________________________start_dormancy__/
+bool Canopy_cover_reference::start_dormancy()                      modification_
+{  expansion_potential_yesterday = 0.0 ;                                         //110512
+   return Canopy_cover_abstract::start_dormancy();
+}
+//_2011-09-01_________________________________________________start_dormancy__/
+bool Canopy_cover_actual::start_dormancy()                         modification_
+{  global_solar_rad_intercepted_green_canopy = 0.0;                                     //CropState.FractionSolarRadInterceptedGreenCanopy(DACE) = 0 'XXX ROGER LATEST March 25 2011 //110512
+   first = true;
+   cover_attained_max = 0.0 ;                                                    //110512
+   cover_to_lose_total = 0.0 ;                                                   //110512
+   return Canopy_cover_abstract::start_dormancy();
+}
+//_2001-04-05__________________________________________________start_dormancy__/
+bool Canopy_cover_abstract::respond_to_clipping()                  modification_
+{  global_solar_rad_intercepted_green_canopy  = canopy_parameter.initial_cover;  //110906
+   return true;
+}
+//_2001-04-21_____________________________________________respond_to_clipping__/
+bool Canopy_cover_actual::respond_to_clipping()                    modification_
+{  global_solar_rad_intercepted_green_canopy  = canopy_parameter.initial_cover;         //    CropState.FractionSolarRadInterceptedGreenCanopy(DACE) = CropParameters.InitialCanopyCover
+   global_solar_rad_intercepted_green_canopy_yesterday  = canopy_parameter.initial_cover;  // I think
+
+   //130508 NYI  this will need to go back to portions that
+
+   return Canopy_cover_abstract::respond_to_clipping();
+}
+//_2001-04-21_____________________________________________respond_to_clipping__/
+float64 Canopy_cover_actual::calc_leaf_area_index()                        const
+{  return calc_XXXX_area_index(get_global_solar_rad_intercepted_total_canopy());
+}
+//_2011-05-26____________________________________________calc_leaf_area_index__/
+float64 Canopy_cover_actual::calc_green_area_index()                       const
+{  return  calc_XXXX_area_index( global_solar_rad_intercepted_green_canopy);
+}
+//_2011-05-26____________________________________________calc_leaf_area_index__/
+float64 Canopy_cover_actual::calc_peak_leaf_area_index()                   const
+{  return calc_XXXX_area_index(cover_attained_max);
+}
+//_2011-05-26____________________________________________calc_leaf_area_index__/
+float64 Canopy_cover_actual::calc_XXXX_area_index(float64 fract_intercept) const
+{  float64 xAI = - CORN_ln(1.0 - fract_intercept)
+                  / (float64)canopy_growth_common_parameter.kc;
+   return xAI;
+}
+//_2011-08-11_____________________________________________calc_XXXX_area_index_/
+void Canopy_cover_abstract::dump_headers(std::ostream &strm,const char *prefix)  const
+{  strm
+      << "\t" << prefix << "_" << "global_solar_rad_intercepted_green_canopy"
+      << "\t" << prefix << "_" << "PAR_solar_rad_intercepted_green_canopy";
+};
+//_2011-09-06__________________________________________________________________/
+void Canopy_cover_reference::dump_headers(std::ostream &strm)              const
+{  Canopy_cover_abstract::dump_headers(strm,"ref");
+   strm << "\texpansion_potential_today";
+}
+//_2011-09-06__________________________________________________________________/
+void Canopy_cover_actual::dump_headers(std::ostream &strm)                 const
+{  Canopy_cover_abstract::dump_headers(strm,"act");
+   strm << "\tglobal_solar_rad_intercepted_total_canopy"
+        << "\tcover_attained_max"
+        << "\tcover_to_lose_total";
+}
+//_2011-09-06__________________________________________________________________/
+void Canopy_cover_abstract::dump(std::ostream &strm)                       const
+{  strm
+   << "\t" <<global_solar_rad_intercepted_green_canopy
+   << "\t" <<PAR_solar_rad_intercepted_green_canopy;
+}
+//_2011-09-06__________________________________________________________________/
+void Canopy_cover_reference::dump(std::ostream &strm)                      const
+{  Canopy_cover_abstract::dump(strm);
+   strm << "\t" <<expansion_potential_today;
+}
+//_2011-09-06__________________________________________________________________/
+void Canopy_cover_actual::dump(std::ostream &strm)                         const
+{  Canopy_cover_abstract::dump(strm);
+   strm << "\t" <<global_solar_rad_intercepted_total_canopy
+      << "\t" <<cover_attained_max
+      << "\t" <<cover_to_lose_total;
+}
+//_2011-09-06__________________________________________________________________/
+} // namespace CropSyst
+

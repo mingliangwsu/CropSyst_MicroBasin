@@ -1,0 +1,39 @@
+#ifndef crop_typeHPP
+#define crop_typeHPP
+#ifndef crop_typesH
+#   include "crop/crop_types.h"
+#endif
+#ifndef labeled_enumH
+#   include "corn/labeled_enum.h"
+#endif
+
+static const uint8 include_vital = 1;
+static const uint8 include_effete = 2;
+static const uint8 include_canopy_dead = 4;
+
+DECLARE_LABELED_ENUM(Stem_type_labeled                ,Stem_type                 ,stem_type_label_table);
+DECLARE_LABELED_ENUM(Crop_model_labeled               ,Crop_model                ,crop_model_label_table);
+DECLARE_LABELED_ENUM(Harvested_part_labeled           ,Harvested_part            ,harvested_part_label_table)
+DECLARE_LABELED_ENUM(Life_cycle_labeled               ,Life_cycle                ,life_cycle_label_table);
+DECLARE_LABELED_ENUM(Photosynthetic_pathway_labeled   ,Photosynthetic_pathway    ,photosynthetic_pathway_label_table)
+DECLARE_LABELED_ENUM(Emergence_model_labeled          ,Emergence_model           ,emergence_model_label_table);
+DECLARE_LABELED_ENUM(Canopy_growth_labeled            ,Canopy_growth             ,canopy_growth_label_table);
+DECLARE_LABELED_ENUM(Nitrogen_leaf_stress_mode_labeled,Nitrogen_leaf_stress_mode ,nitrogen_leaf_stress_model_label_table);
+DECLARE_LABELED_ENUM(Season_dormancy_mode_labeled     ,Season_dormancy_mode      ,season_dormancy_mode_label_table);
+DECLARE_LABELED_ENUM(Harvest_condition_mode_labeled   ,Harvest_condition_mode    ,harvest_condition_mode_label_table);
+DECLARE_LABELED_ENUM(TUE_Equation_labeled             ,TUE_Equation              ,TUE_equation_label_table);
+DECLARE_LABELED_ENUM(RUE_Bais_labeled                 ,RUE_Basis                 ,RUE_basis_label_table);
+DECLARE_LABELED_ENUM(Resolution_labeled               ,Thermal_time_resolution   ,Thermal_time_resolution_label_table_deprecated)  //021124
+DECLARE_LABELED_ENUM(Thermal_response_labeled         ,Thermal_response          ,Thermal_response_label_table)  //1510021124
+DECLARE_LABELED_ENUM(Photoperiodism_labeled,Photoperiodism ,photoperiodism_label_table)   //151122_100512
+
+//16-05-31 At the moment V5 is still using V4 parameter files
+//#if ((CROPSYST_VERSION >= 1) && (CROPSYST_VERSION < 5))
+DECLARE_LABELED_ENUM(Senesced_biomass_fate_labeled    ,Senesced_biomass_fate_obsolete     ,senesced_biomass_fate_label_table);
+DECLARE_LABELED_ENUM(Potential_N_uptake_model_labeled,Potential_N_uptake_model,potential_N_uptake_model_label_table);
+DECLARE_LABELED_ENUM(Transpiration_model_labeled,Transpiration_model,transpiration_model_label_table);
+//#else
+//#endif
+
+DECLARE_LABELED_ENUM(Abscission_labeled,Abscission,abscission_label_table);
+#endif

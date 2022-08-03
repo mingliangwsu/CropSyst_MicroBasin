@@ -1,0 +1,326 @@
+#include "corn/string/strconv.h"
+#include "stdio.h"
+#include <string.h>
+#ifdef __cplusplus
+namespace CORN {
+#endif
+//______________________________________________________________________________
+nat8 identify_radix_cstr(const char *str,nat8 radix)
+{   return
+    ((radix == 0) && (str[0] == '0'))
+    ? (  (str[1] == 'o') || (str[1] == 'O') ? 8
+       : (str[1] == 'x') || (str[1] == 'X') ? 16
+       : (str[1] == 'b') || (str[1] == 'B') ? 2
+       : 10)
+    : radix;
+}
+//____________________________________________________identify_radix_cstr_170225
+nat8 identify_radix_wstr(const wchar_t *str,nat8 radix)
+{   return
+    ((radix == 0) && (str[0] == L'0'))
+    ? (  (str[1] == L'o') || (str[1] == L'O')? 8
+       : (str[1] == L'x') || (str[1] == L'X')? 16
+       : (str[1] == L'b') || (str[1] == L'B')? 2
+       : 10)
+    : radix;
+}
+//____________________________________________________identify_radix_wstr_170225
+nat32 cstr_to_nat16
+(const char *str,nat8 radix)
+{  return (nat16)strtoul(str, 0 ,(int)identify_radix_cstr(str,radix)); }
+//__________________________________________________cstr_to_nat16__170225_161010
+nat32 cstr_to_nat32
+(const char *str,nat8 radix)
+{  return  strtoul(str, 0 ,(int)identify_radix_cstr(str,radix)); }
+//__________________________________________________________170225_120314_000926
+int32 cstr_to_int32
+(const char *str,nat8 radix)
+{  return  strtol(str, 0 ,(int)identify_radix_cstr(str,radix)); }
+//__________________________________________________cstr_to_int32__170225_150103
+int16 cstr_to_int16
+(const char *str,nat8 radix)
+{  return (int16)cstr_to_int32(str,radix);
+}
+//________________________________________________________________________171011
+int16 wstr_to_int16
+(const wchar_t *str,nat8 radix)
+{  return  (int16)wcstol(str, 0 ,(int)identify_radix_wstr(str,radix)); }
+//________________________________________________________________________180215
+int32 wstr_to_int32
+(const wchar_t *str,nat8 radix)
+{  return  wcstol(str, 0 ,(int)identify_radix_wstr(str,radix)); }
+//_________________________________________________________________170225_150111
+nat32 wstr_to_nat32
+(const wchar_t *str,nat8 radix)
+{  return  wcstoul(str, 0 ,(int)identify_radix_wstr(str,radix)); }
+//_2017-02-25__201602-14________________________________________________________
+char *float32_to_cstr
+(float32 value, int decimals)
+{  static char valuestr[30];
+   sprintf(valuestr,"%.*f",decimals,value);
+   return(valuestr);
+}
+//______________________________________________________________________________
+char *float64_to_cstr
+(float64 value, int decimals)
+{  static char valuestr[30];
+   float64 value64 = value; // Outputing 32bit is sufficient,
+   sprintf(valuestr,"%.*lf",decimals,value64);
+   return(valuestr);
+}
+//______________________________________________________________________________
+extern char *float32_to_cstr_formated
+(float32 value, char *result_str,uint8 width, nat8 precision_decimals
+,char decimal_mark,bool allow_scientific_notation)
+{  if (allow_scientific_notation)
+      sprintf(result_str,"%*f",(int)width,value);
+   else sprintf(result_str,"%*.*f",(int)width,(int)precision_decimals,value);
+   nat8 actual_width = strlen(result_str);                                       //150405
+   for (int i = 0; i < actual_width; i++)                                        //150405
+      if (result_str[i] == '.') result_str[i] = decimal_mark;
+   return(result_str);
+}
+//________________________________________________________________________070524
+extern char *float64_to_cstr_formated
+(float64 value, char *result_str,uint8 width, nat8 precision_decimals
+,char decimal_mark,bool allow_scientific_notation)
+{
+   float64 value64 = value; // Outputing 32bit is sufficient,
+   if (allow_scientific_notation)
+        sprintf(result_str,"%*lf",(int)width,value64);
+   else sprintf(result_str,"%*.*lf",(int)width,(int)precision_decimals,value64);
+   for (int i = 0; i < width; i++)
+      if (result_str[i] == '.') result_str[i] = decimal_mark;
+   return(result_str);
+}
+//_______________________________________________float64_to_cstr_formated_070524
+#ifndef __BCPLUSPLUS__
+#include <ctype.h>
+#endif
+char *int8_to_cstr(int8 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  return int32_to_cstr((int32)value,str,radix,str_width_optional,leading_char);
+}
+//________________________________________________________________________980402
+char *nat8_to_cstr(nat8 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  return nat32_to_cstr((int32)value,str,radix,str_width_optional,leading_char);
+}
+//_2013-01-29___________________________________________________________________
+char *int16_to_cstr(int16 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  return int32_to_cstr((int32)value,str,radix,str_width_optional,leading_char);
+}
+//_1998-04-02___________________________________________________________________
+char *nat16_to_cstr(nat16 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  return nat32_to_cstr((nat32)value,str,radix,str_width_optional,leading_char);
+}
+//________________________________________________________________________120314
+char *int32_to_cstr
+(int32 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{
+   char digit_stack[20];
+   int digits=0;
+   bool negative = value < 0;
+   while (value)
+   {  int digit = value % radix;
+      digit_stack[digits] = (digit < 10) ? (digit +48) : digit - 10 + 65;
+      value /= 10;
+      digits += 1;
+   }
+   if (!digits) { digit_stack[0] = '0';  digits += 1; }                          //010928
+   int j = 0;
+   if (negative)
+      str[j++] = '-';
+   for (int i = 0; i< digits ; i++)
+      str[j++] = digit_stack[digits-i - 1];
+   str[j] = 0;
+   if (str_width_optional)
+   {
+      char lead_str[1024]; // 1024 is an arbitrary length
+      int num_leading_zeros = str_width_optional - strlen(str);
+      if (num_leading_zeros < 0) num_leading_zeros = 0;
+      for (int i = 0; i < num_leading_zeros; i++)
+         lead_str[i] = leading_char;
+      lead_str[num_leading_zeros] = 0;
+      strcat(lead_str,str);
+      strcpy(str,lead_str);
+   }
+   return str;
+}
+//__________________________________________________int32_to_cstr__140210_980402
+char *nat32_to_cstr
+(uint32 value,char *str,int8 radix,nat16 str_width_optional,char leading_char)
+{  char digit_stack[20];
+   int digits=0;
+   while (value)
+   {  int digit = value % radix;
+      digit_stack[digits] = (digit < 10) ? (digit +48) : digit - 10 + 65;
+      value /= radix; //140529 10;
+      digits += 1;
+   }
+   if (!digits) { digit_stack[0] = '0';  digits += 1; }                          //010928
+   int j = 0;
+   for (int i = 0; i< digits ; i++)
+      str[j++] = digit_stack[digits-i - 1];
+   str[j] = 0;
+   if (str_width_optional)
+   {
+      char lead_str[1024]; // 1024 is an arbitrary length
+      int num_leading_zeros = str_width_optional - strlen(str);
+      if (num_leading_zeros < 0) num_leading_zeros = 0;
+      for (int i = 0; i < num_leading_zeros; i++)
+         lead_str[i] = leading_char;
+      lead_str[num_leading_zeros] = 0;
+      strcat(lead_str,str);
+      strcpy(str,lead_str);
+   }
+   return str;
+}
+//_________________________________________________________nat32_to_cstr__010817
+wchar_t *nat32_to_wstr
+(nat32 value,wchar_t *str,int8 radix,nat16 str_width_optional,char leading_char)
+{
+   char as_cstr[1024];
+   nat32_to_cstr(value,as_cstr, radix, str_width_optional,leading_char);
+   ASCIIZ_to_UnicodeZ(as_cstr,str);
+
+   if (str_width_optional)
+   {
+      wchar_t lead_str[1024]; // 1024 is an arbitrary length
+      int num_leading_zeros = str_width_optional - strlen(as_cstr);
+      if (num_leading_zeros < 0) num_leading_zeros = 0;
+      for (int i = 0; i < num_leading_zeros; i++)
+         lead_str[i] = leading_char;
+      lead_str[num_leading_zeros] = 0;
+      wcscat(lead_str,str);
+      wcscpy(str,lead_str);
+   }
+   return str;
+}
+//_________________________________________________________nat32_to_wstr__120209
+#ifdef unix
+// Note, unix might have _strupr as in MSC
+char *strupr(char *s)
+{  for (size_t i = 0; i < (size_t)strlen(s); i++)
+      s[i] = toupper(s[i]);
+   return s;
+}
+//________________________________________________________________strupr__980404
+#endif
+bool isvowel(char ch)
+{  char *result = strchr(
+#ifdef unix
+// UNIX strchr takes 'char *' instead of 'const char *'
+       (char *)
+#endif
+       (char *)
+       "aeiouAEIOU"
+       ,ch)  ;
+   return result != 0;
+}
+//______________________________________________________________________________
+#include <ctype.h>
+//______________________________________________________________________________
+void shrink_to(uint16  max_size
+, const char *long_name
+, char *short_name)
+{  char working[100];
+   short_name[0] = 0;                                                            //030120
+   int j = 0;
+   // First try to remove non alpha characters
+   for (uint16 i = 0; i <= (uint16)                                              //010307
+      strlen(long_name)                                                          //030120
+     ; i++)
+   {  char ch = long_name[i];
+      if (isalpha(ch) || isdigit(ch))
+         working[j++] = ch;
+   }
+   working[j] = 0;
+   strcpy(short_name,working);                                                   //030120
+   if ((uint16)strlen(working) > max_size)
+   {  j = 0;
+      // Now try removing vowels
+      for (uint16 i =0; i < (uint16)strlen(working); i++)
+      {  char ch = working[i];
+         if (!isvowel(ch))
+           working[j++] = ch;
+      }
+      working[j] = 0;
+   }
+   uint16 working_len = (uint16)strlen(working);                                 //980926
+   if (working_len > max_size)                                                   //980926
+   {
+      int to_remove = working_len - max_size;
+      int interval = working_len / to_remove;
+      j = 0;
+      for (int i = 0; i < working_len; i++)
+      {  working[i] = working[j];
+         if ((i % interval) == 0)   j += 2;
+         else                       j += 1;
+      }
+   }
+   // Now try truncating
+   working[max_size] = 0;
+   for (int i = 0; i <= (int)strlen(working); i++)                               //030120
+      short_name[i] = (char)toupper(working[i]);
+}
+//_____________________________________________________________shrink_to__010307
+#define is_number_Xstr(number_str)                                             \
+{  bool result = true;                                                         \
+   bool digit_reached = false;					               \
+   for (int i_=0; (int)number_str[i_]; i_++)                                   \
+   {  char ch_i = number_str[i_];                                              \
+      if (isdigit(ch_i))                                                       \
+         digit_reached = true;                                                 \
+      if (digit_reached && isspace(ch_i))                                      \
+        return true;                                                           \
+      if (isalpha(ch_i) ) result = false;                                      \
+   }                                                                           \
+   return result;                                                              \
+}
+//_________________________________________________is_number_Xstr__160215_050517
+bool is_number_cstr(const char *number_str_)
+{
+    is_number_Xstr(number_str_)
+}
+//_______________________________________________________________is_number_cstr_
+bool is_number_wstr(const wchar_t *number_str_)
+{
+    is_number_Xstr(number_str_)
+}
+//________________________________________________________is_number_wstr__160215
+#if (__BCPLUSPLUS__ <= 0x340)
+// Borland C++ 5.0 does not have iswspace  (Might only be available in builder
+bool iswspace(char ch)
+{  bool it_is = false;
+   switch (ch)
+   {  case ' ' : it_is = true; break;
+      case '\t': it_is = true; break;
+      case '\n': it_is = true; break;
+      case 13  : it_is = true; break;
+      case 12  : it_is = true; break;
+   }
+   return it_is;
+}
+//______________________________________________________________iswspace__060719
+#endif
+wchar_t *ASCIIZ_to_UnicodeZ(const_ASCIIZ astr, UnicodeZ wstr)
+{  for (int i = 0; astr[i]; i++)
+      wstr[i] = astr[i];
+   return wstr;
+}
+//____________________________________________________ASCIIZ_to_UnicodeZ__140211
+float32 cstr_to_float32(const char *str)
+{  return (float32)atof(str);
+}
+//_______________________________________________________cstr_to_float32__160926
+float64 cstr_to_float64(const char *str)
+{  return atof(str);
+}
+//_______________________________________________________cstr_to_float64__150103
+float64 wstr_to_float64(const wchar_t *str)
+{  return wcstod(str,0);
+}
+//_______________________________________________________wstr_to_float64__150111
+
+#ifdef __cplusplus
+} //namespace CORN
+#endif

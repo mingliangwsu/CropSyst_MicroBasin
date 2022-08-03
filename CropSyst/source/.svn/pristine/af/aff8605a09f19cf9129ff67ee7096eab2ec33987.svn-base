@@ -1,0 +1,53 @@
+#ifndef runoffH
+#define runoffH
+
+// This options.h needs to be for the current program being compiled
+// is should not necessarily be /cropsyst/cpp/options.h
+#include "options.h"
+#include "common/soil/SCS/SCS.h"
+#include "USDA/NRCS/soil/survey/domains.h"
+#include "corn/dynamic_array/dynamic_array_T.h"
+#define Dynamic_float_array Dynamic_array<float32>
+#include "cs_UED_harvest.h"
+#include "model_options.h"
+#include "cs_vars.h"
+#include "soil/soil_base.h"
+#include "crop/growth_stages.hpp"
+
+class Water_balance_accumulators_class;
+#ifdef XLS_OUTPUT
+class CropSyst_DLY_report_class;
+#endif
+
+class Soil_cropsyst_specific;                                                    //060504
+namespace CropSyst {
+//______________________________________________________________________________
+interface_ Soil_runoff
+{
+   inline virtual bool using_numerical_runoff_model()               affirmation_ { return true;}
+          virtual void add_runoff_from_infiltration                              //990214
+             (float64 additional_runoff)                           modification_ = 0;
+};
+//_2014-12-01_____________________________________________________Soil_runoff__/
+class Soil_runoff_common
+: public implements_ Soil_runoff
+{
+ public: // <- temporarily public so we can access these variables for output
+   float64        estimated_runoff;
+ public:
+   Soil_runoff_common();
+   inline virtual ~Soil_runoff_common() {}                                       //170217
+   inline virtual float64 get_estimated_runoff()                           const
+      { return estimated_runoff; }
+   inline virtual void add_runoff_from_infiltration(float64 additional_runoff)   //990214
+      { estimated_runoff += additional_runoff; }
+      ///< Each iteration in the infiltration model may produce a little bit of
+      /// runoff this is accumulated in estimated runoff (stored by this object).
+   bool setup_structure(CORN::Data_record &data_rec,bool for_write               //030801
+      ,const CS::Desired_variables &desired_vars);                               //170225
+};
+//_2014-12-01_____________________________________________________Soil_runoff__/
+} // namespace CropSyst
+#endif
+//soilroff.h
+

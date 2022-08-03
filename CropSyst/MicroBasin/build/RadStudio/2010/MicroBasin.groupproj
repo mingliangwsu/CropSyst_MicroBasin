@@ -1,0 +1,132 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{3C499447-FD48-4EB8-8E90-C024E6DEE15F}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="..\..\..\..\..\corn\build\RS\2010\corn_complete_V5_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\..\common\simulation\RS\2010\common_sim_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\..\common\weather\build\RadStudio\2010\weather_provider_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\source\build\RS\2010\CropSyst_elements_V5_MicroBasin.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="MicroBasin_all_CropSyst_proper.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="MicroBasin_all_crop_proper.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="MicroBasin_CS5.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="MicroBasin_all_MSVB_FD.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="MicroBasin_all.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="corn_complete_V5_static">
+			<MSBuild Projects="..\..\..\..\..\corn\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_V5_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\corn\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_V5_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\corn\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="common_sim_static">
+			<MSBuild Projects="..\..\..\..\..\common\simulation\RS\2010\common_sim_static.cbproj"/>
+		</Target>
+		<Target Name="common_sim_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\common\simulation\RS\2010\common_sim_static.cbproj"/>
+		</Target>
+		<Target Name="common_sim_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\common\simulation\RS\2010\common_sim_static.cbproj"/>
+		</Target>
+		<Target Name="weather_provider_static">
+			<MSBuild Projects="..\..\..\..\..\common\weather\build\RadStudio\2010\weather_provider_static.cbproj"/>
+		</Target>
+		<Target Name="weather_provider_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\common\weather\build\RadStudio\2010\weather_provider_static.cbproj"/>
+		</Target>
+		<Target Name="weather_provider_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\common\weather\build\RadStudio\2010\weather_provider_static.cbproj"/>
+		</Target>
+		<Target Name="CropSyst_elements_V5_MicroBasin">
+			<MSBuild Projects="..\..\..\..\source\build\RS\2010\CropSyst_elements_V5_MicroBasin.cbproj"/>
+		</Target>
+		<Target Name="CropSyst_elements_V5_MicroBasin:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\source\build\RS\2010\CropSyst_elements_V5_MicroBasin.cbproj"/>
+		</Target>
+		<Target Name="CropSyst_elements_V5_MicroBasin:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\source\build\RS\2010\CropSyst_elements_V5_MicroBasin.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_CropSyst_proper">
+			<MSBuild Projects="MicroBasin_all_CropSyst_proper.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_CropSyst_proper:Clean">
+			<MSBuild Targets="Clean" Projects="MicroBasin_all_CropSyst_proper.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_CropSyst_proper:Make">
+			<MSBuild Targets="Make" Projects="MicroBasin_all_CropSyst_proper.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_crop_proper">
+			<MSBuild Projects="MicroBasin_all_crop_proper.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_crop_proper:Clean">
+			<MSBuild Targets="Clean" Projects="MicroBasin_all_crop_proper.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_crop_proper:Make">
+			<MSBuild Targets="Make" Projects="MicroBasin_all_crop_proper.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_CS5">
+			<MSBuild Projects="MicroBasin_CS5.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_CS5:Clean">
+			<MSBuild Targets="Clean" Projects="MicroBasin_CS5.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_CS5:Make">
+			<MSBuild Targets="Make" Projects="MicroBasin_CS5.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_MSVB_FD">
+			<MSBuild Projects="MicroBasin_all_MSVB_FD.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_MSVB_FD:Clean">
+			<MSBuild Targets="Clean" Projects="MicroBasin_all_MSVB_FD.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all_MSVB_FD:Make">
+			<MSBuild Targets="Make" Projects="MicroBasin_all_MSVB_FD.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all">
+			<MSBuild Projects="MicroBasin_all.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all:Clean">
+			<MSBuild Targets="Clean" Projects="MicroBasin_all.cbproj"/>
+		</Target>
+		<Target Name="MicroBasin_all:Make">
+			<MSBuild Targets="Make" Projects="MicroBasin_all.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="corn_complete_V5_static;common_sim_static;weather_provider_static;CropSyst_elements_V5_MicroBasin;MicroBasin_all_CropSyst_proper;MicroBasin_all_crop_proper;MicroBasin_CS5;MicroBasin_all_MSVB_FD;MicroBasin_all"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="corn_complete_V5_static:Clean;common_sim_static:Clean;weather_provider_static:Clean;CropSyst_elements_V5_MicroBasin:Clean;MicroBasin_all_CropSyst_proper:Clean;MicroBasin_all_crop_proper:Clean;MicroBasin_CS5:Clean;MicroBasin_all_MSVB_FD:Clean;MicroBasin_all:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="corn_complete_V5_static:Make;common_sim_static:Make;weather_provider_static:Make;CropSyst_elements_V5_MicroBasin:Make;MicroBasin_all_CropSyst_proper:Make;MicroBasin_all_crop_proper:Make;MicroBasin_CS5:Make;MicroBasin_all_MSVB_FD:Make;MicroBasin_all:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

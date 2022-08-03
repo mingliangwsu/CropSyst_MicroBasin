@@ -1,0 +1,43 @@
+#ifndef da_uint8H
+#define da_uint8H
+
+#ifndef da_commonH
+#  include <corn/dynamic_array/da_common.h>
+#endif
+
+/*_______*/ namespace CORN {
+
+/*000517*/  class Dynamic_uint8_array
+/*______*/  : public Dynamic_array_common
+/*______*/  {
+/*______*/  private:
+/*______*/     mutable uint8 *array;
+/*000804*/     uint8 default_value;
+/*______*/  public: // structors
+/*______*/     Dynamic_uint8_array
+/*______*/     (uint32 initial_size          // This is the initial allocation space
+/*______*/     ,uint32 i_resize_overage /*= 10*/
+/*______*/     ,uint8 i_default_value
+/*______*/     );   // This is the overage to give on reallocation
+/*______*/     Dynamic_uint8_array(const Dynamic_uint8_array &to_copy);
+/*______*/     Dynamic_uint8_array(uint8 i_default_value/* = 0*/);
+/*070430*/     Dynamic_uint8_array();
+/*______*/     ~Dynamic_uint8_array();
+/*081212_*/    inline const uint8 *get_array()                             const { return array; };
+/*081212_*/    inline       uint8 *get_array()                                   { return array; };
+/*_______*/		   // get_array() function should only be used if you know what you are doing!!!
+/*______*/  public:
+/* 980318*/    inline virtual bool   good()                                const { return array != 0; };
+/*______*/     virtual void reallocate_array(uint32 new_bloated_size)      const;
+/*______*/     virtual uint8 set(uint32 index,uint8 value);
+/*______*/     void set(const Dynamic_uint8_array &to_copy,uint32 new_size  = 0);
+//             Sets all entries
+/*990409*/     uint8 get_allow_resize(uint32 index );
+/*990409*/     uint8 get_no_resize(uint32 index )                          const; // No resizing
+/*980721_*/    virtual void remove(uint32 at_index) ;
+/*001103*/		inline void set_default_value(uint8 i_default_value) { default_value = i_default_value; };
+/*______*/  };
+
+/*_______*/ }; // namespace CORN
+#endif
+

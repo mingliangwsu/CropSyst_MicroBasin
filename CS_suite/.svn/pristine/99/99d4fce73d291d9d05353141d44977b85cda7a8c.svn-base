@@ -1,0 +1,73 @@
+
+[_] 2014-01-20
+
+When running scenarios if the override report format is not specified,
+it should run with the format selected in the scenario, instead no report format
+is selected.
+
+
+[_] 2012-05-25
+
+In Database context:
+
+Add a button to add/create all possible database parameter file directories.
+have a list checkboxes to limit which directories to actually create.
+This checkbox list can also have the default directory names in various languages
+so add a dropdown box to select a language.
+On selecting the language the check box list directory name will switch to
+the respective language.
+
+By default show the current user (or system) language
+http://msdn.microsoft.com/en-us/library/dd318122(VS.85).aspx
+http://support.microsoft.com/kb/193080
+
+Linux:
+char *s;
+s = getenv("LANG");
+if (s == NULL) 
+    printf("LANG is not set");
+else
+    printf(s);
+
+
+----------------------------------------------------------------------------
+
+When pressing the GIS button.
+if there is no GIS file and if there is an old .CSP project
+give the option of converting to the new style else open the .CSP file.
+
+----------------------------------------------------------------------------
+
+Make sure the following functions are implemented.
+
+
+[X] Create format
+[X] Create management
+[X] Create biomatter
+[X] Create soil        
+[_] 	[Soil import]  
+[_] 	[SOILPAR]
+[X] Create rotation
+[X] Create crop  
+[_] 	[Generic]
+[_] 	[Fruit
+[_] 	[CropGro]
+[_] 	[Calibrate crop]
+
+[_] Help
+[_] FAQ
+[_] Manual
+[_] Tutorial
+[X] Webpage
+[_] Close
+
+
+[_]Copy scenario comparison function from project editor
+
+[_]When running multiple scenarios, CS_explorer is locked, in this case minimize the CS_explorer window.
+[_]See why it takes CS_explorer so long to refresh after running the scenario.
+
+
+[X]Scenarios page On create scenario set the scenario as the active directory
+[_] Add bottom tab for setup.
+

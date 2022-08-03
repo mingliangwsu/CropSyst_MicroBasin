@@ -1,0 +1,50 @@
+#ifndef verbosityH
+#define verbosityH
+
+
+/* verbose
+Suggested encoding bits:
+Bits 4-7 indicates high verbosity which would typically be useful
+for debugging and the output is written to error stream.
+7 debugging
+6 explaination (include detailed explaination)
+5 undefined reserved for future use
+3-4 call depth
+Bits 0-2 indicates
+output is written to the log file
+0-2 level number (level 1,2,3,4)
+ typical user level of logging where the
+
+Minimal progress indicator
+Essentially the higher the verbose number the greater the verbosity
+*/
+#define VERBOSE_MASK_LEVEL        0x07
+#define VERBOSE_MASK_DEPTH        0x24
+#define VERBOSE_MASK_DEPTH_SHIFT     3
+
+#define VERBOSE_FLAG_EXPLAINATION 0x40
+#define VERBOSE_FLAG_DEBUG        0x80
+
+
+#if (defined(DEBUG) || defined(_DEBUG))
+#define IS_VERBOSE_DEBUG(verbose,level,depth,debug)                           \
+( (level >= (verbose & VERBOSE_MASK_LEVEL))                                   \
+&&(depth >= (verbose & VERBOSE_MASK_DEPTH)))
+#else
+#define IS_VERBOSE_DEBUG(verbose,level,depth,debug) (false)
+#endif
+
+#define IS_VERBOSE(verbose,level)                                             \
+( !(verbose & VERBOSE_FLAG_DEBUG)                                             \
+&&(level >= (verbose & VERBOSE_MASK_LEVEL)))
+
+
+#define IS_VERBOSE_IN_DEPTH(verbose,level,depth)                              \
+( !(verbose & VERBOSE_FLAG_DEBUG)                                             \
+&&(level >= (verbose & VERBOSE_MASK_LEVEL))                                   \
+&&(depth >= (verbose & VERBOSE_MASK_DEPTH)))
+
+namespace CORN { extern int8 global_verbosity_depth; }
+// Currently the global_verbosity_depth is instanciated in arguments.cpp
+
+#endif

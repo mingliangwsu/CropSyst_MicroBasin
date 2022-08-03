@@ -1,0 +1,47 @@
+#ifndef canopy_growth_LAI_based_V5H
+#define canopy_growth_LAI_based_V5H
+#include "crop/canopy_growth_LAI_based.h"
+#include "canopy_cover_curve.h"
+
+// This is actually now available in also in V4 as the preferred option
+// In V5 the V4 version will be obsolete.
+namespace CropSyst {
+//______________________________________________________________________________
+class Canopy_growth_leaf_area_index_based_V5
+: public extends_ Canopy_growth_leaf_area_index_based
+{private: // Parameter references
+   contribute_ bool is_in_senescence;
+   float64 senesce_LAI_unit_per_deg_day;                                         //141106
+      // Degree days per one unit of LAI scenesence
+      // This used to be a parameter now this is computed
+      // at the start of senescence
+ private: // references
+   const float64 &cumulative_thermal_time;
+ public: // structors
+   Canopy_growth_leaf_area_index_based_V5
+      (const Crop_parameters                       &_crop_parameters      // Will be owned by this crop object
+      ,const Crop_parameters_struct::Canopy_growth_LAI_based     &_parameters
+      ,const Thermal_time_immutable       &_thermal_time                         //151106
+      //151106 ,const Crop_thermal_time_interface_immutable &_thermal_time
+      ,Residues_interface                 *_residues                             //060816
+      ,Crop_nitrogen_interface            *_nitrogen                             //060816
+      ,float64 &_reported_peak_LAI                                               //080725
+      ,Crop_CO2_response                  *_CO2_response                         //080728
+      ,bool _is_continuous_grass                                                 //081108
+      );
+   virtual bool age_leaf                                                         //070328
+      (float64  thermal_time_growing_degree_day
+      ,float64 water_stress_index);
+ private:
+//150419 #ifndef APPLY_DURATION_BEFORE_SENESCENCE
+   virtual void age_by(float64 daily_age_deg_day,float64 leaf_duration_deg_day_f32);
+//150419 #endif
+ public:
+   virtual bool start_senescence()                                 modification_;//131121
+};
+//______________________________________________________________________________
+} // namespace CropSyst
+
+#endif
+
+

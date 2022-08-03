@@ -1,0 +1,265 @@
+#ifndef SOILPROFILECLASS2H
+#define SOILPROFILECLASS2H
+//#define MaxLayers 30
+
+#ifndef MSVB_CASCADE_INFILTRATION_HOUR
+#include "soil/soil_interface.h"
+#include "soil/layers.h"
+#include "soil/texture_interface.h"
+#include "soil/hydrology_interface.h"
+#include "soil/structure_common.h"
+#include "soil/layering.h"
+#include <assert.h>
+#include <vector>
+#endif
+#ifndef CROPSYST_SOILFILE
+#define UNKNOWN_FC_PWP_based false
+#endif
+#include "control/allcontrolclass.h"
+class AllControlClass;
+//______________________________________________________________________________
+class SoilProfileClass
+#ifndef MSVB_CASCADE_INFILTRATION_HOUR
+//140424 Mingliang has put all soil properties in the same class
+
+// I have temporarily have SoilProcessesClass a specialization of
+// Soil_layers_interface because this is where Minglian has the
+// layer thickness and depth values (They should not be here).
+: public implements_ CS::Soil_layers //_interface
+, public implements_ Soil_texture_interface
+, public implements_ Soil_hydraulic_properties_interface
+, public implements_ Soil_structure_common
+/*
+, public extends_    CropSyst::Pond
+*/
+#endif
+#ifdef CROPSYST_SOILFILE
+,public extends_ Soil_parameters_class
+#endif
+{
+    int soilID;
+    //int MaxLayers;      //30
+    //Const WD; = 1000           //water density (kg/m3)
+    int NuL;                    //Number of layers
+    //Temporary variable
+    double est_Saturation_WC;
+    double est_Bulk_Density;
+    double est_A_Value;
+    double est_B_value;
+    double est_Air_Entry_Potential;
+    double est_K_Sat;
+    double est_Wat_Pot_FC;
+    double est_Wat_Pot_PWP;
+#ifdef FROZEN_SOIL
+    std::vector<double> ice_content;            //140820LML  if considering frozen soil,
+                                                //all hydrologic properties should be changed according to soil ice content
+#endif
+    void initMem();
+    void clearMem();
+    void CalculateNodeDepth();
+    void EstimateHydraulicProperties(double Sand,double Clay);
+    double ClayContentForMinimumKsat(double Sand);
+    double calcSoilWaterPotentialAtFC(double Clay_percent, double Silt_percent);
+#ifdef MSVB_CASCADE_INFILTRATION_HOUR
+//140429 RLN this should eventually be replaced by Roger's code
+    void assignApparentKsat();
+    double calcK_satForHr2FC(int layer);
+#else
+ public:
+    virtual bool initialize();
+#endif
+public:
+    #ifdef CROPSYST_SOILFILE
+    #else
+    std::vector<double> Air_Entry_Potential;                                    //(J/kg)
+    std::vector<double> b_Value;
+    #ifdef MSVB_CASCADE_INFILTRATION_HOUR
+    std::vector<double> bulk_density_g_cm3;                                     //140425RLN move to soil structure
+    #endif
+    std::vector<double> Cation_Exchange_Capacity;                               //(cmol/kg)
+    std::vector<double> Clay_Percentage;                                        //(%)
+    std::vector<double> Sand_Percentage;
+    std::vector<double> Field_Capacity;
+    std::vector<double> Saturation_Water_Content;  
+    //170503LML std::vector<double> FC_WPot;                                                //(J/kg)
+    soil_layer_array64(water_pot_at_FC);                                        //170503LML
+    std::vector<double> Layer_Thickness_m;                                      //(m)
+    std::vector<double> Soil_pH;
+    std::vector<double> Permanent_Wilting_Point;
+    #define horizon_clay Clay_Percentage
+    #define horizon_sand Sand_Percentage
+    #endif
+#ifdef MSVB_CASCADE_INFILTRATION_HOUR
+//140429 RLN this should eventually be replaced by Roger's code
+
+    std::vector<double> Apparent_K_Sat;         //(kg*s/m3) true unit
+#endif
+    std::vector<double> B_Inverse;
+    #if defined(MSVB_CASCADE_INFILTRATION_HOUR) || !defined(CROPSYST_SOILFILE)   //150811LML added CROPSYST_PROPER
+    inline virtual float64 get_bulk_density_g_cm3(nat8 layer)              const { return bulk_density_g_cm3[layer]; }
+    inline virtual float64 get_bulk_density_kg_m3(nat8 layer)              const {return g_cm3_to_kg_m3(get_bulk_density_g_cm3(layer));} //150811LML
+    #else
+//140425
+//    Soil_structure_common soil_structure;                                        //140425
+//    inline virtual float64 get_bulk_density_g_cm3(nat8 layer)              const { return soil_structure.get_bulk_density_g_cm3(layer) ; }
+    #endif
+    int Control_Layer;
+    std::vector<double> FC_Unfrozen;
+    std::vector<double> PWP_WPot;
+    bool Free_Drainage_Boundary;
+    #ifdef MSVB_CASCADE_INFILTRATION_HOUR
+    std::vector<double> Hours_To_Field_Capacity;
+    #endif
+    std::vector<double> Ks_Unfrozen;
+    std::vector<double> Ksat_for_Hr2FC;
+    std::vector<double> Ksat_for_Hr2FC_Unfrozen;
+    std::vector<double> K_Sat;                                                   //(kg*s/m3)
+    std::vector<double> K_Sat_Lateral_Flow;                                      //(kg*s/m3) 150211FMS
+    std::vector<double> Layer_Bottom_Depth_m;
+    std::vector<double> Lower_Node_Soil_Volume;                                 //(mm) V_Lower
+    double Manning_coef;
+    std::vector<double> m_Value;
+    std::vector<double> n1_Value;                                               //1-n
+    std::vector<double> Node_Soil_Volume;                                       //(mm)
+    std::vector<double> Node_Depth;                                             //(m)
+    int NLmax;              //Number Of Total Layers
+    std::vector<double> n_Value;                                                //Campbell hydraulic property
+    int Number_Of_Effective_Soil_Layers;                                        //m
+    int Number_Of_Total_Nodes;                                                  //NNmax
+    int Number_Of_Effective_Soil_Nodes;                                         //nn
+    int Number_Of_Uninundated_Soil_Layers;                                      //NLFWT
+    std::vector<double> PWP_Unfrozen;
+    std::vector<double> SAT_Unfrozen;
+    double SurfaceStorage;                                                      //(mm) Storage capability
+    std::vector<double> Theta_b;                                                 //131122
+    std::vector<double> Upper_Node_Soil_Volume; //(mm) It's the upper soil layer
+    bool Water_Table_Boundary;      //For cascade, there is no drainage; For FD, it is real water table boundary condition. 
+    int Water_Table_Layer;
+    int Max_Number_Of_Layer_Pot_Explored_By_Roots;                               //150311FMS
+    AllControlClass &ControlRef;
+/*140511 RLN obsolete
+    #ifdef CROPSYST_SOIL
+    const Soil_properties_sublayers &soil_properties_ref;
+    #endif
+*/
+public:
+    SoilProfileClass(
+/* RLN
+            #ifdef CROPSYST_SOIL
+            const Soil_properties_sublayers &_soil,
+            #endif
+*/
+            AllControlClass &_ControlRef);
+    ~SoilProfileClass();
+    void copy_soilprofile(SoilProfileClass &copy_from);                          //140815LML
+    double calc_h_Theta_b(double Air_Entry);
+    double calcTheta_h_Campbell(double h, double Air_Entry,double Theta_s, double Campbell_b);
+    void setSoilID(int _soilID);
+    int getSoilID();
+    //void assignParametersValues(bool FC_PWP_based);
+    void setManningCoef();
+    void setSurfaceStorageCoef();
+    double calHoursToFieldCapacity(double Percent_Clay);
+   #ifdef MSVB_CASCADE_INFILTRATION_HOUR
+   //140429 RLN this should eventually be replaced by Roger's code
+    void assignHoursToFieldCapacity();
+   #endif
+    void AssignSoilProperties();
+/*140511 RLN obsolete
+    #ifdef CROPSYST_SOIL
+    void CopyValueFromSoilProperties();
+    double getManningCoef();
+    #endif
+*/
+    int NumberOfLayers();
+#ifdef MSVB_CASCADE_INFILTRATION_HOUR
+//140429 RLN this should eventually be replaced by Roger's code
+
+    double calcApparentKSat(double thickness,double WC_sat,double m,double FC, double hours_to_field_capacity);
+#endif
+    double getTotoalSoilDepth_m()                                          const; //RLN made const
+    #ifdef CROPSYST_SOILFILE
+    //141209RLN virtual void get_end();
+    bool initialize_soil_parameters(const Soil_parameters_class &soil_parameters)modification_;//141209RLN
+    #else
+    void ReadSoilProfileParameters
+       (const CORN::OS::File_name &file_name);                                   //160307RLN
+       //160307RLN (int SoilID);
+    #endif
+    /*160307RLN  obsolete, now composing soil filename in BasinClass
+    std::string FindSoilProfileFileName(int SoilID);
+    */
+    void estimateSoilProfileProperties();
+#ifdef FROZEN_SOIL
+    void setIceContentRef(std::vector<double> &_ice_content);                    //140820LML
+    double getIceContentAtLayer(int layer);                                      //140821LML
+#endif
+#ifndef MSVB_CASCADE_INFILTRATION_HOUR
+//140424 These functions are here temporarily until we clean up the soil layers in Mingliang's code
+// These functions are calling assert to see if they are actually needed/used yet
+ // Soil layering interface methods
+   inline virtual nat8   get_max_number_layers()                                  const;
+   inline virtual nat8   get_number_layers()                                      const;
+//   inline virtual nat8   get_layer_at_depth(float64 a_given_depth_m)              const { assert(false); return 0; }
+//   inline virtual nat8   get_layer_at_depth_or_last_layer(float64 a_given_depth_m)const { assert(false); return 0; }
+#ifndef CROPSYST_VERSION
+   inline virtual nat8   get_horizon_at_layer(nat8 layer)                         const { return layer; }
+#endif
+#ifdef CROPSYST_SOILFILE
+   inline virtual float64 get_thickness_m                      (nat8  layer)      const { return get_horizon_thickness(layer); }
+   #define UNKNOWN_FC_PWP_based false
+   inline virtual float64 get_Campbell_b          ( nat8 layer,bool FC_PWP_based) const { return get_horizon_Campbell_b(layer); }
+   inline virtual float64 get_air_entry_potential ( nat8 layer,bool FC_PWP_based) const { return get_horizon_air_entry_pot(layer); }
+   inline virtual float64 get_water_pot_at_FC     ( nat8 layer)                   const { return water_pot_at_FC[layer]; }   // RLN warning need to check if this is the right matching variable
+   inline virtual float64 get_clay_percent                      (nat8 layer)      const { return get_horizon_clay(layer); }
+   inline virtual float64 get_sand_percent                      (nat8 layer)      const { return get_horizon_sand(layer); }
+   inline virtual float64 get_silt_percent                      (nat8 layer)      const { return get_horizon_silt(layer); }
+   
+#else
+   inline virtual float64 get_thickness_m                      (nat8  layer)      const { return Layer_Thickness_m[layer]; }
+   inline virtual float64 get_Campbell_b          ( nat8 layer,bool FC_PWP_based) const { return b_Value[layer]; }
+   inline virtual float64 get_air_entry_potential ( nat8 layer,bool FC_PWP_based) const { return Air_Entry_Potential[layer]; }
+   inline virtual float64 get_water_pot_at_FC     ( nat8 layer)                   const { return water_pot_at_FC/*170503LML FC_WPot*/[layer]; }   // RLN warning need to check if this is the right matching variable
+   inline virtual const float64 *ref_soil_water_pot_at_FC          ()             const { return water_pot_at_FC;}   //170503LML
+   inline virtual float64 get_clay_percent                      (nat8 layer)      const { return Clay_Percentage[layer]; }
+   inline virtual float64 get_sand_percent                      (nat8 layer)      const { return Sand_Percentage[layer]; }
+   inline virtual float64 get_silt_percent                      (nat8 layer)      const { assert(false); return 0; }
+   inline virtual float64 get_pH                                (nat8 layer)      const { return (float64)Soil_pH[layer]; } //141209RLN
+   inline virtual float64 get_cation_exchange_capacity          (nat8 layer)      const { return (float64)Cation_Exchange_Capacity[layer]; } //141209RLN
+#endif
+   inline virtual float64 get_depth_m(nat8  layer = 0)                            const { return (layer == 0) ? get_depth_profile_m() : Layer_Bottom_Depth_m[layer]; }
+   inline virtual float64 get_depth_profile_m                  ()                 const { return getTotoalSoilDepth_m(); }
+   inline virtual nat8    closest_layer_at(float64 a_given_depth)                 const { assert(false); return 0; }
+   inline virtual void copy_array64(soil_layer_array64(target),const soil_layer_array64(source)) const { assert(false); }
+   inline virtual void copy_array32(soil_layer_array32(target),const soil_layer_array32(source)) const { assert(false); }
+    #ifdef USE_VARIABLE_RECORDERS
+    public:
+   inline virtual bool render_variable_recorders
+      (CS::Variable_recorders &recorders
+      ,nat32 desired_descriptive_summary_elements)                /*rendition_*/{ assert(false); return 0; }
+    #endif
+ // Soil_hydraulic_properties_interface methods
+   inline virtual float64 get_field_capacity_volumetric             ( nat8 layer) const { return Field_Capacity[layer];} //170404LML FC_Unfrozen[layer]; }
+   inline virtual float64 get_permanent_wilt_point_volumetric       ( nat8 layer) const { return Permanent_Wilting_Point[layer];}//170404LML PWP_Unfrozen[layer]; }
+   inline virtual float64 get_drained_upper_limit_volumetric        ( nat8 layer) const
+   {
+       assert(false); return 0;
+   }
+   inline virtual float64 get_lower_limit_volumetric                ( nat8 layer) const { assert(false); return 0; }
+   inline virtual float64 get_saturation_water_content_volumetric   ( nat8 layer, float64 current_ice_water_content) const;
+   inline virtual float64 get_unsaturated_conductivity_function_slope( nat8 layer)const ;
+   inline virtual float64 get_bypass_coef                           ( nat8 layer) const { return 0.0; } //150914RLN
+   inline virtual float64 get_sat_hydraul_cond_kg_s_m3              ( nat8 layer) const { return K_Sat[layer]; } // RLN warning need to check units
+ // Soil_texture_interface methods
+   inline virtual void set_sand_clay
+      (nat8 layer, float64 _sand, float64 _clay)                   modification_ { Sand_Percentage[layer] = _sand; Clay_Percentage[layer] = _clay;}
+   inline virtual bool is_bound_by_impermeable_layer() const {return !Free_Drainage_Boundary;}
+ private:
+   Soil_parameters_class  *parameters_currently_not_used;
+   AllControlClass *test;
+   SoilProfileClass *abstract_class_check() { return new SoilProfileClass(*test); }
+#endif
+};
+//______________________________________________________________________________
+#endif // SOILPROFILECLASS_H
+

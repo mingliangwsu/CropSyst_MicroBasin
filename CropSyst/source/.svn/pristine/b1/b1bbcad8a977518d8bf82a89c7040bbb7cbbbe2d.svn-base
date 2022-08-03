@@ -1,0 +1,98 @@
+#ifndef canopy_portionH
+#define canopy_portionH
+
+#ifdef check obsolete
+
+moved into Canopy_growth_portioned::Canopy_accumulation::Portion
+
+#include "options.h"
+#include <corn/container/item.h>
+#include <corn/chronometry/time_types.hpp>
+
+/*_______*/ class Canopy_biomass_GAI; // for friendship
+
+/*_______*/ class Canopy_portion //  Was Daily_history
+/*_______*/ : public CORN::Item
+/*_______*/ {
+/*_______*/ protected:
+//090316/*_______*/    friend class  Canopy_portion;       // So we can implement increment_by
+/*_______*/    friend class  Canopy_biomass_GAI;
+/*_______*/    float64  age;                                 // In degree days
+/*060824_*/    float64  days_dead;
+/*060911_*/    float64  GAI;                                 // Area Index vigorous new growth from this season
+/*970305p*/    float64  dead_AI;                             // Area Index
+/*060601_*/    float64  biomass_produced;                    // kg/m2 The biomass produced for the day.
+/*060601_*/    mutable float64  biomass_current;             // kg/m2 The current biomass ( In the case of decomposing canopy this may be reduced as it is decomposed. )
+/*980226P*/    float64  GAI_related_biomass;                 // kg/m2 GAI related canopy biomass.  It is used for GAI/biomass development calculation.  // was  GAI_related_canopy_biomass
+CO2            float64  GAI_at_baseline_ppm;                 // distr renamed to daily_GAI  (remove _X after we fixup the new biomass.}
+CO2            float64  dead_AI_at_baseline_ppm;             // distr renamed to daily_GAI  (remove _X after we fixup the new biomass.}
+CO2            float64  GAI_related_biomass_at_baseline_ppm; // was GAI_related_canopy_biomass_at_baseline_ppm
+
+// GAI related biomass biomass:
+// Used to calculate GAI in plant development in that
+// during times of stress leaves don't expand
+// although there is still a gain biomass
+
+/*_______*/ public:  // constructors
+/*_______*/    Canopy_portion //  Was Daily_history
+/*_______*/       (float64 i_age
+/*_______*/       ,float64 i_GAI                         // Initially area_index is always green area index
+/*_______*/       ,float64 i_biomass
+/*980226P*/       ,float64 i_GAI_biomass                 // This is the GAI related canopy biomass. It is used for development calculation
+CO2               ,float64 i_GAI_at_baseline_ppm         //  distr renamed to daily_GAI  (remove _X after we fixup the new biomass.}
+CO2               ,float64 i_GAI_biomass_at_baseline_ppm
+/*_______*/       );
+/*_______*/    Canopy_portion();
+/*_______*/       // This constructor is used for accumulators
+#ifdef CHECK_OBSOLETE
+080806
+/*070806_*/    void mark_as_deleted()                                       modification_;
+#endif
+/*_______*/ public: // overrides
+/*970701x*/    virtual int compare(const CORN::Item &other)                     const;
+/*030123_*/    virtual const char *label_cstr_deprecated(char *buffer)                     const { buffer[0] = 0; return buffer; }; // Never printed.
+/*_______*/ public: // Accessors
+/*050823_*/           bool    is_valid()                                        const;
+/*050823_*/    inline bool    is_dead()                                         const { return dead_AI > 0.000001; };
+/*981207_*/    inline virtual float64 get_age()                                 const { return age; };
+/*050823_*/    inline virtual float64 get_GAI()                                 const { return GAI; };
+/*060911_*/    inline virtual float64 get_LAI()                                 const { return GAI + dead_AI ; };
+/*060601_*/    inline virtual float64 get_biomass_produced()                    const { return biomass_produced; };
+/*070801_*/    inline virtual float64 get_biomass_current()                     const { return biomass_current; };  // Originally we did not have any loss (I.e. from decomposition)
+/*981207_*/    inline virtual float64 get_GAI_related_biomass()                 const { return GAI_related_biomass; };
+#ifdef CO2_CHANGE
+CO2            inline virtual float64 get_GAI_at_baseline_ppm()                 const { return GAI_at_baseline_ppm; } ;
+CO2            inline virtual float64 get_GAI_related_biomass_at_baseline_ppm() const { return GAI_related_biomass_at_baseline_ppm; };
+#endif
+/*_______*/ public: // Processing
+/*050823_*/    virtual float64 die() ;
+/*051105_*/       // returns the amount of GAI cleared
+/*050823_*/    bool age_by(float64 daily_age_deg_day,float64 leaf_duration_deg_day_f32) ;
+/*060911_*/    CORN::Days inc_days_dead()                                             modification_;
+/*060316_*/       // returns true if the portion reached senescence today and just died .
+/*_______*/ public:
+/*_______*/    void increment_by(const Canopy_portion &addend)         modification_;
+/*080515_*/    void clear_GAI_related_biomass()                        modification_;
+/*060911_*/    float64 /*100517 void*/ dec_biomass_current(float64 subtrahend_biomass);
+/*060530_*/    float64 dec_green_area_index(float64 subtrahend_area_index);
+/*_______*/       // Decrements the area_index by the subtrahend value.
+/*_______*/       // Returns the resulting area index.
+/*060530_*/    float64 inc_green_area_index(float64 addend_area_index);
+/*060824_*/    float64  slough();
+/*060824_*/       // This invalidates the canopy portion the biomass amount is relinquished to the caller.
+/*060824_*/       // Returns the biomass sloughed
+/*060825_*/    bool  dormancy();
+/*060825_*/       // In senesced_biomass_shed mode,
+/*060825_*/       // at dormancy GAI_vital is transferred to GAI_effete
+/*060825_*/       // This is to prevent any GAI from the previous season to influence new growth
+
+#define DUMP_PORTIONS
+#ifdef DUMP_PORTIONS
+/*_980511*/    virtual bool write(std::ostream &)       performs_IO_ ;
+#endif
+
+/*_______*/ };
+
+#endif
+
+#endif

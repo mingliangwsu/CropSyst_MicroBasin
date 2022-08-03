@@ -1,0 +1,57 @@
+#ifndef SDF_listH
+#define SDF_listH
+#ifndef associationH
+#  include "corn/container/association.h"
+#endif
+/*
+This container is used for working with
+System Data Format (SDF) lists.
+
+(this could potentially be derived from Text list  (but not sure why this is an association list
+I think it was simply because that was the closest thing I had to a text lists.
+
+This class will probably become deprecated when I add SDF rendering to Text_list
+Use instead use Text_list
+
+*/
+namespace CORN {
+class SDF_List; // forward declaration for friendship
+//______________________________________________________________________________
+class SDF_List : public Association_list
+{
+public:
+   class Item : public Association
+   {
+      friend class SDF_List;
+   public: // Because we generally work with the value
+      std::string value;                                                         //040909
+   public:
+      Item();
+      inline virtual ~Item() {}                                                  //081125
+      Item(const char *i_value);                                                 //040909
+      Item(const std::string &i_value);                                          //040909
+      inline virtual const char *get_key()                                 const
+      { return value.c_str(); }
+   };
+   //_______________________________________________________________
+private:
+   bool updated;
+   mutable std::string SDF_list_string;                                          //040909
+      // This is only a buffer, data is stored as SDF_items
+   bool space_is_a_delimiter;                                                    //090901
+public:
+   SDF_List(const char *SDF_list_string = 0,bool space_is_a_delimiter = true);
+   inline virtual ~SDF_List() {}
+   const char *get_cstr() const;
+   void update();
+   // Update refills the list based on the value buffer
+   // This is used after the SDF_list_string has been read by data_record expect.
+   //
+   //
+   std::string &get_SDF_for_data_record_expect();                                //040909
+};
+//______________________________________________________________________________
+} // namespace CORN
+#endif
+// SDF_List
+

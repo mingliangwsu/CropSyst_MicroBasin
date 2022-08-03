@@ -1,0 +1,71 @@
+#include "crop/canopy_growth_LAI_based_V5.h"
+#include "crop/thermal_time.h"
+//______________________________________________________________________________
+namespace CropSyst {
+Canopy_growth_leaf_area_index_based_V5::Canopy_growth_leaf_area_index_based_V5
+(const Crop_parameters            &_crop_parameters
+,const Crop_parameters_struct::Canopy_growth_LAI_based    &_parameters
+,const Thermal_time_immutable       &_thermal_time                               //151106
+,Residues_interface                 *_residues
+,Crop_nitrogen_interface            *_nitrogen
+,float64                            &_reported_peak_LAI
+,CropSyst_NS Crop_CO2_response      *_CO2_response
+,bool _is_continuous_grass
+)
+:Canopy_growth_leaf_area_index_based
+   (_crop_parameters
+   ,_parameters
+   ,_thermal_time
+   ,_residues
+   ,_nitrogen
+   ,_reported_peak_LAI
+   ,_CO2_response
+   ,_is_continuous_grass)
+, is_in_senescence(false)
+, cumulative_thermal_time(_thermal_time.ref_thermal_time_cumulative())           //130626
+, senesce_LAI_unit_per_deg_day(0.0) // computed at senescence                    //141106
+{}
+//_2013-06-10______________________________________________________constructor_/
+void Canopy_growth_leaf_area_index_based_V5::age_by
+(float64 daily_age_deg_day
+,float64 leaf_duration_deg_day_f32)                        modification_
+{}
+//_2008-05-15__________________________________________________________age_by__/
+bool Canopy_growth_leaf_area_index_based_V5::age_leaf
+(float64 thermal_time_growing_degree_day
+,float64 water_stress_index)
+{
+   if (crop_parameters.has_leaf_senescence() && is_in_senescence)
+   {
+      float64 old_GAI = get_GAI(include_vital|include_effete);
+      float64 new_GAI = old_GAI
+         - (senesce_LAI_unit_per_deg_day * thermal_time_growing_degree_day);     //140430
+      die_back_to_GAI(new_GAI);                                                  //140430
+   }
+   // Do not call Canopy_growth_leaf_area_index_based::age_leaf                  //150419
+   /*
+   #ifdef APPLY_DURATION_BEFORE_SENESCENCE
+   else
+      Canopy_growth_leaf_area_index_based::age_leaf( thermal_time_growing_degree_day, water_stress_index);
+   #endif
+   */
+   return true;
+}
+//_2013-06-10_________________________________________________________age_leaf_/
+bool Canopy_growth_leaf_area_index_based_V5::start_senescence() modification_
+{  is_in_senescence = true;
+   float64 GAI_at_senescence = get_GAI(include_vital);                           //130636
+   if (crop_parameters.phenology.culmination.senescence                          //150901
+      <= crop_parameters.phenology.initiation.senescence)
+   {
+      std::cerr << "thermal time to initiate senescence must not be after thermal time of full senescence." << std::endl;
+   }
+   senesce_LAI_unit_per_deg_day = GAI_at_senescence                              //141106
+      / (crop_parameters.phenology.culmination.senescence                        //150520
+        -crop_parameters.phenology.initiation.senescence);
+   return true;
+}
+//_2013-06-10___________________________________________know_start_senescence__/
+} // namespace CropSyst
+
+

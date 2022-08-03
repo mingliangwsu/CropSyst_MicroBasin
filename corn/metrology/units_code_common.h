@@ -1,0 +1,208 @@
+#ifndef units_code_commonH
+#define units_code_commonH
+#ifndef primitiveH
+#  include <corn/primitive.h>
+#endif
+
+// The following are metric system base 10 exponents
+// but also applies to US customary units (I.e. hundred weight)
+
+#define U_metric_base    (nat8) 0x00
+#define U_metric_deca    (nat8) 0x01
+#define U_metric_hecta   (nat8) 0x02
+#define U_metric_kilo    (nat8) 0x03
+#define U_metric_mega    (nat8) 0x06
+#define U_metric_giga    (nat8) 0x09
+#define U_metric_tera    (nat8) 0x0C
+#define U_metric_peta    (nat8) 0x0F
+#define U_metric_exa     (nat8) 0x12
+#define U_metric_zetta   (nat8) 0x15
+#define U_metric_yotta   (nat8) 0x18
+
+#define U_metric_deci    (nat8) 0x41
+#define U_metric_centi   (nat8) 0x42
+#define U_metric_milli   (nat8) 0x43
+#define U_metric_micro   (nat8) 0x46
+#define U_metric_nano    (nat8) 0x49
+#define U_metric_pico    (nat8) 0x4C
+#define U_metric_femto   (nat8) 0x4F
+#define U_metric_atto    (nat8) 0x52
+#define U_metric_zepto   (nat8) 0x55
+#define U_metric_yocto   (nat8) 0x58
+
+
+// Some units codes are not convertable to other units
+// Non-dimensional units
+
+typedef nat32 Units_code;
+
+#define U_primary(quantity,units_system)    ((nat32)(((nat16)quantity << 8)|units_system))
+#define U_secondary(quantity,units_system)  ((nat32)(((nat16)quantity << 8)|units_system)<<16)
+
+
+// For many 16bit units the upper bits (8-15) distinguish the units catagory
+// The low byte lower 8 bits (0-7) serve as a  count, factor, or exponent of some base (usually 10)
+// Usually these can be normalized to a basic units of measure
+
+/*
+In the future, the bitmake codings can be reduced
+
+I.e. currently 2 nybles are needed to represent yocto-yotta
+ For all metric units of measure the low byte is exponent base 10
+
+// 00000000 00000000
+
+This can be reduced to 1 byte
+where
+
+Bit mask (current)
+15 Units system indicator.  0=metric system, 1=nonstandard (english)
+14 \
+13  |
+12  |  Temporal bit indicator 1 = unit of time
+11  |  \  bits 8-11 unit of measure enumeration
+10  |   |
+ 9  |   |
+ 8 /   /
+ 7 unused ?
+ 6 sign of exponent
+ 5 \
+ 4  |
+ 3  |
+ 2  | Metric exponent
+ 1  |
+ 0 /
+
+ Bit mask (proposed)
+// The upper nyble identifies the measure system and units of measure
+15 Units system indicator.  0=metric system, 1=nonstandard (english)
+14 0 = original enumeration  (0 values indicates the same as original but would loose.invalidate electrical)
+   1 = new definition
+15 0 = not composite, 1=composite  (I.e. a single units that represent 2 units)
+13 1=electro magentic
+12 ???
+11 \ 10-12 dimensionality
+10 |  0 = dimension less / unitless, 1=1st dimension
+ 9 /  2=2nd dimension, 3=3rd dimension,4=4th dimension (I.e. temporal)
+ 8 0=extensive (or unitless) , 1=intensive
+The lower nyble indicates the degree of valuation (this is fully compatible with previous system)
+ 7 reserved
+ 6 sign of exponent (current and proposed)
+ 5 0=simple power, 1 = (1000 power)
+ 4 reserved
+ 3 bits 0-3 Either represent simple decimal power or 1000 power
+ 2
+ 1
+ 0
+
+I.e.
+
+10000011  (old kilo) would also be valid in the new system
+10100001  (new kilo)
+*/
+
+
+// Variable name prefix abreviations:
+//
+// U_       Units
+// UC_      Units code           (metric standard)
+
+#define U_units_not_specified 0
+
+// Note that bit 7 for all units must be 0
+// because bit 7 is the denominator indicator
+                                            // 111111
+                                            // 54321098 76543210
+#define UC_unitless                 0       // 00000000 00000000b 0000x
+#define UC_code                     0
+//UC_code is generally not used by UED, but in conversion programs
+//Some file formats use a value field to store codes
+
+// Codes 0x0001 0x0FFF  will denote units with no specific
+// discrete or otherwise identifyable units.
+#define UC_1                        1       // 00000000 00000001b 0001x // Unit quantity (used in recipricol deriviations)
+#define UC_count                    2       // 00000000 00000010b 0002x
+
+#define UC_percent                  3       // 00000000 00000011b 0003x
+// (values generally ranging from 0-100)
+#define UC_unit                     4
+
+// The following units are valus that generally range from 0 to 1
+// that are often used as multipliers or fractional values
+//
+
+#define UC_adjustment            0x11
+#define UC_multiplier            0x11
+// Used to indicate that this value is a scaling or adjustment factor (multiplier)
+// Factor and adjustment are essentially functionally equivelent so the have the same code
+#define UC_factor                0x12
+#define UC_coefficient           0x13
+
+#define UC_decimal_percent       0x14
+// (values generally ranging from 0-1 but representing a percent (i.e. X%/100 )
+
+#define UC_index                 0x15       //
+// (values generally ranging from 0-1 I.e. water stress index 0=no stress 1=full stress)
+// Plant available water (PAW) is currently an index
+
+//#define UC_XXXXXXXXXX            0x16
+
+// (For stress factor values generally ranging from 0-1 I.e. water stress 1=no stress 0=full stress)
+
+#define UC_ratio                 0x17
+#define UC_fraction              0x18
+// Fraction is similar to decimal percent generally ranging between 0 and 1 but could be greater
+#define UC_albedo                0x18
+// Albedo is a fraction
+
+#define UC_probability           0x19
+// Probability is a decimal percent (almost?) always between 0 and 1
+
+#define UC_pH                  0x0020
+// This is a temporary units for pH it is a
+// logarithmic scale ranging between 0 and 14 (7 is neutral)
+/*
+I suspect it is actually some fraction or ratio I.e. columbs per gram or something like that.
+
+Soil pH expresses the degree of acidity in soils.
+pH influence in soil:
+-Nutrient availability
+-Microbial growth
+-Plant growth
+-Toxic trace metal availability
+The pH scale contains 14 units.
+Neutral pH is 7.0
+Substances with a pH lower than 7.0 are considered to be acidic.
+Substances with a pH higher than 7.0 are considered to be alkaline.
+The pH scale is logarithmic a soil with a pH of 5.0 is 10 times as acidic as a soil with a pH of 6.0.
+Most crops grow best when produced in a soil with a neutral pH.
+In agricultural soils the overall range of pH is usually between 4 and 10.
+In the midwest and east, the pH ranges from 4 to 8
+and in the arid west, the pH ranges from 5 to 10.
+*/
+
+//> Do not delete this line, it is used by the units code constant generator
+
+
+// Units of measure between 0x00 and 0x01 are simple unitless or count
+// Units of measure between 0x10 to 0x1F are temporal
+// Currently units of measure is simply an enumeration.
+
+// If I ever redo unitscodes I should reserve a bits to denote
+// extensive (0) intensive (1)
+
+// interval system ( relative scale) (I.e. Celcius)
+// absolute system ( ratio scale) (I.e. Kelvin)
+
+// Im not sure if absolute is always extenstive
+
+// Common composite units
+
+
+#define U_denominator_marker 0x80
+#define U_a_per_b(a,b)  ((nat32)((nat32)a |  ((nat32)(U_denominator_marker | b )<< 16)))
+#define U_a_b(a,b)      ((nat32)a |  ((nat32) b << 16))
+
+#define UC_count_per_unit                 U_a_per_b(UC_count,UC_unit)
+
+#endif

@@ -1,0 +1,195 @@
+L_Automatic_nitrogen_allocated_to_crop_tissues,
+/* nitrogen  ARCCS CROPSYST  VALIDATE PARAMS CS it-md  retranslate fr ca es-rn it
+en Automatic_nitrogen allocated_to plant_tissues
+fr Azote_automatique assigné_aux tissus_de_la_plant
+it Azoto_automatica allocato__ai tessuti_della_pianta
+es Nitrogeno_automática asignado_a_los tejidos_de_la_planta
+ca Nitrogen_automàtica asignat_a_la planta
+*/
+L_Nitrogen_stress,
+/* nitrogen  CROPSYST CSW  PARAMS it-gb
+en Nitrogen stress
+fr Stress azote
+it Stress azotato
+es Stress Nitrógeno
+ca Stress Nitrogen
+*/
+L_Inorganic_nitrogen_applied,
+/* nitrogen  CROPSYST CSW  PARAMS
+en Nitrogen applied
+fr Azote inorganique apporté
+it Concimazioni_di azotate inorganico
+es Nitrógeno inorgánico aplicado
+ca Nitrogen inorganico aplicat
+*/
+L_Nitrogen_concentration,
+/* nitrogen 980206  CROPSYST CSW  PARAMS
+en Nitrogen concentration
+fr Concentration d'azote
+it Concentrazione_di azoto
+es Concentración_de nitrógeno
+ca Concentració_de nitrogen
+*/
+L_Average_nitrogen_stress,
+/* nitrogen  CROPSYST CSW  PARAMS
+en Avg. Nitrogen stress
+fr Moyenne stress azote
+it Stress azotato medio
+es Stress nitrógeno medio
+ca Stress nitrogen mitjà
+*/
+L_NO3_Applied_nitrate,
+/* nitrogen  CROPSYST CSW  PARAMS
+en NO3 applied nitrate
+fr NO3 Nitrate apporté
+it Somministrazione di NO3
+es NO3 nitrato aplicado
+ca NO3 nitrat aplicat
+*/
+L_Nitrification,
+/* nitrogen  CROPSYST CSW  PARAMS
+en Nitrification
+fr Nitrification
+it Nitrificazione
+es Nitrificación
+ca Nitrificació
+*/
+L_Denitrification,
+/* nitrogen  CROPSYST CSW  PARAMS
+en denitrification
+fr denitrification
+it Denitrificazione
+es Denitrificación
+ca Denitrificació
+*/
+L_NO3_leached,
+/* nitrogen  CROPSYST CSW  PARAMS
+en NO3 leached
+fr NO3 lixivié
+it NO3 lisciviato
+es_ch NO3 lixivicado
+es NO3 lixiviado
+ca NO3 lixiviat
+*/
+L_NO3_uptake,
+/* nitrogen  CROPSYST CSW  PARAMS
+en NO3 uptake
+fr Consommation de NO3
+it NO3 assorbito dalla pianta
+es Absorción_de N nítrico
+ca Absorció_de N nítric
+*/
+L_NH4_applied_ammonium,
+/* nitrogen  CROPSYST CSW  PARAMS
+en NH4 applied ammonium
+fr NH4 ammonium apporté
+it Somministrazione di NH4
+es NH4 amonio aplicado
+ca NH4 amoni aplicat
+*/
+L_NH4_mineralization_ammonium,
+/* nitrogen  CROPSYST CSW  PARAMS
+en mineralization ammonium
+fr mineralization de l'ammonium
+it  NH4 mineralizzato
+es Amonio (NH4) mineralizado
+ca Amoni (NH4) mineralitzat
+*/
+L_NH4_leached,
+/* nitrogen  CROPSYST CSW  PARAMS
+en NH4 leached
+fr NH4 lixivié
+it NH4 lisciviato
+es_ch NH4 Amonio lixivicado
+es NH4 Amonio lixiviado
+ca NH4 amoni lixiviat
+*/
+L_NH4_uptake,
+/* nitrogen  CROPSYST CSW  PARAMS
+en NH4 uptake
+fr Consommation de NH4
+it NH4 assorbito dalla pianta
+es_ch NH4 Absorción_de amonio
+es NH4 absorbido_por_la planta
+ca NH4 absorbit_per_la planta
+*/
+L_Ammonium_applied,
+/* nitrogen VALIDATE PARAMS CS
+en Ammonium applied
+fr Ammonium apporté
+it Concimazione sottoforma di azoto ammoniacale
+es Amonio aplicado
+ca Nitrogen amonic aplicat
+*/
+L_Ammonium_source,
+/* nitrogen PARAMS   it-gb
+en Ammonium source
+fr Source de l'ammonium
+it Origine dell'azoto ammoniacale
+es Origen del amonio
+ca Origen del amonic
+*/
+L_Mineralized_from_organic_matter,
+/* nitrogen  CROPSYST CSW PARAMS  it-gb
+en Mineralizated_from organic matter
+fr Mineralization_de matière organique
+it N mineralizzato dalla sostanza organica
+es Mineralizado_de materia orgánica
+ca Mineralitzat_de matèria orgànica
+*/
+L_Organic_nitrogen_applied,
+/* nitrogen CROPSYST PARAMS CSW
+en Organic nitrogen applied.
+fr Azote organique apport‚
+it Azoto organico_da concimazione
+es Nitrógeno orgánico aplicado
+ca Nitrogen organico aplicat
+*/
+L_Total_nitrogen_applied,
+/* nitrogen CROPSYST PARAMS CSW
+en Total nitrogen applied.
+fr Azote organique apport‚
+it Azoto organico_da concimazione
+es Nitrógeno orgánico aplicado
+ca Nitrogen organico aplicat
+*/
+L_NH3_with_manure_N_gaseous_loss,
+/* nitrogen CROPSYST PARAMS  it-md retranslate  atmospheric -> fr es ca aseous: fr es ca it
+en NH3_with manure_N gaseous_loss
+fr NH3_avec engrais_N perte atmosphérique
+it Perdita atmosferica di ammoniaca nel concime azotato
+es NH3_con abono_N pérdidad atmosférica
+ca NH3_amb ?abono?_N perditat atmosferica
+*/
+L_Inorganic_N_gaseous_loss,
+/* nitrogen CROPSYST PARAMS  it-rn retranslate  atmospheric -> fr es ca gaseous: fr es ca it
+en Inorganic N gaseous_loss
+fr N_inorganique perte atmosphérique
+it Perdita atmosferica_di azoto inorganico
+es N_inorgánico pérdidad atmosférica
+ca N_inorganico perditat atmosferica
+*/
+L_NH4,
+/* nitrogen  CROPSYST CSW  PARAMS
+* NH4
+*/
+L_NO3,
+/* nitrogen  CROPSYST CSW  PARAMS
+* NO3
+*/
+L_Total_N,
+/* nitrogen  CROPSYST
+en Total_N
+fr Totale_N
+it Totale_N
+es Total_N
+ca Total_N
+*/
+L_gaseous_loss,
+/* nitrogen  CROPSYST PARAMS CSW it-rn  retranslate  atmospheric -> gaseous:fr es ca
+en gaseous_loss
+fr perte_atmosphérique
+it perdita_atmosferica
+es pérdidad_atmosférica
+ca perditat_atmosferica
+*/

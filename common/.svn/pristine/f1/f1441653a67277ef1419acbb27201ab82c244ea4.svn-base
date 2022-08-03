@@ -1,0 +1,53 @@
+#include "biometeorology/parameter/slope_SVP_curve_psychrometric_resistance.h"
+//#include <iostream.h>
+//______________________________________________________________________________
+Slope_saturated_vapor_pressure_plus_psychrometric_resistance::Slope_saturated_vapor_pressure_plus_psychrometric_resistance
+      (const Vapor_pressure_saturation_slope  &_vapor_pressure_saturation_slope
+      ,const Psychrometric_constant           &_psychrometric_constant
+      ,const Aerodynamics                     &_aerodynamics
+      ,float64                                 _bulk_resistance_d_m)
+      //151124 ,const float64                          &_bulk_resistance_d_m)
+      : CS::Parameter_float64(EXTENSIVE,0.0,UC_kPa_per_C,CORN::calculated_quality)
+        //I think EXTENSIVE
+      , vapor_pressure_saturation_slope   (_vapor_pressure_saturation_slope)
+      , psychrometric_constant            (_psychrometric_constant)
+      , aerodynamics                      (_aerodynamics)
+      , bulk_resistance_d_m               (_bulk_resistance_d_m)
+      {}
+//______________________________________________________________________________
+   // Copy constructure (used by CropSyst::Crop_nitrogen)
+Slope_saturated_vapor_pressure_plus_psychrometric_resistance::Slope_saturated_vapor_pressure_plus_psychrometric_resistance
+      (const Slope_saturated_vapor_pressure_plus_psychrometric_resistance  &from_copy
+      ,float64                             _bulk_resistance_d_m)
+      //151124 ,const float64                          &_bulk_resistance_d_m)
+      : CS::Parameter_float64(from_copy) // (EXTENSIVE,0.0,UC_kPa_per_C,CORN::calculated_quality)
+      , vapor_pressure_saturation_slope   (from_copy.vapor_pressure_saturation_slope)
+      , psychrometric_constant            (from_copy.psychrometric_constant)
+      , aerodynamics                      (from_copy.aerodynamics)
+      , bulk_resistance_d_m               (_bulk_resistance_d_m)
+      {}
+//______________________________________________________________________________
+const CORN::Quality &Slope_saturated_vapor_pressure_plus_psychrometric_resistance::update() rectification_
+{  float64 SSVP_PR = calc();
+   update_kPa_per_C(SSVP_PR);
+   return get_quality();
+}
+//______________________________________________________________________________
+float64 Slope_saturated_vapor_pressure_plus_psychrometric_resistance::calc() const
+{
+/*
+   float64 wind_speed_at_standard_height_m_d =
+         aerodynamics.calc_normalized_wind_speed(wind_speed_m_d);
+   float64 curr_aerodynamic_resistance =         // ra                           //011008
+         aerodynamics.calc_resistance_of_plants
+      (wind_speed_at_standard_height_m_d                                         //011008
+      ,0.12); // meters reference crop plant height                              //011008
+*/
+   float64 aerodynamic_resistance_d_m = aerodynamics.get_resistance_of_plants_reference(SECONDS_PER_DAY); // UC_day_per_meter
+   float64 slope_saturated_vapor_pressure_plus_psychrometric_resistance
+      =  vapor_pressure_saturation_slope.get_kPa_per_C()
+      +  psychrometric_constant.get_kPa_per_C()
+         * (1.0 + bulk_resistance_d_m/aerodynamic_resistance_d_m);
+   return slope_saturated_vapor_pressure_plus_psychrometric_resistance;
+}
+//______________________________________________________________________________

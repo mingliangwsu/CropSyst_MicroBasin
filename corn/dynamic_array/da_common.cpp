@@ -1,0 +1,63 @@
+#error obsolete
+
+#ifdef USE_PCH
+#  include <corn/container/struct_pch.h>
+#else
+#  include <corn/dynamic_array/da_common.h>
+#endif
+#  ifndef CORN_COMPARE_H
+#     include <corn/math/compare.h>
+#  endif
+#pragma hdrstop
+
+
+/*001206*/ namespace CORN {
+//______________________________________________________________________________
+/*_______*/ Dynamic_array_common::Dynamic_array_common
+/*990415_*/ (uint32 initial_size          // This is the initial allocation space
+/*_______*/ ,uint32 i_resize_overage )   // This is the overage to give on reallocation
+/*_______*/ : current_size_plus_overage(initial_size)
+/*_______*/ , resize_overage(i_resize_overage)
+/*000707_*/ , empty_list(initial_size == 0)
+/*_______*/ , terminal_index(initial_size ? (uint32)(initial_size - 1) : (uint32)0) //(int16)((int16)initial_size-(int16)1))
+/*990427_*/ , resized(false)
+/*_______*/ , changed(false)
+/*091217_*/ , order(ASCENDING)   // when all initial value are the same assume ascending order
+/*_______*/ {};
+//______________________________________________________________________________
+/*______*/ Dynamic_array_common::Dynamic_array_common(const Dynamic_array_common &to_copy)
+/*______*/ : current_size_plus_overage      ( to_copy.current_size_plus_overage)
+/*______*/ , resize_overage    ( to_copy.resize_overage)
+/*______*/ , empty_list        ( to_copy.empty_list)
+/*______*/ , terminal_index         ( to_copy.terminal_index)
+/*______*/ , resized           ( false)
+/*______*/ , changed           ( false)
+/*091217_*/ , order(ASCENDING)   // derived classes must determine the order of the copy
+/*______*/ {
+/*______*/ };
+//______________________________________________________________________________
+/*m980305*/ uint32 Dynamic_array_common::get_count() const
+/*_990214*/ { return empty_list? (uint32)0 : (uint32)(get_terminal_index()+(uint32)1); };
+//______________________________________________________________________________
+/*m980310*/ void Dynamic_array_common::clear() { resize(0); };
+//______________________________________________________________________________
+/*______*/ void Dynamic_array_common::resize(uint32 new_size)
+/*______*/ {
+/*______*/     terminal_index = (int32)(new_size -1);
+/*______*/     uint32  bloated_new_size = (uint32)(new_size + resize_overage);
+/*______*/     reallocate_array(bloated_new_size);
+/*______*/     current_size_plus_overage = bloated_new_size;
+/*______*/     changed = true;
+/*990427*/     resized = true;
+/*070604*/     empty_list =  terminal_index < 0;  // terminal_index >= 0; // Even if index is 0 we now have at least 1 element at index 0;
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ void Dynamic_array_common::if_necessary_resize_for(uint32 index)
+/*______*/  {
+/*081030*/       if ((index >= current_size_plus_overage) || empty_list)
+/*______*/          resize((uint32)(index+1));
+/*______*/       terminal_index = CORN_max(terminal_index,(int32)index);
+/*______*/       changed = true;
+/*______*/  };
+//______________________________________________________________________________
+/*001206*/  }; // namespace CORN

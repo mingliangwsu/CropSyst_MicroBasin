@@ -1,0 +1,413 @@
+#ifdef DEPRECATED
+now use Dynamic_array<float32>
+#ifdef USE_PCH
+#  include <corn/container/struct_pch.h>
+#else
+#  include <corn/dynamic_array/da_float32.h>
+#  ifndef CORN_MATH_MOREMATH_H
+#     include <corn/math/moremath.h>
+#  endif
+#  ifndef CORN_MATH_COMPARE_H
+#     include <corn/math/compare.h>
+#  endif
+
+#endif
+#pragma hdrstop
+
+#include <corn/std/std_iomanip.h>
+#include <corn/std/std_iostream.h>
+
+#ifdef _MSC_VER
+//    I don't know why MS VC++ does not have values.h!
+#   include <corn/values_MSC.h>
+#else
+#  include <values.h>  // for MINFLOAT MAXFLOAT
+#endif
+
+/*_______*/ namespace CORN {
+//______________________________________________________________________________
+/*_______*/ Dynamic_float_array::Dynamic_float_array
+/*_______*/   (uint32 initial_size       // This is the initial allocation space
+/*_______*/   ,uint32 i_resize_overage
+/*090822_*/   ,float32 _default_value
+/*_______*/   )   // This is the overage to give on reallocation
+/*000517_*/ : Dynamic_array_common(initial_size,i_resize_overage)
+/*010525_*/ , array(initial_size ? new float32[(initial_size)] : 0)
+/*070213_*/ , array_sum(0.0)
+
+/*_______*/ {   for (uint32 i = 0; i < initial_size; i++)
+/*090822_*/         array[i] = _default_value;
+/*_______*/ };
+//______________________________________________________________________________
+/*990415_*/ Dynamic_float_array::Dynamic_float_array( uint32 size, float32 i_array[])
+/*010525_*/ : Dynamic_array_common(size,1)
+/*000517_*/ , array( new float32[(size)])
+/*070213_*/ , array_sum(0.0)
+/*_______*/ {     for (uint32 i = 0; i < size; i++)        // I should actually use append so we change determine ordering
+/*_______*/         array[i] = i_array[i];
+/*_______*/ };
+//______________________________________________________________________________
+/*990415_*/ Dynamic_float_array::Dynamic_float_array( )
+/*000517_*/ : Dynamic_array_common(10,10)
+/*_______*/ , array( new float32[(10)])
+/*070213_*/ , array_sum(0.0)
+/*_______*/ {  for (uint32 i = 0; i < 10; i++) array[i] = 0;
+/*000718_*/    terminal_index = 0;
+/*000718_*/    empty_list = true;
+/*_______*/ };
+//______________________________________________________________________________
+/*000225_*/ Dynamic_float_array::Dynamic_float_array(const Dynamic_float_array &from_copy)
+/*000707_*/ : Dynamic_array_common(from_copy)
+/*_______*/ , array(0)
+/*070213_*/ , array_sum(0.0)
+/*_______*/ {  uint32 copy_all_elements = terminal_index+1;
+/*000517_*/    terminal_index = 0;
+/*_______*/    copy(from_copy,copy_all_elements);
+/*_______*/    // copy updates array sum
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ Dynamic_float_array::~Dynamic_float_array()
+/*_______*/ {  if (array) delete[] array; array = 0;
+/*_______*/ };
+//______________________________________________________________________________
+/*040802_*/ void Dynamic_float_array::clear()
+/*_______*/ {  Dynamic_array_common::clear();
+/*_______*/    for (uint32 i = 0; i < current_size_plus_overage; i++)
+/*_______*/       array[i] = 0.0;
+/*070213_*/    array_sum = 0;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ void Dynamic_float_array::reallocate_array(uint32 bloated_new_size) const
+/*090828_*/ {  int32 alloc_size = max_uint32(1,bloated_new_size); // Note I don't think the size of factor is needed!
+/*090828_*/    // we must have at least one element in order to create the array.
+/*_______*/    float32 *new_array =  new float32[alloc_size];
+/*000707_*/    if (array)
+/*_______*/    {  for (uint32 i = 0; i < bloated_new_size; i++)
+/*_______*/         new_array[i] = (i < current_size_plus_overage) ? array[i] : (float32)0.0;
+/*_______*/       delete[] array;
+/*030710_*/    } else
+/*_______*/       for (uint32 i = 0; i < bloated_new_size; i++)
+/*_______*/         new_array[i] = 0.0;
+/*041111_*/    if ((terminal_index> 0) &&(alloc_size < terminal_index))
+/*041030_*/    {  resized = true;
+/*041030_*/       changed = true;
+/*041030_*/       terminal_index = bloated_new_size  - 1;
+/*041030_*/    };
+/*_______*/    array = new_array;
+/*_______*/ };
+//______________________________________________________________________________
+/*020131_*/ float32 Dynamic_float_array::set(uint32 index,float32 value)
+/*_______*/ {
+/*_______*/    // I had tried to remove the return value because the float32
+/*_______*/    // causes "hides virtual function" compiler warnings.
+/*_______*/    // but there are still warnings
+/*000517_*/    if_necessary_resize_for(index);
+/*000710_*/    empty_list=false;
+/*070220_*/    changed = true;
+/*_______*/    array[index] = value;
+/*020131_*/    return value;
+/*_______*/ };
+//______________________________________________________________________________
+/*020130_*/ void Dynamic_float_array::set_values(float32 values[],uint32 count)
+/*_______*/ {    for (uint32 i = 0; i < count; i++)
+/*_______*/         set(i,values[i]);
+/*_______*/      changed = true;
+/*_______*/ };
+//______________________________________________________________________________
+/*020130_*/ void Dynamic_float_array::copy(const Dynamic_float_array &from_copy,uint32 new_size)
+/*_______*/ {  uint32 fromcopy_max_index = from_copy.get_terminal_index();
+/*090826_*/    if (array == 0) empty_list = true;
+/*070213_*/    array_sum = 0.0;
+/*990428_*/    {  if (get_terminal_index() != fromcopy_max_index)
+/*000225_*/          resize(new_size ? new_size : (uint32)(fromcopy_max_index+1));
+/*_______*/       if (!from_copy.is_empty())
+/*_______*/          for (uint32 i = 0; i <= get_terminal_index(); i++)
+/*_______*/          {  float32 from_value = from_copy.get_no_resize(i);
+/*_______*/             set(i,from_value);
+/*_______*/          };
+/*990428_*/    };
+/*_______*/    changed = true;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ float32 Dynamic_float_array::get_allow_resize(uint32 index)
+/*000517_*/ {  if_necessary_resize_for(index);
+/*_______*/      return array[index];
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ float32 Dynamic_float_array::get_no_resize(uint32 index)       const
+/*_______*/ {
+/*990718_*/      return ((index >= current_size_plus_overage) || (index > (uint32)terminal_index))
+/*990408_*/      ? (float32)0.0
+/*_______*/      : array[index];
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ float32 Dynamic_float_array::sum(uint32 to_index)              const
+/*_______*/ {  array_sum = 0.0;
+/*990403_*/    if (get_count())
+/*_______*/        for (uint32 i = 0; i <= to_index; i++)
+/*_______*/         array_sum += array[i];
+/*_______*/    return array_sum;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ float32 Dynamic_float_array::sum()                             const
+/*_______*/ {   return sum(terminal_index);
+/*_______*/ };
+//______________________________________________________________________________
+/*040921_*/ float32 Dynamic_float_array::find_minimum(uint32 to_index)     const
+/*_______*/ {  float32 mn = MAXFLOAT;
+/*990403_*/      if (get_count())
+/*_______*/        for (uint32 i = 0; i <= to_index; i++)
+/*_______*/          mn = CORN_min(mn,array[i]);
+/*_______*/      return mn;
+/*_______*/ };
+//______________________________________________________________________________
+/*050907_*/ uint16 Dynamic_float_array::find_minimum_index() const
+//             Returns the index of the minimum value;
+/*_______*/ {  float32 mn = MAXFLOAT;
+/*_______*/    uint16 min_index(0);
+/*_______*/    if (get_count())
+/*_______*/       for (sint32 i = 0; i <= terminal_index; i++)
+/*_______*/       {  float32 array_i = array[i];
+/*_______*/          if (array_i < mn)
+/*_______*/          {  mn = array_i;
+/*_______*/             min_index = (uint16)i;
+/*_______*/          };
+/*_______*/       }
+/*_______*/    return min_index;
+/*_______*/ };
+//______________________________________________________________________________
+/*040921_*/  float32 Dynamic_float_array::find_minimum() const
+/*_______*/ {   return find_minimum(terminal_index);
+/*_______*/ };
+//______________________________________________________________________________
+/*040921_*/ float32 Dynamic_float_array::find_maximum(uint32 to_index) const
+/*_______*/ {   float32 mx = MINFLOAT;
+/*990403_*/      if (get_count())
+/*_______*/      for (uint32 i = 0; i <= to_index; i++)
+/*_______*/         mx = CORN_max(mx,array[i]);
+/*_______*/      return mx;
+/*_______*/ };
+//______________________________________________________________________________
+/*040921_*/ float32 Dynamic_float_array::find_maximum() const
+/*_______*/ {   return find_maximum(terminal_index);
+/*_______*/ };
+//______________________________________________________________________________
+/*070213_*/ float32 Dynamic_float_array::increment_by(const Dynamic_float_array &addends)
+/*_______*/ {  uint32 cnt = addends.get_count();
+/*070213_*/    array_sum = 0.0;
+/*_______*/    for (uint32 i = 0; i < cnt; i++)
+/*_______*/      {
+/*_______*/         float32 addend = addends.get_no_resize(i);
+/*_______*/         float32 augend = get_no_resize(i);
+/*070213_*/         float32 item_sum = augend + addend;
+/*070213_*/         array_sum += item_sum;
+/*_______*/         set(i,item_sum);
+/*_______*/      };
+/*070213_*/    return array_sum;
+/*_______*/ };
+//______________________________________________________________________________
+/*070213_*/ float32 Dynamic_float_array::increment_by(uint32 to_index, float32 addend)
+/*_______*/ {
+/*070213_*/    float32 current_i = get_no_resize(to_index);
+/*_______*/    float32 new_i = current_i + addend;
+/*070213_*/    float32 delta = new_i - current_i;
+/*070213_*/    array_sum += delta;
+/*_______*/    set(to_index,new_i);
+/*070213_*/    return array_sum;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ float32 Dynamic_float_array::decrement_by(const Dynamic_float_array &subtrahends)
+/*_______*/ {
+/*070213_*/    array_sum = 0.0;
+/*_______*/    for (uint32 i = 0; i < subtrahends.get_count(); i++)
+/*_______*/    {
+/*070213_*/       float32 minuend = get_no_resize(i);
+/*070213_*/       float32 subtrahend = subtrahends.get_no_resize(i);
+/*070213_*/       float32 subtraction = minuend -subtrahend;
+/*070213_*/       array_sum += subtraction;
+/*_______*/       set(i,subtraction );
+/*_______*/    };
+/*070213_*/    return array_sum;
+/*_______*/ };
+//______________________________________________________________________________
+/*070213_*/ float32 Dynamic_float_array::decrement_by(uint32 to_index, float32 subtrahend)
+/*_______*/ {
+/*070213_*/    float32 minuend = get_no_resize(to_index);
+/*_______*/    float32 new_i = minuend - subtrahend;
+/*_______*/    set(to_index,new_i);
+/*070213_*/    array_sum -= new_i;
+/*070213_*/    return array_sum;
+/*_______*/ };
+//______________________________________________________________________________
+/*990409_*/ float32 Dynamic_float_array::multiply_by(float32 multiplier)
+/*_______*/ {
+/*070213_*/    array_sum = 0;
+/*_______*/     for (uint32 i = 0; i < get_count(); i++)
+/*990430_*/       {  float32 multiplicand = get_no_resize(i);
+/*070213_*/          float32 product = multiplicand * multiplier;
+/*070213_*/          array_sum += product;
+/*_______*/          set(i,multiplicand * multiplier);
+/*990430_*/       };
+/*070213_*/    return array_sum;
+/*_______*/ };
+//______________________________________________________________________________
+/*990617_*/ float32 Dynamic_float_array::divide_by(float32 divisor)
+/*_______*/ {
+/*070213_*/    array_sum = 0;
+/*_______*/    uint32 count = get_count();
+/*_______*/      for (uint32 i = 0; i < count; i++)
+/*_______*/       {
+/*_______*/          float32 dividend = get_no_resize(i);
+/*_______*/          float32 result = (divisor != 0.0) ? dividend/divisor : (float32)9999999.99; // avoid div by zero
+/*070213_*/          array_sum += result;
+/*_______*/          set(i,result);
+/*_______*/       };
+/*070213_*/    return array_sum;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ float32 Dynamic_float_array::append(float32 value)
+/*_______*/ {
+/*010831_*/    uint32 at = is_empty() ? 0 : (uint32)(terminal_index+1);
+/*091217_*/    uint32 curr_count = get_count();  // Note that this ordering can be moved to DataSet, it has general application
+/*091217_*/    float32 current = curr_count ? get_no_resize(terminal_index) : 0;
+/*091217_*/    if (curr_count > 1)
+/*091217_*/    {
+/*091217_*/       switch (order)
+/*091217_*/       {
+/*091217_*/          case ASCENDING    : if (value < current)  order = UNORDERED; break; // the added item is out of order, so the whole set is considered out of order
+/*091217_*/          case DESCENDING   : if (value > current)  order = UNORDERED; break; // the added item is out of order, so the whole set is considered out of order
+/*091217_*/          default : break; // We have already determined the set is out of order.
+/*091217_*/       };
+/*091217_*/    }  else
+/*091217_*/       order = (curr_count == 1)   // The first two items determine the initial order
+/*091217_*/          ? (value > current) ? ASCENDING : DESCENDING
+/*100119_*/          : order;
+///*100119_*/          : (order == UNORDERED) ? ASCENDING : order; // initially assume the assume the set is assending unless set otherwise
+/*_______*/    set(at,value);
+/*070213_*/    array_sum += value;
+/*_______*/    return value;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ void Dynamic_float_array::remove(uint32 at_index)
+/*_______*/ {
+/*_______*/    // This removes the number at the specified index.
+/*_______*/    // all following array elements are moved down one cell and the ?max_index? is decremented
+/*000707_*/   if (!empty_list)  //(!terminal_index >= 0)
+/*_______*/   {
+/*070213_*/      if ((sint32)at_index < terminal_index)
+/*070213_*/          array_sum -= array[at_index];
+/*_______*/      for (uint32 i = at_index; i < (uint32)terminal_index; i++)
+/*_______*/          array[i] = array[i+1];
+/*_______*/       if (terminal_index == 0)   empty_list = true;
+/*_______*/       else                   terminal_index = (uint32)(terminal_index - 1);
+/*_______*/   };
+/*_______*/ };
+//______________________________________________________________________________
+/*m010523*/ void Dynamic_float_array::append_array(const Dynamic_float_array &values)
+/*_______*/ {  // appends all the values to this array
+/*_______*/    for (uint32 i = 0; i < values.get_count(); i++)
+/*070213_*/    {  float32 append_value = values.get_no_resize(i);
+/*070213_*/       array_sum += append_value;
+/*070213_*/       append(append_value);
+/*_______*/    };
+/*_______*/ };
+//______________________________________________________________________________
+/*m010523*/  void Dynamic_float_array::sort(Ordering ordering /*bool ascending*/)
+/*_______*/ {  // quick sort  This could be improved to work in place
+/*091217_*/    if (order == ordering) return; // the set is already ordered.
+/*_______*/    uint32 count = get_count();
+/*_______*/    if (count > 1)
+/*_______*/    {  Dynamic_float_array lower(0,count);   lower.require_order(ordering);
+/*_______*/       Dynamic_float_array higher(0,count);  higher.require_order(ordering);
+/*_______*/       float32 pivot = get_no_resize(0);
+
+//if (is_approximately(pivot,27.0,0.00001))
+//std::cout << "reached";
+
+#ifdef OBSOLETE
+091217 append is now checking ordering
+/*010602_*/       float32 lowest_ai = pivot;
+/*010602_*/       float32 highest_ai = pivot;
+/*010602_*/       bool lower_all_sorted = true;
+/*010602_*/       bool higher_all_sorted = true;
+#endif
+/*_______*/       for (uint32 i = 1; i < count; i++)
+/*_______*/       {  float32 a_i = get_no_resize(i);
+
+
+
+/*_______*/          if (a_i <= pivot)
+/*_______*/          {  lower.append(a_i);
+#ifdef OBSOLETE
+091217 append is now checking ordering
+/*010602_*/             if (a_i > lowest_ai)   lower_all_sorted = false;
+/*010602_*/             else                   lowest_ai  = a_i;
+#endif
+/*010602_*/          }else
+/*_______*/          {  higher.append(a_i);
+#ifdef OBSOLETE
+091217 append is now checking ordering
+/*010602_*/             if (a_i < highest_ai)  higher_all_sorted = false;
+/*010602_*/             else                   highest_ai = a_i;
+#endif
+/*010602_*/          }
+/*_______*/       };
+//100119/*010602_*/       if (lower.get_order() == UNORDERED)
+/*100119_*/       if (lower.get_order() != ordering)
+/*_______*/           lower.sort(ordering );
+//100119/*010602_*/       if (higher.get_order() == UNORDERED)
+/*100119_*/       if (higher.get_order() != ordering)
+/*_______*/           higher.sort(ordering );
+/*050922_*/       resize(0);  // We don't want to clear because sort is called by Statics update (calc_median) methods but we don't what to delete what data we have already computed (clear erases everything in derived classes)
+
+//if (is_approximately(pivot,27.0,0.00001))
+//std::cout << "reached";
+
+/*040919_*/       append_array(ordering == ASCENDING ? lower : higher);
+/*_______*/          append(pivot);
+/*040919_*/       append_array(ordering == ASCENDING  ? higher: lower);
+
+//if (is_approximately(pivot,27.0,0.00001))
+//std::cout << "reached";
+
+
+/*091217_*/       order = ordering;
+/*_______*/    }; // else one item is sorted;
+/*_______*/ };
+//______________________________________________________________________________
+#ifdef DISABLED
+//070420 I have stream problems in BDS2006
+
+
+/*050107_*/	void Dynamic_float_array::dump(ostream &strm,uint8 precision, bool indexed, char delimiter,  const char *variable, const char *section)
+/*_______*/ {
+//_______//		This outputs the dataset values to the specified stream.
+//_______//		If indexed is false the format format is dataset=9.999,9.999,....
+//_______//		If indexed is true the format is dataset=1=9.999,2=9.999 with
+//_______//		If section is specified  [section] will be output where section is the specified character string
+//_______//		I.e. dump(cout,3, true,'\n',0,"my_section")
+//_______//    Will give:
+//_______//		[my_section]
+//_______//		1=9.999
+//_______//		2=9.999
+//_______//		:
+//_______//		I.e. dump(cout,2, false,',',"my_var",0)
+//_______//    Will give:
+//_______//		my_var=9.99,9.99,9.99 . . .
+/*_______*/		if (section)
+/*_______*/			strm << '[' << section << ']' << endl;
+/*_______*/		if (variable && !indexed)
+/*_______*/			strm << variable << '=';
+/*_______*/		for (uint32 i = 0; i < get_count(); i++)
+/*_______*/		{	if ((!section) && variable)
+/*_______*/				strm << variable;
+/*_______*/			if (indexed) {strm << i << '=';};
+/*_______*/			strm << setprecision(precision) << get_no_resize(i);
+/*_______*/			strm << delimiter;
+/*_______*/		};
+/*_______*/ };
+//______________________________________________________________________________
+#endif
+/*_______*/ } ; // namespace  CORN
+#endif
+

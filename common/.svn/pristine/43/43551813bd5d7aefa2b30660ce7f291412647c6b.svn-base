@@ -1,0 +1,19 @@
+#ifndef WC_vapor_pressure_saturation_slopeH
+#define WC_vapor_pressure_saturation_slopeH
+#include "WP_vapor_pressure_saturation_slope.h"
+#include "WP_vapor_pressure.h"
+#include "WP_air_temperature.h"
+//______________________________________________________________________________
+class Vapor_pressure_saturation_slope_calculator
+: public extends_ Vapor_pressure_saturation_slope
+{
+   const Air_temperature_average &air_temperature_avg;
+ public:
+   Vapor_pressure_saturation_slope_calculator
+      (const Air_temperature_average &air_temperature_avg);
+   virtual const CORN::Quality &update()                          rectification_;
+ private:
+   float64 calc_from_avg_air_temperature()                                 const;
+};
+//______________________________________________________________________________
+#endif

@@ -1,0 +1,79 @@
+#  include <string.h>
+#  include "corn/container/search_tree.h"
+#  include "corn/container/enumlist.h"
+#  include "corn/container/association.h"
+namespace CORN {
+//______________________________________________________________________________
+class Comparable_enumeration : public Enumeration
+{  private : nat32 value;
+ public:
+   Comparable_enumeration(nat32 _value)
+   :Enumeration()
+   ,value(_value)
+   {}
+   inline virtual nat32 get_key_nat32()                                    const { return value;} //020319
+};
+//_2005-11-01___________________________________________________________________
+Enumeration *Enumeration_search_tree::find(nat32 search_key)               const
+{  Comparable_enumeration comp_enum(search_key);
+   return (Enumeration *)find_comparable(comp_enum);
+}
+//_2002-03-19___________________________________________________________________
+bool Enumeration_search_tree::remove_all_matching(nat32 search_key)
+{  /* Remove removes all matching entries from the list and deletes
+      the associated data! \return true if there was a matching deletion. */
+   bool at_least_one_item_removed = false;
+   for (Enumeration *matching_item = find(search_key)
+       ;matching_item
+       ;matching_item = find(search_key))
+   {  remove(matching_item);
+      at_least_one_item_removed = true;
+   }
+   return at_least_one_item_removed;
+}
+//_2002-03-19___________________________________________________________________
+class Comparable_association : public Association
+{ private :
+      //140716 char value[1000];
+      std::string value;                                                         //140716
+   bool case_sensitive;
+ public:
+   inline Comparable_association(const char *_value,bool _case_sensitive)
+      :Association()
+      ,case_sensitive(_case_sensitive)
+      , value(_value)                                                            //140716
+      {}                                                                         //140716
+      //140716 { strcpy(value,_value);}
+   inline Comparable_association()                                               //140716
+      :Association()
+      ,case_sensitive(true)
+      , value()
+      {  }
+   inline virtual const char *get_key()                                    const { return value.c_str();}
+   virtual bool is_case_sensitive()                                        const { return case_sensitive; }
+};
+//_2005-11-01___________________________________________________________________
+Association *Association_search_tree::find(const char * search_key,bool case_sensitive) const
+{  Comparable_association comp_enum(search_key,case_sensitive);
+   return (Association *)find_comparable(comp_enum);
+}
+//_2002-03-19___________________________________________________________________
+#ifdef OBSOLETE
+140716 moved to container
+nat32 /*140716 bool*/ Association_search_tree::remove_all_matching(const char * search_key)
+{  /* Remove removes all matching entries from the list and deletes the associated data!
+      Returns true if there was a matching deletion. */
+   nat32 matching_deletions = 0; //140716 bool at_least_one_item_removed = false;
+   for (Association *matching_item = find(search_key)
+       ;matching_item // search_key
+       ;matching_item = find(search_key))
+   {  remove(matching_item);
+      matching_deletions ++;
+      //140716 at_least_one_item_removed = true;
+   }
+   return matching_deletions;  //140716 return at_least_one_item_removed;
+}
+#endif
+//_2002-03-19___________________________________________________________________
+} // namespace CORN
+

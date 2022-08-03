@@ -1,0 +1,194 @@
+#ifndef CS_inspectorH
+#define CS_inspectorH
+
+#include "corn/math/statistical/statistics_types.hpp"
+#include "corn/container/enumlist.h"
+#include "corn/container/association.h"
+#include "corn/parameters/parameter.h"
+#include "CS_suite/observation/CS_emanator.h"
+#include "UED/library/varcodes.h"
+#include "common/CS_parameter_float64.h"
+#define CS_compose_var_code(CSCV,CSV)   (((nat32)1 << 31) | ((nat32)(((nat32)CSCV << 16) | (nat32)CSV)))
+
+namespace CS {
+#define GENERATE_VARIABLE_CODE 0
+//______________________________________________________________________________
+class Inspector
+: public extends_ CORN::Item    // may want this to be Enumeration item
+, public extends_ CORN::Number_keyed                                             //160604
+{public:
+   UED::Variable_code_clad variable_code_clad; // provided for UED record identification
+   CORN::Units_clad  value_units_code;                                           //160812
+   const Emanator &context;
+   std::string ontology;
+      // Optional partial path to compose ontology property description.
+      // Typically this will be a single word representing a specific
+      // element with emanator's context
+      // An emanator may actually have multiple element's
+      // which may logically share a common ontology but there
+      // is not a specific emanator to represent that ontology.
+      // In this case forward slash may be used in the ontology label
+      // to distinguish this structure.
+
+   CORN::Statistic   already_statistic;
+      // An object may have variables which are already some form of statistic
+      // such as a cumulative value (summation).
+      // Or maximum or minimum encountered value.
+      // In such cases while the desired statistic would have been calculated,
+      // futher statistical analysis would not likely be appropriate.
+      // The user of the listeners can use this indicator to identify
+      // variables for which further statistical analysis might not be appropriate.
+ private:
+    //160610 provided_ std::string      qualified_string;
+    //160610     provided_ CORN::Text_list *qualification_list;
+    //160610 replaced with qualified_instance and qualified_ontology
+
+   provided_ std::string      instance_name_qualified; // rename to just instance?
+   provided_ CORN::Text_list *instance_qualification_list;
+
+   provided_ std::string      ontology_qualified;
+   provided_ CORN::Text_list *ontology_qualification_list;
+
+ public: // structors
+   Inspector
+      (const float64    &value
+      ,CORN::Units_code value_units_code
+      ,const Emanator   &context
+      ,const char       *ontology
+      ,CORN::Statistic  already_statistic
+      ,UED::Variable_code preferred_variable_code = 0);                          //160627
+   Inspector                                                                     //160520
+      (const float32    &value
+      ,CORN::Units_code value_units_code
+      ,const Emanator   &context
+      ,const char       *ontology
+      ,CORN::Statistic  already_statistic
+      ,UED::Variable_code preferred_variable_code = 0);                          //160627
+   Inspector
+      (const int32      &value
+      ,CORN::Units_code value_units_code
+      ,const Emanator   &context
+      ,const char       *ontology
+      ,UED::Variable_code preferred_variable_code = 0);                          //160627
+   Inspector
+      (const nat16      &value
+      ,CORN::Units_code value_units_code
+      ,const Emanator   &context
+      ,const char       *ontology
+      ,UED::Variable_code preferred_variable_code = 0);                          //160627
+
+   Inspector                                                                     //160626
+      (const Physical::Measure_datum &datum
+      ,const Emanator   &context
+      ,const char       *ontology
+      ,CORN::Statistic  already_statistic
+      ,UED::Variable_code preferred_variable_code = 0);                          //160627
+
+   // The preferred variable code is used in CropSyst to
+   // produce CropSyst UED output files compatible with V4
+   // utilities but it should be considered deprecated
+
+   void set_variable_code(UED::Variable_code preferred_variable_code);           //160627
+/*NYI
+   Inspector(const Inspector &copy_from);
+      // copy constructor
+*/
+
+   // Constructor notes:
+
+   virtual const char *get_key()                                           const;
+   virtual int   compare(const CORN::Item &)                               const;
+ public:
+/*obsolete because now have separate instance name and ontology
+   const std::string &append_qualification_to_string
+      (std::string &composed_qualification,char separator)                 const;
+      // returns a fully qualified descriptive label for the listener.
+      // The composed fully qualified description will/should be unique.
+*/
+   const std::string &provide_instance_name_qualified                            //160610
+      (char qualification_separator='.')                              provision_;
+   nat16 list_instance_qualification(CORN::Text_list &append_to_qualification_list) const;
+      // returns a list of the qualified descriptive labels for the inspector.
+      // List the recorder contexts and append this instance's variable name
+   const CORN::Text_list &provide_instance_qualification_list()  provision_;
+
+   const std::string &provide_ontology_qualified                                 //160610
+      (char qualification_separator='/')                              provision_;
+   nat16 list_ontology_qualification(CORN::Text_list &append_to_qualification_list) const;
+      // returns a list of the qualified descriptive labels for the inspector.
+      // List the recorder contexts and append this instance's variable name
+   const CORN::Text_list &provide_ontology_qualification_list()       provision_;
+
+   virtual bool write(std::ostream &)                               performs_IO_;
+      // Currently this write simply identifies the qualified string
+      // Eventually I may have a write 'mode'
+      // to optionally write the observed value (or values) and statistics.
+   nat32 get_variable_code()                                               const;//160609
+   const char *get_units_label(std::string &units_description)             const;//160622
+};
+// Template for instanciation of listener (in render_inspectors):
+// CS::Inspector( XXXX.ref_amount() ,*reporter,XXXX_meta,UC_units,inspector.desired_descriptive_summary_elements,CORN::STAT_ALL_bits)
+
+//_2013-07-30__________________________________________________________________/
+//#define Inspectors CORN::Unidirectional_list
+#ifdef obsolete
+class Inspectors
+: public CORN::Unidirectional_list // of Inspectors
+{
+ public:
+   /* moved to Examinations (Inspector_tallies)
+   nat32 desired_descriptive_summary_elements;                                   //150818
+   Inspection_level level;
+   */
+ public:
+   Inspectors
+      (
+      /*160605  Eventually eliminate thes parameters they now apply to Inspector_tallies
+       Inspection_level _level
+      ,nat32 _desired_descriptive_summary_elements = STAT_BASIC_ELEMENTS_bits
+      */
+      );  //150818
+   inline virtual ~Inspectors() {}
+   bool reset()                                                    modification_;//150819
+//   bool commit()                                                  rectification_;
+   /*obsolete, now using seclusion filter (in Examination)
+   bool eliminate(const Inspector *inspector_to_eliminate)         modification_;//150919
+      // After rendering all potential inspectors, this
+      // function can be used to cull inspectors that are not needed/wanted.
+   */
+   //virtual nat32 write(std::ostream &strm)                          performs_IO_;
+
+   // Conceptual add a method to generate
+   // a list of Inspector_tally
+
+};
+//_2013-07-30__________________________________________________________________/
+#endif
+
+/*NYN
+class Season_Inspectors
+: public extends_ CS::Inspectors
+, public implements_ CORN::Enumeration                                           //140407
+{
+ public:
+   const CropSyst::Crop_interfaced &associated_crop;
+ public:
+   inline Season_Inspectors
+      (const CropSyst::Crop_interfaced &_associated_crop
+      ,nat32 _desired_descriptive_summary_elements = STAT_arithmetic_mean_bit)   //150818
+      : Inspectors()
+      , associated_crop(_associated_crop)
+      {}
+// This write was specific to OFoot this should be moved to a derived class as/if needed
+   //bool write_R_headers(std::ostream &R_stream)                     performs_IO_;
+   //nat32 write_R(std::ostream &R_stream)                            performs_IO_;
+
+   //150818 check used   virtual CORN::Year get_tally_year()                                     const;
+   inline virtual nat32 get_desired_descriptive_summary_elements_to_output() const { return STAT_ALL_bits; }
+   inline virtual nat32 get_key_nat32()                                    const { return (nat32)associated_crop.get_unique_identifier(); }
+};
+*/
+//_2013-07-31__________________________________________________________________/
+} // namespace CS
+#endif
+

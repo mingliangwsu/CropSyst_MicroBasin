@@ -1,0 +1,107 @@
+#ifndef da_float32H
+#define da_float32H
+
+//#include <corn/std/std_iostream.h>
+#include <corn/dynamic_array/da_common.h>
+#include <corn/const.h>
+
+/*980203  This class is a dynamic floating point number array
+          It allows the array to be automatically resized to accomodate
+          larger indicies
+*/
+/*_______*/ namespace CORN {
+
+/*_______*/ class Statistical_data_set;
+/*_______*/
+/*_______*/ class Dynamic_float_array
+/*_______*/ : public Dynamic_array_common
+/*_______*/ {
+/*_______*/    friend class Statistical_data_set;
+/*_______*/ protected:
+/*_______*/    mutable float32 *array;
+/*_______*/ private:
+/*070213_*/    mutable float32 array_sum; // This holds the last known sum of the array.
+/*_______*/ public: // structors
+/*_______*/    Dynamic_float_array
+/*990415_*/       (uint32  _initial_size          // This is the initial allocation space
+/*_______*/       ,uint32  _resize_overage = 10
+/*090822_*/       ,float32 _default_value = 0);   // This is the overage to give on reallocation
+/*990415_*/    Dynamic_float_array( uint32 size, float32 i_array[]);
+/*000225_*/    Dynamic_float_array(const Dynamic_float_array &copy_from);
+/*990415_*/    Dynamic_float_array();
+/*_______*/    virtual ~Dynamic_float_array();
+/*_______*/ public:
+/* 980318*/    inline virtual bool   good()                                const { return array != 0; };
+/*070213_*/    inline const float32 *get_array()                           const { return array; };
+/*070213_*/    inline       float32 *get_array()                                 { return array; };
+/*_______*/		   // get_array() function should only be used if you know what you are doing!!!
+/*_______*/ public:
+/*_______*/    virtual void reallocate_array(uint32 new_bloated_size)      const;
+/*_______*/
+/*990401_*/    virtual float32 set(uint32 index,float32 value)         not_const;
+/*_______*/    virtual void set_values(float32 values[],uint32 count)  not_const;
+/*_______*/    virtual void copy(const Dynamic_float_array &from_copy, uint32 new_size = 0);
+/*990409_*/    float32 get_allow_resize(uint32 index )                 not_const; // current not const, but perhaps mutable would be appropriate
+/*990409_*/    float32 get_no_resize(uint32 index )                        const; // No resizing
+/*990409_*/    inline float32 get(uint32 index )                           const { return get_no_resize(index ); };
+
+/*_______*/    float32 sum(uint32 upto_index)                              const;
+/*_______*/    float32 sum()                                               const;
+/*040921_*/    float32 find_minimum(uint32 upto_index )                    const;
+/*040921_*/    float32 find_minimum()                                      const;
+/*040921_*/    float32 find_maximum(uint32 upto_index)                     const;
+/*040921_*/    float32 find_maximum()                                      const;
+/*050907_*/    uint16  find_minimum_index()                                const;
+/*_______*/       // Returns the index of the minimum value;
+/*040921_*/    inline virtual float32 get_min()                            const { return find_minimum();};
+/*040921_*/    inline virtual float32 get_max()                            const { return find_maximum();};
+/*070213_*/    // All the following XXXX_by methods return the updated sum of the array
+/*_______*/    virtual float32 increment_by(const Dynamic_float_array &addends)     not_const;
+/*_______*/    virtual float32 decrement_by(const Dynamic_float_array &subtrahends) not_const;
+/*990409_*/    virtual float32 increment_by(uint32 at_index,float32 value)          not_const;
+/*990409_*/    virtual float32 decrement_by(uint32 at_index,float32 value)          not_const;
+/*m010523*/       // Add the value to the entry at the specified index.
+
+//990409_NYI   float32 increment_by(float32 delta);
+//990409_NYI   float32 decrement_by(float32 delta);
+                  // These would change the value to all elements by the delta amount
+                  // and return the new sum of the array
+/*990409_*/    virtual float32 multiply_by(float32 multiplier)         not_const;
+/*m010523*/       // Multiply each entry by value and set the result backinto the entry.
+/*990409_*/    virtual float32 divide_by(float32 divisor)              not_const;
+/*m010523*/       // Divide each entry by value and set the result backinto the entry.
+/*m010523*/       // If value is 0, the entries are set to an infiniately large number
+/*m010523*/       // with sign matching the original entry value.
+/*980721_*/    virtual void remove(uint32 at_index)                    not_const;
+/*m010523*/       // This removes the number at the specified index.
+/*m010523*/       // all following array elements are moved down one cell and the ?max_index? is decremented
+/*m980305*/    virtual float32 append(float32 value)                   not_const;
+/*m010523*/       // append adds the specified value to the end of the data set.
+/*m010523*/    virtual void append_array(const Dynamic_float_array &values)      not_const;          // this should be renamed append_dynamic_array
+/*_______*/       // appends all the values to this array
+/*040916_*/       // was simply append but this overrode the scalar append.
+/*m980310*/    virtual void clear()                                    not_const;
+/*_______*/ public:  // The following methods are usually provided in derived classes
+/*_______*/    virtual void sort(Ordering ordering = ASCENDING /*091217 bool ascending = true*/) ;
+/*091217_*/    inline bool get_order()                            const { return order;}
+
+/*050107_*/	public: // Output
+///*050107_*/		void dump(STD_NS ostream &strm,uint8 precision, bool indexed = false, char delimiter = ',',  const char *variable = 0, const char *section = 0);
+//050107_//		This outputs the dataset values to the specified stream.
+//050107_//		If indexed is false the format format is dataset=9.999,9.999,....
+//050107_//		If indexed is true the format is dataset=1=9.999,2=9.999 with
+//050107_//		If section is specified  [section] will be output where section is the specified character string
+//050107_//		I.e. dump(cout,3, true,'\n',0,"my_section")
+//050107_//    Will give:
+//050107_//		[my_section]
+//050107_//		1=9.999
+//050107_//		2=9.999
+//050107_//		:
+//050107_//		I.e. dump(cout,2, false,',',"my_var",0)
+//050107_//    Will give:
+//050107_//		my_var=9.99,9.99,9.99 . . .
+/*_______*/ };
+/*______*/  }; // namespace CORN
+
+#endif
+

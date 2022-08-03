@@ -1,0 +1,16 @@
+#include "UED/convert/convert_response.h"
+#include "import_export_engine.h"
+#include "corn/OS/file_system_logical.h"
+namespace CORN { namespace OS {
+File_system &file_system() { return CORN::OS::file_system_logical; }
+}}
+//______________________________________________________________________________
+int main (int argc, const char *argv[])
+{
+
+   Convert_response_data_record parameters;
+   bool geolocation_encountered_not_used=false;
+   parameters.read_from_command_line(argc,argv,geolocation_encountered_not_used);
+   return UED::Quality_import_export_engine(parameters).process();
+}
+//_2014-06-14___________________________________________________________________

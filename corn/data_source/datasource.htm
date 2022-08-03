@@ -1,0 +1,139 @@
+
+I have created two C++ classes 
+for working with dBase III/IV tables, you are welcome to try.
+
+I have two models for working with dBase.
+My old model is a conventional brute force way of working with tables
+where if creating a table, you need to specified the fields, types
+sizes, etc.. When reading a table, the field layouts are loaded when the
+file is open.  When you want to read a record, you position the record pointer,
+this load all the fields into a buffer structure, and you get the data 
+for each field using a series of get_xxx(field_name).  
+For writing, you use set_xxx(field_name,value).
+There is a different get for each type.
+
+My new model is a much more elegant approach.
+My dBase class is derived from an abstract Data_source class.
+You do not have to declare the fields in the database.
+Instead, you create a Class derived from an abstract Data_record class,
+and override the expect_structure() method describing the fields
+and which member variables in your class they are to be bound to.
+
+I.e.
+
+char *enum_label_table
+{ "X"
+, "A"
+, "B"
+, "C"
+, 0
+};
+
+
+class My_data_record
+: public Data_record
+{
+public:
+	int16			ID;
+	CORN_string		name;
+	float32		value;
+	Enum			code;
+	bool			enable;
+public:
+   My_data_record()
+   : Data_record()
+   {};
+
+   virtual void expect_structure()
+   {
+	#define MAX_NAME_FIELD_LENGTH 100
+	Data_record::expect_structure();
+       expect_int16("ID",id);
+       expect_string("name",name,MAX_NAME_FIELD_LENGTH);
+	expect_float32("value",value);
+       expect_enum("code",code,enum_label_table);
+       expect_bool("enable",enable);
+   };
+};
+
+To a open the database and write records you simply do something like:
+
+dBase_data_source my_table("mytable.dbf");
+for (int i = 1; i <= 10; i++)
+{
+	My_data_record my_record;
+	//set up your member variables as needed:
+	my_record.ID = i;
+	my_record. etc ......
+	my_table.set(my_record);
+};
+
+If the database, already exists, the record will be appended.
+If the database does not exist, it will be created with fields
+matching the expected structure when you set the first record.
+THIS HAS SAVED me a lot of time in 
+
+If you want to overwrite a record (I.e. record 5) use set_position:
+
+	my_record.set_position(5);
+	my_table.set(my_record);
+
+The data record model is designed to work with different
+types of data sources, I.e. I have data sources for,
+INI like files, CGI form data (testing),
+Borland C++ builder database tables (testing);
+so you can store you any instance Data_record derived class into any
+Data_source derived object.
+
+To read records, open the database, position the record pointer and
+use the get() method:
+
+	My_data_record my_record;
+	dBase_data_source my_table("mytable.dbf");
+	for (bool good = my_table.goto_BOF(5)
+           ;good
+           ;my_table.goto_next())
+	{ my_table.get(my_record);
+	  : 
+       };
+
+All the conversion of field values into C++ member instances is
+handled automatically by the dBase_data_source object and field values
+are automatically bound and assigned to class member variables
+as specified in the expect_structure() method.
+Notice the enumeration type, which will automatically convert
+possible string constants (codes etc.) into enumerated values.
+
+My classes can create tables, read and write records
+(reading/writing fields directly into/from a object instance).
+It has indexing (not dbase index files) with 
+a simple index class I provide creates a index on a single field,
+but you could derive your own with a more complex key, 
+or an application specific index.
+
+Methods of the new dBase_data_source include
+(Most of these methods are also provided in my old dBase model):
+
+show_deleted()  
+Used to enable/disable deleted records when positioning the record pointer.
+
+goto_xxx()	  
+Several methods for positioning the record pointer, moving forward or backward
+
+duplicate_record() 
+Creates a copy of the specified record number.
+
+copy_record(from_file)  
+Create a record copying matching fields from the current record in the specified second file.
+
+delete_record()
+undelete_record()
+Mark/unmark the current record as deleted.
+(Currently there is no method to clean deleted records)
+
+get()
+set()
+
+
+
+

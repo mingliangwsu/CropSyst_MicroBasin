@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">Default.Personality</Option>
+			<Option Name="ProjectType"></Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{52806369-F2CA-465E-BF60-A47438C871E8}</Option>
+		</Option>
+	</PersonalityInfo>
+	<Default.Personality>  <Projects>
+      <Projects Name="container_static.lib">..\..\..\..\..\corn\container\BDS\container_static.bdsproj</Projects>
+      <Projects Name="corn_static.lib">..\..\..\..\..\corn\BDS\corn_static.bdsproj</Projects>
+      <Projects Name="ued_static.lib">..\..\..\..\library\BDS\ued_static.bdsproj</Projects>
+      <Projects Name="file_sys_static.lib">..\..\..\..\..\corn\file_sys\BDS\file_sys_static.bdsproj</Projects>
+      <Projects Name="parameters_static.lib">..\..\..\..\..\corn\parameters\BDS\parameters_static.bdsproj</Projects>
+      <Projects Name="datetime_static.lib">..\..\..\..\..\corn\datetime\BDS\datetime_static.bdsproj</Projects>
+      <Projects Name="format_static.lib">..\..\..\..\..\corn\format\BDS\format_static.bdsproj</Projects>
+      <Projects Name="UED_spatial_interpolate.exe">UED_spatial_interpolate.bdsproj</Projects>
+      <Projects Name="Targets">container_static.lib corn_static.lib ued_static.lib file_sys_static.lib parameters_static.lib datetime_static.lib format_static.lib UED_spatial_interpolate.exe</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+</BorlandProject>

@@ -1,0 +1,91 @@
+#include "arguments_CropSyst.h"
+#include <string.h>
+
+namespace CropSyst
+{
+bool LADSS_mode = false;
+//______________________________________________________________________________
+Arguments::Arguments
+(CS::Identification &ID_)                                                        //160222
+//160829 ,int argc_, const char *argv_[]
+
+: CS::Arguments      (ID_/*160829 ,argc_,argv_*/)                                //160222
+, scenario_directory (0)
+{}
+//_2015-04-15___________________________________________________________________
+Arguments::Arguments
+(CS::Identification &ID_                                                         //160222
+,int32 cell_ID, int32 crop_index)
+: CS::Arguments(ID_/*160829 ,0,0*/)
+, scenario_directory(0)                                                          //150422
+{ // Constructor of VIC_CropSyst
+   char cell_ID_cstr[10];     int32_to_cstr(cell_ID,cell_ID_cstr);
+   char crop_index_cstr[10];  int32_to_cstr(crop_index,crop_index_cstr);
+   //161026 unused nat32 scenario_ID = (crop_index << 24) | cell_ID;
+   ID.set_number(cell_ID);                                                       //160222
+   CORN::OS::Directory_name_concrete CWD;
+   #ifdef VIC_CROPSYST_VERSION
+   scenario_directory_name = new CORN::OS::Directory_name_concrete(CWD);         //160504LML
+   #else
+   CORN::OS::Directory_name_concrete cell_ID_directory(CWD,cell_ID_cstr,CORN::OS::directory_entry); //161029
+   scenario_directory_name = new CORN::OS::Directory_name_concrete(cell_ID_directory,crop_index_cstr,CORN::OS::directory_entry); //161029
+   #endif
+}
+//_2015-04-15___________________________________________________________________
+Arguments::~Arguments()
+{  delete scenario_directory; scenario_directory = 0;
+}
+//_2015-04-15___________________________________________________________________
+CropSyst::Scenario_directory &Arguments::provide_scenario_directory() provision_
+{
+   //std::clog << "provide_scenario_directory_name:\t"<<provide_scenario_directory_name() << std::endl;
+   if (!scenario_directory)
+      scenario_directory = new CropSyst::Scenario_directory(provide_scenario_directory_name(),false);
+   return *scenario_directory;
+}
+//_2015-04-15___________________________________________________________________
+bool Arguments::invalidate_scenario_directory()                    modification_
+{
+   delete scenario_directory; scenario_directory = 0;
+   return CS::Arguments::invalidate_scenario_directory();
+}
+//_2016-01-14___________________________________________________________________
+bool Arguments::recognize_filename(const CORN::OS::File_name &param_filename)
+{  bool recognized = true;
+   if (param_filename.has_extension_ASCII("dbf"))
+      GIS_override_table.assign(param_filename.c_str());
+   return recognized;
+}
+//_2015-04-15___________________________________________________________________
+//______________________________________________________________________________
+Arguments_V4::Arguments_V4
+(CS::Identification &ID_)                                                        //160222
+: Arguments(ID_)
+, format_filename(0)
+{}
+//_2015-04-15___________________________________________________________________
+bool Arguments_V4::recognize_argument
+(const std::string &curr_arg)                                      modification_
+{  bool recognized = true;
+   if      (curr_arg == "LADSS")
+   {  LADSS_mode = true; //021206
+   }
+   else if ((curr_arg == "NOGRAPH") || (curr_arg == "nograph"))
+      verbose = false;                                                           //160311
+   recognized = Arguments::recognize_argument(curr_arg);
+   return recognized;
+}
+//_2015-04-15___________________________________________________________________
+bool Arguments_V4::recognize_filename(const CORN::OS::File_name &param_filename)
+{  bool recognized = true;
+   if (param_filename.has_extension_ASCII("fmt") || param_filename.has_extension_ASCII("FMT"))
+   {
+      format_filename = new CORN::OS::File_name_concrete(param_filename);
+   } else Arguments::recognize_filename(param_filename);
+   return recognized;
+}
+//_2015-04-15___________________________________________________________________
+
+
+} // namespace CropSyst
+

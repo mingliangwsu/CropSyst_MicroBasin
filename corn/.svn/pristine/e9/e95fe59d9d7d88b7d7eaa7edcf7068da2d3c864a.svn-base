@@ -1,0 +1,298 @@
+#include "corn/container/bilist.h"
+#include "corn/tabular/tabular_format.h"
+namespace CORN {
+///////////////////////////////////////////////////////////////////////////////
+#define LABEL_format                "format"
+#define LABEL_header_terminator     "header_terminator"
+#define LABEL_column_headers        "column_headers"
+#define LABEL_rows                  "rows"
+#define LABEL_units_rows            "units_rows"
+#define LABEL_units_start_row       "units_start_row"
+#define LABEL_detail_lines          "detail_lines"
+#define LABEL_header_field          "header_field"
+#define LABEL_column                "column"
+//______________________________________________________________________________
+const char *variable_order_label_table[] =
+{  "fixed"
+,  "variable"
+,0 };
+//______________________________________________________________________________
+#define     LABEL_data "data"
+
+// This constructor is used when creating a new format using an editor
+Common_tabular_file_format::Common_tabular_file_format
+(Format_file_type _format_file_type)
+:Common_parameters_data_record (NO_ASSOCIATED_DIRECTORY,"format" /*180626 ,0,0,1*/)          //040925
+,Extent_layout() // Delineation_layout()
+,format_file_type_labeled(_format_file_type)
+,big_endian(false) // assume Intel processors
+,carriage_return_line_feed(false)
+,paginated(false)                                                                //070925
+,FORTRAN_carriage_control(false)                                                 //020525
+,defined_by("")                                                                  //990307
+,defined_date() // default today                                                 //990307
+,header_terminator(0)                                                            //990507
+,column_headers_every_page(false)                                                //070925
+,column_headers_delineation()
+,detail_lines_delineation()                                                      //050411
+,columns_1based()                                                                //040925
+,variable_order_labeled(fixed_order)                                             //020505
+,missing_data_marker("")                                                         //090305
+,year_offset_for_dates_with_only_two_digits(0)                                   //120331
+,cgi_form_server("")                                                             //090305
+,cgi_form_action("")                                                             //090305
+,cgi_form_method("")                                                             //090305
+{ }
+//______________________________________________________________________________
+// This constructor is used when loading a format
+Common_tabular_file_format::Common_tabular_file_format
+(const std::string &/*unused i_description*/
+,Format_file_type   _format_file_type)
+:Common_parameters_data_record(NO_ASSOCIATED_DIRECTORY,"format"/*180626,0,0,1*/)          //040925
+,Extent_layout() // Delineation_layout()
+,format_file_type_labeled(_format_file_type)
+,big_endian(false) // assume Intel processors
+,carriage_return_line_feed(false)
+,paginated(false)                                                                //070925
+,FORTRAN_carriage_control(false)                                                 //020525
+,defined_by("")                                                                  //990307
+,defined_date() // default today                                                 //990307
+,header_terminator(0)                                                            //990507
+,column_headers_every_page(false)                                                //070925
+,column_headers_delineation()
+,detail_lines_delineation()                                                      //050411
+,columns_1based()                                                                //040925
+,variable_order_labeled(fixed_order)                                             //020505
+,missing_data_marker("")                                                         //090305
+,year_offset_for_dates_with_only_two_digits(0)                                   //120331
+,cgi_form_server("")                                                             //090305
+,cgi_form_action("")                                                             //090305
+,cgi_form_method("")                                                             //090305
+{}
+//______________________________________________________________________________
+// This constructor is used by UED_export file
+Common_tabular_file_format::Common_tabular_file_format()
+:Common_parameters_data_record(NO_ASSOCIATED_DIRECTORY,"format"/*180626 ,0,0,1*/)          //040925
+,Extent_layout() // Delineation_layout()
+,format_file_type_labeled(FILE_TYPE_unknown)
+,big_endian(false) // assume Intel processors
+,carriage_return_line_feed(false)
+,paginated(false)                                                                //070925
+,FORTRAN_carriage_control(false)                                                 //020525
+,defined_by("")                                                                  //990307
+,defined_date() // default today                                                 //990307
+,header_terminator(0)                                                            //990507
+,column_headers_every_page(false)                                                //070925
+,column_headers_delineation()
+,detail_lines_delineation()                                                      //050411
+,columns_1based()                                                                //040925
+,variable_order_labeled(fixed_order)                                             //020505
+,missing_data_marker("")                                                         //090305
+,year_offset_for_dates_with_only_two_digits(0)                                   //120331
+,cgi_form_server("")                                                             //090305
+,cgi_form_action("")                                                             //090305
+,cgi_form_method("")                                                             //090305
+{}
+//______________________________________________________________________________
+const char *format_file_type_label_table[] =
+{"unknown"
+,"text"
+,"binary"
+,"dBase"
+,"Lotus123"
+,"Excel"
+,0};
+//______________________________________________________________________________
+#define LABEL_description      "description"
+#define LABEL_time_step        "time_step"
+#define LABEL_format_file_type "format_file_type"
+#define LABEL_big_endian       "big_endian"
+#define LABEL_carriage_return_line_feed        "carriage_return_line_feed"
+#define LABEL_FORTRAN_carriage_control "FORTRAN_carriage_control"
+#define LABEL_defined_by       "defined_by"
+#define LABEL_defined_date     "defined_date"
+#define LABEL_notes            "notes"
+#define LABEL_time_step_units "time_step_units"
+// These are 1 based indexes  (because column references (in identification need to be 1 based)
+DECLARE_CONTAINER_ENUMERATED_SECTION(Common_tabular_file_format::Column,Column_section_VV,1);
+//______________________________________________________________________________
+bool Common_tabular_file_format::expect_structure(bool for_write )
+{  bool expected = Common_parameters_data_record::expect_structure(for_write );  //161023_120314
+   structure_defined = false;                                                    //120314
+   set_current_section(LABEL_format);
+      setup_structure(*this,for_write);                                          //050411
+      //Item::setup_structure(*this,for_write);                                    //180326
+      //Extent_layout::setup_structure(*this,for_write);                           //180326
+      expect_string(LABEL_description
+         ,description.brief
+         ,ARBITRARY_STRING_LENGTH_512);
+      expect_enum(LABEL_format_file_type,format_file_type_labeled);              //020505
+      expect_bool(LABEL_big_endian,big_endian,VV_bool_entry::form_true);
+      expect_bool(LABEL_carriage_return_line_feed,carriage_return_line_feed,VV_bool_entry::form_true);
+      expect_bool("paginated",paginated);                                        //070925
+      expect_bool(LABEL_FORTRAN_carriage_control,FORTRAN_carriage_control,VV_bool_entry::form_true); //020525
+      expect_string(LABEL_defined_by,defined_by,ARBITRARY_STRING_LENGTH_512);
+      expect_int32(LABEL_defined_date,defined_date.date_num);
+      //170525 expect_date(LABEL_defined_date,defined_date,false);
+      expect_enum("column_order",variable_order_labeled);                        //060324
+      expect_int16(LABEL_header_terminator,header_terminator);                   //040925
+      expect_int16("year_offset_when_only_two_digits",year_offset_for_dates_with_only_two_digits); //120331
+   set_current_section("data_markers");                                          //050516
+      expect_string("missing",missing_data_marker,ARBITRARY_STRING_LENGTH_256);  //050516
+   set_current_section(LABEL_column_headers);
+      column_headers_delineation.setup_structure(*this,for_write);               //040925
+      expect_bool("column_headers_every_page",column_headers_every_page);        //070925
+      expect_int16(LABEL_rows             ,column_headers_delineation.rows);
+      expect_int16("units_row_offset"     ,column_headers_delineation.units_row_offset);
+      expect_int16(LABEL_units_rows       ,column_headers_delineation.units_rows);
+      expect_bool("units_parenthesis"     ,column_headers_delineation.units_parenthesis); //060324
+      expect_string("1",column_header_static/*[1]*/,1024); //  column_header_static, 1024, 1 , 9 ,false);         //100104
+   set_current_section(LABEL_detail_lines);
+      expect_int16(LABEL_time_step,detail_lines_delineation.time_step);          //060223
+      expect_enum(LABEL_time_step_units,detail_lines_delineation.time_step_units_enum); //060626
+      detail_lines_delineation.setup_structure(*this,for_write);                 //050411
+   set_current_section(LABEL_format);
+   // column section is done from ET_tabular_format::Column   EXPECT_ENUMERATED_SECTION(LABEL_column,Column_section_VV,columns_1based);
+   /*131209  I dont remember what the sample was for (perhaps debuggin)g
+   set_current_section("sample");                                                //060621
+      expect_file_name("excel",sample_excel_filename);                            //060621
+   */
+   structure_defined = true;                                                     //120314
+   return expected;
+}
+//______________________________________________________________________________
+bool Common_tabular_file_format::set_start()
+{
+   // we need to tell the header_fields what format
+   // so we don't write unecessary fields for the format
+#ifdef CHECK_NEEDED
+100117 Don't remember what I was doing with this.
+It may be obsolete because I now using parameter properties to get the units codes and caption
+   FOR_EACH_IN(column,Common_tabular_file_format::Column,columns_1based,each_column)
+   {  // set the column units_code translated from units_code  if "" and vica versa
+      if (column->units_description=="")
+         column->units_description = column->smart_units_code_enum.get_label();
+      if (column->smart_units_code_enum.get_int32() == 0)
+          column->smart_units_code_enum.set_label(column->units_description.c_str());
+      //                Don't need to worry about UED_import_to_smart_units_code
+   } FOR_EACH_END(each_column)
+#endif
+   return Common_parameters_data_record::set_start();                                   //051028
+}
+//_2005-04-05________________________________________________________set_start_/
+bool Common_tabular_file_format::get_end()
+{
+#ifdef CHECK_NEEDED
+100117 Don't remember what I was doing with this.
+It may be obsolete because I now using parameter properties to get the units codes and caption
+   FOR_EACH_IN(column,Common_tabular_file_format::Column,columns_1based,each_column)
+   {  // set the column units_code translated from units_code  if "" and vica versa
+      if (column->units_description=="")
+         column->units_description =  column->smart_units_code_enum.get_label();
+      if (column->smart_units_code_enum.get_int32() == 0)
+          column->smart_units_code_enum.set_label(column->units_description.c_str());
+   } FOR_EACH_END(each_column);
+#endif
+   return Common_parameters_data_record::get_end();                                     //051028
+}
+//_2005-04-11__________________________________________________________get_end_/
+bool Common_tabular_file_format::Column::setup_structure(CORN::Data_record &data_rec,bool for_write) modification_
+{  bool satup = Tabular_column::setup_structure(data_rec,for_write);
+   if (!for_write)
+   {  //10017  For backward compatibility, eventually delete  (there should not be a lot of files with this entry and units didn't match except for dates).
+         data_rec.expect_enum("units_code",   units); // I used to store the numeric units code in hex
+         data_rec.expect_string("description",caption ,255); // Description is being replaced by Caption //060626_
+   }
+   return satup;
+}
+//_2004-09-26___________________________________________________________________
+bool Common_tabular_file_format::Column::is_key_string(const std::string &key)              affirmation_  //180820
+{ return CORN::Tabular_column::is_key_string(key); }
+
+/*180820  was probably only used for find_cstr now using is_key
+
+const char *Common_tabular_file_format::Column::get_key()                  const
+{  return CORN::Tabular_column::get_key();                                       //100116
+}
+*/
+//_2003-09-26___________________________________________________________________
+void Common_tabular_file_format::reset_for_file_type()
+{  // In the user interface, when the file type is change
+   // we can set up some options that we know are not relevent for the file type.
+   switch (format_file_type_labeled.get())
+   {  case FILE_TYPE_binary :
+         column_headers_delineation.text_quote_mode_labeled.set(Delineation_layout::NO_QUOTE);
+         column_headers_delineation.delimit_mode_labeled.set(Delineation_layout::DELIMIT_intrinsic);
+         detail_lines_delineation. text_quote_mode_labeled.set(Delineation_layout::NO_QUOTE);
+         detail_lines_delineation.delimit_mode_labeled.set(Delineation_layout::DELIMIT_intrinsic);
+      break;
+      case FILE_TYPE_dBase :
+         column_headers_delineation.text_quote_mode_labeled.set(Delineation_layout::NO_QUOTE);
+         column_headers_delineation.delimit_mode_labeled.set(Delineation_layout::DELIMIT_intrinsic);
+         detail_lines_delineation. text_quote_mode_labeled.set(Delineation_layout::NO_QUOTE);
+         detail_lines_delineation.delimit_mode_labeled.set(Delineation_layout::DELIMIT_intrinsic);
+      break;
+      case FILE_TYPE_lotus123 : // same as excel
+      case FILE_TYPE_Excel :
+         column_headers_delineation.text_quote_mode_labeled.set(Delineation_layout::NO_QUOTE);
+         column_headers_delineation.delimit_mode_labeled.set(Delineation_layout::DELIMIT_intrinsic);
+         detail_lines_delineation. text_quote_mode_labeled.set(Delineation_layout::NO_QUOTE);
+         detail_lines_delineation.delimit_mode_labeled.set(Delineation_layout::DELIMIT_intrinsic);
+      break;
+      case FILE_TYPE_text :
+      case FILE_TYPE_unknown :                                                   //091130
+           //Should need to change anything for text user can define all
+      break;
+   }
+}
+//_2006-06-26______________________________________________reset_for_file_type_/
+bool Common_tabular_file_format::default_R_text()                  modification_
+{
+   // Sets up format and delimit for R import/export text files.
+   start_row_1_based=1;
+   format_file_type_labeled.set(FILE_TYPE_text);
+   carriage_return_line_feed  = false;
+   paginated                  = false;
+   FORTRAN_carriage_control   = false;
+   column_headers_every_page  = false;
+   variable_order_labeled.set(variable_order);
+   missing_data_marker        = "";  // R can also be told to recognise  "NA" and "." and "na"
+   bool col_delineation_set =
+       column_headers_delineation.default_R_text()
+    && detail_lines_delineation  .default_R_text();
+
+   column_headers_delineation.start_row_1_based = 1;
+   detail_lines_delineation.start_row_1_based = 2;
+   return col_delineation_set;
+}
+//_2014-10-08___________________________________________________________________
+bool Common_tabular_file_format::copy_from(const Common_tabular_file_format& source) //141008
+{
+   start_row_1_based          = source.start_row_1_based;
+   format_file_type_labeled.set(source.format_file_type_labeled.get());
+   carriage_return_line_feed  = source.carriage_return_line_feed;
+   paginated                  = source.paginated;
+   FORTRAN_carriage_control   = source.FORTRAN_carriage_control;
+   column_headers_every_page  = source.column_headers_every_page;
+   variable_order_labeled.set(source.variable_order_labeled.get());
+   missing_data_marker        = source.missing_data_marker;  // R can also be told to recognise  "NA" and "." and "na"
+   return
+      // NYIExtent_layout::copy_from(source)   &&
+       column_headers_delineation.copy_from(source.column_headers_delineation)
+    && detail_lines_delineation  .copy_from(source.detail_lines_delineation);
+}
+//_2014-10-08___________________________________________________________________
+nat16 Common_tabular_file_format::get_width_column(nat16 column_index)     const
+{
+   Column *col = dynamic_cast<Column *>(columns_1based.get_at(column_index));
+   return col ? col->field_width : 0;
+}
+//2017-03-27____________________________________________________________________
+nat16 Common_tabular_file_format::get_start_column(nat16 column_index)     const
+{
+   Column *col = dynamic_cast<Column *>(columns_1based.get_at(column_index));
+   return col ? col->start_1based : 0;
+}
+//2017-03-27____________________________________________________________________
+} // namespace CORN
+

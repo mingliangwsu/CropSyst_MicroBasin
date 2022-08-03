@@ -1,0 +1,5 @@
+Classes for programs that have many support files, 
+associated subdirectory, or collections of programs.
+
+Provides facilities for consistent organization of directory,
+Help, Manuals etc..

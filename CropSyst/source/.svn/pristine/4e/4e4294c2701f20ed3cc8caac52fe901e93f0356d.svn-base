@@ -1,0 +1,145 @@
+#include "soil/chemical_balance.h"
+#include <iostream>
+#include "rptoptns.h"
+#include <math.h>
+#ifndef compareHPP
+#  include "corn/math/compare.hpp"
+#endif
+#include "static_phrases.h"
+#include "corn/measure/measures.h"
+//_____________________________________________________________________________/
+#ifndef REACCH_VERSION
+#if (CROPSYST_VERSION==4)
+report_var_layout_with_graph report_chem_var_opts[] =
+{ {YLY_HRV_CHEM_ID                  , 0,0,0,0,0                                  ,false,LAYOUT_NO_OPTIONS}
+, {YLY_HRV_applied                  , 7,3,TU__kgN_ha_,UC_kg_ha,TL_applied        ,true ,LAYOUT_NO_OPTIONS}
+, {YLY_HRV_transformation           , 7,3,TU__kgN_ha_,UC_kg_ha,TL_transformation ,true ,LAYOUT_NO_OPTIONS}
+, {YLY_HRV_uptake                   , 7,3,TU__kgN_ha_,UC_kg_ha,TL_uptake         ,true ,LAYOUT_NO_OPTIONS}
+, {YLY_HRV_leached                  , 9,2,TU__kgN_ha_,UC_kg_ha,TL_leached        ,true ,LAYOUT_NO_OPTIONS}
+, {YLY_HRV_initial_profile_content  , 9,9,TU__kgN_ha_,UC_kg_ha,TL_Initial_profile_content ,true ,LAYOUT_NO_OPTIONS}
+, {YLY_HRV_final_profile_content    , 9,2,TU__kgN_ha_,UC_kg_ha,TL_Final_profile_content   ,true ,LAYOUT_NO_OPTIONS}
+//011115_NYI, {YLY_HRV_recalibration            , 9,2,TU__kgN_ha_,UC_kg_ha,TL_Recalibration,true)  This output will be added ASAP
+, {YLY_HRV_balance                  , 7,3,TU__kgN_ha_,UC_kg_ha,TL_balance        ,true ,LAYOUT_NO_OPTIONS}
+};
+//_______________________________________________________report_chem_var_opts__/
+void Chemical_balance_reporter::write_header(Report_writer &report
+,Chemical_balance_accumulators &chem_bal_accums)                                 //040931
+{
+   if (report.report_options.write_enabled)
+   {
+      std::string chemical_name_transformation(chem_bal_accums.chemical_name);   //040428
+      chemical_name_transformation.append(" ");                                  //040428
+      chemical_name_transformation.append(chem_bal_accums.transformation_label); //040428
+      report.write_column_header(&report_chem_var_opts[chem_var_applied]         ,FIRST_COLUMN_HEADER_LINE_ROW,chem_bal_accums.chemical_name);
+      report.write_column_header(&report_chem_var_opts[chem_var_transformation]  ,FIRST_COLUMN_HEADER_LINE_ROW,chemical_name_transformation);
+      if (chem_bal_accums.has_uptake)
+          report.write_column_header(&report_chem_var_opts[chem_var_uptake]      ,FIRST_COLUMN_HEADER_LINE_ROW,chem_bal_accums.chemical_name);
+      report.write_column_header(&report_chem_var_opts[chem_var_leached]         ,FIRST_COLUMN_HEADER_LINE_ROW,chem_bal_accums.chemical_name);
+      report.write_column_header(&report_chem_var_opts[chem_var_content]         ,FIRST_COLUMN_HEADER_LINE_ROW,chem_bal_accums.chemical_name);
+      report.write_column_header(&report_chem_var_opts[chem_var_initial_content] ,FIRST_COLUMN_HEADER_LINE_ROW,chem_bal_accums.chemical_name);
+      report.write_column_header(&report_chem_var_opts[chem_var_final_content]   ,FIRST_COLUMN_HEADER_LINE_ROW,chem_bal_accums.chemical_name);
+      //report.write_column_header(report_chem_var_opts[chem_var_depletion]        ,FIRST_COLUMN_HEADER_LINE_ROW,chemical_name);
+      //011115_NYI,     report.write_column_header(report_chem_var_opts[chem_var_recalibration]    ,FIRST_COLUMN_HEADER_LINE_ROW,chemical_name);
+      report.write_column_header(&report_chem_var_opts[chem_var_balance]         ,FIRST_COLUMN_HEADER_LINE_ROW,chem_bal_accums.chemical_name);
+   }
+}
+//_______________________________________________________________write_header__/
+void Chemical_balance_reporter::write_detail
+(Report_writer &report
+,Chemical_balance_accumulators &chem_bal_accums)                                 //040931
+{
+   if (report.report_options.write_enabled)
+   {  report.write_real((chem_bal_accums.get_applied(true))                   * over_m2_to_ha ,7,3);
+      report.write_real((chem_bal_accums.get_transformed_from(true))          * over_m2_to_ha ,7,3);
+      if (chem_bal_accums.has_uptake)
+         report.write_real((chem_bal_accums.get_uptake(true))                 * over_m2_to_ha ,7,3);
+      report.write_real((chem_bal_accums.get_balance_leached(true))           * over_m2_to_ha ,7,3);  //981230
+      report.write_real((chem_bal_accums.get_original_profile_content(true))  * over_m2_to_ha ,7,3);
+      report.write_real((chem_bal_accums.get_current_profile_content(true))   * over_m2_to_ha ,7,3);  //981006
+      report.write_real((chem_bal_accums.get_balance_error(true))             * over_m2_to_ha ,7,3);
+   }
+}
+//_______________________________________________________________write_detail__/
+#endif
+#endif
+Chemical_balance_accumulators::Chemical_balance_accumulators
+   (float64           _original_profile_content_M
+   ,std::string       &_chemical_name                                            //040931
+   ,const std::string &_transformation_label                                     //040931
+   ,float64        _chem_to_element_factor
+   ,bool           _has_uptake)                                                  //040931
+   :original_profile_content_M(_original_profile_content_M)
+   ,transformed_to_M          (0)
+   ,transformed_from_M        (0)
+   ,applied_irrig_soil_M      (0)
+   ,applied_M                 (0)
+   ,balance_leached_M         (0)
+   ,reported_leached_M        (0)
+   ,uptake_M                  (0)
+   ,residue_M                 (0)
+   ,total_requirements        (0)
+   ,current_profile_content_M (0)
+   ,recalibration_M           (0)                                                //011115
+
+   ,balance_error             (0)
+   ,pending_infiltration                 (0)                                     //071016
+   ,chemical_name          (_chemical_name)                                      //041001
+   ,transformation_label   (_transformation_label)                               //041001
+   ,has_uptake             (_has_uptake)                                         //041001
+   ,chem_to_element_factor (_chem_to_element_factor)
+{}
+//__________________________________Chemical_balance_accumulators_constructor__/
+float64 Chemical_balance_accumulators::balance
+(float64 i_current_profile_content_M)
+{
+   current_profile_content_M = i_current_profile_content_M;
+   balance_error =
+         + original_profile_content_M
+         + transformed_from_M
+         + applied_irrig_soil_M
+         + residue_M
+         - pending_infiltration                                                  //071016
+         - recalibration_M                                                       //011115
+         - current_profile_content_M                                             //981006
+         - transformed_to_M
+         - balance_leached_M
+         - uptake_M;
+   float64 acceptable_error =                                                    //991205
+      CORN::must_be_greater_or_equal_to<float64>
+      (0.5 *         //110825  was 0.05
+       (+ original_profile_content_M + transformed_from_M),0.00001);             //990311
+
+//std::cerr << std::endl << chemical_name << " balance error:" << balance_error << std::endl;
+
+   if (fabs(balance_error) < acceptable_error)                                   //990311
+      balance_error = 0.0;                                                       //990311
+
+if (!CORN::is_approximately<float64>(balance_error,0.0,0.001))
+{
+std::cerr << std::endl << chemical_name << " balance error:" << balance_error
+<< " acceptable:" << acceptable_error
+<< " chemical load:" << (+ original_profile_content_M + transformed_from_M)
+<< std::endl;
+std::cerr
+<< "OPC:" << original_profile_content_M << std::endl
+<< "TRf:" << transformed_from_M << std::endl
+<< "app:" << applied_irrig_soil_M << std::endl
+<< "res:" << residue_M << std::endl
+<< "PIn:" << pending_infiltration << std::endl
+<< "rec:" << recalibration_M << std::endl
+<< "CPC:" << current_profile_content_M << std::endl
+<< "TRt:" << transformed_to_M <<std::endl
+<< "BlL:" << balance_leached_M <<std::endl
+<< "upt:" << uptake_M << std::endl;
+return balance_error;
+}
+
+//if (chemical_name == "salt")
+//cout << balance_error << endl;
+
+   return balance_error;
+}
+//____________________________________________________________________balance__/
+//060206 85 lines
+
+

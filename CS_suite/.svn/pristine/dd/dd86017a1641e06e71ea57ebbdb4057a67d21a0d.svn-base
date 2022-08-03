@@ -1,0 +1,272 @@
+#include "CS_suite/file_system/CS_database_directory.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/seclusion.h"
+#include "corn/container/bilist.h"
+namespace CS
+{
+//______________________________________________________________________________
+Database_directory_context::Database_directory_context
+(
+/*160902
+const CORN::OS::File_system::Directory &simulation_project_or_scenario_dir_parent_dir
+,bool create_now_if_needed                                                       //130126
+,const wchar_t *database_name
+*/
+)
+/*//160902
+:  CORN::OS::File_system_logical::Directory
+   (simulation_project_or_scenario_dir_parent_dir
+   ,database_name,create_now_if_needed)
+*/
+:crop_directory               (0)
+,output_directory             (0)
+,soil_directory               (0)
+,weather_directory            (0)
+,weather_scenarios_directory  (0)
+,management_directory         (0)
+,biomatter_directory          (0)
+,rotation_directory           (0)
+,format_directory             (0)
+,recalibration_directory      (0)
+,water_table_directory        (0)
+,initialization_directory     (0)
+,initialization_H2O_directory (0)
+,initialization_NO3_directory (0)
+,initialization_NH4_directory (0)
+,initialization_OM_directory  (0)
+,STATSGO_states_directory     (0)
+{}
+//______________________________________________________________________________
+Database_directory_context::~Database_directory_context()
+{  reset(); }
+//______________________________________________________________________________
+void Database_directory_context::reset()                                      provision_
+{
+   delete crop_directory;                 crop_directory                = 0;
+   delete output_directory;               output_directory              = 0;
+   delete soil_directory;                 soil_directory                = 0;
+   delete weather_directory;              weather_directory             = 0;
+   delete weather_scenarios_directory;    weather_scenarios_directory   = 0;
+   delete management_directory;           management_directory          = 0;
+   delete biomatter_directory;            biomatter_directory           = 0;
+   delete rotation_directory;             rotation_directory            = 0;
+   delete format_directory;               format_directory              = 0;
+   delete recalibration_directory;        recalibration_directory       = 0;
+   delete water_table_directory;          water_table_directory         = 0;
+   delete initialization_directory;       initialization_directory      = 0;
+   delete initialization_H2O_directory;   initialization_H2O_directory  = 0;
+   delete initialization_NO3_directory;   initialization_NO3_directory  = 0;
+   delete initialization_NH4_directory;   initialization_NH4_directory  = 0;
+   delete initialization_OM_directory;    initialization_OM_directory   = 0;
+   delete STATSGO_states_directory;       STATSGO_states_directory      = 0;
+}
+//______________________________________________________________________________
+provide_directory_name_implementation(Database_directory_context,Crop              ,crop_directory         ,"Crop" )
+provide_directory_name_implementation(Database_directory_context,Output            ,output_directory       ,"Output")
+provide_directory_name_implementation(Database_directory_context,Soil              ,soil_directory         ,"Soil")
+provide_directory_name_implementation(Database_directory_context,Weather           ,weather_directory      ,"Weather" )
+provide_subdir_directory_name_implementation(Database_directory_context,Weather_Scenarios,weather_scenarios_directory,Weather(),"Scenarios")
+provide_directory_name_implementation(Database_directory_context,Management        ,management_directory   ,"Management" )
+provide_directory_name_implementation(Database_directory_context,Biomatter         ,biomatter_directory    ,"Biomatter")
+provide_directory_name_implementation(Database_directory_context,Rotation          ,rotation_directory     ,"Rotation")
+provide_directory_name_implementation(Database_directory_context,Format            ,format_directory       ,"Format")
+provide_directory_name_implementation(Database_directory_context,Recalibration     ,recalibration_directory,"Recalibration")
+provide_directory_name_implementation(Database_directory_context,Water_table       ,water_table_directory  ,"Water_table" )
+provide_directory_name_implementation(Database_directory_context,Initialization    ,initialization_directory,"Initialization")
+/* NYI
+provide_directory_name_implementation(Database_directory,Initialization_H2O,initialization_H2O_directory,filename_literal)
+provide_directory_name_implementation(Database_directory,Initialization_NO3,initialization_NO3_directory,filename_literal)
+provide_directory_name_implementation(Database_directory,Initialization_NH4,initialization_NH4_directory,filename_literal)
+provide_directory_name_implementation(Database_directory,Initialization_OM ,initialization_OM_directory,filename_literal)
+*/
+#if (CS_VERSION==5)
+provide_directory_name_implementation(Database_directory_context,STATSGO2,STATSGO_states_directory,"STATSGO2")
+#endif
+//______________________________________________________________________________
+//______________________________________________________________________________
+Databases::Databases(const CORN::OS::Directory_name &context_dir)
+{  // context_dir would typically be a scenario level,  but could be a project level
+   CORN::Unidirectional_list database_dirs_found;
+   nat32 found_count = CORN::OS::file_system_engine.
+      list_DENs //161013 list_entry_names                                                //160814
+      (context_dir
+      ,0,&database_dirs_found
+      ,CORN::Inclusion("Database/",true)
+      ,CORN::OS::File_system::superdirectory_recursion_inclusive);
+   CORN::OS::Directory_name *database_dir = 0;
+   while (database_dir = dynamic_cast<CORN::OS::Directory_name *>(database_dirs_found.pop_at_head()))
+   {  append(new Database_directory(database_dir)); //given
+   }
+   sort();
+}
+//_2016-09-02___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_in_context_wstring
+(const std::wstring &context_name
+,const std::wstring &name
+,const CORN::OS::Extension &extension)                                rendition_
+{
+//   if (count() == 0) return 0; // no databases so no file
+   CORN::OS::File_name *selected_file = 0;
+   FOR_EACH(DB_dir,Database_directory,each_DB)
+   {
+      CORN::OS::Directory_name_concrete database_context_subdir(*DB_dir->name,context_name);
+      CORN::OS::File_name_concrete *potential_filename_qual
+         = new CORN::OS::File_name_concrete(database_context_subdir,name,extension);
+      if (CORN::OS::file_system_engine.exists(*potential_filename_qual))
+      {  delete selected_file;
+         selected_file = potential_filename_qual;
+      }
+   } FOR_EACH_END(each_DB)
+   return selected_file;
+}
+//_2016-09-02___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_in_context_string
+(const std::wstring &context_name
+,const std::string &name
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   std::wstring name_wide;
+   CORN::string_to_wstring(name,name_wide);
+   return render_find_in_context_wstring(context_name,name_wide,extension);
+}
+//_2016-09-02___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_in_context_int
+(const std::wstring &context_name
+,int number
+,const CORN::OS::Extension &extension)                               rendition_
+{
+   std::wstring name_wide;
+   CORN::append_int32_to_wstring(number,name_wide,10);
+   return render_find_in_context_wstring(context_name,name_wide,extension);
+}
+//_2016-09-02___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_under_context_wstring
+(const std::wstring &context_name
+,const std::wstring &undercontext_name
+,const std::wstring &name
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   CORN::OS::File_name *selected_file = 0;
+   FOR_EACH(DB_dir,Database_directory,each_DB)
+   {
+      CORN::OS::Directory_name_concrete database_context_subdir(*DB_dir->name,context_name);
+      // Note that the context might not necessarily be
+      // in the level's Database directory.
+      CORN::OS::Directory_name *undercontext_subdir =
+         CORN::OS::file_system_engine.find_file_name
+            (undercontext_name,database_context_subdir
+            ,CORN::OS::File_system::subdirectory_recursion_inclusive,0,true);
+      if (undercontext_subdir)
+      {
+         CORN::OS::File_name *potential_filename
+            = new CORN::OS::File_name_concrete(*undercontext_subdir,name,extension);
+         if (CORN::OS::file_system_engine.exists(*potential_filename))
+         {
+            delete selected_file;
+            selected_file = potential_filename;
+         }
+      }
+      delete undercontext_subdir;
+   } FOR_EACH_END(each_DB)
+   return selected_file;
+}
+//_2016-09_19___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_under_context_string
+(const std::wstring &context_name
+,const std::wstring &undercontext_name
+,const std::string &name
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   std::wstring name_wide;
+   CORN::string_to_wstring(name,name_wide);
+   return render_find_under_context_wstring(context_name,undercontext_name,name_wide,extension);
+}
+//_2016-09_19___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_under_context_int
+(const std::wstring &context_name
+,const std::wstring &undercontext_name
+,int number
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   std::wstring name_unqual_wide;
+   CORN::append_int32_to_wstring(number,name_unqual_wide,10);
+   return render_find_under_context_wstring(context_name,undercontext_name,name_unqual_wide,extension);
+}
+//_2016-09_19___________________________________________________________________
+CORN::OS::Directory_name *Databases::render_closest_context
+(const std::wstring &context_name)                                    rendition_
+{
+   CORN::OS::Directory_name *found = 0;
+   FOR_EACH(database_dir,Database_directory,each_database)
+   {
+      CORN::OS::Directory_name_concrete *context
+        = new CORN::OS::Directory_name_concrete(database_dir->get_dir_DEN(),context_name,L"");
+      if (CORN::OS::file_system_engine.exists(*context))
+      {
+         if (found) delete found; // we found a closer directory
+         found = context;
+      }
+      /* returns the context directory (I.e. Soil)
+         scans the list of Databases and returns the
+         Database context directory that exists closest to the
+         project/scenario directory.
+      */
+   } FOR_EACH_END(each_database)
+   return found;
+}
+//_2016-09-29___________________________________________________________________
+CORN::Unidirectional_list *Databases::render_specialization_files_qualified_in_context_string
+(const std::string &context_name)                                     rendition_
+{
+   std::wstring context_name_wide;
+   CORN::string_to_wstring(context_name,context_name_wide);
+   return render_specialization_files_qualified_in_context_wstring(context_name_wide);
+}
+//_2016-10-10___________________________________________________________________
+CORN::Unidirectional_list *Databases::render_specialization_files_qualified_in_context_wstring
+(const std::wstring &context_name)                                    rendition_
+{
+   CORN::Bidirectional_list *specialization_files = new CORN::Bidirectional_list;
+   // List of fully qualified filename
+   FOR_EACH(database_dir,Database_directory,each_database)
+   {  //
+      // CORN::OS::Directory_name context_dir_qual(database_dir.get_dir_DEN(),context_name);
+
+      CORN::OS::Directory_name *context_in_this_database =
+         CORN::OS::file_system_engine.find_qualified_name_in_path
+            (context_name,database_dir->get_dir_DEN());
+
+      if (context_in_this_database)
+      {
+      CORN::Unidirectional_list context_filenames_qual;
+      CORN::OS::file_system_engine.list_DENs                                     //161013160814
+         (*context_in_this_database // context_dir_qual
+         ,&context_filenames_qual
+         ,0
+         ,CORN::Inclusion("*.*",true)  // parameter file names will have an extension
+         ,CORN::OS::File_system::none_recursion_inclusive);
+      for (CORN::OS::File_name *context_filename = dynamic_cast<CORN::OS::File_name *>
+            (context_filenames_qual.pop_first())
+          ;context_filename
+          ;context_filename = dynamic_cast<CORN::OS::File_name *>
+            (context_filenames_qual.pop_first()))
+      {
+         FIND_FOR_EACH_IN(generalization_filename_found,other_context_filename
+            ,CORN::OS::File_name,*specialization_files,false,each_other)
+         {
+            if (other_context_filename->get_name() == context_filename->get_name())
+            {  generalization_filename_found = other_context_filename;
+               each_other->delete_current();
+               specialization_files->append(context_filename);
+            }
+         } FOR_EACH_END(each_other)
+         if (!generalization_filename_found)
+            specialization_files->append(context_filename);
+      } // for
+      }
+   } FOR_EACH_END(each_database)
+   specialization_files->sort();
+   return specialization_files;
+}
+//_2016-10-10___________________________________________________________________
+} // namespace CS

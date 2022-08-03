@@ -1,0 +1,32 @@
+L_Precipitation,
+/* weather  CLIMGEN CROPSYST CSW PARAMS VALIDATE ?  REPORT  ARCCS RPRTVIEW RPRTGRPH
+en Precipitation
+fr Précipitation
+it Precipitazioni
+es Precipitación
+ca Precipitació
+*/
+L_Solar_radiation,
+/* weather  CLIMGEN
+en Solar radiation
+fr Radiation solaire
+it Radiazione solare
+es Radiación solar
+ca Radiació solar
+*/
+L_Snow_storage,
+/* weather RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+en Snow storage
+fr Neige
+it Neve
+es Nieve almacenada
+ca Neu acumulada
+*/
+L_Temperature,
+/* weather CROPSYST CLIMGEN PARAMS
+en Temperature
+fr Temperature
+it Temperatura
+es Temperatura
+ca Temperatura
+*/

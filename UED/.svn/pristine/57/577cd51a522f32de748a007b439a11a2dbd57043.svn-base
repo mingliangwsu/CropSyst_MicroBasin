@@ -1,0 +1,266 @@
+#pragma hdrstop
+#include <UED/convert/DYRESM/DYRESM_convertor.h>
+#include <UED/convert/station_database.h>
+#include <corn/string/uiostring.h>
+#include <iomanip>
+//#include <common/geolocation/geolocation.h>
+#include <UED/library/UED.h>
+#include <UED/library/locrec.h>
+#include <UED/library/std_codes.h>
+#include <math.h>
+#include <common/weather/loc_param.h>
+#include <common/weather/parameter/WP_air_temperature.h>
+#include <common/weather/parameter/WP_vapor_pressure_act.h>
+#include <common/weather/parameter/WP_relative_humidity.h>
+#include <common/weather/parameter/WP_vapor_pressure_deficit.h>
+// loc_param included only for Season.
+
+
+/*
+<#3>
+Comment line: dy_basic test case - daily met forcing
+86400              # met data input time step (seconds)
+CLOUD_COVER        # longwave radiation type (NETT_LW, INCIDENT_LW, CLOUD_COVER)
+FIXED_HT  10       # sensor type (FLOATING; FIXED_HT),  height in m (above water surface; above lake bottom)
+JulDay     SW_[W/m2]    Cloud-Cover  Tair_[C]   Vapour_Press_[hPa]   Wind_Speed_[m/s]   Rain_[m]
+1990001   293.0555556     0.25         29.45          19.99              0.78            0
+1990002   309.2592593     0.59         24.13          14.54              1               0
+1990003   370.2546296     0.08         33.8           18.71              1.28            0
+1990004   107.6388889     0.8          20.85          13.75              2.58            0
+*/
+//______________________________________________________________________________
+//______________________________________________________________________________
+class DYRESM_record
+: public CORN::Enumeration
+{
+public: // attributes
+   Date32   date;
+   float32  SW;            // W/m2
+   float32  NET_LW;        // W/m2
+   float32  cloud_cover_fraction;
+//NYI   float32  INCIDENT_LW;   // W/m2
+//NYI   float32  Cloud_Cover;   // fraction
+   float32  Tair;                    // Deg C
+   float32  Vapour_Press;  // hPa
+   float32  Wind_Speed;    // m/s
+   float32  Rain;          // m
+public: // incase we don't have daily average
+   float32  Tair_max;          CORN::Quality_code Tair_max_quality;// Deg C
+   float32  Tair_min;          CORN::Quality_code Tair_min_quality;// Deg C
+   float32  relative_humidity_max;  CORN::Quality_code relative_humidity_max_quality;
+   float32  relative_humidity_min;  CORN::Quality_code relative_humidity_min_quality;
+public:
+   DYRESM_record(Date32   _date)
+      : CORN::Enumeration()
+      , date(_date)
+      , SW           (0)
+      , cloud_cover_fraction(0)
+      , NET_LW       (0)
+      , Tair         (0)
+      , Vapour_Press (0)
+      , Wind_Speed   (0)
+      , Rain         (0)                           
+      , Tair_max     (0)         , Tair_max_quality(CORN::missing_quality)
+      , Tair_min     (0)         , Tair_min_quality(CORN::missing_quality)
+      , relative_humidity_max (0),relative_humidity_max_quality(CORN::missing_quality)
+      , relative_humidity_min (0),relative_humidity_min_quality(CORN::missing_quality)
+      {};
+   virtual uint32 get_key() const { return date;}
+
+};
+//______________________________________________________________________________
+/*_______*/ uint32 DYRESM_convertor::perform_export()
+/*_______*/ {
+/*_______*/    uint32 records_exported = 0;
+/*_______*/    char filename_only[255];
+/*_______*/    Ustring       export_station_ID;
+/*_______*/    strcpy(filename_only,parameters.ued_filename.get_name(false).c_str());
+/*_______*/    export_station_ID.assign(filename_only);
+/*_______*/
+/*_______*/    UED_indexed_database ued_file(parameters.ued_filename.c_str(),true);
+/*_______*/
+/*060616_*/    UED_geolocation_record  *location_rec= ued_file.get_geolocation_record();
+#ifdef NYI
+currently just using the UED filename,
+/*_______*/    if (location_rec) // if it exists
+/*_______*/    {  // extract the station ID from the location record
+/*_______*/       // if the extracted ID is value then use that IDo
+/*_______*/           if (strlen(location_rec->get_station_ID_code()))
+/*_______*/              export_station_ID.assign(location_rec->get_station_ID_code());
+/*_______*/    };
+#endif
+/*_______*/    ued_file.goto_BOF();
+/*_______*/    cout << "Indexing completed." << endl;
+
+/*_______*/    CORN::File_name DYRESM_filename(parameters.ued_filename.c_str());
+/*_______*/    DYRESM_filename.set_name(filename_only);
+/*_______*/    DYRESM_filename.set_ext("met");
+
+/*_______*/    ofstream DYRESM_file(DYRESM_filename.c_str());
+/*_______*/    DYRESM_file << "<#3>" << endl; // Not sure what this is
+/*_______*/    DYRESM_file << "Comment line: " <<  location_rec->get_station_name() << endl;
+/*_______*/    DYRESM_file << "86400              # met data input time step (seconds)" << endl;
+/*070212_*/       switch (parameters.net_radiation_option)
+/*070212_*/       {  case cloud_cover_fraction_option             : DYRESM_file << "CLOUD_COVER            # longwave radiation type (NETT_LW, INCIDENT_LW, CLOUD_COVER)" << endl; break;
+/*070212_*/          case longwave_net_radiation_option           : DYRESM_file << "NETT_LW            # longwave radiation type (NETT_LW, INCIDENT_LW, CLOUD_COVER)" << endl; break;
+/*070212_*/          case incident_longwave_net_radiation_option  : default : DYRESM_file << "INCIDENT_LW            # longwave radiation type (NETT_LW, INCIDENT_LW, CLOUD_COVER)" << endl; break;
+/*070212_*/       };
+
+/*_______*/
+/*_______*/    DYRESM_file << "FIXED_HT  " << location_rec->get_screening_height() << "       # sensor type (FLOATING; FIXED_HT),  height in m (above water surface; above lake bottom)" << endl;
+/*_______*/    DYRESM_file << "JulDay     SW_[W/m2]  ";
+/*070212_*/       switch (parameters.net_radiation_option)
+/*070212_*/       {  case cloud_cover_fraction_option             : DYRESM_file << "Cloud-Cover [%]"  ; break;
+/*070212_*/          case longwave_net_radiation_option           : DYRESM_file << "  NETT_LW[W/m2] "; break;
+/*070212_*/          case incident_longwave_net_radiation_option  : default : DYRESM_file << "INCIDENT_LW[W/m2]" ; break;
+/*070212_*/       };
+/*_______*/    DYRESM_file << " Tair_[C]   Vapour_Press_[hPa]   Wind_Speed_[m/s]   Rain_[m]" << endl;
+/*_______*/    Enumeration_list DYRESM_records;
+/*_______*/    Units_convertor units_convertor;
+/*_______*/    cout << "Tuplizing data" << endl;
+/*_______*/    // for each data record record in the database.
+/*_______*/    for  (UED_data_record *data_rec = ued_file.goto_next_data_record();data_rec ;data_rec = ued_file.goto_next_data_record())
+/*_______*/    {
+/*_______*/       Date_time_64 for_time(data_rec->get_time_stamp());
+/*_______*/       uint16 num_values = data_rec->get_num_values();
+/*_______*/       UED_units_code &time_step_units_code = data_rec->get_time_step_units_code();
+/*_______*/       UED_variable_code variable_code = data_rec->get_variable_code();
+
+cout << for_time.c_str() << '\t' << ((int32) variable_code) << '\r';
+
+/*_______*/       UED_units_code value_units = data_rec->get_units_code();
+/*_______*/       if (time_step_units_code == UT_day)
+/*_______*/       {
+/*_______*/          for (int TS_count = 1; TS_count <= for_time.days_in_year(); TS_count++)
+/*_______*/          {
+/*_______*/             DYRESM_record *record = (DYRESM_record *)DYRESM_records.find(for_time.get_date32());
+/*_______*/             if (!record)
+/*_______*/             {
+/*_______*/                record = new DYRESM_record(for_time.get_date32());
+/*_______*/                DYRESM_records.append(record);
+/*_______*/             };
+/*_______*/             CORN::Quality_code datum_attribute;
+/*_______*/             float32 value = data_rec->get_value
+/*_______*/             (datum_attribute
+/*_______*/             ,for_time.get_datetime64());
+/*_______*/             if (variable_code == UED_STD_VC_solar_radiation.get())
+/*_______*/                   record->SW = value * 1000000.0/86400.0;
+///*_______*/                    units_convertor.convert(value,value_units,record->SW,UC_watt_m2_flux_density);
+/*_______*/             else if (variable_code == UED_STD_VC_isothermal_longwave_net_radiation.get())  //NET_LW;        // W/m2
+/*_______*/                   record->NET_LW = value * 1000000.0/86400.0;
+/*070212_*/             else if (variable_code == UED_STD_VC_cloud_cover.get())
+/*070212_*/                   record->cloud_cover_fraction = value / 100.0;
+///*_______*/                   units_convertor.convert(value,value_units,record->NET_LW,UC_watt_m2_flux_density);
+/*_______*/             else if (variable_code == UED_STD_VC_avg_temperature.get()) // Tair;          // Deg C
+/*_______*/             {  units_convertor.convert(value,value_units,record->Tair,UC_celcius);
+//NYN/*_______*/                record->Tair_quality = datum_attribute;
+/*_______*/             } else if (variable_code == UED_STD_VC_max_temperature.get())   //Tmax
+/*_______*/             {  units_convertor.convert(value,value_units,record->Tair_max,UC_celcius);
+/*_______*/                record->Tair_max_quality = datum_attribute;
+/*_______*/             } else if (variable_code == UED_STD_VC_min_temperature.get()) //Tmin
+/*_______*/             {  units_convertor.convert(value,value_units,record->Tair_min,UC_celcius);
+/*_______*/                record->Tair_min_quality = datum_attribute;
+/*_______*/             }
+#ifdef NYI
+currently calculating using estimation equation
+/*_______*/                case xxxxx :  // Vapour_Press;  // hPa
+/*_______*/                {
+/*_______*/                   record->Vapour_Press = xxxx;
+/*_______*/                } break;
+#endif
+/*_______*/              else if (variable_code == UED_STD_VC_precipitation.get())   //  Rain;          // m
+/*_______*/                   units_convertor.convert(value,value_units,record->Rain,UC_meter);
+/*_______*/             else if (variable_code == UED_STD_VC_wind_speed.get())   // Wind_Speed;    // m/s
+/*_______*/                   units_convertor.convert(value,value_units,record->Wind_Speed,UC_meters_per_second);
+#ifdef NYI
+/*_______*/             else if (variable_code == xxxxx.get())        // INCIDENT_LW;   // W/m2
+/*_______*/                   record->INCIDENT_LW = value * 1000000.0/86400.0;
+///*_______*/                   units_convertor.convert(value,value_units,record->INCIDENT_LW,UC_watt_m2_flux_density);
+/*_______*/             else if (variable_code == xxxxx.get()) //   cloud cover // fraction
+/*_______*/                   units_convertor.convert(value,value_units,record->Cloud_Cover,UC_fraction);
+#endif
+/*_______*/             else if (variable_code == UED_STD_VC_max_relative_humidity.get())
+/*_______*/             {  record->relative_humidity_max_quality = datum_attribute;
+/*_______*/                  record->relative_humidity_max = value;           // always %
+/*_______*/             } else if (variable_code == UED_STD_VC_min_relative_humidity.get())
+/*_______*/             {  record->relative_humidity_min_quality = datum_attribute;
+/*_______*/                record->relative_humidity_min = value;          // always %
+/*_______*/             };
+/*_______*/             // else ignore all other element
+/*_______*/             for_time.inc();
+/*_______*/          };
+/*_______*/       };
+/*_______*/    };
+/*_______*/    // Now write the DYRESM file record
+/*_______*/    cout << endl <<"writing DYRESM file:" << endl;
+/*_______*/    FOR_EACH_IN(record,DYRESM_record,DYRESM_records,each_record)
+/*_______*/    {
+/*_______*/       cout << record->date << '\r';
+/*_______*/       if (is_essentially(record->Tair,0.0,0.000001))
+/*_______*/          record->Tair = (record->Tair_max + record->Tair_min)/2.0;
+/*_______*/       float32 rel_humid_avg = (record->relative_humidity_max + record->relative_humidity_min)/2.0;
+/*_______*/       float32 vapor_pressure = 0.0;
+/*_______*/
+/*_______*/       switch (parameters.vapor_pressure_calculation)
+/*_______*/       {  case VP_based_on_mean_relative_humidity_and_air_temperature : vapor_pressure =  estimate_vapor_pressure_hPa(record->Tair,rel_humid_avg); break;
+/*_______*/          case  VP_based_on_min_and_max_relative_humidity : default   : vapor_pressure = estimate_vapor_pressure_from_min_max_rel_humid_hPa(*record); break;
+/*_______*/       };
+/*_______*/
+/*_______*/       DYRESM_file << record->date
+/*_______*/       << "   "
+/*_______*/       << setw(11) << setprecision(7) << record->SW
+/*_______*/       << "   ";
+//             Note here there is an option of cloud cover fraction or incident LW net rad.
+/*070212_*/       float32 net_option_value = 0.0;
+/*070212_*/       switch (parameters.net_radiation_option)
+/*070212_*/       {  case cloud_cover_fraction_option             : net_option_value = record->cloud_cover_fraction; break;
+/*070212_*/          case longwave_net_radiation_option           : net_option_value =record->NET_LW; break;
+/*070212_*/          case incident_longwave_net_radiation_option  : default : net_option_value = 0.0; break;
+/*070212_*/       };
+/*070212_*/       if (net_option_value < 0.00001)
+/*070212_*/           net_option_value = 0.0000;
+/*_______*/       DYRESM_file << setw(11) << setprecision(2) << net_option_value
+/*_______*/       << "   "
+/*_______*/       << setw(7) << setprecision(2) << record->Tair
+/*_______*/       << "         "
+/*_______*/       << setw(6) << setprecision(2) << vapor_pressure
+/*_______*/       << "            "
+/*_______*/       << setw(6) << setprecision(2) << record->Wind_Speed
+/*_______*/       << "            "
+/*_______*/       << setw(6) << setprecision(2) << record->Rain
+/*_______*/       << endl;
+/*_______*/       records_exported++;
+/*_______*/    } FOR_EACH_END(each_record);
+/*_______*/    cout << endl <<"completed." << endl;
+/*_______*/    press_return_before_exit = true;
+/*_______*/    return records_exported;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ float32 DYRESM_convertor::estimate_vapor_pressure_hPa(float32 dry_bulb_temperature, float32 rel_humid) const
+/*_______*/ {  // Note this is in hecto pascals
+/*_______*/    static const float32 a = 7.5;
+/*_______*/    static const float32 b = 237.3;
+/*_______*/    static const float32 c = 0.7858;
+/*_______*/    float32 vp_est =  (rel_humid/100.0) * exp(2.303 * (( a * dry_bulb_temperature / (dry_bulb_temperature + b)) + c));
+/*_______*/    return vp_est;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ float32 DYRESM_convertor::estimate_vapor_pressure_from_min_max_rel_humid_hPa(const DYRESM_record &record) const
+/*_______*/ {  // Note this is in hecto pascals
+/*_______*/    Season season_irrelevent; // need default value
+/*_______*/    Air_temperature_maximum_parameter      T_max_param          (record.Tair,record.Tair_max_quality);
+/*_______*/    Air_temperature_minimum_parameter      T_min_param          (record.Tair,record.Tair_min_quality);
+/*_______*/    Relative_humidity_maximum_parameter    rel_humid_max_param  (record.relative_humidity_max,record.relative_humidity_max_quality);
+/*_______*/    Relative_humidity_minimum_parameter    rel_humid_min_param  (record.relative_humidity_min,record.relative_humidity_min_quality);
+/*_______*/    Vapor_pressure_deficit_max_parameter   vpd_max_param        (season_irrelevent,rel_humid_min_param,T_max_param);
+/*_______*/    Vapor_pressure_actual_parameter vapor_pressure_act_param(vpd_max_param,rel_humid_max_param,rel_humid_min_param,T_max_param,T_min_param);
+/*_______*/    vapor_pressure_act_param.update();
+/*_______*/    float32 VP_act_kPa = vapor_pressure_act_param.get() * 10.0;
+/*_______*/    return VP_act_kPa; // kilo to hecto
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ DYRESM_convertor::DYRESM_convertor(int argc, const char *argv[])
+/*_______*/ :UED_convertor(argc,argv)
+/*_______*/ {};
+//______________________________________________________________________________
+

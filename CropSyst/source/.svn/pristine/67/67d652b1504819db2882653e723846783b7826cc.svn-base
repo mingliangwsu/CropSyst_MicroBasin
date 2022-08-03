@@ -1,0 +1,98 @@
+#include "crop/quiescence.h"
+
+namespace CropSyst {
+//______________________________________________________________________________
+Quiescence_requirement::Quiescence_requirement
+(const Crop_parameters_struct::Quiescence &_parameters)
+:parameters(_parameters)
+,consecutive_days(0)
+{}
+//_2008-04-01___________________________________________________________________
+Quiescence_start_requirement::Quiescence_start_requirement
+(const Crop_parameters_struct::Quiescence &parameters_
+,bool _fruit_crop)
+:Quiescence_requirement(parameters_)
+,fruit_crop(_fruit_crop)
+,within_valid_dormancy_period_now(false)                                         //030701
+{}
+//_2008-04-01___________________________________________________________________
+///*180601 dont delete yet
+
+bool Quiescence_start_requirement::in_valid_inactive_period(CORN::DOY doy) const
+{
+
+#if (CS_VERSION==4)
+   CORN::DOY start_inactive_period_valid_DOY =  parameters.start_valid_date.get_DOY(); //020409
+   CORN::DOY leave_inactive_period_valid_DOY =  parameters.leave_valid_date.get_DOY(); //020409
+#else
+   CORN::DOY start_inactive_period_valid_DOY =  parameters.start_DOY;            //110911
+   CORN::DOY leave_inactive_period_valid_DOY =  parameters.end_DOY;              //110911
+#endif
+   if (doy > start_inactive_period_valid_DOY) within_valid_dormancy_period_now = true; //030616
+   bool in_dorm_period
+   //  030631   note, this is not working some time for fruit when the crop doesn't start dorrmancy by the beginning of the year
+   // , we should set a bool for start of dormancy check and clear it when it goes.
+      = fruit_crop
+      ?  // Fruit crops dont have leave_dormancy date
+         within_valid_dormancy_period_now
+      :  ( (leave_inactive_period_valid_DOY < start_inactive_period_valid_DOY)
+         ? (doy < leave_inactive_period_valid_DOY) || (doy > start_inactive_period_valid_DOY)
+         : (doy > start_inactive_period_valid_DOY) && (doy < leave_inactive_period_valid_DOY))
+      ;
+   return in_dorm_period;
+}
+//*/
+//_2001-12-05___________________________________________________________________
+void Quiescence_start_requirement::add_daily_temperature
+(CORN::DOY today_DOY ,float32 temperature_with_est_night)
+{
+//   /*180601
+   if (in_valid_inactive_period(today_DOY))                                      //011205
+//   */
+   {  if (temperature_with_est_night < parameters.inducement_temperature)        //011205
+           consecutive_days ++;
+      else consecutive_days = 0;
+   }
+}
+//______________________________________________________________________________
+Quiescence_end_requirement::Quiescence_end_requirement
+(const Crop_parameters_struct::Quiescence &parameters_
+,CORN::DOY inactive_period_start_DOY)
+:Quiescence_requirement(parameters_)                                             //160326
+///*180601 Claudio says obsolete but dont delete yet
+,inactive_days_remaining(60)
+//*/
+{
+///*180601 Claudio says obsolete but dont delete yet
+
+#if (CS_VERSION==4)
+   CORN::DOY quick_leave_inactive_period_valid_DOY = parameters.leave_valid_date.get_DOY();
+#else
+   CORN::DOY quick_leave_inactive_period_valid_DOY = parameters.end_DOY;
+#endif
+   inactive_days_remaining  =
+      (quick_leave_inactive_period_valid_DOY < inactive_period_start_DOY)
+      ? 365 - inactive_period_start_DOY + quick_leave_inactive_period_valid_DOY
+      : quick_leave_inactive_period_valid_DOY -  inactive_period_start_DOY;
+//*/
+}
+//_2008-04-01_980728____________________________________________________________
+void Quiescence_end_requirement::add_daily_temperature(float32 average_air_temperature)
+{
+///*180601 Claudio says obsolete but dont delete yet
+   inactive_days_remaining -= 1;
+//*/
+   if (
+///*180601 Claudio says obsolete but dont delete yet
+      (inactive_days_remaining < 0)                                             //970520
+         &&
+//*/
+         (average_air_temperature >=                                          //080911
+            parameters.inducement_temperature))                                  //081013
+        consecutive_days ++;                                                     //970219
+   else consecutive_days = 0;                                                    //970219
+}
+//_2002-12-02___________________________________________________________________
+} // namespace CropSyst
+
+

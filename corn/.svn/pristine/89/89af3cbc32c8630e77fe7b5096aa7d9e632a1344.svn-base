@@ -1,0 +1,173 @@
+#include <corn/image/gif/gif_anim.h>
+
+/*______*/  void GIF_animation::optimize()
+/*______*/  {
+/*______*/     GIF_animation_frame *current_background = 0;
+/*______*/     CORN_bidirectional_list unoptimized_images;
+/*______*/     unoptimized_images.transfer_all_from(images);
+/*______*/     for (GIF_animation_frame *frame = (GIF_animation_frame *)unoptimized_images.pop_at_head()
+/*______*/           ; frame
+/*______*/           ; frame = (GIF_animation_frame *)unoptimized_images.pop_at_head())
+/*______*/     {
+/*______*/        GIF_animation_frame &optimized_frame = append_frame(frame->graphic_control.delay_time,false);
+/*______*/        if (frame->is_new_scene())
+/*______*/        {
+/*______*/           if (current_background)
+/*______*/              delete current_background;
+/*______*/           current_background = frame;
+/*______*/           // copy the frame exactly to optimized frame
+/*______*/           optimized_frame.copy_from(*frame);
+/*______*/        }
+/*______*/        else
+/*______*/        {
+/*______*/           for (uint16 row = 0; row < frame->get_rows(); row++)
+/*______*/           {  for (uint16 col = 0; col < frame->get_cols(); col++)
+/*______*/              {  uint8 frame_color = frame->get_at(row,col);
+/*______*/                 uint8 opt_color = frame_color;
+/*______*/                 uint8 back_color = current_background->get_at(row,col);
+/*______*/                 if (frame_color == back_color)
+/*______*/                    opt_color = frame->graphic_control.transparent_color;;
+/*______*/                 optimized_frame.set_at(row,col,opt_color);
+/*______*/              };
+/*______*/           };
+/*______*/           delete frame;
+/*______*/        };
+/*______*/
+/*______*/     };
+/*______*/     if (current_background)
+/*______*/        delete current_background;
+/*______*/  };
+/*______*/
+/*______*/  GIF_animation_frame::GIF_animation_frame
+/*______*/  (uint16 i_width
+/*______*/  ,uint16 i_height
+/*______*/  ,color_map *i_global_color_table // Animations must all share a common color table
+/*______*/  ,uint16 delay_time
+/*______*/  ,bool i_new_scene)
+/*______*/  : GIF_image(i_global_color_table,i_width, i_height,0,0)
+/*______*/  , new_scene(i_new_scene)
+/*______*/  {
+/*______*/
+/*______*/     color_table = i_global_color_table;
+/*______*/
+/*______*/     // These image options are required to implement optimized animations
+/*______*/     graphic_control.disposal_method = GIF_control_extension::DONT_DISPOSE;
+/*______*/     graphic_control.user_input = false;
+/*______*/     graphic_control.use_transparent_color = true;
+/*______*/     graphic_control.transparent_color = 0;
+/*______*/     graphic_control.enabled = true;
+/*______*/     graphic_control.delay_time = delay_time;
+/*______*/  };
+
+/*______*/  GIF_animation_frame &GIF_animation::append_frame(uint16 delay_time,bool new_scene)
+/*______*/  {
+//*______*/        commit_current_frame();
+/*______*/     bool starting_frame = images.count() == 0;
+/*______*/     if (starting_frame) // First frame must always new a new scene
+/*______*/        new_scene = true;
+/*991115*/     GIF_animation_frame *current_frame =
+/*______*/           current_frame = new GIF_animation_frame
+/*______*/           (screen_width,screen_height,global_color_table,delay_time,new_scene);
+/*______*/     images.append(current_frame);
+/*______*/     return *current_frame;
+/*______*/  };
+/*______*/
+
+#ifdef obsolete
+// 000129 replaced by optimize
+/*______*/  void GIF_animation::commit_current_frame()
+/*______*/  {  int r;       // should be iint16
+/*______*/     int c;      // should be iint16
+/*991115*/     GIF_image *current_image = (GIF_image *)images.current();
+/*______*/        if (prev_frame)
+/*______*/        {  // optimized curr_frame to prev_frame
+/*______*/           // There are two optimizations that occur:
+/*______*/           // 1. The new image reduced to only that rectangle of the
+/*______*/           //    current images that is different from the previous frame.
+/*______*/           // 2. Colours that are the same as the previous frame are replaced
+/*______*/           //    buy transparent color.
+/*______*/           int top_row_differs = screen_height;
+/*______*/           int left_col_differs = screen_width;
+/*______*/           int bottom_row_differs = 0;
+/*______*/           int right_col_differs = 0;
+/*______*/           byte transparent_color = current_image->graphic_control.transparent_color;
+/*______*/           bool has_a_difference = false;
+/*______*/           for ( r = 0; (r < screen_height); r ++)
+/*______*/           {
+/*______*/              for ( c = 0; (c < screen_width); c++)
+/*______*/              {
+/*______*/                 if (current_image->get_torus(c,r) !=
+/*______*/                     prev_frame->get_torus(c,r))
+/*______*/                 {
+/*______*/                    top_row_differs = CORN_min(top_row_differs,r);
+/*______*/                    bottom_row_differs = CORN_max(bottom_row_differs,r);
+/*______*/                    left_col_differs = CORN_min(left_col_differs,c);
+/*______*/                    right_col_differs = CORN_max(right_col_differs,c);
+/*______*/                    has_a_difference = true;
+/*______*/                 };
+/*______*/              };
+/*______*/           };
+/*______*/
+/*______*/  //         // temporarily disabling frame size optimizations
+/*______*/  //         top_row_differs = 0;
+/*______*/  //         bottom_row_differs = screen_height;
+/*______*/  //         left_col_differs = 0;
+/*______*/  //         right_col_differs = screen_width;
+/*______*/
+/*______*/           if (has_a_difference)
+/*______*/           {
+/*______*/              int optimized_rows = bottom_row_differs - top_row_differs;
+/*______*/              int optimized_cols = right_col_differs - left_col_differs;
+/*______*/              GIF_image optimized(
+/*______*/                 optimized_cols+1,optimized_rows+1,
+/*______*/                 left_col_differs,top_row_differs
+/*______*/                 );
+/*______*/
+/*______*/              optimized.global_color_table =
+/*______*/              optimized.color_table =
+/*______*/                 global_color_table;
+/*______*/
+/*______*/              optimized.graphic_control.disposal_method = GIF_control_extension::DONT_DISPOSE;
+/*______*/              optimized.graphic_control.user_input = false;
+/*______*/              optimized.graphic_control.use_transparent_color = true;
+/*______*/              optimized.graphic_control.transparent_color = 0;
+/*______*/              optimized.graphic_control.enabled = true;
+/*______*/              optimized.graphic_control.delay_time = current_image->graphic_control.delay_time;
+/*______*/
+/*______*/              int or = 0;
+/*______*/              for ( r = top_row_differs; r <= bottom_row_differs; r ++)
+/*______*/              {
+/*______*/                 int oc = 0;
+/*______*/                 for ( c = left_col_differs; c <= right_col_differs; c++)
+/*______*/                 {
+/*______*/                    byte curr_pix_color = current_image->get_torus(c,r);
+/*______*/                    byte prev_pix_color = prev_frame->get_torus(c,r);
+/*______*/
+/*______*/                    optimized.point(oc,or,
+/*______*/  //                  (curr_pix_color == prev_pix_color)
+/*______*/  //                  ? transparent_color   temporarily disabled
+/*______*/  //                  :
+/*______*/                       curr_pix_color);
+/*______*/                    oc++;
+/*______*/                 };
+/*______*/                 or ++;
+/*______*/              };
+/*______*/
+/*______*/
+/*______*/              // write optimized frame
+/*______*/              GIF_image *hold_image = current_image;
+/*______*/              current_image = &optimized;
+/*______*/              write_current_image();
+/*______*/              current_image = hold_image;   // At this point optimized is automatically disposed so we remove the reference
+/*______*/           };
+/*______*/        }
+/*______*/        else
+//991115obs          if (current_image) // check now down in write_current_image
+/*______*/               write_current_image();
+/*______*/
+/*______*/        delete prev_frame;
+/*______*/        prev_frame = current_image;
+/*______*/        current_image = 0;
+/*______*/  };
+#endif
+

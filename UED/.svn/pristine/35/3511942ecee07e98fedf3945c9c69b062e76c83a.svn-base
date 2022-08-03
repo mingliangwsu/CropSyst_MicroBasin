@@ -1,0 +1,286 @@
+#include "UED/convert/cropsyst/cropsyst_convertor.h"
+#include "corn/data_source/vv_file.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "corn/OS/file_system_engine.h"
+#include "common/weather/database/weather_UED_database.h"
+#include "corn/datetime/date_const.h"
+#include "common/weather/weather_provider.h"
+#include "common/solar/irradiance_extraterrestrial.h"
+#include "corn/seclusion.h"
+//______________________________________________________________________________
+CropSyst_text_convertor::CropSyst_text_convertor(int argc,const char *argv[])
+: UED::Convertor_weather(argc,argv)                                              //170111
+, loc_params ("",true,4,0,0)
+{
+   bool read_mode_of_UED_file = parameters.operation != "import";
+   if (CORN::OS::file_system_engine.exists(parameters.target_filename))
+   {  // import now selects .LOC file
+      CORN::VV_File loc_file(parameters.target_filename.c_str());
+      loc_file.get(loc_params);
+   }
+}
+//______________________________________________________________________________
+void CropSyst_text_convertor::transfer
+(Weather_database &from_database
+,Weather_database &to_database
+,Year                start_year
+,Year                end_year
+,bool                export_more
+,Weather_text_file::Format_old  export_format)
+{
+   CORN::Date starting_date(start_year,1);
+   CORN::Date ending_date(end_year,date_days_in_year(end_year));
+   bool exporting_V4_text_format = false;
+   if (export_more)
+   {
+      to_database.set_preferred_ext("gen");
+      exporting_V4_text_format = export_format == Weather_text_file::V4_format;     //060221
+   }
+   int last_year = 0;
+   CORN::Date today;                                                             //170111
+   Geocoordinate geocoordinate_unused;                                           //170111
+   CS::Solar_irradiance_extraterrestrial_daily unused_ETrad(geocoordinate_unused,today); //170111
+   Weather_provider provider(today,geocoordinate_unused,unused_ETrad,0);         //170111
+
+   //Datetime64 earliest_datetime64   = from_database.get_earliest_date_time();    //170111
+   //Datetime64 latest_datetime64     = from_database.get_latest_date_time();      //170111
+   CORN::Date earliest_date(from_database.get_earliest_available_date());        //170111
+   if (earliest_date < starting_date)                                            //170111
+      starting_date.set(earliest_date);
+
+
+   bool got = true;
+   for (today = starting_date  ;got /*today <= ending_date*/   ;today.inc())
+   {
+//std::cout << today.get_year() << std::endl;
+//std::cout << today.as_string() << std::endl;
+      if (today.get_year() != last_year)
+         std::cout << last_year << '\r';
+      last_year = today.get_year();
+
+      got = from_database.get_to(provider);                                            //170111
+      if (got)
+         to_database.set_from(provider);                                            //170111
+      /*obsolete, now using provider idiom)
+      CORN::Quality_clad max_temperature_quality             ( CORN::measured_quality);
+      CORN::Quality_clad min_temperature_quality             ( CORN::measured_quality);
+      CORN::Quality_clad solar_radiation_quality             ( CORN::measured_quality);
+      CORN::Quality_clad max_relative_humidity_quality       ( CORN::measured_quality);
+      CORN::Quality_clad min_relative_humidity_quality       ( CORN::measured_quality);
+      CORN::Quality_clad precipitation_quality               ( CORN::measured_quality);
+      CORN::Quality_clad wind_speed_quality                  ( CORN::measured_quality);
+      CORN::Quality_clad max_dew_point_temperature_quality   ( CORN::measured_quality);
+      CORN::Quality_clad min_dew_point_temperature_quality   ( CORN::measured_quality);
+      CORN::Quality_clad cloud_cover_percent_quality         ( CORN::measured_quality);
+      CORN::Quality_clad pot_evapotranspiration_quality      ( CORN::measured_quality);
+      CORN::Quality_clad avg_vapor_pressure_deficit_quality  ( CORN::measured_quality);
+
+      float64 precipitation_m            = from_database.get_precipitation_m          (precipitation_quality,today) ;
+      float64 max_temperature            = from_database.get_max_temperature          (max_temperature_quality,today);
+      float64 min_temperature            = from_database.get_min_temperature          (min_temperature_quality,today) ;
+      float64 solar_radiation            = from_database.get_solar_radiation          (solar_radiation_quality,today) ;
+      float64 max_relative_humidity      = from_database.get_max_relative_humidity    (max_relative_humidity_quality,today) ;
+      float64 min_relative_humidity      = from_database.get_min_relative_humidity    (min_relative_humidity_quality,today) ;
+      float64 max_dew_point_temperature  = from_database.get_max_dew_point_temperature(max_dew_point_temperature_quality,today) ;
+      float64 min_dew_point_temperature  = from_database.get_min_dew_point_temperature(min_dew_point_temperature_quality,today) ;
+      float64 wind_speed_md              = from_database.get_wind_speed_m_d           (wind_speed_quality,today) ;
+      float64 cloud_cover_percent        = from_database.get_cloud_cover_percent      (cloud_cover_percent_quality,today) ;
+      float64 pot_evapotranspiration_m   = from_database.get_pot_evapotranspiration_m (pot_evapotranspiration_quality,today) ;
+      float64 avg_vapor_pressure_deficit_kPa= from_database.get_avg_daytime_vapor_pressure_deficit_kPa(avg_vapor_pressure_deficit_quality,today) ;
+
+      //060221 currently dumping everything for export V4 because
+      // we don't know up front what variables are present in the input UED file (at least I suppose I could scan the database)
+      // if the first year has missing variable any following years that do have the variable will have a different number of columns.
+      if (precipitation_quality.is_valid() || exporting_V4_text_format) //(precipitation_quality                 <= UED_generated)
+         to_database.set_precipitation_mm         (today,m_to_mm(precipitation_m),precipitation_quality);
+      if (max_temperature_quality.is_valid() || exporting_V4_text_format)  //       (max_temperature_quality      <= UED_generated)
+         to_database.set_max_temperature          (today,max_temperature,max_temperature_quality);
+      if (min_temperature_quality.is_valid() || exporting_V4_text_format)
+         to_database.set_min_temperature          (today,min_temperature,min_temperature_quality);
+      if (solar_radiation_quality.is_valid() || exporting_V4_text_format)
+         to_database.set_solar_radiation          (today,solar_radiation,solar_radiation_quality);
+      if ((max_relative_humidity_quality.is_valid() && (max_relative_humidity > 0.0)) || exporting_V4_text_format) //(max_relative_humidity_quality         <= UED_generated) //020204
+         to_database.set_max_relative_humidity    (today,max_relative_humidity,max_relative_humidity_quality);
+      if ((min_relative_humidity_quality.is_valid() && (min_relative_humidity > 0.0)) || exporting_V4_text_format)// (min_relative_humidity_quality         <= UED_generated) //020204
+         to_database.set_min_relative_humidity    (today,min_relative_humidity,min_relative_humidity_quality);
+      if (max_dew_point_temperature_quality.is_valid() || exporting_V4_text_format)
+         to_database.set_max_dew_point_temperature(today,max_dew_point_temperature,max_dew_point_temperature_quality);
+      if (min_dew_point_temperature_quality.is_valid() || exporting_V4_text_format)
+         to_database.set_min_dew_point_temperature(today,min_dew_point_temperature,min_dew_point_temperature_quality);
+      if (wind_speed_quality.is_valid() || exporting_V4_text_format)
+         to_database.set_wind_speed_m_d            (today,wind_speed_md,wind_speed_quality);
+      if (cloud_cover_percent_quality.is_valid() || exporting_V4_text_format)
+         to_database.set_cloud_cover_percent      (today,cloud_cover_percent,cloud_cover_percent_quality);
+      if (pot_evapotranspiration_quality.is_valid() || exporting_V4_text_format)
+         to_database.set_pot_evapotranspiration_mm(today,m_to_mm(pot_evapotranspiration_m),pot_evapotranspiration_quality);
+      if (avg_vapor_pressure_deficit_quality.is_valid() || exporting_V4_text_format)
+         to_database.set_avg_daytime_vapor_pressure_deficit_kPa(today,avg_vapor_pressure_deficit_kPa,avg_vapor_pressure_deficit_quality);
+      */
+   }
+}
+//______________________________________________________________________________
+nat32 CropSyst_text_convertor::perform_import()
+{
+   //from the location params get the template dat filename
+   //look for all years matching.
+   //get the min and the max  year
+   // The UED filename will be the same as the target file                       //060621
+
+   // Note that the parameters.ued_filename may have been assigned the target output directory by the import Wizard.
+   // when we invoke the import wizard from the CropSyst weather database editor //070713
+   CORN::OS::File_name_concrete new_UED_filename(parameters.target_filename,L"UED"); //170111
+   parameters.UED_filename.set_DEN(new_UED_filename);                            //170111
+   //170111parameters.UED_filename.set_name(parameters.target_filename.get_name().c_str()); parameters.UED_filename.set_ext("UED"); //070713_
+   Weather_UED_database ued_database
+      (parameters.UED_filename.c_str(),std::ios_base::out);
+
+   Weather_data_text dat_database (loc_params,loc_params.weather_filename_V3);
+   //170111 CORN::Smart_directory_name weather_dir;
+   // Originally the .DAT file selection was in the entry "weather_filename"
+   GEN_DAT_UED_filename template_DAT_filename(loc_params.weather_filename_V3.c_str()); //060616
+   // Later it was changed to "database"
+   // But database could also have been a UED file,  (this utility only imports the .DAT or .GEN files).
+   if (!template_DAT_filename.length() &&
+       (   loc_params.database_filename.has_extension_ASCII("DAT",true)
+        || loc_params.database_filename.has_extension_ASCII("GEN",true)))
+      template_DAT_filename.set_DEN(loc_params.database_filename);
+      //170111 template_DAT_filename.set(loc_params.database_filename.c_str());
+   const CORN::OS::Directory_name &weather_dir                                   //170111
+      = template_DAT_filename.get_parent_directory_name_qualified();
+   //170111 template_DAT_filename .get_path(weather_dir,true);
+   std::wstring template_prefix; template_DAT_filename .get_prefix(template_prefix);
+   //170111 prefix.set_case_sensitive(false);
+   CORN::Unidirectional_list /*170111 Association_list*/ dat_files;
+   CORN::Inclusion CS_text_weather_ext("dat",true);
+   CS_text_weather_ext.include_pattern_cstr("gen");
+
+   CORN::OS::file_system_engine.list_DENs                                        //170111
+      (weather_dir
+      ,&dat_files,0,CS_text_weather_ext,CORN::OS::File_system::none_recursion_inclusive);
+
+   /*170111
+   weather_dir.list_contents_by_type
+   (dat_files   // The list to append contents to (association because dirent names are association
+   ,false                                                                        //050920
+   ,true    // true if the known path is prepended to the listed file names (differs from show_path because the path is actually included in the filename) 030929_
+   ,true    // true if the extension is included with the file name (usually true) 030929_
+   ,true    // true if the known path is to be prepended when the filename is displayed
+   ,true    // true if the extension is to be appended when the filename is displayed
+   ,Directory_entry_name::file_entry    // types of files to list (file or directory names)
+   ,"dat" // const char *extension_filter = 0 // This can be used to limit the list to certain extensions //020208_
+   ,0 // used for recursion (don't pass anything).                               //050922_
+   );
+   // Now add any GEN files
+   weather_dir.list_contents_by_type
+   (dat_files   // The list to append contents to (association because dirent names are association
+   ,false                                                                        //050920
+   ,true                 // true if the known path is prepended to the listed file names (differs from show_path because the path is actually included in the filename) //030929_
+   ,true          // true if the extension is included with the file name (usually true)
+   ,true             // true if the known path is to be prepended when the filename is displayed
+   ,true        // true if the extension is to be appended when the filename is displayed
+   ,Directory_entry_name::file_entry    // types of files to list (file or directory names)
+   ,"gen" // const char *extension_filter = 0 // This can be used to limit the list to certain extensions   //020208
+   ,0 // used for recursion (don't pass anything).                               //050922
+   );
+   */
+   Year min_year=9999;
+   Year max_year=0;
+   FOR_EACH_IN(dat_file,CORN::OS::Directory_entry_name,dat_files,each_dat_file)
+   {  GEN_DAT_UED_filename dat_filename(dat_file->c_str());
+      std::wstring file_name_prefix;
+      if (template_prefix == dat_filename.get_prefix(file_name_prefix))
+      {  Year year = dat_filename.get_year();
+         min_year = CORN_min(min_year,year);
+         max_year = CORN_max(max_year,year);
+      }
+   } FOR_EACH_END(each_dat_file)
+      // Limit period to user selection, but also to data available
+   min_year = CORN_max(parameters.year_earliest,min_year);
+   max_year   = (max_year)
+   ? CORN_min(parameters.year_latest,max_year)
+   : parameters.year_latest;
+   UED::Geolocation_record  *geoloc_rec = const_cast<UED::Geolocation_record  *>(ued_database.get_geolocation_record_immutable()); //110822
+   if (!geoloc_rec)
+   {   geoloc_rec = new UED::Geolocation_record
+            (*(loc_params.geolocation));  // loc_params is guarenteed to have geolocation
+          ued_database.take_geolocation_information(geoloc_rec);
+   // don't delete geoloc_rec it is relinquished to ued_database;
+   }
+   else
+   {
+   // could  update with location file information
+   // shouldn't really need to do this because we are probably creating the UED
+   // since this is an old format.
+   }
+   transfer(dat_database,ued_database,min_year,max_year,false,Weather_text_file::UNKNOWN_format);
+   return 1;
+}
+//______________________________________________________________________________
+uint32 CropSyst_text_convertor::perform_export()
+{
+   std::string export_format_code(parameters.subformat);
+   Weather_text_file::Format_old  export_format = Weather_text_file::V4_format;
+   if (export_format_code == "DPT")          export_format = Weather_text_file::day_precip_temp;
+   else if (export_format_code == "DPTR")    export_format = Weather_text_file::day_precip_temp_rad;
+   else if (export_format_code == "DPTRDW")  export_format = Weather_text_file::day_precip_temp_rad_dewpoint_wind;
+   else if (export_format_code == "DPTRHW")  export_format = Weather_text_file::day_precip_temp_rad_humid_wind;
+   Weather_UED_database ued_database
+      (parameters.UED_filename.c_str(),std::ios_base::in,CORN::measured_quality);
+      //170111 (parameters.UED_filename.c_str(),true,CORN::measured_quality);
+   std::string prefix(parameters.prefix);                                        //170111_060328
+   std::string template_filename(prefix);                                        //170111
+   if (export_format ==  Weather_text_file::V4_format)                           //060221
+         template_filename.append(".gen");                                       //060221
+   else
+         template_filename.append("2000.gen");
+   loc_params.weather_filename_V3.set_str(template_filename);                    //170111
+   const CORN::OS::Directory_name &target_dir =                                  //170111
+      parameters.target_filename.get_parent_directory_name_qualified();          //170111
+   //170111 Directory_name target_dir;
+   //170111 parameters.target_filename.get_path(target_dir,false);
+
+   CORN::OS::File_name_concrete new_weather_filename_V3                          //170111
+      (target_dir,template_filename);
+
+   loc_params.weather_filename_V3.set_DEN(new_weather_filename_V3);              //170111
+   //170111 loc_params.weather_filename_V3.set_path(target_dir.c_str());
+      UED::Geolocation_record  *geoloc_rec = const_cast<UED::Geolocation_record  *>(ued_database.get_geolocation_record_immutable()); //110822
+      if (geoloc_rec)
+      {  // replace location geolocation with a new copy from UED
+         delete loc_params.geolocation;
+         loc_params.geolocation = new Geolocation(*geoloc_rec);
+      }
+      // create a location filename with the same name as ued file with .loc extension
+      /*170111
+      CORN::File_name loc_filename(
+            parameters.target_filename.length() // if target specified in the response file (usually the case)
+            ? parameters.target_filename.c_str()
+            : parameters.UED_filename.c_str() // else just use the UED filename and append the .loc extension (this is what the export wizard does)
+            ,"loc");
+      */
+      CORN::OS::File_name_concrete target_filename
+         (parameters.target_filename.length() // if target specified in the response file (usually the case)
+            ? parameters.target_filename.w_str()
+            : parameters.UED_filename.w_str() // else just use the UED filename and append the .loc extension (this is what the export wizard does)
+         );
+      CORN::OS::File_name_concrete loc_filename
+         (target_filename,CORN::OS::Extension("loc"));
+      {  VV_File loc_file(loc_filename.c_str());
+         loc_file.set(loc_params);
+      }
+   Weather_data_text dat_database (loc_params,loc_params.weather_filename_V3);
+
+      dat_database.setup_to_write(export_format);                                //021212
+      Date_time_64 earliest_date_time(ued_database.get_earliest_date_time() );   //030729
+      Date_time_64 latest_date_time(ued_database.get_latest_date_time() );       //030729
+      Year earliest_year = earliest_date_time.get_year();
+      Year latest_year   =  latest_date_time.get_year();
+
+      // Limit period to user selection, but also to data available
+      earliest_year = CORN_max(parameters.year_earliest,earliest_year);
+      latest_year   = CORN_min(parameters.year_latest,latest_year);
+      transfer(ued_database,dat_database,earliest_year,latest_year,true,export_format);
+   return 1;      
+};
+//______________________________________________________________________________
+

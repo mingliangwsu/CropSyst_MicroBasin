@@ -1,0 +1,46 @@
+
+<H2>UED simple DLL for C++</H2>
+
+This example is a small C++ program that takes on the command line the name of the
+UED file to read, and the CropSyst variable code in hexidecimal.
+<P>
+Data in the UED file is indexed by a variable code.
+Variable codes are integer numbers.
+The file UED_codes.h lists just a few of the variable and units codes used by CropSyst.
+<P>
+The following table shows a few of these
+(I show the code number in hexidecimal and decimal)
+<P>
+<TABLE BORDER=1>
+<TR><TH>Variable code constant                                 <TH>Hex        <TH>Decimal
+<TR><TD>CSVC_weather_ET_pot_time_step_sum                  	   <TD>0x85020001	<TD>2231500801
+<TR><TD>CSVC_weather_ET_act_time_step_sum                    	<TD>0x85020002	<TD>2231500802
+<TR><TD>CSVC_weather_precipitation_time_step_sum               <TD>0x85000001	<TD>2231369729
+<TR>
+<TR><TD>CSVC_soil_base_water_entering_time_step_sum            <TD>0x85110002	<TD>2232483842
+<TR><TD>CSVC_soil_base_water_drainage_time_step_sum            <TD>0x85110003	<TD>2232483843
+</TABLE>
+<P>
+(The CropSyst timestep is daily so these are all daily time step sums (the daily value)).
+<P>
+The variable code must be stored with unsigned 32bit (long) integers.
+<P>
+The variable values are returned as 32bit float/real numbers.
+<P>
+All these variables in this sample UED file are stored using the UED units
+"millimeter of depth"
+<BR>
+This is the corresponding units code:
+<P>
+<TABLE BORDER=1>
+<TR><TH>Variable code constant                                 <TH>Hex        <TH>Decimal
+<TR><TD>UED_STD_UC_mm_depth <TD>0x2543 <TD> 9539
+</TABLE>
+<P>
+UED can actually store and retrieve data using a rich set (hundreds) of
+metric and SI units and even some archaic units.
+(I can provide a c++ .h file for all the available codes email:rnelson@mail.wsu.edu
+for the current file).
+
+
+

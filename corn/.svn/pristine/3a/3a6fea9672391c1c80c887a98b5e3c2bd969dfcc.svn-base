@@ -1,0 +1,33 @@
+#ifndef CORN_IMAGE8_H
+#define CORN_IMAGE8_H
+
+/* This class adds the grid data structure for 8bit images.
+*/
+
+continue here base this on grid/grid_T
+
+
+#include <corn/image/image_base.h>
+#include <corn/image/grid/uint8.h>
+
+namespace CORN {
+
+class Image_8bit
+: public Image_base
+, public Image_grid_uint8
+{
+public:
+   Image_8bit() {};
+   void copy_from(const Image_8bit &to_be_copied)
+   {  Image_base::copy_from(to_be_copied);
+      Image_grid_uint8::copy_from(to_be_copied);
+   };
+   inline virtual uint16 get_width() const { return get_cols();};  // in pixels
+   inline virtual uint16 get_height() const { return get_rows();}; // in pixels
+   inline virtual void point(uint16 x, uint16 y, Image_color_index color)
+   {  set_at(y,x,(uint8)color); };
+};
+
+}; // namespace CORN
+#endif
+

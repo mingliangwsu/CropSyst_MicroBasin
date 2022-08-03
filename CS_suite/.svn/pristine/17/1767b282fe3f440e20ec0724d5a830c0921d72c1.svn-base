@@ -1,0 +1,148 @@
+#ifndef CS_context_discovery_commonH
+#define CS_context_discovery_commonH
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "corn/OS/file_system.h"
+#include "corn/data_source/datarec.h"
+class Geolocation;
+namespace CS
+{
+//______________________________________________________________________________
+class Context_discovery_common
+{
+ protected:
+   mutable CORN::OS::Directory_name   *leaf; mutable bool leaf_owned;
+   mutable CORN::OS::Directory_name   *root; mutable bool root_owned;
+ public:
+   nat8 verbose;                                                                 //170214
+ public:
+      // The root is a top most directory to search for files.
+      // Typically this logical root would be either a project directory (super project)
+      // the user's home
+      // (For both Linux/Unix and Windows ~ is recognized as home)
+      // or less likely to root of the file system,
+      // or the same as the leaf to limit discovery to one directory
+      // The leaf would typically be the CWD.
+
+   Context_discovery_common();
+   Context_discovery_common                                                      //161102
+      (const CORN::OS::Directory_name &leaf_
+      ,const CORN::OS::Directory_name *root_ = 0);
+      // In this case, the leaf is not necessarily the CWD
+      // and the root may be known
+   virtual ~Context_discovery_common();
+   bool know_leaf(const CORN::OS::Directory_name &leaf_)             cognition_;
+   bool know_root(const CORN::OS::Directory_name *root_)             cognition_;
+      // passing 0 will set the root to the primary project
+      // (or user's home or file system root) which ever is found first
+   bool take_leaf(CORN::OS::Directory_name *leaf_);
+   bool take_root(CORN::OS::Directory_name *root_);
+/* check reimplement
+   CORN::OS::Directory_name *find_level
+      (Directory_level level
+      ,const CORN::OS::Directory_name *from_directory = 0)           rendition_;
+*/
+/*161116 currently only in Context_discovery
+   CORN::OS::Directory_name *provide_Scenarios()                     provision_; //161116
+*/
+/* check reimplement
+   CORN::OS::Directory_name *                                                    //160301
+      set_level_as_root(Directory_level level)                       rendition_; //160301
+      // finds the uppermost specified level searching from the leaf.
+      // If such a level is found, it is set at the root.
+      // Normally this is called once to replaced the root of the file system
+      // with a directory that is expected to be the upper most
+      // directory identified as the root for the application.
+      // Typically this would be the user's home directory.
+*/
+/* check reimplement
+   bool is_level
+      (const CORN::OS::Directory_name &directory
+      ,Directory_level level)                                      affirmation_;
+      /// \return true if the specified directory is such a level
+*/
+   const CORN::OS::Directory_name &provide_leaf()                    provision_; //161116
+
+   nat16 find_files_with_extension_wstring
+      (const std::wstring &extension
+      ,modifiable_ CORN::Container &file_list
+      ,CORN::OS::File_system::Recursion recursion
+          = CORN::OS::File_system::superdirectory_recursion_inclusive
+      ,bool unique   = false)    const;
+   nat16 find_files_with_pattern
+      (const std::wstring &pattern
+      ,modifiable_ CORN::Container &DEN_list
+      ,CORN::OS::File_system::Recursion recursion
+          = CORN::OS::File_system::superdirectory_recursion_inclusive
+      ,bool unique   = false)    const;
+
+      // Starting in the leaf, directories in the path are recursively
+      // searched for files matching the specified extension.
+      // File names are appended to the file list as the function
+      // recurses back down the path from the logical root.
+      // The recursion up the path stops at the logical root.
+      // Typically one will use superdirectory_recursion_inclusive
+      // so files in the root are included in the search.
+      // \returns the number of files found with matching extension
+      // that were added to the file_list.
+      // Note that there may be multiple files matching the extension in
+      // any directory of the path.
+      // If unique is true, only the 'closest' files having the same
+      // name lastly encountered while traversing down the directory path
+      // are added to the list
+      // (which would essentially be longest path name) are retained listed.
+      // I.e. if  /x/y/1.ext  and /x/y/z/1.ext are found, only /x/y/z/1.ext
+      // Any files already in the list may be replaced with a closer filename.
+      // (usually the caller will pass and empty list to be filled).
+
+   nat16 compose_parameters_from_VV_files_to_data_rec
+      (modifiable_ CORN::Data_record &data_rec
+      ,const       CORN::Container  &file_list_qualified)                 const;
+      // Sequentially open and read VV format parameter files listed in the file_list.
+      // As the list is processed, any parameter found in the the current file
+      // will overwrite parameters previously loaded, thereby composing
+      // a set of parameters with greater specificity.
+      // Typically sorting (ascending) the file_list before calling this function
+      // or using find_files_with_extension_wstring to generate the file list
+      // will typically have the preferred composition, that is deeper down
+      // the path, the greater the specificity (over riding parameters loaded
+      // from files discovered higher in the path), so parameters in the leaf
+      // have greater precedence than those near the root.
+      // The file list must contain fully qualified filenames because parameters
+      // which are relative file names in each loaded file will be qualified
+      // with respect to the specific file's location.
+
+   nat16 compose_parameters_from_VV_files_with_extension_to_data_rec
+      (modifiable_ CORN::Data_record &data_rec
+      ,const std::wstring &extension
+      ,CORN::OS::File_system::Recursion recursion
+          = CORN::OS::File_system::superdirectory_recursion_inclusive
+      );
+      ///< Calls find_files_with_extension_wstring
+      /// then compose_parameters_from_VV_files_to_data_rec
+
+
+   bool get_geolocation
+      (const CORN::OS::Directory_entry_name  &file_or_directory
+      ,const char *geolocation_section
+      ,modifiable_ Geolocation               &geolocation
+      ,modifiable_ std::string               &ISO_6709_annex_D_or_H)      const;
+      // CS parameter files and/or directories can be geolocated
+      // geolocation data may be stored in a V4 VV_File in a directory
+      // (or any parent dir of a file or directory).
+      // These files can be 'composable'
+      // Alternatively geolocation can be identified in the name
+      // of the file, or directory or in a name of the path using ISO
+
+      // NYI need to add: either the file or directory name or extension
+
+
+   bool find_and_reset_missing_parameter_file_name                               //160126
+      (modifiable_ CORN::OS::File_name &parameter_file_name
+      ,const wchar_t *extension_expected
+      ,const wchar_t *extension_alternate=0
+      ,CORN::OS::File_system::Recursion recursion
+          = CORN::OS::File_system::superdirectory_recursion_inclusive)    const;
+};
+//_2015-12-06___________________________________________________________________
+}
+#endif

@@ -1,0 +1,269 @@
+#error obsolete  180408 obsolete no longer used
+
+#include <corn/math/statistical/statistics_recorder.h>
+#include <corn/math/statistical/stats.h>
+//______________________________________________________________________________
+using namespace std;
+namespace CORN
+{
+nat32  Statistics_recorder::write_descriptive_summary_variable_value
+(std::ostream &strm
+,const Statistical_baseX &summary_statistics
+,nat32  desired_descriptive_summary_elements
+,const char *section
+,const char *units_caption)                                    const
+{  nat32  entries = 0;
+   if (section)
+		strm << '[' << section << ']' << endl;
+   if (units_caption)
+		strm << "units=" << units_caption << endl;
+   for (uint8 stat = 0 ; stat < STAT_COUNT; stat++)
+   {  nat32  element = (1 << stat);
+      if (desired_descriptive_summary_elements & element)
+      {
+         strm << statistic_label_table[stat] << "=";
+         switch (stat)
+         {
+            case STAT_value_index        : summary_statistics.get_current();                 break;
+            case STAT_sum_index          : summary_statistics.get_sum();                     break;
+            case STAT_mean_index         : summary_statistics.get_mean();                    break;
+            case STAT_std_dev_index      : summary_statistics.get_standard_deviation();      break;
+            case STAT_coef_var_index     : summary_statistics.get_coefficient_of_variation();break;
+            case STAT_sum_sqrs_index     : summary_statistics.get_sum_of_squares();          break;
+            case STAT_min_index          : summary_statistics.get_min();                     break;
+            case STAT_max_index          : summary_statistics.get_max();                     break;
+            case STAT_count_index		  : summary_statistics.get_count();                   break;
+            case STAT_median_index       : summary_statistics.get_median();                  break;
+         }
+         strm << endl;
+         entries++;
+      }
+   }
+   return entries;
+}
+//______________________________________________________________________________
+nat32  Statistics_recorder::write_probability_summary_variable_value
+(std::ostream &strm
+,const Statistical_data_set &data_set
+,nat32  desired_probability_10s_summary
+,nat32  desired_probability_5s_summary
+,const char *section)                                                      const
+{  nat32  entries = 0;
+   if (section)
+			strm << '[' << section << ']' << endl;
+   for (uint8 prob_index = 1; prob_index <= 10; prob_index++)   // index 0 is not used
+   {  nat32  prob_bit = (1 << prob_index);
+      if (desired_probability_10s_summary & prob_bit)
+      {  float32 percentage = prob_index * 100.;
+         strm << statistic_probablity_10_label_table[prob_index] << "=" << data_set.get_probability_value( percentage);
+         strm << endl;
+         entries ++;
+      }
+   }
+   for (uint8 prob_index = 1; prob_index <= 10; prob_index++)   // index 0 is not used
+   {  nat32  prob_bit = (1 << prob_index);
+      if (desired_probability_5s_summary & prob_bit)
+      {  float32 percentage = (prob_index * 10.0) - 5.0;
+         strm << statistic_probablity_5_label_table[prob_index] << "=" << data_set.get_probability_value( percentage);
+         strm << endl;
+         entries ++;
+      }
+   }
+   return entries;
+}
+//______________________________________________________________________________
+nat32  Statistics_recorder::write_descriptive_summary_tabular_header
+(std::ostream &strm
+,nat32         desired_descriptive_summary_elements
+,const char   *section
+,const char   *units_caption
+,char          delimitor)                                                  const
+{
+   nat32  entries = 0;
+   for (uint8 stat = 0 ; stat < STAT_COUNT; stat++)
+   {  nat32  element = (1 << stat);
+      if (desired_descriptive_summary_elements & element)
+      {  if (section)
+         {  strm << section;
+            strm << ' ';
+         }
+         strm << statistic_label_table[stat];
+         strm << ' ';
+         if (units_caption)
+         {
+            switch (stat)
+            {
+            case STAT_value_index     : strm << units_caption; break;
+            case STAT_sum_index       : strm << units_caption; break;
+            case STAT_mean_index      : strm << units_caption; break;
+            case STAT_std_dev_index   : /* no units? */        break;
+            case STAT_coef_var_index  : /* no units? */        break;
+            case STAT_sum_sqrs_index  : /* no units? */        break;
+            case STAT_min_index       : strm << units_caption; break;
+            case STAT_max_index       : strm << units_caption; break;
+            case STAT_count_index	  : /* no units? */        break;
+            case STAT_median_index    : strm << units_caption; break;
+            }
+//            strm << delimitor;
+         }
+         entries++;
+            strm << delimitor;
+      }
+   }
+   return entries;
+}
+//______________________________________________________________________________
+nat32  Statistics_recorder::write_descriptive_summary_tabular
+(std::ostream &strm
+,const Statistical_baseX &summary_statistics
+,nat32         desired_descriptive_summary_elements
+,char delimitor)                                                           const
+{  nat32  entries = 0;
+   for (uint8 stat = 0 ; stat < STAT_COUNT; stat++)
+   {  nat32  element = (1 << stat);
+      if (desired_descriptive_summary_elements & element)
+      {
+         switch (stat)
+         {
+            case STAT_value_index        : strm << summary_statistics.get_current();  break;
+            case STAT_sum_index          : strm << summary_statistics.get_sum();               break;
+            case STAT_mean_index         : strm << summary_statistics.get_mean();  break;
+            case STAT_std_dev_index      : strm << summary_statistics.get_standard_deviation();  break;
+            case STAT_coef_var_index     : strm << summary_statistics.get_coefficient_of_variation();  break;
+            case STAT_sum_sqrs_index     : strm << summary_statistics.get_sum_of_squares();  break;
+            case STAT_min_index          : strm << summary_statistics.get_min();  break;
+            case STAT_max_index          : strm << summary_statistics.get_max();  break;
+            case STAT_count_index		  : strm << summary_statistics.get_count();  break;
+            case STAT_median_index       : strm << summary_statistics.get_median();  break;
+         }
+         strm << delimitor;
+      }
+   }
+   return entries;
+}
+//______________________________________________________________________________
+nat32  Statistics_recorder::write_probability_summary_tabular_header
+(std::ostream &strm
+,nat32  desired_probability_10s_summary
+,nat32  desired_probability_5s_summary
+,const char *section
+,const char   *units_caption
+,char delimitor)                                                           const
+{  nat32  entries = 0;
+   for (uint8 prob_index = 0; prob_index < 10; prob_index++)   // index 0 is not used
+   {  nat32  prob_bit = (1 << prob_index);
+      if (desired_probability_10s_summary & prob_bit)
+      {  if (section)
+         {  strm << section;
+            strm << " ";
+         }
+         strm << statistic_probablity_10_label_table[prob_index];
+         strm << " ";
+         strm << units_caption;
+         strm << delimitor;
+      }
+   }
+   for (uint8 prob_index = 0; prob_index < 10; prob_index++)   // index 0 is not used
+   {  nat32  prob_bit = (1 << prob_index);
+      if (desired_probability_5s_summary & prob_bit)
+      {  if (section)
+         { strm << section;
+            strm << " ";
+         }
+         strm << statistic_probablity_5_label_table[prob_index];
+         strm << " ";
+         strm << units_caption;
+         strm << delimitor;
+      }
+         entries++;
+   }
+   return entries;
+}
+//______________________________________________________________________________
+nat32  Statistics_recorder::write_probability_summary_tabular
+(std::ostream &strm
+,const Statistical_data_set &data_set
+,nat32  desired_probability_10s_summary
+,nat32  desired_probability_5s_summary
+,char delimitor
+)                                                              const
+{  nat32  entries = 0;
+   for (uint8 prob_index = 0 ; prob_index < 10; prob_index++)   // index 0 is not used
+   {  nat32  prob_bit = (1 << prob_index);
+       if (desired_probability_10s_summary & prob_bit)
+      {  float32 percentage = (prob_index+1) * 10.0;
+         strm << data_set.get_probability_value( percentage);
+         strm << delimitor;
+         entries++;
+      }
+   }
+   for (uint8 prob_index = 0 ; prob_index < 10; prob_index++)   // index 0 is not used
+   {  nat32  prob_bit = (1 << prob_index);
+      if (desired_probability_5s_summary & prob_bit)
+      {  float32 percentage = ((prob_index+1) * 10.0) - 5.0;
+         strm << data_set.get_probability_value( percentage);
+         strm << delimitor;
+         entries++;
+      }
+   }
+   return entries;
+}
+//______________________________________________________________________________
+#ifdef NYN
+ Never implemented, now used ET_summary_record and element_summary_record Not implemented
+
+nat32  Statistics_recorder::record_descriptive_summary_UED
+(CORN::Ustring &buffer
+,const Statistical_base &summary_statistics
+,const UED::Variable_code_cowl &variable_code
+,const CORN::Units_code    units_code
+,nat32  desired_descriptive_summary_elements)                         const
+{
+   // Header code
+}
+//______________________________________________________________________________
+nat32  Statistics_recorder::record_probability_summary_UED
+(CORN::Ustring &buffer
+,const Statistical_data_set &data_set
+,const UED::Variable_code_cowl &variable_code
+,const CORN::Units_code    units_code
+,nat32  desired_probability_10s_summary
+,nat32  desired_probability_5s_summary)                                    const
+{}
+//______________________________________________________________________________
+#endif
+//______________________________________________________________________________
+#ifdef NYN
+nat32  Statistics_record_text_variable_value::record_observations
+(nat32  desired_probability_summary
+,const Statistical_data_set &data_set
+,const char *section)                                          const
+{
+   output section
+   for each item in data set
+      strm << item_index << "=" << item value << endl;
+   strm << endl;
+}
+#endif
+//______________________________________________________________________________
+#ifdef NYI
+//______________________________________________________________________________
+nat32  Statistics_record_binary::record_descriptive_summary
+(nat32  desired_descriptive_summary_elements
+,const Statistical_base &summary_statistics)                               const
+{
+               output record_header code
+               output code for data set (variable record)
+               output desired elements bit mask
+               output desired elements value
+
+}
+//______________________________________________________________________________
+nat32  Statistics_record_binary::record_probability_summary
+(nat32  desired_probability_10s_summary
+,nat32  desired_probability_5s_summary
+,const Statistical_data_set &data_set)                                     const
+{}
+//______________________________________________________________________________
+#endif
+}

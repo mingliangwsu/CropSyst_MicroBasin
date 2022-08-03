@@ -1,0 +1,101 @@
+#ifndef OM_pools_multipleH
+#define OM_pools_multipleH
+
+#include "organic_matter/OM_pools_common.h"
+//_forward declarations_________________________________________________________
+class Organic_matter_initialization_parameters;
+class Organic_matter_decomposition_parameters;
+//______________________________________________________forward declarations___/
+class Organic_matter_pools_multiple
+: public Organic_matter_pools_common
+{public:
+   Organic_biomatter_multiple_pool  *microbial_biomass_ref[MAX_soil_layers];     // This is so that fast and slow cycling residue has access for contribute_to
+   Organic_biomatter_multiple_pool  *metastable_SOM_ref[MAX_soil_layers];        // This is so lignified residue has access for contribute_to //060524
+ public: // structors
+   Organic_matter_pools_multiple
+      (const Organic_matter_decomposition_parameters &_organic_matter_decomposition_parameters //120912
+      ,Soil_abiotic_environment_profile         &_soil_abiotic_env_profile       //060726
+      ,const Soil_layers_interface              &_soil_layers                    //060726
+      ,unmodifiable_ Soil_structure_interface   &_soil_structure                 //070725
+      ,Soil_nitrogen_interface                  *_soil_N
+      ,const Soil_texture_interface             &_soil_texture);                 //070707
+ private:
+   virtual Organic_biomatter_common *provide_organic_matter_pool                 //070707
+      (Organic_matter_type type,uint8 layer);
+      // Always returns a valid pointer
+   virtual Organic_biomatter_common  *render_OM_pool                             //111001
+      (Organic_matter_type     _type
+      ,Organic_matter_position _position
+      ,uint8                   _layer
+      ,Organic_matter_cycling  _cycling
+      ,RUSLE2_Residue_type     _RUSLE2_residue_type                              //060731
+      ,float64                 _biomass
+      ,float64                 _carbon_fraction
+      ,float64                 _carbon_nitrogen_ratio
+      ,float64                 _decomposition_constant                           //090703
+      ,float64                 _detrition_constant                               //090413
+      ,float64                 _area_per_mass      // = 0.0  stubble and surface residue_only?
+      ,float64                 &_contact_fraction
+      ,const Soil_texture_interface &_soil_texture                               //070707
+      , Soil_abiotic_environment_layer * _soil_abiotic_environment_layer) rendition_;
+
+   virtual Organic_biomatter_common_pool  *render_OM_pool_for_read                         //161116
+      (
+      /* NYN
+       Organic_matter_type     _type
+      ,Organic_matter_position _position
+      ,uint8                   _layer
+      ,Organic_matter_cycling  _cycling
+      ,RUSLE2_Residue_type     _RUSLE2_residue_type
+      ,float64                 _biomass
+      ,float64                 _carbon_fraction
+      ,float64                 _carbon_nitrogen_ratio
+      ,float64                 _decomposition_constant
+      ,float64                 _detrition_constant
+      ,float64                 _area_per_mass      // = 0.0  stubble and surface residue_only?
+      ,float64                 &_contact_fraction
+      ,const Soil_texture_interface &_soil_texture
+      , Soil_abiotic_environment_layer * _soil_abiotic_environment_layer
+      */
+      ) rendition_;
+
+
+   inline virtual modifiable_ Organic_biomatter_common_pool *get_metastable_SOM_ref(nat8 layer)    //110929
+      { return metastable_SOM_ref[layer]; };
+   inline virtual modifiable_ Organic_biomatter_common_pool *get_microbial_biomass_ref(nat8 layer) //110929
+      { return microbial_biomass_ref[layer]; };
+ public:
+   inline virtual nat8 SOM_index_last()                                    const  //170301
+      { return (ORGANIC_MATTER_TYPE_COUNT-1); }
+   virtual bool initialize_layer
+      (uint8 horizon,uint8 layer
+      ,float64 sand_fraction                                                     //060418
+      ,float64 initial_organic_matter_carbon_mass
+      ,float64 microbial_decomposition_const
+      ,const Organic_matter_initialization_parameters &organic_matter_historical_parameters  //060215
+      ,Soil_abiotic_environment_layer *point_soil_abiotic_environment_layer);
+ protected:
+   void calculate_C_contributions
+      (float64 sand_fraction
+      ,float64 &C_Fraction_From_MB_To_MetastableSOM
+      ,float64 &C_Fraction_From_MB_To_LabileSOM
+      ,float64 &C_Fraction_From_LabileSOM_To_PassiveSOM
+      ,float64 &C_Fraction_From_LabileSOM_To_CO2
+      ,float64 &C_Fraction_From_LabileSOM_To_MB
+      ,float64 &C_Fraction_From_MetastableSOM_To_PassiveSOM
+      ,float64 &C_Fraction_From_MetastableSOM_To_CO2
+      ,float64 &C_Fraction_From_MetastableSOM_To_MB
+      ,float64 &C_Fraction_From_PassiveSOM_To_CO2
+      ,float64 &C_Fraction_From_PassiveSOM_To_MB);
+   //120912 this was added so we can store historical equilibrated OM for futher future scenario runs
+   virtual nat32 write(std::ostream &)                                stream_IO_;//150728_120912
+   /*170228 Organic_matter_pools_common::take_OM_pool
+   virtual bool take_OM_pool                                                     //161116
+      (Organic_biomatter_common_pool *OM_pool)                    appropriation_;
+   */
+   virtual bool specialized_reference                                            //170228
+      (Organic_biomatter_common_pool *OM_pool_common);
+};
+//______________________________________________________________________________
+#endif
+

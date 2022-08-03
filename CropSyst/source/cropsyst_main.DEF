@@ -1,0 +1,14 @@
+;------------------------------------------------
+;   Main CropSyst_4
+;   
+;   Copyright © 1994. All Rights Reserved.
+;
+;   SUBSYSTEM:    CropSyst_4.exe Module Defintion File
+;   FILE:         cropsyst.def
+;   AUTHOR:       
+;
+;------------------------------------------------
+
+SECTIONS
+CropSyst_UI_notification READ WRITE SHARED
+

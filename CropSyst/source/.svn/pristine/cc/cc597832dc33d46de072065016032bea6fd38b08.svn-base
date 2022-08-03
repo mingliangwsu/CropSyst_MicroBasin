@@ -1,0 +1,84 @@
+#ifndef crop_rowsH
+#define crop_rowsH
+
+#ifndef primitiveH
+#  include <corn/primitive.h>
+#endif
+#include "options.h"
+
+//020611 Armen has confirmed that ascpect is
+// That I had a note that aspect (degrees) was 0=South 90=East
+// I have converted this from North = 0 90=East which is the ArcView convention.
+
+// Note if compiler complains about the following foward declarations.
+// Include crop_params.h before including this croprows.h file
+//class Crop_parameters
+//class Crop_parameters::Layout;
+//class Crop_parameters::Canopy_characteristics_hedge_row;
+
+//namespace_CropSyst_begin
+//______________________________________________________________________________
+class Crop_row_obsolete
+{
+ private: // Constant parameters
+   float64  Latitude_rad;
+   float64  Slope_percent;
+   float64  Aspect_radians;
+
+   Crop_parameters::Layout                         *layout;
+   Crop_parameters::Canopy_characteristics_hedge_row *canopy_characteristics;
+ private: // current variables
+   float64  row_width;
+   float64  row_height;
+ private:
+   float64 calc_sine_solar_declination    (CORN::DOY on_DOY);
+   float64 calc_sine_solar_elevation      (float64 sin_solar_dec,Hour hour);
+   float64 calc_cosine_solar_azimuth      (float64 sin_solar_dec,float64 sin_solar_elev);
+   float64 calc_shadow_angle              (float64 Solar_Elev,float64 Solar_Azimuth);
+   float64 calc_shadow_length             (float64 shadow_angle);
+   float64 calc_hourly_incident_angle     (float64 Solar_Elev, float64 Solar_Azimuth );
+   float64 calc_corrected_shadow_length   (float64 Shadow_Length,float64 Solar_Elev,float64 Solar_Azimuth);
+   float64 calc_hourly_direct_radiation_potential(float64 sin_solar_elev);
+   float64 RSRD  /*unused*/               (float64 sin_solar_elev,float64  shadow_angle);
+ public:
+   Crop_row_obsolete
+   (float64  _Latitude_rad
+   ,float64  _Slope_percent
+   ,float64  _Aspect_N0_E90_degrees
+   ,Crop_parameters::Layout                         *_layout                     //020410
+   ,Crop_parameters::Canopy_characteristics_hedge_row *_canopy_characteristics   //020410
+   );
+
+   void get_hourly_interception
+   (CORN::Hour hour
+   ,float64    &Hourly_Direct_Row_Int
+   ,float64    &Hourly_Direct_Rad_Pot
+   ,float64    &Hourly_Diffuse_Row_Int
+   ,float64    &Hourly_Diffuse_Rad_Pot
+   ,float64    Sine_Solar_Elev
+   );
+
+   void get_daily_interception
+   (CORN::DOY on_DOY
+   ,float64 &Daily_Direct_Row_Int
+   ,float64 &Daily_Diffuse_Row_Int
+   );
+
+   void expand_dimensions(float64 deg_days_today                                 //000718
+   ,float64  deg_days_flowering
+   ,float64  deg_days_veraison
+   );
+ private:
+   float64 expand_dimension                                                      //000717
+   (float64  deg_days_today
+   , float64 initial_dim
+   , float64 final_dim
+   ,float64  deg_days_flowering
+   ,float64  deg_days_veraison
+   );
+};
+//______________________________________________________________________________
+//namespace_CropSyst_end;
+#endif
+//croprows.h
+

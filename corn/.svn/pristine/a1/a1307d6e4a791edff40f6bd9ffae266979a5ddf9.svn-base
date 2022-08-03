@@ -1,0 +1,122 @@
+#  include "corn/container/SDF_list.h"
+#include "corn/string/strconv.hpp"
+namespace CORN {
+//______________________________________________________________________________
+SDF_List::Item::Item()
+: Association()
+, value()
+{}
+//______________________________________________________________________________
+SDF_List::Item::Item(const std::string &i_value)
+: Association()
+, value(i_value)
+{}
+//_2004-09-09___________________________________________________________________
+SDF_List::Item::Item(const char *i_value)
+: Association()
+, value(i_value)
+{}
+//_2004-09-09___________________________________________________________________
+SDF_List::SDF_List(const char *i_SDF_list_string,bool _space_is_a_delimiter)
+: updated(false)
+, space_is_a_delimiter(_space_is_a_delimiter)                                    //090901
+{  SDF_list_string.assign(i_SDF_list_string ? i_SDF_list_string : "");
+   update();
+}
+//______________________________________________________________________________
+void SDF_List::update()
+{
+   //Parse string and create SDF_items append to list                System
+   std::string item_value;                                                           //040909
+   char cstr[5]; cstr[1] = 0;
+   bool in_quote = false;
+   bool started_value = false;
+   bool in_unquoted_string = false;                                              //041003
+   const char *i_SDF_list_string = SDF_list_string.c_str();
+   for (int i = 0; i < (int)SDF_list_string.length(); i++)
+   {
+      char ci = i_SDF_list_string[i];
+      char ci1 = i_SDF_list_string[i+1];
+      cstr[0] = ci;
+      switch (ci)
+      {  case '\"'  :
+         { if (!in_quote)
+            {  in_quote = true;
+               started_value = true;
+            } else
+            {  if (ci1 == '\"')
+               {  // two quote marks is a quote character
+                  item_value.append(cstr);
+                  i += 1;
+               } else
+               {  // we reached the end of the string
+                  append(new SDF_List::Item(item_value));
+                  item_value.assign("");
+                  if (ci1 == ',') i+=1; // take care of separating comma         //040929
+                  started_value = false;
+                  in_quote = false;
+                     in_unquoted_string = false;                                 //041003
+               }
+            }
+         } break;
+         case ' ': case ',' :
+         { if (in_quote /*070729 || in_unquoted_string*/)
+            {  // We are inside a quote so this is part of the string
+               item_value.append(cstr);
+            } else
+            {  bool delimitor = (space_is_a_delimiter && (ci == ' ')) || ci == ','; //090901
+               if (started_value && delimitor)
+               {  append(new SDF_List::Item(item_value));
+                  item_value.assign("");
+                  started_value = false;
+                  in_unquoted_string = false;                                    //041003
+               } else
+                  if (ci == ',')
+                  {  // we encountered a successive comma, so we append an empty string
+                     append(new SDF_List::Item(""));
+                     in_unquoted_string = false;                                 //041003
+                 }
+                 else  // Special case when we don't treat spaces as delimitor
+                    item_value.append(cstr);                                     //090901
+            }
+         } break;
+         default:
+            item_value.append(cstr);
+            if (!in_quote) in_unquoted_string = true;                            //041003
+            started_value = true;
+         break;
+      }
+   }
+   if (item_value.length()) append(new SDF_List::Item(item_value));              //041003
+   updated = true;
+}
+//______________________________________________________________________________
+const char *SDF_List::get_cstr() const
+{  SDF_list_string.assign("");
+   FOR_EACH(item,SDF_List::Item,each_item)
+     append_SDF_to(item->value,SDF_list_string,true);                            //130919
+   FOR_EACH_END(each_item)
+   return SDF_list_string.c_str();
+}
+//______________________________________________________________________________
+std::string &SDF_List::get_SDF_for_data_record_expect()
+{  get_cstr(); // This should ensure SDF_list_string is updated for the write
+   return SDF_list_string;
+}
+//_2004-09-09___________________________________________________________________
+#ifdef NYI
+I might need to do this inorder to implement
+accessing the SDF_list_string directly in data recor
+void SDF_List::append(Node *node)
+{  update();
+   Association_list::append(node);
+}
+//______________________________________________________________________________
+void SDF_List::prepend(Node *node)
+{  update();
+   Association_list::prepend(node);
+}
+//_1998-02-06___________________________________________________________________
+#endif
+} // namespace CORN
+

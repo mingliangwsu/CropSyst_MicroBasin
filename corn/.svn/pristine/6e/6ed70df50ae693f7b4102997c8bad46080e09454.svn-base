@@ -1,0 +1,215 @@
+#include <corn/image/gif/gif_file.h>
+#include <corn/image/gif/common.h>
+namespace_CORN_start
+
+/*______*/  GIF_file::GIF_file(const char *i_filename)
+/*______*/  :file_name(i_filename)
+/*______*/  ,screen_width(0)
+/*______*/  ,screen_height(0)
+/*______*/  ,background_color(0)
+/*______*/  ,pixel_aspect_ratio(0)
+/*______*/  ,global_color_table(0)
+/*991115*/  ,images()
+/*______*/  ,last_graphic_control()
+/*______*/  {
+/*______*/     read();
+/*______*/  };
+/*______*/
+/*______*/  // Output file
+/*______*/  GIF_file::GIF_file(const char *i_filename,unsigned int i_screen_width ,unsigned int i_screen_height )
+/*______*/  :file_name(i_filename)
+/*______*/  ,screen_height(i_screen_height)
+/*______*/  ,screen_width(i_screen_width)
+/*______*/  ,background_color(0)
+/*______*/  ,pixel_aspect_ratio(0)
+/*______*/  ,global_color_table(0)
+/*991115*/  ,images()
+/*______*/  {
+/*______*/  };
+/*______*/
+/*______*/  int GIF_skip_extension_block(istream &in_strm)
+/*______*/  {
+/*______*/      uint8 extension_length = in_strm.get();
+/*______*/      if (extension_length)
+/*______*/      { uint8 buf[256];
+/*______*/        in_strm.read(buf, extension_length);
+/*______*/        if (in_strm.gcount() != extension_length)
+///*______*/        if (fread(&buf, 1, extension_length,in_file) != extension_length)
+/*______*/           return GIF_ERROR;
+/*______*/        buf[extension_length] = 0;
+/*______*/  //      cout << buf << endl; for debugging
+/*______*/      };
+/*______*/      return GIF_OK;
+/*______*/  };
+/*______*/
+/*______*/  int GIF_skip_comment(istream &in_strm)
+/*______*/  {
+/*______*/      uint8 extension_code = in_strm.get();
+/*______*/      GIF_skip_extension_block(in_strm);
+/*______*/  };
+/*______*/
+/*______*/  void GIF_file::read()
+/*______*/  {
+/*______*/     Binary_fstream in_strm(file_name,true); // GIF files are big endian
+/*______*/     if (in_strm.good())
+/*______*/    {
+/*______*/
+/*______*/    char gif_version[7];
+/*______*/    in_strm.read((char *)&gif_version,6);
+/*______*/    gif_version[6] = 0;
+/*______*/    // Check here for valid gif header
+/*______*/
+/*______*/    // read screen width
+/*______*/    screen_width  = in_strm.read_uint16();
+/*______*/    screen_height = in_strm.read_uint16();
+/*______*/
+/*______*/    uint8 packed_field  = in_strm.get();
+/*______*/
+/*______*/    uint8 color_resolution = (((packed_field & 0x70) + 1) >> 4) + 1;
+/*______*/    uint8 bits_per_pixel = (packed_field & 0x07) + 1;
+/*______*/    bool global_color_map_enabled = packed_field & 0x80;
+/*______*/
+/*______*/    background_color   = in_strm.get();
+/*______*/    pixel_aspect_ratio = in_strm.get();
+/*______*/
+/*______*/    if (global_color_map_enabled)
+/*______*/    {
+/*______*/  	  global_color_table = new color_map(color_resolution,bits_per_pixel);
+/*______*/  	  global_color_table->read(in_strm);
+/*______*/    }
+/*______*/    else
+/*______*/       global_color_table = 0;
+/*______*/
+/*______*/    while (!in_strm.eof())
+/*______*/    {
+/*______*/  	 uint8 record_type = in_strm.get();
+/*______*/  	 switch(record_type)
+/*______*/  	 {
+/*______*/  		case GIF_image_separator :  // ','
+/*______*/  		   images.append(new GIF_image(global_color_table,in_strm,last_graphic_control));
+/*______*/            last_graphic_control.enabled = false;
+/*______*/  		break;
+/*______*/  		case GIF_extension_introducer : // '!'
+/*______*/        {
+/*______*/            uint8 extension_code = in_strm.get();
+/*______*/            switch (extension_code)
+/*______*/            { case GIF_graphic_control_extension :
+/*______*/                 last_graphic_control.read(in_strm);
+/*______*/              break;
+/*______*/              case GIF_application_extension :
+/*______*/              {  uint8 length = in_strm.get();
+/*______*/                 char extension_label[50];
+/*______*/                 in_strm.read(extension_label,length);
+/*______*/                 uint8 block_length = in_strm.get();
+/*______*/                 if (strncmp(extension_label,"NETSCAPE2.0",block_length) == 0)
+/*______*/                 {  uint8 one = in_strm.get(); // Should be 1
+/*______*/                    animation_iterations = in_strm.read_uint16();
+/*______*/                 }
+/*______*/                 else // I don't know what the extension is so just throw it away.
+/*______*/                 {  char *buffer = (char *)malloc(block_length +1);
+/*______*/                    in_strm.read(buffer,block_length);
+/*______*/                    free(buffer);
+/*______*/                 }
+/*______*/                 uint8 block_terminator = in_strm.get(); // should be 0 the block terminator
+/*______*/              }
+/*______*/              break;
+/*______*/              default :
+/*______*/                GIF_skip_extension_block(in_strm);
+/*______*/                uint8 block_terminator = in_strm.get();
+/*______*/              break;
+/*______*/            };
+/*______*/  			 // num_extensions += 1;
+/*______*/  			 // extensions[num_extensions] = new extension(in_file);
+/*______*/        }
+/*______*/  		break;
+/*______*/  		case GIF_comment_extension :
+/*______*/           GIF_skip_comment(in_strm);
+/*______*/  		break;
+/*______*/  		case GIF_trailer : // ';'
+/*______*/  			// TERMINATE_RECORD_TYPE;
+/*______*/           return;
+/*______*/  		default:
+/*______*/  //		 *Type = UNDEFINED_RECORD_TYPE;
+/*______*/  //		 RGIFERROR = D_GIF_ERR_WRONG_RECORD;
+/*______*/  		 return; // GIF_ERROR;
+/*______*/  	 };
+/*______*/    };
+/*______*/    };
+/*______*/  };
+/*______*/
+/*______*/  void GIF_file::write_global(Binary_fstream &out_strm)
+/*______*/  {
+/*______*/    char gif_version[7] = "GIF89a";
+/*______*/    out_strm.write(gif_version,6); //fwrite(&gif_version,1,6,file);
+/*______*/
+/*______*/    // read screen width
+/*______*/    out_strm.write_uint16(screen_width);
+/*______*/    out_strm.write_uint16(screen_height);
+/*______*/
+/*______*/    uint8 has_color_table =  global_color_table ? 0x80 : 0x00;
+/*______*/    uint8 color_res_bits = (global_color_table ? ((global_color_table->color_resolution - 1) << 4) : 0x00);
+/*______*/    uint8 color_table_sorted = ((global_color_table && global_color_table->sorted) ? 0x04 : 0x00);
+/*______*/    uint8 color_table_bits_per_pixel = (global_color_table ? (global_color_table->bits_per_pixel -1) : 0x00);
+/*______*/
+/*______*/    uint8 packed_field = has_color_table | color_res_bits | color_table_sorted | color_table_bits_per_pixel;
+/*______*/
+/*______*/    out_strm.put(packed_field);
+/*______*/
+/*______*/    out_strm.put(background_color);
+/*______*/    out_strm.put(pixel_aspect_ratio);
+/*______*/
+/*______*/    if (global_color_table)
+/*______*/  	  global_color_table->write(out_strm);
+/*______*/
+/*______*/    // Animation control block follows the global color table
+/*______*/    if (animation)
+/*______*/       write_animation_control_block(out_strm);
+/*______*/  };
+/*______*/
+/*______*/
+/*______*/  void GIF_file::write()
+/*______*/  {
+               Binary_fstream out_strm(file_name.c_str(),false);
+/*______*/     write_global(out_strm);
+/*______*/
+/*991115*/     for (GIF_image *image = (GIF_image *)images.move_to_head()
+/*991115*/         ;image
+/*991115*/         ;image = (GIF_image *)images.move_to_next())
+/*991115*/     {
+/*991115*/        image->write(out_strm);
+/*991115*/     };
+/*______*/    out_strm.put(GIF_trailer);
+/*______*/  };
+/*______*/
+/*______*/  void GIF_file::write_animation_control_block(Binary_fstream &out_strm)
+/*______*/  {
+/*______*/    out_strm.put(GIF_extension_introducer);
+/*______*/    out_strm.put(GIF_application_extension);
+/*______*/    out_strm.put((uint8)0x0B); // animation extension length
+/*______*/    char netscape2_0[11] = "NETSCAPE2.0";
+/*______*/    out_strm.write(netscape2_0,11);
+/*______*/    out_strm.put((uint8)0x03); // length of animation block
+/*______*/    out_strm.put((uint8)0x01);
+/*______*/    out_strm.write_uint16(animation_iterations);
+/*______*/    out_strm.put((uint8)0x00);
+/*______*/  };
+/*______*/
+/*______*/  void GIF_file::write_current_image(Binary_fstream &out_strm)
+/*______*/  {
+/*991115*/     GIF_image *current_image = (GIF_image *)images.current();
+/*991115*/     if (current_image)
+/*______*/        current_image->write(out_strm);
+/*______*/  };
+
+/*______*/  void GIF_file::append(GIF_image *image_to_append)
+/*______*/   { images.append(image_to_append); };
+/*______*/
+/*______*/  GIF_file::~GIF_file()
+/*______*/  {
+/*______*/    if (global_color_table) delete global_color_table;
+/*991115*/     images.delete_all();
+/*______*/  }
+namespace_CORN_end
+
+
+

@@ -1,0 +1,337 @@
+#include "CS_suite/file_system/CS_file_discovery.h"
+#include "corn/data_source/vv_file.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/container/bilist.h"
+#include "corn/container/text_list.h"
+#include "common/geodesy/geolocation.h"
+namespace CS
+{
+//______________________________________________________________________________
+nat16 File_discovery::find_files_with_extension_wstring
+(const std::wstring &extension
+,modifiable_ CORN::Container &file_list
+,CORN::OS::File_system::Recursion recursion
+)                                                                          const
+{
+std::string ext_str; CORN::wstring_to_string(extension,ext_str);
+/*debugging
+std::clog << "find:*" << ext_str << std::endl ;
+std::clog << "leaf:" << leaf->c_str() << std::endl ;
+*/
+
+   nat16 found_files_count
+      = CORN::OS::file_system_engine.list_file_names_deprecated
+      (*leaf
+      ,file_list
+      ,recursion
+      ,CORN::OS::Directory_entry_name::full_qualification
+      ,0 // const wchar_t *name_wild_card   = 0
+      ,extension.c_str());
+
+// Warning, need to check than we are listing files as we come down
+// for now can simply sort the list
+
+
+         // Starting in the leaf, directories in the path are recursively
+      // searched for files matching the specified extension.
+      // File names are appended to the file list as the function
+      // recurses back down the path from the logical root.
+      // The recursion up the path stops at the logical root.
+      // Typically one will use superdirectory_recursion_inclusive
+      // so files in the root are included in the search.
+      // \returns the number of files found with matching extension
+      // that were added to the file_list.
+      // Note that there may be multiple files matching the extension in
+      // any directory of the path.
+   return file_list.count(); // recount because may be adding files to an existing list
+}
+//_2015-12-06___________________________________________________________________
+nat16 File_discovery::compose_parameters_from_VV_files_to_data_rec
+(modifiable_ CORN::Data_record &data_rec
+,const       CORN::Container  &file_list_qualified)                        const
+{ nat16 parameter_files_read_successfully = 0;
+
+   #if (defined(VERBOSE) && defined(_DEBUG))
+   std::clog << "Loading parameters from files:" << std::endl;
+   #endif
+   FOR_EACH_IN(param_filename,CORN::OS::File_name, file_list_qualified,each_filename)
+   {
+   #if (defined(VERBOSE) && defined(_DEBUG))
+   std::clog << param_filename->c_str() << std::endl;
+   #endif
+   CORN::VV_File param_file(param_filename->c_str(),true);
+   parameter_files_read_successfully += param_file.get(data_rec);
+   const CORN::OS::Directory_name &param_file_dir
+      = param_filename->get_parent_directory_name_qualified();                   //160114
+   data_rec.resolve_directory_entry_names(param_file_dir);                       //160114
+   } FOR_EACH_END(each_filename)
+   return  parameter_files_read_successfully;
+}
+//_2015-12-06___________________________________________________________________
+nat16 File_discovery::compose_parameters_from_VV_files_with_extension_to_data_rec
+(modifiable_ CORN::Data_record &data_rec
+,const std::wstring &extension
+,CORN::OS::File_system::Recursion recursion)
+{
+   CORN::Unidirectional_list discovered_parameter_filenames;
+   nat16 discovered = find_files_with_extension_wstring
+      (extension,discovered_parameter_filenames,recursion);
+   return compose_parameters_from_VV_files_to_data_rec
+      (data_rec,discovered_parameter_filenames);
+}
+//_2016-01-27___________________________________________________________________
+
+
+/* conceptual
+File_discovery::File_discovery
+(directory_level leaf_
+,directory_level root_)
+{
+
+      // The root is a top most directory to search for files.
+      // Typically this logical root would be either a project directory (super project)
+      // the user's home
+      // (For both Linux/Unix and Windows ~ is recognized as home)
+      // or less likely to root of the file system,
+      // or the same as the leaf to limit discovery to one directory
+      // The leaf would typically be the CWD.
+
+
+   continue here
+}
+*/
+//_2015-12-06_____________________________________________________constructor__/
+/*NYN
+File_discovery::File_discovery
+(const CORN::OS::Directory_name &leaf_
+,const CORN::OS::Directory_name &root_)
+: leaf(leaf_)
+, root(root_)
+{
+}
+*/
+//_2015-12-06___________________________________________________________________
+File_discovery::File_discovery()
+: leaf(0),leaf_owned(true)
+, root(0),root_owned(true)
+{
+   leaf = new CORN::OS::Directory_entry_name_concrete;
+   root = find_level(file_system_root_level,leaf);
+   // root_level currently always going to be the root of the drive.
+}
+//_2015-12-06___________________________________________________________________
+File_discovery::~File_discovery()
+{
+   if (leaf_owned) delete leaf;
+   if (root_owned) delete root;
+}
+//_2015-12-08___________________________________________________________________
+
+bool File_discovery::get_geolocation
+(const CORN::OS::Directory_entry_name  &file_or_directory
+,const char *geolocation_section
+,modifiable_ Geolocation      &geolocation
+,modifiable_ std::string      &ISO_6709_annex_D_or_H)                      const
+{  bool got_geolocation = false;
+   // 1st priority see if there is a geolocation in this scenario or any parent directories
+   // Search for files with .CS_geolocation
+   CORN::Bidirectional_list geolocations;
+   const CORN::OS::Directory_name &search_dir
+      = file_or_directory.is_directory()
+      ? file_or_directory
+      : file_or_directory.get_parent_directory_name_qualified();
+   nat32 geoloc_count = 0;
+   geoloc_count = find_files_with_extension_wstring
+      (L"CS_geocoordinate",geolocations,CORN::OS::File_system::superdirectory_recursion_inclusive);
+   geoloc_count = find_files_with_extension_wstring
+      (L"CS_geolocation",geolocations,CORN::OS::File_system::superdirectory_recursion_inclusive);
+   // also look for geocoordinate files if (geoloc_count==0)  // maybe there will be simple geocoordinate files
+   if (geoloc_count)
+   {  // The geolocation in the deepest directory has highest priorty
+      geolocations.sort(CORN::Container::ASCENDING);
+      CORN::Data_record geolocation_datarec(geolocation_section/*"location"*/);geolocation.setup_structure(geolocation_datarec,false);
+      got_geolocation = compose_parameters_from_VV_files_to_data_rec(geolocation_datarec,geolocations) > 0;
+
+      // If the geolocation is in the name of the file as ISO_6709, remember the ISO coding for return.
+      FOR_EACH_IN(geofile,CORN::OS::File_name,geolocations,each_geofile)
+      {
+         Geocoordinate geocoord_unused;
+         std::string pot_geoloc_filename_as_ISO_6709_annex_D_or_H;
+         CORN::wstring_to_string(geofile->get_name(),pot_geoloc_filename_as_ISO_6709_annex_D_or_H);
+         bool name_is_geocoor = geocoord_unused.set_latitude_and_longitude(pot_geoloc_filename_as_ISO_6709_annex_D_or_H);
+         if (name_is_geocoor)
+            ISO_6709_annex_D_or_H = pot_geoloc_filename_as_ISO_6709_annex_D_or_H;
+      } FOR_EACH_END(each_geofile)
+   }
+   if (!got_geolocation)
+   {  // 2nd priority see if there is geocoordinate in the name of the
+      // file/directory or any parent directories
+
+      CORN::Text_list potential_geocoordinates;
+      Geocoordinate geocoord;
+      file_or_directory.append_path_list_to
+         (potential_geocoordinates);
+      std::wstring name_with_extension;
+      // The last name decimal point gets interpreted as an extension,
+      // so this is handled separately.
+      // I haven't check where geolocation is further up the path
+      // I am not sure if in that case the final decimal point
+      // is also interpreted as an extension (I dont think so).
+      potential_geocoordinates.add_wstring
+         (file_or_directory.get_name_with_extension(name_with_extension));
+
+      // This should also be able to recognize
+      // something like 46.7797N_117.0851W.Pullman
+
+      bool superceed_geoloc = false;
+      for (CORN::Text_list::Item *pot_geocoord = dynamic_cast<CORN::Text_list::Item  *>(potential_geocoordinates.pop_at_tail())
+          ;pot_geocoord && ! superceed_geoloc
+          ;pot_geocoord = dynamic_cast<CORN::Text_list::Item  *>(potential_geocoordinates.pop_at_tail()))
+      {  bool name_is_geocoor = geocoord.set_latitude_and_longitude(*pot_geocoord);
+         if (name_is_geocoor)
+         {  superceed_geoloc = true;
+                geocoord.set_elevation_meter(geolocation.get_elevation());
+                geolocation.copy_from_geocoordinate(geocoord);
+            got_geolocation = true;
+            ISO_6709_annex_D_or_H.assign(*pot_geocoord);                         //160110
+         }
+      }
+   }
+   return got_geolocation;
+}
+//_2015-12-06_________________________________________________get_geolocation__/
+bool File_discovery::know_leaf(const CORN::OS::Directory_name &leaf_) cognition_
+{  {  if (leaf_owned) delete leaf;
+      leaf = const_cast<CORN::OS::Directory_name *>(&leaf_); leaf_owned = false;
+   }
+   return leaf != 0;
+}
+//_2015-12-08___________________________________________________________________
+bool File_discovery::take_leaf(CORN::OS::Directory_name *leaf_)
+{  if (leaf_)
+   {  if (leaf_owned) delete leaf;
+      leaf = leaf_; leaf_owned = true;
+   }
+   return leaf != 0;
+}
+//_2015-12-08___________________________________________________________________
+bool File_discovery::know_root(const CORN::OS::Directory_name &root_) cognition_
+{  {  if (root_owned) delete root;
+      root = const_cast<CORN::OS::Directory_name *>(&root_); root_owned = false;
+   }
+   return root != 0;
+}
+//_2015-12-08___________________________________________________________________
+bool File_discovery::take_root(CORN::OS::Directory_name *root_)
+{  if (root_)
+   {  if (root_owned) delete root;
+      root = root_; root_owned = true;
+   }
+   return root != 0;
+}
+//_2015-12-08___________________________________________________________________
+CORN::OS::Directory_name * File_discovery::find_level
+(Directory_level level
+,const CORN::OS::Directory_name *from_directory)                      rendition_
+{
+   CORN::OS::Directory_name *found_level_rendered = 0;
+   if (from_directory->is_root())
+   {  found_level_rendered =
+       (level == file_system_root_level)
+         ? new CORN::OS::Directory_name_concrete(*from_directory)
+         : 0; // we are at the root so the level was not found;
+   } else
+   {  found_level_rendered = find_level                                          //160307
+         (level,from_directory->get_path_directory_name());
+      if (!found_level_rendered)
+      {
+         if (is_level(*from_directory,level))
+            found_level_rendered = new CORN::OS::Directory_name_concrete(*from_directory);
+         else // recurse
+         {  const CORN::OS::Directory_name *parent = from_directory->get_path_directory_name();
+            found_level_rendered = (parent)
+               ? find_level(level,parent)
+               : 0;
+         }
+      }
+   }
+   return found_level_rendered;
+}
+//_2015-12-08___________________________________________________________________
+CORN::OS::Directory_name *File_discovery::set_level_as_root(Directory_level level) rendition_
+{
+   CORN::OS::Directory_name *found_level_rendered = find_level(level,leaf);
+   if (found_level_rendered)
+      know_root(*found_level_rendered);
+   return found_level_rendered;
+}
+//_2015-12-08___________________________________________________________________
+/*160301 RLN
+bool File_discovery::set_level_as_root(Directory_level level)         rendition_
+{  bool was_set = false;
+   CORN::OS::Directory_name *found_level_rendered = find_level(level,leaf);
+   if (found_level_rendered)
+      was_set = take_root(found_level_rendered);
+   if (!was_set)
+      delete found_level_rendered;
+   return was_set;
+}
+//_2015-12-08___________________________________________________________________
+*/
+
+bool File_discovery::is_level
+(const CORN::OS::Directory_name &directory
+,Directory_level level)                                             affirmation_
+{  bool it_is
+   =  ((directory.is_root()) && (level == file_system_root_level))
+   || ((directory.get_name() == L"Scenarios") && (level == scenarios_level));
+   if (!it_is && (level == project_level))
+   {  // Check if this is project
+      CORN::OS::File_name_concrete project_file(directory,".CS_project");
+      it_is = CORN::OS::file_system_engine.exists(project_file) ;
+      if (!it_is)                                                                //160307
+      {  CORN::OS::Directory_name_concrete database_dir(directory,"Database");   //160307
+         it_is = CORN::OS::file_system_engine.exists(database_dir);              //160307
+      }
+   }
+   if (!it_is && (level == scenario_level))
+   {
+      CORN::OS::File_name_concrete scenario_file(directory,".CropSyst_scenario");
+      it_is = CORN::OS::file_system_engine.exists(scenario_file);
+   }
+   return it_is;
+}
+//_2015-12-08___________________________________________________________________
+bool File_discovery::find_and_reset_missing_parameter_file_name
+(modifiable_ CORN::OS::File_name &parameter_file_name
+,const wchar_t *extension_expected
+,const wchar_t *extension_alternate
+,CORN::OS::File_system::Recursion recursion)                               const
+{
+   bool filename_reset = false;
+   if (!CORN::OS::file_system_engine.exists(parameter_file_name))
+   {  CORN::Unidirectional_list discovered_param_files;
+      nat8 param_file_count = 0;
+      param_file_count = find_files_with_extension_wstring
+         (extension_expected,discovered_param_files
+         ,CORN::OS::File_system::superdirectory_recursion_inclusive);
+      if (!param_file_count && extension_alternate)
+         param_file_count = find_files_with_extension_wstring
+            (extension_alternate,discovered_param_files
+            ,CORN::OS::File_system::superdirectory_recursion_inclusive);
+      CORN::OS::File_name *discovered_filename = dynamic_cast<CORN::OS::File_name *>
+         (discovered_param_files.pop_at_tail());
+      // Use the file found with the greatest specificity
+      // (currently this would be listed last, but probably should sort the list)//160128
+      if (discovered_filename)
+      {
+         parameter_file_name.set_DEN(*discovered_filename);
+         filename_reset = true;
+         delete discovered_filename;
+      }
+   }
+   return filename_reset;
+}
+//_2016-01-26___________________________________________________________________
+} // namespace CS
+

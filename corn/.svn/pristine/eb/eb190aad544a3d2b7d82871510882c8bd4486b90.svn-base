@@ -1,0 +1,142 @@
+These files are created with neither Excel 2003 nor Excel 2007.
+
+These files are in the Microsoft Excel BIFF format as documented in 
+Microsoft Excel 97 Developer's Kit by MicroSoft Press 1997 
+is an OLD Excel format which predates both these versions of Excel.
+
+The files I am working with are actually from a version of the BIFF5 
+format that predates Excel 97.  
+The data in the files consists of a single spreadsheet 
+(this format predates workbooks)
+
+We have been using these files in this format for over 15 years 
+and all versions of Excel have read this legacy format of these files; 
+indeed, both Excel 2003 and Excel 2007 read this format correctly, 
+but with the patches installed, the spreadsheet is not displayed correctly.
+
+An example of the file which is not displayed correctly is available at the following URL:
+
+http://www.bsyse.wsu.edu/rnelson/temp/annual.xls
+
+If you open this file with Excel 2007 a workbook/spreadsheet window opens 
+(There is no error message), but only the window frame is shown with scroll bars, 
+maximize, minimize, close buttons. The window title shows the file name   
+annual.xls [Compatibility Mode]  The inside area of the window shows only  
+the blue background color. No cell grid, no data and no cell row/column numbers are displayed.  
+When I press the keyboard arrow keys, a black box is displayed 
+in the window area where a cell would be if it were displayed correctly. 
+I can move this cell 'cursor' around the window using the arrow keys, 
+and the data from the cell is displayed in the data/formula input field. 
+
+If I click /View\ [New Window], I do then see the spreadsheet and the data 
+is displayed correctly in the new window. 
+
+When I unistall the patch, the spreadsheet opens and all the data is displayed 
+immediately correctly in the spreadsheet window.  
+So Excel, with the patch installed, is reading all the file's data, 
+it just isn't displaying the window correctly.  
+
+This problem occurs not only on my computer but also all my collegues' 
+computers where the respective Excel2003 or Excel 2007 patches 
+have been installed either under Vista or XP. It appears to be a bug 
+introduced and common to both patch(s).
+
+These files are used by hundereds of scientist and researchers in dozens of 
+countries around the world. So I am hoping the display problem can be fixed.
+
+
+I suspect that the security updates
+ KB936507  and KB936509 
+when openning the workbook/spreadsheet are looking for 
+or referencing format/display information in a BIFF record that did not exist
+in the previous/earlier formats, or, is not 
+using information from older version of BIFF records.
+ 
+I think I have narrowed down the problem to the Excel's processing
+of the   WINDOW2 BIFF in the XLS BIFF record file stream.
+ 
+Note that there are TWO versions of the WINDOW2 BIFF record in the Excel file format specification.
+BIFF record header code 3E (hex), (compatible with BIFF versions prior to BIFF8.
+and BIFF header code 23E (hex) used in BIFF8 and later
+(As documented on page 422 and 423 of  MicroSoft Excel 97 Developers Kit (1997)).
+ 
+The format of my annual.XLS file uses the the older 3E (hex) version.
+(I have written a program that dumps the BIFF records header codes of .XLS files)
+My annual.XLS file uses only the following BIFF record types:
+ 
+0002h INTEGER cell
+0003h NUMBER cell
+0004h LABEL cell
+000Ah EOF
+003Dh WINDOW1
+003Eh WINDOW2
+0041h PANE
+0200h DIMENSIONS
+0809h BOF
+ 
+(The WINDOW1, WINDOW2 and PANE records occur near the end of the XLS file).
+ 
+ 
+If I edit my annual.xls file with a binary file editor and zero out the two bytes of the 
+WINDOW2 record body corresponding to the grbit field, and then open and view the file
+in Excel (with the patch installed), 
+the data is displayed; albeit as expected, without the desirable spreadsheet display elements, grid lines and row/col numbers.
+ 
+ 
+[ In my annual.xls file I provided you with in my previous email (http://www.bsyse.wsu.edu/rnelson/temp/annual.xls),
+ the first byte of the grbit field is at file position  0000165D (hexidecimal)  5725 (decimal)
+The flagged option for this field are set for:
+ 
+display formula (disabled)
+display grid      (enabled)
+display row/col (enabled)
+frozen              (enabled)
+display zeros   (enabled)
+default header  (disabled)
+arabic              (disabled)
+display guts     (disabled)
+frozen no split  (enabled)
+sheet selected (enabled)
+paged             (enabled)
+reserved bits   (cleared)
+ 
+Here is a version of this same file where I have cleared (to 0) both bytes 
+the grbit field of the WINDOW2 record with a binary file editor:
+http://www.bsyse.wsu.edu/rnelson/temp/annual_grbit_cleared.xls
+]
+ 
+Excel is very sensitive to the settings of the option flags of the WINDOW2 BIFF record (named 'grbit' at record offset 4),
+with regards to correct display of the spreadsheet window.
+For example: if I set the grbit field to different values,
+to display only the grid, or only the row/col, it may display part of the data, but columns may be missing,
+or extra columns may be inserted or other messed up display artifacts.
+ 
+This would imply that the older version of the WINDOW2 record (BIFF code 3E (hex)) 
+is being read, but the display options are not being processed correctly for the window display.
+ 
+Another less likely explaination:
+ 
+Perhaps your Excel programmer when making modifications in this update, 
+is using the newer WINDOW2 record (BIFF code 23E (hex)) and forgot about
+the older version of the WINDOW2 record (BIFF code 3E (hex)) which  occurs in older formats.
+ 
+I can see how, if the 3E (hex) record is not processed, the window will not be displayed correctly.
+This would explain why when I use /View\[New window] the data is then displayed correctly:
+because, the new window is most likely created with the newer WINDOW2 code 23E (hex).
+ 
+I can see how a programmer could be easily confused with these two 
+versions of the WINDOW2 record 
+and how the older could have been inadvertantly disregarded.
+(These records probably should not have been given the same name).
+ 
+Perhaps this part of the program was refactored and the 
+older WINDOW2 record type was omitted.
+ 
+ 
+In any case the problem appears to be the display of the window as a result
+of improper interpretation of the grbit field of the WINDOW2 'Sheet Window Information Record'
+BIFF record code 3E (hex), for BIFF 7 or earlier formats.  
+This is most likely in the 'compatibility mode' part of the Excel source code.
+ 
+ 
+ 

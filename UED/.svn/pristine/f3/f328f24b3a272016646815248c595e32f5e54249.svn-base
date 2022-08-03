@@ -1,0 +1,45 @@
+
+
+To view the VBA example, open the .XLS file in Excel.
+Enable macros and press [Alt][F11] to open up VBA macro editor.
+Click on "Microsoft Excel Objects" and "sheet1"
+<P>
+You should be able to see how to call the functions from
+the comments in the VB example.
+<P>
+In the spreadsheet, the [Start] button will load the data from the UED file to the spreadsheet.
+(Note that the sample file only has precip, and temperature,
+so this is all the example will add to the spreadsheet.)
+<P>
+Note that you will need to put the .DLL file in some common directory in your PATH accessible to Excel
+(I.e. c:\windows\system32 directory)
+<P>
+Refer to the notes in the UED_simple.bas file for how to use the dll in Excel Visual Basic for applications.
+For Visual Basic, the process is much the same, and I would presume so also for SQL server using Visual Basic for Applications.
+<P>
+You may need to redo the steps to import the .BAS files into the spreadsheet, I'm not sure.
+<P>
+Another note on using the DLL with Visual Basic: you must pass a string variable to the UED_simple_open() function,
+you cannot use a literal constant.  (See the sample spreadsheet macro by pressing [Alt][F11])
+<P>
+A .H file is available for C or C++ (instructions for using the dll with C and C++ are in this file).
+(UED_simple.bas is the same as UED_simple.h in Visual Basic).
+<P>
+Currently the file UED_codes only has the units codes (UC_xxx) for units used by ClimGen,
+the UED_simple_get_xxxx() function can actually perform units conversions for all possible relevant metric
+units,  I.e.  mm, cm, d, m, Dm, hm, km, etc.. and most equivalent English units.
+<P>
+If you are using C++ I can send you the units code header file which will give you all the available units codes.
+(email:rnelson@mail.wsu.edu)
+<P>
+For Visual basic, if you want some other units let me know and I will add the codes to the UED_Codes.bas file.
+<BR>
+(I didn't list all the codes for all the units since it would take me hours to prepare, but I can easily add any individual units you need).
+<P>
+The UED_codes.bas file lists standard UED codes.
+<BR>
+Only the codes precipitation, temperature, solar rad, relative humidity,
+dew pt temperatures and wind speed are currently used by ClimGen.
+<BR>
+(ClimGen may also generate some of the ET and VPD variables
+(depending on available data)).

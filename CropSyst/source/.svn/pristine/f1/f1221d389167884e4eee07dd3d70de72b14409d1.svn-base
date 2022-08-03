@@ -1,0 +1,112 @@
+#include "crop/phenology_common.h"
+//#include "CS_suite/observation/CS_observation.h"
+#include "CS_suite/observation/CS_inspector.h"
+#include "corn/parameters/parameter.h"
+/*160203
+#ifdef USE_VARIABLE_RECORDERS
+#  include "CS_suite/simulation/CS_variable_recorder.h"
+#endif
+*/
+namespace CropSyst
+{
+//______________________________________________________________________________
+Phenology_common::Phenology_common
+(const Crop_parameters_struct::Phenology &phenology_parameter_
+,const float64    &thermal_time_cumulative_ref
+,bool              is_perennial_
+,bool              is_fruit_tree_)
+: phenology_parameter      (phenology_parameter_)
+, thermal_time_cumulative  (thermal_time_cumulative_ref)
+,is_perennial              (is_perennial_)
+,is_fruit_tree             (is_fruit_tree_)
+,days_in_season(0)
+,harvest_DOY(0)
+{  for (int i =0 ; i < NGS_COUNT; i++)
+   {  days_since_start_of [i] = 0;
+      duration_of[i] = 0;
+      start_date[i].set_datetime64(0);                                           //140620
+      start_day_in_season[i]=65000;                                              //140625
+   }
+   start_day_in_season_senescence=65000;                                         //160211
+   start_day_in_season_senescence_full=65000;                                    //160211
+   start_date_tuber_initiation.set_datetime64(0);                                //141217
+}
+//_2013-09-02___________________________________________________________________
+bool Phenology_common::start_day()                                 modification_
+{  days_in_season++;                                                             //140302
+   for (int gs = 0; gs < NGS_COUNT; gs++)
+   {  duration_of          [gs] += (growth_stage == gs) ? 1 : 0;
+      days_since_start_of  [gs] +=
+         (growth_stage == gs)
+         || (gs == NGS_SOWING)
+         || (growth_stage == NGS_DORMANT_or_INACTIVE)
+         || (has_emerged() && (growth_stage >= gs)) ? 1 : 0;
+   }
+   return true;
+}
+//_2013-09-02___________________________________________________________________
+bool Phenology_common::start_season()                              modification_
+{  growth_stage             = NGS_RESTART;
+   harvest_DOY              = 0;
+   days_since_start_of[NGS_EMERGENCE] = 0;                                       //110531 110506
+   return reset();                                                               //110506
+}
+//_2013-09-02___________________________________________________________________
+bool Phenology_common::reset
+(Normal_crop_event_sequence from
+,Normal_crop_event_sequence to)                                    modification_
+{  for (int i = from ; i <= to; i++)                                             //141202
+   {
+      days_since_start_of [i] = 0;
+      duration_of[i] = 0;
+      start_day_in_season[i]=65000;                                              //140625
+      start_date[i].set_YD(CORN::Year(0),CORN::DOY(0));                          //141202
+   }
+   // NYI senescence
+   // and senescence_full
+   days_in_season = 0;                                                           //140302
+      // Make sure that start_day is called after reset
+      // or set this to 1;
+   return true;
+}
+//_2013-09-02___________________________________________________________________
+bool Phenology_common::is_in_vegetative_growth()                    affirmation_
+{  float64 start_growth_deg_day
+      = is_fruit_tree ? 0.0 : phenology_parameter.initiation.emergence;
+   return (growth_stage == NGS_ACTIVE_GROWTH) ||                                 //110422
+      ( (thermal_time_cumulative >= start_growth_deg_day)
+     && (thermal_time_cumulative <= phenology_parameter.culmination.accrescence));
+}
+//_2013-09-02___________________________________________________________________
+bool Phenology_common::is_in_senescence()                           affirmation_
+{   return
+      ( (thermal_time_cumulative >= phenology_parameter.initiation.senescence)
+     && (thermal_time_cumulative <= phenology_parameter.culmination.senescence));
+}
+//__________________________________________________________________
+bool Phenology_common::is_in_tuber_initiation()                     affirmation_
+{
+   return start_date_tuber_initiation.get() > 0
+      &&  !days_since_start_of[NGS_FILLING];
+}
+//_2015-08-25__________________________________________________________________/
+CORN::Parameter_properties_literal PP_crop_season_duration=
+{"season_duration","duration","phenology","Season duration","hint_NYN","URL_NYN",UT_day,"days"};
+//_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+RENDER_INSPECTORS_DEFINITION(CropSyst::Phenology_common)
+{
+   // using crop emanator                                                        //160616
+   /*NYI
+   for each stages (that is relevent to this type of crop)
+   {
+      std::string ontology_days_since_start_of_XXX("phenology/days_since_start_of/");
+      ontology_days_since_start_of_XXX.append(growth_stages[gs]);
+      inspectors.append(new CS::Inspector(days_since_start_of[gs],UT_day,context,ontology_days_since_start_of_XXX, value_statistic));//CSVP_crop_base_season_duration,PP_crop_season_duration,UT_day,STAT_value_bit,CORN::mean_statistic) ); // not sure if I want max or mean for the annual aggregation, I think it is not applicable to annual aggregation/
+   */
+
+//NYI   inspectors.append(new CS::Inspector(days_since_start_of[NGS_GERMINATION],UT_day,*context/*emanator*/,"phenology/days_since_start_of/season", CORN::value_statistic));//CSVP_crop_base_season_duration,PP_crop_season_duration,UT_day,STAT_value_bit,CORN::mean_statistic) ); /* not sure if I want max or mean for the annual aggregation, I think it is not applicable to annual aggregation*/
+   return 0; // doesn't have its own emanator emanator;
+}
+//_2013-09-18________________________________________render_variable_recorders_/
+}// namespace CropSyst
+

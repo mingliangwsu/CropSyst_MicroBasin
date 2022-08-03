@@ -1,0 +1,168 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{56E79464-60EB-4FD8-8A26-792890D017FF}</ProjectGuid>
+			<ProjectType>CppConsoleApplication</ProjectType>
+			<Config Condition="'$(Config)'==''">Debug</Config>
+			<ProjectVersion>12.0</ProjectVersion>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<IncludePath>..\..\;..\..\..\..\..\common\geolocation\;..\;c:\dev\common;$(IncludePath)</IncludePath>
+			<LinkPackageStatics>rtl.lib</LinkPackageStatics>
+			<AllPackageLibs>rtl.lib</AllPackageLibs>
+			<BRCC_Defines>_RTLDLL;NO_STRICT;_NO_VCL;$(BRCC_Defines)</BRCC_Defines>
+			<PackageImports>rtl.bpi;vcl.bpi;vclx.bpi;xmlrtl.bpi;vclie.bpi;inet.bpi;inetdbbde.bpi;inetdbxpress.bpi;vclactnband.bpi;dbrtl.bpi;vcldb.bpi;bdertl.bpi;TMSD2006.bpi;tmsexd2006.bpi;bcbofficexp.bpi;bcbsmp.bpi;soaprtl.bpi;dsnap.bpi;bcbie.bpi;RNAutoControls_basic_package.bpi;EasyListviewD10.bpi;VirtualTreesD10.bpi;VirtualShellToolsD10.bpi;K102_R70.bpi</PackageImports>
+			<TASM_Defines>_RTLDLL;NO_STRICT;_NO_VCL;$(TASM_Defines)</TASM_Defines>
+			<DCC_UnitSearchPath>..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;C:\Documents and Settings\rnelson\My Documents\Borland Studio Projects;$(BDS)\lib;$(BDS)\lib\obj;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_ResourcePath>..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;$(DCC_ResourcePath)</DCC_ResourcePath>
+			<BCC_IncludePath>..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;c:\dev;$(BCC_IncludePath)</BCC_IncludePath>
+			<BRCC_IncludePath>..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;c:\dev;$(BRCC_IncludePath)</BRCC_IncludePath>
+			<DCC_IncludePath>..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;C:\Documents and Settings\rnelson\My Documents\Borland Studio Projects;$(BDS)\lib;$(BDS)\lib\obj;$(DCC_IncludePath)</DCC_IncludePath>
+			<BCC_PCHCache>true</BCC_PCHCache>
+			<TASM_IncludePath>..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;c:\dev;$(TASM_IncludePath)</TASM_IncludePath>
+			<OutputExt>exe</OutputExt>
+			<BCC_GenerateConsoleApp>true</BCC_GenerateConsoleApp>
+			<ILINK_ObjectSearchPath>..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;$(ILINK_ObjectSearchPath)</ILINK_ObjectSearchPath>
+			<FinalOutputDir>c:\cs_suite_5\ued</FinalOutputDir>
+			<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
+			<NoVCL>true</NoVCL>
+			<BCC_Defines>NO_STRICT;$(BCC_Defines)</BCC_Defines>
+			<ILINK_LibraryPath>C:\temp\lib\RS2010\release\;..\..\..\..\..\ued\library\BDS\Debug_Build\;..\..\;..\..\..\..\..\corn\BDS\release_build\;..\..\..\..\..\corn\parameters\BDS\debug_build\;..\..\..\..\..\corn\format\BDS\debug_build\;..\..\..\..\..\common\geolocation\;..\..\..\..\..\corn\datetime\BDS\release_build\;..\..\..\..\..\corn\file_sys\BDS\debug_build\;..\..\..\..\..\corn\container\BDS\debug_build\;..\..\..\..\ued\library\BDS\Debug_Build\;..\..\..\..\corn\BDS\release_build\;..\..\..\..\corn\parameters\BDS\debug_build\;..\..\..\..\corn\format\BDS\debug_build\;..\..\..\..\common\geolocation\;..\..\..\..\corn\datetime\BDS\release_build\;..\..\..\..\corn\file_sys\BDS\debug_build\;..\..\..\..\corn\container\BDS\debug_build\;..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<DCC_ObjPath>..\..\..\..\common\geolocation;..\;C:\dev\CS_suite\UED\map_google;$(DCC_ObjPath)</DCC_ObjPath>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<BCC_Defines>_DEBUG;$(BCC_Defines);$(BCC_Defines)</BCC_Defines>
+			<BCC_UserSuppliedOptions> -k</BCC_UserSuppliedOptions>
+			<ILINK_LibraryPath>$(BDS)\lib\debug;$(ILINK_LibraryPath);$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<DCC_Define>DEBUG;$(DCC_Define);$(DCC_Define)</DCC_Define>
+			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+			<IntermediateOutputDir>Debug_Build</IntermediateOutputDir>
+			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
+			<TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>
+			<ILINK_DisableIncrementalLinking>true</ILINK_DisableIncrementalLinking>
+			<BCC_DisableOptimizations>true</BCC_DisableOptimizations>
+			<TASM_Debugging>Full</TASM_Debugging>
+			<DCC_AdditionalSwitches> -V</DCC_AdditionalSwitches>
+			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+			<BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<BCC_Defines>NDEBUG;$(BCC_Defines);$(BCC_Defines)</BCC_Defines>
+			<IntermediateOutputDir>Release_Build</IntermediateOutputDir>
+			<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
+			<BCC_UserSuppliedOptions> -r</BCC_UserSuppliedOptions>
+			<TASM_Debugging>None</TASM_Debugging>
+			<DCC_AdditionalSwitches> -$O+</DCC_AdditionalSwitches>
+			<ILINK_LibraryPath>$(BDS)\lib\release;$(ILINK_LibraryPath);$(ILINK_LibraryPath)</ILINK_LibraryPath>
+		</PropertyGroup>
+		<ItemGroup>
+			<CppCompile Include="..\..\..\..\..\common\geolocation\geolocation.cpp">
+				<BuildOrder>7</BuildOrder>
+				<DependentOn>..\..\..\..\..\common\geolocation\geolocation.h</DependentOn>
+				<BuildOrder>0</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\map_google_main.cpp">
+				<BuildOrder>2</BuildOrder>
+				<BuildOrder>5</BuildOrder>
+			</CppCompile>
+			<ResFiles Include="map_google.res">
+				<ModuleName>map_google.res</ModuleName>
+				<BuildOrder>-1</BuildOrder>
+				<BuildOrder>1</BuildOrder>
+			</ResFiles>
+			<LibFiles Include="C:\temp\lib\RS2010\release\corn_complete_static.lib">
+				<IgnorePath>true</IgnorePath>
+				<BuildOrder>9</BuildOrder>
+			</LibFiles>
+			<LibFiles Include="C:\temp\lib\RS2010\release\UED_static.lib">
+				<IgnorePath>true</IgnorePath>
+				<BuildOrder>10</BuildOrder>
+			</LibFiles>
+			<BuildConfiguration Include="Base">
+				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<Import Project="$(BDS)\Bin\CodeGear.Cpp.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Cpp.Targets')"/>
+		<ProjectExtensions>
+			<Borland.Personality>CPlusPlusBuilder.Personality.12</Borland.Personality>
+			<Borland.ProjectType>CppConsoleApplication</Borland.ProjectType>
+			<BorlandProject>
+				<CPlusPlusBuilder.Personality>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">1033</VersionInfo>
+						<VersionInfo Name="CodePage">1252</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Debugging>
+						<Debugging Name="DebugSourceDirs"/>
+					</Debugging>
+					<Parameters>
+						<Parameters Name="RunParams">&quot;C:\Simulation\Database\Weather\WA_ID_OR\imported&quot; </Parameters>
+						<Parameters Name="Launcher"/>
+						<Parameters Name="UseLauncher">True</Parameters>
+						<Parameters Name="DebugCWD"/>
+						<Parameters Name="HostApplication"/>
+						<Parameters Name="RemoteHost"/>
+						<Parameters Name="RemotePath"/>
+						<Parameters Name="RemoteParams"/>
+						<Parameters Name="RemoteLauncher"/>
+						<Parameters Name="UseRemoteLauncher">False</Parameters>
+						<Parameters Name="RemoteCWD"/>
+						<Parameters Name="RemoteDebug">False</Parameters>
+						<Parameters Name="Debug Symbols Search Path"/>
+						<Parameters Name="LoadAllSymbols">True</Parameters>
+						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+					</Parameters>
+					<ProjectProperties>
+						<ProjectProperties Name="AutoShowDeps">False</ProjectProperties>
+						<ProjectProperties Name="ManagePaths">True</ProjectProperties>
+						<ProjectProperties Name="VerifyPackages">True</ProjectProperties>
+					</ProjectProperties>
+				</CPlusPlusBuilder.Personality>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+	</Project>

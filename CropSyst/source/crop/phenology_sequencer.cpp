@@ -1,0 +1,242 @@
+//#include "crop/crop_thermal_time.h"
+#include "crop/thermal_time_daily.h"
+#include "crop/phenology_sequencer.h"
+#include "corn/application/explaination/explainations.h"
+#include "crop/growth_stages.hpp"
+#include "static_phrases.h"
+namespace CropSyst
+{
+#ifndef REACCH_VERSION
+//   extern CORN::OS::Directory_name_concrete scenario_directory_global;
+   extern CORN::Explainations              explainations;
+#endif
+//______________________________________________________________________________
+Phenology_sequencer::Phenology_sequencer
+(const CORN::Date_const         &today_
+,const Crop_parameters          &parameters_
+,const Air_temperature_minimum&  air_temperature_min_                            //150217
+,const float64&                  ref_day_length_hours_)                          //140812
+: phenology_parameters(parameters_.phenology)
+, thermal_time
+  ( (parameters_.thermal_time.thermal_response ==linear)                         //151109
+    ? (Thermal_time_common *)(new Thermal_time_daily_linear
+      (parameters_.thermal_time
+      ,stress_adjusted_temperature                                               //140626
+      ,air_temperature_min                                                       //140626
+      ,temperature_with_est_night                                                //140626
+      ,ref_day_length_hours_                                                     //140812
+      ,parameters_.crop_model_labeled.get() == CROPSYST_ORCHARD_MODEL
+      ,parameters_.vernalization.enabled ? &(parameters_.vernalization) : 0
+      ,(parameters_.photoperiod.photoperiodism_cowl.get() > no_photoperiod)      //100513
+         ?(&(parameters_.photoperiod)) : 0) )
+   : (Thermal_time_common *)(new Thermal_time_daily_nonlinear
+      (parameters_.thermal_time
+      ,stress_adjusted_temperature                                               //140626
+      ,air_temperature_min                                                       //140626
+      ,temperature_with_est_night                                                //140626
+      ,ref_day_length_hours_                                                     //140812
+      ,parameters_.crop_model_labeled.get() == CROPSYST_ORCHARD_MODEL
+      ,parameters_.vernalization.enabled ? &(parameters_.vernalization) : 0
+      ,(parameters_.photoperiod.photoperiodism_cowl.get() > no_photoperiod)      //100513
+         ?(&(parameters_.photoperiod)) : 0))
+  )
+, phenology
+   (parameters_.phenology
+   ,thermal_time->ref_thermal_time_cumulative()
+   ,((parameters_.crop_model_labeled.get() == CROPSYST_ORCHARD_MODEL) &&
+       (parameters_.harvested_part_labeled.get() == fruit_part))
+   ,parameters_.is_perennial()
+   )
+, harvest_orchard_fruit_part
+   ((parameters_.crop_model_labeled.get() == CROPSYST_ORCHARD_MODEL) &&
+       (parameters_.harvested_part_labeled.get() == fruit_part))
+,stress_adjusted_temperature  ()
+,temperature_with_est_night   ()
+,air_temperature_min          (air_temperature_min_)
+, ref_today           (today_)
+, emerged             (false)
+, is_tuber            (parameters_.harvested_part_labeled.get()  == tuber_part)
+,planting_date       (phenology.start_date[NGS_PLANTING])
+,restart_date        (phenology.start_date[NGS_ACTIVE_GROWTH])
+                  // The start of the season (at planting) and
+                  // season restart for multiple year crops.
+,emergence_date      (phenology.start_date[NGS_EMERGENCE])
+,flowering_date      (phenology.start_date[NGS_ANTHESIS])
+,tuber_init_date     (phenology.start_date_tuber_initiation)                     //141217
+   // This could be a reference to phenology.start_date[NGS_FILLING]
+,grain_filling_date  (phenology.start_date[NGS_FILLING])
+,maturity_date       (phenology.start_date[NGS_MATURITY])                        //141202
+,inactive_begin_date (phenology.start_date[NGS_DORMANT_or_INACTIVE])
+{
+}
+//______________________________________________________________________________
+bool Phenology_sequencer::thermal_time_matchs(float64 deg_day_event,bool clipping_adjusted) const
+{  return (thermal_time->get_accum_degree_days(clipping_adjusted,TT_YESTERDAY) < deg_day_event)
+       && (thermal_time->get_accum_degree_days(clipping_adjusted,TT_TODAY) >= deg_day_event);
+}
+//______________________________________________________________________________
+void Phenology_sequencer::thermal_time_event()
+{
+   Normal_crop_event_sequence growth_stage = phenology.get_growth_stage_sequence();
+   if (growth_stage == NGS_DORMANT_or_INACTIVE) return;                          //071113
+   if (growth_stage == NGS_GERMINATION)                                          //041201
+      if (!use_emergence_hydrothermal_time())                                    //041201
+       if (thermal_time_matchs(phenology_parameters.initiation.emergence,false)) //041201
+          initiate_emergence();
+   if (has_leaf_senescence())                                                    //970130
+      if (is_tuber &&                                                            //140621
+          thermal_time_matchs(phenology_parameters.initiation.tuber,true))       //970130
+         initiate_tuber();                                                       //970130
+   if (growth_stage >= NGS_ACTIVE_GROWTH)                                        //121221
+   {
+      if ((phenology_parameters.initiation.flowering) // Clipping event may set this to 0 indicating flowering is cancelled
+          && thermal_time_matchs(phenology_parameters.initiation.flowering,true))//081102
+         initiate_flowering();
+      if (!CORN::is_approximately<float32>(phenology_parameters.initiation.senescence,0,0.000001)  //131024_121221
+          && thermal_time_matchs(phenology_parameters.initiation.senescence,true))//121221
+         initiate_senescence();                                                  //121221
+      if ((phenology_parameters.culmination.accrescence)                         //130429
+          && thermal_time_matchs(phenology_parameters.culmination.accrescence,true))//130429
+         initiate_max_canopy();                                                  //130429
+   }
+   if (harvest_orchard_fruit_part)                                               //140619
+   {
+#ifdef OLD_ORCHARD
+      if (thermal_time_matchs(phenology_parameters.initiation.filling,true)) initiate_fruit_growth();  //030521
+       if (thermal_time_matchs(phenology_parameters.initiation.rapid_fruit_growth,true)) initiate_rapid_fruit_growth( );   //030521
+#endif
+   } else // Now all non fruit crops, not just those harvest for seed can have grain (seed) filling
+       if ((phenology_parameters.initiation.filling)
+         // Clipping event may set this to 0 indicating filling is cancelled     //030521
+             && thermal_time_matchs(phenology_parameters.initiation.filling,true)) initiate_filling();
+   if (phenology_parameters.maturity_significant                                 //080319
+       && thermal_time_matchs(phenology_parameters.initiation.maturity,true))    //970130
+      initiate_maturity();
+}
+//_2014-06-19_1997-05-14____________________________________thermal_time_event_/
+bool Phenology_sequencer::start()
+{  return phenology.reset();
+}
+//_2014-06-19___________________________________________________________________
+void Phenology_sequencer::trigger_synchronization(Normal_crop_event_sequence event)
+{  //This should actually be moved to Phenology
+   phenology.days_since_start_of  [event] = 1;
+   phenology.duration_of          [event] = 1;
+   phenology.start_date           [event].set(ref_today);                        //140620
+   phenology.start_day_in_season  [event] = phenology.days_in_season;            //140620
+   phenology.start_day_in_season_senescence = phenology.days_in_season;          //160211
+   phenology.start_day_in_season_senescence_full = phenology.days_in_season;     //160211
+}
+//_2013-09-03___________________________________________________________________
+bool Phenology_sequencer::event_start
+   (Normal_crop_event_sequence event_seq
+   ,const char *preferred_description)
+{
+   phenology.growth_stage = event_seq;
+   phenology.start_date[event_seq].set(ref_today);                               //160118
+   trigger_synchronization(event_seq);
+   log_event(get_growth_stage_description(event_seq,phenology.is_fruit_tree));
+   return true;
+}
+//_2014-06-20___________________________________________________________________
+bool Phenology_sequencer::initiate_emergence()
+{  bool just_emerged = false;
+   if (!emerged)                                                                 //000719
+   {  just_emerged = event_start(NGS_EMERGENCE)                                  //140619
+                  && event_start(NGS_ACTIVE_GROWTH);                             //140619
+   }
+   emerged = true;
+   return just_emerged;
+}
+//_2014-06-19_________________________________________________event_emergence__/
+bool Phenology_sequencer::initiate_tuber    ()
+{
+   tuber_init_date.set(ref_today);                                               //141217
+   return true;
+}
+//_2014-06-19_________________________________________________xxx_/
+bool Phenology_sequencer::initiate_flowering     ()
+{  bool event_started = false;
+   if (phenology.get_growth_stage_sequence() != NGS_FILLING)                     //081110
+   {
+      /*
+      phenology.growth_stage = NGS_ANTHESIS;                                     //081110
+      // In the case of tuber, there could be filling before flowering
+      log_event(TL_Begin_flowering);
+      flowering_date.set(today);
+      event_started = true;
+      */
+      event_started =  event_start(NGS_ANTHESIS);
+   }
+   return event_started;
+}
+//_2014-06-19_________________________________________________xxx_/
+bool Phenology_sequencer::initiate_filling()
+{  return event_start(NGS_FILLING);
+}
+//_2014-06-19_________________________________________________xxx_/
+bool Phenology_sequencer::initiate_maturity      ()
+{  return event_start(NGS_MATURITY);
+}
+//_2014-06-19_____________________________________________event_begin_maturity_/
+
+bool Phenology_sequencer::initiate_senescence    ()
+{  log_event("Begin senescence");
+   return true;
+}
+//_2014-06-19_________________________________________________xxx_/
+bool Phenology_sequencer::initiate_max_canopy          ()
+{
+/*
+   log_event("Maximum canopy");
+   trigger_synchronization(NGS_END_CANOPY_GROWTH);
+   return true;
+*/
+   return event_start(NGS_END_CANOPY_GROWTH,"Maximum canopy");
+}
+//_2014-06-19_________________________________________________xxx_/
+#ifdef OLD_ORCHARD
+//071120
+bool Phenology_sequencer::initiate_fruit_growth()
+{  return event_start(FGS_FRUCTESCENCE);
+}
+//_2014-06-19_________________________________________________xxx_/
+bool Phenology_sequencer::initiate_veraison()
+{  return event_start(FGS_VERAISON);
+}
+//_2014-06-19_________________________________________________xxx_/
+bool Phenology_sequencer::initiate_rapid_fruit_growth()
+{  return event_start(FGS_RAPID_FRUIT_DEVELOPMENT);
+}
+//_2014-06-19_________________________________________________xxx_/
+#endif
+bool Phenology_sequencer::start_inactive_period(bool apply_dormancy)
+{
+   //It is necessary to clear thermal time at the start of the inactive
+   //period otherwise, for fruit crops, chilling evaluation uses thermal time
+   //and if there is residual thermal time, the chilling requirement will be
+   //immediately satisfied.
+   thermal_time->clear_accum_degree_days();                                      //000719
+   return event_start(NGS_DORMANT_or_INACTIVE);                                  //140620
+}
+//_2014-06-25___________________________________________________________________
+void Phenology_sequencer::log_event(const char *description)               const
+{
+/*NYI
+#ifndef REACCH_VERSION
+   explainations.append(new CORN::Explaination                                   //140620
+      (CORN::Explaination::information_severity
+      ,"growth_stage_started.html"
+      ,description
+      ,scenario_directory_global.c_str()
+         // Using the CWD which should be the scenario as the context
+         // but might want to use the crop parameter filename
+      ,today)
+      );
+#endif
+*/
+}
+//_2002-09-12___________________________________________________________________
+} // namespace CropSyst
+
+

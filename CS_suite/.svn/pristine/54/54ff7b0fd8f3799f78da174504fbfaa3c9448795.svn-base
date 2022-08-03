@@ -1,0 +1,69 @@
+#ifndef CS_suite_directoryH
+#define CS_suite_directoryH
+#include "corn/application/suite_directory_OS_FS.h"
+#include "corn/application/application_directory_OS_FS.h"
+#include "CS_suite/CAFE/CAFE_directory.h"
+#include "CS_suite/CropSyst/CropSyst_directory.h"
+#include "CS_suite/ClimGen/ClimGen_directory.h"
+#include "CS_suite/CANMS/CANMS_directory.h"
+#include "CS_suite/UED/UED_directory.h"
+
+//---------------------------------------------------------------------------
+/*
+#define CAFE_Directory        CS::Application_directory
+#define CAFE_dairy_Directory  CS::Application_directory
+*/
+//---------------------------------------------------------------------------
+namespace CS
+{
+class Suite_Directory
+: public CORN::OS_FS::Suite_directory
+{
+protected:
+   provided_ CropSyst_Directory           *CropSyst_directory;
+   provided_ UED::Application_directory   *UED_directory;
+   provided_ ClimGen_Directory            *ClimGen_directory;   // Currently I don't have an specialized application directory for ClimGen
+   provided_ CANMS_Directory              *CANMS_directory;
+   provided_ CAFE_Directory               *CAFE_directory;                       //110106
+   provided_ NIFA_Directory               *NIFA_directory;                       //141110
+   provided_ CORN::OS::Directory_name_concrete *Database_directory;              //140630
+   provided_ CORN::OS_FS::Program_directory *CS_Explorer_directory;           //141116
+   provided_ CORN::OS::File_name       *ClimGen_exe_file;
+   provided_ CORN::OS::File_name       *CS_explorer_exe_file;
+   provided_ CORN::OS::File_name       *CS_suite_exe_file;
+   provided_ CORN::OS::Directory_name  *common_weather_directory;
+   provided_ CORN::OS::File_name       *weather_editor_exe_file;
+   provided_ CORN::OS::File_name       *Database_REACCH_to_CS_soil_weather_exe_file;//140630
+public: // 'structors
+   Suite_Directory(const CORN::OS::Directory_entry_name &directory_or_subdir_file_name);
+   // Use this constructor when we have either:
+   // a fully qualified CS_suite directory
+   // a fully qualified filename (typically a program in any subdirectory of the suite);
+   virtual ~Suite_Directory();
+public:
+   virtual bool is_valid()                                                 const;
+public:  // Fluent interfaces
+   const CropSyst_Directory         &CropSyst()                               provision_;
+   const CORN::OS_FS::Program_directory   &CS_Explorer()                            provision_; //141116
+   const UED::Application_directory &UED()                                    provision_;
+   const ClimGen_Directory          &ClimGen()                                provision_;
+   const CANMS_Directory            &CANMS()                                  provision_;
+   const CAFE_Directory             &CAFE()                                   provision_;
+   const NIFA_Directory             &NIFA()                                   provision_; //141110
+   const CORN::OS::File_name        &CS_explorer_executable()                 provision_;
+   const CORN::OS::Directory_name   &common_weather()                         provision_;
+   const CORN::OS::File_name        &weather_editor_executable()              provision_;
+   const CORN::OS::Directory_name   &Database()                               provision_;
+   const CORN::OS::File_name        &Database_REACCH_to_CS_soil_weather_executable() provision_; //140630
+private:
+   virtual void reset()                                                 provision_; // provides because only modifies provided contributes;
+};
+//______________________________________________________________________________
+extern CS::Suite_Directory *Suite_directory;
+} // namespace CS
+
+#define CS_SUITE_4_Web_root_dir "http:\/\/www.bsyse.wsu.edu\/CS_suite"
+//extern CS::Suite_Directory *CS_Suite_directory;
+// The 'main' source file of each program the uses CS::Suite_directory will need to implement the instance of CS_suite_directory
+#endif
+

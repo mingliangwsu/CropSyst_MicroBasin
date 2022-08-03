@@ -1,0 +1,263 @@
+#include "import_export_engine.h"
+#include "UED/convert/convert_response.h"
+#include "UED/library/database_file.h"
+#include "UED/library/std_codes.h"
+#include <iomanip>
+/* Format
+
+variable code <tab> period start date and/or time <tab> period end date and/or time <tab> corn quality code
+
+Codes are hexidecimal
+
+time spans can be either date, time or date and time.
+Time values are decimal fraction of day with or without leading 0.
+
+Lines can also have optional text description of the variable code dates and quality
+This text is purely commentary and should not be otherwise parsed.
+
+
+decided not to do this:
+{span code} variable code <tab> {span} <tab> corn quality code
+where
+{span code} is either
+PERIOD or
+INSTANT
+{span}
+Is either
+period start date and/or time <tab> period end date and/or time
+or
+instant date and/or time
+*/
+namespace UED {
+//______________________________________________________________________________
+Quality_import_export_engine::Quality_import_export_engine
+(const Convertor_arguments &_parameters)
+: parameters(_parameters)
+, variable_quantum_lists()
+, quality_spans()
+, last_used_quality_span(0)
+{}
+//______________________________________________________________________________
+int Quality_import_export_engine::process()
+{  return (parameters.operation == "import")
+   ? perform_import()
+   : perform_export();
+}
+//______________________________________________________________________________
+nat32 Quality_import_export_engine::perform_import()
+{  Database_file UED_file
+      (parameters.UED_filename.c_str()
+         // the filename may null indicating that
+         // records are to be kept in memory and will not be written to a file.
+      ,(std::ios_base::in | std::ios_base::out)
+      ,false);                                                                   //140612
+   nat32 spans_processed = 0;
+   std::ifstream quality_file(parameters.target_filename.c_str());
+   UED::Variable_code   variable_code;
+   float64              date_start;
+   float64              date_end;
+   nat32 /*Quality_code*/ quality;
+   std::string          comment;
+   while (!quality_file.eof())
+   {  quality_file >> std::hex >> variable_code >> date_start >> date_end >> std::hex >> quality;
+      std::getline(quality_file,comment);
+      quality_spans.append(new Quality_span
+         (variable_code,date_start,date_end,(Quality_code)quality));
+      spans_processed ++;
+   }
+   for (Binary_data_record_cowl *
+        data_rec = UED_file.goto_next_data_record()
+       ;data_rec
+       ;data_rec = UED_file.goto_next_data_record())
+   {  nat16 num_values = data_rec->get_num_values();
+      for (nat16 index = 0; index < num_values; index++)
+      {  UED::Variable_code variable_code = data_rec->get_variable_code();
+         CORN::Quality_clad quality_i;
+         data_rec->get_at(index, quality_i);
+         CORN::datetime64 timestamp_i = data_rec->get_date_time_for_index(index);
+         const Quality_span *quality_span = get_quality_span(data_rec->get_variable_code(),timestamp_i);
+         if (quality_span)
+            data_rec->set_quality_at(index,quality_span->quality);
+      }
+   }
+   return spans_processed;
+}
+//______________________________________________________________________________
+Quality_import_export_engine::Quality_span *Quality_import_export_engine::find_quality_span
+(UED::Variable_code variable_code,CORN::datetime64 timestamp)
+{  FIND_FOR_EACH_IN(found_qual_span,qual_span, Quality_span, quality_spans,true,each_QS)
+   {  if (  (qual_span->variable_code == variable_code)
+          &&(timestamp >= qual_span->date_start)
+          &&(timestamp <= qual_span->date_end))
+         found_qual_span = qual_span;
+   } FOR_EACH_END(each_QS)
+   return found_qual_span;
+}
+//______________________________________________________________________________
+Quality_import_export_engine::Quality_span *Quality_import_export_engine::get_quality_span
+(UED::Variable_code variable_code
+,CORN::datetime64 timestamp)
+{  if (last_used_quality_span)
+   {  if ((last_used_quality_span->variable_code == variable_code)
+          && (   (timestamp >= last_used_quality_span->date_start)
+              && (timestamp <= last_used_quality_span->date_end)))
+         return last_used_quality_span;
+   }
+   last_used_quality_span = find_quality_span(variable_code,timestamp);
+   return last_used_quality_span;
+}
+//______________________________________________________________________________
+nat32 Quality_import_export_engine::perform_export()
+{  nat32 data_records_processed = 0;
+   UED::Database_file UED_file
+      (parameters.UED_filename.c_str()
+         // the filename may null indicating that
+         // records are to be kept in memory and will not be written to a file.
+      ,std::ios_base::in
+      ,false);                                                                   //140612
+   std::ofstream quality_file(parameters.target_filename.c_str());
+   std::cout << "Identifying quality time spans in file:" << parameters.target_filename << std::endl;
+   for (Binary_data_record_cowl *
+        data_rec = UED_file.goto_next_data_record()
+       ;data_rec
+       ;data_rec = UED_file.goto_next_data_record())
+   {
+      const std::string &variable_abbrev = standard_variable_abbreviation(data_rec->get_variable_code());
+/*debug
+if ((variable_abbrev == "precip"))
+      std::cout <<  variable_abbrev ;
+*/
+      data_records_processed += identify_quality_spans(*data_rec);
+   }
+   if (variable_quantum_lists.count())
+   {
+      std::cout << "Consolidating quality time space and writing" << std::endl;
+      FOR_EACH_IN(var_quantum_list,Variable_quantum_list,variable_quantum_lists,each_VQL)
+      {  UED::Variable_code variable_code = var_quantum_list->variable_code;
+         const std::string &variable_abbrev = standard_variable_abbreviation( variable_code);
+         var_quantum_list->sort();
+         Quantum *first_continuous_quantum = dynamic_cast<Quantum *>(var_quantum_list->pop_at_head());
+         if (first_continuous_quantum)
+         {
+         Quantum *last_quantum = first_continuous_quantum;
+         // Warning currently assuming daily timestep
+         CORN::Date_clad_32 next_expected_quantum_date(first_continuous_quantum->timestamp.get_date32());
+         next_expected_quantum_date.inc_day();
+         for   (Quantum *quantum = dynamic_cast<Quantum *>(var_quantum_list->pop_at_head())
+               ;quantum
+               ;quantum = dynamic_cast<Quantum *>(var_quantum_list->pop_at_head()))
+         {
+/* debug
+if ((variable_abbrev == "precip"))
+//&& ((int)quantum->timestamp.get_datetime64() == 1970002))
+{
+std::cout <<  variable_abbrev ;
+std::cout <<  (int)quantum->timestamp.get_datetime64() << std::endl;
+std::cout <<  (int)next_expected_quantum_date.get_datetime64() << std::endl;
+std::cout <<  quantum->quality.get() << std::endl;
+//std::cout <<  first_continuous_quantum->quality.get() << std::endl;
+}
+*/
+            if (  (quantum->timestamp.get_datetime64() == next_expected_quantum_date.get_datetime64())
+                &&(quantum->quality.get_quality_code() == first_continuous_quantum->quality.get_quality_code()))   //150307
+            {
+               // just keep eating quantums
+            } else
+            {  std::string span_start; first_continuous_quantum->timestamp.append_to_string(span_start _ISO_FORMAT_DATE_TIME);
+               std::string span_end;  quantum->timestamp.append_to_string(span_end _ISO_FORMAT_DATE_TIME);
+               std::cout <<  variable_abbrev<<  " " << span_start << " - " << span_end << " " << quantum->quality.get_description() << std::endl;
+               quality_file
+                  << std::hex << variable_code
+                  << '\t' << std::setprecision(10) << first_continuous_quantum->timestamp.get_datetime64()
+                  << '\t' << std::setprecision(10) << quantum->timestamp.get_datetime64()
+                  << '\t' << std::hex << quantum->quality.get_quality_code()
+                  << '\t' << '|' << variable_abbrev
+                  << '\t' << span_start
+                  << '\t' << span_end
+                  << '\t' << quantum->quality.get_description()
+                  << std::endl;
+               first_continuous_quantum = quantum;
+            }
+            next_expected_quantum_date.set_datetime64(quantum->timestamp.get_datetime64());
+            next_expected_quantum_date.inc_day();
+            last_quantum = quantum;
+         }
+            {
+               std::string span_start; first_continuous_quantum->timestamp.append_to_string(span_start _ISO_FORMAT_DATE_TIME);
+               std::string span_end;  last_quantum->timestamp.append_to_string(span_end _ISO_FORMAT_DATE_TIME);
+               std::cout <<  variable_abbrev <<  " " << span_start << " - " << span_end << " " << last_quantum->quality.get_description() << std::endl;
+               quality_file
+                  << std::hex << variable_code
+                  << '\t' << std::setprecision(10) <<first_continuous_quantum->timestamp.get_datetime64()
+                  << '\t' << std::setprecision(10) <<last_quantum->timestamp.get_datetime64()
+                  << '\t' << std::hex << last_quantum->quality.get_quality_code()
+                  << '\t' << '|' << variable_abbrev
+                  << '\t' << span_start
+                  << '\t' << span_end
+                  << '\t' << last_quantum->quality.get_description()
+                  << std::endl;
+            }
+         }
+      } FOR_EACH_END(each_VQL)
+   }
+}
+//______________________________________________________________________________
+bool Quality_import_export_engine::identify_quality_spans
+(const Binary_data_record_cowl &data_rec)
+{  CORN::Units_code time_step_units_code = data_rec.get_time_step_units_code();
+   nat16 num_values = data_rec.get_num_values();
+   for (nat16 index = 0; index < num_values; index++)
+   {  UED::Variable_code variable_code = data_rec.get_variable_code();
+      CORN::Quality_clad quality_i;
+      data_rec.get_at(index, quality_i);
+      CORN::datetime64 timestamp_i = data_rec.get_date_time_for_index(index);
+      add_quantum(variable_code,timestamp_i,quality_i,time_step_units_code);
+   }
+   return true;
+}
+//______________________________________________________________________________
+bool Quality_import_export_engine::add_quantum
+(UED::Variable_code   variable_code
+,CORN::datetime64           timestamp_i
+,const CORN::Quality &quality_i
+,CORN::Units_code     time_step_units_code_not_currently_used)
+{
+   /* NYI time_step_units_code
+      Should also have lists level by time_step_units_code,
+      Currently assuming all records have the same time step WARNING.
+   */
+   Variable_quantum_list &variable_quantum_list = provide_variable_quantum_list(variable_code);
+   variable_quantum_list.add_quantum(timestamp_i,quality_i);
+   return true;
+}
+//______________________________________________________________________________
+Quality_import_export_engine::Variable_quantum_list &Quality_import_export_engine::provide_variable_quantum_list(UED::Variable_code   variable_code)
+{  Variable_quantum_list * var_quantum_list = dynamic_cast<Variable_quantum_list *>
+      (variable_quantum_lists.find(variable_code));
+   if (!var_quantum_list)
+   {  var_quantum_list = new Variable_quantum_list(variable_code);
+      variable_quantum_lists.append(var_quantum_list);
+   }
+   return *var_quantum_list;
+}
+//______________________________________________________________________________
+bool Quality_import_export_engine::Variable_quantum_list::add_quantum
+(CORN::datetime64     timestamp
+,const CORN::Quality &quality)
+{  append(new Quantum(timestamp,quality));
+}
+//______________________________________________________________________________
+Quality_import_export_engine::Quality_span::Quality_span
+(UED::Variable_code  variable_code_
+,CORN::datetime64    date_start_
+,CORN::datetime64    date_end_
+,CORN::Quality_code  quality_)
+: CORN::Item()
+, variable_code(variable_code_)
+, date_start   (date_start_)
+, date_end     (date_end_)
+, quality      (quality_)
+{}
+//______________________________________________________________________________
+} // namespace UED
+

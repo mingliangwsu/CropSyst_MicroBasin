@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\temp\lib\BCB5\release\common_sim_static.lib"/>
+    <OBJFILES value="C:\temp\obj\common\simulation\BCB5\\synchronization.obj 
+      C:\temp\obj\common\simulation\BCB5\\scenario.obj 
+      C:\temp\obj\common\simulation\BCB5\\simulation.obj 
+      C:\temp\obj\common\simulation\BCB5\\event.obj 
+      C:\temp\obj\common\simulation\BCB5\\operation.obj 
+      C:\temp\obj\common\simulation\BCB5\\log.obj 
+      C:\temp\obj\common\simulation\BCB5\\event_status.obj 
+      C:\temp\obj\common\simulation\BCB5\\exit_codes.obj 
+      C:\temp\obj\common\simulation\BCB5\\event_types.obj 
+      C:\temp\obj\common\simulation\BCB5\\simulation_project_directory.obj 
+      C:\temp\obj\common\simulation\BCB5\\scenario_directory.obj 
+      C:\temp\obj\common\simulation\BCB5\\balancer.obj"/>
+    <RESFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\.."/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="xUSE_PCH;CS_VERSION=4;_DEBUG;USE_OS_FS"/>
+    <SYSDEFINES value="NO_STRICT;_RTLDLL"/>
+    <MAINSOURCE value="common_sim_static.bpf"/>
+    <INCLUDEPATH value="..\..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\parameters;..\..\..\GUI\recent;..\..\..\measure;..\..\..\..;..\..\..\..\CropSyst\source;..\..\.."/>
+    <LIBPATH value="..\..;..\..\..\parameters;..\..\..\GUI\recent;..\..\..\measure;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+    <LISTFILE value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -Vmm -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\common\simulation\BCB5\&quot; 
+      -N0&quot;C:\temp\obj\common\simulation\BCB5\&quot; -$Y+ -$W -$O- -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-l&quot;C:\dev\components\AutoControls\&quot; /P64"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value="cg32.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=21
+Item0=..\..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\parameters;..\..\..\GUI\recent;..\..\..\measure;..\..\..\..;..\..\..\..\CropSyst\source;..\..\..
+Item1=..\..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\parameters;..\..\..\GUI\recent;..\..\..\measure;..\..\..\..;..\..\..\..\CropSyst\source;C:\dev\common
+Item2=..\..;$(BCB)\include;$(BCB)\include\vcl;..\..\..\parameters;..\..\..\GUI\recent;..\..\..\measure;..\..\..\..;..\..\..\..\CropSyst\source
+Item3=$(BCB)\include;$(BCB)\include\vcl;..;..\..\parameters;..\..\GUI\recent;..\..\measure;..\..\..;..\..\..\CropSyst\source
+Item4=$(BCB)\include;$(BCB)\include\vcl;..\;..;..\..\parameters;..\..\GUI\recent;..\..\measure;..\..\..;..\..\..\CropSyst\source
+Item5=..\;..;..\..\parameters;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\CropSyst\version4
+Item6=..\;..;..\..\parameters;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\CropSyst\cpp
+Item7=..\;..;..\..\parameters;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..;c:\dev\CropSyst\cpp
+Item8=..\;..;..\..\parameters;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item9=..;..\..\parameters;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item10=..\;..\..\parameters;..;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item11=..\..\parameters;..\;..;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item12=..;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item13=..\;..;..\..\GUI\recent;..\..\measure;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item14=..\;..\..\GUI\recent;..\..\measure;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item15=..\..\GUI\recent;..\..\measure;..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item16=..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item17=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item18=..\;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item19=$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item20=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=13
+Item0=..\..;..\..\..\parameters;..\..\..\GUI\recent;..\..\..\measure;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..;..\..\parameters;..\..\GUI\recent;..\..\measure;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\;..;..\..\parameters;..\..\GUI\recent;..\..\measure;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\;..\..\parameters;..;..\..\GUI\recent;..\..\measure;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\..\parameters;..\;..;..\..\GUI\recent;..\..\measure;$(BCB)\lib\obj;$(BCB)\lib
+Item5=..;..\..\GUI\recent;..\..\measure;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\;..;..\..\GUI\recent;..\..\measure;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\;..\..\GUI\recent;..\..\measure;..;$(BCB)\lib\obj;$(BCB)\lib
+Item8=..\..\GUI\recent;..\..\measure;..\;..;$(BCB)\lib\obj;$(BCB)\lib
+Item9=..;$(BCB)\lib\obj;$(BCB)\lib
+Item10=..\;..;$(BCB)\lib\obj;$(BCB)\lib
+Item11=..\;$(BCB)\lib\obj;$(BCB)\lib
+Item12=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=12
+Item0=xUSE_PCH;CS_VERSION=4;_DEBUG;USE_OS_FS
+Item1=xUSE_PCH;CS_VERSION=4;_DEBUG;xUSE_OS_FS
+Item2=xUSE_PCH;CS_VERSION=4;_DEBUG
+Item3=USE_PCH;CS_VERSION=4;_DEBUG
+Item4=USE_PCH;CS_VERSION=4
+Item5=USE_PCH;_DEBUG;CS_VERSION=4
+Item6=USE_PCH;_DEBUG
+Item7=USE_PCH
+Item8=_DEBUG;USE_PCH
+Item9=_DEBUG;SUPPORT_STRING;ONEHEADER
+Item10=_DEBUG;SUPPORT_STRING
+Item11=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=4
+Item0=C:\temp\obj\common\simulation\BCB5\
+Item1=C:\temp\obj\common\simulation\BCB5
+Item2=C:\temp\obj\BCB5\
+Item3=C:\temp\obj\BCB5
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=C:\temp\lib\BCB5\release\
+Item1=C:\temp\lib\BCB5\release
+
+[HistoryLists\hIBPIOutputDir]
+Count=1
+Item0=C:\dev\components\AutoControls\
+
+[HistoryLists\hlTlibPageSize]
+Count=3
+Item0=0x0040
+Item1=0x0020
+Item2=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+
+  <FILES>
+    <FILE type="override" value="..\..\exit_codes.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\event_status.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+  </FILES>
+</PROJECT>

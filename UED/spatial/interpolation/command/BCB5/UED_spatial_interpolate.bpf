@@ -1,0 +1,18 @@
+USEUNIT("..\UED_spatial_interpolate_main.cpp");
+USEUNIT("..\..\..\..\..\common\geolocation\geolocation.cpp");
+USEUNIT("..\..\UED_database_interpolate_datarec.cpp");
+USEUNIT("..\..\UED_database_interpolator.cpp");
+USEUNIT("..\..\..\..\..\common\geolocation\geometry\terrestrial_geometry.cpp");
+USEUNIT("..\..\..\..\..\corn\math\numerical\interpolate_2D_3D.cpp");
+USEUNIT("..\..\..\..\convert\station_database.cpp");
+USELIB("C:\temp\lib\BCB5\release\container_static.lib");
+USELIB("C:\temp\lib\BCB5\release\datetime_static.lib");
+USELIB("C:\temp\lib\BCB5\release\corn_static.lib");
+USELIB("C:\temp\lib\BCB5\release\ued_static.lib");
+USELIB("C:\temp\lib\BCB5\release\file_sys_static.lib");
+USELIB("C:\temp\lib\BCB5\release\format_static.lib");
+USELIB("C:\temp\lib\BCB5\release\parameters_static.lib");
+//---------------------------------------------------------------------------
+This file is used by the project manager only and should be treated like the project file
+
+main

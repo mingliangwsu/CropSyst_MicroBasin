@@ -1,0 +1,130 @@
+#include "corn/data_source/command_options_datasrc.h"
+#include "corn/data_source/vv_file.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+#include <cstring>
+
+namespace CORN {
+//______________________________________________________________________________
+Command_options_data_source::Command_options_data_source
+(nat16       argc_
+,const char *argv_[]
+,const char *response_file_extension_)
+: VV_Data_source()
+, argc(argc_)
+, argv(argv_)
+, args()
+{
+   for (int a = 0; a < 1000; a++)
+      if ((a > 0) && (a < argc))                                                 //161016
+         args.add_cstr(argv[a]);
+}
+//________________________________________________________________constructor__/
+Command_options_data_source::Command_options_data_source(const std::string &response_line)
+: VV_Data_source()
+, argc(0)
+, argv(0)
+, args(response_line.c_str(),' ')
+{}
+//_2016-10-15_____________________________________________________constructor__/
+Command_options_data_source::Command_options_data_source
+(const CORN::OS::File_name &response_filename)
+: VV_Data_source()
+, argc(0)
+, argv(0)
+, args()
+{  nat32 line_count = 0;
+   std::ifstream response_stream(response_filename.c_str());
+   std::string response_line;
+   while (response_stream.good() && !response_stream.eof())
+   {  getline(response_stream,response_line);
+      if (!response_line.empty())
+      {  CORN::Text_list line_args(response_line.c_str(),' ');
+         args.transfer_all_from(line_args);
+         line_count++;
+      }
+   }
+   //return line_count > 0;
+}
+//_2016-10-15___________________________________________________________________
+bool Command_options_data_source::get(modifiable_ Data_record &options_record)
+{
+   bool got = VV_Data_source::get(options_record);
+   int a = 1;
+   CORN::Text_list unrecognized_args;
+      for (CORN::Text_list::Item *arg = dynamic_cast<CORN::Text_list::Item *>(args.pop_first())
+          ;arg
+          ;arg = dynamic_cast<CORN::Text_list::Item *>(args.pop_first()))
+      {  {  Submission_status status = submit(options_record,*arg,false);
+            switch (status)
+            {
+               case section_known   : // [section_name] on the command line (argv) will set to the respective new current section.
+               case entry_known     : // variable=value Variables are set to values for the current section.
+               {
+                  // Derived classes
+                     nat32 args_consumed = consume_argments(*arg,args);
+                     for (nat32 c = 1; c <= args_consumed; c++)
+                        a += args_consumed;
+               } break;
+               case section_unknown :
+               case entry_unknown :
+               case unrecognized :
+               case comment_recognized :
+               default :
+               {
+               // Any other encountered argument is currently ignored
+               // may want option to abort with unrecognized arguments
+                 unrecognized_args.add_string(*arg);
+               } break;
+            } // switch (status)
+            delete arg;
+         }
+         a++;
+      } // for arg
+   options_record.get_end();
+   FOR_EACH_IN(unrec_arg,CORN::Text_list::Item,unrecognized_args,each_arg)
+      args.add_string(*unrec_arg);
+   FOR_EACH_END(each_arg)
+   return true; // expected_entried_found ;
+}
+//________________________________________________________________________get__/
+VV_Data_source::Submission_status Command_options_data_source::submit(modifiable_ Data_record &data_rec,const std::string &text,bool unexpected_only)  submission_
+{
+   Arguments *as_arguments = dynamic_cast<Arguments *>(&data_rec);
+   // First see if the data record as arguments recognize options (I.e. --XX -X or --var-value assigments)
+   VV_Data_source::Submission_status status
+      =  as_arguments
+         ? (as_arguments->recognize(text))
+            ? entry_known : unrecognized : unrecognized;
+   if (status == unrecognized)
+      status = VV_Data_source::submit(data_rec,text,unexpected_only);
+   return status;
+}
+//_2016-10-15__________________________________________________________________/
+nat32 Command_options_data_source::consume_argments
+(const std::string &identifier
+,CORN::Text_list &remaining_args)                                  modification_
+{
+   // This default method simplay skips ignores the next argument in the list.
+   // returns the number of arguments consumed (0)
+   // Derived classes may have identified a previously subitted argument/option
+   // which specifies that the following arguments are further options
+   // or parameters that will need to be specially processed (consumed)
+   // The identified argument (identifier) is echoed back to the derived class
+   // which will removed the following argments to be consumed
+   // from the remaining_args list.
+   return 0;
+}
+//_2016-10-15__________________________________________________________________/
+bool Command_options_data_source::prompt_user_for_unencountered_options
+(const char *selected_options[])
+{  return false;
+}
+//______________________________________prompt_user_for_unencountered_options__/
+const char *Command_options_data_source::label_cstr(char *buffer)          const
+{  strcpy(buffer,"command line options");
+   return buffer;
+}
+//_2013-04-01__________________________________________________Command_options_/
+} // namespace CORN
+

@@ -1,0 +1,268 @@
+// #error 151204 This class is now obsolete, replaced with CS::Simulation_engine
+
+#ifndef simulationH
+#define simulationH
+#ifndef COMMON_SCENARIO_H
+#  include "common/simulation/scenario.h"
+#endif
+#ifndef COMMON_EVENT_STATUS_H
+#  include "common/simulation/event_status.h"
+#endif
+#ifndef SIMULATION_EXIT_CODES_H
+#  include "common/simulation/exit_codes.h"
+#endif
+#ifndef dateHPP
+#  include "corn/datetime/date.hpp"
+#endif
+#if (CROPSYST_VERSION==4)
+#include "crop/crop_param_V4.h"
+#endif
+#ifndef BALANCER_H
+#  include "common/simulation/balancer.h"
+#endif
+//______________________________________________________________________________
+class Common_scenario;
+class Common_simulation_log;
+//extern CORN::Date simulation_today;                                              //070227
+// simulation_today is global.
+// It is used for debugging and quick and dirty output with out having to pass the date around
+
+#define NO_NEED_TO_LOG 0
+// This define can be used when performing operations when it is not necessary to log the event or event parameters/results
+//______________________________________________________________________________
+class Common_simulation  // replace with CS::Simulation_engine
+{
+public:
+   CORN::Date                    &Ytoday;
+protected:
+   const CORN::Date              &start_date;  // These are references the dates stored in the user parameter
+   const CORN::Date              &stop_date;                                     //101221 now const
+   Common_event_list *event_queue; // points to the active queue (A or B)
+   // This references the scenerio event list for easy access.
+public:
+   Common_event_list queueA;
+private:
+   Common_event_list queueB;
+   /**<\fn As we identify pending event they are swapped from one queue to the
+      other for the next day (this removes the need to copy pending event queue
+   **/
+   Common_event_list completed_events;
+   /**<\fn This is a list of events that have been completed.
+   Events are completed when the actual date has been assigned (syncronized)
+   and the date has passed.
+   For event periods the events will be moved to this list when
+   the end date has been assigned and passed,
+   or the repetitions count is 0.
+   We no longer use them, these events are no longer used,
+   but there may still be object that continue to reference
+   the operation parameters from these events so we can't delete
+   any event until the simulation ends.
+   **/
+   Common_event_list events_for_next_season;
+   /**<\fn This is a list of completed events that are to be rescheduled at the start
+   of the next season.
+   See the related functions reschedule_growing_season_events(crop) and clear_growing_season_events(crop)
+   **/
+//151003 appears to be obsolete   Unidirectional_list  operatable_objects;
+   /**<\fn Objects that receive operations when an event is triggered
+   register themselves with the simulation.
+   **/
+   Unidirectional_list  balancers;  // List of Balancer                          //070227
+   /**<\fn This is a list of balancers simulation components may
+   relinquish their accumulation responsability to the master simulation to
+   optimally perform accumulations, this ensures the accumulation
+   is performed after all daily processing settles.
+   For CropSyst, season accumulation is performed by the Land_unit_simulation.
+   Because Common_simulation does not have the concept of season.
+   Although Cropping_system_simulation has the concept of season
+   each LBU will have its own season (since it has its own rotation).
+   Balancers are owned by this Common_simulation list and will
+   be deleted when the simulation ends.
+   simulation elements may keep pointers (or references) to the balancers
+   they create and/or use but must not delete them.
+   **/
+protected:
+   bool  aborted;    // if set true, some condition (management could not be applied contigency)
+   bool  viable;     // if set false, this indicates a management could not be applied and specified a not viable contigency.
+protected:
+   contribute_ Common_simulation_log *event_log; // Not owned by this.   // May be 0 if no event log
+   std::ofstream         *balance_file_daily;                                    //090409
+   std::ofstream         *balance_file_annual;                                   //090409
+//NYI/*090409_*/    std::ofstream         *balance_file_seasonal;
+public:
+   Common_simulation
+      (CORN::Date              &_today
+      ,const CORN::Date             &_start_date                                 //101221 now const
+      ,const CORN::Date             &_end_date                                   //101221 now const
+      ,Common_simulation_log  *_schedule_log);
+   virtual ~Common_simulation();                                                 //090409
+public:
+   virtual  CS::Simulation_run_result run()                        modification_;
+   /**<\fn This runs the simulation and contains the daily loop.
+      Generally it will not be overridden.
+      Before the daily loop starts, the starting and ending
+      date events will be syncronized (since these will have
+      been provided in the constructor.
+      \return true if the run completed with no errors.
+      \return false if the simulation was aborted
+      Note, may want to return error or run result code
+   **/
+public: // accessor
+   inline const CORN::Date              &get_today()                       const { return Ytoday; }
+public:
+   virtual bool initialize()                                      initialization_;//150505
+   virtual bool start()                                             modification_;
+   /**<\fn This function can be overridden to do any special
+      setup at the start of the simulation.
+      This will be called one time at the beginning of run().
+      \return true if start was ok (and run loop can begin).
+      I.e. CropSyst Start recording to output file.
+   **/
+   virtual bool start_year()                                        modification_; //150501
+   /**<\fn This is called at the beginning of the first day of the year before process_day()
+      Derived classes may override this method to perform special processing
+      (such as annual accumulator setup)
+      \return true if successful
+   **/
+   virtual bool start_day()                                        modification_;//150501
+   /**<\fn This is called each day before process_day().
+      Derived classes can use this to setup for the current day.
+      Normally clearing daily state and or accumlators.
+   **/
+   virtual bool process_day()                                      modification_;//150611
+   /**<\fn This the call done by the daily loop.
+      It will check for any events that can be processed on this day.
+      This method is often overridden for any special processing
+      that is specific to the model.
+      If overridden the Common_simulation::process_day() method should
+      be called first so the events get processed.
+      Returns false if the process cause substantial errors
+      or the simulation should be terminated.
+   **/
+   inline virtual bool end_day()                                    modification_{return true;}
+   /**<\fn This is called each day after process_day().
+      Derived classes can use this to setup for the current day.
+      Normally clearing daily state and or accumlators.
+   **/
+   inline virtual bool end_year()                                   modification_{ return true; }
+   /**<\fn This is called at the end of the last day of the year after process_day()
+      Derived classes may override this method to perform special processing
+      (such as annual report generation and annual accumulator setdown )
+      Returns true if successful
+   **/
+   virtual bool stop()                                              modification_;
+   /**<\fn Overridden to do any special setup at the end of the simulation.
+      This will be called one time at the end of run()
+      but only if start was true and run loop was started.
+      It will be called even if
+      I.e. CropSyst Stop recording to output file
+   **/
+   virtual bool log_contingency(Contingency contingency)            modification_;
+   /**<\fn Record to the log file the contingency
+   **/
+public: // The following are for working with event lists
+   #ifndef EVENT_SCHEDULER_VERSION
+   virtual nat16  synchronize_thermal_time
+      (float32 thermal_time_today
+      ,void *associated_object = 0)                                 modification_;
+      // we can optionally syncronized only if the associated object matches
+   //030517  WARNING,  I think I will also need to copy events for the next season in synchronize_thermal_time
+   // as I do in  synchronize.
+   #endif
+   virtual nat16  synchronize
+      (const     Synchronization &sync
+      ,const CORN::Date &date_to_synchronize_to
+      ,void *associated_object = 0)                                 modification_;
+      // we can optionally syncronized only if the associated object matches
+   /**<\fn This function scans the scenario events list for
+      matching syncronizations.
+      It creates new actual date events based on the date to syncronize to.
+      The actual events operation pointer currently is normally
+      set to the potential event, because syncronization may
+      produce multiple actual events based on the potential
+      event definition, we don't delete or convert potential
+      events to actual events, we do move the potential events
+      to the synced_pot_events so we can optimize the matching
+      process not having to scan for events that have already
+      been syncronized and probably already processed.
+      \return the number of events added to the act_events
+      list for the syncronization.
+   **/
+#ifdef EVENT_SCHEDULER_VERSION
+// associated object with only used with crop model, simulation elements can now have their own event scheduler
+#else
+
+   virtual nat16  remove_events_associated_with(void *object)      modification_;
+   nat16  reschedule_growing_season_events(void *object);
+   /**<\fn The object is usually a crop
+      When a crop restarts after dormancy, call this function specifying the related crop.
+      The synchronizations will be clear
+   **/
+   nat16 clear_growing_season_events(void *object)                 modification_;
+   /**<\fn The object is usually a crop
+      When a crop is terminated, call this function specifying the related crop.
+      This calls remove_events_associated_with
+      and also clears events_for_next_season
+      Note we don't simply clear the list, because their may be
+      multiple event (I.e. CANMS or intercropping etc.)
+   **/
+   nat16 disassociate_events(void *object,nat16  operation_type_code);
+#endif
+   virtual Common_operation *get_operation
+      (const char *operation_type_str
+      ,const std::string &operation_ID  // filename may be updated with qualification so not const
+      ,modifiable_ CORN::OS::File_name &operation_filename    // the fully qualified operation filename may be returned (to be output to the schedule)
+      ,int32       resource_set_ID,bool &relinquish_op_to_event) = 0;
+   /**<\fn Derived classes must override
+      operations may be stored/located by operation ID and/or filename
+   **/
+   nat32 take_balancer(Simulation::Balancer *balancer);                         //070227
+   /**<\fn This gives the balancer to the simulation to maintain accumulators.
+      Balancers are optional.
+      \return handle of balance.                                                  070227
+   **/
+ protected: // The following methods must be overridden by derived classes.
+   virtual Event_status_indicator perform_operation
+      (Common_operation &op
+      , void *associated_with_obj)                                  modification_= 0;
+   /**<\fn The derived class should determine the operation type and route the operation
+      to the appropriate objects for processing.
+      Events may be associated with a particular object
+      the associated object may be used to route an operation
+      \return true if the operation could be performed
+   **/
+   #ifdef EVENT_SCHEDULER_VERSION
+   // process_model_specific_event was to handle crop parameter adjustments this is now handled by the crop event scheduler
+   #else
+   virtual Event_status_indicator process_model_specific_event(const Simple_event *event) = 0; //130428
+   #endif
+protected: // The following methods may be be overridden by derived classes.
+   inline virtual bool end_operation_period
+      (Common_operation &op
+      , const CORN::Date &date_period_ends)                         modification_{ return true; }
+   /**<\fn This is used to indicate the end of an event period.
+      Derived classes may use this method to perform any additional processing to
+      discontinue the operation, or as an opportunity to perform the operation "one more time".
+      Normally this function should return true since it is intended as a single to the simulation
+      that the event is to be disabled, but the derived object may elect to return false
+      to 'postpone' the disable.  The simulation will continue to call the end_operation_period
+      every time step until this function returns true
+   **/
+
+   virtual const OS::Directory_name &get_output_directory_name()           const = 0;
+   /**<\fn The default output directory is the current working directory.
+      However, typically (as in CropSyst), there should be a directory specifically for output,
+      so this method should be overloaded.
+   **/
+   inline nat32 get_ID()                                                   const
+      { return (nat32)
+         #if (__LP64__ || _M_X64)
+         (int64_t)                                                               //120511
+         #endif
+         this;}
+   virtual const std::string &get_model_name()                             const = 0; //120925
+};
+//______________________________________________________________________________
+#endif
+// common/scenario/simulation.h
+

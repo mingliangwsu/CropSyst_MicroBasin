@@ -1,0 +1,264 @@
+From serval!netnews.nwnet.net!news.uoregon.edu!gaia.ucs.orst.edu!umn.edu!news-feed-2.peachnet.edu!ukma!usenet.ins.cwru.edu!howland.reston.ans.net!paladin.american.edu!news.univie.ac.at!aci.cvut.cz!rhino.cis.vutbr.cz!gateway Thu Nov  4 17:39:15 PST 1993
+Article 305 of bit.software.international:
+Path: serval!netnews.nwnet.net!news.uoregon.edu!gaia.ucs.orst.edu!umn.edu!news-feed-2.peachnet.edu!ukma!usenet.ins.cwru.edu!howland.reston.ans.net!paladin.american.edu!news.univie.ac.at!aci.cvut.cz!rhino.cis.vutbr.cz!gateway
+>From: jbowyer@cis.vutbr.cz (Bowyer Jeff)
+Newsgroups: bit.software.international
+Subject: CA: Urgent Request for Localization Information
+Date: 4 Nov 1993 13:45:07 +0100
+Organization: Technical University of Brno, Czech Republic
+Lines: 249
+Sender: daemon@rhino.cis.vutbr.cz
+Approved: insoft-l-moderator@cis.vutbr.cz
+Message-ID: <2batgj$m0n@rhino.cis.vutbr.cz>
+Reply-To: <insoft-l@cis.vutbr.cz>
+
+Here are the consolidated responses to the original question from
+Bertel Schmitt (73220.2562@CompuServe.COM):
+
+     For a super-duper-urgent localization project I need a file with
+     the following data:
+
+     For (hopefully) each country on the planet:
+
+          Language(s) (in local language i.e. Spanish = Espagnol)
+          Time format (AM/PM,24 etc.)
+          Date Format (ie. MM\DD\YY, DD.MM.YY, DD-MM-YY etc.)
+          Currency Symbol (i.e. $, DM, Lit., HFL etc.)
+
+
+As usual, subscribers to the INSOFT-L Internationalization of Software
+mailing list responded remarkably.  Bertel has informed me that he
+received several messages in addition to the ones included here; he will
+consolidate all of the information, then send a file to me for our
+anonymous ftp server.
+
+
+Jeff
+INSOFT-L List Manager
+
+*========================================================================*
+ Jeff Bowyer                         EMail:
+ Computing Center		     jbowyer@cis.vutbr.cz
+ Technical University of Brno
+ Udolni 19, 602 00 BRNO
+ Czech Republic
+*========================================================================*
+
+
+Sender: Chiaki Ishikawa (pmcgw!personal-media.co.jp!ishikawa@uunet.UU.NET)
+        Personal Media Corp.
+
+I wish I had the same set of information.
+
+Here is a crude list about Japan. (BEWARE: I haven't checked the
+official JIS, Japanese Industry Standard's relevant section, but the
+following is the format many Japanese would use. So just a common
+sense answer, maybe incorrect in terms of STRICT STANDARD SENSE.)
+
+> Language(s) (in local language i.e. Spanish = Espagnol)
+
+	Japanese = Nihongo.  Er, obviously I cant write Japanese here!
+
+> Time format (AM/PM,24 etc.)
+
+	1. traditional and used widely
+
+			American English
+	Gozen 0 ji	0 am
+	Gozen 1 ji	1 am
+	...
+	Gozen 11 ji
+	Syogo		Noon
+	Gogo 1 ji	1 pm
+	Gogo 2 ji	2 pm
+	..
+	Gogo 11 ji	13 pm
+
+	2. This is also used widely.
+
+			American English
+	00:00		0 am
+	01:00		1 am
+	02:00		2 am
+		...
+	12:00		noon
+	13:00		1 pm
+		...
+	23:00		11 pm.
+
+The both formats are used widely.
+For example, an annoncement from Nihon Sun User's Group used the
+second one. Another from Nihon DEC used the first format. AT&T Spin
+network service in Tokyo uses the second format in their direct
+mailing letter.
+
+> Date Format (ie. MM\DD\YY, DD.MM.YY, DD-MM-YY etc.)
+
+	1. Used widely
+
+	-YYYY/MM/DD	eg. 1993/10/25, or
+
+	- 1993 Nen 10 Gatsu 25 Nichi.	Nen ... Phonetic rendering of Year
+					Gatsu ... same for Month
+					Nichi ... same for Day
+				These are actually appropriate kanjis.
+
+	- 1993.10.25.	
+
+	2. Japanese way.
+
+	Heisei 5 Nen 10 Gatu 25 Nichi.
+
+	Let me explain: According to the tradition the period under
+	which an Emperor (and in the OLD days, Empress) is given a
+	proper name: Thusly,
+		The year 1993 in Julian calendar is
+		Heisei 5 Nen.
+
+	Hence, October 25, 1993 is Heisei 5 Nen 10 Gatsu 25 Nichi.
+
+	(In the really old days, emperors changed names for these
+	years at their whim: natural disasters, omens found to be good
+	according to fortune tellers, and such  prompted the changes.
+	Today, only when an emperor dies and succeeded by his son
+	[yes, current law is very much male-centric.], the name
+	changes and is done by the government, not by the emperor.]
+
+
+Frankly speaking all three format above for Western style
+representation and the Japanese one are used in a mixed manner.
+
+> Currency Symbol (i.e. $, DM, Lit., HFL etc.)
+
+	YEN. Currency symbol is produced by overwriting equal sign
+over a capital Y mark.
+Hard to reproduce on ASCII TERMINAl.
+
+BTW, the decimal point is period. So one thousand twenty four point
+and a quarter YEN is
+	1024.25 Yen
+or
+	1,024.25 Yen
+
+When the currency symbol is used it usually comes first.
+	Y1024.25
+	Y1,024.25
+with Y actually overwritten with an equal sign.
+
+The three digits separators have become common ALTHOUGH Japanese
+counting system uses different names for a group of 4 (FOUR) digit
+groups!!! (Silliest Adoption of Western Practices Withtou Critical
+Mind!!!) So don't be surprised if an old Japanese put comma for every
+four digits :-)
+
+Frankly, I have to ask `what standard?' :-)
+
+
+Sender: Goran Eriksson (get@get.pp.se)
+
+For Sweden:
+
+>> Language(s) in local language
+Swedish: svenska
+
+>> Time format
+24 hours. HH:MM:SS
+
+>> Date Format
+YYYY-MM-DD or abbreviated YY-MM-DD or YYMMDD
+Example: 1993-10-25, 93-10-25 or 931025 for October 25, 1993.
+
+>> Currency Symbol
+SEK
+
+
+Sender: Rajiv Ellepola (mpere@leonis.nus.sg)
+        Dept. of Mech. & Prod. Engineering
+        National University of Singapore
+
+Attached is some information on Sri Lanka.
+
+Country	   :	Sri Lanka
+Language   :	Singhala
+Time forma :	AM/PM
+Currency   :	Rs (rupees) Cts (cents)
+		e.g.
+			Rs. 10.25 would mean Ten rupees and twenty five cents.
+
+Good luck. Feel free to contact me if you need more information.
+
+
+Sender: Peter Castine (pcastine@mvax.kgw.tu-berlin.de)
+
+German		Deutsch
+8:21 p.m.	20:21 Uhr	// 'Uhr' (O'Clock) is always appended	
+		DD.MM.JJ	// Year can also be 4-digit
+Currency	DM		// Suffix, separate from digits by a
+				// blank
+
+Days of week
+Sonday		Sonntag
+		Montag		// Weekly calendars begin on Monday
+		Dienstag
+		Mittwoch
+		Donnerstag
+		Freitag
+		Samstag		// Also 'Samstag' (regional)
+
+Months				// Can abbr. to first 3 letters
+January		Januar
+		Februar
+		M\"arz		// \"a -> a-umlaut
+		April
+		Mai
+		Juni
+		Juli
+		August
+		September
+		Oktober
+		November
+		Dezember
+
+Sorting: as in English, but *two* different conventions for handling
+umlauts and "sharp" s (looks like Greek beta)
+
+Duden: a-umlaut, o-umlaut, u-umlaut treated as a, o, u.
+	(I can't think of a single case in German where two
+	words would be identical but for an umlaut. In other
+	words, merging plain vowels with their umlauted variants
+	does not lead to an ambiguous sorting algorithm.)
+	
+	sharp s treated as 'ss'
+
+DIN:	a-umlaut is treated as 'ae'
+	o-umlaut is treated as 'oe'
+	u-umlaut is treated as 'ue'
+        sharp s treated as 'ss'
+
+
+>From: Pasi Eronen (pasi@forum.nullnet.fi)
+
+Here's the information for Finland:
+
+Language: Finnish = suomi
+Time format: 24, no leading zero in hours, separator is a period
+Date format: DD.MM.YYYY (no leading zeroes)
+Currency symbol: " mk", suffix, two decimals (if non-zero), decimal
+separator is a comma (for example, "132 mk" or "24,10 mk").
+
+> I know there's a book somewhere (published by Apple?) but it won't
+> do me much good, because I'm away from NYC, holed up in Germany to
+> finish this need-it-yesterday project for an airline.
+
+If you have access to Microsoft Windows, try changing the country
+setting in the "Control Panel". It doesn't give you the language name,
+but at least the time, date, and currency formats for a couple of dozen
+countries.
+
+
+Sender: Jeff Bowyer (jbowyer@cis.vutbr.cz)
+
+Alright, all of you Czech and Slovak subscribers to INSOFT-L . . . here
+*was* your big chance to provide the world with localization information.
+
+

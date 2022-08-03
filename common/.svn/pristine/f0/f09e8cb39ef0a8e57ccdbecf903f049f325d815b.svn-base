@@ -1,0 +1,422 @@
+#include "common/geodesy/geocoordinates.h"
+#include "common/geodesy/geometry/terrestrial_geometry.h"
+ #include "corn/seclusion.h"
+#include "corn/OS/file_system_engine.h"
+
+#include "corn/data_source/generic_datarec.h"
+#include "corn/string/strconv.hpp"
+namespace CS
+{
+//______________________________________________________________________________
+Geocoordinates::Arguments::Arguments()
+: CORN::Arguments()
+, geocoordinates_filename(0)
+, corner1      ()
+, corner2      ()
+, length_km    (0)
+, centroid     (true)
+{}
+//_2016-08-25___________________________________________________________________
+Geocoordinates::Arguments::~Arguments()
+{
+   delete geocoordinates_filename;
+}
+//_2016-08-25___________________________________________________________________
+bool Geocoordinates::Arguments::recognize_filename
+(const CORN::OS::File_name &param_filename)                        modification_
+{  bool recognized = false;
+   if (param_filename.has_extension(L"DBF"))
+   {  geocoordinates_filename = new CORN::OS::File_name_concrete(param_filename);
+      recognized = true;
+      recognized_count++;
+   }
+   return recognized;
+}
+//______________________________________________________________________________
+bool Geocoordinates::Arguments::recognize(const std::string &paramstring) modification_
+{  bool recognized = CORN::Arguments::recognize(paramstring);
+   if (!recognized)
+   if      (!corner1.is_valid()) recognized = corner1.set_from_ISO_6709(paramstring);
+   else if (!corner2.is_valid()) recognized = corner2.set_from_ISO_6709(paramstring);
+   else if (paramstring.find("km") != std::string::npos)
+   {  std::string length_km_str(paramstring,0,paramstring.length()-2);
+      length_km = CORN::cstr_to_float32(length_km_str.c_str());
+      recognized = true;
+   }
+   else if (paramstring.find("m") != std::string::npos)
+   {  std::string length_m_str(paramstring,0,paramstring.length()-1);
+      float32 length_m = CORN::cstr_to_float32(length_m_str.c_str());
+      length_km = m_to_km(length_m);
+      recognized = true;
+   }
+   /* conceptual provide option to reference coordinate to
+      centroid or SW NW  NE WE corner of grid cell
+      (Note that ESRI grids are SW corner oriented
+      currently always centroid
+   else if (paramstring == "centroid")
+   {  centroid = true
+      recognized = true;
+   }
+   */
+   return recognized;
+}
+//______________________________________________________________________________
+bool Geocoordinates::Arguments::get_end()
+{  bool ended = CORN::Arguments::get_end();                                      //161023
+   if (!geocoordinates_filename && CORN::is_approximately<float32>(length_km,0.0,0.00000001))
+       geocoordinates_find(false);
+   return ended;                                                                 //161023
+}
+//______________________________________________________________________________
+bool Geocoordinates::Arguments::geocoordinates_find_file(const char *extension_raw)
+{
+   std::clog
+      << "info: searching path directories for geocoordinates."
+      << extension_raw << std::endl;
+   CORN::OS::Directory_entry_name_concrete CWD;
+   std::wstring geocoordinate_ext = L"geocoordinates.";
+      CORN::append_ASCIIz_to_wstring(extension_raw,geocoordinate_ext);
+   geocoordinates_filename
+      =  CORN::OS::file_system_engine.find_file_name
+         (geocoordinate_ext.c_str(),CWD,CORN::OS::File_system::superdirectory_recursion_inclusive,true);
+   if (!geocoordinates_filename) // if still not found
+   {
+      std::clog << "info: searching path directories for any file(s) with extension:" << extension_raw<< std::endl;
+      CORN::Unidirectional_list any_EXT_files;
+      std::string wildcard_and_ext = "*.";
+      CORN::append_ASCIIz_to_string(extension_raw,wildcard_and_ext);
+      CORN::Inclusion EXT_inclusion(wildcard_and_ext.c_str() /*"*.DBF"*/,true); // dbf_inclusion.include_pattern("*.dbf");
+      nat32 matching_file_count = CORN::OS::file_system_engine.list_DENs //list_entry_names
+         (CWD,&any_EXT_files,0,EXT_inclusion
+         ,CORN::OS::File_system::superdirectory_recursion_inclusive);
+      if (matching_file_count == 1)
+      {  geocoordinates_filename = dynamic_cast<CORN::OS::File_name *>(any_EXT_files.pop_at_head());
+         std::clog
+            << "info: presumming the one file found contains point geocoordinates" << std::endl
+            << "file: " << geocoordinates_filename->c_str() << std::endl;
+      }
+      else if (matching_file_count > 1)
+      {  // Multiple DBF files were found in the path.
+         // List them and prompt user which one
+         int32 selection = 0;
+         do
+         {  int f = 0;
+            FOR_EACH_IN(matching_file, CORN::OS::File_name, any_EXT_files, each_matching)
+            {  f++;
+               std::cout << (int) f << '\t' << matching_file->c_str() << std::endl;
+            } FOR_EACH_END(each_matching)
+            std::cout << "Enter file number (enter 0 if none of these)" << std::endl;
+            std::cin >> selection;
+            if (selection > 0)
+            {  nat32 selection_index = selection - 1;
+               geocoordinates_filename = dynamic_cast<CORN::OS::File_name *>(any_EXT_files.get_at(selection_index));
+               any_EXT_files.detach(geocoordinates_filename);
+            }
+         } while (selection > (int) matching_file_count);
+      }
+   }
+   return geocoordinates_filename != 0;
+}
+//______________________________________________________________________________
+bool Geocoordinates::Arguments::geocoordinates_find(bool must_exist)
+{  bool provided = false;
+   // At this point geocoordinates file was not specified on the command line
+   if (!must_exist)
+   {  std::clog << "info: searching for optional Geocoordinates (points) file." << std::endl; }
+
+   std::clog
+      << "info: Geocoordinates file was not specified on the command line" << std::endl;
+
+   if (! geocoordinates_find_file("dbf"))
+   {  if (! geocoordinates_find_file("dat"))
+      // if (!geocoordinates_filename) // if still not found
+      {  std::clog << "info: no geocoordinate DBF file found in the path." << std::endl;
+         if (must_exist)
+         {
+            std::cout << "prompt: Enter required geocoordinates filename to proceed." << std::endl;
+            std::cout << "  this may be a .DBF or .dat tab or space delimited text file with one column header line identifying  ISO6709 geocoordinate or latitude and longitude and elevation (optional)." << std::endl;
+            std::string geocoord_filename;
+            std::cin >> geocoord_filename;
+            bool entered = geocoord_filename.length();
+            if (entered)
+               geocoordinates_filename = new CORN::OS::File_name_concrete(geocoord_filename);
+         }
+      }
+   }
+   provided =
+      (geocoordinates_filename != 0)
+      && CORN::OS::file_system_engine.exists(*geocoordinates_filename);
+   return provided;
+}
+//______________________________________________________________________________
+nat32 Geocoordinates::load()
+{  nat32 coord_count = 0;
+   bool generate_grid = (arguments.length_km > 0.000001)
+       &&(arguments.corner1.is_valid())
+       &&(arguments.corner2.is_valid());
+   if (generate_grid)
+   {  if (arguments.verbose)
+         std::clog << "info: composing grid for specified extent." << std::endl
+            << "assume: points are at grid cell centroid." << std::endl;
+      coord_count += compose_from_extent();
+   }
+
+   bool load_file = arguments.geocoordinates_filename;
+   if (load_file) // filename specified, can probably load
+   {
+      if (generate_grid)
+      {
+         std::clog
+            << "warn: both grid extent and grid table filename were specified on the command line, this is not an error but may result in duplicate and/or inconsistent points if the total extent overlaps." << std::endl
+            << "file: " <<  arguments.geocoordinates_filename->c_str() << std::endl
+            << "conceptual: cells in close proximity could be culled, contact Roger Nelson rnelson@wsu.edu if this needs to be implemented." << std::endl
+            << "prompt: use also the table file (Y/N) ?" <<std::endl;
+         std::string Y_N = "n";
+         std::cin >> Y_N;
+         load_file = (Y_N.c_str()[0] == 'Y') || (Y_N.c_str()[0] == 'y');
+      }
+   }
+   if (load_file)
+   {
+      bool load_DBF
+         = arguments.geocoordinates_filename->has_extension(L"DBF")
+         ||arguments.geocoordinates_filename->has_extension(L"dbf");
+      coord_count += load_DBF
+         ?  load_from_DBF()
+         :  load_from_text();
+   }
+   if (load_file && (coord_count == 0))
+   {
+         std::clog << "error: no points loaded from geocoordinate file" << std::endl
+            << " user: make sure geocoordinates exist in the file in the prescribed column(s): " << std::endl
+            << arguments.geocoordinates_filename->c_str()
+            << std::endl;
+   }
+   return coord_count;
+}
+//______________________________________________________________________________
+nat32 Geocoordinates::load_from_text()
+{  nat32 coord_count = 0;
+   std::ifstream geocoord_strm(arguments.geocoordinates_filename->c_str());
+   if (geocoord_strm.good())
+   {
+      std::string col_header;
+      getline(geocoord_strm,col_header);
+      while (!geocoord_strm.eof())
+      {
+         Geocoordinate_item *geocoord = new Geocoordinate_item;
+         float32 latitude;
+         float32 longitude;
+         //float32 elevation;
+         geocoord_strm >> latitude >> longitude;
+         geocoord->set_latitude_dec_deg_f32  (latitude);
+         geocoord->set_longitude_dec_deg_f32 (longitude);
+         //geocoord->set_elevation_meter       (elevation);
+         if (geocoord->is_valid())
+         {  append(geocoord);
+            coord_count++;
+         }
+      }
+   } else
+      std::cerr << "error: unable to find open: " << arguments.geocoordinates_filename->c_str() << std::endl;
+   return coord_count;
+}
+//______________________________________________________________________________
+bool Geocoordinates::provide_fields_dBase(CORN::Data_source_dBase &DBF_file)  provision_
+{
+   if (!fields_dBase)
+      fields_dBase = new Fields_dBase;
+   return fields_dBase != 0;
+}
+//______________________________________________________________________________
+bool Geocoordinates::setup_DBF_fields(CORN::Data_source_dBase &DBF_file)  provision_
+{
+   bool sat_up = provide_fields_dBase(DBF_file);
+
+      fields_dBase->geocoordinate = DBF_file.lookup_field("COORDINATE");
+      if (!fields_dBase->geocoordinate) fields_dBase->geocoordinate = DBF_file.lookup_field("ISO6709");
+      fields_dBase->latitude = DBF_file.lookup_field("LATITUDE");
+      if (!fields_dBase->latitude)     fields_dBase->latitude = DBF_file.lookup_field("LAT");
+      fields_dBase->longitude = DBF_file.lookup_field("LONGITUDE");
+      if (!fields_dBase->longitude)    fields_dBase->longitude = DBF_file.lookup_field("LONG");
+      if (!fields_dBase->longitude)    fields_dBase->longitude = DBF_file.lookup_field("LON");
+      fields_dBase->elevation = DBF_file.lookup_field("ELEVATION");
+      if (!fields_dBase->elevation)    fields_dBase->elevation = DBF_file.lookup_field("ELEV");
+      // Elevation is essentially optional.
+   return sat_up;
+}
+//______________________________________________________________________________
+Geocoordinate_item *Geocoordinates::render_geocoordinate()                 rendition_
+{
+   return new Geocoordinate_item;
+}
+//______________________________________________________________________________
+bool Geocoordinates::set_from_record
+(CORN::Generic_data_record &geocoord_rec
+,Geocoordinate &geocoord
+)
+{
+   // dBase records only have one generic aribtrarily named primary section
+   CORN::VV_section *section = geocoord_rec.get_current_section();
+
+         if (fields_dBase->geocoordinate)
+         {
+            CORN::VV_string_entry *geocoordinate_entry =
+               dynamic_cast<CORN::VV_string_entry *>
+                  (section->entries.find_cstr(fields_dBase->geocoordinate->get_key(),false));
+            if (geocoordinate_entry)
+            {
+                std::string geocoord_string;
+                geocoordinate_entry->append_to_string(geocoord_string);
+                geocoord.set_from_ISO_6709(geocoord_string);
+            }
+         }
+
+         if (fields_dBase->latitude)
+         {
+            CORN::VV_float32_entry *latitude_entry =
+               dynamic_cast<CORN::VV_float32_entry *>
+                  (section->entries.find_cstr(fields_dBase->latitude->get_key(),false));
+            if (latitude_entry)
+               geocoord.set_latitude_dec_deg_f32(latitude_entry->get_value());
+         }
+
+         if (fields_dBase->longitude)
+         {
+            CORN::VV_float32_entry *longitude_entry =
+               dynamic_cast<CORN::VV_float32_entry *>
+                  (section->entries.find_cstr(fields_dBase->longitude->get_key(),false));
+            if (longitude_entry)
+               geocoord.set_longitude_dec_deg_f32(longitude_entry->get_value());
+         }
+         if (fields_dBase->elevation)
+         {
+            CORN::VV_float32_entry *elevation_entry =
+               dynamic_cast<CORN::VV_float32_entry *>
+                  (section->entries.find_cstr(fields_dBase->elevation->get_key(),false));
+            if (elevation_entry)
+               geocoord.set_elevation_meter(elevation_entry->get_value());
+         }
+   return true;
+}
+//______________________________________________________________________________
+nat32 Geocoordinates::load_from_DBF()
+{
+   // DBF field names are case insensitive (although the original file format only stored uppercase
+
+   //assert(false);
+   //NYI
+   nat32 records_read = 0;
+   nat32 records_valid = 0;
+
+
+   if (arguments.verbose)
+      std::clog << "info: loading geocoordinates from " << std::endl << arguments.geocoordinates_filename->c_str() << std::endl;
+
+   CORN::Data_source_dBase DBF_file
+      (arguments.geocoordinates_filename->c_str(),std::ios_base::in);
+   DBF_file.initialize();
+   setup_DBF_fields(DBF_file);
+/*moved
+   // DBF field names are case insensitive (although the original file format only stored uppercase
+   CORN::Data_source_dBase::Field_item *gecoordinate_field = DBF_file.lookup_field("COORDINATE");
+   if (!gecoordinate_field)             gecoordinate_field = DBF_file.lookup_field("ISO6709");
+   CORN::Data_source_dBase::Field_item     *latitude_field = DBF_file.lookup_field("LATITUDE");
+   if (!latitude_field)                     latitude_field = DBF_file.lookup_field("LAT");
+   CORN::Data_source_dBase::Field_item    *longitude_field = DBF_file.lookup_field("LONGITUDE");
+   if (!longitude_field)                   longitude_field = DBF_file.lookup_field("LONG");
+   if (!longitude_field)                   longitude_field = DBF_file.lookup_field("LON");
+   CORN::Data_source_dBase::Field_item    *elevation_field = DBF_file.lookup_field("ELEVATION");
+   if (!elevation_field)                   elevation_field = DBF_file.lookup_field("ELEV");
+      // Elevation is essentially optional.
+*/
+   CORN::Generic_data_record *geocoord_rec = DBF_file.render_generic_data_record();
+
+
+
+   if (fields_dBase->geocoordinate || fields_dBase->latitude || fields_dBase->longitude)
+   {  // This appears to have geocoordinates
+
+      for (bool more_records = DBF_file.goto_BOF()
+          ;more_records
+          ;more_records = DBF_file.goto_next())
+      {
+         DBF_file.get(*geocoord_rec);
+
+         Geocoordinate_item *geocoord = render_geocoordinate(); //new Geocoordinate_item;
+         records_read += set_from_record(*geocoord_rec,*geocoord ); // member: ,*fields_dBase);
+
+         if (geocoord->is_valid())
+         {
+            append(geocoord);
+            records_valid++;
+         } else
+         {
+            delete geocoord;
+            std::clog << "warn: invalid geocoordinate in record #" << records_read <<std::endl;
+         }
+      }
+   } else
+   {  std::cerr << "error: no geocoordinate field(s) found in"
+         << arguments.geocoordinates_filename->c_str()
+         << std::endl;
+   }
+   if (records_valid < records_read)
+      std::clog << "warn: invalid geocoordinates found, count=" << records_read - records_valid << std::endl;
+   nat32 records_unique = count();
+   if (records_unique < records_valid)
+      std::clog << "warn: duplicate geocoordinates found, unique=" <<  records_unique << std::endl;
+   delete geocoord_rec;
+   if (arguments.verbose)
+      std::clog << "info: unique valid records encountered=" << records_unique << " out of=" << records_read << std::endl;
+   return records_unique;
+}
+//______________________________________________________________________________
+nat32 Geocoordinates::compose_from_extent()
+{  nat32 points = 0;
+//   float32 corner1_lat  = corner1.get_latitude();
+//   float32 corner1_long = corner1.get_longitude();
+//   float32 corner2_lat  = corner2.get_latitude();
+//   float32 corner2_long = corner2.get_longitude();
+
+   Geocoordinate corner_SW
+      (std::min<float32>(arguments.corner1.get_latitude_dec_deg(),arguments.corner2.get_latitude_dec_deg())
+      ,std::min<float32>(arguments.corner1.get_longitude_dec_deg(),arguments.corner2.get_longitude_dec_deg()));
+   Geocoordinate corner_NW
+      (std::max<float32>(arguments.corner1.get_latitude_dec_deg(),arguments.corner2.get_latitude_dec_deg())
+      ,std::min<float32>(arguments.corner1.get_longitude_dec_deg(),arguments.corner2.get_longitude_dec_deg()));
+   Geocoordinate corner_SE
+      (std::min<float32>(arguments.corner1.get_latitude_dec_deg(),arguments.corner2.get_latitude_dec_deg())
+      ,std::max<float32>(arguments.corner1.get_longitude_dec_deg(),arguments.corner2.get_longitude_dec_deg()));
+   Geocoordinate corner_NE
+      (std::max<float32>(arguments.corner1.get_latitude_dec_deg(),arguments.corner2.get_latitude_dec_deg())
+      ,std::max<float32>(arguments.corner1.get_longitude_dec_deg(),arguments.corner2.get_longitude_dec_deg()));
+
+   Terrestrial_geometry geometry;
+   float32 vertical_distance_km   = geometry.distance_between_km(corner_SW,corner_NW);
+   float32 horizontal_distance_km  = geometry.distance_between_km(corner_SW,corner_SE);
+
+   float32 delta_km = arguments.length_km;
+   nat32 rows = vertical_distance_km    / delta_km;
+   nat32 cols = horizontal_distance_km  / delta_km;
+   float32 centroid_offset = arguments.centroid ? delta_km / 2.0 : 0.0;
+   if (arguments.verbose) std::clog << "info: rows="<<rows<<" cols="<<cols<< std::endl;
+
+   for (nat32 row = 0; row < rows; row++)
+   {
+      float32 row_offset_km = (row * delta_km) + centroid_offset;
+      for (nat32 col = 0; col < cols; col++)
+      {
+         float32 col_offset_km = (col * delta_km) + centroid_offset;
+         Geocoordinate cursor(corner_SW);
+         geometry.latitude_delta_km(row_offset_km,cursor);
+         geometry.longitude_delta_km(col_offset_km,cursor);
+         Geocoordinate_item *cursor_item = new Geocoordinate_item(cursor);
+         append(cursor_item);
+         points ++;
+      }
+   }
+   return points;
+}
+//_2016-09-26___________________________________________________________________
+} // namespace CS

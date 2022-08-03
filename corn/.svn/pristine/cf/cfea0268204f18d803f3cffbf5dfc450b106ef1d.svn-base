@@ -1,0 +1,45 @@
+#include "corn/chronometry/date_32.h"
+namespace CORN
+{
+Date_32_clad::Date_32_clad()
+   : Date_32_cowl(date_num)
+   {}
+Date_32_clad::Date_32_clad(Date32 date_raw)
+   : Date_32_cowl(date_num)
+   , date_num(date_raw)
+   {}
+Date_32_clad::Date_32_clad(const Date_32_clad &other)
+   : Date_32_cowl(date_num)
+   , date_num(other.get_date32())
+   {}
+Date_32_clad::Date_32_clad(const Temporal &other)
+   : Date_32_cowl(date_num)
+   , date_num(other.get_date32())
+   {}
+Date_32_clad::Date_32_clad(Year year, DOY doy)
+   : Date_32_cowl(date_num)
+   , date_num(year*1000+doy)
+   {}
+//______________________________________________________________________________
+Datetime64 Date_32_cowl::set_DT
+(const Date_interface &date_, const Time_interface &)               assignation_
+{  set(date_);
+   return get_datetime64();
+}
+//_2017-04-30___________________________________________________________set_DT_/
+Datetime64 Date_32_cowl::set_datetime64(Datetime64 value)           assignation_
+{  return date_ref = (int32)value; }
+//_2017-04-30___________________________________________________set_datetime64_/
+Datetime64 Date_32_cowl::set_date32(int32 date32)                   assignation_
+{  return date_ref = date32;}
+//_2017-04-30_2003-07-17____________________________________________set_date32_/
+Datetime64 Date_32_cowl::set(const Temporal /*170530 Date_const_interface*/ &new_date)  assignation_
+{  return date_ref = new_date.get_date32(); }
+//_2017-04-30_2014-11-20_2014-07-21_2002-08-67_____________________________set_/
+Datetime64 Date_32_cowl::set_YD(Year year,CORN::DOY doy)
+{  date_ref = year *1000 + doy;
+   return get_datetime64();
+}
+//_2017-04-30___________________________________________________________set_YD_/
+//______________________________________________________________________________
+} // namespace CORN

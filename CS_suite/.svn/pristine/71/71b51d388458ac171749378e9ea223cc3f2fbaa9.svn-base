@@ -1,0 +1,352 @@
+object tillage_residue_form: Ttillage_residue_form
+  Left = 225
+  Top = 817
+  Align = alClient
+  Caption = 'Operation selection'
+  ClientHeight = 215
+  ClientWidth = 448
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  OnKeyPress = FormKeyPress
+  PixelsPerInch = 96
+  TextHeight = 13
+  object terminate_crop_checkbox: TRNAutoCheckBox
+    Left = 0
+    Top = 0
+    Width = 448
+    Height = 17
+    Align = alTop
+    Caption = 'Terminate crop  (end growth without a harvested yield)'
+    State = cbGrayed
+    TabOrder = 0
+    ExplicitWidth = 441
+  end
+  object dust_mulching_checkbox: TRNAutoCheckBox
+    Left = 0
+    Top = 17
+    Width = 448
+    Height = 17
+    Align = alTop
+    Caption = 'Dust mulching'
+    State = cbGrayed
+    TabOrder = 1
+    OnClick = dust_mulching_checkboxClick
+    ExplicitTop = 24
+    ExplicitWidth = 105
+  end
+  object dust_mulch_groupbox: TGroupBox
+    Left = 0
+    Top = 34
+    Width = 448
+    Height = 93
+    Align = alTop
+    Caption = 'Dust mulching'
+    TabOrder = 2
+    Visible = False
+    ExplicitLeft = 8
+    ExplicitTop = 35
+    ExplicitWidth = 425
+    DesignSize = (
+      448
+      93)
+    object dust_mulch_depth_edit: TRNAutoParameterEditBar
+      AlignWithMargins = True
+      Left = 8
+      Top = 16
+      Width = 432
+      Height = 21
+      Alignment = taLeftJustify
+      Anchors = [akLeft, akTop, akRight]
+      BevelOuter = bvNone
+      Caption = 'Mulching layer depth'
+      TabOrder = 0
+      ExplicitWidth = 409
+    end
+    object dust_mulch_days_edit: TRNAutoParameterEditBar
+      AlignWithMargins = True
+      Left = 8
+      Top = 40
+      Width = 432
+      Height = 22
+      Hint = 
+        'This is the number of days the mulch layer tends to remain sand ' +
+        'like (with no precipitation)'
+      Alignment = taLeftJustify
+      Anchors = [akLeft, akTop, akRight]
+      BevelOuter = bvNone
+      Caption = 'Number of days until mulch effect subsides'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+      ExplicitWidth = 409
+    end
+    object dust_mulch_intensity_edit: TRNAutoParameterEditBar
+      AlignWithMargins = True
+      Left = 8
+      Top = 64
+      Width = 432
+      Height = 21
+      Hint = '0.0 = not effect, 1.0 most sever (actually don'#39't use 1.0)'
+      Alignment = taLeftJustify
+      Anchors = [akLeft, akTop, akRight]
+      BevelOuter = bvNone
+      Caption = 'Dust mulch intensity'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+      ExplicitWidth = 409
+    end
+  end
+  object panel_NRCS_field_op: TPanel
+    Left = 0
+    Top = 191
+    Width = 448
+    Height = 24
+    Align = alBottom
+    Alignment = taLeftJustify
+    Caption = 'NRCS field operation'
+    TabOrder = 3
+    ExplicitTop = 183
+    DesignSize = (
+      448
+      24)
+    object button_NRCS_help: TSpeedButton
+      Left = 419
+      Top = 1
+      Width = 21
+      Height = 21
+      Anchors = [akTop, akRight]
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        04000000000000010000120B0000120B00001000000000000000000000000000
+        800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        3333333333FFFFF3333333333F797F3333333333F737373FF333333BFB999BFB
+        33333337737773773F3333BFBF797FBFB33333733337333373F33BFBFBFBFBFB
+        FB3337F33333F33337F33FBFBFB9BFBFBF3337333337F333373FFBFBFBF97BFB
+        FBF37F333337FF33337FBFBFBFB99FBFBFB37F3333377FF3337FFBFBFBFB99FB
+        FBF37F33333377FF337FBFBF77BF799FBFB37F333FF3377F337FFBFB99FB799B
+        FBF373F377F3377F33733FBF997F799FBF3337F377FFF77337F33BFBF99999FB
+        FB33373F37777733373333BFBF999FBFB3333373FF77733F7333333BFBFBFBFB
+        3333333773FFFF77333333333FBFBF3333333333377777333333}
+      NumGlyphs = 2
+    end
+    object NRCS_tillage_field_op_number_combbox: TComboBox
+      Left = 112
+      Top = 2
+      Width = 309
+      Height = 21
+      Hint = 'Used for surface residue disturbance and fate'
+      Anchors = [akLeft, akTop, akRight]
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+      Text = '(selection is optional but recommended)'
+      OnChange = NRCS_tillage_field_op_number_combboxChange
+      Items.Strings = (
+        '(optional - unknown - not listed)'
+        'Add mulch'
+        'Aerator, field surface, ground driven'
+        'Aerial seeding'
+        'Bale straw or residue'
+        'Bed shaper'
+        'Bed shaper, 12 in'
+        'Bedder, hipper, disk hiller'
+        'Bedder, hipper, hiller 12 in high'
+        'Bedder, hipper, hiller 15 in high'
+        'Bedder, hipper, hiller 18 in high'
+        'Bulldozer, clearing'
+        'Burn residue'
+        'Burn residue, high intensity'
+        'Burn residue, low intensity'
+        'Chisel, st. pt.'
+        'Chisel, st. pt. 12 in deep'
+        'Chisel, st. pt. 15 in deep'
+        'Chisel, sweep shovel'
+        'Chisel, twisted shovel'
+        'Chop veg. with machete'
+        'Cultipacker, roller'
+        'Cultivate, manually'
+        'Cultivator, field 6-12 in sweeps'
+        'Cultivator, field w/ spike points'
+        'Cultivator, hipper, disk hiller on beds'
+        'Cultivator, off bar w/disk hillers on beds'
+        'Cultivator, row - 1st pass ridge till'
+        'Cultivator, row - 2nd pass ridge till'
+        'Cultivator, row 1 in ridge'
+        'Cultivator, row 3 in ridge'
+        'Cultivator, row, high residue'
+        'Disk, offset, heavy'
+        'Disk, offset, heavy 12 in depth'
+        'Disk, offset, heavy 15 in depth'
+        'Disk, tandem heavy primary op.'
+        'Disk, tandem light finishing'
+        'Disk, tandem secondary op.'
+        'Do all'
+        'Do all, on beds'
+        'Drill or air seeder single disk openers 7-10 in spac.'
+        'Drill or air seeder, hoe opener in hvy residue'
+        'Drill or air seeder, hoe/chisel openers 6-12 in spac.'
+        'Drill or airseeder, double disk'
+        'Drill or airseeder, double disk opener, w/ fert openers'
+        'Drill or airseeder, double disk, w/ fluted coulters'
+        'Drill or airseeder, offset double disk openers'
+        'Drill, air seeder, sweep or band opener'
+        'Drill, deep furrow  12 to 18 in spacing'
+        'Drill, heavy, direct seed, dbl disk opnr'
+        'Drill, heavy, direct seed, dbl disk opnr w/row cleaners'
+        'Drill, semi-deep furrow  12 to 18 in spacing'
+        'Furrow diker'
+        'Furrow shaper, torpedo'
+        'Graze, continuous'
+        'Graze, intensive rotational'
+        'Graze, rotational'
+        'Graze, stubble or residue'
+        'Harrow, coiled tine'
+        'Harrow, heavy'
+        'Harrow, rotary'
+        'Harrow, spike tooth'
+        'Harrow, tine, on beds'
+        'Kill crop'
+        'Knife, windrow dry beans'
+        'Land plane'
+        'Lister, 40 in'
+        'Manure injector'
+        'Manure spreader'
+        'Middle buster, digger'
+        'Mulch treader'
+        'Para-plow or para-till'
+        'Permeable weed barrier applicator'
+        'Planter, double disk opnr'
+        'Planter, double disk opnr w/fluted coulter'
+        'Planter, double disk opnr, 18 in rows'
+        'Planter, in-row subsoiler'
+        'Planter, ridge till'
+        'Planter, runner opener'
+        'Planter, small veg seed'
+        'Planter, strip till'
+        'Planter, sugarcane'
+        'Planter, transplanter, vegetable'
+        'Planter, transplanter, vegetable, no-till'
+        'Planting, broadcast seeder'
+        'Planting, hand 10 percent dist.'
+        'Planting, hand 5 percent dist.'
+        'Planting, manual'
+        'Planting, no-til manually'
+        'Plastic mulch applic. 40 inch beds 100 percent cover'
+        'Plastic mulch applic. 40 inch beds 75 percent cover'
+        'Plastic mulch applic. 48 inch beds 100 percent cover'
+        'Plastic mulch applic. 48 inch beds 80 percent cover'
+        'Plastic mulch applic. 54 inch beds 100 percent cover'
+        'Plastic mulch applic. 54 inch beds 80 percent cover'
+        'Plastic mulch applic. 64 inch beds 100 percent cover'
+        'Plastic mulch applic. 64 inch beds 85 percent cover'
+        'Plastic mulch applicator 100 percent cover'
+        'Plastic mulch applicator 40 percent cover'
+        'Plastic mulch applicator 75 percent cover'
+        'Plastic mulch, 05 percent removal'
+        'Plastic mulch, 10 percent removal'
+        'Plastic mulch, 25 percent removal'
+        'Plastic mulch, 50 percent  removal'
+        'Plastic mulch, remove'
+        'Plow, disk'
+        'Plow, moldboard'
+        'Plow, moldboard, conservation'
+        'Plow, moldboard, up hill'
+        'Plow, reversable'
+        'Regrow'
+        'Residue, row cleaner'
+        'Rodweeder'
+        'Roller, corrugated packer'
+        'Roller, on beds'
+        'Roller, residue'
+        'Roller, smooth'
+        'Root rake'
+        'Rotary hoe'
+        'Rototiller, field'
+        'Rototiller, field, add residue'
+        'Rototiller, row cult add residue'
+        'Rototiller, row cultivator'
+        'Sand fighter'
+        'Seedbed finisher'
+        'Shredder, flail or rotary'
+        'Shredder, rotary, regrow veg'
+        'Shredder, rotary, remove residue'
+        'Sprayer, kill crop'
+        'Sprayer, post emergence'
+        'Stalk puller'
+        'Striptiller w/middlebuster on beds'
+        'Subsoiler'
+        'Subsoiler bedder (ripper/hipper)'
+        'Subsoiler ripper, 24 to 40 in. deep'
+        'Sweep plow 20-40 in wide'
+        'Sweep plow wider  than 40 in w/ mulch treader'
+        'Sweep plow, wider than 40 in'
+        'Water mulch; off'
+        'Water mulch; on'
+        'Weed control, manual hoe')
+    end
+  end
+  object groupbox_oxidation_effect: TGroupBox
+    Left = 0
+    Top = 127
+    Width = 448
+    Height = 64
+    Hint = 
+      'The higher the numbers, the greater the cumulative soil disturba' +
+      'nce. Ultimately this is intended to affect organic matter decomp' +
+      'osition.'
+    Align = alTop
+    Caption = 'Tillage intensity oxidation effect'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 4
+    ExplicitTop = 119
+    ExplicitWidth = 305
+    object edit_oxidation_effect_sand: TRNAutoParameterEditBar
+      AlignWithMargins = True
+      Left = 2
+      Top = 15
+      Width = 247
+      Height = 21
+      Alignment = taLeftJustify
+      BevelOuter = bvNone
+      Caption = 'sand'
+      TabOrder = 0
+    end
+    object edit_oxidation_effect_clay: TRNAutoParameterEditBar
+      AlignWithMargins = True
+      Left = 2
+      Top = 39
+      Width = 247
+      Height = 21
+      Alignment = taLeftJustify
+      BevelOuter = bvNone
+      Caption = 'clay'
+      TabOrder = 1
+    end
+    object button_tillage_oxidation_low: TButton
+      Left = 256
+      Top = 10
+      Width = 41
+      Height = 25
+      Caption = 'Low'
+      TabOrder = 2
+      OnClick = button_tillage_oxidation_lowClick
+    end
+    object button_tillage_oxidation_high: TButton
+      Left = 256
+      Top = 36
+      Width = 41
+      Height = 25
+      Caption = 'High'
+      TabOrder = 3
+      OnClick = button_tillage_oxidation_highClick
+    end
+  end
+end

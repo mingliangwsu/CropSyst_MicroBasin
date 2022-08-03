@@ -1,0 +1,1204 @@
+
+
+<!--obsolete 
+
+   Decided not to store units in the parameter file because
+   redundent information since the units are specified in the technical definition.
+  
+  
+  The CropSyst parameter editor will always write the units property.
+-->
+
+Parameters are <B>introduced</B> to the file.
+Unlike the version 4 parameter file, 
+parameters are added to the file as desired.
+Parameters are initially provided with default values
+the user then introduces parameters that superceed the default values.
+The parameter file can also 'inherit' parameters from a specified parameter.
+When the parameter file is initially created this file will be the crop parameter
+file of the parent directory (this supports the new claudistic idiom)
+<P>
+<H2>Parameter entries</H2>	
+Parameters are constructed of a key and value.
+
+<PRE>
+<em>key</em>: <em>value</em>  
+</PRE>
+<H4>key</H4>
+
+Key are typically specified heirachically 
+corresponding to the path  in the 
+crop ontology variable definition  directory structure. 
+<BR>
+For example:
+<BR>
+<PRE>
+<B>
+leaf:
+   area:
+      index:
+         active:</B> <EM>GAI value</EM>
+</PRE>
+
+The definition will be defined by the
+Technical, Operational, Theoretical, and Conceptional ontological definitions
+depending on what is available.
+These definitions will be searched in this order.
+For example Technical definitions may be omitted if
+there is no specialization of the Operational, Theoretical, or Conceptional definitions.
+<P>
+Related values are typically grouped using YAML accordingly:
+<PRE>
+<B>
+leaf:
+   area:
+      index:</B>
+         <B>active:</B> <EM>GAI value</EM>
+         <B>inactive:</B> <EM>LAI value</EM>
+</PRE>
+
+</P>
+
+In the short form the value is a scalar value.
+Any properties of the value such as units an quality are assumed
+to be as defined by the variable ontology definition.
+
+<FONT COLOR="GREY">Conceptual:<BR>
+The key can be represented using a shorthand representation, Ie.:
+<BR>
+<B>leaf/area/index/active:  </B> <EM>GAI value</EM>
+<BR>
+<B>leaf/area/index/inactive:</B> <EM>LAI value</EM>
+</FONT>
+
+</P>
+Parameters are either intrinsically constant or dynamic.
+This is defined by the ontology.
+</P>
+
+
+<H2>Constant parameters</H2>
+Constant parameters cannot be modified during the course of the growing season.
+Such parameters include:
+<UL>
+<LI>basic plant characteristics
+<LI>submodel selection
+<LI>thermal time to phenologic stages
+<LI>harvest index
+</UL>
+
+Constant values will be entered in the short form.
+
+<H2 ID="numeric_parameter">Numeric parameter</H2>
+
+Numeric entries are entered with YAML <B>map</B> constructs
+where parameters are  key and value pairs.
+Default numeric entries entered using the short form will have
+constant continuous value throughout the crop duration.
+<P>
+For numeric values one may want to override the expected 
+properties defined by the technical ontology.
+In this case instead of using the short form, 
+the value is provided with additional information:
+
+<PRE>
+<em>key</em>: 
+   <B>normalization: </B> <em>value</em>
+   <B>quality: </B><B>observed</B> or <B>calculated</B> or <B>interpolated</B> or <B>other</B> or <B>estimated</B> or <B>forecasted</B> or <B>generated</B> or <B>derived</B>
+   <B>units: </B> <em>units</em>
+</PRE>
+<P>
+The <em>key: </em> <B>normalization: </B> <em>value</em> 
+may be provided without additional information.
+<P>
+The normalization entry indicates that the value should be consider
+the value to be used in normal conditions, but may be
+preempted a value in superceeding conditions with greater precedence.
+</P>
+
+<B>units</B> may be omitted when the value conforms to units prescribed 
+by a technical specification of the file/data stream
+(and/or predefined in the implementation of the program).
+<P>It would be preferrable that a program read variable values
+perform necessary units conversion.  
+Or at least check that specified units for the value conform
+to expected values and emit an error if this is not the case.
+</P>
+When writing to a data stream it is highly recommended that
+units be included for the sake of clarity for users that my visually 
+inspect the data where a technical specification might not 
+be provided or readily available.
+
+
+
+<pre>
+<em>key:</em> 
+   <B>normalization: </B> <em>value</em>
+</PRE>
+is equivelent to  <em>key: </em> <em>value</em> 
+
+<H4>quality</H4>
+The quality of the value is optional but should be specified.
+If quality is omitted, it is assumed be observed/measured.
+CropSyst parameter calibration/preparation utilities may calculate/interpolate or otherwise derive
+values, in which case the quality will be set accordingly
+<H4>units</H4>
+The units are optional, if omit the units are assumed to be the
+same as the variable ontology definition.
+If the units are specified and different than the defined units,
+the value shall be converted as needed accordingly.
+
+<H2>Parameter calibration</H2>
+<pre>
+<em>key:</em> 
+   <B>calibration: </B> <em>value</em>
+</PRE>
+
+A parameter may have a value denoted as a calibration.
+The calibration is a value provided by a calibration routine.
+For example CropSyst provides utilities to derive calibrated values
+derived from emperical/observed data.
+
+<H2>Parameter adjustment</H2>
+<pre>
+<em>key:</em> 
+   <B>assumption: </B> <em>value</em>
+</PRE>
+
+In addition to normalization and calibration value parameters 
+could be futher adjusted to accomodate cultivars and/or local conditions.
+For example a crop parameter file may have variables with normalized or calibrated values
+suitable for a specific location but may need to be further adjusted
+for use in other locations by other heuristic derivation method(s).
+I this case the derived value is 'assumed' to be better than
+any other provided values. 
+Generally <B>assumption</B> entries are to parameter files by
+an a program that calculates such adjustments.
+This program should preserve existing normalization and/or calibration entries
+in the file.
+Programs using the file will preferentially use the <em>assumed</em>
+over <em>normal</em> or <em>calibrated</em> values.
+It is not necessarily the case that adjusted values are of greater
+quality than calibrated or normal values (indeed normal or calibrated
+values would usually be considered higher quality since there
+deriviation is more based on higher quality information,
+but for the sake of practicality is is nessisary that 
+the model overrides with 'assumed' .
+
+
+<H3>Dynamic parameters</H3>
+Version 4 had some sets of parameters for values that changed during the season,
+but a separate parameter had 
+needed to be added for each synchronization event  as originally V4 didn't allow for 
+values to change other than at the start of a growth stage (for instance).
+Version 4 introduced the ability to schedule the adjustment of some parameters during the growing season.
+<P>
+This new YAML structure allows much more flexibility 
+allowing one to specify parameter adjustments thoughout the crop duration.
+
+This mechanism has been extended to allow all potentially adjustable parameters to be
+dynamically re-set using various time series adjustment methods.
+</P>
+
+<!--obsolete
+When creating the file by hand, it is not necessary to specify the units
+for variable (For all variables, the units are optional), 
+the default units will be assumed if not specified.
+Specified units will override the default units (but only if the units are appropriate for the variable).
+-->
+
+
+<H3 ID="dynamic">
+Time series values
+</H3>
+For most numeric parameters, one can specify  
+thermal-time series data points for interpolated dynamic adjustment 
+of the parameter values
+set with respect to at phenologic miles stones
+<P>
+The operational ontology definition of the parameter 
+indicates whether the parameter can be so temporarly adjusted.
+Adjustable parameters are identified as being 'dynamic'.
+
+Currently the interpolation time series method types are: <B>step</B> (piecewise constant) 
+and <B>linear</B>.  
+If the method is omitted the interpolation defaults to <B>step</B>
+<BR>
+Future versions may implement: <B>piecewise</B>, <B>polnomial</B>, <B>quadradic</B>,  <B>Lagrange</B>, <B>Gaussian</B>, <B>spline</B>, <B>cubic_spline</B> <B>conservative</B>
+<!--See http://bender.astro.sunysb.edu/classes/phy688_spring2013/lectures/interpolation-roots.pdf -->
+
+
+
+	<DL>
+	<DT>
+	
+	<B>interpolation</B>: !<em>method</em> [ <em> set of time series point values  </em> ]
+	<DD>
+	where  the  time series points value entries absissa are either 
+	phenologic milestone, thermal time, or actual or relative   point values
+	 of the form:
+	 <BR>
+    <B>{</B>
+            <B> sync:</B>   <B>days</B>
+            <B> stage:</B>  <em>growth-stage</em>
+            <B> offset:</B> <em>day-count</em>
+            <B> ordinate:</B> <em>ordinate-value </em><B>}</B>
+    <P>
+    or of the form 
+    <BR>
+	 <B>{</B>
+		      <B> sync:</B>   <B>°C-days</B>
+		      <B> stage:</B>  <em>growth-stage</em>
+		      <B> offset:</B> <em>degree days</em>
+		      <B> ordinate:</B> <em>ordinate-value </em><B>}</B>
+    <P>
+    or of the form 
+    <BR>
+    <B>{</B>
+            <B> sync:</B>   <B>date</B>
+            <B> offset:</B> <em>date in format YYYYDDD</em>
+            <B> ordinate:</B> <em>ordinate-value </em><B>}</B>
+    <BR>
+    Dates can be either have actual years (> 1000)
+	or relative years where 0 is the sowing year, 1 is the first year after
+	sowing, 2 the second, etc..
+	<P>
+    or of the form 
+    <BR>
+    <B>{</B>
+            <B> sync:</B>   <B>season</B>
+            <B>, offset:</B> <em>season index</em>
+            <B>, ordinate:</B> <em>ordinate-value </em><B>}</B>
+	<BR>
+   (this form is used for season biomass adjustment in CropSyst)
+	<P>
+	For example:
+
+	<PRE>
+     interpolation: !linear
+       - sync: days       
+         stage: emergence 
+         offset: 4 
+         ordinate: 0.01   
+       - sync: days            
+         stage: maturity 
+         offset: 5 
+         ordinate: 0.6     
+       - sync: days      
+         stage: senescence 
+         offset: 2 
+         ordinate: 0.4    
+       - sync: °C-days    
+         stage: planting
+         offset: 1050 
+         ordinate: 0.45      
+       - sync: date
+         offset: 0000165  #day of year 165
+         ordinate: 0.06   
+   </PRE>
+   <PRE>
+     interpolation: !step
+       - sync: days
+         stage: anthesis 
+         offset: 1 
+         ordinate: 0.3    
+       - sync: °C-days   
+         stage: emergence 
+         offset: 20 
+         ordinate: 0.06   
+   </PRE>
+  
+   Alternate inline YAML rendering:
+   <PRE>
+   interpolation: !linear
+         - { sync: days,    stage: emergence,  offset: 4,     ordinate: 0.01  }
+         - { sync: days,    stage: maturity ,  offset: 5,     ordinate: 0.6   }
+         - { sync: days,    stage: senescence, offset: 2,     ordinate: 0.4   }
+         - { sync: °C-days, stage: planting ,  offset: 1050,  ordinate: 0.45  }
+         - { sync: date,    offset: 0000165, ordinate: 0.06  }
+   </PRE>   
+   <PRE>
+   interpolation: !step
+         - { sync: days,    stage: anthesis ,  offset: 1,     ordinate: 0.3   }
+         - { sync: °C-days, stage: emergence , offset: 20 ,   ordinate: 0.06  }
+
+   </PRE>     
+   </P>
+   
+	Here, the variable  will be initialized with the scalar value and will be adjusted
+	to the respective values the specified milestones/dates are reached.
+   
+   
+
+
+<!-- obsolete because I think not valid YAML
+	 of the form <B>{</B> <em>growth-stage</em><B>+</B><em>day-count</em>days<B>:</B> <em> ordinate-value </em><B>}</B>
+
+	<PRE>
+    dynamic: 
+       [{emergence: 0.01} 
+       ,{floresence+1: 0.3}
+       ,{maturescence+3: 0.6}
+       ,{senescence+2: 0.4}]
+	</PRE>
+-->
+   <!-- obsolete
+	In the case the milestone occurs on the date of the start of the growth stage,
+	the ( +0 ) can be omitted (I.e 0.01 will be set on the first date of emergence).  
+   -->
+   In the case of step point,
+	The ordinate value will be set at the specified number of days after
+	the starting date of the specified growth stage.
+   The parameter will retain the constant value until the next event occurs.
+   <BR>
+   In the case of linear point,
+   the value will be calculated from the value at the start of
+   the respective growth stage to the thermal time of the start of the growth stage
+   plus the specified degree days.
+   <BR> 
+   Note that there could be multiple concurrent curves the curves are
+   sorted/stacked such that the current active curve will be given the priority
+   thermal time of the latest growth stage encountered, Once the point has been
+   encounted, the curve is deleted.  Date curves have the lowest priority.
+					
+<!-- obsolete because same as from planting or restart					 
+	<DT><H5>thermal time point values</H5>
+	<DD>
+	 of the form 
+	 <B>{</B> <em>thermal-time</em></B> <em> ordinate-value </em><B>}</B>.
+	 So the abscissa of time series is a thermal time in degree days.
+<BR>
+	For example:
+	
+	<PRE>
+    dynamic: 
+       [{100: 0.01}  
+       ,{800: 0.3}
+       ,{1500: 0.6}
+       ,{2000: 0.4}]
+	</PRE>
+	
+	The values are linearly interpolated between the points for the current
+	simulation date.
+-->	
+
+<!--150104 obsolete
+	<DT><H5>Date point values</H5>
+	<DD>
+	 of the form 
+	 <B>{</B> <em>YYYYDDD</em>:</B> <em> ordinate-value </em><B>}</B>.
+	 So the abscissa of time series is a relative date
+	 (YYYY is a 4 digit year where 0000 is the planting year
+	 and DDD is the day of year).
+	 Using relative dates is rarely used, it is recommended to use
+	 phenologic miles stones and/or thermal time points.
+    
+    <BR>
+    For example:
+    <PRE>
+         - linear temporal 1153 date    0.45      #day 153 of the first year after sowing/planting
+         - step temporal 220 date   0.06   #day 220 of the sowing/planting year
+    
+    </PRE>
+-->    
+
+</DL>
+
+Note there is a space after the colons (and commas) conformant with YAML.
+The milestones or thermal-time in the time series events may be listed in any order, 
+but it is recommended to list them in natural progressive order.
+<P>
+
+Both constant phenologic milestone and thermal-time 
+(and actual or relative dates)  entries can be included in time series.
+In this case the constant phenologic milestone values will reset the linear interpolation curve value
+for the current point and linear interpolation will proceed from the reset value
+until the next milestone or thermal time or date is achieved.
+
+
+<H2>Observations</H2>
+
+The format accomodates the storage of observation/measured records in the crop parameter file.
+Observations are used by parameter calibration utilities such as the CropSyst calibrator. 
+<BR>
+<!--
+<font color="gray">Conceptual:</font>
+<BR>
+-->
+
+Some observation values are stored under the corresponding
+crop parameter sections with the optional assocation <B>observation</B>.
+<P>
+For example:   
+<PRE>
+<B>
+leaf:
+   area:
+      index:</B>
+         <B>active:</B> 
+            <B>observation:</B>
+               <B>- {1980125: 1.2}</B>
+               <B>- {1980132: 1.4}</B>
+
+</PRE>
+</P>
+
+
+In this case the time series abscissa values are actual dates.
+Relative dates can alternatively be specified.
+
+<P>
+For example:   
+<PRE>
+<B>
+leaf:
+   area:
+      index:</B>
+         <B>active:</B> 
+            <B>observation: </B>
+               <B>- { 0000125: 1.2} </B>
+               <B>- { 0001132: 1.4} </B>
+
+</PRE>
+</P>
+
+
+Date entries are always 7 digits, where the first 4 digits denote the year.
+Years less than 1000 are assumed to be relative date where 0000 is the
+year of planting, 0001 the first year after planting, etc.
+Usually calibration observed data are actual or relative dates, but
+points relative phenologic growth stage and/or thermal time
+can also be specified in the time series 
+(there can be mixed milestones, thermal time, actual date and relative dates
+in the same time series)
+The number of digits distingishes the type of abscissa,
+Abscissa values with 7 digits are years, 6 digits or less are assumed to be thermal time
+and a growth stage name indicates a milestone abscissa.
+
+<BR>
+<FONT COLOR="GRAY">
+Conceptual:
+Observation items can also be phenologic milestone, thermal time, 
+or date point values as with the interpolation items.
+</FONT>
+
+<P>
+<H2>Calibration</H2>
+
+A  parameter with the extended form may have 
+in addition to a normalization value entry
+ observation and/or interpolation
+(as well as units and quality).
+<!-- conceptual terms:  
+presumption:
+presupposition: a value provided not based on any actual know, measured or determined value, assumed based on other information.
+postulation: a value provided without any emperical data (best guess)
+assumption:
+
+-->
+Only the normalization entry is required.
+For CropSyst, observations are generally used only for calibration
+to derive the calibration value.
+During the simulation run, the parameter value will be loaded
+with the normalization value, which should be retained for the duration of
+the crop.
+
+The calibration entry can be used to override this behaviour
+with the mode options  <B>normalization</B>, <B>interpolation</B>, <B>observation</B>
+indicating which data source should be for the value at the current time step.
+<DL>
+<DT><B>normalization</B></DT>
+<DD>A value to be normally used based on expert knowledge.
+    In CropSyst this would correspond to a value entered in the parameter
+    editor to be used normally through out the duration of the simulation
+    unless superceeded by a value introduced with higher precidence
+
+</DD>
+<!--
+<DT>
+   <B>normalization</B>
+<DD>
+   With this mode, the normalization value will always be used.
+-->   
+<DT>
+   <B>interpolation</B>
+<DD>   
+   
+   With this mode, the value will be initialized with the normalization value 
+   but will be superceded with the interpolated value as the interpolation curve
+   comes into effect.
+
+<DT>
+   <B>observation</B>
+   <DD>
+
+With this mode or observation values will supercede the normalization value
+when the respective dates are accounted. 
+If actual dates are listed, the values are only superceded when the
+exact specified years' dates are encountered by the model.
+If relative dates are used in an observation, the value will be
+used whenever the day of year (with the correspond relative year offset)
+is encountered (during the rotation).
+
+
+
+<HR>
+
+<H2>Legend</H2>
+<TABLE BOARDER=1>
+<TR><TH>Rendering<TH>Meaning
+<TR><TD><B>  bold </B><TD>Appears in parameter file
+<TR><TD><I>emphasis</I><TD>Comment/description 
+<TR><TD><B>bold </B><TD>Appears in parameter file
+<TR><TD><B><FONT COLOR="GRAY">bold gray</FONT></B>        <TD>Parameter from version 4 obsolete in V5
+<TR><TD><B><FONT COLOR="MAGENTA">magenta</FONT></B>   <TD>Meta information (This will be stored in the structure file, but not the parameter files)
+<TR><TD><B><FONT COLOR="RED">[section]variable</FONT></B> <TD>section and variable indicates the parameter used to be under the specified section with the specified variable name in V4
+<TR><TD><B><FONT COLOR="PURPLE">purple</FONT></B>         <TD>Meta information used to compose user interface (for example panel name)
+
+</TABLE>
+<HR>
+<PRE>
+<B>crop:</B>                 //original
+   <B>details_URL: </B><em> URL of detailed description document. Could be any file type, but HTML is recommended</em>
+   <B>description: </B><em>Brief description of the crop (one line with no restriction on line length) </em>
+   <B>feed_name_immature: </B> <em> name is used by CANMS feeding submodel </em>
+   <B>feed_name_midmature: </B><em> name is used by CANMS feeding submodel </em>
+   <B>feed_name_mature: </B>	<em> name is used by CANMS feeding submodel </em>
+   <FONT COLOR="GRAY"><B>harvested_part: </B>grain </FONT>  <FONT COLOR="BLUE">  (moved to [harvest] in V5) </FONT>
+   <B><FONT COLOR="GRAY">tea:</FONT> </B>no (No longer used in CropSyst)
+   <B>photosynthetic_pathway: </B>C4
+   <B>life_cycle: </B>annual
+   <B>stem_type: </B>herbaceous
+   <B>season_dormancy_mode: </B>single
+   <B>canopy_growth: </B>leaf_area_index
+   <FONT COLOR="GRAY"><B>c_species: </B>C4</FONT><FONT COLOR="BLUE">  (renamed to  to photosynthetic_pathway in V5) </FONT>
+   <B>senesced_biomass_fate: </B>shed
+   <B>linger: </B>90 Days that senesced leaves linger with (remain standing/attached to) the plant
+   <B>row_type: </B>no_rows
+   <B>stages: </B>NOCROP PREPLANTING PREEMERGENCE ACTIVE_GROWTH FLOWERING GRAIN_FILLING MATURITY DORMANT HARVESTABLE HARVESTED 
+<FONT COLOR="GRAY">
+<FONT COLOR="BLUE"> Obsolete in V5: </FONT>
+<FONT COLOR="GRAY">
+   <B>phenology_observed:count: </B>3
+   <B>observation:count: </B>42
+   <B>production:count: </B>3
+</FONT>
+</FONT>
+</PRE>
+<HR><!--______________________________________________________________________________-->
+<B>classification:</B> 
+   <B><FONT COLOR="PURPLE">
+   en: Classification
+   </FONT></B>    
+   <B>perennial: </B>no  # was ><FONT COLOR="RED">[crop]perennial</FONT></B>
+   <B>land_use: </B>ROW_CROPS
+   <B>model: </B>crop
+
+<HR><!--______________________________________________________________________________-->
+<PRE>
+<B>leaf:</B>
+   <B>senesces: </B>yes
+   <B>clip_newest: </B>yes
+   <B>area:</B>
+      <B>index:</B>
+         <B>inactive:</B> <A HREF="numeric_parameter">see numeric parameter</A>
+         <B>active:</B> <A HREF="numeric_parameter">see numeric parameter</A>
+      <B>specific:</B> 
+         <B>optimum:</B> <A HREF="numeric_parameter">see numeric parameter</A> <FONT COLOR=BLUE>  this entry replaces specific_leaf_area </FONT>
+   <B>stem_leaf_partition:</B> <A HREF="numeric_parameter">see numeric parameter</A>
+   <B>duration:</B> <A HREF="numeric_parameter">see numeric parameter</A>
+   <B>duration_stress_sensitivity:</B><A HREF="numeric_parameter">see numeric parameter</A>
+</PRE>
+
+
+</DL>
+
+<DT><B>Biomass:</B><DD>
+<FONT COLOR="GREEN">
+<BR><B>observation:  </B> <A HREF="#observation"> See observation time series </A> <FONT COLOR="BLUE">(For Calibration) </FONT>
+<BR>   [ {1996-maturescence:	20819.5000000000}
+<BR>   , {1997-maturescence: 8952.4003906250};
+</FONT>
+</DL>
+
+<HR><!--______________________________________________________________________________-->
+<PRE>
+<B>transpiration: </B>
+   <B>ET_crop_coef: </B>
+      <B>units:coefficient </B>
+      <B>constant:</B>1.20 
+   <B>max_water_uptake: </B>
+      <B>constant:10.00</B>
+      <B>units:mm/day</B>
+   <B>stomatal_closure_leaf_water_pot: </B> 
+      <B>constant:-1000.00 </B> 
+      <B>units:-J/kg</B> 
+   <B>wilt_leaf_water_pot: </B>
+      <B>constant:</B>-1600.00
+      <B>units:-J/kg</B>
+   <B>kc: </B>
+      <B>constant</B>:0.50 
+      <B>units: 0-1</B> 
+</PRE>
+<HR><!--______________________________________________________________________________-->
+<DT><B>[water_use_efficiency]</B><DD> original    this is replaced with new TUE curve 
+<BR><B>season2_adj: </B>1.0000000000
+<BR><B>season3_adj: </B>1.0000000000
+<BR><B>season4_adj: </B>1.0000000000
+<BR><B>season5_adj: </B>10.0000000000
+<HR><!--______________________________________________________________________________-->
+
+
+<DT><B>attainable_growth:</B> <FONT COLOR=gray>was [growth]</FONT><DD> 
+<FONT COLOR="gray"><B>WUE_changes: </B>no </FONT> <FONT COLOR="BLUE">Obsolete because we can now optionally specify curve </FONT>
+
+<BR><FONT COLOR="gray"><B>RUE_basis: </B>photosynthetically_active_radiation </FONT>
+<DL>	
+<DT><B>TUE:</B><DD>
+<B>equation: </B>Tanner_Sinclair	<FONT COLOR="BLUE">was TUE_equation</FONT>
+<DL>
+<DT><B>scaling_coef: </B>		<FONT COLOR="BLUE">was TUE_scaling_coef</FONT>
+<DD>
+<B>units:</B>?? unitless
+<BR><B>constant: </B>0.45
+<BR><B>dynamic:   </B><A HREF="#dynamic"> See dynamic time series </A>
+	<BR>[ {emergence: 0.45 }  // was TUE_scaling_coef_veg
+	<BR>, {bulking:  0.45} ]      // was TUE_scaling_coef  (reproductive growth)
+
+<DT><B>at_1pKa_VPD:</B><FONT COLOR="BLUE"> was (TUE_at_1pKa_VPD) </FONT>
+<DD> 
+<B>units:</B>g BM/kg H2O T
+<BR><B>dynamic:   </B><A HREF="#dynamic"> See dynamic time series </A>
+	<BR>[ {emergence: 5.00  } <FONT COLOR="BLUE">  was TUE_at_1pKa_VPD </FONT>
+	<BR>, {????bulking?????:   5.0   } ]   <FONT COLOR="BLUE"> was TUE_at_1pKa_VPD_veg</FONT>
+
+<DT><B>water_productivity:</B>  # FAO AquaCrop water productivity
+<DD> 
+<B>units:</B> g BM/kg H2O
+<BR><B>dynamic:   </B><A HREF="#dynamic"> See dynamic time series </A>
+	<BR>[ {emergence: 5.00  } <FONT COLOR="BLUE">  was water_productivity </FONT>
+	<BR>, {????bulking?????:   5.0   } ]   <FONT COLOR="BLUE"> was water_productivity_veg</FONT>
+
+</DL>
+<DT><B>RUE:</B><DD>
+<B>basis: photosynthetically_active_radiation </B> 	<!--was RUE_basis-->
+<DL>
+<DT><B>PAR:</B><DD>
+<B>units:</B>g/MJ 
+<BR><B>dynamic:   </B><A HREF="#dynamic"> See dynamic time series </A>
+</DL>
+<DT><B>biomass_transpiration_coef:</B><DD>
+<B>units:</B>Pa 
+<BR><B>dynamic:   </B><A HREF="#dynamic"> See dynamic time series </A>
+	<BR>[ {emergence: 9.30  } <FONT COLOR="BLUE">  was biomass_transpiration_coef </FONT>
+	<BR>, {????bulking?????:  5.00} ]   <FONT COLOR="BLUE"> was biomass_transpiration_coef_veg</FONT>
+
+<DT><B>limit_temperature:</B><DD>
+<B>units:</B> °C
+<BR><B>dynamic:  </B> <A HREF="#dynamic"> See dynamic time series </A>
+<BR>[ {emergence:10.00}]   <FONT COLOR="BLUE">was early_growth_limit_temp</FONT>
+</DL>
+
+<BR><H2><FONT COLOR=RED>continue here...</FONT></H2>
+
+<BR><B>LWP_reduces_canopy_expansion: </B>-800.00 J/kg (must be more negative than value above that begins reduction)
+<BR><B>LWP_reduces_canopy_expansion_units:</B>J/kg
+<BR><B>LWP_stops_canopy_expansion: </B>-1200.00 J/kg hint
+<BR><B>LWP_stops_canopy_expansion_units:</B>J/kg
+<BR><B>light_to_biomass: </B>0.0040000002 
+<BR><B>light_to_biomass_units:</B>kg/MJ
+<BR><B>light_to_biomass_units_shown: </B>kg/MJ
+<BR><B>at_pt_root_limit: </B>0.5000000000 Act. to pot. transpiration ratio that limits root growth
+<BR><B>at_pt_limit: </B>0.8000000119 Act. to pot. transpiration ratio that limits leaf area growth
+<BR><B>opt_temp_for_growth: </B>10.0000000000 Optimum mean daily temperature for growth
+<BR><B>biomass_water_ratio: </B>0.0000000000 Obsolete
+
+<HR><!--______________________________________________________________________________-->
+<BR><H2><FONT COLOR=RED>continue here</FONT></H2> 
+<PRE>
+<DT><B>morphology:</B><DL>  rename this to canopy section
+<BR><B>max_canopy_height: </B>1.50 # m 
+</PRE>
+<HR><!--______________________________________________________________________________-->
+<PRE>
+<B>root:</B>
+   <B>extent:</B>
+      emergence: 0.012 # m  # was root_length_at_emergence
+      root_max: 1.5000000000 # m Maximum rooting depth  was max_root_depth
+   <B>density:</B>
+      <B>surface:</B> 6.0000000000  # Surface root density  was surface_root_density: 
+      <B>distribution_curvature:</B> 4.0000000000  # was root_density_distribution_curvature Curvature of root density distribution
+   <B>length_per_unit_mass:</B> 90.0000000000  # km/kg  Root length per unit root mass  # was root_length_per_unit_mass
+   <B>sensitivity_water_stress:</B> 0.00 # index    // was root_sensitivity_water_stress
+   <B>root_shoot_ratio:</B> 
+      <B>emergence:</B> 2.0
+      <B>root_max:</B> 0.1
+
+  
+</PRE>
+<HR><!--______________________________________________________________________________-->
+<PRE>
+<B>harvest: </B>
+   <B>part: </B>grain
+   <B>temperature_stress_sensitivity: </B>0.00 0.5-1.5
+   <B>translocation_max: </B>0.0000000000
+
+   <B>sensitivity:</B> 
+      <B>units: factor
+      <B>dynamic:   </B><A HREF="#dynamic"> See dynamic time series </A>
+         - { stage: flowering, ordinate: 0.1 }
+         - { stage: filling,  0.2  }
+         - { stage: filling, sync: days, offset: 30 0.0
+<BR>
+<FONT COLOR=BLUE> In the case of  part=grain or leaf</FONT>
+
+   <B>index:</B>     // harvest index method
+      <B>unstressed: </B>0.43 
+      <B>units: </B>0-1
+
+<FONT COLOR="GREEN">
+   <B>yield:</B> <FONT COLOR="BLUE"># (For Calibration) </FONT>
+      <B>observation:  </B> <A HREF="#observation"> See observation time series </A> 
+         - { <EM>YYYYDDD</EM>: 8952.4003906250 }
+         - { <EM>YYYYDDD</EM>: 10522.0996093750}]
+</FONT>
+
+
+</PRE>
+<HR><!--______________________________________________________________________________-->
+<PRE>
+<B>germination:</B> <!-- #was [emergence]-->
+   <B>mode: </B><B>thermal_time</B> or <B>hydrothermal_time</B> (This may need to be moved to higher level)  <!--#was model -->
+   <B>seedling_leaf_area: </B>2.00 #cm² on first day of emergence
+   <B>base_temperature: </B>-1.0 # °C 
+   hydrothermal_time_constant:
+      <B>intercept: </B>22.35 <!-- was a= Emperical constant -->
+      <B>slope: </B>129.66 <!-- was b=  Emperical constant -->
+   base_soil_water_pot  # J/kg
+      <B>mean:</B> -1000.0 
+      <B>stdev:</B> 100.0 
+<PRE>
+<HR><!--______________________________________________________________________________-->
+<PRE>
+<B>hardiness:</B>
+   Hardiness is not enabled any one of these dynamic parameters is scheduled:
+   <B>yield_salvageable:<B> dynamic boolean  
+   the dynamic schedule date is when yield is salvageable
+   this replaces the parameter salvageable_days_before_maturity
+   unlike previous version, now any scheduling is possible not only days before maturity.
+   <B>cold_temperature:<B> 
+      <B>damage: </B>(replaces damage_cold_temp)
+      <B>lethal: </B>(replaces lethal_cold_temp)
+      <B>critical: </B>applicable only to tubers. (replaces tuber_crit_temperature)
+</PRE>
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[nitrogen]</B><DL>
+<BR><B>fixation: </B>no
+<BR><B>legume_fraction: </B>1.0000000000
+<BR><B>nitrogen_leaf_stress_mode: </B>none
+
+<BR><H2><FONT COLOR=RED>continue here</FONT></H2>...
+
+<BR><B>max_uptake_daily_rate: </B>8.00 kg/ha/day hint
+<BR><B>max_uptake_daily_rate_units:</B>kg/ha/day
+<BR><B>demand_adjust: </B>1.00 adjustment hint
+<BR><B>demand_adjust_units:</B>adjustment
+<BR><B>stubble_max_conc: </B>0.007 kgN/kgDM hint
+<BR><B>stubble_max_conc_units:</B>kgN/kgDM
+<BR><B>root_conc: </B>0.007 kgN/kgDM hint
+<BR><B>root_conc_units:</B>kgN/kgDM
+<BR><B>residual_N_not_available_for_uptake: </B>1.000 ppm hint
+<BR><B>residual_N_not_available_for_uptake_units:</B>ppm
+<BR><B>soil_N_conc_where_N_uptake_decreases: </B>5.000 ppm hint
+<BR><B>soil_N_conc_where_N_uptake_decreases_units:</B>ppm
+<BR><B>PAW_where_N_uptake_rate_decreases: </B>0.500 0-1 hint
+<BR><B>PAW_where_N_uptake_rate_decreases_units:</B>0-1
+<BR><B>uptake_adj: </B>1.0000000000 Nitrogen uptake adjustment
+<BR><B>availability_adj: </B>1.0000000000 Nitrogen availability adjustment
+<BR><B>residual: </B>0.0000000000 Amount of residual nitrogen per soil layer
+<BR><B>max_conc_emerge: </B>0.0500000007 Maximum N concentration during early growth
+<BR><B>min_conc_mature: </B>0.0070000002 Minimum N concentration at maturity
+<BR><B>max_conc_mature: </B>0.0199999996 Maximum N concentration at maturity
+<BR><B>max_stubble: </B>0.0070000002 Maximum N content of standing stubble
+
+<HR><!--______________________________________________________________________________-->
+
+<BR><H2><FONT COLOR=RED>continue here</FONT></H2>
+
+<DT><B>[fruit]</B><DL>
+<BR><B>fract_total_solids: </B>0.35 0-1 hint
+<BR><B>fract_total_solids_units:</B>0-1
+<BR><B>max_fruit_load: </B>20000.00 kg/ha hint
+<BR><B>max_fruit_load_units:</B>kg/ha
+<BR><B>initial_growth_fraction_to_fruit: </B>0.90 0-1 hint
+<BR><B>initial_growth_fraction_to_fruit_units:</B>0-1
+<BR><B>rapid_growth_fraction_to_fruit: </B>0.65 0-1 hint
+<BR><B>rapid_growth_fraction_to_fruit_units:</B>0-1
+<BR><B>harvest_temperature: </B>15.0 °C hint
+<BR><B>harvest_temperature_units:</B>°C
+<BR><B>harvest_temperature_days: </B>5 Days hint
+<BR><B>harvest_temperature_days_units:</B>Days
+<BR><B>earliest_harvest: </B>258 DOY hint
+<BR><B>earliest_harvest_units:</B>DOY
+<BR><B>latest_harvest: </B>275 DOY hint
+<BR><B>latest_harvest_units:</B>DOY
+<BR><B>max_water_uptake_before_fruiting: </B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_before_fruiting_units:</B>mm/day
+<BR><B>max_water_uptake_during_initial_fruit: </B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_during_initial_fruit_units:</B>mm/day
+<BR><B>max_water_uptake_during_radid_fruit: </B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_during_radid_fruit_units:</B>mm/day
+<BR><B>max_water_uptake_during_veraison: </B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_during_veraison_units:</B>mm/day
+<BR><B>max_water_uptake_after_maturity: </B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_after_maturity_units:</B>mm/day
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[CO2]  (no change)</B><DD>
+<BR><B>growth_ratio_elevated_to_baseline_ppm: </B>1.25 ratio hint
+<BR><B>growth_ratio_elevated_to_baseline_ppm_units:</B>ratio
+<BR><B>elevated_reference_conc: </B>660.0 ppm hint
+<BR><B>elevated_reference_conc_units:</B>ppm
+<BR><B>baseline_reference_conc: </B>350.0 ppm hint
+<BR><B>baseline_reference_conc_units:</B>ppm
+<BR><B>linger: </B>90 days remain standing/attached to
+<BR><B>linger_units:</B>days
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[salinity] (no change)</B><DD>
+<BR><B>osmotic_pot_50: </B>-0.0 kPa hint
+<BR><B>osmotic_pot_50_units:</B>kPa
+<BR><B>tolerance_P: </B>0.000 1-5 hint
+<BR><B>tolerance_P_units:</B>1-5
+
+
+<HR><!--______________________________________________________________________________-->
+
+<BR><H2><FONT COLOR=RED>continue here</FONT></H2>
+
+<DT><B>[canopy_characteristics]</B><DL>
+<BR><B>initial_width: </B>1.00 m hint
+<BR><B>initial_width_units:</B>m
+<BR><B>final_width: </B>1.00 m hint
+<BR><B>final_width_units:</B>m
+<BR><B>initial_breadth: </B>2.00 m hint
+<BR><B>initial_breadth_units:</B>m
+<BR><B>final_breadth: </B>2.00 m hint
+<BR><B>final_breadth_units:</B>m
+<BR><B>initial_height: </B>1.20 m hint
+<BR><B>initial_height_units:</B>m
+<BR><B>final_height: </B>1.20 m hint
+<BR><B>final_height_units:</B>m
+<BR><B>branch_insertion_height: </B>0.60 m hint
+<BR><B>branch_insertion_height_units:</B>m
+<BR><B>initial_canopy_diameter: </B>3.0000000000 Initial canopy diameter
+<BR><B>final_canopy_diameter: </B>4.0000000000 Final canopy diameter
+<BR><B>max_LAI_of_canopy_projection: </B>3.0000000000 Maximum LAI of canopy crown diameter projected to soil surface
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[layout]</B><DD> (no change)
+<BR><B>row_spacing: </B>2.70 m hint
+<BR><B>row_spacing_units:</B>m
+<BR><B>row_azimuth: </B>0.00 0 : </B> North, 90 : </B> East, 180 : </B> South,  270 : </B> West hint
+<BR><B>row_azimuth_units:</B>0 : </B> North, 90 : </B> East, 180 : </B> South,  270 : </B> West
+<BR><B>col_spacing: </B>2.70 m hint
+<BR><B>col_spacing_units:</B>m
+
+<HR><!--______________________________________________________________________________-->
+
+<BR><H2><FONT COLOR=RED>continue here</FONT></H2> 
+<DT><B>[canopy_cover]</B><DL>
+<BR><B>initial_cover: </B>0.01 fraction hint
+<BR><B>initial_cover_units:</B>fraction
+<BR><B>maximum_cover: </B>0.90 fraction hint
+<BR><B>maximum_cover_units:</B>fraction
+<BR><B>mature_green_cover: </B>0.10 fraction hint
+<BR><B>mature_green_cover_units:</B>fraction
+<BR><B>mature_total_cover: </B>0.10 fraction hint
+<BR><B>mature_total_cover_units:</B>fraction
+<BR><B>rel_TT_at_half_CC_max: </B>0.45 fraction hint
+<BR><B>rel_TT_at_half_CC_max_units:</B>fraction
+<BR><B>cC_initial: </B>0.0099999998 Initial canopy cover
+<BR><B>cC_maximum: </B>0.8999999762 Maximum canopy cover
+<BR><B>cC_mature_green: </B>0.1000000015 Green canopy cover at maturity
+<BR><B>cC_mature_total: </B>0.1000000015 Total canopy cover at maturity (green and senesced)
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>phenology:</B>
+<DD>
+<BR><B>maturity_significant: </B>yes
+<BR><B>clipping_resets: </B>no
+<BR><B>emergence: </B>350 °C-days hint
+<BR><B>emergence_units:</B>°C-days
+<BR><B>flowering: </B>1580 °C-days hint
+<BR><B>flowering_units:</B>°C-days
+<BR><B>peak_LAI: </B>1550 °C-days hint
+<BR><B>peak_LAI_units:</B>°C-days
+<BR><B>max_root_depth: </B>1040 °C-days Established root depth for established fruit trees
+<BR><B>max_root_depth_units:</B>°C-days
+<BR><B>tuber_init: </B>1000 °C-days hint
+<BR><B>tuber_init_units:</B>°C-days
+<BR><B>filling: </B>1680 °C-days hint
+<BR><B>filling_units:</B>°C-days
+<BR><B>rapid_fruit_growth: </B>1300 °C-days hint
+<BR><B>rapid_fruit_growth_units:</B>°C-days
+<BR><B>maturity: </B>2382 °C-days hint
+<BR><B>maturity_units:</B>°C-days
+<BR><B>water_stress_sensitivity: </B>1.00 0-1 hint
+<BR><B>water_stress_sensitivity_units:</B>0-1
+<BR><B>WUE_change: </B>1000 °C-days hint
+<BR><B>WUE_change_units:</B>°C-days
+<BR><B>senescence: </B>1080 °C-days hint
+<BR><B>senescence_units:</B>°C-days
+<BR><B>resolution: </B>hr
+   <DT>
+   thermal_time:
+   <DD>
+      <DL>
+      <DT>accumulation:
+      <DD>
+            <DL>
+            <DT>threshold_temperature:
+            <DD>
+                  <DL>
+                  <DT>base:
+                  <DD>
+                     <DL>
+                     <DT>units: °C<DD>
+                     <DT>dynamic:
+                     
+                     </DL>
+            </DL>
+         </DL>        
+      </DL>
+    
+                  
+  
+<BR><B>base_temp: </B>3.00  hint
+<BR><B>base_temp_units:</B>°C
+<BR><B>cutoff_temp: </B>22.00 °C hint
+<BR><B>cutoff_temp_units:</B>°C
+<BR><B>optimal_temp: </B>22.00 °C hint
+<BR><B>optimal_temp_units:</B>°C
+<BR><B>maximum_temp: </B>35.00 °C hint
+<BR><B>maximum_temp_units:</B>°C
+
+<HR><!--______________________________________________________________________________-->
+
+
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[inactive_period]</B><DD>  (no change)
+<BR><B>consider_inactive_days: </B>7 days hint
+<BR><B>consider_inactive_days_units:</B>days
+<BR><B>inducement_temperature: </B>10.00 °C hint
+<BR><B>inducement_temperature_units:</B>°C
+<BR><B>start_DOY: </B>365  The latest day where dormancy or inactive period will has certainly occured (historically
+<BR><B>start_DOY_units:</B>
+<BR><B>end_DOY: </B>365  The earliest day where dormancy or inactive period  has occured (historically
+<BR><B>end_DOY_units:</B>
+<BR><B>minimum_duration: </B>19 days hint
+<BR><B>minimum_duration_units:</B>days
+<BR><B>start_valid_date: </B>365 (12/30)
+<BR><B>end_valid_date: </B>365 (12/30)
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[residue] </B><DL>(no change)
+<BR><B>RUSLE2_type: </B>unknown
+<BR><B>decomposition_time_50: </B>40  Hint
+<BR><B>decomposition_time_50_units:</B>
+<BR><B>fast_cycling_top_fraction: </B>0.50  Hint
+<BR><B>fast_cycling_top_fraction_units:</B>
+<BR><B>slow_cycling_top_fraction: </B>0.40  Hint
+<BR><B>slow_cycling_top_fraction_units:</B>
+<BR><B>lignified_top_fraction: </B>0.10  Hint
+<BR><B>lignified_top_fraction_units:</B>
+<BR><B>fast_cycling_root_fraction: </B>0.50  Hint
+<BR><B>fast_cycling_root_fraction_units:</B>
+<BR><B>slow_cycling_root_fraction: </B>0.30  Hint
+<BR><B>slow_cycling_root_fraction_units:</B>
+<BR><B>lignified_root_fraction: </B>0.20  Hint
+<BR><B>lignified_root_fraction_units:</B>
+<BR><B>fast_cycling_decomposition_time_50: </B>3.50  Hint
+<BR><B>fast_cycling_decomposition_time_50_units:</B>
+<BR><B>slow_cycling_decomposition_time_50: </B>9.99  Hint
+<BR><B>slow_cycling_decomposition_time_50_units:</B>
+<BR><B>lignified_decomposition_time_50: </B>115.07  Hint
+<BR><B>lignified_decomposition_time_50_units:</B>
+<BR><B>detrition_time_50: </B>720.0  Accounts for decomposition due to exposure to the elements.
+<BR><B>detrition_time_50_units:</B>
+<BR><B>carbon_fraction: </B>0.46  Hint
+<BR><B>carbon_fraction_units:</B>
+<BR><B>stubble_area_covered_to_mass_ratio: </B>2.00  Hint
+<BR><B>stubble_area_covered_to_mass_ratio_units:</B>
+<BR><B>area_covered_to_mass_ratio: </B>4.00  Hint
+<BR><B>area_covered_to_mass_ratio_units:</B>
+<BR><B>decomposition_time: </B>30 Time to reach 63% decomposition
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[vernalization]</B><DD> (no change)
+<BR><B>enabled: </B>no
+<BR><B>low_temp: </B>3.00 °C hint
+<BR><B>low_temp_units:</B>°C
+<BR><B>high_temp: </B>10.00 °C hint
+<BR><B>high_temp_units:</B>°C
+<BR><B>start: </B>10.00000000000000000000000000000000000000 °C-days hint
+<BR><B>start_units:</B>°C-days
+<BR><B>end: </B>50.00000000000000000000000000000000000000 °C-days hint
+<BR><B>end_units:</B>°C-days
+<BR><B>min_factor: </B>0.00 0-1 hint
+<BR><B>min_factor_units:</B>0-1
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[photoperiod] </B><DD> (no change)
+<BR><B>consideration: </B>none
+<BR><B>stop: </B>0.00 hours For short day crops this must be greater than the unconstrained value, for long day crops it must be less.
+<BR><B>stop_units:</B>hours
+<BR><B>unconstrain: </B>0.00 hours For short day crops this must be less than the stopped value, for long day crops it must be greater.
+<BR><B>unconstrain_units:</B>hours
+<BR><B>enabled: </B>no
+<BR><B>start: </B>0.0000000000 to inhibit flowering Day length (photo-period)
+<BR><B>end: </B>0.0000000000 for insensitivity Day length (photo-period)
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[harvest_index] </B><DL>
+<BR><B>unstressed: </B>0.4300010800 Unstressed harvest index
+<BR><B>flowering_sensitivity: </B>0.0000000000 flowering Sensitivity to water and nitrogen stress
+<BR><B>filling_sensitivity: </B>0.0000000000 filling/bulking Sensitivity to water and nitrogen stress
+<BR><B>filling_duration: </B>30 Duration of grain filling period (unstressed)
+<BR><B>temperature_stress_sensitivity: </B>0.0000000000 Sensitivity to temperature stress during flowering
+<BR><B>fract_total_solids: </B>0.3499999940 Fraction of total solids
+<BR><B>max_fruit_load: </B>20000.0000000000 Max. fruit load (fresh mass)
+<BR><B>initial_growth_fraction_to_fruit: </B>0.8999999762 Fraction of above biomass apportioned to fruit after flowering
+<BR><B>rapid_growth_fraction_to_fruit: </B>0.6499999762 Fraction of above biomass apportioned to fruit during accelerated fruit growth
+<BR><B>harvest_temperature: </B>15.0000000000 Low temperature for harvest
+<BR><B>harvest_temperature_days: </B>5 Consecutive days below the low temperature for to consider harvest
+<BR><B>earliest_harvest: </B>258 Day to start looking for harvest conditions
+<BR><B>latest_harvest: </B>275 Day to force harvest (or fixed date)
+<BR><B>max_water_uptake_before_fruiting: </B>10.0000000000 before fruiting
+<BR><B>max_water_uptake_during_initial_fruit: </B>10.0000000000 during intial fruit
+<BR><B>max_water_uptake_during_radid_fruit: </B>10.0000000000 during rapid fruit
+<BR><B>max_water_uptake_during_veraison: </B>10.0000000000 during veraison
+<BR><B>max_water_uptake_after_maturity: </B>10.0000000000 after maturity
+<BR><B>translocation_factor: </B>0.3000000119 Translocation to yield factor
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[options]</B><DD>  (no change)
+<BR><B>advanced: </B>no
+
+
+<DT><B>[dormancy]</B><DD>  (no change)
+<BR><B>senesce: </B>100.0000000000 Biomass that senesces at the on sent of dormancy
+<BR><B>enabled: </B>no
+<BR><B>inducement_temperature: </B>10.0000000000 Average temperature for 7 consecutive days to induce dormancy
+<BR><B>start_valid_date: </B>365 (12/30)
+<BR><B>leave_valid_date: </B>365 (12/30)
+<BR><B>scenesce: </B>100.0000000000 Biomass that senesces at the on sent of dormancy
+
+
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[information]</B><DD> (no change)
+<BR><B>UED_filename: </B>C:\Simulation\Projects\info    or_sample\Database\Weather\prosNM.ued
+[phenology_information]
+<BR><B>observed_data_mode: </B>experimental_measurment_mode
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[phenology_typical_season]</B><DD> (no change)
+<BR><B>enabled: </B>yes
+<BR><B>planting_date: </B>2006172 (2006/June/21(172))
+<BR><B>emergence_date: </B>2006172 (2006/June/21(172))
+<BR><B>tuber_initiation_date: </B>2006172 (2006/June/21(172))
+<BR><B>peak_LAI_date: </B>2006172 (2006/June/21(172))
+<BR><B>begin_flowering_date: </B>2006172 (2006/June/21(172))
+<BR><B>begin_grain_filling_date: </B>2006172 (2006/June/21(172))
+<BR><B>rapid_fruit_growth_date: </B>2006172 (2006/June/21(172))
+<BR><B>maturity_date: </B>2006172 (2006/June/21(172))
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[???_biomass_LAI]</B><DD> (no change)
+<BR><B>biomass_LAI_info    ion_mode: </B>both_SLA_SLP
+
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[phenology_observed:0]</B><DL>
+<BR><B>enabled: </B>yes
+<BR><B>planting_date: </B>1996104 (1996/April/13(104))
+<BR><B>emergence_date: </B>1996146 (1996/May/25(146))
+<BR><B>tuber_initiation_date: </B>1996104 (1996/April/13(104))
+<BR><B>peak_LAI_date: </B>1996221 (1996/August/8(221))
+<BR><B>begin_flowering_date: </B>1996223 (1996/August/10(223))
+<BR><B>begin_grain_filling_date: </B>1996228 (1996/August/15(228))
+<BR><B>begin_rapid_fruit_growth_date: </B>1996104 (1996/April/13(104))
+<BR><B>maturity_date: </B>1996284 (1996/October/10(284))
+<BR><B>complete_senescence_date: </B>0 (Date omitted)
+
+:
+:
+<DT><B>[phenology_observed:n]</B><DL>
+:
+:
+
+<HR><!--______________________________________________________________________________-->
+
+<BR><B><H2><FONT COLOR=RED>continue here</FONT></H2>...
+<FONT COLOR="BLUE">
+<BR>Observations have been moved to the sections  "biomass" and "GAI"
+</FONT>
+<FONT COLOR="gray">
+<DT><B>[observation:0]</B><DL>
+<BR><B>date: </B>1996150 (1996/5/29)
+<BR><B>biomass: </B>10.3400001526
+<BR><B>GAI: </B>0.0199999996
+:
+:
+<DT><B>[observation:n]</B><DL>
+<BR><B>date: </B>1996160 (1996/6/8)
+<BR><B>biomass: </B>72.0000000000
+<BR><B>GAI: </B>0.1500000060
+</FONT>
+<HR><!--______________________________________________________________________________-->
+<FONT COLOR="BLUE">
+<BR>Observations have been moved to the sections  "biomass" and "GAI"
+</FONT>
+<FONT COLOR="gray">
+<DT><B>[production:0]</B><DL>
+<BR><B>year: </B>1996
+<BR><B>biomass_at_maturity: </B>20819.5000000000
+<BR><B>yield: </B>8952.4003906250
+:
+:
+<DT><B>[production:n]</B><DL>
+<BR><B>year: </B>1997
+<BR><B>biomass_at_maturity: </B>24469.9003906250
+<BR><B>yield: </B>10522.0996093750
+</FONT>
+<HR><!--______________________________________________________________________________-->
+
+<DT><B>[GUI]</B><DL>
+<BR><B>show: </B>ffff
+<BR><B>top: </B>291
+<BR><B>left: </B>320
+<BR><B>width: </B>640
+<BR><B>height: </B>441
+<BR><B>activepageindex: </B>18
+<DT><B>[version]</B><DL>
+<BR><B>major: </B>4
+<BR><B>release: </B>14
+<BR><B>minor: </B>4
+
+</DL>

@@ -1,0 +1,130 @@
+#ifndef itemH
+#define itemH
+#include <ostream>
+#ifndef primitiveH
+#  include "corn/primitive.h"
+#endif
+#ifndef constH
+#  include "corn/const.h"
+#endif
+#include <fstream>
+namespace CORN {                                                                 //001206
+class Data_record;                                                               //010103
+class Binary_file_interface;                                                     //111015
+//______________________________________________________________________________
+interface_ Item_interface
+{  inline Item_interface() {}                                                    //120511 even though this is an interface gcc want this declared for copy constructor
+   inline virtual ~Item_interface() {}                                           //130304
+   virtual const char *label_cstr(char *buffer)                            const = 0;
+};
+//_2009-07-28___________________________________________________________________
+interface_ Item
+: public extends_interface_ Item_interface                                       //090728
+{
+ public:
+   enum Filter
+      {filter_all                          // 000
+      ,filter_selected                     // 001
+      ,filter_checked                      // 010
+      ,filter_select_or_checked            // 011
+      ,filter_not_selected_and_not_checked // 100
+      ,filter_not_selected                 // 101
+      ,filter_not_checked                  // 110
+      ,filter_not_checked_or_not_checked   // 111
+      };                                                                         //040318
+   //___________________________________________________________________Filter_/
+   struct Format
+      {  // applied to each item in the container
+         char *initializer;
+         char *separator;
+         char *finalizer;  // I.e. might include \n or \r (ie. linux) if line separation
+         char indentor; // Usually either space or tab, or 0 if no indentation
+         struct Key
+         {  bool distinquished;    // If the key is specially set aside (I.e. JSON, INI files)
+            bool case_sensitive;   // used only when reading
+            char *separator;
+            struct Quotation
+            {  char *initializer;   // I.e.  JSON keys are double quoted
+               char *finalizer;     // I.e.  JSON keys are double quoted
+            } quotation;
+         } key;
+         struct Comment
+         {  char *initializer;   // I.e. C style comments
+            char *finalizer;
+            char *endline;       // I.e. C++ style comment (Do not include newline character)
+         } comment;
+      };
+   //_2013-02-17________________________________________________________Format_/
+ public: // 'structors
+   Item();                                                                       //120511
+      // Even though this is an interface gcc wants this declared for copy constructor
+   virtual ~Item();
+         // All derived classes must define compare and label for the class.
+         // This destructor is required!
+         // (if it is not included, items don't get deleted correctly.
+ public:
+   inline virtual const char *label_cstr(char *buffer)                     const { return buffer;}    //020125
+      // label_cstr is deprecated, use label_string                              //170101
+   inline virtual const char *label_string(std::string &buffer)            const { return buffer.c_str();} //170101
+   inline virtual const wchar_t *label_wstring(std::wstring &buffer)       const { return buffer.c_str();} //170101
+      // Rename this to append_caption_to_ASCII
+      // Appends a user recognizable (representation) of the object to the buffer.
+      // This is usually used to display a short caption representing the object to the user.
+          virtual int   compare(const Item &)                              const; //150211 { return 0; }  //980511
+   inline virtual bool is_case_sensitive()                                 const { return false; } //150201_051101   
+   inline virtual const char *get_key()                                    const { return ""; }
+   inline virtual const wchar_t  *get_key_wide()                           const { return L""; } //110828
+      //170101 get_key methods are deprecated use the key_Xstring() mentods
+   inline virtual const char    *key_string (std::string &buffer)          const { return buffer.c_str();} //170101
+   inline virtual const wchar_t *key_wstring(std::wstring &buffer)         const { return buffer.c_str();} //170101
+
+   inline virtual nat32 get_key_nat32()                                    const { return 0; } //110305
+          virtual const std::wstring &append_to_wstring(std::wstring &buffer) const; //130103
+   inline virtual const std::string &append_to_string(std::string &buffer) const { return buffer; } //130103
+      // Appends a text representation of the object to the string buffer.
+      // In most cases, append_to_string must be implemented in derived classes to become active.
+
+   virtual bool  write(std::ostream &)                               performs_IO_;//150728_980511
+   virtual bool  write_with_format                                               //150728
+      (std::ostream &,const Format &,nat16 identation_level)         performs_IO_;//130217
+   inline virtual nat32 write_binary(Binary_file_interface &)        performs_IO_{ return 0;} //111015
+   inline virtual nat32 read_binary(Binary_file_interface &)         performs_IO_{ return 0;} //111015
+//NYI   inline virtual nat32 write_return_bytecount(STD_NS ostream &)    performs_IO_ = 0; //{ return 0;}; //111015
+      // Eventually replaced as write() in derived classes with write_return_bytecount which we can then rename
+   inline virtual void  setup_structure(Data_record &,bool /*for_write*/)  modification_ {} //020617
+   inline virtual bool  is_enabled()                                 affirmation_{ return true; } //011221
+      /**<\fn is_enable can be overridden in derived classes
+      it is intended to be used for GUI list boxes **/
+   inline virtual bool  is_selected()                                affirmation_{ return false; } //011221
+      /**<\fn is_selected  can be overridden in derived classes
+      it is intended to be used for GUI list boxes and check list boxes **/
+   inline virtual bool  is_checked()                                 affirmation_{ return false; } //011221
+      /**<\fn is_checked can be overridden in derived classes
+         it is intended to be used for GUI check list boxes */
+   inline virtual bool  set_selected(bool /*_selected*/)            contribution_{ return false; }  //020124 Note that this should be mutates because were are modifying control information, not attributes
+      /**<\fn This is used to set the selected state of the item (for GUI listboxes).
+         This can be overridden by derived classes that want to support selected state*/
+   inline virtual bool  set_checked(bool /*_selected*/ )            contribution_{ return false; }  //020124 Note that this should be mutates because were are modifying control information, not attributes
+      /**<\fn This is used to set the checked selected state of the item (for GUI checked listboxes).
+         This can be overridden by derived classes that want to support checked state.*/
+   inline virtual nat8 get_checkbox_state()                                const { return 0 /* unchecked*/ ; } // 011221
+      /**<\fn can be overridden in derived classes
+            it is intended to be used for GUI check list boxes */
+   virtual nat8  get_node_path(char **node_path)                           const; //020319
+      /**<\fn This is used by TAutoContainerTreeView to put Items in nodes
+         It can also be used by data rec to identify sections.
+         Node path is allocated by this function which is relinquished to the caller
+         The caller must delete node path.
+         Node path will be 0 if not supported by this object.
+         get_node_path returns the number of nodes in the path. */
+   inline virtual int   get_image_index()                                  const { return (int) -1;} //020319
+      /**<\fn This can be used in GUI applications for objects which may have associated images.
+            -1 indicates no image association. */
+   bool matches_filter(Filter filter)                              confirmation_;//040318
+   virtual bool matches_wstr(const wchar_t *other_text)                    const;//150922
+};
+//_1999-11-05___________________________________________________________________
+typedef Item * Item_pointer;
+} // namespace CORN                                                              //001206
+#endif
+

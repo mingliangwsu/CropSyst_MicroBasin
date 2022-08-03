@@ -1,0 +1,1073 @@
+#  include "UED/library/UED.h"
+#  include "UED/library/std_codes.h"
+#  include "common/weather/wthrbase.h"
+#  include "common/weather/database/weather_database.h"
+#  include "corn/math/statistical/stats_best.h"
+#  include "common/weather/loc_param.h"
+#  include "common/weather/any_timestep/min_max_to_timestep_estimator.h"
+#  include "common/weather/atmospheric_CO2_change_interface.h"
+
+#  ifndef compareHPP
+#     include "corn/math/compare.hpp"
+#  endif
+
+#ifdef WEATHER_GENERATION
+#include "ClimGen/source/ClimGenF.h"
+#endif
+
+#include <assert.h>
+#ifdef DETAIL_TRACE
+#include <fstream>
+using namespace std;
+extern int trace_indent;
+extern std::ofstream trace;
+//extern std::ofstream dump;
+bool dump_it = true;
+#endif
+
+#define get_now() today
+//150125 eventually replace get_now() with today
+// get_now was when Sun was the temporal driver
+//______________________________________________________________________________
+Weather_base::Weather_base
+(Weather_database    *weather_database_                                          //050307
+,modifiable_ Weather_provider &provider_                                               //151201
+,const CORN::Date_const_interface /*170525 Date */    &today_                                                     //150125
+,const Geocoordinate &geocoordinate_                                             //150629
+,float64              screening_height                                           //151128
+//151201 moved to meteorology   ,const CS::Solar_irradiance_extraterrestrial /*151028 _daily*/ &ET_solar_irradiance_new_     //150626
+,bool                 treat_valid_data_as_real_                                  //081108
+,bool                 read_only_                                                 //000711
+//160110 snow_pack has been moved to Land_unit_meteorology ,Snow_pack_model      snow_pack_model_                                           //991004
+//160110 snow_pack has been moved to Land_unit_meteorology ,float64              soil_slope_percent_                                        //991004
+//160110 snow_pack has been moved to Land_unit_meteorology ,float64              site_aspect_deg_from_north_                                //991004
+//160110 snow_pack has been moved to Land_unit_meteorology ,bool                 forest_vegetation_                                         //991004
+,CORN::Seconds)      /*unused time_step_seconds may be used in derived classes need to check*/ // 000711
+: Weather_interface()                                                            //151027
+//151027 moved to Land_unit_meteorology , Xsun(today_,geocoordinate_)                                                     //151027
+/* moved to Land_unit_meteorological
+, Xsky //151027 Sky
+   (
+   //151027 UC_MJ_m2,*_weather_database->get_geolocation_constant()
+   //151037 ,_today               //150125_020319
+    ET_solar_irradiance_new_                                                     //150626
+   ,curr_air_temperature_avg  //151027 air_temperature_avg                                                          //151023
+   ,curr_solar_radiation      //151027 solar_radiation                                                              //151023
+   ,curr_precipitation        //151027 precipitation
+   )                                                               //151023
+*/
+//151201 #if ((CS_VERSION>=1) && (CS_VERSION<=4))
+//151201 ,Wind(curr_wind_speed,2.0)                                                       //150209
+//151201#endif
+,CS::Weather_subdaily                                                            //151212
+   (*this //weather_database_
+   ,today_
+   ,provider_.air_temperature_max
+   ,provider_.air_temperature_min
+   ,provider_.relative_humidity_max
+   ,provider_.relative_humidity_min
+   )
+#if ((CS_VERSION>=1) && (CS_VERSION<=4))
+,Wind(provider_.wind_speed,2.0)                                                  //151202_150209
+#endif
+,CS::Seasons
+   (today_
+   ,(geocoordinate_.get_latitude_dec_deg() < 0)                                  //150629
+   )
+,provider(provider_)                                                             //151201
+,database_read_only        (read_only_)                                          //010726
+,treat_valid_data_as_real  (treat_valid_data_as_real_)                           //081109
+,geocoordinate             (geocoordinate_)                                      //151027
+,weather_data              (weather_database_)                                   //050307
+,avg_DOY_with_min_annual_temperature(15)                                         //060427
+,updated_for_year          (0)                                                   //130515
+,annual_temperature_avg    (0)                                                   //130515
+
+,ClimGen_parameters(0)                                                           //091214
+{
+   //010726			get_end() will be called after we load the location parameters
+   //					but I now also allow a default location with default weather
+   //					parameters but with a weather filename (specified in constructor)
+   //					so call get_end() now to load that weather database with
+   //					simple snow pack model.
+}
+//_1999-03-01___________________________________________________________________
+Weather_base::~Weather_base()
+{  // We can't delete the abstract class, it doesn't call the virtual destructor!
+   weather_data = 0; // just a reference pointer, don't delete                   //041130
+}
+//_2000-07-10___________________________________________________________________
+bool Weather_base::done_with_dates_before(const CORN::Date_const_interface /*170525 Date */ &earliest_date) const
+{  return weather_data->done_with_dates_before(earliest_date);
+}
+//_2014-11-03___________________________________________________________________
+#if (CS_VERSION < 5)
+const Location_parameters *Weather_base::get_location_parameters() const // 090303 made const
+{  return weather_data->get_location_parameters();}
+#endif
+//_2005-07-13___________________________________________________________________
+const Geolocation         *Weather_base::get_geolocation_constant() const
+{return weather_data->get_geolocation_constant();}                               //050713
+//_2005-05-25___________________________________________________________________
+const CORN::Quality &Weather_base::load_wind_speed_estimate_if_necessary
+(Wind_speed &wind_speed,const Date_const_interface * /*170525 Date */ _date)
+{
+//160706 #ifdef WEATHER_PROVIDER_VERSION
+   assert(false); // NYI
+/*
+#else
+   if (_date.get() == 0) _date.set(today.get_date32());
+   float64 WS_m_s = load_wind_speed(wind_speed,_date);
+   if (WS_m_s < 0.00001) wind_speed.invalidate();
+   if (!wind_speed.is_valid())
+   {
+      float64 WS_m_d = forecast_wind_speed_m_d(_date.get_DOY());
+      wind_speed.set_m_d(WS_m_d,quality_forecasted_from(CORN::estimated_quality));//150811
+      // Note that forcasted from is worse quality generated
+      // This will allow ClimGen's generated wind speed to
+      // override this forecast from seasonal conditions
+   }
+#endif
+*/
+   return wind_speed;
+}
+//_2015-01-26__1997-03-03_______________load_wind_speed_estimate_if_necessary__/
+float64 Weather_base::forecast_wind_speed_m_d(CORN::DOY doy)
+{  float64 result = 0.0;
+   const Location_parameters *location = weather_data->get_location_parameters(); // 090303 made const
+   switch (location?location->wind_speed_classification_labeled.get():WIND_SPEED_MEDIUM )
+   {  case WIND_SPEED_UNKNOWN    : result = 0.0; break;                           //091217
+      case WIND_SPEED_VERY_LOW   : result = 1.0; break; // m/s                    //980311
+      case WIND_SPEED_LOW        : result = 2.0; break; // m/s                    //980311
+      case WIND_SPEED_MEDIUM     : result = 3.0; break; // m/s                    //980311
+      case WIND_SPEED_MEDIUM_HIGH: result = 4.0; break; // m/s                    //980311
+      case WIND_SPEED_HIGH       : result = 6.0; break; // m/s                    //980311
+      case WIND_SPEED_VERY_HIGH  : result = 8.0; break; // m/s                    //980311
+      case WIND_SPEED_SPECIFIED  :
+         {  // Don't need to check location exists here (done above)
+             result =
+               is_spring_or_summer_time(doy)                                     //140813
+               ? location->get_wind_speed_spring_summer_ms() // m/s
+               : location->get_wind_speed_fall_winter_ms() ; // m/s
+         } break;
+   }
+   result *= seconds_per_day;  // convert m/s -> m/d
+   result = CORN::must_be_greater_or_equal_to<float64>(result,0.0001);           //980710
+   return result;
+}
+//_1997-03-03___________________________________________________________________
+/*151118 Now takes reference to gecoordinate which might not necessarity be the weather data location.
+float64 Weather_base::get_location_elevation_m()   const { return weather_data->get_geolocation_constant()->get_elevation();}
+float64 Weather_base::get_latitude_dec_deg()       const { return weather_data->get_geolocation_constant()->get_latitude_dec_deg(); } // degrees
+float64 Weather_base::get_longitude_dec_deg()      const { return weather_data->get_geolocation_constant()->get_longitude_dec_deg(); }
+float64 Weather_base::get_latitude_rad()           const { return weather_data->get_geolocation_constant()->get_latitude_radians();}  // radians
+float64 Weather_base::get_longitude_rad()          const { return weather_data->get_geolocation_constant()->get_longitude_radians();}
+*/
+//______________________________________________________________________________
+const char *Weather_base::get_description(std::string &return_buffer)    const
+{ return weather_data->get_description(return_buffer); }                         //050525
+//_2004-11-09_________________________________________________get_description__/
+void Weather_base::load()
+{
+   // load the data for the time step
+//160706    #ifdef WEATHER_PROVIDER_VERSION
+      weather_data->get_to(provider);
+/* //160706
+   #else
+   // Time step will already be advanced
+   // The following must be loaded in order
+
+   //151027    curr_precipitation_m            = load_curr_precipitation_m            ();    //990802
+//   float64 debug_precip =
+                                     load_curr_precipitation              ();    //151027
+//std::cout << debug_precip << std::endl;
+                                     load_curr_max_temperature            ();    //990802
+                                     load_curr_min_temperature            ();    //990802
+                                     load_curr_solar_radiation            ();    //140715_990802
+                                     load_curr_max_dew_point_temperature  ();    curr_max_dew_point_temperature.modified = false;            //990802
+                                     load_curr_min_dew_point_temperature  ();    curr_min_dew_point_temperature.modified = false;            //990802
+   load_curr_avg_dew_point_temperature  ();                                      curr_avg_dew_point_temperature.modified = false;            //050602
+                                     load_curr_max_relative_humidity      ();    curr_max_relative_humidity.modified = false;                //990802
+                                     load_curr_min_relative_humidity      ();    curr_min_relative_humidity.modified = false;                //990802
+   //  Wind speed will be loaded value or estimated                              //991202
+   load_wind_speed_estimate_if_necessary(curr_wind_speed);                       //150126
+   // Warning currently not tracking windspeed quality, but probably not relevent here //150123
+
+   curr_pot_evapotranspiration_m   = load_curr_pot_evapotranspiration_m   ();    //991109
+
+   curr_vapor_pressure_actual.invalidate(false);                                 //080617
+    load_curr_avg_fullday_vapor_pressure_deficit_kPa ();
+   //000612NYI    curr_max_vapor_pressure_deficit_kPa = load_max_vapor_pressure_deficit_kPa ();
+
+   // Range quality check is done by respective database class.
+
+   if (curr_max_temperature.Celcius() < curr_min_temperature.Celcius())          //150210
+   {
+      std::cerr << "Error: Max air temperature is less than min on " << today.as_string() << std::endl;
+      assert(false);
+   }
+   curr_air_temperature_avg.update();                                            //140507
+   #endif
+*/
+   if (treat_valid_data_as_real)                                                                                                                   //081109
+   {
+      // Now using assume quality because we don't want to mark the property as modified, otherwise a new record may be instanciated               //141101
+//160706       #ifdef WEATHER_PROVIDER_VERSION
+      if (provider.precipitation_actual          .get_quality()            .is_valid())   provider.precipitation_actual   .assume_code(measured_quality);
+      if (provider.solar_radiation        .get_quality()            .is_valid())   provider.solar_radiation .assume_code(measured_quality);     //081109
+      if (provider.wind_speed             .get_quality()            .is_valid())   provider.wind_speed      .assume_code(measured_quality);     //081109
+/* //160706
+      #else
+      //151027 if (precipitation_quality                         .is_valid())   precipitation_quality                  .assume_code(measured_quality);      //081109
+      if (curr_precipitation              .get_quality().is_valid())   curr_precipitation                      .assume_code(measured_quality);  //151027
+      if (ref_solar_radiation_modifiable()              .is_valid())   ref_solar_radiation_modifiable()       .assume_code(measured_quality);   //140715_081109
+      //140715 if (solar_radiation_quality                       .is_valid())   solar_radiation_quality                .set        (measured_quality);   //081109
+      //150123 if (wind_speed_quality                            .is_valid())   wind_speed_quality                     .assume_code(measured_quality);      //081109
+      if (curr_wind_speed                               .is_valid())   curr_wind_speed                         .assume_code(measured_quality);      //150123_081109
+      #endif
+*/
+//      if (curr_max_vapor_pressure_deficit_quality      .is_valid())   curr_max_vapor_pressure_deficit        .set        (measured_quality);     //081109
+//      if (curr_vapor_pressure_max                      .is_valid())   curr_vapor_pressure_max                .assume_code(measured_quality);  //081109
+//      if (curr_vapor_pressure_min         .get_quality().is_valid())   curr_vapor_pressure_min               .assume_code(measured_quality);  //081109
+      if (curr_max_temperature            .get_quality().is_valid())   curr_max_temperature                    .assume_code(measured_quality);  //081109
+      if (curr_min_temperature            .get_quality().is_valid())   curr_min_temperature                    .assume_code(measured_quality);  //081109
+      if (curr_max_dew_point_temperature  .get_quality().is_valid())   curr_max_dew_point_temperature          .assume_code(measured_quality);  //081109
+      if (curr_min_dew_point_temperature  .get_quality().is_valid())   curr_min_dew_point_temperature          .assume_code(measured_quality);  //081109
+      if (curr_avg_dew_point_temperature  .get_quality().is_valid())   curr_avg_dew_point_temperature          .assume_code(measured_quality);  //081109
+      if (curr_max_relative_humidity      .get_quality().is_valid())   curr_max_relative_humidity              .assume_code(measured_quality);  //081109
+      if (curr_min_relative_humidity      .get_quality().is_valid())   curr_min_relative_humidity              .assume_code(measured_quality);  //081109
+   }
+}
+//_______________________________________________________________________load__/
+/*160115 obsolete
+bool Weather_base::start()
+{  bool started = true;
+//150626 obsolete because Sky is nolonger derived from Extraterrestrial_solar_irradiance_day
+//   started &= Sky::start();                                                      //150126
+
+   //NYN started &= Wind::start();                                               //150126
+   //150126 this object should should not call start_day
+   return started;                                                               //140709
+}
+*/
+//_2005-01-11___________________________________________________________start__/
+bool Weather_base::start_day()
+{  bool started = true;                                                          //150126
+/* moved to subdaily
+#ifdef WEATHER_PROVIDER_VERSION
+   provided_date_yesterday.set(today); provided_date_yesterday.dec();
+   provided_date_tomorrow .set(today); provided_date_tomorrow.inc();
+   //151126 decided not to use provider for the few elements needed
+   //if (provider_yesterday) delete provider_yesterday; provider_yesterday = 0;
+   //if (provider_tomorrow)  delete provider_tomorrow;  provider_tomorrow = 0;
+
+#endif
+*/
+   invalidate(true); // Clear completely all values from previous day.           //091218
+   load();
+   started &= update();                                                          //150126
+/* //160706
+#ifndef WEATHER_PROVIDER_VERSION
+   CORN::DOY doy = get_now().get_DOY();                                          //050610
+   if (geocoordinate.get_latitude_dec_deg() < 0 )                                //151118_040115
+   {  // Southern hemisphere
+      if      ((doy > 357) || (doy < 81)) season_for_dew_point = SUMMER_ONLY_SEASON;   //081029   // 081029 was ((doy > 334) || (doy < 91))
+      else if ((doy > 151) && (doy <244)) season_for_dew_point = WINTER_ONLY_SEASON;   //040115
+      else                                season_for_dew_point = SPRING_OR_FALL_SEASON;//040115
+   }                                                                                   //040115
+   else
+   {  // Northern hemisphere
+      if      ((doy > 173) && (doy <265)) season_for_dew_point = SUMMER_ONLY_SEASON;   //081029   // was  ((doy > 151) && (doy <274))
+      else if ((doy > 334) || (doy < 60)) season_for_dew_point = WINTER_ONLY_SEASON;   //040115
+      else                                season_for_dew_point = SPRING_OR_FALL_SEASON;//040115
+   }
+#endif
+*/
+   if (ClimGen_parameters) // When generating in ClimGen we want to clear any previous generated element values   //091216
+      invalidate(false);   // don't invalidate optimal (I.e. measured, calculate, interpolated) values.  //091216
+   started &= CS::Weather_subdaily::start_day(); // do last because needs loaded weather
+   return started;                                                               //150125_140709
+}
+//_2009-12-16_______________________________________________________start_day__/
+bool Weather_base::update()                                       /* should be  rectification_*/ //151212
+{  bool updated = true;
+   /*151027  Sun now owned by Land_unit_meteorology
+   updated &= Xsun.update();                                                  //151027
+   */
+   // 151027 Sky::update();                                  //150125
+   // Probably should call sky.update() here, but need to check
+   // if where I have it now is needed there.
+//151202   CORN::DOY doy_unused = get_now().get_DOY();                                          //050610
+
+//050604       curr_max_vapor_pressure_deficit requires dewpt and rel humidity
+//             see if we can get atleast estimated values
+   //   curr_max_relative_humidity and curr_min_dew_point_temperature now both can be calculated
+   //   from VPD_max (aridity factor) and Tmax I am updating curr_max_vapor_pressure_deficit_kPa first
+   //   so it will be ready for use by curr_max_relative_humidity and  curr_min_relative_humidity.
+   //  This is kind of a hack doing this here, I should use a provide idiom.      081016
+
+//TRACE trace << get_now().get_year() << ' ' << doy ;
+//TRACE trace << "\t Tmax = " << get_curr_max_temperature();
+//TRACE trace << "\t Tmin = " << get_curr_min_temperature();
+//TRACE trace << endl;
+
+//if (dump_it)
+//{
+//dump  <<  get_now().get_year() << ' ' << doy << '\t' << get_curr_max_temperature() << '\t' << get_curr_min_temperature();
+//}
+
+   //151202 curr_vapor_pressure_nighttime.know_DOY_unused(doy);                                  //081030_
+   // Update minimum relative humidity first because
+   // it has the most stable estimation
+   // and we need it first if we need to use the regression parameters
+   // to produce vapor_pressure_minimum.
+/* //160706
+   #ifndef WEATHER_PROVIDER_VERSION
+      // rehumid
+      curr_max_relative_humidity.know_precipitation
+      (curr_precipitation.get_mm());                                             //151027
+      //151027       (m_to_mm(curr_precipitation_m));
+   #endif
+*/
+/* //160706
+   #ifndef WEATHER_PROVIDER_VERSION
+   //151202
+   curr_min_relative_humidity.update();
+   curr_max_relative_humidity.update();
+   // We may have estimated value for dew point temperature to derive relative humidity
+   // we will throw away estimated values and recalculate DewPoint from relative humidity
+   curr_max_dew_point_temperature.CS::Parameter_float64::invalidate(false);
+   curr_min_dew_point_temperature.CS::Parameter_float64::invalidate(false);
+   curr_max_dew_point_temperature.update(); // May calculate/estimate dew point depending on available data
+   curr_min_dew_point_temperature.update(); // so it may be available
+   #endif
+*/
+
+//if (dump_it)
+//dump << endl;
+/*151202 moved to meteorology
+#ifdef WEATHER_PROVIDER_VERSION
+   updated &= provider.update();                                                 //140709_110905
+#endif
+*/
+
+   season_S_S_F_W=(Season_S_S_F_W)get_season_S_S_F_W();                          //050801
+
+   #if ((CS_VERSION>=1) && (CS_VERSION<=4))
+      Wind::update_aerodynamic_resistance();
+   #endif
+
+
+//160706       #ifdef WEATHER_PROVIDER_VERSION
+         provider.aerodynamics.update();                                         //110104
+/* //160706
+      #else
+         aerodynamics.update();                                                  //110104
+      #endif
+*/
+   updated &= CS::Weather_subdaily::update();                                    //151212
+
+
+/*moved to meteorology/weather provider
+   curr_vapor_pressure_deficit_daytime.update();                                  //140813
+*/
+   //151023 if (Xsnow_pack) Xsnow_pack->update();                                           //141205
+   return updated;                                                               //140709
+}
+//_1999-10-08__________________________________________________________update__/
+void Weather_base::invalidate(bool absolutely)
+{
+//160706 #ifdef WEATHER_PROVIDER_VERSION
+   // I'm not sure why the quality invalidation are duplicated,
+   // but it may be needed to ensure they are not revalidated.
+
+   // should be able to just call Weather_provider::invalidate()
+/*
+   provider.precipitation              .invalidate(absolutely);                  //990802
+   provider.solar_radiation            .invalidate(absolutely);                  //990802
+   provider.precipitation              .invalidate(absolutely);                  //990802
+   provider.solar_radiation            .invalidate(absolutely);                  //990802
+   provider.air_temperature_max        .CS::Parameter_float64::invalidate(absolutely);   //050602
+   provider.air_temperature_min        .CS::Parameter_float64::invalidate(absolutely);   //050602
+   provider.dew_point_temperature_max  .CS::Parameter_float64::invalidate(absolutely);   //990802
+   provider.dew_point_temperature_min  .CS::Parameter_float64::invalidate(absolutely);   //990802
+   provider.relative_humidity_max      .invalidate(absolutely);                  //990802
+   provider.relative_humidity_min      .invalidate(absolutely);                  //990802
+   provider.vapor_pressure_deficit_max .invalidate(absolutely);
+   provider.wind_speed                 .invalidate(absolutely);                  //991012
+   provider.vapor_pressure_deficit_max .invalidate(absolutely);                  //050602
+   provider.vapor_pressure_daytime     .invalidate(absolutely);                  //081027 vapor_pressure_max
+   provider.vapor_pressure_nighttime   .invalidate(absolutely);                  //081027
+   provider.air_temperature_max        .CS::Parameter_float64::invalidate(absolutely);   //990802
+   provider.air_temperature_min        .CS::Parameter_float64::invalidate(absolutely);   //990802
+   provider.air_temperature_avg        .CS::Parameter_float64::invalidate(absolutely);   //140529
+   provider.dew_point_temperature_max  .CS::Parameter_float64::invalidate(absolutely);   //990802
+   provider.dew_point_temperature_min  .CS::Parameter_float64::invalidate(absolutely);   //990802
+   provider.dew_point_temperature_avg  .CS::Parameter_float64::invalidate(absolutely);   //990802
+   provider.relative_humidity_max      .invalidate(absolutely);                  //990802
+   provider.relative_humidity_min      .invalidate(absolutely);                  //990802
+   provider.wind_speed                 .invalidate(absolutely);                  //990802
+   provider.vapor_pressure_actual      .invalidate(absolutely);                  //080617
+   provider.vapor_pressure_deficit_fullday_avg.invalidate(absolutely);           //080617
+*/
+/* //160706
+#else
+   //151027 precipitation_quality            .invalidate(absolutely);                     //990802
+   curr_precipitation                  .invalidate(absolutely);                  //151027
+   ref_solar_radiation_modifiable() .invalidate(absolutely);                     //140723
+   curr_max_temperature                .invalidate(absolutely);                  //050602
+   curr_min_temperature                .invalidate(absolutely);                  //050602
+   curr_max_dew_point_temperature      .invalidate(absolutely);                  //990802
+   curr_min_dew_point_temperature      .invalidate(absolutely);                  //990802
+   curr_max_relative_humidity          .invalidate(absolutely);                  //990802
+   curr_min_relative_humidity          .invalidate(absolutely);                  //990802
+   curr_max_vapor_pressure_deficit     .invalidate(absolutely);
+   curr_wind_speed                     .invalidate(absolutely);                  //991012
+   curr_max_vapor_pressure_deficit     .invalidate(absolutely);                  //050602
+   curr_vapor_pressure_max             .invalidate(absolutely);                  //081027
+   curr_vapor_pressure_nighttime       .invalidate(absolutely);                  //081027
+   curr_max_temperature                .invalidate(absolutely);                  //990802
+   curr_min_temperature                .invalidate(absolutely);                  //990802
+   curr_air_temperature_avg            .invalidate();                            //140521
+   curr_max_dew_point_temperature      .invalidate(absolutely);                  //990802
+   curr_min_dew_point_temperature      .invalidate(absolutely);                  //990802
+   curr_avg_dew_point_temperature      .invalidate(absolutely);                  //990802
+   curr_max_relative_humidity          .invalidate(absolutely);                  //990802
+   curr_min_relative_humidity          .invalidate(absolutely);                  //990802
+   curr_wind_speed                     .invalidate(absolutely);                  //990802
+   curr_vapor_pressure_actual          .invalidate(absolutely);                  //080617
+   curr_avg_fullday_vapor_pressure_deficit.invalidate(absolutely);               //080617
+#endif
+*/
+}
+//_2009-12-16___________________________________________________________________
+
+//          In the following load methods, the quality request will be any valid quality
+//          The load with return the actual quality
+//160706 #ifdef WEATHER_PROVIDER_VERSION
+bool Weather_base::load_weather_provider(Weather_provider &weather_provider) mutation_
+{  return weather_data->get_to(weather_provider);
+
+   //110910 Note probably should set up treat_valid_data_as_real
+   // as in load(), but this wasn't previously done,
+   // so carefully check where needed
+   // for example, see where Daily::get_solar_radiation(const CORN::Date  & _date)
+   // is used
+
+}
+//_2011-09-10___________________________________________________________________
+/* //160706
+#else
+
+//______________________________________________________________________________
+#ifdef NYI
+float64 Weather_base::load_curr_pot_evapotranspiration_m()             mutation_
+{
+   pot_evapotranspiration_quality = UED_valid_attribute;                         //990802
+   return curr_pot_evapotranspiration_m = load_pot_evapotranspiration_m(pot_evapotranspiration_quality,today);
+}
+//______________________________________________________________________________
+float64 Weather_base::load_curr_vapor_pressure_deficit_kPa()           mutation_
+{  vapor_pressure_deficit_quality = UED_valid_attribute;                         //990802
+   return curr_vapor_pressure_deficit_kPa = load_pot_vapor_pressure_deficit_kPa(pot_vapor_pressure_deficit_quality,today);
+}
+#endif
+//______________________________________________________________________________
+float64 Weather_base::load_curr_solar_radiation()  mutation_// yes only pass by value!
+{  return load_solar_radiation(curr_solar_radiation,today);                      //140715_990802
+}
+//_1997-10-13___________________________________________________________________
+float64 Weather_base::load_curr_precipitation()                        mutation_
+{ return load_precipitation               (curr_precipitation              , today); } //151027
+float64 Weather_base::load_curr_max_temperature()                      mutation_
+{  return load_max_temperature            (curr_max_temperature            ,today);} //050602
+float64 Weather_base::load_curr_min_temperature()                      mutation_
+{  return load_min_temperature            (curr_min_temperature            ,today);} //050602
+float64 Weather_base::load_curr_avg_dew_point_temperature()            mutation_ // yes only pass by value!                //050602
+{  return load_avg_dew_point_temperature  (curr_avg_dew_point_temperature  ,today);} //050602
+float64 Weather_base::load_curr_min_dew_point_temperature()             mutation_ // yes only pass by value!                //980305
+{  return load_min_dew_point_temperature  (curr_min_dew_point_temperature  ,today);} //050602
+float64 Weather_base::load_curr_max_dew_point_temperature()             mutation_ // yes only pass by value!                //980305
+{  return load_max_dew_point_temperature  (curr_max_dew_point_temperature  ,today);} //050602
+float64 Weather_base::load_curr_max_relative_humidity( )                mutation_ //  %
+{  return load_max_relative_humidity      (curr_max_relative_humidity      ,today);} //050602
+float64 Weather_base::load_curr_min_relative_humidity()                 mutation_ // yes only pass by value!                    //980306
+{return  load_min_relative_humidity      (curr_min_relative_humidity  ,today);}      //050602
+float64 Weather_base::load_curr_avg_fullday_vapor_pressure_deficit_kPa() mutation_ // yes only pass by value!   //080617
+{ return  load_avg_fullday_VPD_kPa(curr_avg_fullday_vapor_pressure_deficit,today);}                                                                     //080617
+//______________________________________________________________________________
+float64 Weather_base::load_curr_wind_speed_m_d()                       mutation_
+{
+   const Geolocation *geoloc = weather_data ? weather_data->get_geolocation_constant() : 0; //150427
+   Wind_speed parameter
+      (geoloc ? geoloc->get_screening_height() : 2.0);                           //150427
+   parameter.assume_code(UED_give_me_best_quality);
+   load_wind_speed(parameter,today);
+   return parameter.get_m_d();
+}
+//_2015-01-23__1998-04-23_______________________________________________________
+float64 Weather_base::load_solar_radiation(Solar_radiation &solar_rad, const Date_time  &date_time_) mutation_
+{  float64 result = 0.0;
+   if (weather_data)
+      result = weather_data->get_solar_radiation(solar_rad,date_time_);
+   else solar_rad.invalidate(true);                                              //021211
+   // don't change quality for this type of load, the date may not be the current date  040510
+   return result;                                                                //150123
+}
+//_2014-07-15___________________________________________________________________
+float64 Weather_base::load_precipitation
+(Precipitation &parameter, const Date_time  &date_time_ ) mutation_
+{
+float64 result = 0.0;
+   if (weather_data)
+   {
+      result = weather_data->get_precipitation_m(parameter,date_time_);
+      parameter.force_amount(result);                                            //151028
+      //parameter.assume(quality);                                                 //151028
+   }
+   else parameter.invalidate(true);                                              //021211
+   // don't change quality for this type of load, the date may not be the current date  040510
+   return result;
+}
+//______________________________________________________________________________
+#ifdef NYI
+float64 Weather_base::load_pot_evapotranspiration_m(Weather_daily_load_formals) mutation_ // yes only pass by value!
+{  float64 result = 0.0;
+   if (weather_data)
+     result =  weather_data->get_pot_evapotranspiration_m(quality,_date_time);
+   else quality |= not_valid_quality;
+   xxxxx_quality = quality;
+   return result;
+}
+//______________________________________________________________________________
+float64 Weather_base::load_vapor_pressure_deficit_m(Weather_daily_load_formals) mutation_ // yes only pass by value!
+{  float64 result = 0.0;
+   if (weather_data)
+     result =  weather_data->get_vapor_pressure_deficit_m(quality,_date_time);
+   else quality |= not_valid_quality;
+   xxxxx_quality = quality;
+   return result;
+}
+#endif
+//______________________________________________________________________________
+float64 Weather_base::load_max_temperature(Air_temperature_maximum &parameter, const Date_time  &_date_time) mutation_ // yes only pass by value!
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+      result = weather_data->get_max_temperature(quality,_date_time);
+      parameter.force_amount(result);                                            //150123
+      parameter.assume(quality);                                                 //150123
+   }
+   else parameter.invalidate(true);                                              //021211
+   //040510_ don't change quality for this type of load, the date may not be the current date
+   return result;                                                                //150123
+}
+//______________________________________________________________________________
+float64 Weather_base::load_min_temperature(Air_temperature_minimum &parameter, const Date_time  &_date_time) mutation_ // yes only pass by value!
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+      result = weather_data->get_min_temperature(quality,_date_time);
+      parameter.force_amount(result);                                            //150123
+      parameter.assume(quality);                                                 //150123
+   }
+   else parameter.invalidate(true);                                              //021211
+   //040510_ don't change quality for this type of load, the date may not be the current date
+   return result;                                                                //150123
+}
+//______________________________________________________________________________
+float64 Weather_base::load_min_relative_humidity(Relative_humidity &parameter,  const Date_time  &_date_time) mutation_  // yes only pass by value!
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+      result =  weather_data->get_min_relative_humidity(quality,_date_time);
+      parameter.force_amount(result);                                            //150123
+      parameter.assume(quality);                                                 //150123
+   } else parameter.invalidate(true);                                            //021211
+   // don't change quality for this type of load, the date may not be the current date 040510
+   return result;                                                                //150123
+}
+//_1998-03-06___________________________________________________________________
+float64 Weather_base::load_avg_fullday_VPD_kPa
+(Vapor_pressure_deficit_fullday &parameter
+,  const Date_time  &_date_time)                                       mutation_ // yes only pass by value!
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+      result =  weather_data->get_avg_fullday_vapor_pressure_deficit_kPa(quality,_date_time);
+      parameter.force_amount(result);                                            //150123
+      parameter.assume(quality);                                                 //150123
+   } else parameter.invalidate(true);                                            //021211
+   // don't change quality for this type of load, the date may not be the current date 040510_
+   return result;                                                                //150123
+}
+//_2008-06-17_____________________________________________________________________________
+float64 Weather_base::load_max_relative_humidity(Relative_humidity &parameter, const Date_time  &_date_time ) mutation_  //  %
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+      result = weather_data->get_max_relative_humidity(quality,_date_time);
+      parameter.force_amount(result);                                            //150123
+      parameter.assume(quality);                                                 //150123
+   } else parameter.invalidate(true);                                            //021211
+   // don't change quality for this type of load, the date may not be the current date 040510
+   return result;                                                                //150123
+}
+//______________________________________________________________________________
+float64 Weather_base::load_max_dew_point_temperature(Dew_point_temperature_maximum &parameter, const Date_time  &_date_time)  mutation_// yes only pass by value!
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+      result = weather_data->get_max_dew_point_temperature(quality,_date_time);
+      parameter.force_amount(result);                                            //150123
+      parameter.assume(quality);                                                 //150123
+   } else parameter.invalidate(true) ;                                           //021211
+   //040510_ don't change quality for this type of load, the date may not be the current date
+   return result;                                                                //150123
+}
+//_1998-03-05____________________________________________________________________
+float64 Weather_base::load_min_dew_point_temperature(Dew_point_temperature_minimum &parameter, const Date_time  &_date_time)  mutation_// yes only pass by value!
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+     result = weather_data->get_min_dew_point_temperature(quality,_date_time);
+      parameter.force_amount(result);                                            //150123
+      parameter.assume(quality);                                                 //150123
+   }  else parameter.invalidate(true);                                           //021211
+   // don't change quality for this type of load, the date may not be the current date  040510
+   return result;                                                                //150123
+}
+//_1998-03-05____________________________________________________________________
+float64 Weather_base::load_avg_dew_point_temperature(Dew_point_temperature_average &parameter, const Date_time  &_date_time)  mutation_
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+     result = weather_data->get_avg_dew_point_temperature(quality,_date_time);
+      parameter.force_amount(result);                                            //150123
+      parameter.assume(quality);                                                 //150123
+   } else parameter.invalidate(true) ;                                //021211
+   //040510_ don't change quality for this type of load, the date may not be the current date
+   return result;                                                                //150123
+}
+//_1998-03-05____________________________________________________________________
+float64 Weather_base::load_wind_speed(Wind_speed &parameter , const Date_time  &_date_time)  mutation_ //150123
+{  float64 result = 0.0;
+   if (weather_data)
+   {  CORN::Quality_clad quality;
+      result =  weather_data->get_wind_speed_m_d(quality,_date_time);
+      result = parameter.set_m_d(result,quality);                                //150123
+   } else parameter.invalidate(true);                                            //021211
+   // don't change quality for this type of load, the date may not be the current date  040510
+   return result;
+}
+#endif
+*/
+//_1998094023___________________________________________________________________
+/*151023
+float64 Weather_base::precipitate()        // returns liquid total water entering the system
+{  return snow_pack->precipitate();
+}
+*/
+//______________________________________________________________________________
+/* 160706 #ifdef WEATHER_PROVIDER_VERSION
+
+#else
+float64 Weather_base::set_precipitation_mm
+(float64 precip_mm
+,CORN::Quality &attribute)
+{
+   return curr_precipitation.update_value_qualified(weather_data->set_precipitation_mm(get_now(),precip_mm,attribute),attribute); //151027
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_pot_evapotranspiration_mm
+(float64 pot_ET_mm
+,CORN::Quality &attribute)
+{  curr_pot_evapotranspiration_m = mm_to_m(weather_data->set_pot_evapotranspiration_mm(get_now(),pot_ET_mm,attribute));   //990827
+   pot_evapotranspiration_quality.assume(attribute);
+   return curr_pot_evapotranspiration_m;                                        //990827
+}
+//_1999-11-09___________________________________________________________________
+float64 Weather_base::set_avg_fullday_vapor_pressure_deficit_kPa
+(float64 avg_VPD_kPa
+,CORN::Quality &attribute)
+{  return curr_avg_fullday_vapor_pressure_deficit.update_value_qualified
+   (weather_data->set_avg_fullday_vapor_pressure_deficit_kPa(get_now(),avg_VPD_kPa,attribute),attribute);  //080617
+}
+//_1999-11-09___________________________________________________________________
+float64 Weather_base::set_max_temperature
+(float64 degrees_C
+,CORN::Quality & attribute
+,bool override_safety)                                                           //081115
+{  return  curr_max_temperature.update_value_qualified(weather_data->set_max_temperature(get_now(),degrees_C,attribute),attribute, override_safety);   //050603
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_min_temperature
+(float64 degrees_C
+,CORN::Quality & attribute
+,bool override_safety)                                                           //081115
+{  return curr_min_temperature.update_value_qualified(weather_data->set_min_temperature(get_now(),degrees_C,attribute),attribute, override_safety); //990827
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_solar_radiation
+(float64 solar_rad_MJ_m2
+,CORN::Quality & attribute)                                             mutation_
+{
+   return curr_solar_radiation.set_MJ_m2                                         //140715
+      (weather_data->set_solar_radiation(get_now(),solar_rad_MJ_m2,attribute)
+      ,attribute);                                                               //990827
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_max_relative_humidity
+(float64 max_rel_humid_percent
+,CORN::Quality & attribute)
+{return curr_max_relative_humidity.update_value_qualified(weather_data->set_max_relative_humidity(get_now(),max_rel_humid_percent,attribute),attribute); }  //990827
+//150123 { return curr_max_relative_humidity.set(weather_data->set_max_relative_humidity(get_now(),max_rel_humid_percent,attribute),attribute); }  //990827
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_min_relative_humidity
+(float64 min_rel_humid_percent
+,CORN::Quality & attribute)
+{  return curr_min_relative_humidity.update_value_qualified(weather_data->set_min_relative_humidity(get_now(),min_rel_humid_percent,attribute),attribute);   //990827
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_max_dew_point_temperature
+(float64 max_dew_point_temp
+,CORN::Quality & attribute)
+{  return curr_max_dew_point_temperature.update_value_qualified(weather_data->set_max_dew_point_temperature(get_now(),max_dew_point_temp,attribute),attribute);
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_min_dew_point_temperature
+(float64 min_dew_point_temp
+,CORN::Quality & attribute)
+{  return curr_min_dew_point_temperature.update_value_qualified(weather_data->set_min_dew_point_temperature(get_now(),min_dew_point_temp,attribute),attribute); //050603
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_avg_dew_point_temperature
+(float64 avg_dew_point_temp
+,CORN::Quality & attribute)
+{  return curr_avg_dew_point_temperature.update_value_qualified(weather_data->set_avg_dew_point_temperature(get_now(),avg_dew_point_temp,attribute),attribute); //050603
+}
+//_1999-04-24___________________________________________________________________
+float64 Weather_base::set_wind_speed_m_d
+(float64 wind_speed_m_d
+,CORN::Quality & attribute)
+{
+   //150123 Warning  I most likely need to use update_value_qualified
+   curr_wind_speed.update_value_qualified(weather_data->set_wind_speed_m_d(get_now(),wind_speed_m_d,attribute), attribute); //150123
+   return curr_wind_speed.get_m_d(); //return value is the specified units
+}
+#endif
+*/
+//_1999-04-24___________________________________________________________________
+/*150127
+
+ * I don't think this was every really used
+ * However, cloud cover fraction it something that we calculate that
+ * could be written to UED
+
+
+float64 Weather_base::set_cloud_cover_percent
+(float64 cloud_cover_percent
+,CORN::Quality & attribute)
+{
+
+   Xsky.curr_cloud_cover_fraction =  weather_data->set_cloud_cover_percent(get_now(),cloud_cover_percent,attribute)/100.0;
+   Xsky.cloud_cover_quality.assume(attribute);                                       //150123
+   return Xsky.curr_cloud_cover_fraction;
+}
+
+*/
+
+//_1999-10-22___________________________________________________________________
+
+void Weather_base::commit( const Date_const_interface /*170525 Date_time*/ &now)
+{  // Save any modifications (Call this before advancing to the next timestep).
+//160706 #ifdef WEATHER_PROVIDER_VERSION
+   if (curr_max_temperature.is_modified()
+   ||curr_min_temperature.is_modified()
+   ||curr_max_relative_humidity.is_modified()
+   ||curr_min_relative_humidity.is_modified()
+   ||curr_max_dew_point_temperature.is_modified()
+   ||curr_min_dew_point_temperature.is_modified())
+      weather_data->set_from(provider);
+/* //160706
+#else
+   if (curr_max_temperature.is_modified())            { weather_data->set_max_temperature          (now,curr_max_temperature       .Celcius()     ,curr_max_temperature);          }
+   if (curr_min_temperature.is_modified())            { weather_data->set_min_temperature          (now,curr_min_temperature       .Celcius()     ,curr_min_temperature);          }
+   if (curr_max_relative_humidity.is_modified())      { weather_data->set_max_relative_humidity    (now,curr_max_relative_humidity .in_preset_units() ,curr_max_relative_humidity); }
+   if (curr_min_relative_humidity.is_modified())      { weather_data->set_min_relative_humidity    (now,curr_min_relative_humidity .in_preset_units() ,curr_min_relative_humidity); }
+   if (curr_max_dew_point_temperature.is_modified())  { weather_data->set_max_dew_point_temperature(now,curr_max_dew_point_temperature.Celcius()  ,curr_max_dew_point_temperature);}
+   if (curr_min_dew_point_temperature.is_modified())  { weather_data->set_min_dew_point_temperature(now,curr_min_dew_point_temperature.Celcius()  ,curr_min_dew_point_temperature);}
+   // Eventually add here the other parameters when I convert to weather parameters
+#endif
+*/
+}
+//_2005-06-16___________________________________________________________________
+void Weather_base::fix_up_relative_humidity()
+{  //CORN::Quality_clad curr_max_relative_humidity_quality(curr_max_relative_humidity.get_quality());
+   float32 max_rel_humid = curr_max_relative_humidity.in_preset_units();
+   //CORN::Quality_clad curr_min_relative_humidity_quality(curr_min_relative_humidity.get_quality());
+   float32 min_rel_humid = curr_min_relative_humidity.in_preset_units();
+   if (max_rel_humid < min_rel_humid)
+   {
+      float32 hold =  min_rel_humid;
+      min_rel_humid = max_rel_humid;
+      max_rel_humid = hold;
+      curr_max_relative_humidity.force_amount(max_rel_humid);
+      curr_min_relative_humidity.force_amount(min_rel_humid);
+   }
+}
+/*150126
+void Weather_base::fix_up_relative_humidity()
+{  CORN::Quality_clad curr_max_relative_humidity_quality;
+   float32 max_rel_humid = curr_max_relative_humidity.get_with_quality(curr_max_relative_humidity_quality);
+   CORN::Quality_clad curr_min_relative_humidity_quality;
+   float32 min_rel_humid = curr_min_relative_humidity.get_with_quality(curr_min_relative_humidity_quality);
+   if (max_rel_humid < min_rel_humid)
+   {
+      float32 hold =  min_rel_humid;
+      min_rel_humid = max_rel_humid;
+      max_rel_humid = hold;
+      curr_max_relative_humidity.set_value_quality(max_rel_humid,curr_max_relative_humidity_quality);
+      curr_min_relative_humidity.set_value_quality(min_rel_humid,curr_min_relative_humidity_quality);
+   }
+}
+
+*/
+//_2005-06-16___________________________________________________________________
+bool Weather_base::any_valid_data_today()
+{  return
+      get_precipitation_quality().is_valid()
+   || get_max_temperature_quality().is_valid()
+   || get_min_temperature_quality().is_valid()
+   || curr_solar_radiation.is_valid()                                            //140715 
+//140715    || get_solar_radiation_quality().is_valid()
+   || get_max_dew_point_temperature_quality().is_valid()
+   || get_min_dew_point_temperature_quality().is_valid()
+   || get_max_relative_humidity_quality().is_valid()
+   || get_min_relative_humidity_quality().is_valid()
+//   || get_wind_speed_quality().is_valid())
+//   || get_pot_evapotranspiration_quality().is_valid())
+//   || get_avg_vapor_pressure_deficit_quality().is_valid())
+   ;
+}
+//______________________________________________________________________________
+/*151202 This is for CropCrop but I never really implemented it
+float64 Weather_base::get_curr_avg_air_temperature_daylight()  const
+{  //  only for CropGro
+   // WARNING! Because we don't have avg_air_temperature for day light, i am estimating it with the
+   // following, I need to confirm with Claudio
+#ifdef WEATHER_PROVIDER_VERSION
+return (provider.air_temperature_max + provider.air_temperature_avg)/ 2.0;
+#else
+   Quality_clad Tmax_qual; Quality_clad Tavg_qual;
+   float64 Tavg_daylight = (curr_max_temperature.Celcius() + curr_air_temperature_avg.Celcius()) / 2.0;  //140507
+   return  Tavg_daylight;
+#endif
+}
+*/
+//_2003-11-22___________________________________________________________________
+/*151212 moved to Weather_subdaily
+Minutes Weather_base::get_minutes_in(Units_code time_step_units) const
+{  Minutes minutes_in_timestep=60;
+   switch (time_step_units)
+   {  case UT_minute  : minutes_in_timestep = 1;   break;
+      case UT_hour    : minutes_in_timestep = 60;  break;
+      default :
+      {  CORN::Units_clad smart_time_step(time_step_units);
+         CORN::Units_component time_step_component(smart_time_step.get_primary());
+         switch (time_step_component.get_measure_index())
+         {
+            case UM_minutes: minutes_in_timestep = time_step_component.get_submeasure_index(); break;
+            case UM_hours  : minutes_in_timestep = 60.0 * time_step_component.get_submeasure_index(); break;
+         }
+      } break;
+   }
+   return minutes_in_timestep;
+}
+//______________________________________________________________________________
+float64 Weather_base::Time_step_variable_estimator::get_at(nat32 interval) const
+{  return curr_values.get(interval); }
+//______________________________________________________________________________
+void  Weather_base::get_temperature_by_interval
+(Units_code time_step_units,Dynamic_array<float32>&temperature_X_minute)
+{  Time_step_variable_estimator *timestep_estimator = get_temperature_time_step_estimator(time_step_units);
+   timestep_estimator->estimator->get_by_interval(temperature_X_minute);
+}
+//_2004-11-15___________________________________________________________________
+float64 Weather_base::get_est_temperature_at(Units_code time_step_units,uint16 time_index) const
+{  Time_step_variable_estimator *timestep_estimator = get_temperature_time_step_estimator(time_step_units);
+   float64 temperature = timestep_estimator->get_at(time_index);
+   return temperature;
+}
+//_2004-11-15___________________________________________________________________
+float64 Weather_base::get_est_temperature_at_hour(Hour hour) const
+{  return get_est_temperature_at(UT_hour,hour);
+}
+//_2005-008-16__________________________________________________________________
+Weather_base::Time_step_variable_estimator::Time_step_variable_estimator(Units_code _time_step_units,Min_max_to_timestep_estimator *_estimator)
+: Enumeration()
+, estimator(_estimator)                                                          //060501
+, curr_values(_estimator->get_intervals(),24,0.0)                                //060501
+, time_step_units(_time_step_units)
+{}
+//_2004-11-15___________________________________________________________________
+Weather_base::Time_step_variable_estimator::~Time_step_variable_estimator()
+{  delete estimator; }
+//_2004-11-15___________________________________________________________________
+Weather_base::Time_step_variable_estimator
+   *Weather_base::get_temperature_time_step_estimator(Units_code time_step_units) mutation_
+{  Time_step_variable_estimator *time_step_estimator
+   = (Time_step_variable_estimator *)time_step_temperature_estimators.find((uint32)time_step_units);
+   if (!time_step_estimator)
+   {  // There has not be a request for estimation at this time step yet so create one.
+      Temperature_estimator * estimator = new Temperature_estimator(get_minutes_in(time_step_units));
+      #ifdef WEATHER_PROVIDER_VERSION
+      weather_data->get_parameter_on
+         (Tmin_tomorrow,UED::STD_VC_min_temperature.get(),provided_date_tomorrow);     //151126
+      float64 tmin_tomorrow_Celcius = Tmin_tomorrow.Celcius();                   //151126
+      weather_data->get_parameter_on
+         (Tmax_yesterday,UED::STD_VC_max_temperature.get(),provided_date_yesterday);   //151126
+      float64 tmax_yesterday_Celcius = Tmax_yesterday.Celcius();                 //151126
+      #else
+      float64 tmin_tomorrow_Celcius = get_next_min_temperature();                //060511
+      CORN::Date yesterday(today); yesterday.dec_day(1);                         //060511
+      float64 tmax_yesterday_Celcius = get_max_temperature(yesterday);           //060511
+      #endif
+      estimator->reset
+            (curr_max_temperature.Celcius()
+            ,tmax_yesterday_Celcius
+            ,curr_min_temperature.Celcius()
+            ,tmin_tomorrow_Celcius);
+      time_step_estimator = new Time_step_variable_estimator(time_step_units,estimator);
+      time_step_temperature_estimators.append(time_step_estimator);
+   }
+   return time_step_estimator;
+}
+//_2004-11-15___________________________________________________________________
+Weather_base::Time_step_variable_estimator *Weather_base::get_relative_humidity_time_step_estimator(Units_code time_step_units) mutation_
+{  Time_step_variable_estimator *time_step_estimator
+   = (Time_step_variable_estimator *)time_step_relative_humidity_estimators.find((uint32)time_step_units);
+   if (!time_step_estimator)
+   {  // There has not be a request for estimation at this time step yet so create one.
+      Relative_humidity_estimator * estimator = new Relative_humidity_estimator(get_minutes_in(time_step_units));
+      float64 RHmax = curr_max_relative_humidity.in_preset_units();              //150126_081106
+      float64 RHmin = curr_min_relative_humidity.in_preset_units();              //150126_081106
+      estimator->reset
+            (RHmax  // max today
+            ,RHmax  // actually normally we want max_tomorrow
+            ,RHmin   // min today
+            ,RHmin); // actually normally we want min_yesterday
+      time_step_estimator = new Time_step_variable_estimator(time_step_units,estimator);  //060511
+      time_step_relative_humidity_estimators.append(time_step_estimator);
+   }
+   return time_step_estimator;
+}
+//_2004-11-15___________________________________________________________________
+*/
+/*151027 Caller should now instead take reference to Sky
+float64 Weather_base::get_shortwave_net_radiation_today_MJ_m2(float64 _albedo) const
+{  // needs units indicator I think return MJ_m2
+   float64 sol_rad_MJ_m2 = curr_solar_radiation.get_MJ_m2();                     //140715
+   float64 short_wave_net_rad = Xsky.calc_shortwave_net_radiation(_albedo,sol_rad_MJ_m2);
+   return short_wave_net_rad;
+}
+*/
+//_2004-11-08___________________________________________________________________
+/*150626
+float64 Weather_base::get_extraterrestrial_irradiance_today_MJ_m2() const
+{  // currently we derive from Solar_irradinces as M2/m2
+   return get_extraterrestrial_irradiance_today();
+}
+*/
+//_2004-11-09___________________________________________________________________
+//160706 #ifdef WEATHER_PROVIDER_VERSION
+float64 Weather_base::get_curr_max_air_temperature()               const {return curr_max_temperature;}     //LML 140916
+/* //160706
+#else
+float64 Weather_base::get_curr_max_air_temperature()               const { return curr_max_temperature.Celcius(); }   //  C
+float64 Weather_base::get_curr_min_air_temperature()               const { return curr_min_temperature.Celcius(); }   //  C
+//______________________________________________________________________________
+#endif
+*/
+float64 Weather_base::get_air_temperature_min_tomorrow()                   const
+{
+   return Tmin_tomorrow;
+}
+//_2015-12-01___________________________________________________________________
+float64 Weather_base::get_air_temperature_max_yesterday()                  const
+{  return Tmax_yesterday;
+}
+//_2015-12-01___________________________________________________________________
+/*151201 moved to meteorological
+CS::CO2_atmospheric_concentration CO2_not_applicable;                            //150507
+const CS::CO2_atmospheric_concentration &Weather_base::ref_CO2_current_conc()            const //150507
+{  return atmospheric_CO2_change                                                 //090709
+      ? atmospheric_CO2_change->ref_CO2_current_conc()
+      : CO2_not_applicable;  // I am currently returning 0 this should trigger an obvious error
+   // Caller will need to provide an atmospheric_CO2_change model.
+} // ppm
+*/
+//_2003-11-22___________________________________________________________________
+#ifdef WEATHER_GENERATION
+void Weather_base::know_generation_parameters(const ClimGen_Parameters  &_ClimGen_parameters) contribution_
+{  ClimGen_parameters = &_ClimGen_parameters;
+   curr_vapor_pressure_nighttime.know_generation_parameters(_ClimGen_parameters.vapor_pressure_nighttime_parameters);
+   curr_max_vapor_pressure_deficit.know_generation_parameters(_ClimGen_parameters.VPD_parameters);
+   curr_max_relative_humidity.know_generation_parameters(_ClimGen_parameters.relative_humidity_extremes,season_for_dew_point);
+   curr_min_relative_humidity.know_generation_parameters(_ClimGen_parameters.relative_humidity_extremes,season_for_dew_point);
+}
+//_2009-12-14___________________________________________________________________
+#endif
+//______________________________________________________________________________
+CORN::Date32 Weather_base::get_earliest_available_date()                   const //150209
+{  return weather_data->get_earliest_available_date();
+}
+//_2014-02-09___________________________________________________________________
+//#ifdef WEATHER_PROVIDER_VERSION
+// Actually this can be all versions
+bool Weather_base::get_parameter_on
+(modifiable_ CS::Parameter  &property
+,nat32                      variable_code // Typically the variable code will be UED variable code
+,const CORN::Date_const_interface /*170525 Date */         &on_date)                               rectification_
+{
+   return weather_data->get_parameter_on(property,variable_code,on_date);
+}
+//_2015-11-22___________________________________________________________________
+/*151122 conceptual
+bool Weather_base::setup_property_reference
+(Physical::Property_cowl  &property
+,nat32                     variable_code // Typically the variable code will be UED variable code
+,const CORN::Date         &on_date)                               rectification_
+{
+   return weather_data->setup_property_reference(property,variable_code,on_date);
+}
+*/
+//_2015-11-19___________________________________________________________________*
+
+//#endif
+/*decided not to do this
+ const Air_temperature_average *Weather_base::provide_air_temperature_average_on(const CORN::Date &on_date) provision_
+{
+   assert(false);//NYI
+   return 0;
+}
+//_2015-11-19___________________________________________________________________*
+const Air_temperature_maximum *Weather_base::provide_air_temperature_maximum_on(const CORN::Date  &date) provision_
+{
+}
+//_2015-11-19___________________________________________________________________
+const Air_temperature_minimum *Weather_base::provide_air_temperature_minimum_on(const CORN::Date  &date) provision_
+{
+}
+//_2015-11-19___________________________________________________________________
+const Precipitation           *Weather_base::provide_precipitation_on(const CORN::Date  &date) provision_
+{
+   assert(false);//NYI
+   return 0;
+}
+*/
+//_2015-11-19___________________________________________________________________
+
+//060613 1157 lines
+//090707  973 lines
+

@@ -1,0 +1,192 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\CS_suite_4\UED\convert\tabular_format_editor.exe"/>
+    <OBJFILES value="tabular_format_editor.obj ..\..\..\form_column_field.obj 
+      ..\..\..\..\..\..\corn\format\html\form_IO\content.obj 
+      ..\..\..\form_delineation_layout.obj ..\..\..\form_header_field.obj 
+      ..\..\..\form_tabular_format_editor.obj 
+      ..\..\..\..\..\..\GUI\parameter\form_param_file.obj 
+      ..\..\..\..\..\..\GUI\recent\form_recent_file.obj 
+      ..\..\..\..\..\..\GUI\recent\recent.obj ..\..\..\..\ED_tabular_format.obj 
+      ..\..\..\..\..\..\corn\tabular\tabular_format.obj 
+      ..\..\..\..\..\..\corn\tabular\tabular_text.obj 
+      ..\..\..\..\..\..\corn\tabular\tabular_format_identifier.obj 
+      ..\..\..\..\..\..\corn\tabular\tabular_text_parser.obj 
+      ..\..\..\..\..\..\corn\tabular\tabular_parser.obj 
+      ..\..\..\..\ED_tabular_parser.obj 
+      ..\..\..\..\..\..\components\AutoControls\AutoUnitsForm.obj 
+      ..\..\..\..\..\..\GUI\parameter\form_param_file_common.obj 
+      ..\..\..\..\..\..\GUI\translator\translator_windows.obj 
+      ..\..\..\..\..\..\CS_suite\CS_suite_directory.obj 
+      ..\..\..\..\..\..\CS_suite\UED\UED_directory.obj 
+      ..\..\..\..\..\..\corn\tabular\delineation.obj 
+      ..\..\..\..\..\..\components\AutoControls\AutoFileEditBar.obj 
+      ..\..\..\..\..\..\components\AutoControls\AutoMetricUnitsForm.obj"/>
+    <RESFILES value="tabular_format_editor.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) ..\..\..\form_column_field.dfm 
+      ..\..\..\form_delineation_layout.dfm ..\..\..\form_header_field.dfm 
+      ..\..\..\form_tabular_format_editor.dfm 
+      ..\..\..\..\..\..\GUI\parameter\form_param_file.dfm 
+      ..\..\..\..\..\..\GUI\recent\form_recent_file.dfm 
+      ..\..\..\..\..\..\components\AutoControls\AutoUnitsForm.dfm 
+      ..\..\..\..\..\..\components\AutoControls\AutoFileEditBar.dfm 
+      ..\..\..\..\..\..\components\AutoControls\AutoMetricUnitsForm.dfm"/>
+    <LIBFILES value="..\..\..\..\..\..\components\TMS_4.7\source_BCB5\wininet.lib 
+      C:\temp\lib\BCB5\release\CS_directory.lib 
+      C:\temp\lib\BCB5\release\UED_static.lib 
+      C:\temp\lib\BCB5\release\corn_complete_static.lib"/>
+    <LIBRARIES value="K102_R51.lib"/>
+    <SPARELIBS value="Vcl50.lib bcbie50.lib AutoControls.lib VCLX50.lib BCBSMP50.lib 
+      K102_R51.lib tmsc5.lib VCLDB50.lib TEE50.lib VCLSMP50.lib VCLBDE50.lib 
+      tmsxlsc5.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi TeeQR50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi 
+      Inet50.bpi NMFast50.bpi dclocx50.bpi bcb2kaxserver50.bpi Tee50.bpi 
+      tmsc5.bpi VCLSMP50.bpi tmsxlsc5.bpi VCLIB50.bpi TeeUI50.bpi TeeDB50.bpi 
+      AutoControls.bpi"/>
+    <PATHCPP value=".;..\..\..;..\..\..\..\..\..\corn\format\html\form_IO;..\..\..\..\..\..\GUI\parameter;..\..\..\..\..\..\GUI\recent;..\..\..\..;..\..\..\..\..\..\corn\tabular;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\GUI\translator;..\..\..\..\..\..\CS_suite;..\..\..\..\..\..\CS_suite\UED"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="_DEBUG;USE_PCH"/>
+    <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="tabular_format_editor.cpp"/>
+    <INCLUDEPATH value="..\..\..;..\..\..\..\..\..\corn\file_sys;..\..\..\..\..\..\CS_suite\UED;..\..\..\..\..\..\CS_suite;..\..\..\..\..\..\GUI\translator;..\..\..\..\..\..\CropSyst\source;..\..\..\..\..\..\TDF\parser;..\..\..\..\..\..\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\..\..\corn\tabular;..\..\..\..\..\..\Common\GUI\recent;..\..\..\..\..\..\Common\GUI\parameter;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\corn\format\html\form_IO;..\..\..\..;..\..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\..\GUI\recent;..\..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\GUI\components\simulation"/>
+    <LIBPATH value="..\..\..;..\..\..\..\..\..\corn\file_sys;..\..\..\..\..\..\CS_suite\UED;..\..\..\..\..\..\CS_suite;..\..\..\..\..\..\GUI\translator;..\..\..\..\..\..\CropSyst\source;$(BCB)\Projects\Bpl;..\..\..\..\..\..\TDF\parser;..\..\..\..\..\..\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\..\..\corn\tabular;..\..\..\..\..\..\Common\GUI\recent;..\..\..\..\..\..\Common\GUI\parameter;..\..\..\..\..\..\components\AutoControls\combined;..\..\..\..\..\..\components\autocontrols\basic;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..;..\..\..\..\..\..\corn\format\html\form_IO;..\..\..\..;..\..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\..\GUI\recent;..\..\..\..\..\..\GUI\parameter;..\..\..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\GUI\components\simulation"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=C:\temp\obj\ued\BCB5\tabular_format_editor.csm -Hc -Vx -Ve -X- -r- 
+      -a8 -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-$Y+ -$W -$O- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-l&quot;C:\dev\components\AutoControls\&quot; -D&quot;&quot; -aa -Tpe -GD -s -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj $(PACKAGES) sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=21
+Item0=..\..\..;..\..\..\..\..\..\corn\file_sys;..\..\..\..\..\..\CS_suite\UED;..\..\..\..\..\..\CS_suite;..\..\..\..\..\..\GUI\translator;..\..\..\..\..\..\CropSyst\source;..\..\..\..\..\..\TDF\parser;..\..\..\..\..\..\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\..\..\corn\tabular;..\..\..\..\..\..\Common\GUI\recent;..\..\..\..\..\..\Common\GUI\parameter;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..\corn\format\html\form_IO;..\..\..\..;..\..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\..\GUI\recent;..\..\..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..\..\..;..\..\..\..\..\..\components\AutoControls;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\GUI\components\simulation
+Item1=..\..\..\..\corn\file_sys;..\..\..\..\CS_suite\UED;..\..\..\..\CS_suite;..\..\..\..\GUI\translator;..\..\..\..\CropSyst\source;..\;..;..\..\..\..\TDF\parser;..\..\..\..\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\GUI\components\simulation
+Item2=..\;..;..\..\..\..\TDF\parser;..\..\..\..\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\GUI\components\simulation
+Item3=..\;..\..\..\..\TDF\parser;..;C:\dev\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;C:\dev\components\TMS_4.7\source_BCB5;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;C:\dev\components\Other\ShellShock\source_BCB5;..\..\..\..\GUI\components\simulation
+Item4=..\;..\..\..\..\TDF\parser;..;..\..\..\..\components\TMS_4.1\source_BCB5\XlsAdapter;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item5=..\..\..\..\TDF\parser;..\;..\..\..\..\components\TMS_4.1\source_BCB5\XlsAdapter;..;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item6=C:\dev\components\TMS_4.1\source_BCB5\XlsAdapter;..\;..;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;C:\dev\components\TMS_4.1\source_BCB5;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item7=..\..\..\..\components\TMS\xlsadapter;..\;..;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item8=..\;..\..\..\..\corn\tabular;..;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item9=..\..\..\..\corn\tabular;..\;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item10=..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item11=..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;C:\dev\GUI\components\simulation
+Item12=..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\TMS;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source
+Item13=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source
+Item14=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls;C:\dev\components\Other\ShellShock\source
+Item15=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\components\AutoControls
+Item16=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;C:\dev\components\AutoControls
+Item17=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item18=..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item19=..\..\..\..\GUI\parameter;$(BCB)\include;$(BCB)\include\vcl
+Item20=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=19
+Item0=..\..\..;..\..\..\..\..\..\corn\file_sys;..\..\..\..\..\..\CS_suite\UED;..\..\..\..\..\..\CS_suite;..\..\..\..\..\..\GUI\translator;..\..\..\..\..\..\CropSyst\source;$(BCB)\Projects\Bpl;..\..\..\..\..\..\TDF\parser;..\..\..\..\..\..\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\..\..\corn\tabular;..\..\..\..\..\..\Common\GUI\recent;..\..\..\..\..\..\Common\GUI\parameter;..\..\..\..\..\..\components\AutoControls\combined;..\..\..\..\..\..\components\autocontrols\basic;..\..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\..;..\..\..\..\..\..\corn\format\html\form_IO;..\..\..\..;..\..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\..\GUI\recent;..\..\..\..\..\..\GUI\parameter;..\..\..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\..\GUI\components\simulation
+Item1=..\..\..\..\corn\file_sys;..\..\..\..\CS_suite\UED;..\..\..\..\CS_suite;..\..\..\..\GUI\translator;..\..\..\..\CropSyst\source;..\;..;$(BCB)\Projects\Bpl;..\..\..\..\TDF\parser;..\..\..\..\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\GUI\components\simulation
+Item2=..\;$(BCB)\Projects\Bpl;..;..\..\..\..\TDF\parser;..\..\..\..\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\GUI\components\simulation
+Item3=$(BCB)\Projects\Bpl;..\;..\..\..\..\TDF\parser;..;C:\dev\components\TMS_4.7\source_BCB5\XlsAdapter;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;C:\dev\components\TMS_4.7\source_BCB5;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;C:\dev\components\Other\ShellShock\source_BCB5;..\..\..\..\GUI\components\simulation
+Item4=$(BCB)\Projects\Bpl;..\;..\..\..\..\TDF\parser;..;..\..\..\..\components\TMS_4.1\source_BCB5\XlsAdapter;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item5=..\..\..\..\TDF\parser;..\;..\..\..\..\components\TMS_4.1\source_BCB5\XlsAdapter;..;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item6=C:\dev\components\TMS_4.1\source_BCB5\XlsAdapter;..\;..;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;C:\dev\components\TMS_4.1\source_BCB5;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item7=..\..\..\..\components\TMS\xlsadapter;..\;..;..\..\..\..\corn\tabular;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item8=..\;..\..\..\..\corn\tabular;..;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item9=..\..\..\..\corn\tabular;..\;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source;..\..\..\..\GUI\components\simulation
+Item10=..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source;C:\dev\GUI\components\simulation
+Item11=..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source
+Item12=..\..\..\..\Common\GUI\recent;..\..\..\..\Common\GUI\parameter;..\..\..\..\components\AutoControls\combined;..\..\..\..\components\autocontrols\basic;..\..\..\..\components\TMS;..\..\..\..;..\..\..\..\corn\format\html\form_IO;..\..;..\..\..\..\CropSyst\cpp;..\;..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source
+Item13=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source;C:\dev\components\AutoControls
+Item14=..\..\..\..\GUI\recent;..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source
+Item15=..\..\..\..\GUI\parameter;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\..\components\Other\ShellShock\source
+Item16=$(BCB)\lib\obj;$(BCB)\lib;components\Other\ShellShock\source
+Item17=$(BCB)\lib\obj;$(BCB)\lib;C:\dev\components\Other\ShellShock\source
+Item18=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=2
+Item0=c:\program files\borland\cbuilder5\source\vcl;C:\dev\corn\parameters\
+Item1=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=2
+Item0=_DEBUG;USE_PCH
+Item1=_DEBUG
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=C:\CS_suite_4\UED\convert\
+Item1=C:\CS_suite_4\UED\convert
+
+[HistoryLists\hIBPIOutputDir]
+Count=2
+Item0=C:\dev\components\AutoControls\
+Item1=C:\dev\components\AutoControls
+
+[Debugging]
+DebugSourceDirs=c:\program files\borland\cbuilder5\source\vcl;C:\dev\corn\parameters\
+
+[Parameters]
+RunParams=D:\assist\cropsyst\chen\chen.TDF
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

@@ -1,0 +1,62 @@
+#ifndef date_time_64H
+#define date_time_64H
+#include "corn/chronometry/date_time_abstract.h"
+namespace CORN
+{
+//______________________________________________________________________________
+class Date_time_64_cowl
+: public extends_ Date_time_abstract
+{
+ private:
+   datetime64 &datetime_ref;
+ public:
+   inline Date_time_64_cowl(datetime64 &datetime_ref_)
+      : Date_time_abstract()
+      , datetime_ref(datetime_ref_)
+      {}
+ public: // accessors
+   inline virtual Datetime64 get_datetime64()      const { return datetime_ref;}
+   inline virtual Date32     get_date32()  const { return (Date32)datetime_ref;}
+   virtual Datetime64        get_time64()                                 const;
+
+ public: // assignations (date implementations)
+   virtual Datetime64 set_date32(Date32 value)                     assignation_;
+   virtual Datetime64 set_datetime64(datetime64 value)             assignation_;
+   inline virtual datetime64 set(const Temporal /*170530 Date_const_interface*/ &other) assignation_
+      { return datetime_ref = other.get_datetime64(); }
+ public: // assignations (date-time implementations)
+   virtual Datetime64 set_date(const Date_interface &date)         assignation_;
+ public: // modifiers
+ public: // autoincrement
+ public: // math
+ public: // affirmations
+ public: // methods for arbitrary time
+ public: // conversions
+//   const std::string &append_to_string(std::string &target)               const;
+ protected: // utility
+   virtual void split(datetime64 &date_part, datetime64 &time_fract)      const;
+   virtual datetime64 join(datetime64 date_part, datetime64 time_fract);
+   virtual datetime64 inc_time_fract(datetime64 time_fract)       modification_;
+};
+//_2017-04-26________________________________________________Date_time_64_cowl_/
+class Date_time_64_clad
+: public extends_ Date_time_64_cowl
+{
+ protected:
+   datetime64 datetime;
+ public:
+   Date_time_64_clad();
+   Date_time_64_clad(datetime64 value);
+   Date_time_64_clad(Date32 date, nat32 time);
+
+ public:
+   inline virtual datetime64 set(const Temporal /*170530 Date_const_interface*/ &other) assignation_
+      { return datetime = other.get_datetime64(); }
+ private:
+   Date_time_64_clad *check_abstract() { return new Date_time_64_clad(); }
+};
+//_2017-04-26________________________________________________Date_time_64_clad_/
+} // namespace CORN
+// Roger Nelson rnelson@wsu.edu
+
+#endif

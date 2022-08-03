@@ -1,0 +1,39 @@
+Irrigation application #1
+Application conditions #2
+Application conditions only apply to automatic irrigation or periodic specified events #3
+Typically ''Soil water depletion'' mode is used. Leaf water potential mode is intended for fruit orchard/vineyard. #4
+Consideration mode #5
+Soil water depletion #6
+Leaf water potential #7
+Depletion constraints #8
+Maximum allowable depletion #9
+Usually use a value 1 or less. Greater than 1 will evaluate deeper than the roots. #11
+Fraction of current root depth #12
+Depletion observation depth #14
+These options can be set because this event has postponable contigency. #16
+Observation depth mode #17
+at a constant fixed depth #18
+at a fraction of the current root depth #19
+the entire profile #20
+Irrigation will occur when the leaf water potential becomes more negative than this value. #21
+Leaf water potential #22
+Application amount #24
+If this operation is schedule to repeat, the "Irrigate to a specified refill point" (based on soil conditions) may be useful.  If this is a single event, simply use "Irrigate a fixed amount". #25
+Application mode #26
+Irrigate a fixed amount #27
+Irrigate to a specified refill point #28
+Enter 0.0 to supply enough water to refill to plant available water #29
+Total irrigation #30
+This parameter is used to add a little more irrigation to compensate for inefficiency.  (Values > 1.0 are less efficient) #32
+Net irrigation multiplier (1.0 is 100% efficient) #33
+This can be used to fix an upper limit a recharging option is specified (Enter 0.0 if no maximum is applied) #35
+Irrigation system maximum application capacitymm #36
+This can be used to specify the minimum amount of water the irrigation system can deliver (Enter 0.0 if no maximum is applied) #37
+Irrigation system minimum application capability #38
+This is the fraction of plant available water to refill to (0=permanent wilt point, 1=field capacity) #40
+Refill point #41
+Solute concentrations #43
+Enter 0 values for concentration if not applicable. #44
+Salt concentration (Salinity) #45
+Nitrate NO3 nitrogen concentration #47
+Ammonium NH4 nitrogen concentration #49

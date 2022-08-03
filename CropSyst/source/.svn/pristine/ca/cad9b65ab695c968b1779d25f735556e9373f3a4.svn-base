@@ -1,0 +1,75 @@
+#ifndef rotationH
+#define rotationH
+#include "rot_param.h"
+#include "UED/library/database_file.h"
+#define SOW_EVENTS_ARRAY_ALLOC 255
+namespace CS
+{
+   class Weather_database_daily;
+}
+namespace CropSyst
+{
+//______________________________________________________________________________
+class Rotation
+: public extends_ CORN::Item
+{
+   Rotation_parameters parameters;
+   bool cyclable;
+      // we can only have cycles if all sowing events are relative
+   //170310unused bool rotation_cycling_enabled;  // scenario control option
+
+   const CORN::OS::File_name_concrete template_rotation_file_name;
+      // This must be fully qualified at this point because
+      // we use this filename to resolve crop and management filenames.
+ public:
+   Rotation
+      (const CORN::OS::File_name &template_rotation_filename
+      //170310unsued  ,bool rotation_cycling_enabled
+      );
+   nat32 render_planting_events
+      (modifiable_ CORN::Container &event_list
+      ,CORN::Year start_year
+      ,CORN::Year stop_year
+      ,nat8 cycle)                                                        const;
+      // Generates cycle shifted sowing events
+      /// \returns the number of planting_events
+
+   nat32 render_planting_events_adjusted_for_weather_conditions
+      (
+   //160726 decided not to do this       UED::Database_file_indexed &weather_database_file,
+       CS::Weather_database_daily/*_UED*/ &weather // eventually delete this line
+      ,modifiable_ CORN::Container &event_list
+      ,CORN::Year start_year
+      ,CORN::Year stop_year
+      ,nat8 cycle)                                                        const;
+      // adjusts the sowing date
+      // based on temperature condition and precipition conditions.
+      /// \returns the number of events added to the event_list
+   inline nat8 get_cycles()                   const { return parameters.years; }
+      /// \returns the number of cycles in the rotation
+      /// which will match the number of years in the rotation.
+      /// This is only applicable to relative rotations
+      /// Otherwise it returns 0 (indicating all sowing events have actual dates).
+      /// and cycle shifting (and rotator) will not be applicable.
+
+   inline nat16 count_computed_plantings()                                 const
+      { return parameters.count_computed_plantings(); }
+};
+//_2016-07-08_________________________________________________________Rotation_/
+class Rotations
+: public extends_ CORN::Unidirectional_list  // of Rotation unique
+{
+//   CORN::Unidirectional_list rotations; // unique items
+ public:
+   Rotations();
+   const Rotation *provide
+      (const CORN::OS::File_name &rotation_filename
+      ,bool rotation_cycling_enabled);
+      // \returns null if the rotation file does not exists or could not
+      // be loaded or composed.
+};
+//_2016-07-08________________________________________________________Rotations_/
+extern Rotations rotations_global;  // aspect
+} // namespace CropSyst
+#endif
+

@@ -1,0 +1,25 @@
+#ifndef desired_varsH
+#define desired_varsH
+#include "corn/dynamic_array/dynamic_array_T.h"
+#define Dynamic_uint32_array Dynamic_array<nat32>
+#include "UED/library/varcodes.h"
+namespace CropSyst {
+//______________________________________________________________________________
+class Desired_variables
+: public CORN::Dynamic_array<uint32>
+{
+ public:
+   bool desire_everything;                                                       //111221
+ public:
+	inline Desired_variables(bool _desire_everything=false)
+      : CORN::Dynamic_array<uint32>(50,10,0)
+      , desire_everything
+         (_desire_everything)
+      {}
+   bool is_desired(UED_variable_code var_code) const;
+   // returns true if the specified variable is listed as a desired variable.
+};
+//______________________________________________________________________________
+}
+#endif
+

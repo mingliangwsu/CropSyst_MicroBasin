@@ -1,0 +1,287 @@
+#ifndef cmmnoptsH
+#define cmmnoptsH
+
+// I am replacing the WKS output to UED_output
+// This will provide faster runs and smaller output files.
+
+#include "corn/condcomp.h"
+
+// Eventually (in version V) I want to use the label true/false instead of 0/1
+#define CROPSYST_VV_BOOL_FORM CORN::VV_bool_entry::form_true
+#define CROPSYST_MAX_DESCRIPTION_LENGTH  128
+
+// 110808 #define no_cropsyst_namespaces
+// Eventually I want to create a CropSyst name space, I haven't finished yet.
+
+#if (CROPSYST_VERSION == 4)
+#define namespace_CropSyst_begin
+#  define namespace_CropSyst_end
+// already defined in options.h#  define CropSyst_NS
+#  define using_namespace_CropSyst
+#else
+#define namespace_CropSyst_begin namespace CropSyst {
+// namespace CropSyst {
+#  define namespace_CropSyst_end }
+// }
+// already defined in options.h#  define CropSyst_NS CropSyst::
+// CropSyst::
+#  define using_namespace_CropSyst using namespace CropSyst
+// using namespace CropSyst
+
+#endif
+
+#if defined(CROPSYST) || defined(WSHEDMOD)
+#  define T_CS
+#else
+#  define T_CS _COMMENT_
+#endif
+
+#ifdef SOILR
+#  define T_SR
+#else
+#  define T_SR _COMMENT_
+#endif
+
+#  define UEDOUT _COMMENT_
+
+#ifdef XLS_OUTPUT
+#  define XLSOUT
+#  define CSSOUT
+#else
+#  define XLSOUT _COMMENT_
+#endif
+
+#ifndef CSSOUT
+#  define CSSOUT _COMMENT_
+#endif
+
+//140917 #ifdef FINITE_DIFF_OR_CASCADE
+#ifdef SOIL_INFILTRATION
+#  define FINITE_DIFF
+#  define CASCADE
+#endif
+
+#ifdef FINITE_DIFF
+#  define FD
+#else
+// We must have at least the cascade model
+#  define CASCADE
+#  define FD _COMMENT_
+#endif
+
+#  define OLD_RESIDUE_BALANCE
+
+#ifdef NITROGEN
+//141212 #  define SOIL_TEMPERATURE
+#  define CHEM_PROFILE
+#  define NITRO
+#else
+#  define NITRO _COMMENT_
+#endif
+
+#ifdef CO2_CHANGE
+#  define CO2
+#  ifdef CO2_V4
+#     define CO2V4
+#     define CO2V5 _COMMENT_
+#  else
+#     define CO2V4 _COMMENT_
+#     define CO2V5
+#  endif
+#else
+#  define CO2 _COMMENT_
+#  define CO2V4 _COMMENT_
+#  define CO2V5 _COMMENT_
+#endif
+
+#ifdef PESTICIDE
+#  define CHEM_PROFILE
+#  define PEST
+#else
+#  define PEST _COMMENT_
+#endif
+
+#ifdef CHEM_PROFILE
+#  define CHEM
+#else
+#  define CHEM _COMMENT_
+#endif
+
+#ifdef SALINITY
+#  define SALT
+#  define XSALT _COMMENT_
+#else
+#  define SALT _COMMENT_
+#  define XSALT
+#endif
+
+#ifdef SOIL_TEMPERATURE
+#  define SOILTEMP
+#  define XSOILTEMP _COMMENT_
+#else
+#  define SOILTEMP _COMMENT_
+#  define XSOILTEMP
+#endif
+
+#ifdef SOIL_FREEZING
+#  define FREEZE
+#  define XFREEZE _COMMENT_
+#else
+#  define FREEZE _COMMENT_
+#  define XFREEZE
+#  define OLDFRZ _COMMENT_
+#  define NEWFRZ _COMMENT_
+#endif
+
+#ifdef MANAGEMENT
+#  define TILLAGE
+#  define AUTOMATIC_IRRIGATION
+#  define MGMT
+#else
+#  define MGMT _COMMENT_
+#endif
+
+#ifdef WATERTABLE
+#define WATERTAB
+#define XWATERTAB _COMMENT_
+#else
+#define WATERTAB _COMMENT_
+#define XWATERTAB
+#endif
+
+#ifdef CROP_ROTATION
+#define ROT
+#else
+#define ROT _COMMENT_
+#endif
+
+#ifdef TILLAGE
+#  define TILL
+#else
+#  define TILL _COMMENT_
+#endif
+
+#ifdef AUTOMATIC_IRRIGATION
+#  define AUTOIRRG
+#else
+#  define AUTOIRRG _COMMENT_
+#endif
+
+#ifdef RESIDUES
+#define RESID
+#else
+#define Residue_pools void
+#endif
+
+#ifdef RUNOFF
+#   define ROFF
+#else
+#   define ROFF _COMMENT_
+#endif
+
+#ifdef EROSION
+#  define ERSN
+#else
+#  define ERSN _COMMENT_
+#endif
+
+#ifdef WSHEDMOD
+#  define WSHED
+#else
+#  define WSHED _COMMENT_
+#endif
+
+/* 090316
+I am pretty sure this is obsolete, replaced by orchard model
+#ifdef CROP_ROWS
+#  define CROPROWS
+#else
+#  define CROPROWS _COMMENT_
+#endif
+ */
+
+#ifdef LADSS_MODE
+#define LADSS
+#else
+#define LADSS _COMMENT_
+#endif
+
+#ifdef FRUIT_CROP_MODEL
+// Fruit crop model require hourly thermal time
+#  define HOURLY_THERMAL_TIME
+#  define OPTFRUIT
+#else
+#  define OPTFRUIT _COMMENT_
+#endif
+
+#ifdef HOURLY_THERMAL_TIME
+// In CropSyst we already have hourly temperature in the weather class
+#define Weather_for_crop Weather
+#  define HOURTT
+#else
+#define Weather_for_crop Weather_interface
+#  define HOURTT _COMMENT_
+#endif
+
+#ifdef unix
+// We don't need detail file in LADSS
+#  undef DETAIL_FILE
+#endif
+#ifdef DETAIL_FILE
+#  define DETAIL
+#else
+#  define DETAIL _COMMENT_
+#endif
+
+// Version control
+#if (CROPSYST_VERSION == 3)
+#  define V3
+#  define V234
+#  define V34
+#  define V2 _COMMENT_
+#  define XV3 _COMMENT_
+#  define XV2
+#endif
+
+#if (CROPSYST_VERSON == 4)
+#  define V4
+#  define V234
+// version 2 or 3 or 4
+#  define V34
+// version 2 or 3
+#  define XV4 _COMMENT_
+#  define V23 _COMMENT_
+#  define V2  _COMMENT_
+#else
+#  define V4 _COMMENT_
+#  define XV4
+#endif
+#if (CROPSYST_VERSION==5)
+#  define V5
+#else
+#  define V5 _COMMENT_
+#endif
+
+#  define NEWREC
+#  define OLDREC _COMMENT_
+#  ifdef dBase_recorder
+#     define DBASEREC
+#  else
+#     define DBASEREC _COMMENT_
+#  endif
+#     define UEDREC
+#     define XUEDREC _COMMENT_
+#  ifdef Paradox_recorder
+#     define PARADOXREC
+#  else
+#     define PARADOXREC _COMMENT_
+#  endif
+#  ifdef Oracle_recorder
+#     define ORACLEREC
+#  else
+#     define ORACLEREC _COMMENT_
+#  endif
+
+#endif
+// cmmnopts.h
+

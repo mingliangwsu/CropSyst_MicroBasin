@@ -1,0 +1,33 @@
+//---------------------------------------------------------------------------
+
+#ifndef Excel_workbook_formH
+#define Excel_workbook_formH
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include "AdvGridWorkbook.hpp"
+#include "AdvGrid.hpp"
+//#include "AdvGridExcel.hpp"
+#include "BaseGrid.hpp"
+#include <Grids.hpp>
+#include "AdvObj.hpp"
+#include "tmsAdvGridExcel.hpp"
+//---------------------------------------------------------------------------
+class TForm1 : public TForm
+{
+__published: // IDE-managed Components
+   TAdvGridWorkbook *excel_IO_grid_WB;
+   TAdvGridExcelIO *AdvGridExcelIO1;
+   TButton *continue_button;
+   TAdvStringGrid *AdvStringGrid1;
+   void __fastcall continue_buttonClick(TObject *Sender);
+private: // User declarations
+public: // User declarations
+   __fastcall TForm1(TComponent* Owner);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TForm1 *Form1;
+//---------------------------------------------------------------------------
+#endif

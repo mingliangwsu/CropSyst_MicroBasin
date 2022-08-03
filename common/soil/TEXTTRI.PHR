@@ -1,0 +1,33 @@
+L_Soil_texture_triangle,
+/* texttri PARAMS
+en Soil texture triangle
+fr Triangle des textures sols
+it Grafico della tessitura dei suoli
+es Triangulo de las texturas del suelo
+ca Triangle de les textures del sòl
+*/
+L_sand,
+/* texttri PARAMS CS VALIDATE
+en sand
+fr sable
+it sabbia
+es arena
+ca Sorra
+*/
+L_clay,
+/* texttri PARAMS CS VALIDATE
+en clay
+fr argile
+it argilla
+es_ch barro
+es arcilla
+ca argila
+*/
+L_silt,
+/* texttri PARAMS CS VALIDATE
+en silt
+fr limon
+it limo
+es limo
+ca Llim
+*/

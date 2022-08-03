@@ -1,0 +1,112 @@
+#error This class has been replaced by Land_unit_meteorological remove from the project. 151128
+#include "CS_land_unit_meteorological.h"
+#include "corn/OS/file_system_engine.h"
+#include "common/weather/weather.h"
+#include "common/weather/atmospheric_CO2_change_recalibration.h"
+#include "corn/OS/directory_entry_name.h"
+//______________________________________________________________________________
+namespace CS
+{
+//______________________________________________________________________________
+Land_unit::Land_unit
+(sint32 _ID
+,const Geocoordinate &geocoordinate_)
+: geocoordinate(geocoordinate_)
+, sun(0)                                                                         //150921
+, weather(0)
+, storms(0)                                                                      //120916
+, ID(_ID)
+, ID_string()                                                                    //150919
+{  CORN::append_int32_to_string(ID,ID_string);                                   //150919
+}
+//______________________________________________________________________________
+bool Land_unit::set_weather                                                      //010207
+(Weather*                     _weather                                           //041104
+,meteorology::Storms*             _storms)                                           //140214
+{  weather  = _weather;
+   storms   = _storms;
+   sun = _weather;                                                               //150921
+   return true;
+}
+//______________________________________________________________________________
+bool Land_unit::setup_CO2
+(const CORN::OS::File_name &recalibration_filename
+, const CORN::Date &start_date
+, const CORN::Date &stop_date
+, const CORN::Date &today)                                                       //150315
+{  bool result = true;
+   if (weather)
+   {  // By default, we setup the linear parameters                              //090707
+      // In version 5 CO2 data may be stored in UED file                         //090707
+      if (CORN::OS::file_system_engine.exists(recalibration_filename))           //130121
+      { // There may be CO2 data in the recalibration file.                      //090707
+         bool CO2_recalibration_encountered = false;                             //090707
+         Atmospheric_CO2_change_recalibration *CO2_change_with_recalibration     //090707
+            = new Atmospheric_CO2_change_recalibration
+               (recalibration_filename.c_str()                                   //121126
+               ,start_date
+               ,stop_date
+               ,today                                                            //150315
+               ,365.0 //active_model_options->initial_CO2_conc
+               ,CO2_recalibration_encountered);
+         if (CO2_recalibration_encountered)                                      //090707
+            weather->take_atmospheric_CO2_change
+                  (CO2_change_with_recalibration);
+                  // This will replace any default linear CO2 change
+         else delete CO2_change_with_recalibration;
+#ifdef REACCH_VERSION
+//after loading the CO2 values, I need to clear the re
+recalibration_filename.set_cstr("");
+#endif
+      }
+   } else result = false;
+   return result;
+}
+//_2012-01-25___________________________________________________________________
+float64 Land_unit::get_snow_pack_thickness()                               const
+{  return weather->get_snow_pack_thickness();
+}
+//_2014-12-08___________________________________________________________________
+const Air_temperature_average &Land_unit::ref_air_temperature_avg()        const
+{  return weather->ref_air_temperature_avg();
+}
+//_2014-12-08___________________________________________________________________
+const Wind_speed &Land_unit::ref_wind_speed()                              const
+{  return weather->ref_wind_speed();
+}
+//_2015-04-27___________________________________________________________________
+const Sun &Land_unit::ref_sun()                                            const
+{  return *sun;
+}
+//_2015-09-21___________________________________________________________________
+/*151116
+const Geolocation *Land_unit::Xprovide_geolocation()                   provision_
+{  // By default get the location from weather, but
+   // Derived classes will generally discover a location file is available.
+   if (!geolocation && weather)
+   {
+      geolocation = weather->get_geolocation_constant();
+   }
+   return geolocation;
+}
+*/
+//_2015-11-15___________________________________________________________________
+
+
+/* NYI render variable recorders
+
+// Weather
+#define CSVP_weather_precipitation
+#define CSVP_weather_snow_storage
+#define CSVP_weather_temperature
+#define CSVP_weather_solar_radiation                        
+
+
+// ET
+#define CSVP_weather_ET_pot                                          0x20001
+#define CSVP_weather_ET_act                                          0x20002
+#define CSVP_weather_ET_ref                                          0x20003
+*/
+} // namespace CS
+//______________________________________________________________________________
+

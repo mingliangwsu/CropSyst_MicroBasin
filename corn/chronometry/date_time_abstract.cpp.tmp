@@ -1,0 +1,460 @@
+#include "corn/chronometry/date_time_abstract.h"
+#include "corn/chronometry/date_32.h"
+#include "corn/chronometry/time_second.h"
+#include "corn/math/compare.hpp"
+#include <assert.h>
+#include <math.h>
+namespace CORN
+{
+//______________________________________________________________________________
+
+// accessors
+
+//_2017-4-29____________________________________________________________________/
+/*170430 probably handled OK by Date abstract but don't delete until verified
+Year Date_time_abstract::get_year()                                        const
+  // extracts the year from the Date date
+{  Date new_date((int32)value);
+   return new_date.get_year();
+}
+*/
+//______________________________________________________________________________
+/*170430 probably handled OK by Date abstract but don't delete until verified
+DOY Date_time_abstract::get_DOY()                                          const
+   // extracts the day of year from the Date date
+{  Date new_date((int32)value);
+   return new_date.get_DOY();
+}
+*/
+//______________________________________________________________________________
+/*170430 probably handled OK by Date abstract but don't delete until verified
+Month Date_time_abstract::get_month()                                      const
+{  Date new_date((int32)value);
+   return new_date.get_month();
+}
+*/
+//______________________________________________________________________________
+/*170430 probably handled OK by Date abstract but don't delete until verified
+DOM       Date_time_abstract::get_DOM() const
+{  Date new_date((int32)value);
+   return new_date.get_DOM();
+}
+*/
+//______________________________________________________________________________
+/*170430 probably handled OK by Date_abstract but don't delete until verified
+void  Date_time_abstract::gregorian(Year &year, Month &month, DOM &dom) const
+{  Date new_date((int32)value);
+   new_date.gregorian(year,month,dom);
+}
+  // extracts the year month and day of month from the Date date
+*/
+//______________________________________________________________________________
+Hour Date_time_abstract::get_hour() const
+{  datetime64 time = get_time64();
+   float64 hour = round(time / (1.0/24.0));                                      //170621LML
+   return (Hour)hour;
+}
+//______________________________________________________________________________
+Minute Date_time_abstract::get_minute() const
+{  datetime64 time = get_time64();
+   float64 minute = time / (1.0/1440.0);
+   return (Minute)minute;
+}
+//______________________________________________________________________________
+Second   Date_time_abstract::get_second() const
+{  datetime64 time = get_time64();
+   float64 second = time / (1.0/86400.0);
+   return (Second)second;
+}
+//______________________________________________________________________________
+Centisecond  Date_time_abstract::get_centisecond()                         const
+{  datetime64 time = get_time64();
+   float64 second = time / (1.0/8640000.0);
+   return (Second)second;
+}
+//______________________________________________________________________________
+Millisecond  Date_time_abstract::get_millisecond()                         const
+{  datetime64 time = get_time64();
+   float64 second = time / (1.0/86400000.0);
+   return (Second)second;
+}
+//______________________________________________________________________________
+Hours     Date_time_abstract::get_hours_after_midnight()   const  { return (Hours)(get_time64()*24.0); }
+Minutes   Date_time_abstract::get_minutes_after_midnight() const  { return (Minutes)(get_time64()*1440.0); }
+Seconds   Date_time_abstract::get_seconds_after_midnight() const  { return (Seconds)(get_time64()*86400.0); }
+//______________________________________________________________________________
+
+
+
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//______________________________________________________________________________
+
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+
+// assignations
+datetime64 Date_time_abstract::set_now()
+{
+   Date_abstract::set_now();
+   Time_abstract::set_now();
+   return get_datetime64();
+
+/*170429
+Date_abstract and Time_abstract should be able to hand these
+Dont delete this original until I have tested
+#if defined(__MSDOS__) || defined(_WIN64) || defined(_WIN32)
+   #if (!defined(_MSC_VER) && !defined(__MINGW32__))
+      struct date date_struct;
+      getdate(&date_struct);
+      set_YMD((Year)date_struct.da_year,(CORN::Month)date_struct.da_mon,(CORN::DOM)date_struct.da_day);
+      struct time time_struct;
+      gettime(&time_struct);
+      return set_HMSc((Hour)time_struct.ti_hour,(Minute)time_struct.ti_min,(Second)time_struct.ti_sec,(Centisecond)time_struct.ti_hund);
+   #endif
+#endif
+#if ((_MSC_VER > 0) && (_MSC_VER < 1700))
+   // NOTE it may be earier versions that dropped CTime
+    CTime theTime;                                                               //040908
+    theTime = CTime::GetCurrentTime();                                           //040908
+    set_YMD((Year)theTime.GetYear(),(Month)theTime.GetMonth(),(DOM)theTime.GetDay());
+    return set_HMS((Hour)theTime.GetHour(),(Minute)theTime.GetMinute(),(Second)theTime.GetSecond());
+#else
+    time_t     now = time(0);
+    struct tm  tstruct;
+    tstruct = *localtime(&now);
+      // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+      // for more information about date/time format
+      //strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+      set_YMD((Year)(tstruct.tm_year + 1900),(Month)(tstruct.tm_mon),(DOM)(tstruct.tm_mday));
+      return set_HMS((Hour)(tstruct.tm_hour),(Minute)(tstruct.tm_min),(Second)(tstruct.tm_sec));
+#endif
+#ifdef __unix
+     tm *time_struct;
+     time_t timer;
+     time(&timer);
+     time_struct = localtime(&timer);
+     //localtime_r(&timer,&time_struct);
+     set_YD(                                                                     //030713
+          1900+time_struct->tm_year //according to the docs this is years since 1900 so I hope it is 2000 complient. 990824
+         ,time_struct->tm_yday);
+      return set_HMS((Hour)time_struct->tm_hour,(Minute)time_struct->tm_min,(Second)time_struct->tm_sec);
+#endif
+*/
+}
+//______________________________________________________________________________
+datetime64 Date_time_abstract::set_year(Year year)                   assignation_
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);
+   new_date.set_year(year);
+   return join(new_date.get_datetime64(),time);
+}
+//_2003-07-17_________________________________________________________set_year_/
+datetime64 Date_time_abstract::set_DOY(DOY doy)                      assignation_
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);
+   new_date.set_DOY(doy);
+   return join(new_date.get_datetime64(),time);
+}
+//_2003-07-13__________________________________________________________set_DOY_/
+datetime64 Date_time_abstract::set_YMD
+(Year year,Month month,DOM dom)                                     assignation_
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);
+   new_date.Date_abstract::set_YMD(year,month,dom);
+   return join(new_date.get_datetime64(),time);
+}
+//_2003-07-13__________________________________________________________set_YMD_/
+datetime64 Date_time_abstract::set_YD(Year year,DOY doy)             assignation_
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);
+   new_date.set_YD(year,doy);
+   return join(new_date.get_datetime64(),time);
+}
+//_2003-07-13___________________________________________________________set_YD_/
+datetime64 Date_time_abstract::set_month(Month month)                assignation_
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);
+   new_date.set_month(month);
+   return join(new_date.get_datetime64(),time);
+}
+//_2005-04-06________________________________________________________set_month_/
+datetime64 Date_time_abstract::set_DOM(DOM dom)                      assignation_
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);
+   new_date.set_DOM(dom);
+   return join(new_date.get_datetime64(),time);
+}
+//_2005-04-06__________________________________________________________set_DOM_/
+datetime64 Date_time_abstract::set_date(const Date_interface &date) assignation_
+{
+   datetime64 old_date;
+   datetime64 time;
+   split(old_date,time);
+   return join(date.get_datetime64(),time);
+}
+//_2017-05-23____________________________________________________________________/
+datetime64 Date_time_abstract::set_DT
+(const Date_interface &date, const Time_interface &time)            assignation_
+{  return join(date.get_datetime64(),time.get_datetime64());
+}
+//_2003-07-17___________________________________________________________set_DT_/
+datetime64 Date_time_abstract::set_time(const Time_interface &time) assignation_
+{  return set_S(time.get_seconds());
+}
+//_2003-07-17_________________________________________________________set_time_/
+datetime64 Date_time_abstract::set_time64(datetime64 new_time)      assignation_
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   return join(date,new_time);
+}
+//__________________________________________________________________set_time64_/
+datetime64 Date_time_abstract::set_S(Seconds seconds)
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   float64 new_time = (float64)seconds/86400.0;
+   return join(date,new_time);
+}
+//_______________________________________________________________________set_S_/
+datetime64 Date_time_abstract::set_HHMMSS(int32 HHMMSS)
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Hour hour = (Hour )(HHMMSS/10000);
+   int32 MMSS = HHMMSS%10000;
+   Minute minute = (Minute)(MMSS / 100);
+   Second second = (Second)(MMSS%100);
+   Time_second_clad new_time;
+   new_time.set_HMS(hour,minute,second);
+   return join(date,new_time.get_datetime64());
+}
+//______________________________________________________________________________
+datetime64 Date_time_abstract::set_HMS(Hour hour, Minute minute, Second second)
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   float64 seconds = second + minute*60 + hour*3600;                             //131010
+   float64 seconds_after_midnight = seconds *1000;
+   time =  seconds_after_midnight / 86400.0;                             //131010
+   return join(date,time);
+}
+//______________________________________________________________________________
+datetime64 Date_time_abstract::set_HMSm(Hour hour, Minute minute, Second second,Millisecond millisecond)
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   float64 seconds = second + minute*60 + hour*3600;                             //131010
+   float64 milliseconds_after_midnight = seconds *1000 + millisecond;            //131010
+   time =  milliseconds_after_midnight / 86400000.0;                             //131010
+   return join(date,time);
+}
+//______________________________________________________________________________
+datetime64 Date_time_abstract::set_HMSc(Hour hour, Minute minute, Second second,Centisecond centisecond)
+{  datetime64 date;
+   datetime64 time;
+   split(date,time);
+   float64 seconds = second + minute*60 + hour*3600;                             //131010
+   float64 centiseconds_after_midnight = seconds *100 + centisecond;             //131010
+   time = centiseconds_after_midnight / 8640000.0;                               //131010
+   return join(date,time);
+}
+//_2017-06-04_2003-07-14_________________________________________________________
+// modifiers
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+
+// autoincrement
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+datetime64  Date_time_abstract::inc_years(int16 years)
+{ // Adds offset years to the date.
+  // If years is negative,  years are subtracted
+   datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);                                           //051218
+   new_date.inc_years(years);
+   return join(new_date.get_datetime64(),time);
+}
+//_1997-09-09________________________________________________________inc_years_/
+
+//_2017-4-29____________________________________________________________________/
+/*170430 obsolete interface already implements as inc_years(-years);
+datetime64  Date_time_abstract::dec_years(int16 years)
+{ // Subtracts offset years to the date.
+  // If years is negative,  years are added
+   datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);                                           //040909
+   new_date.dec_year(years);
+   return join(new_date.get_datetime64(),time);
+}
+//_1997-09-09___________________ ____________________________________dec_years_/
+*/
+//_2017-4-29____________________________________________________________________/
+datetime64   Date_time_abstract::inc_months(int16 months)
+{ // Adds months to the date.
+  //   If months is negative,  months are subtracted
+   datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);                                           //040909
+   new_date.inc_months(months);
+   return join(new_date.get_datetime64(),time);
+}
+//_1997-09-09_______________________________________________________inc_months_/
+
+/*170430 obsolete interface already implements as inc_months(-years);
+datetime64   Date_time_abstract::dec_months(int16 months)
+{ // Subtracts months from the date.
+  //   If months is negative,  months are added
+   datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);                                                   //040909
+   new_date.dec_month(months);
+   return join(new_date.get_datetime64(),time);
+}
+//_1997-09-09_______________________________________________________dec_months_/
+*/
+datetime64 Date_time_abstract::inc_days(int32 days)
+{  // Adds days to the date incrementing the year if necessary.
+   //   If offset is negative, offset days are subtracted
+   datetime64 date = 0;
+   datetime64 time = 0;
+   split(date,time);
+   Date_32_clad new_date((int32)date);
+   new_date.inc_days(days);
+   return join(new_date.get_datetime64(),time);
+}
+//____________________________________________________________________inc_days_/
+datetime64 Date_time_abstract::dec_days(int32 days)
+{  // Subtracts days from the date decrementing the year if necessary.
+   //   If offset is negative, offset days are added
+   datetime64 date;
+   datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((int32)date);                                                   //040909
+   new_date.dec_days(days);
+   return join(new_date.get_datetime64(),time);
+}
+//____________________________________________________________________dec_days_/
+datetime64 Date_time_abstract::inc_hours(Hours hours)
+{  datetime64 time_fract = (float64)hours/(24.0);                                //170502
+   return inc_time_fract(time_fract);
+}
+//_2003-07-14________________________________________________________inc_hours_/
+datetime64 Date_time_abstract::inc_minutes(Minutes minutes)
+{  datetime64 time_fract = (float64)minutes/(1440.0);
+   return inc_time_fract(time_fract);
+}
+//_2003-07-14______________________________________________________inc_minutes_/
+datetime64 Date_time_abstract::inc_seconds(Seconds seconds)
+{  datetime64 time_fract = (float64)seconds/(86400.0);
+   return inc_time_fract(time_fract);
+}
+//_2003-07-14______________________________________________________inc_seconds_/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+
+// math
+//_2017-4-29____________________________________________________________________/
+
+//_2017-4-29____________________________________________________________________/
+
+// affirmations
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+
+// methods for arbitrary time
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+
+// conversions
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+//_2017-4-29____________________________________________________________________/
+const std::string &Date_time_abstract::append_to_string(std::string &target) const
+{
+   Date_abstract::append_to_string(target);
+   target += " "; // need to check if ISO format separates with space
+   Time_abstract::append_to_string(target);
+   /*170430 Dont delete until I verify this is working correctly.
+      This was the original, but I don't think it is necessary to split now
+   Datetime64 date;
+   Datetime64 time;
+   split(date,time);
+   Date_32_clad new_date((long)date);
+   new_date.format->copy_format(*Date_abstract::format);                //141120
+   new_date.append_to_string(target);
+   if (!is_approximately<Datetime64>(time,0.0,0.000000001))
+   {
+      Time_second_clad new_time(time);
+      new_time.format.copy_format(time_format);                         //141120
+      target.append(" ");
+      new_time.append_to_string(target);
+   }
+   */
+   return target;
+}
+//_2014-11-20_2014-06-15______________________________________append_to_string_/
+/*170430 This was in the original but Date_abstract should handle this OK
+DOY Date_time_abstract::days_in_this_year()
+{  return Date(get_date32()).days_in_this_year();
+}
+*/
+//_1999-02-14___________________________________________________________________
+/*170430 This was in the original but Date_abstract should handle this OK
+nat32 Date_time_abstract::days_between(const Date_time &date2,bool inclusive) const
+{  Date from_date(get_date32());
+   Date to_date(date2.get_date32());
+   return from_date.days_between(to_date,inclusive);
+}
+*/
+//______________________________________________________________________________
+datetime64 Date_time_abstract::set_c_str(const char *date_time_str)
+{
+      //need to implement  expect the string to be in the current format
+
+   // Not yet tested
+
+   Date_abstract::set_c_str(date_time_str);
+   nat32 time_separator_pos = 0;
+
+   // NYI Need to find the time separator date_time_str
+   // actually set_c_str should return the position of the last character
+   // parsed
+
+
+   Time_abstract::set_c_str(date_time_str+(time_separator_pos+1));
+      // WARNING  need to check to make sure that any date part is handled OK
+
+   return get_datetime64();;
+}
+//_2003-07-13___________________________________________________________________
+} // namespace CORN

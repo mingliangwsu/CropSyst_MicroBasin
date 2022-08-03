@@ -1,0 +1,161 @@
+#include "canopy_cover_curve.h"
+#include <math.h>
+#ifndef compareHPP
+#  include "corn/math/compare.hpp"
+#endif
+#ifndef moremathH
+#  include "corn/math/moremath.h"
+   // using namespace std;
+#endif
+
+/*
+acquiescence
+adolescence
+insenescence
+maturescence
+obsolescence
+quiescence
+virescent (becomming green)
+
+viridescence (green)
+virilescence
+apicalescence
+culimanescence
+*/
+
+namespace CropSyst
+{
+//______________________________________________________________________________
+bool Canopy_cover_curve::parameterize
+(float64 _CO2_adj_maximum_cover
+,float64 initial_cover)
+{
+/* for debug
+initial_cover = 0.58;
+fract_season_to_reach_half_max_cover = 0.0001;
+*/
+   CO2_adj_maximum_cover = _CO2_adj_maximum_cover;                               //141123
+
+   //141125 mature_green_cover = _mature_green_cover;
+//150120obsolete   full_senescence_green_cover = _full_senescence_green_cover;                   //141125
+   if (CO2_adj_maximum_cover <= 0.000001) return true;                           //130821
+   if (initial_cover < 0.0000001) initial_cover = 0.00001;                       //130610
+
+      //101030 In CropSyst this is available as an input parameter
+      // We may want to implement this in the CropSyst canopycover submodel.
+   { // DetermineCanopyGrowthParameters
+      float64 new_asym_CC = CO2_adj_maximum_cover;                               //______//      New_Asym_CC = Maximum_Canopy_Cover
+         do                                                                      //______//      Do
+         {  asym_CC = new_asym_CC;                                               //______//         Asym_CC = New_Asym_CC
+            shape_factor = -log(1.0 / (asym_CC / initial_cover - 1.0))           //110628//         Shape_Factor = -Log(1 / (Asym_CC / Initial_Canopy_Cover - 1)) / Season_Fraction_For_Half_Maximum_Canopy_Cover
+                 / fract_season_to_reach_half_max_cover;
+            b_Coefficient = 1.0                                                  //______//         b_Coefficient = 1 / Exp(-Shape_Factor * Season_Fraction_For_Half_Maximum_Canopy_Cover)
+               / exp(-shape_factor * fract_season_to_reach_half_max_cover);
+            new_asym_CC = -(initial_cover                                        //110628//         New_Asym_CC = -(Initial_Canopy_Cover - (1 + b_Coefficient) * Maximum_Canopy_Cover) / b_Coefficient
+               - (1.0 + b_Coefficient) * CO2_adj_maximum_cover) / b_Coefficient;
+         } while (fabs(new_asym_CC - asym_CC) > 0.0001);                         //______//      Loop Until Abs(New_Asym_CC - Asym_CC) < 0.0001
+         actual_CC_max = asym_CC / (1.0 + b_Coefficient * exp(-shape_factor));   //______//      Actual_CC_Max = Asym_CC / (1 + b_Coefficient * Exp(-Shape_Factor))
+   }
+/*141124
+   {  // determine senescence parameters
+      float64 check;                                                             //______//      Dim Check As Single
+      float64 new_C_low =  mature_green_cover;                                   //110628//      New_C_low = Canopy_Cover_At_Maturity
+      do                                                                         //______// Do
+      {  C_low = new_C_low;                                                      //______//        C_low = New_C_low
+         asym_CC_senescence = -(C_low - actual_CC_max * (1.0 + b_Coefficient)) / b_Coefficient;//  Senescence_Asym_CC = -(C_low - Actual_CC_Max * (1 + b_Coefficient)) / b_Coefficient
+         new_C_low = asym_CC_senescence-(1.0+b_Coefficient*exp(-shape_factor))   //______//        New_C_low = Senescence_Asym_CC - (1 + b_Coefficient * Exp(-Shape_Factor)) * (Senescence_Asym_CC - Canopy_Cover_At_Maturity)
+             * (asym_CC_senescence - mature_green_cover);                        //110628//
+
+//         new_C_low = CORN::must_be_between<float64>(new_C_low,0.00000001,1.0);
+
+         check = fabs(new_C_low - C_low);                                        //______//        Check = Abs(New_C_low - C_low)
+      } while (check > 0.0001);                                                  //______//      Loop Until Check < 0.0001
+   }
+*/
+   return true;
+}
+//_2013-06-11_____________________________________________________parameterize_/
+bool Canopy_cover_curve::start_senescence()
+{
+   in_senescence = true;
+   {  // determine senescence parameters
+      float64 check;
+      float64 new_C_low = 0.0;
+      do                                                                         //______// Do
+      {  C_low = new_C_low;                                                      //______//        C_low = New_C_low
+         asym_CC_senescence = -(C_low - CC_at_max_canopy * (1.0 + b_Coefficient)) / b_Coefficient;//  Senescence_Asym_CC = -(C_low - Actual_CC_Max * (1 + b_Coefficient)) / b_Coefficient
+         new_C_low = asym_CC_senescence-(1.0+b_Coefficient*exp(-shape_factor))   //______//        New_C_low = Senescence_Asym_CC - (1 + b_Coefficient * Exp(-Shape_Factor)) * (Senescence_Asym_CC - Canopy_Cover_At_Maturity)
+             * (asym_CC_senescence - 0.0);                                       //110628
+
+//         new_C_low = CORN::must_be_between<float64>(new_C_low,0.00000001,1.0);
+
+         check = fabs(new_C_low - C_low);                                        //______//        Check = Abs(New_C_low - C_low)
+      } while (check > 0.0001);                                                  //______//      Loop Until Check < 0.0001
+   }
+   return true;
+}
+//_2014-11-24___________________________________________________________________
+float64 Canopy_cover_curve::calculate(float64 _cumulative_thermal_time)    const
+{  cumulative_thermal_time = _cumulative_thermal_time;                           //130703
+   return
+      (cumulative_thermal_time >= thermal_time_start_season)
+      ?  ( cumulative_thermal_time <= thermal_time_end_vegetative_growth)
+         ?  calc_during_cresence()                                               //141123
+         :  in_senescence
+            ? calc_during_senescence()
+            : calc_during_culminescence()
+      : 0.0;
+}
+//_2013-06-11________________________________________________________calculate_/
+float64 Canopy_cover_curve::calc_during_cresence()                         const //141123
+{  float64 relative_thermal_time                                                 // Relative_Thermal_Time =
+         = (cumulative_thermal_time - thermal_time_start_season)                 //    (Cumulative_Thermal_Time - Thermal_Time_To_Start_Growing_Season)
+            / (thermal_time_end_vegetative_growth - thermal_time_start_season);  //    / (Thermal_Time_To_End_Canopy_Growth - Thermal_Time_To_Start_Growing_Season)
+   float64 calculated_cover = asym_CC / (1.0 + b_Coefficient * exp(-shape_factor * relative_thermal_time));//        CalculateCover = Asym_CC / (1.0 + b_Coefficient * exp(-Shape_Factor * Relative_Thermal_Time))
+   return calculated_cover;
+}
+//_2013-06-11____________________________________calc_during_vegetative_growth_/
+float64 Canopy_cover_curve::calc_during_culminescence()                    const
+{  return CC_at_max_canopy;                                                      //141125   // CalculateCover = Actual_CC_Max
+}
+//_2013-06-11___________________________________________calc_during_quiescence_/
+float64 Canopy_cover_curve::calc_during_senescence()                       const
+{  float64 calculated_cover = 0.0;
+   float64 relative_thermal_time =                                               // Relative_Thermal_Time =
+        (cumulative_thermal_time - thermal_time_beginning_senescence)            //      (Cumulative_Thermal_Time - Thermal_Time_Beginning_Senescence)
+      / (thermal_time_full_senescence   - thermal_time_beginning_senescence);           //       / (Thermal_Time_Maturity - Thermal_Time_Beginning_Senescence)
+   calculated_cover = asym_CC_senescence - (asym_CC_senescence - C_low)          // CalculateCover = Senescence_Asym_CC - (Senescence_Asym_CC - C_low)
+      / (1.0 + b_Coefficient * exp(-shape_factor * relative_thermal_time));      //    / (1 + b_Coefficient * Exp(-Shape_Factor * Relative_Thermal_Time))
+   float64 canopy_cover_at_full_senescence = 0.0 ;
+   calculated_cover =CORN::must_be_greater_or_equal_to<float64>                  // If CalculateCover < Canopy_Cover_At_Maturity Then
+      (calculated_cover,canopy_cover_at_full_senescence);                        //    CalculateCover = Canopy_Cover_At_Maturity
+   return calculated_cover;
+}
+//______________________________________________________calc_during_senescence_/
+Canopy_cover_curve::   Canopy_cover_curve
+(float64 _thermal_time_end_vegetative_growth
+,float64 _thermal_time_beginning_senescence
+,float64 _thermal_time_full_senescence
+,float64 _thermal_time_maturity
+,float64 _thermal_time_start_season
+,float64 _fract_season_to_reach_half_max_cover)
+:cumulative_thermal_time               (0)
+,thermal_time_end_vegetative_growth    (_thermal_time_end_vegetative_growth)
+,thermal_time_beginning_senescence     (_thermal_time_beginning_senescence)
+,thermal_time_full_senescence          (_thermal_time_full_senescence)           //141125
+,thermal_time_maturityX                (_thermal_time_maturity)
+,thermal_time_start_season             (_thermal_time_start_season)
+,fract_season_to_reach_half_max_cover  (_fract_season_to_reach_half_max_cover)
+, CO2_adj_maximum_cover (0.0)                                                    //141125
+, b_Coefficient         (0.0)                                                    //141125
+, asym_CC               (0.0)                                                    //141125
+, asym_CC_senescence    (0.0)                                                    //141124
+, shape_factor          (0.0)                                                    //141125
+, C_low                 (0.0)                                                    //141124
+, actual_CC_max         (0.0)                                                    //141125
+, CC_at_max_canopy      (0.0)                                                    //141125
+, in_senescence         (false)                                                  //141124
+{}
+//______________________________________________________________________________
+} // namespace CropSyst
+

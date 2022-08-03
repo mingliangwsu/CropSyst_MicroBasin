@@ -1,0 +1,242 @@
+#ifndef file_systemH
+#define file_systemH
+#include "corn/const.h"
+#include "corn/OS/directory_entry_name.h"
+#include "corn/container/association.h"
+#include "corn/datetime/datetime64.h"
+
+namespace CORN {
+namespace OS {
+class Directory_entry_name;
+#define FILE_SYSTEM_RECURSION_SUBDIRECTORY   CORN::OS::File_system::subdirectory_recursion_inclusive
+#define FILE_SYSTEM_RECURSION_SUPERDIRECTORY CORN::OS::File_system::superdirectory_recursion_inclusive
+//#define FILE_SYSTEM_RECURSION_INCLUSIVE
+#define FILE_SYSTEM_RECURSION_EXCLUSIVE      CORN::OS::File_system::none_recursion_exclusive
+//______________________________________________________________________________
+class File_system  // interface
+{public:
+   enum Recursion
+      { none_recursion_inclusive             = 0
+      , subdirectory_recursion_inclusive     = 1
+      , superdirectory_recursion_inclusive   = 2
+      , both_recursion_inclusive             = 3
+      , none_recursion_exclusive             = 4
+      , subdirectory_recursion_exclusive     = 5
+      , superdirectory_recursion_exclusive   = 6
+      , both_recursion_exclusive             = 7
+      };
+      // Note these values are bitmasks.
+      // In Linux superdirectory_recursion stops in home (inclusive). (may have bits for home inclusive, move exclusive, and follow up to root
+      // When resursing superdirectory recursion only goes up in superdirectories.
+      // Exclusive means the start directory file entries are not listed
+      // and only once into the recursion are the entries includes.
+
+   class File_type_description : public Association
+   {public:
+      virtual const std::string &get_extension()                           const=0;
+         // Without the dot
+      virtual const std::string &get_filter_label()                        const=0;
+      virtual const std::string &compose_file_type_pattern_for_Windows
+         (std::string &pattern)                                            const = 0;
+   };
+   //_______________________________________________________________
+   class Directory_entry     // interface
+   : public extends_interface_ Item  // so it can be listed.
+   {public:
+      typedef Directory_entry_type Type;
+      /* moved to file_system_types
+      enum Type
+      {
+         // Note: This enumeration is not arbitrary, it matches the   090624_
+         // high order nyble of the st_mode word16 of the
+         // directory entry 'stat' (POSIX complient)
+       unknown_entry             = 0x0  // a comment in the sys/stat.h file seems to indicate that the st_mode 0 could represent a file, but the S_ISREG macro only test for value 8
+      ,FIFO_special_entry        = 0x1
+      ,character_special_entry   = 0x2
+      ,block_special_entry       = 0x3
+      ,directory_entry           = 0x4
+      // 4,5,6,7 are undefined (perhaps the correspond to junctions, symbolic links, and/or hard links)
+      ,file_entry                = 0x8};
+      */
+      //____________________________________________________________
+   public: // 'structors
+   // Directory_entry( const Directory_name *name,bool take_name );
+//      virtual ~Directory_entry() {}
+   public:
+      virtual bool exists()                                                const = 0;
+      //conceptual
+      virtual const Directory_entry_name &ref_designation()                const = 0;
+    public:
+      virtual const Directory_entry_name &set_wstr
+         (const wchar_t *to_copy_from)                              modification_=0;
+      virtual const Directory_entry_name &set_cstr
+         (const char *to_copy_from)                                 modification_=0;
+   };
+   //_____________________________________________Directory_entry__/
+   class Directory   // Interface
+   : public extends_interface_ Directory_entry
+   #ifdef DIRECTORY_ENTRY_IS_A_NAME
+   , public extends_interface_ CORN::OS::Directory_entry_name /* unqualified */
+   #endif
+   {
+   public: // 'structors
+//      Directory
+//         (const Directory_name *directory_name
+//         ,bool take_directory_name      );
+//      virtual ~Directory() {};
+   public:  // Note the following functions are actually functions of the operating system's file system, not functions of directory name.
+      virtual bool create()                                                const = 0;
+      virtual nat32  list_entry_names_deprecated
+         (Container *file_name_list
+         ,Container *directory_name_list
+         ,Recursion recursion // ,bool recursive                                 //150908
+         ,Directory_entry_name::Qualification qualification                      //150908
+         ,const wchar_t *entry_name_wild_card = 0
+         ,const wchar_t *extension_filter = 0
+         ,const CORN::Text_list *exclude_directories = 0)                  const = 0; //130103
+         ///< Creates  Directory_names and File_names for all directories and optionally recursively all subdirectories
+         ///< and appends them to file_name and directory_name_list.
+         ///< extension_filter can be used to limit the list to certain extensions  (without dot)
+      inline virtual nat32  list_directory_names_deprecated
+         (Container &directory_name_list
+         ,Recursion recursion // ,bool recursive                                 //150908
+         ,Directory_entry_name::Qualification qualification                      //150908
+         ,const wchar_t *entry_name_wild_card = 0
+         ,const wchar_t *extension_filter = 0)                             const
+            { return list_entry_names_deprecated
+               (0,&directory_name_list
+               ,recursion,qualification                                          //150908
+               //150908 ,recursive
+               ,entry_name_wild_card,extension_filter);}
+         ///< Creates a Directory_name for all directories and optionally recursively all subdirectories
+         ///< and appends them to directory_name_list.
+         ///< extension_filter can be used to limit the list to certain extensions  (without dot)
+      inline virtual nat32  list_file_names_deprecated
+         (Container &file_name_list
+         ,Recursion recursion // ,bool recursive                                 //150908
+         ,Directory_entry_name::Qualification qualification                      //150908
+         ,const wchar_t *entry_name_wild_card = 0
+         ,const wchar_t *extension_filter = 0)                             const
+            { return list_entry_names_deprecated
+               (&file_name_list,0
+               ,recursion,qualification                                          //150908
+               //150908 ,recursive
+               ,entry_name_wild_card,extension_filter);}
+         ///< Creates a file_name for all files and optionally recursively all file in subdirectories
+         ///< and appends them to directory_name_list.
+         ///< The search can be limited to specified extension (currently no wildcard)
+         ///< extension_filter can be used to limit the list to certain extensions  (without dot)
+      inline virtual bool is_directory()                            affirmation_ { return true;} // 130518
+      inline virtual bool is_suite()                                 affirmation_{ return false;}  //091109
+   public: // The following methods work with the desktop environment
+      virtual bool browse   //080929
+         (bool open_new_window         = true   ///< Opens a new window otherwise opens and brings to front an existing window that is already open to the directory. //091215_
+         ,bool show_directory_tree_view= true   ///< Show directory tree view panel as well as the file list view panel  //091215_
+         ,bool show_as_apparent_root   = false  ///< This directory will appear as root (so you can't navigate to parent directories).  //091215_
+         ,bool select                  = false  ///< Selects/Highlights this directory in the file list view.
+         )                                                                 const = 0;
+         ///< Derived classes should override this.
+         ///< In windows, for example, this will launch Windows Explorer
+   public:
+         /** In the following methods, the rendered file or directory name
+             (if found) is reliquished to to the caller.
+            \return null if not such directory entry exists.
+         **/
+      virtual CORN::OS::File_name *find_file_name
+         (const std::wstring  &target_filename
+         ,File_system::Recursion recursion                                       //150908
+         ,Directory_entry_name::Qualification qualification                      //150908
+         )                       rendition_ = 0;
+         ///< The target_filename may be a wildcard pattern.
+         ///< There could be multiple files that match the target filename,
+         ///< we simply return the first in the list.
+      virtual CORN::OS::Directory_name *find_directory_name                      //100107
+         (const std::wstring  &target_directory_name
+         ,File_system::Recursion recursion                                       //150908
+         ,Directory_entry_name::Qualification qualification                      //150908
+         )                 rendition_ = 0;
+         ///< The rendered directory name (if found) is reliquished to to the caller.
+         ///< \return null if no such directory
+
+      /* In the following find_xxx_in_path methods
+         The search extends up the to the parent directory.
+         If recurse is true the search extends up the parent's parent directory.
+         If inclusive is true, the this directory is searched
+         (??but not subdirectories??)
+      */
+      virtual CORN::OS::File_name *find_file_name_in_path                        //110202
+         (const std::wstring   &target_file_name_unqualified,bool recurse_up_the_path,bool inclusive)  rendition_ = 0;
+      virtual CORN::OS::Directory_name *find_directory_name_in_path              //110202
+         (const std::wstring   &target_dir_name_unqualified,bool recurse_up_the_path,bool inclusive)   rendition_ = 0;
+      virtual void reset()                                             provision_=0;
+         ///< Clears provided directory and file names.
+      #ifdef NYI
+      virtual const Directory_entry *provide_resolved_directory_entry
+         (const Directory_entry_name &relative_directory_entry_name)   provision_=0;
+         /**<
+         \return
+         **/
+      #endif
+
+    public:
+#ifdef NYI
+      Directory *find_directory(const std::string &unqualified_dir_name,bool recursive) const = 0;   //081211
+         ///< NYI unqualified_file_name_to_find may contain wild card characters.
+         ///< creates and returns the fully qualified filename if it is found.
+         ///< The ownership of the filename is reliquished to the caller.
+      bool create()                                           performs_IO_const_;
+         ///< Create the directory.
+         ///< (although technically could be a const, it does I/O, so don't use const.)
+         ///< All parent directories in the path will also be created if they don't already exist.
+         ///< Returns true if the directory was newly created or already exists.
+         ///< false if it could not be created
+      bool set_as_current_working_directory()                 performs_IO_const_;
+         ///< Returns true if successful.
+         ///< (although technically could be a const, it does I/O, so don't use const.)
+      virtual int invoke_viewer()                                          const;//011104
+         ///< This launches a folder browser opens the folder as a root in a new window with double pane mode
+         ///< In windows this is Windows explorer
+         ///< Under X-Windows this is the respective browser.
+         ///< See also directory_entry::browse();
+   private:
+#endif
+   };
+   //___________________________________________________Directory__/
+   class File
+   : public extends_interface_ Directory_entry
+   {
+   public: // 'structors
+//      File();
+//      inline virtual ~File() {};
+   public:
+   private:
+   };
+   //______________________________________________________ File __/
+public:
+   virtual const File_system::Directory *provide_directory                       //120207
+      (const CORN::OS::Directory_name &directory_name)                 provision_= 0;
+/*120207
+   directory names now are neither kept or known by directory entries
+*/
+};
+//______________________________________________________________ File_system __/
+//extern File_system &file_system;
+
+File_system &file_system();
+// The file_system() function is not implemented in the library.
+// This method must be implemented by the calling program or derived classes.
+// The calling program must include a library that implements a File_system
+// (or implement one itself).
+// Then implement this function which will return a reference to an
+// instance of the file_system.
+
+/* If you don't need a specialized file system, add the following lines
+to your main() source file.
+namespace CORN { namespace OS {
+File_system &file_system() { return CORN::OS::file_system_logical; }
+}}
+*/
+
+
+} } // namespace CORN OS
+#endif

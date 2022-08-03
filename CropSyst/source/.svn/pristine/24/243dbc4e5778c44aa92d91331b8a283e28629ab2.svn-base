@@ -1,0 +1,536 @@
+﻿#include "options.h"
+#include <math.h>
+#ifndef moremathH
+#  include "corn/math/moremath.h"
+   using namespace std;
+#endif
+#  ifndef compareHPP
+#     include "corn/math/compare.hpp"
+#  endif
+#include "soil/infiltration_cascade_hourly.h"
+#include "soil/surface_infiltration_green_ampt.h"
+#include "soil/dynamic_water_entering.h"
+#include "soil/chemicals_profile.h"
+#include "physics/standard_constants.h"                                         //LML 150219
+#include "mgmt_types.h"
+
+//#define FIDEL_150527
+
+//______________________________________________________________________________
+Soil_infiltration_cascade_hourly::Soil_infiltration_cascade_hourly
+(const Soil_layers_interface     &_soil_layers                                   //140424
+,const Soil_texture_interface    &_soil_texture                                  //140424
+,const Soil_hydraulic_properties_interface &_soil_hydraulic_properties           //140423
+,Soil_hydrology_interface &_hydrology                                            //060512
+//160804#ifdef OLD_EVAPORATE
+//160804//160720 ,modifiable_ Physical::Water_depth           &evaporation_potential_remaining_   //160413
+//160804,modifiable_ CORN::Dynamic_array<float64> &evaporation_potential_remaining_      //160720
+//160804#endif
+,CropSyst::Soil_runoff  *_runoff                                                 //131101_130308
+,CropSyst::Pond         &_pond                                                   //130308
+)                                                                                //131001
+: Soil_infiltration_cascade_common
+   (_soil_layers
+   ,_soil_hydraulic_properties                                                   //140423
+   ,_hydrology
+//160804   #ifdef OLD_EVAPORATE
+//160804   ,evaporation_potential_remaining_                                             //160413
+//160804   #endif
+   ,_runoff
+   ,_pond
+   )                                                                             //130308_070116
+, soil_texture(_soil_texture)
+, number_layers                  (0)                                             //070123
+, Minimum_Saturated_Hydraulic_Conductivity(0.0)                                  //130328
+, surface_infiltration_Green_Ampt(0)
+{  clear_layer_array64(hours_to_field_capacity);                                 //080610
+}
+//______________________________________________________________________________
+bool Soil_infiltration_cascade_hourly::initialize()                modification_
+{  bool inited = Soil_infiltration_cascade_common::initialize();
+   if (runoff &&  runoff->using_numerical_runoff_model())
+      surface_infiltration_Green_Ampt = new Soil_surface_infiltration_Green_Ampt
+         (soil_hydraulic_properties
+         ,hydrology                                                             //140820
+         ,runoff,pond);
+   for (nat8 layer = 1;layer <= soil_layers.get_number_layers(); layer++)
+   {  float64 percent_clay = soil_texture.get_clay_percent(layer);
+      hours_to_field_capacity[layer]=calc_hours_to_field_capacity(percent_clay);//120716
+   }
+   return inited;                                                                //131217
+}
+//_2008-06-09______________________________________________________initialize__/
+bool Soil_infiltration_cascade_hourly::infiltrate
+(float64                       water_entering_soil_not_irrigation_not_used_by_this_model
+,float64                       management_irrigation_daily
+,float64                       management_auto_irrigation_concentration_unused /* this parameter used only by F.D. model */
+,Dynamic_water_entering_soil *non_runoff_water_entering_in_intervals_mm          //990204
+,Dynamic_water_entering_soil *irrigation_water_entering_in_intervals_mm // optional (may be 0) //070119
+,const Dynamic_array<float32> &runon_in_intervals_unused   /* used only by F.D. model */ //990409
+,Dynamic_array<float32>       &runoff_in_intervals                               //130127 now used
+)
+{  // Cascade never gives additional runoff.
+   Soil_infiltration_cascade_common::infiltrate                                  //070118
+      (water_entering_soil_not_irrigation_not_used_by_this_model
+      ,management_irrigation_daily
+      ,management_auto_irrigation_concentration_unused
+      ,non_runoff_water_entering_in_intervals_mm
+      ,irrigation_water_entering_in_intervals_mm
+      ,runon_in_intervals_unused
+      ,runoff_in_intervals);
+   // Read water entering soil data
+   // In C++ version version hours are 0 indexed whereas V.B. Hour = 1
+   float64 precip_and_irrigation_hourly_mm[24]; // setup in the next statement
+   for (Hour hour = 0; hour < 24; hour++)
+   {  float64 precip_hourly = non_runoff_water_entering_in_intervals_mm ? non_runoff_water_entering_in_intervals_mm->get(hour)  : 0; //140226
+      float64 irrig_hourly  = irrigation_water_entering_in_intervals_mm ? irrigation_water_entering_in_intervals_mm->get(hour) : 0;
+      precip_and_irrigation_hourly_mm[hour] = precip_hourly + irrig_hourly;
+   }
+   soil_layer_array64(old_water_content); clear_layer_array64(old_water_content);// used for chemical transport   // 070827 rename to old_liquid_water_content 070116
+   number_layers = soil_layers.get_number_layers();
+   for (Hour hour = 0; (hour < 24); hour++)                                               // Hour = 1
+   {
+      clear_layer_array64(water_flow); // m/hr                                   //130614
+      // Retrieve hourly irrigation                                              // Do
+      for (Layer layer = 1; layer <= number_layers; layer++)
+      { old_water_content[layer] = hydrology.get_liquid_water_content_volumetric(layer);
+        if (CORN::is_approximately<float64>(old_water_content[layer],0.0,0.000001))
+        old_water_content[layer] = 0.0000001;  //To avoid div by zero  // may occur if freezing
+      }  // old_water_content is needed for chemical transport
+      float64 precip_and_irrigation_hourly_m                            // Hourly_Irrigation = Hourly_Irrigation_Amount(Hour)
+         = mm_to_m(precip_and_irrigation_hourly_mm[hour]);              // Hourly_Irrigation = Hourly_Irrigation / 1000 'Convert mm to m
+      float64 runon_interval = runon_in_intervals_unused.get((nat32)hour);       //130308
+      float64 pond_depth_m = pond.relinquish_depth();                            //130308
+      float64 upflow_m = 0; // meter                                             //130308
+      process_hour /*was process_hourly_infiltration*/                           //140423
+         (hour                                                                   //130325
+         ,precip_and_irrigation_hourly_m+runon_interval+pond_depth_m,upflow_m);  //130127
+      float64 not_ponded_runoff = pond.set_depth_with_runoff(upflow_m);          //160413RLN
+      if (runoff && runoff->using_numerical_runoff_model()                       //130430
+          && not_ponded_runoff > 0.0)                                            //160413RLN
+      {  runoff->add_runoff_from_infiltration(not_ponded_runoff/*160413 upflow_m*/); //160413_130308
+         runoff_in_intervals.set(hour,not_ponded_runoff/*160413 upflow_m*/);     //160413_130308_130127
+      }
+      // Now  communicate results to other submodels.
+      hydrology.record_water_content_for_hour(hour);                             //070814
+      //RLN Not used in C++V       Profile_Water_Depth = Profile_Water_Depth + Drainage_Flow_mm
+      if (chemicals)                                                             //070119
+      {  soil_layer_array64(liquid_water_content);                               //080127
+         hydrology.get_liquid_water_content_layers_volumetric(liquid_water_content);//080127
+         chemicals->                                                             //070119
+         chemical_transport_and_exchange
+         (CASCADE_HOURLY_INFILTRATION
+         ,number_layers
+         ,number_layers // this parameter is dummy it is used only for F.D.      //080219
+         ,3600*hour  // start time                                               //71015
+         ,3600 /* 1 hour duration*/                                              //71015
+         ,old_water_content         // 070813  Warning (I dont know if this should be only liquid water content or total water content - was liquid only)
+         ,liquid_water_content   //070813_990311  Warning ( should this be only liquid water content or total water content - was liquid only)
+         ,precip_and_irrigation_hourly_m
+         ,water_flow                                                             //080208
+         ,0.0 // no deferment in cascade model                                   //071016
+         ,override_leaching_depth                                                //981230
+         ,soil_layers.get_layer_at_depth( leaching_depth)                        //981230
+         );
+      }                                                                //080127     Hour = Hour + 1
+   } // for each hour.                                                 // Loop Until Hour > Number_Of_Simulation_Hours
+   infiltration =  balance_drainage;                                             //070116
+   if (!  override_leaching_depth)                                               //990106
+            reported_drainage =  balance_drainage;                               //990106
+   return  true;                                                                 //080122_070116
+}
+//____________________________________________________________________infiltrate
+void Soil_infiltration_cascade_hourly::process_hour                              //140423 // Sub Infiltrate
+(Hour hour                                                                       //130325
+,float64 water_input_hourly /* pass by value only local copy updated */
+,float64 &surface_out_flow)                                                      //130127
+{  // Infiltrate precipitation and irrigation (saturate top layers)
+   // Note that the caller should check that water_input_hourly > 0
+   // If this is not the case, this function need not be called;
+   // (it is not erroneous, but this function has no effect when there is no input water flow.)
+   soil_layer_array64(water_content_liquid);
+   clear_layer_array64(water_content_liquid);
+   float64 water_potential_after_drainage = 0;                                   //130127
+   float64 saturated_cascade_flow_out = 0.0;
+
+  /* Hours_To_Field_Capacity is setup in constructor. */
+   #ifdef MICROBASIN_VERSION
+   balance_drainage = 0.0;          //LML 141204
+   //150623 done by caller clear_layer_array64(water_flow);                      //150617LML
+   #endif
+
+   const Seconds time_step = 3600;
+   // Note that this implies this could probably be made time generic.
+   float64 flow_in = water_input_hourly;                                         //130128
+   number_layers = soil_layers.get_number_layers();
+   nat8 start_layer = 1;
+   bool wetted_area_irrigation = soil_wetting && (soil_wetting->surface_evaporation_area_fraction < 1.0); //130313
+   if (wetted_area_irrigation)                                                   //130313
+   {
+      float64 FC =  get_field_capacity_ice_corrected(1);
+      water_content_liquid[1] =  hydrology.get_liquid_water_content_volumetric(1);
+      float64 water_content_old = water_content_liquid[1];
+      float64 thickness_1 =
+         #if (CROPSYST_VERSION==4)
+         CORN_clean_precision(soil_layers.get_thickness_m(1),DEF_CLEAN_PRECISION);
+         #else
+         soil_layers.get_thickness_m(1);
+         #endif
+      float64 depth_to_FC = (FC - water_content_liquid[1]) *  thickness_1;
+      if (flow_in > depth_to_FC)
+      {
+         water_content_liquid[1] = FC;
+         flow_in -= depth_to_FC;
+      } else
+      {
+         water_content_liquid[1] +=  flow_in / thickness_1;
+         flow_in  = 0;
+      }
+      water_flow[1] = flow_in;
+      start_layer =  2;                                                          //130313
+
+         float64 WC_new_layer = water_content_liquid[1];                         //130128
+         float64 change_WC =  WC_new_layer - water_content_old;
+         hydrology.change_liquid_water_content_by_volumetric(1,change_WC);
+   }
+   for (nat8  layer = start_layer                                                ///130313
+       ; layer <= number_layers
+       ; layer++)
+   {  water_content_liquid[layer] = hydrology.get_liquid_water_content_volumetric(layer);
+   }                                                                             //Next Layer
+   // Needed to calculate hourly water balance
+/* not used in C++ version
+   float64 profile_init = 0.0;
+   for (nat8 layer = start_layer; (layer <= number_layers) ; layer++)
+      profile_init += water_content_liquid[layer] * soil_layers.get_thickness_m(layer) * water_density;
+*/
+
+   // WARNING  I am not sure  Minimum_Saturated_Hydraulic_Conductivity
+   // is set to a value when not in Runoff  (stays at default 0.0?)
+   float64 Water_Depth_To_Infiltrate = water_input_hourly;
+   if (surface_infiltration_Green_Ampt)
+   {
+      Water_Depth_To_Infiltrate =
+          surface_infiltration_Green_Ampt //140501 Green_Ampt_infiltration_for_numerical_runoff
+            ->update
+            (hour, water_input_hourly, water_content_liquid[1]
+            ,Minimum_Saturated_Hydraulic_Conductivity
+            ,surface_out_flow
+            ,number_layers);                                                     //140819
+   }
+   water_flow[0] = Water_Depth_To_Infiltrate;
+   if (Water_Depth_To_Infiltrate > 0)
+   {  // Cascade water available to infiltrate first, leaving layers at saturation. Redistribution is applied later below.
+      saturated_cascade_flow_out = 0.0;
+      for (nat8 layer = 1; layer <= number_layers; layer++)
+      {
+         bool last_layer = layer == number_layers;                               //140820
+         float64 WC_sat_ice_adjusted
+            = soil_hydraulic_properties.get_saturation_water_content_volumetric(layer,hydrology.get_ice_content_volumetric(layer));
+         float64 thickness_layer =
+            #if (CROPSYST_VERSION==4)
+            CORN_clean_precision(soil_layers.get_thickness_m(layer),DEF_CLEAN_PRECISION);
+            #else
+            soil_layers.get_thickness_m(layer);
+            #endif
+         /*150922 Claudio moved this again
+         //150611 LML COS-FMS and reinstated in Oct 10 2014
+         float64 Sat_Cond_Limited_Flow_In = soil_hydraulic_properties.get_sat_hydraul_cond_m_hr(layer); //'Convert kg*s/m3 to m/h
+         if (Water_Depth_To_Infiltrate > Sat_Cond_Limited_Flow_In)
+         {
+            // float64 Excess_Flow_In = Water_Depth_To_Infiltrate - Sat_Cond_Limited_Flow_In;
+            Water_Depth_To_Infiltrate = Sat_Cond_Limited_Flow_In;
+            water_flow[layer-1] = Water_Depth_To_Infiltrate;                     //COS-FMS May 26 , 2015 ' Recalculate the water flow from layer above; FMS May 27, 2015 changed to module variable SoilStateRef.WaterFlow(Layer)  by Water_Flow
+            // surface_out_flow += distribute_excess_flow_upwards(layer, Excess_Flow_In,water_content_liquid);
+         }
+         */
+
+         //151013LML reenabled the following block in responding to Claudio's comment
+         // This section limits flow down if insufficient saturated hydraulic conductivity
+         float64 Sat_Cond_Limited_Flow_In = soil_hydraulic_properties.get_sat_hydraul_cond_m_hr(layer); //'Convert kg*s/m3 to m/h
+         if (Water_Depth_To_Infiltrate > Sat_Cond_Limited_Flow_In)
+         {
+            float64 Excess_Flow_In = Water_Depth_To_Infiltrate - Sat_Cond_Limited_Flow_In;
+            Water_Depth_To_Infiltrate = Sat_Cond_Limited_Flow_In;
+            water_flow[layer-1] = Water_Depth_To_Infiltrate;                     //COS-FMS May 26 , 2015 ' Recalculate the water flow from layer above; FMS May 27, 2015 changed to module variable SoilStateRef.WaterFlow(Layer)  by Water_Flow
+            surface_out_flow += distribute_excess_flow_upwards(layer, Excess_Flow_In,water_content_liquid);
+         }
+         //140120 not further used else Excess_Flow_In = 0
+
+         float64 Available_Storage_To_Saturation
+            = (WC_sat_ice_adjusted - water_content_liquid[layer]) * thickness_layer;
+         float64 depth_layer = soil_layers.get_depth_m(layer);
+         if (Water_Depth_To_Infiltrate > Available_Storage_To_Saturation)
+         {
+            water_content_liquid[layer] = WC_sat_ice_adjusted;                                 //130709
+            Water_Depth_To_Infiltrate -=  Available_Storage_To_Saturation;       //130709
+            water_flow[layer] = Water_Depth_To_Infiltrate; // m/h                //130709
+            if (surface_infiltration_Green_Ampt)                                 //140820
+                surface_infiltration_Green_Ampt->update_wetting_front_when_water_depth_to_infiltrate_exceeds_available_storage_to_saturation
+                (layer, depth_layer, last_layer);
+            if (last_layer && (Water_Depth_To_Infiltrate > 0))                   //140419
+            {
+                saturated_cascade_flow_out = Water_Depth_To_Infiltrate;          //140419
+                // Drainage obtained during saturation cascading
+                water_flow[number_layers] = saturated_cascade_flow_out;          //150922COS
+                Water_Depth_To_Infiltrate = 0.0;
+            }
+         } else
+         {
+            if (surface_infiltration_Green_Ampt)                                 //140820
+            {
+               float64 depth_prev_layer = layer == 1 ? 0.0 : soil_layers.get_depth_m(layer-1);
+               float64 Wetting_Front_Depth = depth_prev_layer + thickness_layer * Water_Depth_To_Infiltrate / Available_Storage_To_Saturation;
+               surface_infiltration_Green_Ampt->update_wetting_front(layer,Wetting_Front_Depth);
+            }
+            water_content_liquid[layer] += Water_Depth_To_Infiltrate / thickness_layer; //140814COS This was moved from above
+            Water_Depth_To_Infiltrate = 0.0;
+            water_flow[layer] = Water_Depth_To_Infiltrate;// 'm/h
+            layer = number_layers;
+         } // if  Water_Depth_To_Infiltrate > Available_Storage_To_Saturation
+      } // for layer                                                                                                                                                                                      //     Next Layer
+   } else
+      if (surface_infiltration_Green_Ampt) surface_infiltration_Green_Ampt->clear_wetting_front();
+      //now using clear_wetting_front Wetting_Front_Depth = 0; // 'ín m. Set to zero when water entering the soil is zero (no rainfall or irrigation)
+   float64 flow_out = 0.0;
+   float64 flow_out_sum = 0.0;
+   nat8 first_drainable_layer = 0;
+   bool redistribution = false;
+   if (water_input_hourly > 0.0)                                                 //080702
+   {  first_drainable_layer = start_layer;                                       //130311
+      redistribution = true;                                                     //120716
+   } else  /* Although there is no infiltration, there could be drainage:*/      //080702
+   {  for (nat8 layer =start_layer                                               //130311
+          ; (layer <= number_layers)  && (first_drainable_layer == 0)
+          ; layer++)                                                             //120716
+      {  float64 WC_layer_curr = hydrology.get_liquid_water_content_volumetric(layer); //080702
+         float64 field_capacity_layer = get_field_capacity_ice_corrected(layer); //130128 restored 080702
+         if (WC_layer_curr> field_capacity_layer + 0.000000100001)               //150926_080702
+         {  first_drainable_layer = layer;                                       //080702
+            redistribution = true;                                               //120716
+                                                                                 //120716
+         }                                                                       //120716
+      }                                                                          //120716
+   }                                                                             //120716
+   if (redistribution)                                                           //120716
+   {
+      flow_in = 0;                                                               //130325
+         //'Flow in top layer = 0 because water is already cascaded. Now we are only distributing
+      for (nat8 layer = first_drainable_layer                                       //080702 090417
+           ; layer <= number_layers
+           ; layer++)
+      {  // This redistribution function was completely rewritten Jan 2013
+         float64 thickness_layer =
+            #if (CROPSYST_VERSION==4)
+            CORN_clean_precision(soil_layers.get_thickness_m(layer),DEF_CLEAN_PRECISION);
+            #else
+            soil_layers.get_thickness_m(layer);
+            #endif
+         float64 WC_sat_ice_adjusted
+            = soil_hydraulic_properties.get_saturation_water_content_volumetric(layer,hydrology.get_ice_content_volumetric(layer)); //140822
+         float64 FC_layer =  soil_hydraulic_properties.get_field_capacity_volumetric(layer);
+         float64 b_value_layer =  soil_hydraulic_properties.get_Campbell_b(layer,false); //140124
+         float64 m_layer = 2.0 * b_value_layer + 3.0;   // This could be moved to hydraulic properties (Not sure what this is)
+         float64 one_minus_m_layer = 1.0 - m_layer;
+         float64 m_minus_one_layer = m_layer - 1.0;
+         float64 hours_to_field_capacity_layer = hours_to_field_capacity[layer];
+         float64 apparent_K_sat_layer = thickness_layer * water_density
+            * pow(WC_sat_ice_adjusted , m_layer)
+            * (pow(FC_layer , one_minus_m_layer)
+               - pow(WC_sat_ice_adjusted , one_minus_m_layer))
+            / (standard_gravity * hours_to_field_capacity_layer
+               * 3600.0 * m_minus_one_layer);
+         apparent_K_sat_layer = CORN::must_be_greater_or_equal_to
+            (apparent_K_sat_layer,0.000000001);                                  //140120
+         float64 one_hour_water_content_change_at_saturation
+            = WC_sat_ice_adjusted
+             - pow((pow(WC_sat_ice_adjusted  ,one_minus_m_layer)
+                   +  (standard_gravity * apparent_K_sat_layer * m_minus_one_layer * time_step)
+                    / (thickness_layer * water_density * pow(WC_sat_ice_adjusted , m_layer)))
+                  , (1.0 / one_minus_m_layer));
+         float64 excess_flow_in = 0.0;   // meters?
+         {  float64 flow_in_max = ((WC_sat_ice_adjusted - water_content_liquid[layer]) + one_hour_water_content_change_at_saturation) * thickness_layer;
+            float64 Sat_Cond_Limited_Flow_In = //m/hr                            //140116
+               soil_hydraulic_properties.get_sat_hydraul_cond_m_hr(layer);
+            flow_in_max =std::min<float64>(flow_in_max,Sat_Cond_Limited_Flow_In);//140116
+
+
+
+            /*DEBUG！！！
+            if (layer == number_layers) {
+                std::clog<<"flow_in_max:"<<flow_in_max
+                         <<"\tSat_Cond_Limited_Flow_In:"<<Sat_Cond_Limited_Flow_In
+                         <<"\tflow_in_max:"<<flow_in_max
+                         <<"\tflow_in:"<<flow_in
+                         <<std::endl;
+            }*/
+
+
+
+
+
+            if (flow_in > flow_in_max)
+            {
+               excess_flow_in = flow_in - flow_in_max;
+               flow_in = flow_in_max;                                            //140116
+               water_flow[layer-1] -= excess_flow_in;                            //150922COS
+               surface_out_flow += distribute_excess_flow_upwards(layer, excess_flow_in,water_content_liquid); //140116
+            }
+            /*150922COS
+            if (layer > 1)                                                       //150921RLN
+               water_flow[layer-1] += flow_in;                                   //150616LML
+            */
+         }
+         float64 WC_temp_layer = std::min<float64>(water_content_liquid[layer] + flow_in / thickness_layer, WC_sat_ice_adjusted);
+         float64 water_content_timestep_mean = (water_content_liquid[layer] + WC_temp_layer) / 2.0;
+         float64 one_hour_water_content_change = 0.0;                            //130709
+         if (water_content_timestep_mean > FC_layer)
+         {  one_hour_water_content_change
+               = water_content_timestep_mean
+                -pow( (pow(water_content_timestep_mean ,one_minus_m_layer)
+                   + (standard_gravity * apparent_K_sat_layer * (m_layer - 1) * time_step)
+                     / (thickness_layer * water_density * pow(WC_sat_ice_adjusted , m_layer)))
+                    , (1 / one_minus_m_layer));
+            if (one_hour_water_content_change > (water_content_timestep_mean - FC_layer ))
+               one_hour_water_content_change = water_content_timestep_mean - FC_layer;
+         } else
+            one_hour_water_content_change = 0;
+         if (one_hour_water_content_change < 0) one_hour_water_content_change = 0.0;
+         float64 air_entry_pot_layer = soil_hydraulic_properties.get_air_entry_potential(layer,false); //not FC_PWP_based
+         if (layer > first_drainable_layer)
+         {  float64 WC_at_water_potential_after_drainage =  WC_sat_ice_adjusted * pow((water_potential_after_drainage / air_entry_pot_layer)
+                                 , (-1.0 / b_value_layer));
+            WC_at_water_potential_after_drainage = CORN::must_be_between<float64>
+               (WC_at_water_potential_after_drainage,FC_layer, WC_sat_ice_adjusted);
+            float64 water_content_change_for_equilibrium_water_potential
+               = water_content_liquid[layer] + flow_in / thickness_layer - WC_at_water_potential_after_drainage;
+
+
+            /*150922COS Claudio removed
+            //150527COS-FMS water_content_change_for_equilibrium_water_potential = CORN::must_be_greater_or_equal_to(water_content_change_for_equilibrium_water_potential,0.0);
+            if (water_content_change_for_equilibrium_water_potential < one_hour_water_content_change) //150527COS-FMS
+            {  if (water_content_change_for_equilibrium_water_potential < 0) {   //COS-FMS May 27, 2015 150616LML
+                 water_content_liquid[layer] += flow_in / thickness_layer;       //COS-FMS May 27, 2015 150616LML
+                 flow_out = 0.0;                                                 //COS-FMS May 27, 2015 150616LML
+               } else
+               {
+                 water_content_liquid[layer] = WC_at_water_potential_after_drainage;
+                 flow_out = water_content_change_for_equilibrium_water_potential * thickness_layer;
+              }
+            } else
+            {  //
+               water_content_liquid[layer] += flow_in / thickness_layer - one_hour_water_content_change;
+               flow_out = one_hour_water_content_change * thickness_layer;
+            }
+            */
+            //150922COS  Claudio restored this, it is working correctly
+            water_content_change_for_equilibrium_water_potential = CORN::must_be_greater_or_equal_to(water_content_change_for_equilibrium_water_potential,0.0);
+            if (water_content_change_for_equilibrium_water_potential > one_hour_water_content_change)
+            {   water_content_liquid[layer] = WC_at_water_potential_after_drainage;
+                flow_out = water_content_change_for_equilibrium_water_potential * thickness_layer;
+            } else
+            {  //
+               water_content_liquid[layer] += flow_in / thickness_layer - one_hour_water_content_change;
+               flow_out = one_hour_water_content_change * thickness_layer;
+            }
+
+         } else  //(layer < first_drainable_layer)
+         {  water_content_liquid[layer] += flow_in / thickness_layer - one_hour_water_content_change;
+            flow_out = one_hour_water_content_change * thickness_layer;
+            water_potential_after_drainage = air_entry_pot_layer
+                  * pow((water_content_liquid[layer] / WC_sat_ice_adjusted),(- b_value_layer));
+            water_potential_after_drainage = std::max<float64>(water_potential_after_drainage,soil_hydraulic_properties.get_water_pot_at_FC(layer));
+            water_potential_after_drainage = std::min<float64>
+               (water_potential_after_drainage, 0.0);                            //140116
+        }
+        //150616LML //water_flow[layer] += flow_out; // flow is in kg/m2/h or mm/h
+        //150922COS Claudio restored this
+        water_flow[layer] += flow_out; // flow is in kg/m2/h or mm/h
+        flow_in = flow_out;
+        flow_out_sum += flow_out;
+        //RLN WC is set below Soil.NewWaterContent(layer) = water_content[layer]
+        if (override_leaching_depth && (layer==layer_at_reported_drainage_depth))//130205
+           reported_drainage += (flow_out + saturated_cascade_flow_out);         //140814
+      } // for layer
+   } // redistribution
+
+   //150922COS water_flow[number_layers] += flow_out;                                        //150617LML
+/*for local water balance
+soil_layer_array64(DEBUG_water_content);
+clear_layer_array64(DEBUG_water_content);
+*/
+   for (nat8 layer = first_drainable_layer                                       //080702 090417
+           ; layer <= number_layers
+           ; layer++)
+   {  float64 change_WC =  water_content_liquid[layer] - hydrology.get_liquid_water_content_volumetric(layer);
+      hydrology.change_liquid_water_content_by_volumetric(layer,change_WC);
+//DEBUG_water_content[layer] = hydrology.get_liquid_water_content_volumetric(layer);
+   }
+   balance_drainage += (flow_out + saturated_cascade_flow_out);                  //140814;
+   //std::cout<<" flow_out:"<<flow_out<<" saturated_cascade_flow_out:"<<saturated_cascade_flow_out<<std::endl;
+      //  this line hooks in drainage for the rest of the model.
+/*for local water balance
+
+
+float64 Profile_Final = 0;
+for (nat8 layer = 0; layer <= number_layers; layer++)
+    Profile_Final += water_content[layer] * soil_layers.get_thickness_m(layer) * water_density;
+float64 Balance = profile_init + water_input_hourly * 1000 - runoff_sum *1000.0 - flow_out * 1000 - Profile_Final;
+std::cout << Balance <<std::endl;
+if (fabs(Balance) > 0.00000001)
+std::cout << "balance error" << std::endl;
+*/
+}                                                                      // End Sub
+//_2008-06-09_____________________________________process_hourly_infiltration__/
+float64 Soil_infiltration_cascade_hourly::distribute_excess_flow_upwards  modification_
+( nat8 from_layer
+, float64 &excess_flow_in
+, soil_layer_array64(water_content))
+{
+   for (nat8 lyr = from_layer; (lyr > 1) && (excess_flow_in > 0.0) ; lyr--)
+   {  // not computed for layer 1 which is simply the excess
+      nat8 lyr_above = lyr-1;
+      nat8 lyr_above_2 = lyr-2;
+      float64 WC_sat_layer_above
+            = soil_hydraulic_properties.get_saturation_water_content_volumetric(lyr_above,ICE_WATER_CONTENT_RELEVENCE_UNKNOWN_140822);
+      float64 thickness_layer_above =  soil_layers.get_thickness_m(lyr_above);
+      float64 Available_Porosity = (WC_sat_layer_above - water_content[lyr_above]) * thickness_layer_above; // 'm
+      if (excess_flow_in > Available_Porosity)
+      {  water_content[lyr_above] = WC_sat_layer_above;
+         excess_flow_in -= Available_Porosity;
+         if (lyr > 1)                                                            //150922COS
+         water_flow[lyr_above_2] -= excess_flow_in;                              //150922COS_141010FMS_150603LML
+      } else
+      {  water_content[lyr_above] +=  excess_flow_in / thickness_layer_above;
+         excess_flow_in = 0.0;
+      }
+   }
+   water_flow[0] -= excess_flow_in;                                              //150922COS
+   return excess_flow_in;
+}
+//_2014-01-16___________________________________________________________________
+float64 Soil_infiltration_cascade_hourly::calc_hours_to_field_capacity           // VB: HoursToFieldCapacity
+(float64 percent_clay)                                                     const
+{  //Determine number of hours to reach field capacity if the user selected default calculation
+
+// Verhulst-Pearl: f(t)=L0/(L0+(Lm-L0)*e^-rt)
+
+   static const float32 L0 = 0.05;  //initial value
+   static const float32 Lm = 1.0;   //max_value
+   float32 x_known = (Lm + L0) / 1.1;
+   float32 rtm = (70.0  + 0.0) / 2.0; // 140124 was 60.0
+   float32 xR = x_known / Lm;
+   // calculating r based on the known values
+   float32 r = -(1.0 / rtm) * log(((L0 / xR) - L0) / (Lm - L0));
+   float32 tt = (percent_clay - 12.0);
+   float32 HTFC = (L0 / (L0 + (Lm - L0) * exp(-r * tt))) * 20.0 * 24.0;
+   if (HTFC < 24)  HTFC = 24;                                                   //140415
+   return HTFC;
+}
+//_2013-01-27____________________________________calc_hours_to_field_capacity__/
+// 359 lines  276, 221
+// 071206 210 line
+// 080608 340 lines
+//______________________________________________________________________________
+
+

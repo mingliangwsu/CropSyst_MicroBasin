@@ -1,0 +1,52 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+USEUNIT("..\..\gen_dat_filename.cpp");
+USEUNIT("..\..\loc_param.cpp");
+USEUNIT("..\..\phrases.cpp");
+USEUNIT("..\..\sky.cpp");
+USEUNIT("..\..\snow.cpp");
+USEUNIT("..\..\solar_rad.cpp");
+USEUNIT("..\..\stormgen.cpp");
+USEUNIT("..\..\sun.cpp");
+USEUNIT("..\..\wind.cpp");
+USEUNIT("..\..\wthr.cpp");
+USEUNIT("..\..\wthrbase.cpp");
+USEUNIT("..\..\daily.cpp");
+USEUNIT("..\..\any_timestep\temperature_est.cpp");
+USEUNIT("..\..\database\wthrfile.cpp");
+USEUNIT("..\..\database\weather_UED_database.cpp");
+USEUNIT("..\..\storm_event.cpp");
+USEUNIT("..\..\..\geolocation\geolocation.cpp");
+USEUNIT("..\..\..\geolocation\UTM.cpp");
+USEUNIT("..\..\..\geolocation\UTM_conversion\SwissGrid.cpp");
+USEUNIT("..\..\..\geolocation\UTM_conversion\LatLong-UTMconversion.cpp");
+USEUNIT("..\..\database\common_weather_creators.cpp");
+USEUNIT("..\..\parameter\WP_vapor_pressure_act.cpp");
+USEUNIT("..\..\parameter\WP_dew_point_temperature.cpp");
+USEUNIT("..\..\parameter\WP_relative_humidity.cpp");
+USEUNIT("..\..\parameter\wp_vapor_pressure.cpp");
+USEUNIT("..\..\weather.cpp");
+USEUNIT("..\..\day\vapor_pressure_day.cpp");
+USEUNIT("..\..\day\sun_days.cpp");
+USEUNIT("..\..\day\weather_day.cpp");
+USEUNIT("..\..\hour\weather_hours.cpp");
+USEUNIT("..\..\hour\sun_hours.cpp");
+USEUNIT("..\..\hour\ET_irrad_hour.cpp");
+USEUNIT("..\..\hour\solar_irrad_hour.cpp");
+USEUNIT("..\..\parameter\weather_parameter.cpp");
+USEUNIT("..\..\any_timestep\min_max_to_timestep_estimator.cpp");
+USEUNIT("..\..\any_timestep\relhumid_est.cpp");
+USEUNIT("..\..\parameter\WP_vapor_pressure_deficit.cpp");
+USEUNIT("..\..\weather_types.cpp");
+USEUNIT("..\..\parameter\WP_atmospheric_pressure.cpp");
+USEUNIT("..\..\..\biometeorology\ET_common.cpp");
+USEUNIT("..\..\..\biometeorology\ET_reference.cpp");
+USEUNIT("..\..\..\biometeorology\ET_model.cpp");
+USEUNIT("..\..\..\biometeorology\ET_reference_FAO.cpp");
+//---------------------------------------------------------------------------
+#define Library
+
+// To add a file to the library use the Project menu 'Add to Project'.
+

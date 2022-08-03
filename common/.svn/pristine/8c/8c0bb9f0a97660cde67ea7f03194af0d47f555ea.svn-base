@@ -1,0 +1,158 @@
+#include "evaporator.h"
+#include "common/weather/hour/weather_hours.h"
+#include "CS_suite/observation/CS_inspector.h"
+namespace CS
+{
+//______________________________________________________________________________
+#ifdef OBSOLETE
+160920 replaced with Evaporator_intervals
+Evaporator::Evaporator
+(modifiable_ Physical::Water_depth &evaporation_potential_
+)
+: evaporation_potential_remaining(evaporation_potential_)
+, evaporation_actual             (0.0)
+, evaporation_potential          (0.0)
+, evaporation_pot_effective      (0)
+/*160717
+, evap_potential_hourly          (0)
+, weather_hourly                 (0)
+*/
+{}
+//_2016-05-23______________________________________________________constructor_/
+bool Evaporator::start_day()                                       modification_
+{
+   evaporation_actual = 0.0;
+   evaporation_potential = calc_evaporation_potential();
+   evaporation_pot_effective = evaporation_potential;
+/*160717
+   if (weather_hourly)         //160616LML even zero, need initialize hourly pot evap
+   {
+      evaporation_pot_effective = 0;
+      if (!evap_potential_hourly)
+           evap_potential_hourly = new float64[24];
+      for (CORN::Hour hour = 0; hour <24; hour++)
+      {
+         float64 fract_solar_irradiance_hour = weather_hourly->get_insolation_fraction(hour);
+         float64 evap_potential_hour = evaporation_potential * fract_solar_irradiance_hour;
+         evap_potential_hourly[hour] = evap_potential_hour;
+         evaporation_pot_effective += evap_potential_hour;
+      }
+      assert (CORN::is_approximately<float64>(evaporation_pot_effective,evaporation_potential,0.00000001));
+   }//160616  else if (evaporation_potential)
+*/
+      evaporation_potential_remaining.deduct(evaporation_potential);
+   return true;
+}
+//_2016-05-23_______________________________________________________start_day__/
+float64 Evaporator::evaporate_now(float64 evaporation_requested_now)    modification_
+{
+   evaporation_actual += evaporation_requested_now;
+   return evaporation_requested_now;
+   /*160603
+   evaporation_potential_remaining.dec_m(evaporation_requested_now);
+   evaporation_actual += evaporation_requested_now;
+   return  evaporation_requested_now;
+   */
+}
+//_2016-05-23________________________________________________________evaporate_/
+/*160717
+bool Evaporator::enable_evaporation_hourly
+(const CS::Weather_hours *weather_hourly_)                       initialization_
+{
+   if (!weather_hourly_)
+      // if we disable during run, we no longer need evap_potential_hourly
+      delete evap_potential_hourly;
+   weather_hourly = weather_hourly_;
+   return weather_hourly;
+}
+//_2016-05-23___________________________________________________________________
+float64 Evaporator::evaporate_hour(CORN::Hour hour)                modification_
+{  float64 evaporation_now = 0;
+   // Hourly evaporation could be calculated
+   // I.e. http://www.apesimulator.org/help/models/leafwetness/EvaporationRateHourly.html
+   // However currently it is estimated using fraction of solar irradiance
+   if (evap_potential_hourly)
+   {
+      evaporation_now = evap_potential_hourly[hour];
+      //160608 Don't do this the hourly evaporation potential is calculated once
+      // at the beginning of the day
+      // In the case of hourly evaporation there is
+      // remaining potential evaporation is deducted throughout the hours of the day.
+      //float64 evap_pot_accomodated = evaporation_potential_remaining.deduct(evaporation_now);
+   } // else we are in daily evap mode.
+   return evaporate_now(evaporation_now);
+}
+*/
+//_2016-05-23___________________________________________________________________
+float64 Evaporator::evaporate_day()                                modification_
+{
+/*160717
+   if (evap_potential_hourly) return 0; // using hourly evap mode                //160608
+*/
+   float64 evaporation_now = get_evaporation_potential_daily();
+      // try to evaporate all potential now.
+   float64 act_evaporation = 0;
+   if (evaporation_now > 0.0)
+      act_evaporation = evaporate_now(evaporation_now);
+      //100610 There could be pond on top of plastic mulch, so pond evaporation is not affected by mulch
+      // Because evap changes water content, we need to update the water pot
+   return act_evaporation;
+}
+//_2016-06-06___________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Evaporator)
+{
+   inspectors.append(new CS::Inspector(evaporation_actual         ,UC_m   ,*context,"evaporation/act"    ,sum_statistic,GENERATE_VARIABLE_CODE));
+   inspectors.append(new CS::Inspector(evaporation_potential      ,UC_m   ,*context,"evaporation/pot"    ,sum_statistic,GENERATE_VARIABLE_CODE));
+//160804 inspectors.append(new CS::Inspector(evaporation_pot_effective  ,UC_m   ,*context,"evaporation/pot_eff",sum_statistic,GENERATE_VARIABLE_CODE));
+   return 0;
+}
+//_2016-06-28___________________________________________________________________
+#endif
+
+Evaporator_intervals::Evaporator_intervals
+(modifiable_ CORN::Dynamic_array<float64>  &evaporation_potential_remaining_)
+: evaporation_potential_remaining(evaporation_potential_remaining_)
+, evaporation_actual()
+, evaporation_potential()
+
+, output_evaporation_potential_daily(0)
+, output_evaporation_actual_daily   (0)
+{}
+//_2016-07-18___________________________________________________________________
+bool Evaporator_intervals::start_day()                             modification_
+{
+   evaporation_actual.clear();
+   evaporation_potential.clear();
+   output_evaporation_potential_daily = 0;
+   output_evaporation_actual_daily = 0;
+   return true;
+}
+//_2016-07-18___________________________________________________________________
+bool Evaporator_intervals::end_day()                               modification_
+{
+   output_evaporation_potential_daily  = evaporation_potential.sum();            // m
+   output_evaporation_actual_daily     = evaporation_actual.sum();               // m
+   return true;
+}
+//_2016-07-18___________________________________________________________________
+float64 Evaporator_intervals::evaporate_interval(nat8 interval)    modification_
+{  // This is usually overridden by derived classes.
+   // It should normally never be called.
+   // The default simply evaporates all potential remaining for the interval.
+   float64 evap_pot = evaporation_potential_remaining.get(interval);
+   evaporation_potential.set(interval,evap_pot);
+   evaporation_potential_remaining.set(interval,0.0);
+   float64 evap_act = evap_pot;
+   evaporation_actual.set(interval,evap_act);
+   return evap_act;
+}
+//_2016-07-18___________________________________________________________________
+RENDER_INSPECTORS_DEFINITION(Evaporator_intervals)
+{
+   inspectors.append(new CS::Inspector(output_evaporation_actual_daily         ,UC_m   ,*context,"evaporation/act"    ,sum_statistic,GENERATE_VARIABLE_CODE));
+   inspectors.append(new CS::Inspector(output_evaporation_potential_daily      ,UC_m   ,*context,"evaporation/pot"    ,sum_statistic,GENERATE_VARIABLE_CODE));
+   return 0;
+}
+//_2016-07-18___________________________________________________________________
+} // namespace CS
+

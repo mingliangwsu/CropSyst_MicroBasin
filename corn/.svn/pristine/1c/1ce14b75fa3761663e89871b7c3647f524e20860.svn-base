@@ -1,0 +1,102 @@
+#ifndef moremathH
+#define moremathH
+#include <math.h>
+#ifndef primitiveH
+#  include "corn/primitive.h"
+#endif
+
+#define CORN_sqr(x) ((x)*(x))
+
+// WARNING! don't try to remove any parenthesis they are required in these macros!!!!
+#define CORN_ln(x) ((double)log((double)x))
+#define CORN_quadratic(a,b,c,d) (( - (b) + (d) * sqrt((double)(((b) * (b)) - 4.0 * (a) * (c)))) / (2.0 * (a)))
+
+// The quadradic equation has two solutions.
+#define CORN_quadratic1(a,b,c,d) (( - (b) + (d) * sqrt((double)(((b) * (b)) - 4.0 * (a) * (c)))) / (2.0 * (a)))
+#define CORN_quadratic2(a,b,c,d) (( - (b) - (d) * sqrt((double)(((b) * (b)) - 4.0 * (a) * (c)))) / (2.0 * (a)))
+
+#define CORN_round_int(x)  (((int)((x)*10)%10 > 4) ? (int)(x) + 1 : (int)(x))
+// 981118
+
+extern float64 CORN_round_double(float64 number, int precision); // 050420_
+
+#define        DEF_CLEAN_PRECISION 0.00001
+float64 CORN_clean_precision(float32 x, float64 precision);
+//100718 pow10 is not needed for Gcc compiler
+// It is needed for MSC and some other (not sure which) UNIX compilers
+#if (defined(_MSC_VER)||defined(__MINGW32__))
+#  define NEEDS_POW10
+#endif
+
+#ifdef NEEDS_POW10
+#   define pow10(x) pow((double)10.0,(double)x)
+#endif
+// These are constants provided in MSVC that a lot of people use
+// The are also already defined in under Solaris Forte
+#ifndef M_E
+// e  (Euler number)
+#define  M_E         2.71828182845904523536
+#endif
+#ifndef M_LOG2E
+// log2(e)
+#define  M_LOG2E     1.44269504088896340736
+#endif
+#ifndef M_LOG10E
+// log10(e)
+#define  M_LOG10E    0.434294481903251827651
+#endif
+#ifndef M_LN2
+// ln(2)
+#define  M_LN2       0.693147180559945309417
+#endif
+#ifndef M_LN10
+// ln(10)
+#define  M_LN10      2.30258509299404568402
+#endif
+#ifndef M_PI
+// pi
+#define  M_PI        3.14159265358979323846
+#endif
+#ifndef M_PI_2
+//  pi/2
+#define  M_PI_2  1.57079632679489661923
+#endif
+#ifndef M_PI_4
+// pi/4
+#define  M_PI_4  0.785398163397448309616
+#endif
+#ifndef M_1_PI
+// 1/pi
+#define  M_1_PI  0.318309886183790671538
+#endif
+#ifndef M_2_PI
+// 2/pi
+#define  M_2_PI  0.636619772367581343076
+#endif
+#ifndef M_2_SQRTPI
+// 2/sqrt(pi)
+#define  M_2_SQRTPI  1.12837916709551257390
+#endif
+#ifndef M_SQRT2
+// sqrt(2)
+#define  M_SQRT2  1.41421356237309504880
+#endif
+#ifndef M_SQRT1_2
+// 1/sqrt(2)
+#define  M_SQRT1_2  0.707106781186547524401
+#endif
+#ifndef M_SQRT2PI
+#define M_SQRT2PI   2.50662827463100050242
+#endif
+#ifndef M_1_SQRTPI
+#define M_1_SQRTPI  (0.5*M_2_SQRTPI)
+#endif
+
+/*______*/
+#endif
+
+#define CORN_Eulers_number M_E
+//100518 was Euler_numbers
+#define CORN_pi M_PI
+
+//moremath

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="CORN_static" />
+		<Option execution_dir="/home/rnelson/dev/corn/CB8/corn_static/" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="CORN_static" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-Wno-unknown-pragmas" />
+					<Add option="-Wno-reorder" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="CORN static library" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-Wall" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wno-reorder" />
+			<Add option="-DUSE_STD_STRING" />
+			<Add option="-DCS_VERSION=4" />
+			<Add option="-DUSE_OS_FS" />
+			<Add directory="/home/rnelson/dev" />
+			<Add directory="/home/rnelson/dev/corn" />
+			<Add directory="c:/dev" />
+			<Add directory="C:/dev/corn" />
+		</Compiler>
+		<Unit filename="../../../OS/Directory_entry_name.cpp" />
+		<Unit filename="../../../OS/Directory_entry_name_abstract.cpp" />
+		<Unit filename="../../../OS/Directory_entry_name_logical.cpp" />
+		<Unit filename="../../../OS/File_system.cpp" />
+		<Unit filename="../../../OS/File_system_engine.cpp" />
+		<Unit filename="../../../OS/File_system_engine_Unix_and_Linux.cpp" />
+		<Unit filename="../../../OS/File_system_engine_common.cpp" />
+		<Unit filename="../../../OS/File_system_logical.cpp" />
+		<Unit filename="../../../container/SDF_list.cpp" />
+		<Unit filename="../../../container/array.cpp" />
+		<Unit filename="../../../container/association.cpp" />
+		<Unit filename="../../../container/bilist.cpp" />
+		<Unit filename="../../../container/binary_tree.cpp" />
+		<Unit filename="../../../container/container.cpp" />
+		<Unit filename="../../../container/enumlist.cpp" />
+		<Unit filename="../../../container/indexer.cpp" />
+		<Unit filename="../../../container/item.cpp" />
+		<Unit filename="../../../container/search_tree.cpp" />
+		<Unit filename="../../../container/text_list.cpp" />
+		<Unit filename="../../../container/unilist.cpp" />
+		<Unit filename="../../../data_source/datarec.cpp" />
+		<Unit filename="../../../data_source/datasrc.cpp" />
+		<Unit filename="../../../data_source/datasrc_index.cpp" />
+		<Unit filename="../../../data_source/generic_datarec.cpp" />
+		<Unit filename="../../../data_source/vv_entry.cpp" />
+		<Unit filename="../../../data_source/vv_file.cpp" />
+		<Unit filename="../../../data_type_enum.cpp" />
+		<Unit filename="../../../datetime/date.cpp" />
+		<Unit filename="../../../datetime/date_format.cpp" />
+		<Unit filename="../../../datetime/date_time_format.cpp" />
+		<Unit filename="../../../datetime/date_translator.cpp" />
+		<Unit filename="../../../datetime/datetime64.cpp" />
+		<Unit filename="../../../datetime/temporal_base.cpp" />
+		<Unit filename="../../../datetime/time.cpp" />
+		<Unit filename="../../../datetime/time_format.cpp" />
+		<Unit filename="../../../file_sys/dir_ent.cpp" />
+		<Unit filename="../../../file_sys/dirname.cpp" />
+		<Unit filename="../../../file_sys/file_system.cpp" />
+		<Unit filename="../../../file_sys/filename.cpp" />
+		<Unit filename="../../../file_sys/filtered_filename.cpp" />
+		<Unit filename="../../../file_sys/smart_dirname.cpp" />
+		<Unit filename="../../../file_sys/smart_filename.cpp" />
+		<Unit filename="../../../labeled_enum.cpp" />
+		<Unit filename="../../../math/moremath.cpp" />
+		<Unit filename="../../../math/numerical/interpolate.cpp" />
+		<Unit filename="../../../math/numerical/interpolate_2D_3D.cpp" />
+		<Unit filename="../../../math/numerical/linrregr.cpp" />
+		<Unit filename="../../../math/numerical/nonlinearfit.cpp" />
+		<Unit filename="../../../math/numerical/numeric.cpp" />
+		<Unit filename="../../../math/numerical/solver.cpp" />
+		<Unit filename="../../../math/random.cpp" />
+		<Unit filename="../../../math/statistical/normal_distribution.cpp" />
+		<Unit filename="../../../math/statistical/statistics_recorder.cpp" />
+		<Unit filename="../../../math/statistical/stats.cpp" />
+		<Unit filename="../../../math/statistical/stats_best.cpp" />
+		<Unit filename="../../../measure/common_units.cpp" />
+		<Unit filename="../../../measure/measures.cpp" />
+		<Unit filename="../../../measure/unitconv.cpp" />
+		<Unit filename="../../../measure/units.cpp" />
+		<Unit filename="../../../measure/units_enum.cpp" />
+		<Unit filename="../../../metrology/timestep.cpp" />
+		<Unit filename="../../../metrology/units_clad.cpp" />
+		<Unit filename="../../../metrology/units_symbology.cpp" />
+		<Unit filename="../../../parameters/parameter.cpp" />
+		<Unit filename="../../../parameters/parameters.cpp" />
+		<Unit filename="../../../parameters/parameters_datarec.cpp" />
+		<Unit filename="../../../parameters/parameters_directory.cpp" />
+		<Unit filename="../../../quality.cpp" />
+		<Unit filename="../../../string/strconv.cpp" />
+		<Unit filename="../../../string/uiostring.cpp" />
+		<Unit filename="../../../string/ustring.cpp" />
+		<Unit filename="../../../tabular/delineated_datarec.cpp" />
+		<Unit filename="../../../tabular/delineation.cpp" />
+		<Unit filename="../../../tabular/tabular.cpp" />
+		<Unit filename="../../../tabular/tabular_format.cpp" />
+		<Unit filename="../../../tabular/tabular_text.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<envvars />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,72 @@
+#ifndef CORN_GIF_IMAGE_H
+#define CORN_GIF_IMAGE_H
+
+#include <corn/container/unilist.h>
+#include <corn/image/image8.h>
+#include <corn/image/gif/control.h>
+#include <corn/image/gif/colormap.h>
+namespace CORN
+{
+
+100930 continue here  need to replace Binary_fstream with Binary_file_fstream  (or Binary_file_interface)
+
+continue here basis this on image_T
+
+class GIF_image
+: public Image_8bit
+, public CORN_container_item
+{
+ protected:
+	color_map  *local_color_table;   // 0 if not local color table
+	color_map  *global_color_table;  // Image must point to global color table
+	color_map  *color_table;         // points to either the local or the global color table
+ public:
+	uint16 left;    // 0 indexed
+	uint16 top;	// 0 indexed
+	uint16 width;
+	uint16 height;
+	bool interlaced;
+	bool modified;
+   GIF_control_extension graphic_control;
+ public:
+	GIF_image
+	   (color_map *i_global_color_table
+      ,uint16 i_width, uint16 i_height
+      ,uint16 i_left = 0,uint16 i_top = 0);
+	GIF_image
+      (color_map *i_global_color_table
+	   , Binary_fstream &in_strm
+      ,GIF_control_extension i_graphic_control);
+   ~GIF_image();
+	void read(Binary_fstream &in_strm);  // reads the image from the GIF file
+	void write(Binary_fstream &out_strm); // writes the image to the GIF file
+
+ public: // Image accessors
+   void set_torus(int16 col, int16 row,uint8 color);
+   nat8 get_torus(int16 col, int16 row);
+   // This function returns the color at x,y
+   // if X is < 0 or X > width, the dimensions are wrapped around
+ public: // Drawing primatives
+   inline void set_transparent_color(uint8 color_index)
+   {  graphic_control.enabled = true;
+      graphic_control.use_transparent_color = true;
+      graphic_control.transparent_color = color_index;
+   }
+   inline virtual Image_color_index get_transparent_color()												//000129
+   { return graphic_control.transparent_color; }
+ public: // Advanced drawing
+	void overlay_image(GIF_image &image_to_overlay,uint16 col,uint16 row);
+	void copy_from(const GIF_image &to_be_copied);
+ public: // Color optimization
+	//void change_colors(uint8 new_colors[]);
+   void recolor(uint8 new_colors[]);
+   void quantize(int max_colors);
+	inline color_map *take_color_table(color_map *i_color_table)
+	{  color_table = local_color_table = i_color_table;
+	   return color_table;
+	}
+};
+//_1999-11-15______________________________________________________________________________________
+}; // namespace CORN
+
+#endif

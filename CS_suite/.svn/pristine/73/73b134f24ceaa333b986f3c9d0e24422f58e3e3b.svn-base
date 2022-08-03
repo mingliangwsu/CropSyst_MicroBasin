@@ -1,0 +1,219 @@
+L_Dormant,
+/* cs_crops  CROPSYST   it-gb     TRANSLATE
+en Dormant
+fr Dormant
+it Dormienti
+es Dormant
+ca Dormant
+*/
+L_Generic,
+/* cs_crops  PARAMS VALIDATE  it-gb
+en Generic
+fr Générique
+it Generica
+es Genérico
+ca Genèric
+*/
+L_Grains,
+/* cs_crops  PARAMS VALIDATE
+en Grains
+fr Céréales
+it Cereali
+es_ch Grano
+es Cereal
+ca Cereal
+*/
+L_Growth,
+/* cs_crops  CSW ( PARAMS )
+en Growth
+fr Croissance
+it Crescita
+es Crecimiento
+ca Creixement
+*/
+L_Growth_stage,
+/* cs_crops  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+en Growth stage
+fr Phase de croissance
+it Stadio di crescita
+es Estado de crecimiento
+ca Estat de creixement
+*/
+L_Harvest,
+/* cs_crops  CROPSYST PARAMS CS VALIDATE
+en Harvest
+fr Récolte
+it Raccolata
+es Cosecha
+ca Collita
+*/
+L_Harvestable,
+/* cs_crops PARAMS CROPSYST
+en Harvestable
+fr Récoltable
+it Raccoglibile
+es Cosechable
+ca Recol.lectable
+*/
+L_Leaf,
+/* cs_crops  PARAMS it-rn fr-rn ca-rn es-rn
+en Leaf
+fr Feuille
+it Foglia
+es Hoja
+ca Full
+*/
+L_Alfalfa,
+/* PARAMS     it-gb     es-cs     TRANSLATE   fr-rn  ca
+en Alfalfa
+fr Erba medica
+it Erba medica
+es Alfalfa
+ca Alfalfa
+*/
+L_Legume_grain_green,
+/* cs_crops  PARAMS VALIDATE  it-gb
+en Legume (grain-green)
+fr Légume (céréale-verte)
+it Leguminosa (da granella-da foraggio)
+es_ch Legumbre (grano-verde)
+es Legumbre (cereal para forraje)
+ca Llegum (cereal per forratge)
+*/
+L_Bean,
+/* cs_crops  PARAMS
+en Bean
+fr Haricot
+it Fagiolo
+es_ch Frejol
+es Frijol,
+ca Mongeta seca
+*/
+L_Clover,
+/* cs_crops  PARAMS
+en Clover
+fr Trèfle
+it Trifoglio
+es Trébol
+ca Trèbol
+*/
+L_Grass,
+/* cs_crops PARAMS         fr-rn it-rn    TRANSLATE es ca
+en Grass
+fr Herbe
+it Prato
+es Grass?
+ca Grass?
+*/
+L_Lentil,
+/* cs_crops  PARAMS
+en Lentil
+fr Lentille
+it Lenticchia
+es Lenteja
+ca Llentia
+*/
+L_Lupin,
+/* cs_crops  PARAMS
+en Lupin
+fr Lupin
+it Lupino
+es Altramuz
+ca Guixes
+*/
+L_Maize,
+/* cs_crops  PARAMS
+en Corn
+fr Maïs
+it Mais
+es Maíz
+ca Panís
+*/
+L_Millet,
+/* cs_crops  PARAMS
+en Millet
+fr Millet
+it Miglio
+es Mijo
+ca Mill
+*/
+L_Potato,
+/* cs_crops  PARAMS
+en Potato
+fr Pomme de terre
+it Patata
+es Patata
+ca Patata
+*/
+L_Sugarbeet,
+/* cs_crops  PARAMS
+en Sugarbeet
+fr Betterave à sucre
+it Barbabietola da zucchero
+es Remolacha
+ca Remolatxa
+*/
+L_Oat,
+/* cs_crops  PARAMS
+en Oat
+fr Avoine
+it Avena
+es Avena
+ca Civada
+*/
+L_Rapeseed,
+/* cs_crops  PARAMS
+en Rapeseed
+fr Colza
+it Colza (ravizzone)
+es Colza
+ca Colza
+*/
+L_Sorghum,
+/* cs_crops  PARAMS
+en Sorghum
+fr Sorgho
+it Sorgo
+es Sorgo
+ca Sorgo
+*/
+L_Soybean,
+/* cs_crops  PARAMS
+en Soybean
+fr Soya
+it Soia
+es Soja
+ca Soja
+*/
+L_Tea,
+/* cs_crops PARAMS
+en Tea
+fr Thé
+it Tè
+es Té
+ca Té
+*/
+L_Tea_leaves,
+/* cs_crops PARAMS  fr-rn it-rn ca-rn es-rn
+en Tea leaves
+fr Thé (feuilles)
+it Tè (foglia)
+es Té (hojas)
+ca Té (fulles)
+*/
+L_Wheat,
+/* cs_crops  PARAMS
+en Wheat
+fr Blé
+it Frumento
+es Trigo
+ca Blat
+*/
+L_Pea,
+/* cs_crops  PARAMS
+en Pea
+fr Pois
+it Pisello
+es Guisante
+ca Pèsol
+*/

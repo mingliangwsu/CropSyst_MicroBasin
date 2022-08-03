@@ -1,0 +1,378 @@
+#include "rot_param.h"
+#ifndef REACCH_VERSION
+#include "crop/crop_param.h"
+#endif
+#include "common/weather/weather_interface.h"
+#include "common/weather/parameter/WC_air_temperature.h"
+#include "static_phrases.h"
+#include "corn/measure/units.ph"
+#include "corn/measure/measures.h"
+#include "mgmt_param.h"
+#include "cs_mgmt.h"
+#include "corn/datetime/date.hpp"
+#include "corn/math/statistical/stats.h"
+#include "UED/library/std_codes.h"
+#ifdef LADSS_MODE
+   extern bool LADSS_mode;
+#endif
+namespace CropSyst {
+//______________________________________________________________________________
+const char *planting_date_mode_label_table[] =
+{"fixed_date"     // 0
+,"min_temp_req"   // 1
+,"days_to_emerge" // 2
+,0};
+//______________________________________________________________________________
+const char *sowing_status_label_table[] =
+{"failed"
+,"succeeded"
+,"delayed"
+,"conflict"
+,0};
+//______________________________________________________________________________
+Sowing_operation::Sowing_operation()
+: CropSyst_field_operation_VX(CS_OP_ROT_SOWING)
+, LADSS_land_use_ID(0)
+, LADSS_mgt_ID(0)
+, crop_filename("noname.crp")
+, management_filename("noname.mgt")
+#if (defined (CROPSYST_PROPER) || defined(OFOOT_VERSION))
+, seeding_parameters()
+#endif
+, sowing_date_mode_labeled(FIXED_DATE)
+, delay_after_precip    (0)   , v_delay_after_precip      (delay_after_precip                               ,LABEL_delay_after_precip     ,0  ,0   ,30  ,    0,100  ,T_date_Days,TL_Number_of_days_to_delay)
+, appreciable_precip_mm (0)   , v_appreciable_precip_mm   (appreciable_precip_mm    ,UC_mm                  ,LABEL_appreciable_precip     ,1,0.0,0.0 ,20.0,0.0  ,100.0,TU_mm,TL_Significant_precipitation_amount)
+, sowing_avg_temp       (0)   , v_sowing_avg_temp         (sowing_avg_temp          ,UC_Celcius             ,LABEL_avg_temp               ,2,0  ,0.0 ,30.0,-10.0,40.0 ,TU_degrees_C,TL_Five_day_mean_temp)
+, sowing_min_PAW        (0.5) , v_sowing_min_PAW          (sowing_min_PAW           ,U_units_not_specified  ,LABEL_min_PAW                ,2,0.5,0.0 , 1.0,  0.0, 1.0 ,TU_0_1,TL_layer_2_is_greater_than,TL_Sow_only_when_PAW)
+, sowing_max_PAW        (1.0) , v_sowing_max_PAW          (sowing_max_PAW           ,U_units_not_specified  ,LABEL_max_PAW                ,2,1.0,0.0 , 1.0,  0.0, 1.0 ,TU_0_1,TL_layer_1_is_less_than,TL_Sow_only_when_PAW)
+, expected_days_to_emerge(0)  , v_expected_days_to_emerge (expected_days_to_emerge                          ,LABEL_expected_days_to_emerge,0  ,0   ,40  ,    0,9999 ,T_date_Days,TL_Typical_number_of_days_for_emergence)
+, management(0)  // Instanciated during simulation run when the rotation is loaded.
+, crop_params(0)
+{
+   #ifdef OFOOT_VERSION
+   // typical_relative is used for phenology adjustment in OFoot
+   for (nat8 ngs = 0; ngs < NGS_COUNT; ngs++)
+      typical_relative[ngs].clear();                                             //140717
+   #endif
+}
+//______________________________________________________________________________
+Sowing_operation::Sowing_operation(const char *_crop_filename,const char *_management_file_name)
+: CropSyst_field_operation_VX(CS_OP_ROT_SOWING)
+, LADSS_land_use_ID(0)
+, LADSS_mgt_ID(0)
+, crop_filename(_crop_filename)
+, management_filename(_management_file_name)
+#if (defined (CROPSYST_PROPER) || defined(OFOOT_VERSION))
+, seeding_parameters()
+#endif
+, sowing_date_mode_labeled(FIXED_DATE)
+, delay_after_precip    (0)   , v_delay_after_precip      (delay_after_precip                               ,LABEL_delay_after_precip     ,0  ,0   ,30  ,    0,100  ,T_date_Days,TL_Number_of_days_to_delay)
+, appreciable_precip_mm (0)   , v_appreciable_precip_mm   (appreciable_precip_mm    ,UC_mm                  ,LABEL_appreciable_precip     ,1,0.0,0.0 ,20.0,0.0  ,100.0,TU_mm,TL_Significant_precipitation_amount)
+, sowing_avg_temp       (0)   , v_sowing_avg_temp         (sowing_avg_temp          ,UC_Celcius             ,LABEL_avg_temp               ,2,0  ,0.0 ,30.0,-10.0,40.0 ,TU_degrees_C,TL_Five_day_mean_temp)
+, sowing_min_PAW        (0.5) , v_sowing_min_PAW          (sowing_min_PAW           ,U_units_not_specified  ,LABEL_min_PAW                ,2,0.5,0.0 , 1.0,  0.0, 1.0 ,TU_0_1,TL_layer_2_is_greater_than,TL_Sow_only_when_PAW)
+, sowing_max_PAW        (1.0) , v_sowing_max_PAW          (sowing_max_PAW           ,U_units_not_specified  ,LABEL_max_PAW                ,2,1.0,0.0 , 1.0,  0.0, 1.0 ,TU_0_1,TL_layer_1_is_less_than,TL_Sow_only_when_PAW)
+, expected_days_to_emerge(0)  , v_expected_days_to_emerge (expected_days_to_emerge                          ,LABEL_expected_days_to_emerge,0  ,0   ,40  ,    0,9999 ,T_date_Days,TL_Typical_number_of_days_for_emergence)
+, management(0)  // Instanciated during simulation run when the rotation is loaded.
+, crop_params(0)
+, crop_params_relinquished_to_crop(false)
+{}
+//______________________________________________________________________________
+Sowing_operation::Sowing_operation(const Sowing_operation &original)
+: CropSyst_field_operation_VX(original)
+, sowing_date_mode_labeled((Sowing_date_mode)original.sowing_date_mode_labeled.get())
+, LADSS_land_use_ID(original.LADSS_land_use_ID)
+, LADSS_mgt_ID(original.LADSS_mgt_ID)
+, crop_filename(original.crop_filename,CORN::OS::Directory_entry_name::include_copy)
+, management_filename(original.management_filename,CORN::OS::Directory_entry_name::include_copy)
+#if (defined (CROPSYST_PROPER) || defined(OFOOT_VERSION))
+, seeding_parameters(original.seeding_parameters)
+#endif
+, sowing_avg_temp        (original.sowing_avg_temp)         , v_sowing_avg_temp         (sowing_avg_temp          ,UC_Celcius             ,LABEL_avg_temp               ,2,0  ,0.0 ,30.0,-10.0,40.0 ,TU_degrees_C,TL_Five_day_mean_temp)
+, sowing_min_PAW         (original.sowing_min_PAW)          , v_sowing_min_PAW          (sowing_min_PAW           ,U_units_not_specified  ,LABEL_min_PAW                ,2,0.5,0.0 , 1.0,  0.0, 1.0 ,TU_0_1,TL_layer_2_is_greater_than,TL_Sow_only_when_PAW)
+, sowing_max_PAW         (original.sowing_max_PAW)          , v_sowing_max_PAW          (sowing_max_PAW           ,U_units_not_specified  ,LABEL_max_PAW                ,2,1.0,0.0 , 1.0,  0.0, 1.0 ,TU_0_1,TL_layer_1_is_less_than,TL_Sow_only_when_PAW)
+, expected_days_to_emerge(original.expected_days_to_emerge) , v_expected_days_to_emerge (expected_days_to_emerge                          ,LABEL_expected_days_to_emerge  ,0  ,0   ,40  ,    0,9999 ,T_date_Days,TL_Typical_number_of_days_for_emergence)
+, delay_after_precip     (original.delay_after_precip)      , v_delay_after_precip      (delay_after_precip                               ,LABEL_delay_after_precip       ,0  ,0   ,30  ,    0,100  ,T_date_Days,TL_Number_of_days_to_delay)
+, appreciable_precip_mm  (original.appreciable_precip_mm)   , v_appreciable_precip_mm   (appreciable_precip_mm    ,UC_mm                  ,LABEL_appreciable_precip     ,1,0.0,0.0 ,20.0,0.0  ,100.0,TU_mm,TL_Significant_precipitation_amount)
+// The following are instanciated during simulation run when the rotation is loaded.
+, crop_description       (original.crop_description)                             //130906
+, management(0)
+, crop_params(0)
+, crop_params_relinquished_to_crop(false)
+{
+ #ifdef OFOOT_VERSION
+   for (nat8 gs = 0; gs <= NGS_COUNT; gs++)                                      //140807
+      typical_relative[gs].set(original.typical_relative[gs]);                   //140807
+      // Currently only emergence, max canopy, and maturity date are used.
+ #endif
+}
+//______________________________________________________________________________
+Sowing_operation::~Sowing_operation()
+{
+   if (management) delete management; management = 0;
+   if (crop_params && !crop_params_relinquished_to_crop) delete crop_params; crop_params = 0;
+}
+//_2002-05-28___________________________________________________________________
+DECLARE_CONTAINER_ENUMERATED_SECTION(Sowing_event,sowing_operation_section_VV,true);
+void Sowing_operation::setup_parameters(Data_record &data_rec,bool for_write)
+{  CropSyst_field_operation_VX::setup_parameters(data_rec,for_write);
+   data_rec.expect_string(LABEL_description,description.brief,1024);             //150112_031014
+   // although simulation parameters has description,
+   // simulation_parameters->setup_parameters does/must not set the description
+   // (this is only done by expect structure).
+   data_rec.expect_int32("LAND_USE_ID",LADSS_land_use_ID);                       //020811
+   data_rec.expect_int32("MGT_ID",LADSS_mgt_ID);                                 //020811
+   data_rec.expect_file_name(LABEL_crop,crop_filename);
+   data_rec.expect_file_name(LABEL_management,management_filename);
+   //Do not record status!
+   if (!for_write || (sowing_date_mode_labeled.get() != FIXED_DATE))
+   {
+   data_rec.expect_enum(
+      #ifdef LADSS_MODE
+      // In LADSS, sowing mode is FIXED_DATE when sow_ID is loaded
+      // In the SOWING parameters table, the mode is specified as "TEMPERATURE_CONDITION"
+      (LADSS_mode) ? "TEMPERATURE_CONDITION" :
+      #endif
+         LABEL_mode
+         ,sowing_date_mode_labeled);
+   // The following are for conditional sowing mode:
+   data_rec.expect_valid_int16(v_delay_after_precip);
+   data_rec.expect_valid_int16(v_expected_days_to_emerge);
+   data_rec.expect_valid_float32(v_sowing_avg_temp);
+   data_rec.expect_valid_float32(v_sowing_min_PAW);
+   data_rec.expect_valid_float32(v_sowing_max_PAW);
+   data_rec.expect_valid_float32(v_appreciable_precip_mm);
+   }
+   #if (defined (CROPSYST_PROPER) || defined(OFOOT_VERSION))
+   seeding_parameters.setup_parameters(data_rec,for_write);                      //041201
+   #endif
+   #ifdef OFOOT_VERSION
+   data_rec.expect_date("typical_emergence_date" ,typical_relative[NGS_EMERGENCE]);
+   data_rec.expect_date("typical_canopy_max_date",typical_relative[NGS_END_CANOPY_GROWTH]);
+   data_rec.expect_date("typical_maturity_date"  ,typical_relative[NGS_MATURITY]);
+   #endif
+}
+//______________________________________________________________________________
+const char *Sowing_operation::label_cstr(char *buffer) const
+{
+   CropSyst_field_operation_VX::label_cstr(buffer);                              //011207
+   strcat(buffer,"Crop:");
+   strcat(buffer,crop_description.c_str());                                      //020615
+   #ifdef LADSS_MODE
+                  if (!LADSS_mode)
+   #endif
+      {  strcat(buffer,"(");                                                     //020615
+         strcat(buffer,crop_filename.c_str());                                   //020615
+         strcat(buffer,")");                                                     //020615
+      }
+      strcat(buffer," Management:");                                             //010202
+      if (management)                                                            //010202
+      {  strcat(buffer,management->description.brief.c_str());                   //150112_020615
+      }
+#ifdef LADSS_MODE
+      if (!LADSS_mode)
+#endif
+      {  strcat(buffer,"(");                                                     //020615
+         strcat(buffer,management_filename.c_str());                             //020615
+         strcat(buffer,")");                                                     //020615
+      }
+   return buffer;
+}
+//______________________________________________________________________________
+#ifndef REACCH_PROCEDURES
+#if (!defined(AGMIP))
+const char *Sowing_operation::get_management_description()                 const
+{  return management ? management->description.brief.c_str() : "";               //150112
+}
+//_2002-05-28___________________________________________________________________
+bool Sowing_operation::good_planting_conditions
+(const CORN::Date &today
+, float64         soil_plant_avail_water_1
+, float64         soil_plant_avail_water_2
+, float64         crop_est_degday_days_from_now                                  //020220
+, float64         crop_deg_day_emerge                                            //020220
+#ifdef OLD_ROTATION
+#if (CROPSYST_VERSION >=5 )
+,modifiable_ CORN::Statistical_sample_with_dataset<float32,float32,float32>      //160616
+      &sowing_precipitation_window_meter                                         //141105
+#endif
+,const Weather_spanning_interface &weather
+#endif
+)                                      //151130
+{  bool determinable = true;
+
+   bool dry_enough =  (soil_plant_avail_water_1 <= (sowing_max_PAW + 0.0001));
+
+#ifdef OLD_ROTATION
+
+   float64 appreciable_precip_m = mm_to_m(appreciable_precip_mm);                //020220
+   // See if there has been any appreciable preciptation in the last X days      //000330
+   bool appreciable_rain_in_X_days = false;                                      //000330
+
+   #if (CROPSYST_VERSION >=5 )
+   assert(false); // sowing_precipitation_window_meter hasn't been primed yet
+   while (sowing_precipitation_window_meter.get_count()>(Days)delay_after_precip)//141105
+      sowing_precipitation_window_meter.remove_at(0);                            //141105
+   appreciable_rain_in_X_days = sowing_precipitation_window_meter.provide_max() > appreciable_precip_m; //141105
+
+   #else
+   CORN::Date prev_date(today);                                                  //000330
+   Precipitation precipitation;                                                  //151119
+   for (Days day_ago = 0 ;day_ago < (Days)delay_after_precip ;day_ago++)         //1160331_130120
+   {
+      //160706 #ifdef WEATHER_PROVIDER_VERSION
+      if (!weather.get_parameter_on
+         (precipitation,UED::STD_VC_precipitation.get(),prev_date))              //151119
+      {
+         // NYI Need explaination that precipitation is not available
+      }
+      if (precipitation.get_m() > appreciable_precip_m)                          //151119
+      //160706 #else
+      //160706 if (weather.get_precipitation_m(prev_date) > appreciable_precip_m)         //000330
+      //160706 #endif
+         appreciable_rain_in_X_days = true;                                      //000330
+      prev_date.dec();                                                           //000330
+   }                                                                             //000330
+   #endif
+   dry_enough &= !appreciable_rain_in_X_days;                                    //160708_000323_991118
+      //160708 && (soil_plant_avail_water_1 <= (sowing_max_PAW + 0.0001));
+
+#else
+// appreciable precip condition check moved to new rotatiton class Rotation
+
+#endif
+   bool damp_enough =
+       soil_plant_avail_water_2 >= sowing_min_PAW;
+
+   bool warm_enough = true;                                                      //141216
+   switch (sowing_date_mode_labeled.get())
+   {
+#ifdef OLD_ROTATION
+
+      case MIN_TEMP_REQ    :
+      {
+         CORN::Statistical_running_tally avg_air_temp_for_window;
+         #define sowing_window_days 15
+         //160706 #ifdef WEATHER_PROVIDER_VERSION
+         Air_temperature_maximum air_temp_max;                                   //151119
+         Air_temperature_minimum air_temp_min;                                   //151119
+         Air_temperature_average_calculator air_temp_avg                         //151119
+            (air_temp_max,air_temp_min);                                         //160204
+         //160706 #endif
+
+         for (CORN::Days day_offset = 0; day_offset < sowing_window_days; day_offset++) //131219_131211
+            //131211 Was 5 days now 15
+         {  CORN::Date lookahead_date(today.get());
+            lookahead_date += day_offset;
+            //160706 #ifdef WEATHER_PROVIDER_VERSION
+            air_temp_avg.invalidate();                                           //151120
+            // Actually this should now be working is all versions but need to check 151119
+            determinable &=
+               (   weather.get_parameter_on(air_temp_max,UED::STD_VC_max_temperature.get(),lookahead_date) //151119
+                && weather.get_parameter_on(air_temp_min,UED::STD_VC_min_temperature.get(),lookahead_date) //151119
+                && air_temp_avg.update().is_valid());                            //151124
+            avg_air_temp_for_window.append(air_temp_avg.Celcius());              //151119
+            //160706 #else
+            //160706 //151130 becoming obsolete
+            //160706 float32 avg_air_temp = //weather.get_avg_temperature(lookahead_date);
+            //160706 (weather.get_max_temperature(lookahead_date) +
+            //160706  weather.get_min_temperature(lookahead_date))/2.0;
+            //160706 avg_air_temp_for_window.append(avg_air_temp);
+            //160706 #endif
+         }
+         float64 avg_temps = avg_air_temp_for_window.get_mean();                 //131219
+         warm_enough = (avg_temps >= sowing_avg_temp);
+      } break;
+#else
+      // air temperature condition moved to Rotation class
+#endif
+      case DAYS_TO_EMERGE  :
+      {  warm_enough = crop_est_degday_days_from_now >= crop_deg_day_emerge;
+      } break;
+   }
+//if (warm_enough && dry_enough &&damp_enough)
+//std::clog << "good plant cond:" << today.as_string() << std::endl;
+   if (!determinable)
+   {
+      // Need to explain that could not be accurately determined
+      // because weather data unavailable.
+      // This is not necessarily an error because we may be nearing
+      // the end of a simulation period so planting may not be
+      // relevent anyway.
+   }
+
+   return (warm_enough && dry_enough &&damp_enough);
+
+}
+//______________________________________________________________________________
+#endif
+#endif
+
+Rotation_parameters::Rotation_parameters()
+: Common_parameters_data_record(NO_ASSOCIATED_DIRECTORY,LABEL_rotation,CS_VERSION_NUMBERS)   //050323
+, sowing_events()
+, end_year(Date().get_year())
+, years(1)
+{}
+//_2002-05-30___________________________________________________________________
+bool Rotation_parameters::expect_structure(bool for_write)
+{  bool expected = Common_parameters_data_record::expect_structure(for_write);   //161025
+   structure_defined = false;                                                    //120314
+   set_current_section(LABEL_rotation);
+      expect_int16("end_year",end_year);
+      expect_int16("years",years);
+   EXPECT_ENUMERATED_SECTION(LABEL_sowing,sowing_operation_section_VV,sowing_events);
+   structure_defined = true;                                                     //120314
+   return expected;                                                              //161025
+}
+//_2002-06-12___________________________________________________________________
+bool Sowing_event::expect_structure(bool for_write)
+{  structure_defined = false;                                                    //120314
+   setup_structure(*this,for_write);
+   structure_defined = true;                                                     //120314
+   return true;
+}
+//_2003-10-12___________________________________________________________________
+void Sowing_event::setup_structure(Data_record &data_rec,bool for_write) modification_
+{  Common_event::setup_structure(data_rec,for_write);
+   data_rec.expect_date(LABEL_date,begin_sync,false);                            //120518
+   data_rec.expect_date(LABEL_date,date,false);                                  //120518
+   provide_sowing_operation();                                                   //130120
+   sowing_op->setup_parameters(data_rec,for_write);
+}
+//_2003-01-13___________________________________________________________________
+Sowing_operation &Sowing_event::provide_sowing_operation()        /*provision_*/ //130118_was get_sowing_operation
+{  if (!sowing_op)
+   {  sowing_op = new Sowing_operation;
+      set_operation(sowing_op,true);
+   }
+   return *sowing_op;                                                            //130118
+}
+//_2013-01-18__2003-10-14_____________________________provide_sowing_operation_/
+Common_operation *Sowing_event::set_operation
+(Common_operation *_operation ,bool _owns_operation)
+{  sowing_op = (Sowing_operation *)_operation;
+   return Common_event::set_operation(_operation,_owns_operation);
+}
+//_2004-12-03___________________________________________________________________
+Crop_parameters *Sowing_operation::relinquish_crop_params()
+{  if (crop_params)
+      crop_params_relinquished_to_crop = true;
+   return crop_params;
+}
+//_2003-07-11___________________________________________________________________
+bool Sowing_operation::take_crop_params(Crop_parameters *_crop_params)
+{  crop_params = _crop_params;
+   crop_params_relinquished_to_crop = false;
+   return crop_params_relinquished_to_crop;                                      //160510
+}
+//_2003-07-11___________________________________________________________________
+/*160708 unused
+const Crop_parameters *Sowing_operation::reference_crop_params()           const
+{ return crop_paramsX;}
+//_2013-09-01___________________________________________________________________
+Crop_parameters    *Sowing_operation::reference_crop_params_modifiable()
+{ return crop_paramsX;}
+//_2013-09-01___________________________________________________________________
+*/
+} // namespace CropSyst
+

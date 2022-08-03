@@ -1,0 +1,261 @@
+#ifndef primitiveH
+#   include "corn/primitive.h"
+#endif
+#include <math.h>
+#include "corn/math/moremath.h"
+#include "corn/math/compare.hpp"
+#include "common/soil/hydrology/pedotransfer_saxton_1986.h"
+//______________________________________________________________________________
+// Calculates hydraulic properties from texture
+Pedotransfer_functions_Saxton_1986::Pedotransfer_functions_Saxton_1986
+(float32 & _sand, float32 &_clay, float32 &_silt
+,float32 & _saturation                  ,bool saturation_fixed
+,float32 & _vol_WC_at_1500              ,bool vol_WC_at_1500_fixed
+,float32 & _vol_WC_at_FC                ,bool vol_WC_at_FC_fixed
+,float32 & _sat_hydraul_cond_m_d        ,bool sat_hydraul_cond_m_d_fixed
+,float32 & _bulk_density                ,bool bulk_density_fixed
+,float32 & _soil_b                      ,bool soil_b_fixed
+,float32 & _air_entry_pot               ,bool air_entry_pot_fixed
+,float32 & _porosity                    ,bool porosity_fixed
+,float32 & _water_pot_at_FC             ,bool water_pot_at_FC_fixed               //130326
+)
+: Pedotransfer_functions_abstract
+(_sand, _clay, _silt
+,_saturation                  ,saturation_fixed
+,_vol_WC_at_1500              ,vol_WC_at_1500_fixed
+,_vol_WC_at_FC                ,vol_WC_at_FC_fixed
+,_sat_hydraul_cond_m_d        ,sat_hydraul_cond_m_d_fixed
+,_bulk_density                ,bulk_density_fixed
+,_soil_b
+,_air_entry_pot
+,_porosity                    ,porosity_fixed
+,_water_pot_at_FC             , water_pot_at_FC_fixed                            //130326
+)
+, acoef_quality               (unknown_quality)
+, bcoef_quality               (unknown_quality)
+{}
+//______________________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_acoef()
+{  if (acoef_quality.is_unknown())
+   {  float sand_2 = sand * sand;
+      acoef = exp(-4.396 - 0.0715 * clay -
+              4.88e-4 * sand_2 - 4.285e-5 * sand_2 * clay);
+      acoef_quality.assume_code(calculated_quality); // computed_from_fixed;
+   }
+   return acoef;
+}
+//______________________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_bcoef()
+{  if (bcoef_quality.is_unknown())
+   {  float sand_2 = sand * sand;
+      float clay_2 = clay * clay;
+      bcoef = - 3.140 - 0.00222 * clay_2 - 3.484e-5 * sand_2 * clay;
+      bcoef_quality.assume_code(calculated_quality);
+   }
+   return bcoef;
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::calc_saturation_based_on_texture(CORN::Quality &returned_quality)
+{  float32 sand_term = 7.251e-4 * sand ;
+   float32 clay_term = 0.1276 * log10((double)clay);
+   return  0.332 - sand_term+clay_term ;
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_WC_at_based_on_texture(float potential)
+{  float result;
+   float acoef_ = get_acoef();                                                   //040209
+   float bcoef_ = get_bcoef();                                                   //040209
+   if ((acoef_ == 0.0) || (bcoef_ == 0.0))                                       //040209
+            result = 0.0; // Avoid div0
+   else  // potential will usually be either  15.0 or 0.33
+   {  float32 base = ( (-potential/100.0) / acoef_);                             //040209
+      float32 exponent = (1.0 / bcoef_);                                         //040209
+      result = pow(base,exponent);
+   }
+   return result;
+}
+//______________________________________________________________________________
+float  Pedotransfer_functions_Saxton_1986::calc_WC_at
+(float potential
+,float air_entry_pot_
+,float soil_b_
+,float saturation_)
+{  float result =  pow((double)(potential / air_entry_pot_),(double)(-1.0/soil_b_)) * saturation_;
+   return  result;
+}
+//______________________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_WC_at
+(float potential // -1500 or -33
+,float current_vol_WC, CORN::Quality  &vol_WC_quality
+,bool fixed_or_based_on_texture_only)
+{  float result = current_vol_WC;
+   if (vol_WC_quality.is_worse_than(fixed_quality)) // always return fixed
+   {  if (((saturation_quality    .is_better_than(vol_WC_quality)))
+           && !fixed_or_based_on_texture_only)
+      {  CORN::Quality_clad saturation_quality;
+         result = calc_WC_at(potential,get_air_entry_pot(),get_soil_b(),get_saturation(saturation_quality));   //990525
+         vol_WC_quality.assume_code(quality_calculated_from_quality(saturation_quality /*probably should be worst quality of air_entry+ soil_b and saturation_quality */)); // was simply saturated status   //080313
+      } else
+      {  result = get_WC_at_based_on_texture( potential);
+         vol_WC_quality.assume_code(estimated_quality);                          //080419
+      }
+   }
+   return result;
+}
+//______________________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_vol_WC_at_1500(bool fixed_or_based_on_texture_only)  // similar to PWP
+{  CORN::Quality_clad compute_quality(vol_WC_at_1500_quality);
+   float64 a_good_WC_at_1500 = get_WC_at(-1500.0,vol_WC_at_1500,compute_quality,fixed_or_based_on_texture_only);
+   set_vol_WC_at_1500(a_good_WC_at_1500,compute_quality);
+   return vol_WC_at_1500;
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_vol_WC_at_FC(bool fixed_or_based_on_texture_only)  // similar to FC
+{  CORN::Quality_clad compute_quality(vol_WC_at_FC_quality);
+   float64 a_good_WC_at_FC = get_WC_at(-33,vol_WC_at_FC,compute_quality,fixed_or_based_on_texture_only);
+   set_vol_WC_at_FC(a_good_WC_at_FC,compute_quality);
+   return vol_WC_at_FC;
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::provide_water_pot_at_FC()
+{
+   CORN::Quality_clad compute_quality(water_pot_at_FC_quality);
+   if (!water_pot_at_FC_quality.is_measured())
+   {  float32 WPFC =                                                             //130326
+                (silt > 80.0)                               //130326
+                ? -33                                                            //130326
+                : -13.833 * CORN_ln( clay) + 10.356;        //130326
+            WPFC = CORN::must_be_less_or_equal_to<float32>(WPFC,10.0);           //130326
+      water_pot_at_FC =  WPFC;                                //130326
+//      soil->fix_water_pot_at_FC        ( layer, false);                    //130326
+      water_pot_at_FC_quality.assume_code(CORN::calculated_quality);
+   }
+   return water_pot_at_FC;
+
+}
+/*_2014-04-16___________________________________________________________________
+
+
+/*140416
+float Pedotransfer_functions_Saxton_1986::get_vol_WC_at_33(bool fixed_or_based_on_texture_only)  // similar to FC
+{  CORN::Quality compute_quality = vol_WC_at_33_quality;
+   float64 a_good_WC_at_33 = get_WC_at(-33,vol_WC_at_33,compute_quality,fixed_or_based_on_texture_only);
+   set_vol_WC_at_33(a_good_WC_at_33,compute_quality);
+   return vol_WC_at_33;
+}
+//_1998-10-30___________________________________________________________________
+*/
+float Pedotransfer_functions_Saxton_1986::get_sat_hydraul_cond_m_d()
+{  if (sat_hydraul_cond_m_d_quality.is_unknown())
+   { CORN::Quality_clad saturation_quality(unknown_quality);
+      float sat = get_saturation(saturation_quality);
+      float clay_2 = clay * clay;
+      float sat_hydraul_cond_cm_hr =  (sat != 0.0)
+      ?	  exp((12.012 - 0.0755 * (float)sand) +
+             (- 3.895 + 0.03671 * (float)sand  -
+                        0.1103  * (float)clay  +
+                        8.7546e-4 * clay_2) / sat)
+      : 0.0;
+     CORN::Quality_clad new_sat_hydr_cond_quality(quality_calculated_from_quality(saturation_quality));  //080313
+      set_sat_hydraul_cond_m_d(sat_hydraul_cond_cm_hr * 24.0 / 100.0 //cm/hr -> m/day
+          ,new_sat_hydr_cond_quality);
+   }
+   return  sat_hydraul_cond_m_d;
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_sat_hydraul_cond_cm_hr()
+{  return get_sat_hydraul_cond_m_d() / 24.0 * 100.0; // m/d->cm/hr
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_bulk_density_based_on_texture(CORN::Quality &bulk_density_based_on_texture_quality)
+{  CORN::Quality_clad sat_based_on_texture_quality;
+   float32 sat_based_on_texture = calc_saturation_based_on_texture(sat_based_on_texture_quality);
+   bulk_density_based_on_texture_quality.assume_code(quality_calculated_from_quality(sat_based_on_texture_quality));
+    return (1.0 - sat_based_on_texture ) * normal_particle_density_g_cm3 /*2.65*/;
+}
+//______________________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::set_soil_b(float _soil_b,CORN::Quality_code new_quality)
+{
+   {  soil_b = _soil_b;
+   }
+   return soil_b;
+}
+//______________________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_geometric_mean_particle_size()
+{ // I think in micro meters
+  if (GM_particle_size_quality.is_unknown())
+  { geometric_mean_particle_size =
+    exp(  2.302  * (silt / 100.0)                                                //980528
+        - 0.602  * (clay / 100.0)                                                //980528
+        + 4.7897 * (sand / 100.0)                                                //980528
+        + 1.263  * CORN_sqr((sand/100.0)));                                      //980528
+    GM_particle_size_quality.assume_code(calculated_quality); //  computed_from_fixed;
+  }
+  return geometric_mean_particle_size;
+}
+//_1998-10-30___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::calc_soil_b
+(float WC_at_33_or_FC
+,float PC_at_1500_or_PWP)
+{
+/*140416 May need to implement this, but I think it is the same
+   float32 WC_sat = 99999;  // WARNING NEED TO CALC THIS
+   return (CORN_ln(soil_water_pot_at_PWP) - CORN_ln(-water_pot_at_FC))
+        / (CORN_ln(WC_at_33_or_FC / WC_sat) - CORN_ln(PC_at_1500_or_PWP / WC_sat));
+*/
+   return CORN_ln(soil_water_pot_at_PWP / water_pot_at_FC) /
+          CORN_ln(WC_at_33_or_FC / PC_at_1500_or_PWP);
+
+}
+//_1999-03-21___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_soil_b()
+{  if ((vol_WC_at_FC_quality.get_quality_code() == fixed_quality) ||
+       (vol_WC_at_1500_quality.get_quality_code()  == fixed_quality))
+   {  soil_b = calc_soil_b(get_vol_WC_at_FC(true)  , get_vol_WC_at_1500(true)); //990321
+   }
+   return soil_b;
+}
+//______________________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::calc_air_entry_pot
+(float WC_at_33_or_FC
+,float saturation_                                                               //040209
+,float soil_b_)                                                                  //040209
+{  return water_pot_at_FC *
+	         pow((double)(WC_at_33_or_FC / saturation_),(double)soil_b_);         //040209
+}
+//_1999-03-21___________________________________________________________________
+float Pedotransfer_functions_Saxton_1986::get_air_entry_pot()
+{  // Warning I need to check if this new condition is what I need.
+   {  CORN::Quality_clad sat_based_on_temp_quality;
+      CORN::Quality_clad bulk_density_quality;
+      CORN::Quality_clad bulk_density_based_on_texture_quality;
+      float air_entry_pot_based_on_texture_saturation = calc_air_entry_pot(get_vol_WC_at_FC(true),calc_saturation_based_on_texture(sat_based_on_temp_quality),get_soil_b());
+      float new_air_entry_pot = air_entry_pot_based_on_texture_saturation
+         * pow((double)(get_bulk_density(bulk_density_quality)/get_bulk_density_based_on_texture(bulk_density_based_on_texture_quality)),(double)(0.67*get_soil_b()));
+       set_air_entry_pot(new_air_entry_pot);
+    }
+    return air_entry_pot;
+}
+//_1998-10-30___________________________________________________________________
+bool Pedotransfer_functions_Saxton_1986::recompute_every_thing()
+{  float total_texture = sand+clay+silt;
+   if (!CORN::is_approximately<float>(total_texture,100.0,1.0))
+      return false;
+   reset_questionable_states();
+   CORN::Quality_clad sat_qual;       get_saturation(sat_qual);
+   CORN::Quality_clad BD_quality;     get_bulk_density(BD_quality);
+   get_air_entry_pot();                                                         //980528
+   get_vol_WC_at_1500(false);
+   get_vol_WC_at_FC(false);
+   get_sat_hydraul_cond_m_d();                                                  //980528
+ //get_geometric_mean_particle_size();
+   return true;
+}
+//______________________________________________________________________________
+void Pedotransfer_functions_Saxton_1986::reset_questionable_states()
+{  Pedotransfer_functions_abstract::reset_questionable_states();
+   acoef_quality .assume_code((acoef_quality.get_quality_code() == fixed_quality) ? fixed_quality : unknown_quality);
+   bcoef_quality .assume_code((bcoef_quality.get_quality_code() == fixed_quality) ? fixed_quality : unknown_quality);
+}
+//______________________________________________________________________________
+

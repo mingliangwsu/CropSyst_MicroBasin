@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="UED_components_package.bpl"/>
+    <OBJFILES value="UED_components_package.obj AutoProfilePlotter.obj AutoGraphPlotter.obj 
+      AutoTimeSeriesPlotter.obj ..\..\corn\image\clrramp.obj"/>
+    <RESFILES value="UED_components_package.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value="C:\temp\lib\BCB5\release\corn_static.lib 
+      C:\temp\lib\BCB5\release\container_static.lib 
+      C:\temp\lib\BCB5\release\datetime_static.lib 
+      C:\temp\lib\BCB5\release\file_sys_static.lib"/>
+    <LIBRARIES value="BCBSMP50.lib AutoControls.lib"/>
+    <SPARELIBS value="Vcl50.lib AutoControls.lib VCLX50.lib BCBSMP50.lib"/>
+    <PACKAGES value="vcl50.bpi Vclx50.bpi"/>
+    <PATHCPP value=".;..\..\corn\image"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="_DEBUG;BUILDER_API;OLD_BINARY_FILE"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="UED_components_package.cpp"/>
+    <INCLUDEPATH value="..\..\corn\image;$(BCB)\include;$(BCB)\include\vcl;..\.."/>
+    <LIBPATH value="..\..\corn\image;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\components\AutoControls"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tWM"/>
+    <PFLAGS value="-$YD -$W -$O- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="-D&quot;&quot; -aa -Tpp -x -Gn -Gl -Gi -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0pkg32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=1
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=3
+Item0=..\..\corn\image;$(BCB)\include;$(BCB)\include\vcl;..\..
+Item1=$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item2=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=4
+Item0=..\..\corn\image;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\components\AutoControls
+Item1=..\..\corn\image;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;C:\dev\components\AutoControls
+Item2=..\..\corn\image;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item3=$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=3
+Item0=_DEBUG;BUILDER_API;OLD_BINARY_FILE
+Item1=_DEBUG;BUILDER_API
+Item2=_DEBUG
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

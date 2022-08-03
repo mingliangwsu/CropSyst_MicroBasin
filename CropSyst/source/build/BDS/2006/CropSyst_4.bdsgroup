@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">Default.Personality</Option>
+			<Option Name="ProjectType"></Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{FF59FCF8-78A0-45EE-A921-8D9E8034AA7A}</Option>
+		</Option>
+	</PersonalityInfo>
+	<Default.Personality>  <Projects>
+      <Projects Name="corn_complete_OS_FS_static.lib">..\..\..\..\..\corn\build\BDS\corn_complete_OS_FS_static.bdsproj</Projects>
+      <Projects Name="common_sim_static.lib">..\..\..\..\..\common\simulation\BDS\common_sim_static.bdsproj</Projects>
+      <Projects Name="ued_static.lib">..\..\..\..\..\UED\library\build\BDS\ued_static.bdsproj</Projects>
+      <Projects Name="CS_directory.lib">..\..\..\..\..\CS_suite\build\BDS\2006\CS_directory.bdsproj</Projects>
+      <Projects Name="weather_static.lib">..\..\..\..\..\common\weather\build\BDS\weather_static.bdsproj</Projects>
+      <Projects Name="cropsyst_4.exe">cropsyst_4.bdsproj</Projects>
+      <Projects Name="makeCSVC.exe">..\..\..\makeCSVC.bdsproj</Projects>
+      <Projects Name="test_pest.exe">..\..\..\pest\test\RS\2010\test_pest.bdsproj</Projects>
+      <Projects Name="simulate_cell_4.exe">..\..\..\..\REACCH\build\BDS\simulate_cell_4.bdsproj</Projects>
+      <Projects Name="Targets">corn_complete_OS_FS_static.lib common_sim_static.lib ued_static.lib CS_directory.lib weather_static.lib cropsyst_4.exe makeCSVC.exe test_pest.exe simulate_cell_4.exe</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+	<StarTeamAssociation></StarTeamAssociation>
+	<StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>

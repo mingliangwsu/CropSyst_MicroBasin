@@ -1,0 +1,158 @@
+#include "common/weather/daily.h"
+#include "common/weather/hour/sun_hours.h"
+namespace CS
+{
+//______________________________________________________________________________
+Weather_daily::Weather_daily
+(const Geocoordinate              &geocoordinate_
+,const CORN::Date_const           &today_
+)
+: geocoordinate   (geocoordinate_)
+, today           (today_)
+, weather_provider(0)
+, sun_days        (0)
+, sun_hours       (0)
+, ET_solar_irrad  (0)
+{}
+//_2016-07-29__________________________________________________________________/
+CS::Solar_irradiance_extraterrestrial_hourly &Weather_daily::provide_ET_solar_irrad() provision_
+{
+   if (!ET_solar_irrad)
+   {
+        ET_solar_irrad
+         = new CS::Solar_irradiance_extraterrestrial_hourly
+            (geocoordinate,provide_sun_days(),provide_sun_hours(),today);
+   }
+   return *ET_solar_irrad;
+}
+//_2016-07-29__________________________________________________________________/
+Sun_days &Weather_daily::provide_sun_days()                           provision_
+{
+   if (!sun_days)
+   {
+      float64 longitude_radians = geocoordinate.get_longitude_radians();          //151208_071116
+      float64 standard_meridian_radians = longitude_radians; // Currently we do not have standard meridian in geolocation so simply using the longitude. 071116
+      sun_days = new Sun_days( longitude_radians, standard_meridian_radians);
+   }
+   return *sun_days;
+}
+//_2016-07-29__________________________________________________________________/
+Sun_hours &Weather_daily::provide_sun_hours()                         provision_
+{
+   if (!sun_hours)
+      sun_hours = new Sun_hours
+      (provide_sun_days(),geocoordinate.get_latitude_dec_deg());
+   return *sun_hours;
+}
+//_2016-07-29__________________________________________________________________/
+Weather_provider &Weather_daily::provide_weather_provider()           provision_
+{
+   if (!weather_provider)
+      weather_provider =
+         new Weather_provider
+               (today,geocoordinate,provide_ET_solar_irrad()
+               // currently no generation ,weather_database->get_location_parameters()
+               );
+   return *weather_provider;
+}
+//_2016-07-29__________________________________________________________________/
+bool Weather_daily::start()                                        modification_
+{  bool started = true;
+   started &= ET_solar_irrad->start();
+   return started;
+}
+//_2016-07-31__________________________________________________________________/
+} // namespace CS
+
+/*160908 OBSOLETE
+#ifdef WEATHER_PROVIDER_VERSION
+//LML 140915 added macro
+#else
+//______________________________________________________________________________
+float64 Weather_daily_deprecated::get_precipitation_m(const CORN::Date &_date)        const // yes only pass by value!
+{
+   Precipitation parameter;                                                      //151027
+   return load_precipitation(parameter,_date);                                   //151027
+}
+//______________________________________________________________________________
+float64 Weather_daily_deprecated::get_solar_radiation(Solar_radiation &solar_rad,const CORN::Date &_date) const // yes only pass by value!
+{     return load_solar_radiation(solar_rad,_date);                              //140715
+}
+//______________________________________________________________________________
+float64 Weather_daily_deprecated::get_max_temperature(const CORN::Date &_date)        const // yes only pass by value!
+{  Air_temperature_maximum parameter;
+   return load_max_temperature(parameter,_date);
+}
+//_2005-06-02___________________________________________________________________
+float64 Weather_daily_deprecated::get_min_temperature(const CORN::Date &_date)        const // yes only pass by value!
+{  Air_temperature_minimum parameter;
+   return load_min_temperature(parameter,_date);
+}
+//_2005-06-02___________________________________________________________________
+float64 Weather_daily_deprecated::get_min_relative_humidity(const CORN::Date &_date)  const //  %
+{  //050602 Warning check if I need estimate or calculate
+   CORN::Quality_clad quality;                                                   //140220
+   Relative_humidity parameter;                                                  //140220
+   return load_min_relative_humidity(parameter,_date);
+}
+//_2005-06-02___________________________________________________________________
+float64 Weather_daily_deprecated::get_max_relative_humidity(const CORN::Date &_date)  const //  %
+{  //050602  Warning check if I need estimate or calculate
+   CORN::Quality_clad quality;                                                   //140220
+   Relative_humidity max_rel_humid_param;                                        //140220
+   return load_max_relative_humidity(max_rel_humid_param,_date);
+}
+//_2005-06-02___________________________________________________________________
+float64 Weather_daily_deprecated::get_max_dew_point_temperature(const CORN::Date &_date) const // yes only pass by value!
+{  Dew_point_temperature_maximum parameter;                                      //140220
+   return load_max_dew_point_temperature(parameter,_date);
+}
+//_2005-06-02__1998-03-05_______________________________________________________
+float64 Weather_daily_deprecated::get_min_dew_point_temperature(const CORN::Date &_date)  const // yes only pass by value!
+{  Dew_point_temperature_minimum parameter;
+   return load_min_dew_point_temperature(parameter,_date);
+}
+//_2005-06-02__1998-03-05_______________________________________________________
+float64 Weather_daily_deprecated::get_avg_dew_point_temperature(const CORN::Date &_date)  const // yes only pass by value!
+{  Dew_point_temperature_average parameter;                                      //140220_050602
+   return load_avg_dew_point_temperature(parameter,_date);
+}
+//_1998-03-05___________________________________________________________________
+float64 Weather_daily_deprecated::get_wind_speed_m_d(const CORN::Date  &_date)        const // yes only pass by value!
+{  float64 temporary_screening_height; // delete
+   Wind_speed parameter(temporary_screening_height);
+   load_wind_speed(parameter,_date);
+   return parameter.get_m_d();                                                   //150123
+}
+#endif
+#ifdef WEATHER_PROVIDER_VERSION
+
+#else
+//______________________________________________________________________________
+float64 Weather_daily_deprecated::get_next_min_temperature()                          const
+{  CORN::Date tomorrow(today); tomorrow.inc_day(1);
+   return get_min_temperature(tomorrow);
+}
+//_2004-01-16___________________________________________________________________
+float64 Weather_daily_deprecated::get_next_min_relative_humidity()                    const
+{  CORN::Date tomorrow(today); tomorrow.inc_day(1);
+   return get_min_relative_humidity(tomorrow);
+}
+//_2006-05-01___________________________________________________________________
+float64 Weather_daily_deprecated::get_next_max_relative_humidity()                    const
+{  CORN::Date tomorrow(today); tomorrow.inc_day(1);
+   return get_max_relative_humidity(tomorrow);
+}
+//_2006-05-01___________________________________________________________________
+#endif
+
+float64 Weather_daily_deprecated::get_cloud_factor_for_net_rad(float64 clear_sky_solar_rad) const
+{  float64 solar_rad = ref_solar_radiation().get_MJ_m2();                        //140715
+   float64 rad_ratio = solar_rad/clear_sky_solar_rad;
+   rad_ratio = CORN::must_be_between<float64>(rad_ratio,0.0,1.0);                //150505
+   float64 cloud_fact = 1.35 * rad_ratio -0.35;
+   cloud_fact = CORN::must_be_between<float64>(cloud_fact,0.0,1.0);              //150505
+   return cloud_fact;
+}
+//______________________________________________________________________________
+*/

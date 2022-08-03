@@ -1,0 +1,579 @@
+#ifndef soilstateclassH
+#define soilstateclassH
+#include "soilprofileclass2.h"
+//#include "soil/complete.h"
+#include "control/allcontrolclass.h"
+#ifndef CROPSYST_VERSION
+#include "control/clssimulation.h"
+#endif
+#ifndef MSVB_CASCADE_INFILTRATION_HOUR
+#include "soil/hydrology_cascade.h"
+#include "pond.h"
+#define CROPSYST_HYDROLOGY
+#endif
+#ifdef CROPSYST_FD
+#include "soil/hydrology_finite_diff.h"
+#define CROPSYST_HYDROLOGY
+#endif
+#ifdef CROPSYST_VERSION
+#include "soil/chemicals_profile.h"
+#endif
+#include <vector>
+#include "CropSyst/source/cs_filenames.h"
+class clsSimulation;
+class SoilProfileClass;
+class Soil_hydrology_cascade;                                                    //140527
+class Soil_hydrology_finite_difference;                                          //140527
+//______________________________________________________________________________
+class InitialSoilStateClass
+{
+public:
+    int soil_type_id;
+    double Bypass_Coefficient;
+    CRP_filename previous_residue_crop_filename;
+    soil_horizon_array32(horizon_percent_organic_matter);
+    soil_horizon_array32(horizon_N_NO3);                                         // kg N/ha initial N
+    soil_horizon_array32(horizon_N_NH4);                                         // kg N/ha initial N
+    soil_horizon_array32(horizon_incorporated_residue);
+    soil_horizon_array32(vwc);
+    Organic_matter_initialization_parameters organic_matter_initialization_parameters;
+    float32 stubble_residue_32;
+    float32 surface_residue_32;
+public:
+    SoilProfileClass &SoilProfileRef;
+public:
+    InitialSoilStateClass(SoilProfileClass &SoilProfileRef_);
+    void ReadSoilStateParameters(const CORN::OS::File_name &file_name);                                        //150723RLN
+    ~InitialSoilStateClass(){}
+};
+//_2016-03-17_LML____________________________________________________________________
+#ifdef MBVB_SOIL
+class SoilStateClass
+{
+    int num_layers;                     //Will delete later
+    public: Soil_hydrology_cascade *hydrology_cascade;                           //140509
+    public: Soil_hydrology_finite_difference  *hydrology_FD;                     //140509
+    #ifdef CROPSYST_HYDROLOGY
+    public: Soil_hydrology_interface *hydrology;                                 //140509
+    #endif
+private:
+    void initMem();
+public:
+    std::vector<double> Hydro_Standard_Slope;
+    #ifdef MBVB_SOIL_TEMPERATURE
+    std::vector<double> Avg_Daily_Soil_T;
+    std::vector<std::vector<double> > Soil_Temperature;               //[hour][layer] [24][] is daily average
+    #endif
+    #ifdef CROPSYST_VERSION
+    soil_layer_array64(Water_Flow); //(m/h)                                      //150812RLN
+        // Water flow out of each layer (vertical flow)
+    #else
+    std::vector<double> Soil_Disturbance_Rating;
+    std::vector<double> Tillage_Decomposition_Adjustment_Factor;
+    std::vector<double> Water_Flow;                                             //(m/h)    Water flow out of each layer (vertical flow)
+   #endif
+    double Minimum_Hydraulic_Conductivity;                                      //(m/h) MinimumHydraulicConductivity;        //(m/h)
+    double Current_Infiltration_Rate;                                           //(m/h) CurrentInfiltrationRate;
+    double Wetting_Front_Depth;                                                 //(m) wet front depth
+    double Daily_Soil_Water_Actual_Evaporation_m;
+    //double *Hourly_Soil_Water_Actual_Evaporation;    //FMS Aug 18, 2014
+	#ifndef CROPSYST_VERSION
+    //double *Hourly_Canopy_Solar_Radiation_Interception_Fraction;    //(25);
+	#endif
+    double Hourly_Drainage_m;                                                   //(m) flux
+    #ifndef CROPSYST_FD
+    double xHourly_Ponded_Water_m;                                              //(m) it is a state. not flux M.Liu
+    #endif
+    double Hourly_Irrigation_m;                                                 //(m)
+    double Hourly_Runoff_m;                                                     //(m) Overlandflow runoff
+    double Hourly_Runon_m;                                                      //(m) Overlandflow runon from upstream grid cells
+    double Hourly_Runoff_infiltration_excess_m;                                 //LML 141028
+    double Daily_Runoff_infiltration_excess_m;                                  //LML 141028
+    double Hourly_Infiltration_m;       //(m)
+    double Hourly_Prec_Irrig_SnowMelt_m;
+    double Hourly_Soil_Water_Evaporation_m; //(m) LML 140903
+	#ifndef CROPSYST_VERSION
+    //double *Hourly_Standing_Stubble_Solar_Radiation_Interception_Fraction;  //(25);
+    //double *Hourly_Surface_Residue_Solar_Radiation_Interception_Fraction;   //(25);
+	#endif
+    double Daily_Drainage_m;                  //(m/day)
+    double Vertical_flow_balance_allLayers; //(m)
+    std::vector<double> Ice_Content;
+    double Surface_Storage;
+	#ifndef CROPSYST_VERSION
+    double Ammonia_Available_For_Volatilization;
+    double Ammonia_N_Mass_Volatilization;
+    double Bare_Soil_CN_Adjustment_Factor;
+    #endif
+    double Bypass_Coefficient;
+    #ifndef CROPSYST_VERSION
+    double Crop_CN_IIA;
+    double Crop_CN_IIB;
+    double Crop_CN_IIC;
+    double Crop_CN_IID;
+    #endif
+    std::vector<std::vector<double> > comb_Share_Flow;                           //[layer][direction] adjusted shareflow direction 0-7: fraction each direction 8:total fraction
+
+    // The cumulative value appear to be mostly only for output
+    // These should be put is a separate class because the are
+    // not soil state  160323 RLN
+
+    double Cumulative_Actual_Soil_Evaporation_m;                                 //(mm)
+    double Cumulative_Actual_Crop_Transpiration_m;
+
+    #ifndef CROPSYST_VERSION
+    double Cumulative_Ammonia_N_Mass_Volatilization;
+    #endif
+    #ifndef CROPSYST_CHEMICAL_TRANSPORT
+    double Cumulative_Ammonium_Leaching;
+    double Cumulative_Ammonium_LeachingAtControlLayer;
+    #endif
+    #ifndef CROPSYST_VERSION
+    double Cumulative_Ammonium_N_Fertigation;
+    double Cumulative_Ammonium_N_Fertilization;
+    #endif
+    double Cumulative_Drainage;
+    double Cumulative_Drainage_m;                                                //150921LML
+    double Cumulative_Irrigation_m;
+    double Cumulative_Drainage_AtControlLayer;
+   //160323RLN  #ifndef CROPSYST_CHEMICAL_TRANSPORT
+    double Cumulative_Nitrate_Leaching;                                          //(kgN/m2)
+    double Cumulative_Nitrate_LeachingAtControlLayer;                            //(kgN/m2)
+    double Cumulative_Phosphorus_Leaching;                                       //(kgP/m2)
+   //160323RLN #endif
+    #ifndef CROPSYST_VERSION
+    double Cumulative_Nitrate_N_Fertigation;
+    double Cumulative_Nitrate_N_Fertilization;
+    double Cumulative_Nitrogen_Uptake;
+    double Cumulative_Organic_N_Fertilization;
+    double Cumulative_Profile_Denitrification;
+    double Cumulative_Profile_N2O_Loss;
+    double Cumulative_Profile_Nitrification;
+    double Cumulative_Profile_Nitrogen_Immobilization;
+    double Cumulative_Profile_OM_Mineralization;
+    double Cumulative_Profile_Residue_Carbon_Lost_As_CO2;   
+    double Cumulative_Profile_Residue_Mineralization;
+    double Cumulative_Profile_SOM_Carbon_Lost_As_CO2;       
+    #endif
+    double Cumulative_Runoff;
+    #ifndef CROPSYST_VERSION
+    double Cumulative_Nitrate_N_Fertilization_Since_Planting;
+    double Cumulative_Ammonium_N_Fertilization_Since_Planting;
+    double Cumulative_Nitrate_N_Fertigation_Since_Planting;
+    double Cumulative_Ammonium_N_Fertigation_Since_Planting;
+    double Cumulative_Profile_OM_Mineralization_Since_Planting;
+    double Cumulative_Profile_Residue_Mineralization_Since_Planting;
+    double Cumulative_Profile_Nitrogen_Immobilization_Since_Planting;
+    double Cumulative_Nitrate_Leaching_Since_Planting;
+    double Cumulative_Ammonium_Leaching_Since_Planting;
+    double Cumulative_Ammonia_N_Mass_Volatilization_Since_Planting;
+    double Cumulative_Profile_Denitrification_Since_Planting;
+    #endif
+    #ifndef CROPSYST_VERSION
+    //150811RLN these are never used
+    std::vector<double> Denitrification_Event;                  //layer
+    std::vector<double> Denitrification_Event_Second_Day;
+    #endif
+    double Drainage;
+   #ifndef CROPSYST_VERSION
+    std::vector<double> Initial_C_Fraction_To_Active_Labile_SOM;        //For allocating SOM to different types
+    std::vector<double> Initial_C_Fraction_To_Active_Metastable_SOM;
+    std::vector<double> Initial_C_Fraction_To_Microbial_Biomass;
+    std::vector<double> Initial_C_Fraction_To_Passive_SOM;
+    std::string Initial_Soil_Residue_Label;
+    std::vector<double> Initial_Soil_Residue_Mass;
+    std::string Initial_Standing_Stubble_Residue_Label;
+    double Initial_Standing_Stubble_Residue_Mass;
+    std::string Initial_Surface_Residue_Label;
+    double Initial_Surface_Residue_Mass;
+   #endif
+    double Daily_Infiltration;  //(m)
+    double Daily_Irrigation_m;
+    #ifndef CROPSYST_CHEMICAL_TRANSPORT
+    double Daily_Ammonium_Leaching;                                              //(kgN/m2) 150921LML note.
+    double Daily_Ammonium_N_Fertigation;
+    double Daily_Ammonium_N_Fertilization;
+    double Daily_Nitrate_Leaching;                                               //(kgN/m2) 150921LML note.
+    double Daily_Nitrate_N_Fertigation;
+    double Daily_Nitrate_N_Fertilization;
+    double Daily_Organic_N_Fertilization;
+    double Daily_Phosphorus_Leaching;
+    #endif
+    //double Daily_PET_MB;                                                         //(m) 160407LML
+    double Daily_Ponded_Water;
+    double Daily_Runoff_m;
+    double Daily_Runon_m;                                                       //LML 140923
+    double Daily_LaterFlowIn_m;                                                 //LML 150222
+    double Daily_LaterFlowOut_m;                                                //LML 150222
+    double Daily_Profile_N2O_Loss;                                               //FMS Jan 29, 2015
+	#ifndef CROPSYST_VERSION
+    double Fallow_CN_I;
+    double Fallow_CN_II;
+    double Fallow_CN_III;
+    /*140509 RLN  moved below  delete these lines
+    double *Old_Lower_Water_Content;
+    double *Old_Upper_Water_Content;
+    */
+    //double *OM;
+    std::vector<double> Layer_Actual_Ammonium_N_Uptake;
+    std::vector<double> Layer_Actual_Nitrate_N_Uptake;
+    std::vector<double> Layer_Actual_Phosphorus_Uptake;
+	#endif
+    #ifdef MBVB_FD
+    std::vector<double> Old_Lower_Water_Content;
+    std::vector<double> Old_Upper_Water_Content;
+    #endif
+    #ifndef CROPSYST_VERSION
+    std::vector<double> Initial_NO3;                                             //(kgN/m2) NO3
+    std::vector<double> Initial_NH4;                                             //(kgN/m2) NH4
+    #else
+    std::vector<double> Layer_Ammonium_N_Mass;                                   //(kgN/m2)
+    std::vector<double> Layer_Nitrate_N_Mass;                                    //(kgN/m2)
+    #endif
+    std::vector<double> Layer_Phosphorus_Mass;
+    #ifndef CROPSYST_CHEMICAL_TRANSPORT
+    std::vector<double> Layer_Ammonium_N_Conc;                                   //(gN/L or kgN/m3) 151029LML note: only surface concentration is used.
+    std::vector<double> Layer_Nitrate_N_Conc;                                    //(gN/L or kgN/m3) 151029LML note: only surface concentration is used.
+    std::vector<double> Layer_Phosphorus_Conc;
+    #endif
+    #ifndef CROPSYST_VERSION
+    std::vector<double> Layer_Carbon_Mass_In_Organic_Matter;                     //(kgC/m2)
+    std::vector<double> Layer_Carbon_Mass_In_Organic_Residue;
+    std::vector<double> Layer_Carbon_Mass_In_Organic_Residue_Plus_Microbes;
+    std::vector<double> Layer_Carbon_Transfer_From_Residue_To_SOM;
+    std::vector<double> Layer_Denitrified_N_Mass;
+    std::vector<double> Layer_Mineralized_N_Mass_From_Organic_Matter;
+    std::vector<double> Layer_Mineralized_N_Mass_From_Organic_Residues;
+    std::vector<double> Layer_Nitrified_N_Mass;
+    std::vector<double> Layer_Nitrogen_Mass_Immobilized;
+    std::vector<double> Layer_Nitrogen_Mass_In_Organic_Matter;
+    std::vector<double> Layer_Nitrogen_Mass_In_Organic_Residue;
+    std::vector<double> Layer_Nitrogen_Transfer_From_Residue_To_SOM;
+    std::vector<double> Layer_Organic_Matter_Content;                               //(%)
+    //FMS Apr 21, 2015
+    //std::vector<double> Layer_Organic_Residue_Mass;
+    std::vector<double> Layer_Potential_Ammonium_N_Uptake;
+    std::vector<double> Layer_Potential_Nitrate_N_Uptake;
+    std::vector<double> Layer_Potential_Phosphorus_Uptake;
+    std::vector<double> Layer_Residue_C_Balance;
+    std::vector<double> Layer_Residue_CO2_Loss;
+    std::vector<double> Layer_Residue_N_Balance;
+    std::vector<double> Layer_Soil_Water_Uptake;
+    std::vector<double> Layer_SOM_C_Balance;
+    std::vector<double> Layer_SOM_CO2_Loss;
+    std::vector<double> Layer_SOM_N_Balance;
+    std::vector<double> Layer_Total_CO2_Loss;
+    #endif
+    //#ifndef MSVB_CASCADE_INFILTRATION_HOUR
+    CropSyst::Pond &pond;
+    //#endif
+    //LML 140618 #if (!defined (CROPSYST_HYDROLOGY) || defined(MBVB_FD))
+    //140509 RLN becoming obsolete
+    #ifdef CROPSYST_VERSION
+    soil_layer_array64(New_Water_Content); // used for chemical transport   // 070827 rename to old_liquid_water_content 070116
+    soil_layer_array64(Old_Water_Content); // used for chemical transport   // 070827 rename to old_liquid_water_content 070116
+    #else
+    std::vector<double> New_Water_Content;                                      //LML 140618 for hourly chemical transport
+    std::vector<double> Old_Water_Content;                                      //LML 140618 for hourly chemical transport
+    #endif
+    std::vector<double> Delta_Water_Content;                                    //FMS Aug 19, 2014 +: water extraction
+    #ifndef CROPSYST_VERSION
+    std::vector<double> Initial_OM;                                             //(%) OM dry weight
+    std::vector<double> Initial_Phosphorus;                                     //(kg/ha) Phosphorus
+    #endif
+    std::vector<double> Yesterday_WC;                                            //(m3/m3) 150520 water content
+    std::vector<std::vector<double> > Today_Hourly_WC;                           //[layer][hour] 150520 water content
+    double Non_Intercepted_Precipitation_mm;
+    double output_daily_canopy_interception_water_mm;                            //150909LML
+   #ifndef CROPSYST_VERSION
+    double Profile_Ammonium_Immobilization;
+    double Profile_Carbon_Transferred_From_Residue_To_SOM;
+    double Profile_Denitrification;
+    double Profile_Labile_Carbon_Mass;
+    double Profile_Metastable_Carbon_Mass;
+    double Profile_Microbial_Carbon_Mass;
+    double Profile_Nitrate_Immobilization;
+    double Profile_Nitrification;
+    double Profile_Nitrogen_Transferred_From_Residue_To_SOM;
+    double Profile_OM_Mineralization;
+    double Profile_Passive_Carbon_Mass;
+    double Profile_Residue_Carbon_Lost_As_CO2;
+    double Profile_Residue_Carbon_Mass;
+    double Profile_Residue_Mineralization;
+    double Profile_Residue_Nitrogen_Mass;
+    double Profile_Net_N_Mineralization_Mass;                                    //FMS Apr 2, 2015
+    #endif
+    double Profile_Soil_Water_Depletion;
+    #ifndef CROPSYST_VERSION
+    double Profile_Soil_Water_Uptake;
+    double Profile_SOM_Carbon_Decomposed;
+    double Profile_SOM_Carbon_Lost_As_CO2;
+    double Profile_SOM_Carbon_Mass;
+    double Profile_SOM_Carbon_Mass_Balance;
+    double Profile_SOM_Nitrogen_Decomposed;
+    double Profile_SOM_Nitrogen_Mass;
+    double Profile_SOM_Nitrogen_Mass_Balance;
+
+    double Residue_CN_I_10Mg_per_Ha;
+    double Residue_CN_II_10Mg_per_Ha;
+    double Residue_CN_III_10Mg_per_Ha ;
+    double Residue_Cover_CN_Adjustment_Factor;
+    #endif
+    //double Sheet_Of_Water_Available_To_Infiltrate_m;    //FMS Jan 25, 2014 LML removed 14/04/18
+    /*160414RLN obsolete now using evaporation_potential_remaining.
+    double Daily_Soil_Water_Potential_Evaporation_m;
+    */
+    double Standing_Stubble_Fraction_Solar_Radiation_Interception;
+    double Surface_Residue_Fraction_Solar_Radiation_Interception;
+    double Surface_Water_Store; //Unclear the usage LML 14/04/07
+	#ifndef CROPSYST_VERSION
+    /*FMS Apr 17, 2015 Deleted those variables
+    double Top_30cm_Labile_Carbon_Mass;
+    double Top_30cm_Metastable_Carbon_Mass;
+    double Top_30cm_Microbial_Carbon_Mass;
+    double Top_30cm_Passive_Carbon_Mass;
+    double Top_30cm_Soil_Carbon_Mass;
+    double Top_5cm_Labile_Carbon_Mass;
+    double Top_5cm_Metastable_Carbon_Mass;
+    double Top_5cm_Microbial_Carbon_Mass;
+    double Top_5cm_Passive_Carbon_Mass;
+    double Top_5cm_SOM_Carbon_Mass;
+    double Top_60cm_Labile_Carbon_Mass;
+    double Top_60cm_Metastable_Carbon_Mass;
+    double Top_60cm_Microbial_Carbon_Mass;
+    double Top_60cm_Passive_Carbon_Mass;
+    double Top_60cm_Soil_Carbon_Mass;
+    */
+    double Total_Actual_Ammonium_N_Uptake;
+    double Total_Actual_Nitrate_N_Uptake;
+    double Total_Actual_Nitrogen_Uptake;
+    double Total_Actual_Phosphorus_Uptake;
+    #endif
+    double Total_Ammonium_N_Mass_At_Planting;
+    double Total_Nitrate_N_Mass_At_Planting;
+    #ifndef CROPSYST_VERSION
+    double Total_Ammonium_N_Mass;
+    double Total_Nitrate_N_Mass;
+    double Total_Phosphorus_Mass;
+    #endif
+    #ifndef CROPSYST_VERSION
+    double Total_Potential_Ammonium_N_Uptake;
+    double Total_Potential_Nitrate_N_Uptake;
+    double Total_Potential_Phosphorus_Uptake;
+    double Cumulative_Profile_Carbon_Transferred_From_Residue_To_SOM; // FMS 11/04/2013
+    double Cumulative_Profile_SOM_Carbon_Decomposed; //FMS 11/04/2013
+    double Cumulative_Profile_Initial_Organic_Matter_Carbon_Mass; // FMS 11/05/2013
+    double Cumulative_Profile_Final_Organic_Matter_Carbon_Mass; // FMS 11/05/2013
+    double Cumulative_Profile_Residue_Carbon_Lost_As_CO2_MB; //FMS 11/19/2013
+    double Cumulative_Profile_SOM_Carbon_Lost_As_CO2_MB; //FMS 11/19/2013
+    #endif
+    double Daily_Cell_Change_In_Solute_Mass_By_Lateral_Profile;                  //FMS Sep 22, 2014 ' OJO Change by Daily_Cell_Solute_Mass_Flow_Lateral FMS Mar 23, 2015
+    double Daily_Cell_Change_Solute_Mass_By_Lateral_Surface_Runoff;              //FMS Nov 21, 2014  OJO Change by Daily_Cell_Solute_Mass_Flow_Lateral_Surface FMS Mar 23, 2015
+    double Daily_Cell_Solute_Mass_Flow_Out_By_Lateral_Profile;                   //kg/m2 FMS Mar 23, 2015
+    double Daily_Cell_Solute_Mass_Flow_Out_By_Lateral_Surface_Runoff;            //kg/m2 FMS Mar 23, 2015
+    #ifndef CROPSYST_VERSION
+    std::vector<double> Soil_Microbial_Carbon_Mass;                              //FMS Apr 17, 2015
+    std::vector<double> Soil_Labile_Carbon_Mass;                                 //FMS Apr 17, 2015
+    std::vector<double> Soil_Passive_Carbon_Mass;                                //FMS Apr 17, 2015
+    std::vector<double> Soil_Metastable_Carbon_Mass;                             //FMs Apr 17, 2015
+    #endif
+    #ifdef MBVB_FD
+    int Water_Table_Layer;
+	#endif
+    #if (!defined (CROPSYST_HYDROLOGY) || defined(MBVB_FD))
+    std::vector<double> Water_Content;                          //(m3/m3) Liquid water
+    std::vector<double> Water_Potential;  //RLN I think water potential is actually only needed for FD
+    #endif
+    double WT_Solute_Conc;
+    #ifndef CROPSYST_VERSION
+    std::string Hydrologic_Group;
+    #endif
+    #ifndef CROPSYST_FD
+    #ifdef MBVB_FD
+    //140509 RLN becoming obsolete
+
+    std::vector<double> Upper_Water_Content;
+    std::vector<double> Lower_Water_Content;
+    std::vector<double> New_Upper_Water_Content;
+    std::vector<double> New_Lower_Water_Content;
+    #endif
+    #endif
+    double Count_For_Average_Concentration;                                      //131029FMS
+    double Sum_Layer_Concentration;
+    #ifndef CROPSYST_VERSION
+    double Ammonium_Mass_Into_OM_Mineralization;                           //131031FMS
+    double Nitrate_Mass_Into_Soil_SOM_Mineralization;                            //131031FMS
+    double Sum_Solute_N_In; // (kg/m2) amount of N coming into the MB by fertigation //131001FMS change from SoilProcessesClass
+    #endif
+    double Maintenance_Respiration;             //(g glucose/m2/d)               //140627FMS
+    double Biosynthesi_Efficiency;              //(g dry weight biomass / g glucose) //140627FMS
+    double Gross_Canopy_Photosynthesis;         //(g C/m2/d)                     //040702FMS
+    double CO2_by_Plant_Respiration;            //(g C/m2/d)                     //140702FMS
+    double Biomass_Root_Today;                  // gC/m2                         //140702FMS
+    double Biomass_Top_Today;                   // gC/m2                         //140702FMS
+    bool Convert_Biomass_To_Residue;                                             //140711FMS
+    Surface_Soil_Cover_Type Surface_Soil_Cover;                                  //140826FMS
+public:
+    double Annual_Precipitation_m;                                               //161101LML
+    double Annual_Actual_Soil_Evaporation_m;                                     //(m) 160404LML
+    double Annual_Actual_Crop_Transpiration_m;                                   //(m) 160404LML
+    double Annual_Drainage_m;                                                    //(m) 160404LML
+    double Annual_Irrigation_m;                                                  //(m) 160404LML
+    double Annual_Ammonium_Leaching;                                             //(kgN/m2) 150921LML note.
+    //double Annual_Ammonium_N_Fertigation;                                      //(kgN/m2) 160405LML
+    double Annual_Ammonium_N_Fertilization;                                      //(kgN/m2) 160405LML
+    double Annual_Nitrate_Leaching;                                              //(kgN/m2) 160405LML
+    //double Annual_Nitrate_N_Fertigation;                                       //(kgN/m2) 160405LML
+    double Annual_Nitrate_N_Fertilization;                                       //(kgN/m2) 160405LML
+    double Annual_Organic_N_Fertilization;                                       //(kgN/m2) 160405LML
+    double Annual_Nitrification;                                                 //(kgN/m2) 160405LML
+    double Annual_Denitrification;                                               //(kgN/m2) 160405LML
+    double growth_season_N_leached;                                              //(kgN/m2) 170207LML
+public:
+    SoilProfileClass &SoilProfileRef;
+    AllControlClass &ControlRef;
+    InitialSoilStateClass &initSoilStateRef;                                     //160317LML
+    #ifdef CROPSYST_VERSION
+    Soil_chemicals_profile *chemicals_optional;                                   //150914LML
+    #endif
+public:
+    SoilStateClass
+      (AllControlClass  &_ControlRef
+      ,SoilProfileClass &_SoilProfileRef
+      ,CropSyst::Pond   &_pond
+      #ifdef CROPSYST_VERSION
+      ,Soil_chemicals_profile *_chemical
+      #endif
+      ,InitialSoilStateClass &initSoilStateRef_                                  //160317LML
+       );
+    ~SoilStateClass();
+    int getSoilLayers();
+    void printSoilState();
+    double getTotalSoilLiqWaterContent_m();
+    double getTotalSoilIceContent_m();
+    double getTotalSoilWaterContent_m();    //LML 140829 liq + ice
+    double getProfileSoilVWC();                                                  //150909LML
+    #ifndef CROPSYST_VERSION
+    double getTotalSOMCarbonMass();         //(kgC/m2)
+    double getTotalSOMNitrogenMass();       //(kgN/m2)
+    #endif
+    #ifndef CROPSYST_VERSION
+    void TransferNutrientsBetweenLayers(Solute nutrient_lable,double fraction,int from_layer,int to_layer);
+    #endif
+    #ifndef CROPSYST_VERSION
+    void UpdateSoilSoluteStateAfterUptake();
+    #endif
+    void UpdateProfileState();
+    double calc_h_Theta(double Theta,double Air_Entry,double Theta_s,double Campbell_b);
+    #ifdef MBVB_FD
+    //140511 This is actually not used anymore
+    void ResetSoilWaterStatus(std::vector<double> &Initial_SavePot,std::vector<double> &Initial_Save_wu,std::vector<double> &Initial_Save_wl,
+                              std::vector<double> &Upper_WC,std::vector<double> &Lower_WC);
+    #endif
+    #ifdef MBVB_FD
+    double calcFDProfileWater();
+    void setSoilWaterByNewUpperAndLower(int LastLayer);
+    #endif
+    #if (!defined (CROPSYST_HYDROLOGY) || defined(MBVB_FD))
+    void setSoilWater();
+    void setallSoilWater();
+    #endif
+    #ifndef CROPSYST_VERSION
+    void SetSCSSoilCurveNumbers();
+    #endif
+    void ClearStateVariables();
+    #ifndef CROPSYST_VERSION
+    void UpdateSoilState();
+    #endif
+    #ifdef CROPSYST_SOILFILE
+    void SetDefaultSoilState();                                                  //141210LML
+    #endif
+    void ReadSoilStateParameters
+       #ifdef CROPSYST_VERSION
+       (const CORN::OS::File_name &file_name
+        ,CropSyst::Scenario &initial_profile);                                   //150723RLN
+       #else
+       (int SoilID);
+       #endif
+    void ReadSoilStateParameters
+       #ifdef CROPSYST_VERSION
+       (const CORN::OS::File_name &file_name
+       ,InitialSoilStateClass &initial_profile);                                        //150723RLN
+       #else
+       (int SoilID);
+       #endif
+    void CopySoilStateParameters
+       (const InitialSoilStateClass &from_initial_profile
+       ,CropSyst::Scenario &initial_profile_scen);                               //160317LML
+    //160722 void InitDailyFluxes();
+    virtual bool start_day()                                       modification_;//160724RLN
+       //160722RLN was InitDailyFluxes
+    //void InitAnnualFluxes();                                                     //140926LML
+    virtual bool start_year()                                      modification_;//160404LML
+    void InitHourlyFluxes();
+    void ClearMaintenanceFluxes();
+    #ifndef CROPSYST_VERSION
+    double getProfileNO3NMass();            //(kgN/m2) LML 140829 not including surface NO3
+    double getProfileNH4NMass();            //(kgN/m2) LML 140829 not including surface NH4
+    #endif
+    void setFactorCalibrationLaterFlow(int L,double X);
+    double getFactorCalibrationLaterFlow(int L);
+    double get_K_Theta_Lateralflow                                               //150518LML
+      (nat8 layer, double Theta, double Theta_s
+      ,double K_sat_input, double Theta_b_input);
+    std::string FindSoilStateParameterFileName(int SoilID);
+    virtual float64 get_liquid_water_content_volumetric      ( nat8 layer)  const;
+    virtual float64 set_water_content_volumetric_layer( nat8 layer, float64 new_water_content);
+    virtual float64 change_liquid_water_content_by_volumetric( nat8 layer, float64 change_WC) modification_;
+    virtual float64 set_liquid_water_content_volumetric_layer( nat8 layer, float64 new_water_content);
+#ifndef MSVB_CASCADE_INFILTRATION_HOUR
+   virtual bool initialize();                                                    //140506
+    //140424 These functions are here temporarily until we clean up the soil layers in Mingliang's code
+    // These functions are calling assert to see if they are actually needed/used yet
+    // Soil hydrology interface methods
+   virtual float64 get_water_plus_ice_content_gravimetric   ( nat8 layer)  const { assert(false); return 0; }
+   virtual float64 get_water_plus_ice_content_volumetric_at ( nat8 layer,CORN::Hour hour)  const { assert(false); return 0; }
+   virtual float64 get_water_plus_ice_content_volumetric    ( nat8 layer)  const { return get_liquid_water_content_volumetric(layer) + get_ice_content_volumetric(layer); }
+   virtual float64 get_water_filled_porosity( nat8 layer, CORN::Hour for_hour)   const { assert(false); return 0; }
+   virtual float64 get_water_potential                      ( nat8 layer)  const { assert(false); return 0; }
+   virtual float64 provide_water_depth_profile(bool all_water)        provision_ { assert(false); return 0; }
+   virtual float64 get_plant_avail_water( nat8 layer)                      const { assert(false); return 0; }
+   virtual float64 calc_available_water_fraction( nat8 layer, bool real_wilt_based) const { assert(false); return 0; } //160601RLN
+   virtual float64 get_K_Theta
+      (nat8 layer
+      ,float64 Theta, float64 Theta_s)                                     const { assert(false); return 0; }
+    virtual float64 get_ice_content_volumetric               ( nat8 layer) const { return Ice_Content[layer]; }
+   virtual float64 get_ice_content_volumetric_yesterday      ( nat8 layer) const { assert(false); return 0; }
+   virtual bool is_frozen                                    ( nat8 layer) const { assert(false); return 0; }
+   virtual float64 extract_water(float64 water_uptake_m[] , nat8 start_layer) { assert(false); return 0; }
+   //160724RLN virtual bool start_day()                                        modification_ { assert(false); return 0; }
+   virtual void update_liquid_and_ice_water_content()              modification_ { assert(false);  }
+    #ifdef USE_VARIABLE_RECORDERS
+    public:
+      virtual bool render_variable_recorders
+      (CS::Variable_recorders &recorders
+      ,nat32 desired_descriptive_summary_elements)                /*rendition_*/{ assert(false); return 0; } //130924
+    #endif
+ private:
+    AllControlClass   *test_ControlRef;
+    SoilProfileClass  *test_SoilProfileRef;
+    InitialSoilStateClass *test_InitSoilState;
+    inline SoilStateClass *abstract_class_check()                                //160606RLN
+      { return new SoilStateClass
+            (*test_ControlRef,*test_SoilProfileRef,pond
+            #ifdef CROPSYST_VERSION
+            ,0
+            #endif
+            ,*test_InitSoilState
+            ); }
+#endif
+   #ifdef CROPSYST_HYDROLOGY
+   public:
+   virtual unmodifiable_ Soil_hydrology_interface *get_hydrology_constant() const
+   {
+      return 0; // NYI
+   }
+   #endif
+};
+#endif
+#endif // SOILSTATECLASS_H

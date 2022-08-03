@@ -1,0 +1,530 @@
+L_Crop_file,
+/* cropfile   CROPSYST  VALIDATE PARAMS CS     it-gb
+en Crop file
+fr Fichier culture
+it File della coltura
+es Archivo del cultivo
+ca Archiu del cultiu
+*/
+L_Crop_name,
+/* cropfile   CROPSYST   PARAMS
+en Crop name
+fr Nom de la culture
+it Nome della coltura
+es Nombre del cultivo
+ca Nom del cultiu
+*/
+
+
+L_for_insensitivity,
+/* cropfile  PARAMS CS VALIDATE
+en for insensitivity
+fr pour repose
+it nessuna risposta
+es no hay respuesta
+ca Sense resposta
+*/
+L_Green_LAI_at_physioligical_maturity_GAI,
+/* cropfile  VALIDATE PARAMS                it-gb
+en Green LAI at physiological maturity (GAI)
+fr LAI vert à maturité physiologique (GAI)
+it Indice di area fogliare verde a maturazione fisiologica (GAI)
+es Area foliar verde a la madurez fisiológica
+ca Area foliar viva en la maduresa fisiològica
+*/
+L_Land_use,
+/* cropfile  PARAMS CS VALIDATE
+en Land Use
+fr Assolement
+it Uso del suolo
+es Uso del suelo
+ca Us del sòl
+*/
+L_Photo_period,
+/* cropfile  PARAMS
+en Photo-period
+fr Photopériode
+it Fotoperiodo
+es Fotoperiodo
+ca Fotoperiode
+*/
+L_Emergence,
+/* cropfile  ?  REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS    RPRTGRPH
+en Emergence
+fr Levée
+it Emergenza
+es Emergencia
+ca Emergència
+*/
+L_End_flowering,
+/* cropfile  PARAMS VALIDATE CROPSYST
+en End flowering
+fr Fin floraison
+it Fine della fioritura
+es Fin de floración
+ca Final de la floració
+*/
+
+L_Begin_veraison,
+/* cropfile PARAMS CROPSYST  it-rn 000625  check en-rn fr-rn translations  es ca
+en Begin veraison
+fr Début veraison
+it Inizio invaiatura
+es Comienzo de veraison
+ca Inici de la veraison
+*/
+L_Veraison,
+/* cropfile CROPSYST  it-rn  000625  check en-rn fr-rn translations  es ca
+en Veraison
+fr Véraison
+it Invaiatura
+es Veraison
+ca Veraison
+*/
+L_Peak_LAI,
+/* cropfile  RPRTGRPH CROPSYST CSW ( REPORT PARAMS )
+en Peak LAI
+fr Pic de LAI
+it LAI massimo
+es LAI máximo
+ca LAI màxim
+*/
+L_Phenology,
+/* cropfile  CSW ( PARAMS )
+en Phenology
+fr Phenologie
+it Fenologia
+es Fenológía
+ca Fenològica
+*/
+L_Fraction_of_straw_remaining_after_harvest,
+/* cropfile  PARAMS CS VALIDATE
+en Fraction of straw remaining after harvest
+fr Fraction de paille restant aprés la recolte
+it Frazione di residui colturali dopo la raccolta
+es Fracción de la paja que permanece como residuo
+ca Fracció de la palla que queda com a residuu
+*/
+L_Daily_canopy_extinction_coefficient,
+/* cropfile  PARAMS CS
+en Extinction coefficient for solar radiation
+fr Coefficient d'extinction pour la radiation solaire
+it Coefficiente di estinzione della radiazione solare
+es Coeficiente de extinción de radiación solar
+ca Coeficient d'extinció de la radiació solar
+*/
+L_Maximum_N_concentration_early_growth,
+/* cropfile  PARAMS CS VALIDATE
+en Maximum N concentration during early growth
+fr Concentration maximale d'azote à la levée
+it Massima concentrazione di N durante le prime fasi di sviluppo
+es_ch Concentración máxima de N durante crecimiento inicial
+es Concentración máxima de N en el estado de emergéncia
+ca Concentració màxima de N en emergència
+*/
+L_Maximum_N_concentration_at_maturity,
+/* cropfile  PARAMS CS VALIDATE
+en Maximum N concentration at maturity
+fr Concentration maximale d'azote à maturité
+it Minima concentrazione  di N alla maturazione
+es Concentración máxima de N a la madurez
+ca Concentració màxima de N en la maduresa
+*/
+L_Maximum_N_content_of_standing_stubble,
+/* cropfile  PARAMS CS VALIDATE    it-gb
+en Maximum N content of standing stubble
+fr Contenu maximum d'Azote dans la paille
+it Contenuto massimo di azoto nelle stoppie
+es Contenido máximo de N del rastrojo
+ca Contingut màxim de N en el rostoll
+*/
+L_Minimum_N_concentration_at_harvest,
+/* PARAMS CS VALIDATE    it-rn            980724 fr-rn es-rn ca-rn check RETRANSLATE
+en Minimum N concentration of harvested material
+fr Concentration minimo d'azote à récolte
+it Conc. minima di N alla raccolta
+es Conc. mínima de N a la cosecha
+ca Conc. mínima de N en la collita
+*/
+L_Minimum_N_concentration_at_maturity,
+/* cropfile  PARAMS CS VALIDATE
+en Minimum N concentration at maturity
+fr Concentration minimale d'azote à maturité
+it Concentrazione minima di N nelle prime fasi
+es_ch Concentración minima de N alla maturazione
+es Concentración mínima de N a la madurez
+ca Concentració mínima de N en la maduresa
+*/
+L_minimum,
+/* PARAMS CS VALIDATE  en-rn fr-rn it-rn ca-rn es-rn
+en minimum
+fr minimale
+it minima
+es m¡nima
+ca m¡nim
+*/
+L_maximum,
+/* PARAMS CS VALIDATE  en-rn fr-rn it-rn ca-rn es-rn
+en maximum
+fr maximum
+it massima
+es m xima
+ca m…xima
+*/
+L_AT_PT_ratio_limit_to_leaf_area_growth,
+/* cropfile  PARAMS CS VALIDATE  it-md 990605  fr-rn es-rn ca-rn
+en Act. to pot. transpiration ratio that limits leaf area growth
+fr Rap. de transp. réelle à pot. ce qui la crois. de la couvert vég. est limité
+it Rap. tra trasp. eff. e pot. al quale si limita la crescita dell'apparato fogliare
+es Razón de transpiración real a pot. a que se limita el crecimiento aereo
+ca Rel. de transpiració act. a pot. a que se limita el creixement aeri
+*/
+L_Area_to_mass_ratio_of_residue_cover,
+/* cropfile  PARAMS CS VALIDATE
+en Area to mass ratio of residue cover
+fr Rapport superficie/poids de la couche de résidus
+it Rapporto superficie/massa dei residui superficiali
+es_ch Razón area/masa de la capa de residuos
+es Relación área/masa de la capa de residuus
+ca Relació àrea/massa de la capa de residuus
+*/
+L_Crop_morphology,
+/* cropfile  PARAMS CS
+en Crop morphology
+fr Morphologie de la culture
+it Morfologia della coltura
+es Morfología del cultivo
+ca Morfologia del cultiu
+*/
+L_Nitrogen_availability_adjustment,
+/* cropfile  PARAMS   it-gb
+en Nitrogen availability adjustment
+fr Fixation de l'azote disponible pour plante
+it Aggiustamenzo dell'azoto disponible per la pianta
+es Ajuste del nitrogeno disponible para la planta
+ca Ajust del nitrogen disponible per la planta
+*/
+L_Nitrogen_uptake_adjustment,
+/* cropfile  PARAMS CS VALIDATE
+en Nitrogen uptake adjustment
+fr Consommation en azote
+it Aggiustamento dell'assorbimento dell'azoto
+es Ajuste para la absorción de nitrógeno
+ca Ajust de la absorció de nitrogen
+*/
+L_residual_nitrogen,
+/* cropfile  PARAMS
+en Amount of residual nitrogen per soil layer
+fr Quantité d'azote non disponible pour consommation
+it Quantità di azoto residuo non disponibile per l'assorbimento radicale
+es Cantidad de nitrógeno no disponible para la absorción
+ca Quantitat de nitrogen no disponible per a l'absorció
+*/
+L_Optimum_mean_daily_temperature_for_growth,
+/* cropfile PARAMS CS VALIDATE           it-rn es-cs check translations: fr-rn ca-rn
+en Optimum mean daily temperature for growth
+fr Température moyenne journalière pour la croissance optimale
+it Temperatura media quotidiana per la crescita ottimale
+es Temperatura media diaria óptima para el crecimiento
+ca Temperatura mitja diaria òptima por el creixement
+*/
+L_Average_temperature_to_induce_dormancy,
+/* cropfile PARAMS CS VALIDATE CROPSYST   it-gb es-cs check translations: fr-rn ca-rn
+en Average temperature for 7 consecutive days to induce dormancy
+fr Température moyenne durant 7 jours consécutifs induire la dormance
+it Temperatura media per 7 giorni consecutivi per indurre la dormienza
+es Temperatura media durante 7 días consecutivos para inducir dormancia
+ca ?Temperatura mitja durant 7 dies consecutius induir la dormancia?
+*/
+L_First_date_to_start_looking_for_dormancy,
+/* cropfile PARAMS CS VALIDATE CROPSYST  es-cs  it-gb check translations: fr-rn  ca-rn
+en First date to start looking for dormancy
+fr Premier date commencer cherche la dormance
+it Primo giorno per l'inizio della dormienza
+es Primera fecha para comenzar búsqueda del inicio de dormancia
+ca ?Primer data inici busca la dormancia?
+*/
+L_First_date_to_start_looking_for_restart_after_dormancy,
+/* cropfile PARAMS CS VALIDATE CROPSYST   es-cs    it-gb   check translations: fr-rn  ca-rn
+en First date to start looking for restart after dormancy
+fr Premier date commencer cherche relance après la dormance
+it Primo giorno di ripresa dopo la dormienza
+es Primera fecha para comenzar búsqueda de término de dormancia
+ca ?Primer data comenzar busca reinicia després de dormancia?
+*/
+L_Osmotic_potential____OBSOLETE,
+/* cropfile  PARAMS CSW
+en Osmotic potential
+fr Potentiel osmotique
+it Potenziale osmotico
+es Potencial osmótico
+ca Potencial osmòtic
+*/
+L_must_be_less_than_degree_days_of,
+/* cropfile  VALIDATE PARAMS         it-gb
+en must be less than degree days of
+fr faut étre moins de
+it devono essere minori dei gradi giorno di
+es debe ser menos que los grados-día para
+ca ha de ser més petit de
+*/
+L_Vernalization,
+/* cropfile  PARAMS CS
+en Vernalization
+fr Vernalization
+it Vernalizzazione
+es Vernalización
+ca Vernalització
+*/
+L_Vernalization_complete,
+/* cropfile  VALIDATE CROPSYST PARAMS CS
+en Vernalization complete
+fr Complet vernalization
+it Completamento del periodo di  Vernalizzazione
+es Completa vernalización
+ca Completa vernalització
+*/
+L_Vernalization_starts,
+/* cropfile  VALIDATE CROPSYST PARAMS CS
+en Vernalization starts
+fr Début vernalization
+it Inizio vernalizzazione
+es Inicio vernalización
+ca Inici vernalització
+*/
+L_Light_to_above_ground_biomass_conversion,
+/* cropfile  PARAMS CS VALIDATE   it-gb
+en Light to above ground biomass conversion
+fr Conversion de la lumière interceptée en matière sèche
+it Conversione luce/biomassa area
+es Conversión de luz a materia seca
+ca Converssió llum/matèria seca
+*/
+L_Decomposition_time_constant,
+/* cropfile  PARAMS CS VALIDATE
+en Decomposition time constant
+fr Temps de décomposition
+it Tempo di decomposizione
+es Tiempo de descomposición
+ca Temps de descomposició
+*/
+L_Temperature_limit_ceases,
+/* cropfile  PARAMS VALIDATE
+en Thermal time to cease temperature limitation
+fr Durée thermique a laquelle la temp. minimale cesse
+it Unitá termiche totali per la fine dell' inibizione termica
+es_ch Tiempo térmico al cual limitación térmica cesa
+es Tiempo térmico en el cual limitación térmica cesa
+ca Temps tèrmic en el qual la temperatura deixa de ser limitant
+*/
+L_Biomass_transpiration_coefficient,
+/* cropfile  ?  REPORT CROPSYST RPRTVIEW  VALIDATE PARAMS CS RPRTGRPH
+en Above ground biomass-transpiration coefficient
+fr Coefficient matière sèche-transpiration
+it Coefficiente sostanza secca /acqua traspirata
+es Coeficiente biomasa seca/transpiración
+ca Coeficient biomassa seca/transpiració
+*/
+L_during_grain_filling,
+/* cropfile  PARAMS CS
+en during grain filling
+fr pendant le remplissage
+it durante il periodo di riempimento delle cariossidi
+es durante el llenado de grano
+ca durant l'ompliment del gra
+*/
+L_during_flowering,
+/* cropfile  PARAMS CS
+en during flowering
+fr pendant la floraison
+it durante la fioritura
+es durante floración
+ca Durant la floració
+*/
+L_Translocation_factor,
+/* cropfile  PARAMS CS    it-gb
+en Translocation factor
+fr Facteur de translocation
+it Fattore di translocazione
+es Factor de translocación
+ca Factor de translocació
+*/
+L_Translocation_to_grain_factor,
+/* cropfile  PARAMS CS    it-gb
+en Translocation to grain factor
+fr Facteur de translocation à grain
+it Fattore di translocazione granire
+es Factor de translocación formar grano
+ca Factor de translocació formar gra
+*/
+L_Root,
+/* cropfile  PARAMS VALIDATE it-rn fr-rn 990605 check translation: ca-rn es-rn
+en Edible root
+fr Racine alimentaire
+it Radice commestibile
+es_ch Radicula comestibla
+es Raíz comestible
+ca Arrel comestible
+*/
+L_Tuber,
+/* cropfile  PARAMS VALIDATE CROPSYST  it-rn fr-rn 990605 check translation: es-rn ca-rn
+en Tuber crop
+fr Tubér
+it Tubero
+es_ch Tuber
+es Tubér
+ca Tubèr
+*/
+L_Thermal_time,
+/* cropfile  PARAMS
+en Thermal time
+fr Durée thermique
+it Unità termiche
+es Tiempo térmico
+ca Temps tèrmic
+*/
+L_Classification,
+/* cropfile  PARAMS VALIDATE
+en Classification
+fr Classification
+it Classificazione
+es Clasificación
+ca Classificació
+*/
+L_Barley,
+/* cropfile  PARAMS
+en Barley
+fr Orge
+it Orzo
+es Cebada
+ca Ordi
+*/
+L_spring,
+/* cropfile  PARAMS VALIDATE
+en spring
+fr printanière
+it primavera
+es primavera
+ca primavera
+*/
+L_Sunflower,
+/* cropfile  PARAMS
+en Sunflower
+fr Tournesol
+it Girasole
+es Girasol
+ca Girasol
+*/
+L_winter_adj,
+/* cropfile  PARAMS VALIDATE
+en winter
+fr hivernal
+it inverno
+es_ch invierno
+es invernal
+ca hivernal
+*/
+L_Flowering,
+/* cropfile  VALIDATE CROPSYST PARAMS CS
+en Flowering
+fr Floraison
+it Fioritura
+es Floración
+ca Floració
+*/
+L_Grain_filling,
+/* cropfile  VALIDATE PARAMS CROPSYST
+en Grain filling
+fr Remplissage
+it Riempimento cariossidi
+es Llenado de grano
+ca Ompliment del gra
+*/
+L_N_fixation,
+/* cropfile  PARAMS VALIDATE CROPSYST  980724
+en Nitrogen fixation
+fr Fixation d'azote
+it Fissazione dell'azoto
+es Fijación de Nitrógeno
+ca Fixació de nitrogen
+*/
+L_Harvest_index,
+/* cropfile  PARAMS CS VALIDATE
+en Harvest index
+fr Indice de recolte
+it Indice di raccolta
+es Indice de cosecha
+ca Idex de collita
+*/
+L_Nitrogen,
+/* cropfile  ?  REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS    RPRTGRPH
+en Nitrogen
+fr Azote
+it Azoto
+es Nitrógeno
+ca Nitrogen
+*/
+L_Harvested_part,
+/* cropfile  PARAMS CSW   fr-md it-md es-md ca-md 990605
+en Harvested part
+fr La partie récolté
+it La parte raccolta
+es La parte cosechado (cosechada...)
+ca La part collitata
+*/
+L_Parameters_for_computed_planting_date_managemenet,
+/* cropfile  PARAMS CS VALIDATE
+en Parameters for computed planting date management
+fr Parametres pour la date de semis calculée
+it Parametri per il data di semina calcolata
+es Parámetros para la fecha de siembra calculada
+ca Paràmetres per data de sembra calculada
+*/
+L_Morphology,
+/* cropfile  CSW PARAMS
+en Morphology
+fr Morphologie
+it Morfologia
+es Morfologia
+ca Morfologia
+*/
+L_Perennial,
+/* cropfile CSW PARAMS CROPSYST     fr-rn it-gb    TRANSLATE
+en Perennial
+fr Vivance
+it Perenne
+es Perenne
+ca Perenne
+*/
+L_CO2_concentration,
+/* cropfile CS PARAMS     980219
+en CO2 concentration
+fr CO2 concentration
+it CO2 concentrazione
+es CO2 concentración
+ca CO2 concentració
+*/
+L_Dormancy,
+/* cropfile PARAMS CS VALIDATE CROPSYST   it-gb check translations: fr-rn es-cs ca-rn
+en Dormancy
+fr Dormance
+it Dormienza
+es Dormancia
+ca ?Dormancia?
+*/
+L_Hardiness,
+/* cropfile PARAMS CS VALIDATE CROPSYST en-rn it-md translation: fr-rn es-cs ca-rn
+en Hardiness
+fr Robustesse
+it Resistenza
+es Resistencia
+ca ?Resistencia?
+*/
+L_Sensitive_to_cold_temperatures,
+/* cropfile PARAMS CS VALIDATE CROPSYST en-rn it-rn translation: fr-rn es-cs ca
+en Sensitive to cold temperatures
+fr Sensible à températures froides
+it Sensibile alle temperature fredde
+es Sensible a helada
+ca Sensitive to cold temperatures
+*/

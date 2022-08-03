@@ -1,0 +1,16 @@
+Conditions that force clipping/harvest #2
+Any of the following enabled conditions may trigger the clipping/grazing/harvest event (these conditions are ''or'' not ''and'' I.e.  consider growth rate or consider LAI or consider Biomass or consider flowering.). #3
+This growth rate adjustment accelerates (above 1) or delays clipping (below 1) and it is used as a multiplier to what is considered a low green area index growth rate, which is a fixed value embedded in the code (0.05 GAI/day).  #4
+Relative growth rate adjustement #5
+Maximum biomass that forces clipping #7
+Maximum LAI that forces clipping #9
+This is usually used with alfalfa to clip as the plants flower or reflower #11
+Number of days after flowering forces clippingDays #12
+Consider relative growth rate adjustement #13
+Clip when LAI is reached #14
+Consider LAI status #15
+Clip when biomass is reached #16
+Consider Biomass status #17
+Clip based on flowering #18
+Consider flowering status #19
+Operation constraints and biomatter fate #20

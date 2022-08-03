@@ -1,0 +1,167 @@
+
+------------------------------------------------------------
+Check if still needs retranslation  ru de
+
+Adjustment factor for phenologic response to stress
+Ratio of growth at elevated reference ppm to baseline ppm atmospheric CO2 concentration
+Baseline reference atmospheric CO2 concentration
+Maximum plant height
+Evapotranspiration crop coefficient at full canopy
+
+before planting
+
+Max. fruit load
+make sure it is 'Maximum fruit load (fresh mass)' in the crop_editor dfm
+
+
+Consecutive days below the low temperature for to consider harvest
+in crop_editor dfm, replace with 
+Consecutive days below the low temperature to consider harvest
+
+Leaf water potential that stops canopy expansion (must be more negative than value above that begins reduction)
+move (must be more negative than value above that begins reduction) to hint if crop_editor.dfm
+
+Min. green leaf area index for regrowth (perennial and/or clipped annuals)
+move (perennial...) to hint
+
+Extinction coefficient for solar radiation .... in crop_editor.dfm
+should be:
+Canopy extinction coefficient for total (global) solar radiation
+
+Season 1 (Not applicable season 1 is not adjusted)
+should be 
+Season 1 (Not applicable, season 1 is not adjusted)
+
+(as in AquaCrop) Only during vegetative growth
+should be 
+Only during vegetative growth
+
+(as in AquaCrop) Throughout growth or after vegetative growth if applicable
+should be 
+Throughout growth or after vegetative growth if applicable
+
+Fraction of total solids
+
+
+----------------------------------------------------------
+Check if still needs translation: fr it es ca
+
+Season 1
+
+Cold temperature which begins to damage plant (leaves)
+Cold temperature which beings to damage crop
+Cold temperature which begins to damage flower/fruit
+Cold temperature which is lethal to flower/fruit
+
+Transpiration Use Efficiency when VPD is at 1kPa 
+attainable biomass growth adjustment
+Scaling coefficient of TUE regression 
+power function 
+Water productivity 
+
+Maximum temperature
+power function
+Begin rapid fruit growth
+seed filling, or orchard fruit filling, or tuber bulking
+Thermal time for change of water use efficiency
+Leaf area of seedling
+on first day of emergence
+Germination base temperature
+Mean base soil water potential 
+for 50% emergence
+required for fruit trees
+
+
+
+before fruiting
+Elevated to baseline growth ratio
+
+Emergence 
+Emergence / Start of shoot growth 
+Emergence submodel
+End vegetative growth 
+Maximum root depth
+Maximum root depth achieved
+Maximum uptake during rapid linear growth
+Attainable growth
+Biennial
+Biomass adjustment
+season
+Biomass tranpiration coefficient during reproductive growth (or throughout the season depending on the WUE mode).
+Available default crop parameters
+
+
+Biomass that senesces at the onset of dormancy
+Accounts for disintegration as a result of physical processes such as wind damage, abrasion, photodegradation, etc..
+
+
+
+
+
+
+Water productivity
+Day length (photo-period) to start flowering inhibition
+Day length (photo-period) to end flowering inhibition
+
+Day requirement to start
+Day requirement to complete
+End of vegetative growth
+
+Initial tree width
+Final tree width
+Initial tree width along the row
+Final tree width along the row
+Initial tree height
+Final tree height
+Branch insertion height
+Spacing between rows
+Spacing along rows
+Row azimuth
+Leaf water potential that stops canopy expansion
+
+Green canopy cover at maturity
+Total canopy cover at maturity greeen and senesced
+Canopy extinction coefficient for total global radiation
+Mean daily temperature that limits early growth
+Only during vegetative growth
+Throughout growth or after vegetative growth if applicable
+(as in AquaCrop) 
+Above ground biomass transpiration coefficient for annuals
+Only during vegetative growth
+Transpiration Use Efficiency (when VPD is at 1kPa)
+Time that senesced leaves linger with (remain standing/attached to) the plant
+Maximum Radiation Use Efficiency (unstressed low vapor pressure deficit)
+Date to force harvest (or fixed_date)
+Day to start looking for harvest conditions
+Consecutive days below the low temperature to consider harvest
+before fruiting
+Fraction of above ground biomass apportioned to fruit during accelerated fruit growth
+Fraction of above ground biomass apportioned to fruit after flowering
+Fruits per tree
+Initial fruit mass
+Initial release rate of biomass reserves (per day)
+Sensitivity to water and nitrogen stress during active growth
+Sensitivity to temperature stress during flowering
+Biomass that senesces at the onset of dormancy
+Thermal time to bud break (Chill requirement not satisified)
+Thermal time to bud break (Chill requirement satisified)
+Chill requirement
+Average temperature over these consecutive days below which inactivity is induced
+at end or restart of growth activity
+Plant available water at which N uptake starts decreasing
+Soil N concentration at which N uptake starts decreasing
+Residual N not available for uptake
+Standard root N concentration
+Maximum N concentration of chaff and stubble
+Nitrogen demand adjustment
+
+Root length at emergence
+Root sensitivity to water stress
+Root length per unit root mass
+Curvature of root density distribution
+Maximum surface root density at full rooting depth
+Emperical constant
+intercept for hydrothermal time constant curve
+Duration of grain filling period (unstressed)
+Optimal temperature
+Standard deviation base soil water potential

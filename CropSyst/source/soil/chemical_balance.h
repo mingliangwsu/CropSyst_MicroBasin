@@ -1,0 +1,118 @@
+#ifndef chemical_balanceH
+#define chemical_balanceH
+#ifndef NEW_N_XFER_BAL
+
+// In any case I would like to redo chemical balances with less overhead
+// using inspector like idiom and be optional.
+
+// This is broken now because
+// transformed_from_M is not currently valid.
+// Now using receiver idiom and that transfer was not accomodated.
+// The N balance is currently only checked in N report
+
+#ifndef primitiveH
+#  include "corn/primitive.h"
+#endif
+//#ifdef VERSION2
+#ifndef REACCH_VERSION
+//041001 This class will eventually be replaced
+// currently I am first making the balance accumulators independent
+// the chemicals will now store Chemical_balance_accumulators instead of Chemical_balance_reporter
+// The Chemical_balance_reporter will be moved to CS_mod
+#if (CS_VERSION==4)
+#  include "rprtclss.h"
+#endif
+#endif
+#include <string>
+//______________________________________________________________________________
+class Chemical_balance_accumulators
+{public:
+   float64 original_profile_content_M; // kg chem / m^2 molecular
+   float64 transformed_to_M;   //{kg chem / m^2 molecular }
+                             //{ NH4 -> NO3 }
+                             //{ NO3 -> denitrified NO3 }
+                             //{ pot min. N -> NH4 }
+   float64 transformed_from_M;  //{kg chem / m^2 molecular }
+   float64 applied_irrig_soil_M; // kg chem/m2 Chemical applied in concentration with irrigation actually going into soil
+   float64 applied_M;          // total applied including volatilized (for output only)
+   float64 balance_leached_M;                                                    //981230
+   float64 reported_leached_M;                                                   //981230
+
+   float64 uptake_M;
+   float64 residue_M;  // From residue. For NH4 Includes input from manure
+
+   float64 total_requirements;
+   float64 current_profile_content_M;                                            //990317
+   float64 recalibration_M;                                                      //011115
+   // In the case of salinity. When soil is innundated by water table, there is a change in salinity to the observed water table salinity.
+   float64 balance_error;
+ public:
+   float64 pending_infiltration; // Surface applied chemicals may be deferred until following days.   //071016
+                     // The deferment is not accumulated.
+ public:  // The following are only used for reporting purposes                   //030931
+   std::string &chemical_name;
+   // The name of the chemical
+
+   std::string transformation_label;
+   // This is the name of the transformation (I.e. mineralization, denitrification etc..
+
+   bool has_uptake;
+   // Some chemicals dont have uptake in the balance.
+ public:
+   float64 chem_to_element_factor;
+ public:
+   Chemical_balance_accumulators
+      (float64        _original_profile_content_M
+      ,std::string   &_chemical_name                                             //040931
+      ,const std::string &_transformation_label                                  //040931
+      ,float64        _chem_to_element_factor
+      ,bool           _has_uptake );                                             //040931
+   inline virtual ~Chemical_balance_accumulators() {}                            //170217
+   virtual float64 balance
+      (float64 _current_profile_content_M);
+   inline void inc_uptake(float64 uptake_to_add_M)
+      {  uptake_M += uptake_to_add_M; }
+   inline void inc_applied_irrig_soil(float64 appl_M)
+      {  applied_irrig_soil_M += appl_M; }
+   inline void inc_applied(float64 appl_M)
+      { applied_M += appl_M; }
+   inline void inc_balance_leached_M(float64 leached_M)                          //990317
+      {  balance_leached_M += leached_M; }
+   inline void inc_reported_leached_M(float64 leached_M)                         //990317
+      {  reported_leached_M += leached_M; }
+   inline void set_reported_leached_M()                                          //990317
+      {  reported_leached_M = balance_leached_M;}
+   inline void inc_transformed_to(float64 transformed_M)                         //990317
+      {  transformed_to_M += transformed_M; }
+   inline void inc_transformed_from(float64 transformed_M)                       //990317
+      {  transformed_from_M += transformed_M; }
+   inline void dec_residue(float64 amount_M)                                     //990317
+      {  residue_M -= amount_M; }
+   inline void recalibrate(float64 adjustment_amount_M)                          //011115
+      {  recalibration_M += adjustment_amount_M; }
+   inline float64 get_original_profile_content(bool elemental) const { return elemental ? original_profile_content_M * chem_to_element_factor : original_profile_content_M;} // kg chem / m^2 molecular
+   inline float64 get_transformed_to         (bool elemental)  const { return elemental ? transformed_to_M           * chem_to_element_factor : transformed_to_M;}   //{kg chem / m^2 molecular }
+                             //{ NH4 -> NO3 }
+                             //{ NO3 -> denitrified NO3 }
+                             //{ pot min. N -> NH4 }
+   inline float64 get_transformed_from       (bool elemental)  const { return elemental ? transformed_from_M         * chem_to_element_factor : transformed_from_M;}  //{kg chem / m^2 molecular }
+   inline float64 get_applied_irrig_soil     (bool elemental)  const { return elemental ? applied_irrig_soil_M       * chem_to_element_factor : applied_irrig_soil_M;} // kg chem/m2 Chemical applied in concentration with irrigation actually going into soil
+   inline float64 get_applied                (bool elemental)  const { return elemental ? applied_M                  * chem_to_element_factor : applied_M;}          // total applied including volatilized (for output only)
+   inline float64 get_balance_leached        (bool elemental)  const { return elemental ? balance_leached_M          * chem_to_element_factor : balance_leached_M;} //981230
+   inline float64 get_reported_leached       (bool elemental)  const { return elemental ? reported_leached_M         * chem_to_element_factor : reported_leached_M;}//981230
+
+   inline float64 get_uptake                 (bool elemental)  const { return elemental ? uptake_M                   * chem_to_element_factor : uptake_M;}
+   inline float64 get_residue                (bool elemental)  const { return elemental ? residue_M                  * chem_to_element_factor : residue_M;}  // From residue. For NH4 Includes input from manure
+
+   inline float64 get_total_requirements     (bool elemental)  const { return elemental ? total_requirements         * chem_to_element_factor : total_requirements;}
+   inline float64 get_current_profile_content(bool elemental)  const { return elemental ? current_profile_content_M  * chem_to_element_factor : current_profile_content_M;}  //990317
+   inline float64 get_recalibration          (bool elemental)  const { return elemental ? recalibration_M            * chem_to_element_factor : recalibration_M;}            //011115
+   inline float64 get_balance_error          (bool elemental)  const { return elemental ? balance_error              * chem_to_element_factor : balance_error;}
+
+   inline float64 know_pending_infiltration(float64 _pending_infiltration) { return pending_infiltration = _pending_infiltration; } //071214_071016 need to increment
+};
+//______________________________________________________________________________
+#endif
+#endif
+//chem_bal.h
+

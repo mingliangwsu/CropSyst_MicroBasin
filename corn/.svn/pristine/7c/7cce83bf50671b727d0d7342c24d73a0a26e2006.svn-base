@@ -1,0 +1,118 @@
+#include "suite_directory_OS_FS.h"
+#include "corn/OS/file_system_engine.h"
+namespace CORN {
+namespace OS_FS {
+//______________________________________________________________________________
+
+Suite_directory::Suite_directory
+(const OS::Directory_name &directory_name
+,const wchar_t *_prefered_documentation_dir_name
+,const wchar_t *_prefered_manual_dir_name
+,const wchar_t *_prefered_icons_dir_name)
+: OS::File_system_logical::Directory(directory_name,false)
+   // Suite directory is usually prexisting                                      //130116
+, prefered_documentation_dir_name       (_prefered_documentation_dir_name)
+, prefered_manual_dir_name              (_prefered_manual_dir_name)
+, prefered_icons_dir_name               (_prefered_icons_dir_name)
+, current_program(0)
+, common_directory         (0)
+, documentation_directory  (0)
+, manual_directory        (0)
+, icons_directory          (0)
+, install_or_update_filename(0)                                                  //120112
+//141010 , temp_rendered_dirname(0)                                                       //120320
+{
+
+//141010  setup_from_subdirectory_entry(directory_name);                                //120224
+
+}
+/*141010
+//________________________________________________________________constructor__/
+Suite_directory::Suite_directory
+(const wchar_t *_prefered_documentation_dir_name
+,const wchar_t *_prefered_manual_dir_name
+,const wchar_t *_prefered_icons_dir_name)
+: OS::File_system_logical::Directory
+
+   (*(temp_rendered_dirname = OS::file_system_engine.render_current_working_directory())
+   ,false)
+
+   // NOTE: is am just temporarily using the icons_directory as a buffer to to store the initiating_program_qual path
+, prefered_documentation_dir_name       (_prefered_documentation_dir_name)
+, prefered_manual_dir_name              (_prefered_manual_dir_name  )
+, prefered_icons_dir_name               (_prefered_icons_dir_name   )
+, current_program(0)
+, common_directory         (0)
+, documentation_directory  (0)
+, manual_directory         (0)
+, icons_directory          (0)
+, install_or_update_filename(0)                                                  //120112
+{
+//141010 Instanciated must do this because it uses virtual method
+//setup_from_subdirectory_entry(*temp_rendered_dirname);                        //130308  need to check this
+}
+*/
+//___________________________constructor given an initiating program filename__/
+/*141010
+bool Suite_directory
+::setup_from_subdirectory_entry
+(const CORN::OS::Directory_entry_name &directory_entry_name
+,bool from_sub_sub_dir
+)
+{  bool setup_successful = false;
+   if (is_root()) return false;
+   const CORN::OS::Directory_name *expected_suite_dir = directory_entry_name.get_path_directory_name(); //140104
+   if (from_sub_sub_dir)                                                         //141010
+      expected_suite_dir = expected_suite_dir->directory_entry_name.get_path_directory_name();
+   if (!expected_suite_dir || !CORN::OS::file_system_engine.exists(*expected_suite_dir))          //140104
+      return false; // will occur if we have trailed up past the root                          //141010
+   setup_successful = (is_valid())
+      ?  true
+      : setup_from_subdirectory_entry(*expected_suite_dir);
+   return setup_successful;
+}
+*/
+//______________________________________________setup_from_initiating_program__/
+void Suite_directory::reset()                                          provision_ // provides because only modifies provided contributes;
+{  if (documentation_directory)  delete documentation_directory;  documentation_directory = 0;
+   if (manual_directory)         delete manual_directory;         manual_directory=0;
+   if (icons_directory)          delete icons_directory;          icons_directory = 0;
+   if (common_directory)         delete common_directory;         common_directory = 0;   //101114
+   if (install_or_update_filename)delete install_or_update_filename; install_or_update_filename=0;      //120112
+}
+//___________________________________________________________reset_subentries__/
+void Suite_directory::know_initiating_program(const char *initiating_program)
+{  if (current_program) delete current_program;
+   current_program = new CORN::OS::File_name_concrete(initiating_program);
+}
+//____________________________________________________know_initiating_program__/
+Documentation_directory    &Suite_directory
+::documentation()                                                      provision_
+{  if (!documentation_directory)
+   {  OS::Directory_name_concrete dir(*this,prefered_documentation_dir_name);
+      documentation_directory = new Documentation_directory(dir);
+   }
+   return *documentation_directory;
+}
+//______________________________________________________________documentation__/
+provide_directory_name_implementation(Suite_directory,common,common_directory,"common")
+provide_directory_name_implementation(Suite_directory,manual,manual_directory,prefered_manual_dir_name)
+provide_directory_name_implementation(Suite_directory,icons,icons_directory,prefered_icons_dir_name)
+
+const OS::File_name &Suite_directory::install_or_update()             provision_
+{  if (!install_or_update_filename)
+   {  OS::Directory_name_concrete installation_dir(*this,"installation");
+      install_or_update_filename = new OS::File_name_concrete(installation_dir
+         ,L"install_or_update"
+         #ifdef _Windows
+         ,L"exe"
+         #else
+         ,L""
+         #endif
+         );
+   }
+   return *install_or_update_filename;
+}
+//_2012-01-12___________________________________________________________________
+} } // namespace OS_FS CORN
+

@@ -1,0 +1,203 @@
+#include "documentation_directory_OS_FS.h"
+#include <string.h>
+#include "corn/string/strconv.hpp"
+#include "corn/OS/file_system_engine.h"
+namespace CORN    {
+namespace OS_FS   {
+//______________________________________________________________________________
+const char *document_type_label_table[] =
+{ "info"
+, "manual"
+, "help"
+, "tutorial"
+, "FAQ"
+, "explaination"
+, "history"
+};
+//______________________________________________________________________________
+
+Documentation_directory::Documentation_directory
+(const OS::File_name &_associated_program_filename_qualified)
+: Adjunct_directory
+   (_associated_program_filename_qualified
+   ,false)  // Doc directory is usually preexisting so don't need to create      //130116
+/*141114
+,tutorial_filename      (0)   // ("tutorial.htm")
+,help_filename          (0)   // ("help.htm")
+,manual_filename        (0)   // ("manual.htm")
+,FAQ_filename           (0)   // ("FAQ.htm")
+,history_filename       (0)   // ("history.htm")
+,tutorial_dirname        (0)   // ("tutorial")
+,help_dirname            (0)   // ("help")
+,manual_dirname          (0)   // ("manual")
+,FAQ_dirname             (0)   // ("FAQ")
+,history_dirname         (0)   // ("history")
+,explaination_dirname    (0)   // ("history")                                    //110810
+*/
+{
+   for (nat8 dt = 0; dt <= DOCUMENT_TYPE_COUNT; dt++)                            //141114
+   {  document_filename[dt] = 0;
+      document_dirname[dt] = 0;
+   }
+}
+//______________________________________________________________________________
+CORN::OS::File_name *Documentation_directory::find_document_filename(const std::wstring &document_name) rendition_
+{
+      /* NYI
+         The unqualified_URL can have one of the following forms:
+
+         %keyword%/path/filename.exe#link
+         %keyword%/filename.exe#link
+         path/filename.exe#link
+         filename.exe#link
+         where %keyword% is one of the following:
+
+         %tutorial%
+         %help%
+         %manual%
+         %FAQ%
+         %history%
+         %explaination%
+      */
+
+      /* NYI
+         The #link is optional and would be as in an HTML document anchor/link.
+         The optional path may consiste of one or more subdirectories.
+         In the %keyword% forms, the target document filename is composed by replacing the
+         %keyword% with the respective documentation subdirectory
+         and prepending this directory's path.
+         If the keyword is omitted, the target document filename is composed
+         by simply prepending this directory's path.
+
+      */
+      // First search for documents such as XXXX.html
+      CORN::OS::File_name *found_document = find_file_name
+         (document_name
+         ,OS::File_system::subdirectory_recursion_inclusive                      //150908
+         //161003 ,OS::Directory_entry_name::full_qualification
+         );                         //150908
+            // I think these were originally fully qualified,
+            // but may want the qualifiction mode optional (add parameter)
+         //150908 ,true);
+         //130901 not sure if I want to recurse to find the document
+      if (!found_document)
+      {  // Maybe it is a directory of html documents which should have an
+         // index.html (or index.htm) document
+         OS::File_system_logical::Directory document_directory(*this,document_name,false);
+         if (document_directory.exists())
+            found_document = document_directory.find_file_name
+               (L"index"
+               ,OS::File_system::subdirectory_recursion_inclusive                //150908
+               //161103 ,OS::Directory_entry_name::full_qualification
+               );                   //150908
+               // I think these were originally fully qualified,
+               // but may want the qualifiction mode optional (add parameter)
+      }
+
+      /*
+         If the composed qualified target document filename is not found,
+         the filename.exe is recursively searched in this directory.
+         If it is still not found, the program's (usually the parent) directory
+         is recursively search.
+         If it is still not found, the application's
+         (usually the program's parent) directory
+         (if any) is recursively search.
+         If it is still not found, the Suite directory (if any) is
+         recursively searched.
+
+      **/
+   return found_document;
+}
+//_2012-04-02___________________________________________find_document_filename_/
+CORN::OS::File_name * Documentation_directory::find_document_filename_string(const std::string &unqualified_URL) rendition_
+{  std::wstring unqualified_URL_wstring;  CORN::string_to_wstring(unqualified_URL,unqualified_URL_wstring);
+   return find_document_filename(unqualified_URL_wstring);
+}
+//_2013-02-13____________________________________find_document_filename_string_/
+CORN::OS::File_name * Documentation_directory::find_document_filename_cstr(const char *unqualified_URL) rendition_
+{  std::wstring unqualified_URL_wstring;  CORN::ASCIIz_to_wstring(unqualified_URL,unqualified_URL_wstring);
+   return find_document_filename(unqualified_URL_wstring);
+}
+//_2013-02-13____________________________________find_document_filename_string_/
+CORN::OS::File_name * Documentation_directory::find_document_filename_wstr(const wchar_t *unqualified_URL) rendition_
+{  std::wstring unqualified_URL_wstring(unqualified_URL);
+   return find_document_filename(unqualified_URL_wstring);
+}
+//_2013-02-13____________________________________find_document_filename_string_/
+
+/*141114
+#define provide_document_file_name_implementation(filename_method,filename_variable,filename_literal) \
+const CORN::OS::File_name &Documentation_directory::filename_method()             provision_ \
+{  if (!filename_variable)                                                      \
+   {  filename_variable = dynamic_cast<CORN::OS::File_name_concrete *>(find_document_filename_wstr(filename_literal));        \
+      if (!filename_variable)                                                   \
+         filename_variable = new CORN::OS::File_name_concrete(*this,filename_literal,L"HTML"); \
+   }                                                                           \
+   return *filename_variable;                                                   \
+}
+//_2012-02-06___________________________________________________________________provide_document_file_name_implementation(tutorial_document ,tutorial_filename,L"tutorial")
+provide_document_file_name_implementation(help_document     ,help_filename    ,L"help")
+provide_document_file_name_implementation(manual_document   ,manual_filename  ,L"manual")
+provide_document_file_name_implementation(FAQ_document      ,FAQ_filename     ,L"FAQ")
+provide_document_file_name_implementation(history_document  ,history_filename ,L"history")
+//______________________________________________________________________________
+provide_directory_name_implementation(Documentation_directory,tutorial     ,tutorial_dirname    ,L"tutorial")
+provide_directory_name_implementation(Documentation_directory,help         ,help_dirname        ,L"help")
+provide_directory_name_implementation(Documentation_directory,manual       ,manual_dirname      ,L"manual")
+provide_directory_name_implementation(Documentation_directory,FAQ          ,FAQ_dirname         ,L"FAQ")
+provide_directory_name_implementation(Documentation_directory,history      ,history_dirname     ,L"history")
+provide_directory_name_implementation(Documentation_directory,explaination ,explaination_dirname,L"explaination")
+//______________________________________________________________________________
+*/
+const CORN::OS::File_name &Documentation_directory::provide_document_filename(Document_type doc_type)provision_
+{  if (!document_filename[doc_type])
+   {  document_filename[doc_type] = dynamic_cast<CORN::OS::File_name_concrete *>
+         (find_document_filename_cstr(document_type_label_table[doc_type]));
+      if (!document_filename[doc_type])
+         document_filename[doc_type] = new CORN::OS::File_name_concrete(*this,document_type_label_table[doc_type],L"htm");
+      if (!CORN::OS::file_system_engine.exists(*document_filename[doc_type]))
+      {  delete document_filename[doc_type];
+         document_filename[doc_type] = new CORN::OS::File_name_concrete(*this,document_type_label_table[doc_type],L"HTML");
+      }
+   }
+   return *document_filename[doc_type];
+}
+//______________________________________________________________________________
+const CORN::OS::Directory_name &Documentation_directory::provide_document_dirname(Document_type doc_type)provision_
+{  if (!document_dirname[doc_type])
+   {  document_dirname[doc_type] = new CORN::OS::Directory_name_concrete(*this,document_type_label_table[doc_type]);
+   }
+   return *document_dirname[doc_type];
+}
+//_2014-11-14___________________________________________________________________
+//______________________________________________________________________________
+/*
+Documentation_directory:: ~Documentation_directory()
+{  reset();
+}
+//______________________________________________________________________________
+void Documentation_directory::reset()                                 provision_
+{  for (nat8 dt = 0; dt <= DOCUMENT_TYPE_COUNT; dt++)
+   {  delete document_dirname[dt];
+      document_dirname[dt] = 0;
+   }
+
+/*141114
+   delete tutorial_filename;   tutorial_filename = 0;
+   delete help_filename;       help_filename = 0;
+   delete manual_filename;     manual_filename = 0;
+   delete FAQ_filename;        FAQ_filename = 0;
+   delete history_filename;    history_filename = 0;
+
+   delete tutorial_dirname;    tutorial_dirname = 0;
+   delete help_dirname;        help_dirname = 0;
+   delete manual_dirname;      manual_dirname = 0;
+   delete FAQ_dirname;         FAQ_dirname = 0;
+   delete history_dirname;     history_dirname = 0;
+   delete explaination_dirname;explaination_dirname = 0;
+}
+*/
+
+} // namespace OS_FS
+} // namespace CORN
+

@@ -1,0 +1,114 @@
+#ifndef evaporatorH
+#define evaporatorH
+
+#include "common/physics/water_depth.h"
+#include "corn/chronometry/time_types.hpp"
+#include "CS_suite/observation/CS_observation.h"
+#include "corn/dynamic_array/dynamic_array_T.h"
+namespace CS
+{  class Weather_hours;
+}
+//______________________________________________________________________________
+namespace CS   // May want to be CS namespace because Residues would be CS
+{
+//______________________________________________________________________________
+class Evaporator_intervals
+{
+ protected: // references to other objects
+   modifiable_ CORN::Dynamic_array<float64> &evaporation_potential_remaining;
+ protected:
+   CORN::Dynamic_array<float64> evaporation_actual;         // m
+   CORN::Dynamic_array<float64> evaporation_potential;      // m
+
+ public: // only for output! Do not uses these for calculation!
+   float64 output_evaporation_potential_daily;
+   float64 output_evaporation_actual_daily;
+ public:
+   Evaporator_intervals
+      (modifiable_ CORN::Dynamic_array<float64>  &evaporation_potential_remaining
+      );
+ public: // CS::Simulation_element implementations
+   virtual bool start_day()                                        modification_;
+   virtual bool end_day()                                          modification_;
+ public:
+   inline virtual bool is_hourly_enabled()                          affirmation_
+      { return evaporation_potential_remaining.get_count() == 24; }
+      //160717 {return weather_hourly != 0; }
+   inline virtual bool is_daily_enabled()                           affirmation_
+      { return evaporation_potential_remaining.get_count() == 1; }
+   inline virtual float64 get_evaporation_actual_day()                     const
+      { return evaporation_actual.sum(); }
+   inline virtual float64 get_evaporation_potential_day()                  const
+      { return evaporation_potential.sum(); }
+
+   inline float64 get_output_evaporation_potential_daily()  const { return output_evaporation_potential_daily; }
+   inline float64 get_output_evaporation_actual_daily()     const { return output_evaporation_actual_daily; }
+
+
+   inline virtual float64 get_evaporation_actual_hour(CORN::Hour hour)     const
+      { return evaporation_actual.get(hour); }
+ public:
+   virtual float64 evaporate_interval(nat8 interval)               modification_;
+   inline virtual float64 evaporate_day()                          modification_
+      { return evaporate_interval(0); }
+   inline virtual float64 evaporate_hour(CORN::Hour hour)          modification_
+      { return evaporate_interval(hour); }
+ public: // inspection
+   RENDER_INSPECTORS_DECLARATION;
+};
+//_2016-07-18___________________________________________________________________
+
+#ifdef OBSOLETE
+160720  replaced with Evaporator_intervals
+class Evaporator
+{
+ protected: // references to other objects
+   modifiable_ Physical::Water_depth &evaporation_potential_remaining;
+ public: // currently public for output but eventually will be inspected
+   float64 evaporation_actual;         // m  today
+   float64 evaporation_potential;      // m  today
+   float64 evaporation_pot_effective;  // m today
+/*160718 The hourly was not implemented correctly
+ protected:
+   // Currently hourly evaporation is estimated based on fraction of solar
+   // irradiance (so currently only fraction of solar irradiance is needed;
+   // however I would/can be more property calculated.
+   float64 *evap_potential_hourly; // m  optional (24 items) and may be none
+   const CS::Weather_hours *weather_hourly;
+*/
+ public:
+   virtual bool start_day()                                        modification_;
+ public:
+   Evaporator
+      (modifiable_ Physical::Water_depth &evaporation_potential_
+      );
+   virtual float64 evaporate_hour(CORN::Hour hour)                 modification_;
+   virtual float64 evaporate_day()                                 modification_;
+   virtual bool enable_evaporation_hourly
+      (const CS::Weather_hours *weather_hourly)                  initialization_;
+      // Passing 0 effectively disables hourly evaporation mode.
+      // returns true if was enabled.
+      // Usually called once during initialization after wheather hourly is instanciated.
+      // Note that enable_hourly can be called any time during
+      // to enable or disable hourly evapration during the run.
+   virtual float64 evaporate_now(float64 evap_requested_now)       modification_;
+   inline virtual float64 get_evaporation_potential_daily()                const
+      { return evaporation_potential; }
+   inline virtual float64 get_evaporation_actual_daily()                   const
+      { return evaporation_actual; }
+  //160804  virtual float64 calc_evaporation_potential()                     calculation_=0;//160603
+   virtual float64 calc_evaporation_potential(nat8 interval)        calculation_;//160804_160603
+   inline virtual bool is_hourly_enabled()                          affirmation_
+      { return false; }                                                          //160717
+      //160717 {return weather_hourly != 0; }
+   inline virtual bool is_daily_enabled()                           affirmation_
+      { return true; }
+      // {return weather_hourly == 0; }
+ public: // inspection
+   RENDER_INSPECTORS_DECLARATION;                                                //160627
+};
+//_2016-05-23___________________________________________________________________
+#endif
+} // namespace CS
+#endif
+

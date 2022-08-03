@@ -1,0 +1,75 @@
+<H1>Observation</H1>
+
+Observation is a set of classes that allows variables to be
+inspected, examined, recorded and processed
+independent of the simulation model
+with minimal impact on the simulation model and submodels objects.
+
+Inspection is a mechanism that allows variables to be observed.
+
+Examination is a mechanism that allows observations to be tallied and/or recorded.
+
+<!-- conceptual
+Exploration look for patterns in or create new knowledge from examind outputs
+Interrogation ?
+Investigation ?investigation
+
+Perlustrate distil/clarify information to more presentable form?
+Illustrate Present information 
+
+Supervision would check that the simulation is functioning correctly
+(Could also be applicable to decision support system
+
+-->
+
+
+The inspector can be used to:
+<UL>
+<LI>Record variable values for output.
+<LI>Communicate between disparate modules such as pluggins
+    that may not even be implemented in the same language.
+
+</UL> 
+ <P>
+An object simply creates an emanator object which it gives
+to the global emanator list and implements a method
+that instanciates inspectors and gives the inspectors to the
+provided list of inspectors.
+The Object usually no longer interacts with the inspector it creates.
+Simulation elements that exist throughout the duration of the simulation
+need not maintain references to their inspectors nor emanators.
+
+An object which may go out of scope (be deleted) will usually keep
+a reference to its emanator so that in the destructor 
+it can signal the emanator that it is being deleted.
+Inspectors use this to know that the inspected value reference no longer
+exists for the deleted emanating object.
+
+<P>
+The simulation engine initiates the global inspection mechanism
+Typically at the end of it's start() method,
+this allows subelements to have been instanciated, initialized
+and started .
+<FONT color="gray">
+{May want to start the inspection before starting 
+anything else (subelements)}
+</FONT>
+<P>
+A subelement may be dynamic, instanciated after global inspection has been setup.
+The element instanciating a subelement may initiate inspector rendition
+to allow the subelement to add its emanator and inspectors.
+<P>
+An element will typically add inspectors for all variables suitable
+for inspection.  The application (which instantiates the the simulation engine).
+may provide mechanism to 'prune' the global inspector list removing inspectors
+that are of no interest.  Of shunt inspectors from the global 'active'
+list to inactive lists (I.e. to temporarily disable specific inspections).
+<P>
+Simulation elements can create their own Inspections
+and or interactive with the global inspection as they may have knowledge
+about the relevence of inspection.
+
+
+
+
+

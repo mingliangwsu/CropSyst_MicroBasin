@@ -1,0 +1,46 @@
+
+PAWS without headers
+806,1995-06-01,30.600,01.150,0000.000,25.590,07.020,11.400,04.360
+806,1995-06-02,24.750,00.930,0000.000,23.240,08.630,12.180,07.580
+806,1995-06-03,26.350,00.770,0000.000,25.520,08.420,13.000,05.250
+806,1995-06-04,13.510,00.660,0004.830,20.960,10.830,12.620,06.890
+806,1995-06-05,22.520,01.180,0004.320,18.430,07.770,10.960,02.030
+806,1995-06-06,10.130,00.710,0000.510,15.260,07.470,10.260,04.640
+806,1995-06-07,28.710,01.100,0000.000,24.970,08.020,14.340,07.660
+806,1995-06-08,29.710,01.080,0000.000,27.010,08.350,14.440,05.220
+806,1995-06-09,27.060,00.640,0000.000,28.870,09.230,14.260,06.450
+806,1995-06-10,04.970,00.530,0006.600,16.440,11.540,14.600,09.380
+806,1995-06-11,22.140,00.880,0000.000,22.070,07.060,12.910,05.180
+
+PAWS with headers
+
+Data Extracted:2005-05-17 13:54:20
+<a href="/station_info/station_info_806.html">WSU PUYALLUP, at WSU WWREC, Puyallup, Wa</a><BR>Lat:47.1 Lng:122.3 elevation:200
+Dates Range From 1995-06-01 To 2005-05-16
+
+                      Total      Avg                   Max        Min        Max        Min        
+                      Solar      Wind       Total      Air        Air        Dewpt      Dewpt      
+Station               Rad        Speed      Precip     Temp C     Temp C     Temp C     Temp C     
+ID         Gregorian  MJ/^M2     M/s@2M     mm         1.6 M      1.6 M      1.6 M      1.6 M
+--------   -------    -------    ------     ------     ------     ------     ------     ------
+806        1995-06-01 30.600     01.150     0000.000   25.590     07.020     11.400     04.360    
+806        1995-06-02 24.750     00.930     0000.000   23.240     08.630     12.180     07.580    
+806        1995-06-03 26.350     00.770     0000.000   25.520     08.420     13.000     05.250    
+806        1995-06-04 13.510     00.660     0004.830   20.960     10.830     12.620     06.890    
+806        1995-06-05 22.520     01.180     0004.320   18.430     07.770     10.960     02.030
+
+PAWS with all fields and headers
+Data Extracted:2005-05-17 14:54:23
+<a href="/station_info/station_info_806.html">WSU PUYALLUP, at WSU WWREC, Puyallup, Wa</a><BR>Lat:47.1 Lng:122.3 elevation:200
+Dates Range From 1995-06-01 To 2005-05-16
+
+                           Total      Avg        Avg        Avg        Avg                   Wind                  Leaf       Soil       Max        Time       Min        Time       Max        Time       Min        Time       Bare       Bare       Bare       Bare       Bare       Covrd      Covrd      Covrd      Covrd      Covrd      Avg        Avg        Avg        Avg        Avg        Avg        
+                           Solar      Air        Dewpt      Wind       Wind       Dev        Run        Total      Wetness    Moistr     Air        of         Air        of         Dewpt      of         Dewpt      of         Soil       Soil       Soil       Soil       Soil       Soil       Soil       Soil       Soil       Soil       Air        Air        Air        Air        Air        Air        
+Station                    Rad        Temp C     Temp C     Speed      Dir deg    in         KM         Precip     total      kPa        Temp C     Max        Temp C     Min        Temp C     Max        Temp C     Min        Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     Temp C     
+ID         Greg.    Julian MJ/^M2     1.6 M      1.6 M      M/s@2M     2 M        Dir        2 M        mm         minutes    203.2mm    1.6 M      Temp       1.6 M      Temp       1.6 M      Dewpt      1.6 M      Dewpt      0.0mm      50.8mm     101.6mm    203.2mm    406.4mm    0.0mm      50.8mm     101.6mm    203.2mm    406.4mm    1 M        2 M        4 M        10 M       16 M       20 M       
+--------   --------------- -------    ------     -------    ------     -------    -------    --------   ------     -------    ------     ------     -----      ------     -----      ------     -----      ------     -----      ------     ------     ------     ------     ------     ------     ------     ------     ------     ------     ------     ------     ------     ------     ------     ------     
+806        2005-01-01  001 0.270      4.000      3.670      0.440      297.970    56.130     37.990     1.780      750.000    0.000      6.530      14:00      2.060      09:00      5.860      14:00      1.960      09:00      NA         NA         NA         4.890      NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA        
+806        2005-01-02  002 1.070      0.690      -0.930     0.470      332.170    29.320     40.960     0.000      315.000    0.000      5.620      15:00      -3.320     23:00      2.380      00:00      -3.600     23:00      NA         NA         NA         4.340      NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA        
+806        2005-01-03  003 1.080      -1.480     -3.290     0.480      302.250    59.010     41.260     0.000      90.000     0.000      4.930      15:00      -5.880     09:00      0.050      14:00      -6.240     09:00      NA         NA         NA         2.960      NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA        
+806        2005-01-04  004 1.100      -1.290     -4.750     0.890      333.940    42.840     77.030     0.250      45.000     0.000      5.180      15:00      -6.880     08:00      -1.790     11:00      -7.140     08:00      NA         NA         NA         2.100      NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA        
+806        2005-01-05  005 1.090      -2.960     -4.750     0.270      117.000    64.070     23.340     0.000      30.000     0.000      4.500      16:00      -7.720     08:00      -1.790     12:00      -8.140     08:00      NA         NA         NA         1.610      NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA         NA        

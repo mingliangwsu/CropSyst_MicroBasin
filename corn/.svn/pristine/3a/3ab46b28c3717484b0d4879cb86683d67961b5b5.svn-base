@@ -1,0 +1,75 @@
+#ifndef text_listH
+#define text_listH
+
+#include <string.h>
+
+#ifndef bi_listH
+#  include "corn/container/bilist.h"
+#endif
+
+namespace CORN {
+class Data_record;
+// This is a simple list of text
+//______________________________________________________________________________
+class Text_list
+: public extends_ Bidirectional_list  // so we can sort
+{public:
+   class Item : public implements_ CORN::Item , public extends_ std::string
+   {
+   public: // constructors
+      inline Item(const char *text)
+         : CORN::Item()
+         , std::string (text)
+         {}
+      inline Item(const char *text,size_t start, size_t n = std::string::npos)
+         : CORN::Item()
+         , std::string (text,start,n)
+         {}
+      virtual ~Item() {}                                                         //081125
+      inline virtual const char *label_cstr(char *buffer)                  const //050619
+         { strcpy(buffer,c_str()); return buffer;}
+      virtual bool write(std::ostream &strm)                        performs_IO_;//150728
+      inline virtual const char *get_key()                                 const //160704
+         { return std::string::c_str(); }
+   };
+ public:
+   Text_list
+      (const char *initial_text = 0
+      ,char separator_character = '\n');                                         //090918
+   /* Conceptual
+   Text_list
+      (const wchar_t *initial_text = 0
+      ,wchar_t separator_character = '\n');                                         //090918
+   */
+      // This constructor takes all_text which contains \n separated
+      // text strings and composes an initial list of text.
+   inline  virtual ~Text_list() {}                                               //081125
+   virtual Item *find(const char *search_key,bool case_sensitive = true)   const;
+   virtual Item *find_string (const std::string &search_key, bool case_sensitive = true) const; //130310
+   virtual Item *find_wstring(const std::wstring &search_key,bool case_sensitive = true) const;
+        // find should be renamed find_cstr
+
+   // Note that uniqueness is now a property of container
+   // the unique parameter is now redundent  151002
+
+
+   Text_list::Item *add_cstr(const char *text_to_add);                           //110228_060910
+   Text_list::Item *add_wstr(const wchar_t *text_to_add);                        //120209
+   Text_list::Item *add_string (const std::string  &text_to_add);                //130123
+   Text_list::Item *add_wstring(const std::wstring &text_to_add);                //130123
+      //121012 add_cstr and add_wstr were previously both named 'add'
+      //but some compilers complain and/or cannot handle this contravariant overloading.
+   virtual std::string &string_items(std::string &string_buffer,  char separator = '\n') const;   //090918
+   /* conceptual
+   virtual std::string &string_items_wstring(std::wstring &string_buffer,  char separator = '\n') const; //160228
+   */
+      ///< Composes a string representation of the items which is appended to buffer.
+      /// The string_buffer is not cleared, it may have previously composed text which is left intact.
+      /// The separator is appended between items (not prepended or appended).
+      /// \returns the string buffer (so if there are no items the string buffer would not be changed).
+};
+//______________________________________________________________________________
+}; // namespace CORN
+
+#endif
+

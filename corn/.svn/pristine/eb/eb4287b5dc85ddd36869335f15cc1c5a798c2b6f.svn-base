@@ -1,0 +1,155 @@
+#include <corn/image/image_base.h>
+
+#define odd(x) ((-x) & 0x01)
+#define even(x) (!((-x) & 0x01))
+
+
+namespace CORN
+{
+
+/*______*/ void Image_base::checker_board_transparent()
+/*______*/ {
+/*______*/    for (int r=0; r < get_height(); r++)
+/*______*/       for (int c = 0; c < get_width(); c++)
+/*______*/          if ((even(r) && even(c)) ||
+/*______*/              (odd(r) && odd(c)))
+/*______*/             point(c,r,get_transparent_color());
+/*______*/ };
+
+
+/*______*/  // line can be moved to image
+/*______*/  void Image_base::line(uint16 c1,uint16 r1,uint16 c2,uint16 r2,Image_color_index color)
+/*______*/  {
+/*______*/  #ifdef DDA
+/*______*/    int error = 0;
+/*______*/    int deltax = c2 - c1;
+/*______*/    int deltay = r2 - r1;
+/*______*/
+/*______*/    if (deltay < 0)
+/*______*/    {
+/*______*/      int h_c1 = c1;
+/*______*/      c1 = c2;
+/*______*/      c2 = h_c1;
+/*______*/      int h_r1 = r1;
+/*______*/      r1 = r2;
+/*______*/      r2 = h_r1;
+/*______*/      deltay=-deltay;
+/*______*/      deltax=-deltax;
+/*______*/    };
+/*______*/
+/*______*/    int c = c1;
+/*______*/    int r = r1;
+/*______*/    int i;
+/*______*/    if (deltax >= 0)
+/*______*/    {
+/*______*/       if (deltax >= deltay)
+/*______*/       {  for (i = 1; i < deltax; i++)
+/*______*/              if (error < 0)
+/*______*/              { c+= 1;
+/*______*/                 point(c,r,color);
+/*______*/                 error += deltay;
+/*______*/              }
+/*______*/              else
+/*______*/              { c+= 1;
+/*______*/                 r+= 1;
+/*______*/                 point(c,r,color);
+/*______*/                 error  += deltay - deltax;
+/*______*/              };
+/*______*/       }
+/*______*/       else
+/*______*/       {
+/*______*/         for (i = 1 ; i < deltay;i++)
+/*______*/           if (error < 0)
+/*______*/           {
+/*______*/              c+= 1;
+/*______*/              r += 1;
+/*______*/              point(c,r,color);
+/*______*/              error += deltay - deltax;
+/*______*/           }
+/*______*/           else
+/*______*/           { r += 1;
+/*______*/             point(c,r,color);
+/*______*/             error -= deltax;
+/*______*/           }
+/*______*/       }
+/*______*/    }
+/*______*/    else
+/*______*/      if (deltax >= deltay)
+/*______*/      {
+/*______*/        for (i= 1; i< deltax; i++)
+/*______*/           if (error < 0)
+/*______*/           { c-= 1;
+/*______*/             point(c,r,color);
+/*______*/             error += deltay;
+/*______*/           }
+/*______*/           else
+/*______*/           { c -= 1;
+/*______*/             r -= 1;
+/*______*/             point(c,r,color);
+/*______*/             error += deltax+deltay;
+/*______*/           };
+/*______*/      }
+/*______*/      else
+/*______*/        for (i = 1; i < deltay ; i++)
+/*______*/              if (error < 0)
+/*______*/              { c -= 1;
+/*______*/                r -= 1;
+/*______*/                point (c,r,color);
+/*______*/                error += deltax + deltay;
+/*______*/              }
+/*______*/              else
+/*______*/              { r += 1;
+/*______*/                point(c,r,color);
+/*______*/                error += deltax;
+/*______*/              };
+/*______*/      point(c2,r2,color);
+/*______*/
+/*______*/  #else
+/*______*/
+/*______*/     if (r2 < r1)
+/*______*/     {
+/*______*/       int h_c1 = c1;
+/*______*/       c1 = c2;
+/*______*/       c2 = h_c1;
+/*______*/       int h_r1 = r1;
+/*______*/       r1 = r2;
+/*______*/       r2 = h_r1;
+/*______*/     };
+/*______*/
+/*______*/     int deltax = c2 - c1;
+/*______*/     int deltay = r2 - r1;
+/*______*/
+/*______*/     if (deltay == 0)
+/*______*/        for (int c = c1; c <= c2; c++)
+/*______*/           point(c,r1,color);
+/*______*/     else
+/*______*/        if (deltax == 0)
+/*______*/           for (int r = r1; r <= r2; r++)
+/*______*/              point(c1,r,color);
+/*______*/     else
+/*______*/     if ((deltax > deltay))
+/*______*/     {
+/*______*/       float slope = (float)deltay / (float)deltax;
+/*______*/       for (int c = 0; c < deltax; c++)
+/*______*/       {
+/*______*/         int r = (float)c * slope;
+/*______*/         point(c1+c,r1+r,color);
+/*______*/       };
+/*______*/     }
+/*______*/     else
+/*______*/     {
+/*______*/       float slope = (float)deltax / (float)deltay;
+/*______*/       for (int r = 0; r < deltay; r++)
+/*______*/       {
+/*______*/         int c = (float)r * slope;
+/*______*/         point(c1+c,r1+r,color);
+/*______*/       };
+/*______*/     }
+/*______*/
+/*______*/  #endif
+/*______*/  };
+/*______*/
+
+
+
+};

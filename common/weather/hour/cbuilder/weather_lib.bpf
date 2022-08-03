@@ -1,0 +1,27 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+USEUNIT("..\wthrfile.cpp");
+USEUNIT("..\et.cpp");
+USEUNIT("..\et_ref.cpp");
+USEUNIT("..\gen_dat_filename.cpp");
+USEUNIT("..\loc_param.cpp");
+USEUNIT("..\phrases.cpp");
+USEUNIT("..\sky.cpp");
+USEUNIT("..\snow.cpp");
+USEUNIT("..\solar_rad.cpp");
+USEUNIT("..\stormgen.cpp");
+USEUNIT("..\sun.cpp");
+USEUNIT("..\wind.cpp");
+USEUNIT("..\wthr.cpp");
+USEUNIT("..\wthrbase.cpp");
+USEUNIT("..\wthrdata.cpp");
+USEUNIT("..\daily.cpp");
+USEUNIT("..\wthr_vp.cpp");
+USEUNIT("..\temperature_est.cpp");
+//---------------------------------------------------------------------------
+#define Library
+
+// To add a file to the library use the Project menu 'Add to Project'.
+

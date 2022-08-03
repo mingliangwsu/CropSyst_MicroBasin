@@ -1,0 +1,85 @@
+#ifndef date_32H
+#define date_32H
+#include "corn/chronometry/date_abstract.h"
+namespace CORN
+{
+class Common_tabular_file_format;
+//______________________________________________________________________________
+class Date_32_cowl_const
+: public extends_ Date_const_abstract
+{
+ private:
+   const Date32 &date_ref;
+ public:
+   inline Date_32_cowl_const(const Date32 &date_ref_)
+      : Date_const_abstract()
+      , date_ref(date_ref_)
+      {}
+ public: // accessors
+   inline virtual Datetime64 get_datetime64()                              const
+      { return (Datetime64)date_ref;}
+   inline virtual Date32 get_date32()                                      const
+      { return date_ref; }
+   inline const Date32 &ref_date32()                        { return date_ref; }
+ };
+//_2017-05-24___________________________________________________________________
+class Date_32_cowl
+: public extends_ Date_abstract
+{
+ private:
+   Date32 &date_ref;
+ public:
+   inline Date_32_cowl(Date32 &date_ref_)
+      : Date_abstract()
+      , date_ref(date_ref_)
+      {}
+ public: // assignations
+   virtual Datetime64 set_DT
+      (const Date_interface &
+      ,const Time_interface &)                                     assignation_;
+   virtual Datetime64 set_datetime64(Datetime64 value)             assignation_;
+   virtual Datetime64 set_date32(int32 date32)                     assignation_;
+   virtual Datetime64 set_YD(Year year,DOY doy)                    assignation_;
+   virtual Datetime64 set(const Temporal /*170530 Date_const_interface*/ &new_date)    assignation_;
+ public: // accessors
+   inline virtual Datetime64 get_datetime64()                              const
+      { return (Datetime64)date_ref;}
+   inline virtual Date32 get_date32()                                      const
+      { return date_ref; }
+   inline Date32 &ref_date32()                              { return date_ref; }
+};
+//_2017-04-26__________________________________________________________________________
+class Date_32_clad
+: public extends_ Date_32_cowl
+{
+ protected:
+   friend class Common_tabular_file_format;
+// public: // temporarily
+   Date32 date_num; //Conforms to ISO8601:2004
+ public:
+   Date_32_clad();
+   Date_32_clad(Date32 date_raw);
+   Date_32_clad(const Date_32_clad &other);
+   Date_32_clad(const Temporal &other);
+   Date_32_clad(Year year, DOY doy);
+ public:
+   inline Date32 &ref_date32()                              { return date_num; }                                 //170530
+
+   // get_datetime64 and get_date32 shouldn't be needed should be handled by cowl
+   inline virtual Datetime64 get_datetime64()                              const
+      { return (Datetime64)date_num;}
+   inline virtual Date32 get_date32()                                      const
+      { return date_num; }
+
+
+ private:
+   Date_32_clad *check_abstract() { return new Date_32_clad(); }
+};
+//_2017-04-26__________________________________________________________________________
+/* replacements
+ref_date_num() -> ref_date32()
+*/
+//______________________________________________________________________________
+} // namespace CORN
+
+#endif

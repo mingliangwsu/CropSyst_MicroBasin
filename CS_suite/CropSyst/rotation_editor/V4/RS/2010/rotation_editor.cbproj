@@ -1,0 +1,329 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{A44F57A8-6172-4270-BE45-98CA32DA0102}</ProjectGuid>
+			<ProjectVersion>12.0</ProjectVersion>
+			<MainSource>rotation_editor.cpp</MainSource>
+			<Config Condition="'$(Config)'==''">Debug</Config>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<FinalOutputDir>C:\CS_Suite_5\CropSyst\</FinalOutputDir>
+			<Defines>CROPSYST_PROPER;MANAGEMENT=4;$(Defines)</Defines>
+			<OutputExt>exe</OutputExt>
+			<LinkPackageImports>rtl.bpi;vcl.bpi;vclx.bpi;bcbie.bpi;tmsd2010.bpi;adortl.bpi;dbrtl.bpi;bdertl.bpi;xmlrtl.bpi;vclactnband.bpi;vclimg.bpi;vcldb.bpi;VclSmp.bpi;RNAutoControls_CORN_package.bpi</LinkPackageImports>
+			<AllPackageLibs>rtl.lib;vcl.lib;vclx.lib;bcbie.lib;tmsd2010.lib;adortl.lib;dbrtl.lib;bdertl.lib;xmlrtl.lib;vclactnband.lib;vclimg.lib;vcldb.lib;VclSmp.lib;RNAutoControls_CORN_package.lib</AllPackageLibs>
+			<ProjectType>CppVCLApplication</ProjectType>
+			<PackageImports>vclx.bpi;vcl.bpi;vclimg.bpi;dbrtl.bpi;Rave77VCL.bpi;bdertl.bpi;rtl.bpi;bcbie.bpi;vclactnband.bpi;xmlrtl.bpi;bcbsmp.bpi;vcldb.bpi;vcldbx.bpi;vcltouch.bpi;dsnap.bpi;dsnapcon.bpi;TeeUI.bpi;TeeDB.bpi;Tee.bpi;vclib.bpi;ibxpress.bpi;adortl.bpi;IndyCore.bpi;IndySystem.bpi;IndyProtocols.bpi;inet.bpi;intrawebdb_100_140.bpi;Intraweb_100_140.bpi;vclie.bpi;inetdb.bpi;webdsnap.bpi;websnap.bpi;inetdbbde.bpi;inetdbxpress.bpi;soaprtl.bpi;vclribbon.bpi;DbxCommonDriver.bpi;DbxClientDriver.bpi;DBXInterBaseDriver.bpi;DBXMySQLDriver.bpi;dbexpress.bpi;dbxcds.bpi;tmsd2010.bpi;VclSmp.bpi;tmsexd2010.bpi;tmsxlsd2010.bpi;tmswizd2010.bpi;JamShellD2010Win32.bpi;UED_components_package.bpi;RNAutoControls_CORN_package.bpi</PackageImports>
+			<Multithreaded>true</Multithreaded>
+			<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
+			<DynamicRTL>true</DynamicRTL>
+			<UsePackages>true</UsePackages>
+			<IncludePath>$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;c:\dev\CropSyst\source;$(IncludePath)</IncludePath>
+			<ILINK_LibraryPath>$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<BCC_wpar>false</BCC_wpar>
+			<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
+			<BCC_ExtendedErrorInfo>true</BCC_ExtendedErrorInfo>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
+			<BCC_DisableOptimizations>true</BCC_DisableOptimizations>
+			<DCC_Optimize>false</DCC_Optimize>
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+			<Defines>_DEBUG;$(Defines)</Defines>
+			<BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
+			<IntermediateOutputDir>Debug</IntermediateOutputDir>
+			<BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>
+			<DCC_Define>DEBUG</DCC_Define>
+			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+			<TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>
+			<BCC_StackFrames>true</BCC_StackFrames>
+			<ILINK_LibraryPath>$(BDS)\lib\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
+			<TASM_Debugging>Full</TASM_Debugging>
+			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<Defines>NDEBUG;$(Defines)</Defines>
+			<IntermediateOutputDir>Release</IntermediateOutputDir>
+			<ILINK_LibraryPath>$(BDS)\lib\release;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<TASM_Debugging>None</TASM_Debugging>
+		</PropertyGroup>
+		<ItemGroup>
+			<CppCompile Include="..\..\form_rotation_editor.cpp">
+				<Form>rotation_editor_form</Form>
+				<DependentOn>..\..\form_rotation_editor.h</DependentOn>
+				<BuildOrder>2</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="rotation_editor.cpp">
+				<BuildOrder>0</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\form_common_editor.cpp">
+				<BuildOrder>9</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\rot_param.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\rot_param.h</DependentOn>
+				<BuildOrder>8</BuildOrder>
+			</CppCompile>
+			<LibFiles Include="..\..\..\..\..\..\corn\build\RS\2010\Release\corn_complete_static.lib">
+				<IgnorePath>true</IgnorePath>
+				<BuildOrder>5</BuildOrder>
+			</LibFiles>
+			<CppCompile Include="..\..\form_planting_event.cpp">
+				<Form>planting_event_form</Form>
+				<DependentOn>..\..\form_planting_event.h</DependentOn>
+				<BuildOrder>7</BuildOrder>
+			</CppCompile>
+			<ResFiles Include="rotation_editor.res">
+				<BuildOrder>1</BuildOrder>
+			</ResFiles>
+			<CppCompile Include="..\..\..\..\..\..\GUI\translator\translator_windows.cpp">
+				<DependentOn>..\..\..\..\..\..\GUI\translator\translator_windows.h</DependentOn>
+				<BuildOrder>6</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\static_phrases.cpp">
+				<BuildOrder>10</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\common\simulation\event.cpp">
+				<DependentOn>..\..\..\..\..\..\common\simulation\event.h</DependentOn>
+				<BuildOrder>11</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\common\simulation\synchronization.cpp">
+				<DependentOn>..\..\..\..\..\..\common\simulation\synchronization.h</DependentOn>
+				<BuildOrder>12</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\crop\crop_param_V4.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\crop\crop_param_V4.h</DependentOn>
+				<BuildOrder>13</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\crop\crop_param_class.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\crop\crop_param_class.h</DependentOn>
+				<BuildOrder>14</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\crop\crop_param_struct.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\crop\crop_param_struct.h</DependentOn>
+				<BuildOrder>15</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\crop\growth_stages.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\crop\growth_stages.h</DependentOn>
+				<BuildOrder>16</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\common\simulation\event_types.cpp">
+				<DependentOn>..\..\..\..\..\..\common\simulation\event_types.h</DependentOn>
+				<BuildOrder>17</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\common\simulation\operation.cpp">
+				<DependentOn>..\..\..\..\..\..\common\simulation\operation.h</DependentOn>
+				<BuildOrder>18</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\management\management_param_class.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\management\management_param_class.h</DependentOn>
+				<BuildOrder>19</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\management\management_param_struct.cpp">
+				<BuildOrder>21</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\management\management_param_V4.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\management\management_param_V4.h</DependentOn>
+				<BuildOrder>22</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\CS_suite_directory.cpp">
+				<DependentOn>..\..\..\..\..\CS_suite_directory.h</DependentOn>
+				<BuildOrder>22</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\cs_operation.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\cs_operation.h</DependentOn>
+				<BuildOrder>23</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\cs_operation_codes.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\cs_operation_codes.h</DependentOn>
+				<BuildOrder>24</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\mgmt_types.cpp">
+				<BuildOrder>25</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\N_sources.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\N_sources.h</DependentOn>
+				<BuildOrder>26</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\common\residue\residue_const.cpp">
+				<DependentOn>..\..\..\..\..\..\common\residue\residue_const.h</DependentOn>
+				<BuildOrder>27</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\common\residue\residue_decomposition_param.cpp">
+				<DependentOn>..\..\..\..\..\..\common\residue\residue_decomposition_param.h</DependentOn>
+				<BuildOrder>28</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\CropSyst\source\seeding_param.cpp">
+				<DependentOn>..\..\..\..\..\..\CropSyst\source\seeding_param.h</DependentOn>
+				<BuildOrder>29</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\ClimGen\ClimGen_directory.cpp">
+				<DependentOn>..\..\..\..\..\ClimGen\ClimGen_directory.h</DependentOn>
+				<BuildOrder>30</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\CropSyst_directory.cpp">
+				<DependentOn>..\..\..\..\CropSyst_directory.h</DependentOn>
+				<BuildOrder>31</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\CS_application_directory.cpp">
+				<DependentOn>..\..\..\..\..\CS_application_directory.h</DependentOn>
+				<BuildOrder>32</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\UED\UED_directory.cpp">
+				<DependentOn>..\..\..\..\..\UED\UED_directory.h</DependentOn>
+				<BuildOrder>33</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\file_system\CS_file_ext.cpp">
+				<BuildOrder>34</BuildOrder>
+			</CppCompile>
+			<LibFiles Include="C:\Program Files (x86)\Embarcadero\RAD Studio\7.0\lib\wininet.lib">
+				<IgnorePath>true</IgnorePath>
+				<BuildOrder>35</BuildOrder>
+			</LibFiles>
+			<CppCompile Include="..\..\..\..\..\..\GUI\parameter\form_param_file_common.cpp">
+				<BuildOrder>34</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\GUI\parameter\form_param_file_RS.cpp">
+				<Form>parameter_file_form</Form>
+				<DependentOn>..\..\..\..\..\..\GUI\parameter\form_param_file_RS.h</DependentOn>
+				<BuildOrder>35</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\corn\data_source\vv_file.cpp">
+				<DependentOn>..\..\..\..\..\..\corn\data_source\vv_file.h</DependentOn>
+				<BuildOrder>36</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\corn\data_source\vv_datasrc.cpp">
+				<DependentOn>..\..\..\..\..\..\corn\data_source\vv_datasrc.h</DependentOn>
+				<BuildOrder>37</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\corn\parameters\parameters_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\..\..\..\corn\parameters\parameters_directory_OS_FS.h</DependentOn>
+				<BuildOrder>38</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\corn\OS\file_system_logical.cpp">
+				<DependentOn>..\..\..\..\..\..\corn\OS\file_system_logical.h</DependentOn>
+				<BuildOrder>39</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\corn\OS\directory_entry_name_abstract.cpp">
+				<DependentOn>..\..\..\..\..\..\corn\OS\directory_entry_name_abstract.h</DependentOn>
+				<BuildOrder>40</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\corn\OS\directory_entry_name_concrete.cpp">
+				<DependentOn>..\..\..\..\..\..\corn\OS\directory_entry_name_concrete.h</DependentOn>
+				<BuildOrder>41</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\components\RNAutoControls\corn\RNAutoDateButton.cpp">
+				<DependentOn>..\..\..\..\..\..\components\RNAutoControls\corn\RNAutoDateButton.h</DependentOn>
+				<BuildOrder>42</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\components\RNAutoControls\corn\RNAutoCalendarForm.cpp">
+				<Form>RNAutoCalendarForm</Form>
+				<DependentOn>..\..\..\..\..\..\components\RNAutoControls\corn\RNAutoCalendarForm.h</DependentOn>
+				<BuildOrder>43</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\components\RNAutoControls\corn\RNAutoContainerListBox.cpp">
+				<DependentOn>..\..\..\..\..\..\components\RNAutoControls\corn\RNAutoContainerListBox.h</DependentOn>
+				<BuildOrder>44</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\..\components\RNAutoControls\container\RNAutoContainerCheckListBox.cpp">
+				<DependentOn>..\..\..\..\..\..\components\RNAutoControls\container\RNAutoContainerCheckListBox.h</DependentOn>
+				<BuildOrder>45</BuildOrder>
+			</CppCompile>
+			<FormResources Include="..\..\form_rotation_editor.dfm"/>
+			<FormResources Include="..\..\form_planting_event.dfm"/>
+			<FormResources Include="..\..\..\..\..\..\GUI\parameter\form_param_file_RS.dfm"/>
+			<FormResources Include="..\..\..\..\..\..\components\RNAutoControls\corn\RNAutoCalendarForm.dfm"/>
+			<BuildConfiguration Include="Base">
+				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<Import Project="$(BDS)\Bin\CodeGear.Cpp.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Cpp.Targets')"/>
+		<ProjectExtensions>
+			<Borland.Personality>CPlusPlusBuilder.Personality.12</Borland.Personality>
+			<Borland.ProjectType>CppVCLApplication</Borland.ProjectType>
+			<BorlandProject>
+				<CPlusPlusBuilder.Personality>
+					<Source>
+						<Source Name="MainSource">rotation_editor.cpp</Source>
+					</Source>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">1033</VersionInfo>
+						<VersionInfo Name="CodePage">1252</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Debugging>
+						<Debugging Name="DebugSourceDirs"/>
+					</Debugging>
+					<Parameters>
+						<Parameters Name="RunParams">C:\temp\test\editors\rotation\1.rot</Parameters>
+						<Parameters Name="Launcher"/>
+						<Parameters Name="UseLauncher">False</Parameters>
+						<Parameters Name="DebugCWD">C:\temp\test\editors\rotation\</Parameters>
+						<Parameters Name="HostApplication"/>
+						<Parameters Name="RemoteHost"/>
+						<Parameters Name="RemotePath"/>
+						<Parameters Name="RemoteParams"/>
+						<Parameters Name="RemoteLauncher"/>
+						<Parameters Name="UseRemoteLauncher">False</Parameters>
+						<Parameters Name="RemoteCWD"/>
+						<Parameters Name="RemoteDebug">False</Parameters>
+						<Parameters Name="Debug Symbols Search Path"/>
+						<Parameters Name="LoadAllSymbols">True</Parameters>
+						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+					</Parameters>
+					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\bcboffice2k140.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\bcbofficexp140.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+					</Excluded_Packages>
+					<ProjectProperties>
+						<ProjectProperties Name="AutoShowDeps">False</ProjectProperties>
+						<ProjectProperties Name="ManagePaths">False</ProjectProperties>
+						<ProjectProperties Name="VerifyPackages">True</ProjectProperties>
+					</ProjectProperties>
+				</CPlusPlusBuilder.Personality>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+	</Project>

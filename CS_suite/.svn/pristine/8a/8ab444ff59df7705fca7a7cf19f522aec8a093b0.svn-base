@@ -1,0 +1,276 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{CF8AA64C-F04B-4860-85AD-6D4BE1C68ECF}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="CS_directory.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\CropSyst\management_editor\RS\2010\management_editor.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\CropSystVB\RS\2010\simulation_engine_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\CropSyst\soil_editor\V5\RS\2010\soil_editor.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\GIS\project_editor\V4\RadStudio\2010\GIS_project_editor.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\UED\quality\build\RadStudio\import_export.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\CropSyst\wizard\build\RadSudio\2010\CropSyst_wizard.cbproj">
+				<Dependencies>CS_directory.cbproj;..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj</Dependencies>
+			</Projects>
+			<Projects Include="..\..\..\..\UED\library\build\RS\2010\UED_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\UED\editor\weather\VCL\build\RadStudio\2010\UED_weather_editor.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="C:\dev_other\yaml-0.1.5\tests\dump\test_stream.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="C:\dev_other\yaml-0.1.5\build\RadStudio\2010\yaml_cpp.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="C:\dev_other\yaml-0.1.5\build\RadStudio\2010\yaml-0.1.5.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="CS_simulation.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\CropSyst\source\build\RS\2010\CropSyst_5.cbproj">
+				<Dependencies>..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj;CS_directory.cbproj;..\..\..\..\UED\library\build\RS\2010\UED_static.cbproj;CS_simulation.cbproj</Dependencies>
+			</Projects>
+			<Projects Include="..\..\..\scenarios\generator\build\RadStudio\2010\generator.cbproj">
+				<Dependencies>..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj</Dependencies>
+			</Projects>
+			<Projects Include="..\..\..\scenarios\scheduler\build\RadStudio\2010\scheduler.cbproj">
+				<Dependencies>..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj</Dependencies>
+			</Projects>
+			<Projects Include="..\..\..\CS_explorer\V5\build\RadStudio\2010\CS_explorer.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\CropSyst\REACCH\database\netCDF_to_UED\build\RadStudio\2010\netCDF_to_UED.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\CropSyst\REACCH\database\netCDF_to_DBF\build\RadStudio\2010\netCDF_to_DBF.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\UED\collate\build\RadStudio\2010\UED_collate.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="corn_complete_static">
+			<MSBuild Projects="..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="CS_directory">
+			<MSBuild Projects="CS_directory.cbproj"/>
+		</Target>
+		<Target Name="CS_directory:Clean">
+			<MSBuild Targets="Clean" Projects="CS_directory.cbproj"/>
+		</Target>
+		<Target Name="CS_directory:Make">
+			<MSBuild Targets="Make" Projects="CS_directory.cbproj"/>
+		</Target>
+		<Target Name="management_editor">
+			<MSBuild Projects="..\..\..\CropSyst\management_editor\RS\2010\management_editor.cbproj"/>
+		</Target>
+		<Target Name="management_editor:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\CropSyst\management_editor\RS\2010\management_editor.cbproj"/>
+		</Target>
+		<Target Name="management_editor:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\CropSyst\management_editor\RS\2010\management_editor.cbproj"/>
+		</Target>
+		<Target Name="simulation_engine_static">
+			<MSBuild Projects="..\..\..\..\CropSystVB\RS\2010\simulation_engine_static.cbproj"/>
+		</Target>
+		<Target Name="simulation_engine_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\CropSystVB\RS\2010\simulation_engine_static.cbproj"/>
+		</Target>
+		<Target Name="simulation_engine_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\CropSystVB\RS\2010\simulation_engine_static.cbproj"/>
+		</Target>
+		<Target Name="soil_editor">
+			<MSBuild Projects="..\..\..\CropSyst\soil_editor\V5\RS\2010\soil_editor.cbproj"/>
+		</Target>
+		<Target Name="soil_editor:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\CropSyst\soil_editor\V5\RS\2010\soil_editor.cbproj"/>
+		</Target>
+		<Target Name="soil_editor:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\CropSyst\soil_editor\V5\RS\2010\soil_editor.cbproj"/>
+		</Target>
+		<Target Name="GIS_project_editor">
+			<MSBuild Projects="..\..\..\GIS\project_editor\V4\RadStudio\2010\GIS_project_editor.cbproj"/>
+		</Target>
+		<Target Name="GIS_project_editor:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\GIS\project_editor\V4\RadStudio\2010\GIS_project_editor.cbproj"/>
+		</Target>
+		<Target Name="GIS_project_editor:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\GIS\project_editor\V4\RadStudio\2010\GIS_project_editor.cbproj"/>
+		</Target>
+		<Target Name="import_export">
+			<MSBuild Projects="..\..\..\..\UED\quality\build\RadStudio\import_export.cbproj"/>
+		</Target>
+		<Target Name="import_export:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\UED\quality\build\RadStudio\import_export.cbproj"/>
+		</Target>
+		<Target Name="import_export:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\UED\quality\build\RadStudio\import_export.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory;corn_complete_static" Name="CropSyst_wizard">
+			<MSBuild Projects="..\..\..\CropSyst\wizard\build\RadSudio\2010\CropSyst_wizard.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory:Clean;corn_complete_static:Clean" Name="CropSyst_wizard:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\CropSyst\wizard\build\RadSudio\2010\CropSyst_wizard.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory:Make;corn_complete_static:Make" Name="CropSyst_wizard:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\CropSyst\wizard\build\RadSudio\2010\CropSyst_wizard.cbproj"/>
+		</Target>
+		<Target Name="UED_static">
+			<MSBuild Projects="..\..\..\..\UED\library\build\RS\2010\UED_static.cbproj"/>
+		</Target>
+		<Target Name="UED_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\UED\library\build\RS\2010\UED_static.cbproj"/>
+		</Target>
+		<Target Name="UED_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\UED\library\build\RS\2010\UED_static.cbproj"/>
+		</Target>
+		<Target Name="UED_weather_editor">
+			<MSBuild Projects="..\..\..\UED\editor\weather\VCL\build\RadStudio\2010\UED_weather_editor.cbproj"/>
+		</Target>
+		<Target Name="UED_weather_editor:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\UED\editor\weather\VCL\build\RadStudio\2010\UED_weather_editor.cbproj"/>
+		</Target>
+		<Target Name="UED_weather_editor:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\UED\editor\weather\VCL\build\RadStudio\2010\UED_weather_editor.cbproj"/>
+		</Target>
+		<Target Name="test_stream">
+			<MSBuild Projects="C:\dev_other\yaml-0.1.5\tests\dump\test_stream.cbproj"/>
+		</Target>
+		<Target Name="test_stream:Clean">
+			<MSBuild Targets="Clean" Projects="C:\dev_other\yaml-0.1.5\tests\dump\test_stream.cbproj"/>
+		</Target>
+		<Target Name="test_stream:Make">
+			<MSBuild Targets="Make" Projects="C:\dev_other\yaml-0.1.5\tests\dump\test_stream.cbproj"/>
+		</Target>
+		<Target Name="yaml_cpp">
+			<MSBuild Projects="C:\dev_other\yaml-0.1.5\build\RadStudio\2010\yaml_cpp.cbproj"/>
+		</Target>
+		<Target Name="yaml_cpp:Clean">
+			<MSBuild Targets="Clean" Projects="C:\dev_other\yaml-0.1.5\build\RadStudio\2010\yaml_cpp.cbproj"/>
+		</Target>
+		<Target Name="yaml_cpp:Make">
+			<MSBuild Targets="Make" Projects="C:\dev_other\yaml-0.1.5\build\RadStudio\2010\yaml_cpp.cbproj"/>
+		</Target>
+		<Target Name="yaml-0_1_5">
+			<MSBuild Projects="C:\dev_other\yaml-0.1.5\build\RadStudio\2010\yaml-0.1.5.cbproj"/>
+		</Target>
+		<Target Name="yaml-0_1_5:Clean">
+			<MSBuild Targets="Clean" Projects="C:\dev_other\yaml-0.1.5\build\RadStudio\2010\yaml-0.1.5.cbproj"/>
+		</Target>
+		<Target Name="yaml-0_1_5:Make">
+			<MSBuild Targets="Make" Projects="C:\dev_other\yaml-0.1.5\build\RadStudio\2010\yaml-0.1.5.cbproj"/>
+		</Target>
+		<Target Name="CS_simulation">
+			<MSBuild Projects="CS_simulation.cbproj"/>
+		</Target>
+		<Target Name="CS_simulation:Clean">
+			<MSBuild Targets="Clean" Projects="CS_simulation.cbproj"/>
+		</Target>
+		<Target Name="CS_simulation:Make">
+			<MSBuild Targets="Make" Projects="CS_simulation.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static;CS_directory;UED_static;CS_simulation" Name="CropSyst_5">
+			<MSBuild Projects="..\..\..\..\CropSyst\source\build\RS\2010\CropSyst_5.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static:Clean;CS_directory:Clean;UED_static:Clean;CS_simulation:Clean" Name="CropSyst_5:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\CropSyst\source\build\RS\2010\CropSyst_5.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static:Make;CS_directory:Make;UED_static:Make;CS_simulation:Make" Name="CropSyst_5:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\CropSyst\source\build\RS\2010\CropSyst_5.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static" Name="generator">
+			<MSBuild Projects="..\..\..\scenarios\generator\build\RadStudio\2010\generator.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static:Clean" Name="generator:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\scenarios\generator\build\RadStudio\2010\generator.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static:Make" Name="generator:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\scenarios\generator\build\RadStudio\2010\generator.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static" Name="scheduler">
+			<MSBuild Projects="..\..\..\scenarios\scheduler\build\RadStudio\2010\scheduler.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static:Clean" Name="scheduler:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\scenarios\scheduler\build\RadStudio\2010\scheduler.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="corn_complete_static:Make" Name="scheduler:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\scenarios\scheduler\build\RadStudio\2010\scheduler.cbproj"/>
+		</Target>
+		<Target Name="CS_explorer">
+			<MSBuild Projects="..\..\..\CS_explorer\V5\build\RadStudio\2010\CS_explorer.cbproj"/>
+		</Target>
+		<Target Name="CS_explorer:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\CS_explorer\V5\build\RadStudio\2010\CS_explorer.cbproj"/>
+		</Target>
+		<Target Name="CS_explorer:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\CS_explorer\V5\build\RadStudio\2010\CS_explorer.cbproj"/>
+		</Target>
+		<Target Name="netCDF_to_UED">
+			<MSBuild Projects="..\..\..\..\CropSyst\REACCH\database\netCDF_to_UED\build\RadStudio\2010\netCDF_to_UED.cbproj"/>
+		</Target>
+		<Target Name="netCDF_to_UED:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\CropSyst\REACCH\database\netCDF_to_UED\build\RadStudio\2010\netCDF_to_UED.cbproj"/>
+		</Target>
+		<Target Name="netCDF_to_UED:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\CropSyst\REACCH\database\netCDF_to_UED\build\RadStudio\2010\netCDF_to_UED.cbproj"/>
+		</Target>
+		<Target Name="netCDF_to_DBF">
+			<MSBuild Projects="..\..\..\..\CropSyst\REACCH\database\netCDF_to_DBF\build\RadStudio\2010\netCDF_to_DBF.cbproj"/>
+		</Target>
+		<Target Name="netCDF_to_DBF:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\CropSyst\REACCH\database\netCDF_to_DBF\build\RadStudio\2010\netCDF_to_DBF.cbproj"/>
+		</Target>
+		<Target Name="netCDF_to_DBF:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\CropSyst\REACCH\database\netCDF_to_DBF\build\RadStudio\2010\netCDF_to_DBF.cbproj"/>
+		</Target>
+		<Target Name="UED_collate">
+			<MSBuild Projects="..\..\..\..\UED\collate\build\RadStudio\2010\UED_collate.cbproj"/>
+		</Target>
+		<Target Name="UED_collate:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\UED\collate\build\RadStudio\2010\UED_collate.cbproj"/>
+		</Target>
+		<Target Name="UED_collate:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\UED\collate\build\RadStudio\2010\UED_collate.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="corn_complete_static;CS_directory;management_editor;simulation_engine_static;soil_editor;GIS_project_editor;import_export;CropSyst_wizard;UED_static;UED_weather_editor;test_stream;yaml_cpp;yaml-0_1_5;CS_simulation;CropSyst_5;generator;scheduler;CS_explorer;netCDF_to_UED;netCDF_to_DBF;UED_collate"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="corn_complete_static:Clean;CS_directory:Clean;management_editor:Clean;simulation_engine_static:Clean;soil_editor:Clean;GIS_project_editor:Clean;import_export:Clean;CropSyst_wizard:Clean;UED_static:Clean;UED_weather_editor:Clean;test_stream:Clean;yaml_cpp:Clean;yaml-0_1_5:Clean;CS_simulation:Clean;CropSyst_5:Clean;generator:Clean;scheduler:Clean;CS_explorer:Clean;netCDF_to_UED:Clean;netCDF_to_DBF:Clean;UED_collate:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="corn_complete_static:Make;CS_directory:Make;management_editor:Make;simulation_engine_static:Make;soil_editor:Make;GIS_project_editor:Make;import_export:Make;CropSyst_wizard:Make;UED_static:Make;UED_weather_editor:Make;test_stream:Make;yaml_cpp:Make;yaml-0_1_5:Make;CS_simulation:Make;CropSyst_5:Make;generator:Make;scheduler:Make;CS_explorer:Make;netCDF_to_UED:Make;netCDF_to_DBF:Make;UED_collate:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

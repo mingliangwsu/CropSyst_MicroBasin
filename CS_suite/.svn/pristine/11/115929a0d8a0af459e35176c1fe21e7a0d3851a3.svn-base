@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CS_parameter_files_NET", "CS_parameter_files_NET.vcproj", "{6C09C566-3BD9-4748-BD18-553B6011B2BE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F736352B-5C9F-494A-83EE-F56127589522} = {F736352B-5C9F-494A-83EE-F56127589522}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "corn_complete_static", "..\..\..\..\corn\VS\2008\corn_complete_static.vcproj", "{F736352B-5C9F-494A-83EE-F56127589522}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CropSystVB_NET", "..\..\..\..\CropSystVB\VS\2008\CropSystVB_NET\CropSystVB_NET.vcproj", "{A8DF11C2-59ED-4F79-9C69-B8BCA2184C78}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F736352B-5C9F-494A-83EE-F56127589522} = {F736352B-5C9F-494A-83EE-F56127589522}
+		{D6741C59-1BC6-44F9-9B16-1DCA3C28F075} = {D6741C59-1BC6-44F9-9B16-1DCA3C28F075}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_sim_static", "..\..\..\..\common\simulation\VS\2008\common_sim_static\common_sim_static.vcproj", "{D6741C59-1BC6-44F9-9B16-1DCA3C28F075}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C09C566-3BD9-4748-BD18-553B6011B2BE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6C09C566-3BD9-4748-BD18-553B6011B2BE}.Debug|Win32.Build.0 = Debug|Win32
+		{6C09C566-3BD9-4748-BD18-553B6011B2BE}.Release|Win32.ActiveCfg = Release|Win32
+		{6C09C566-3BD9-4748-BD18-553B6011B2BE}.Release|Win32.Build.0 = Release|Win32
+		{F736352B-5C9F-494A-83EE-F56127589522}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F736352B-5C9F-494A-83EE-F56127589522}.Debug|Win32.Build.0 = Debug|Win32
+		{F736352B-5C9F-494A-83EE-F56127589522}.Release|Win32.ActiveCfg = Release|Win32
+		{F736352B-5C9F-494A-83EE-F56127589522}.Release|Win32.Build.0 = Release|Win32
+		{A8DF11C2-59ED-4F79-9C69-B8BCA2184C78}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A8DF11C2-59ED-4F79-9C69-B8BCA2184C78}.Debug|Win32.Build.0 = Debug|Win32
+		{A8DF11C2-59ED-4F79-9C69-B8BCA2184C78}.Release|Win32.ActiveCfg = Release|Win32
+		{A8DF11C2-59ED-4F79-9C69-B8BCA2184C78}.Release|Win32.Build.0 = Release|Win32
+		{D6741C59-1BC6-44F9-9B16-1DCA3C28F075}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D6741C59-1BC6-44F9-9B16-1DCA3C28F075}.Debug|Win32.Build.0 = Debug|Win32
+		{D6741C59-1BC6-44F9-9B16-1DCA3C28F075}.Release|Win32.ActiveCfg = Release|Win32
+		{D6741C59-1BC6-44F9-9B16-1DCA3C28F075}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

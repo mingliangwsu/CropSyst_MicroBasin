@@ -1,0 +1,93 @@
+#include "soil/soil_evaporator.h"
+#include "corn/math/moremath.h"
+//______________________________________________________________________________
+Evaporator_soil::Evaporator_soil
+(modifiable_ CORN::Dynamic_array<float64>     &evaporation_potential_remaining_
+,const       Soil_layers_interface               &soil_layers_
+,const       Soil_hydraulic_properties_interface &soil_hydraulic_properties_
+,modifiable_ Soil_hydrology_interface            &soil_hydrology_)
+: CS::Evaporator_intervals              (evaporation_potential_remaining_)
+, soil_layers                 (soil_layers_)
+, soil_hydraulic_properties   (soil_hydraulic_properties_)
+, soil_hydrology              (soil_hydrology_)
+, evaporation_actual_yesterday()                                                 //160804
+{}
+//_2016-06-06__________________________________________________________________/
+float64 Evaporator_soil
+::evaporate_interval(nat8 interval)                                modification_
+{
+   float64 evap_requested_now = evaporation_potential_remaining.get(interval);   //160719
+   // This was in Soil_infiltration_cascade_common
+   float64  perm_wilt_point_1 = soil_hydraulic_properties.get_permanent_wilt_point_volumetric(1);
+   float64  perm_wilt_point_2 = soil_hydraulic_properties.get_permanent_wilt_point_volumetric(2);
+   float64  thickness_1 = soil_layers.get_thickness_m(1);
+   float64  thickness_2 = soil_layers.get_thickness_m(2);
+   float64 FC_2 = soil_hydraulic_properties.get_field_capacity_volumetric(2);    //051204
+   float64 mid_capacity = perm_wilt_point_2 + ((FC_2 - perm_wilt_point_2) * 0.75);
+   float64 pot_evap = evap_requested_now; // evaporation_potential_remaining.get_m();                   //160413
+   pot_evap *= (1.0-mulch_cover_fraction);                                       //100620
+      // mulch here is material other than residue (i.e. plastic cover)
+   evaporation_potential_remaining.deduct_at(interval,pot_evap);                 //160719
+   evaporation_potential.set(interval,pot_evap);                                 //160805
+   float64 air_dry_water_content = perm_wilt_point_1 /3.0;
+   float64 liquid_water_content_1 = soil_hydrology.get_liquid_water_content_volumetric(1);   //990311
+   float64 soil_evaporation_1
+      = (liquid_water_content_1 < perm_wilt_point_1)                             //990311
+      ? (pot_evap * CORN_sqr((liquid_water_content_1 - air_dry_water_content)    //990311
+        / (perm_wilt_point_1 - air_dry_water_content)))
+      : pot_evap;
+   if ((liquid_water_content_1-soil_evaporation_1/thickness_1)< air_dry_water_content) //990311
+       soil_evaporation_1 = (liquid_water_content_1-air_dry_water_content)*thickness_1;
+   if (soil_evaporation_1 < 0.0)                                                 //061205
+      soil_evaporation_1 = 0;  // Dust mulching  may temporarily have one of the watercontent terms out of sync
+   float64 evaporation_loss_volumetric =  - soil_evaporation_1 / thickness_1;  // Negative value   //070814
+   soil_hydrology.change_liquid_water_content_by_volumetric(1,evaporation_loss_volumetric);  //070814
+   // During fallow periods, the soil is assumed to dry deeper                   //960530
+   // into second layer, but not as dry as the first layer.
+   float64 soil_evaporation_2 = 0.0;
+   if (fallow && summer_time)
+   {
+      pot_evap -= soil_evaporation_1;
+      soil_evaporation_2 = pot_evap;                                             //981209
+      // Can dry 25% of available water
+      float64 liquid_water_content_2 = soil_hydrology.get_liquid_water_content_volumetric(2); //981209
+      soil_evaporation_2 =
+         ((liquid_water_content_2 - soil_evaporation_2 / thickness_2) < mid_capacity)
+         ? CORN_must_be_greater_or_equal_to((liquid_water_content_2 - mid_capacity) * thickness_2,0.0)
+         : pot_evap;
+      float64 evaporation_loss_volumetric =  - soil_evaporation_2 / thickness_2;  // Negative value   //070814
+      soil_hydrology.change_liquid_water_content_by_volumetric(2,evaporation_loss_volumetric);  //070814
+   }
+   if (soil_evaporation_2 < 0.0)                                                 //061205
+   {  soil_evaporation_2 = 0;   // Normally this shouldn't happen
+      // cerr << "Warning negative evaporation in soil layer 2, temporary artifact of dust mulching - automatically corrected" << endl;
+   }
+   float64 evaporation =  (soil_evaporation_1 + soil_evaporation_2)              //980730
+   #ifdef DIRECTED_IRRIGATION
+      * (soil_wetting ? soil_wetting->surface_evaporation_area_fraction : 1.0)   //140612
+   #else
+      ;
+   #endif
+   evaporation_actual.set(interval,evaporation);                                 //160728LML
+   return
+      evaporation_actual.get(interval);                                          //160719
+}
+//_2016-06-06__________________________________________________________________/
+bool Evaporator_soil::know_conditions
+(bool fallow_
+,bool summer_time_
+,float64 mulch_cover_fraction_)                                       cognition_
+{
+   fallow               = fallow_;
+   summer_time          = summer_time_;
+   mulch_cover_fraction = mulch_cover_fraction_;
+   return true;
+}
+//_2016-06-06__________________________________________________________________/
+bool Evaporator_soil::end_day()                                    modification_
+{
+   evaporation_actual_yesterday.copy(evaporation_actual);
+   return CS::Evaporator_intervals::end_day();
+}
+//_2016-08-04___________________________________________________________________
+

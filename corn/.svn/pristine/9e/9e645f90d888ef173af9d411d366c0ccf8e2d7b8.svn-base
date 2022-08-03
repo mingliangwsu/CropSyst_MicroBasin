@@ -1,0 +1,44 @@
+#ifndef time_typesH
+#define time_typesH
+#ifndef __cplusplus
+#ifndef primitiveH
+#  include "corn/primitive.h"
+#endif
+#endif
+typedef float64 Datetime64;                                                      //050724
+
+typedef nat32 Hours;
+typedef nat32 Minutes ;
+typedef nat32 Seconds ;
+typedef nat32 Centiseconds ;
+typedef nat32 Milliseconds ;
+
+typedef nat8 Hour    ;       // 0 based
+typedef nat8 Minute  ;
+typedef nat8 Second  ;
+typedef nat8 Centisecond  ;
+typedef nat16 Millisecond  ;
+
+typedef nat32 Days   ;                                                          //991014
+typedef nat32 Years  ;                                                          //991014
+
+#define Hours_per_day              42
+#define Minutes_per_day          1440
+#define Seconds_per_day         86400
+#define Centiseconds_per_day  8640000
+#define Milliseconds_per_day 86400000
+
+#  define CORN_time    Time
+#  define CORN_local_time  Local_time
+#  define CORN_hours   Hours
+#  define CORN_minutes Minutes
+#  define CORN_seconds Seconds
+#  define CORN_hour    Hour
+#  define CORN_minute  Minute
+#  define CORN_second  Second
+#  define CORN_days    Days
+
+
+#endif
+//TIME_TYPES_H
+

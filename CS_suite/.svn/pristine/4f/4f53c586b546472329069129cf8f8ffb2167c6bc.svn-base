@@ -1,0 +1,237 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\CS_suite_4\cropsyst\soil_editor.exe"/>
+    <OBJFILES value="C:\temp\obj\CropSyst\GUI\bcb5\\soil_editor.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_soil_editor.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\pedotransfer_saxton_1986.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\SCS.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\texture.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\layering.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\recent.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\pedotransfer_interface.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\pedotransfer_abstract.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\pedotransfer_saxton_2006.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\txtrhydr.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_triangle_selector.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_param_file.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_param_file_common.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\translator_windows.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_soil_texture.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_param.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_param_V4.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_param_class.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\static_phrases.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\cs_project.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\cs_project_directory.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\cs_scenario_directory.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\database_dir.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\CS_project_editor_params.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\soil_water_characteristics_form.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\form_soil_editor_common_VCL.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\domains.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\program_directory.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\dir_ent.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\filtered_filename.obj 
+      C:\temp\obj\CropSyst\GUI\bcb5\\parameter.obj"/>
+    <RESFILES value="soil_editor.res C:\temp\obj\CropSyst\GUI\bcb5\\buttons.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) ..\form_soil_editor.dfm ..\form_triangle_selector.dfm 
+      ..\..\..\..\..\GUI\parameter\form_param_file.dfm ..\form_soil_texture.dfm 
+      ..\..\..\convert\soil\VCL\soil_water_characteristics_form.dfm"/>
+    <LIBFILES value="C:\temp\lib\BCB5\release\corn_complete_static.lib 
+      C:\temp\lib\BCB5\release\CS_directory.lib &quot;C:\Program Files\Borland\CBuilder5\Lib\wininet.lib&quot;"/>
+    <LIBRARIES value="K102_R51.lib CORN_datasets.lib VCLSMP50.lib tmsc5.lib AutoControls.lib"/>
+    <SPARELIBS value="Vcl50.lib AutoControls.lib VCLX50.lib BCBSMP50.lib bcbie50.lib tmsc5.lib 
+      VCLDB50.lib TEE50.lib VCLSMP50.lib CORN_datasets.lib VCLBDE50.lib 
+      K102_R51.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi TeeUI50.bpi TeeDB50.bpi Tee50.bpi TeeQR50.bpi 
+      VCLIB50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi Inet50.bpi NMFast50.bpi 
+      dclocx50.bpi bcb2kaxserver50.bpi"/>
+    <PATHCPP value=".;..;..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\Common\soil;..\..\..\..\..\GUI\recent;..\..\..\..\..\GUI\parameter;..\..\..\..\..\GUI\translator;..\..\..\..\..\CropSyst\source\soil;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\project;..\..\..\convert\soil\VCL;..\..;..\..\..\..\..\USDA\NRCS\soil\survey;..\..\..\..\..\corn\application;..\..\..\..\..\common"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;..\..\..\..\..\components\AutoControls\resources"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="SUPPORT_STRING;ONEHEADER;CROPSYST;STATSGO_DATABASE;OLD_BINARY_FILE;_DEBUG;CS_VERSION=4"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="soil_editor.cpp"/>
+    <INCLUDEPATH value="..\..\..\..\..\corn\file_sys;..\..\..\..\..\corn\application;..\;..\..;..\..\..\..\..\CropSyst\GUI\Builder\soil_editor;..\..\..\..\..\USDA\NRCS\soil\survey;..\..\..\convert\soil\VCL;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\project;..\..\..\..\..\CropSyst\source\soil;..\..\..\..\..\GUI\translator;..\..\..\..\..\CropSyst\cpp\soil;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\CropSyst\convert\soil\GUI;..\..\..\..\..\GUI\parameter;..\..\..\..\..\GUI\recent;..\..\..\..\..\parameters;&quot;C:\Program Files\Borland\BCB5\Projects\&quot;;..\..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\Common\measure;..\..\..\..\..\components\datasets\corn\data_table;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\Common\soil\statsgo;..\..\..\..\..\Common\simulation;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\Common\soil;..\..\..\..\..\corn\RUI\resources;..\..\..\..\..\CropSyst\GUI\Builder\components;..\..\..\..\..\CropSyst\GUI\Builder\project_editor;..\..\..\..\..\components\autocontrols;&quot;C:\Program Files\Borland\BCB5\Bin\&quot;;$(BCB)\include;$(BCB)\include\vcl;&quot;C:\Program Files\Borland\BCB5\Bin\dev\&quot;;..\..\..\..\..;..\..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\..\common;..\..\..\..\..\USDA\NRCS"/>
+    <LIBPATH value="..\..\..\..\..\common;..\..\..\..\..\corn\file_sys;..\..\..\..\..\corn\application;..\;..\..;..\..\..\..\..\CropSyst\GUI\Builder\soil_editor;..\..\..\..\..\USDA\NRCS\soil\survey;..\..\..\convert\soil\VCL;..\..\..\..\..\CropSyst\source\project;..\..\..\..\..\CropSyst\source;..\..\..\..\..\CropSyst\source\soil;..\..\..\..\..\GUI\translator;..\..\..\..\..\CropSyst\cpp\soil;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\..\..\common\soil\hydrology;..\..\..\..\..\CropSyst\convert\soil\GUI;..\..\..\..\..\GUI\parameter;..\..\..\..\..\GUI\recent;..\..\..\..\..\parameters;&quot;C:\Program Files\Borland\BCB5\Projects\&quot;;..\..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\..\components\AutoControls\resources;..\..\..\..\..\Common\measure;..\..\..\..\..\components\datasets\corn\data_table;..\..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\..\Common\soil\statsgo;..\..\..\..\..\Common\simulation;..\..\..\..\..\Common\soil\SCS;..\..\..\..\..\Common\soil;..\..\..\..\..\CropSyst\cpp;..\..\..\..\..\corn\RUI\resources;..\..\..\..\..\CropSyst\GUI\Builder\components;..\..\..\..\..\CropSyst\GUI\Builder\project_editor;..\..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;&quot;C:\Program Files\Borland\BCB5\Bin\&quot;;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; -N0&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; 
+      -$Y+ -$W -$O- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-I&quot;C:\temp\obj\CropSyst\GUI\bcb5\&quot; -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=30
+Item0=..\..\..\..\USDA\NRCS\soil\survey;..\..\..\..\CS_suite\CropSyst\convert\soil\VCL;..\..\..\cpp;..\..\..\source;..\..\..\source\project;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item1=..\..\..\..\CS_suite\CropSyst\convert\soil\VCL;..\..\..\cpp;..\..\..\source;..\..\..\source\project;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item2=..\..\..\source;..\..\..\source\project;..\..\..\source;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item3=..\..\..\cpp;..\..\..\source\project;..\..\..\source;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source_BCB5;..\..\..\..\common
+Item4=..\..\..\source\project;..\..\..\source;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\source;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source_BCB5;c:\dev\common
+Item5=..\..\..\source\project;..\..\..\source;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source_BCB5
+Item6=..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;C:\dev\components\Other\ShellShock\source_BCB5
+Item7=..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item8=C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item9=C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item10=C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item11=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item12=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.1\source;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item13=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;C:\dev\components\TMS_4.1\source;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item14=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item15=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item16=..\..\..\..\Common\GUI\parameter;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item17=..\..\..\..\Common\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;..\..\..\..\components\Other\ShellShock\source
+Item18=..\..\..\..\Common\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..;C:\dev\components\Other\ShellShock\source
+Item19=..\..\..\..\Common\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..
+Item20=..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..
+Item21=..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..
+Item22=..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..
+Item23=..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;..\..\..\..
+Item24=..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\;c:\dev
+Item25=..\project_editor;..\..\..\..\components\autocontrols;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;C:\Program Files\Borland\BCB5\Bin\dev\
+Item26=C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;\dev
+Item27=C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;dev
+Item28=C:\Program Files\Borland\BCB5\Bin;$(BCB)\include;$(BCB)\include\vcl;\dev
+Item29=C:\Program Files\Borland\BCB5\Bin;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=22
+Item0=..\..\..\..\USDA\NRCS\soil\survey;..\..\..\..\CS_suite\CropSyst\convert\soil\VCL;..\..\..\source\project;..\..\..\source;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\..\..\CS_suite\CropSyst\convert\soil\VCL;..\..\..\source\project;..\..\..\source;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..\..\source\project;..\..\..\source;..\..\..\source\soil;..\..\..\..\GUI\translator;..\..\..\..\CS_suite\CropSyst\soil_editor;..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\..\..\cpp\soil;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item4=C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item5=C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item6=C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\common\soil\hydrology;..\..\..\convert\soil\GUI;..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.1\source_BCB5;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item8=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS_4.1\source;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item9=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;C:\dev\components\TMS_4.1\source;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item10=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item11=..\..\..\..\GUI\parameter;..\..\..\..\GUI\recent;..\..\..\..\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item12=..\..\..\..\Common\GUI\parameter;..\..\..\..\Common\GUI\recent;..\..\..\..\Common\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item13=..\..\..\..\Common\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects\;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item14=..\..\..\..\Common\parameters;..\..\..\..\GUI\recent;C:\Program Files\Borland\BCB5\Projects;..\..\..\..\GUI\parameter;..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item15=..\..\..\..\components\DataSets\CORN\Data_rec;..\..\..\..\components\AutoControls\resources;..\..\..\..\Common\measure;..\..\..\..\components\datasets\corn\data_table;..\..\..\..\components\TMS;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item16=..\..\..\..\Common\simulation;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item17=..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\cpp;..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item18=..\..\..\..\corn\RUI\resources;..\components;..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item19=..\project_editor;..\..\..\..\components\autocontrols;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item20=$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item21=$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=3
+Item0=c:\program files\borland\BCB5\source\vcl;c:\dev\corn\format\;C:\dev\components\DataSets\CORN\;C:\dev\corn\data_source\
+Item1=c:\program files\borland\BCB5\source\vcl;c:\dev\corn\format\;C:\dev\components\DataSets\CORN\
+Item2=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=10
+Item0=SUPPORT_STRING;ONEHEADER;CROPSYST;STATSGO_DATABASE;OLD_BINARY_FILE;_DEBUG;CS_VERSION=4
+Item1=SUPPORT_STRING;ONEHEADER;CROPSYST;STATSGO_DATABASE;OLD_BINARY_FILE;_DEBUG
+Item2=SUPPORT_STRING;ONEHEADER;CROPSYST;STATSGO_DATABASE;OLD_BINARY_FILE
+Item3=_DEBUG;SUPPORT_STRING;ONEHEADER;CROPSYST;STATSGO_DATABASE;OLD_BINARY_FILE
+Item4=_DEBUG;SUPPORT_STRING;ONEHEADER;CROPSYST;STATSGO_DATABASE;xOLD_BINARY_FILE
+Item5=_DEBUG;SUPPORT_STRING;ONEHEADER;CROPSYST;STATSGO_DATABASE
+Item6=_DEBUG;SUPPORT_STRING;ONEHEADER;CROPSYST
+Item7=_DEBUG;SUPPORT_STRING;ONEHEADER
+Item8=_DEBUG;SUPPORT_STRING
+Item9=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=4
+Item0=C:\temp\obj\CropSyst\GUI\bcb5\
+Item1=C:\temp\obj\CropSyst\GUI\bcb5\
+Item2=C:\temp\obj\CropSyst\GUI\Builder\soil_editor\
+Item3=C:\temp\obj\CropSyst\GUI\Builder\soil_editor
+
+[HistoryLists\hlFinalOutputDir]
+Count=3
+Item0=C:\CS_suite_4\cropsyst\
+Item1=C:\CS_suite\cropsyst\
+Item2=C:\CS_suite\cropsyst
+
+[Debugging]
+DebugSourceDirs=c:\program files\borland\BCB5\source\vcl;c:\dev\corn\format\;C:\dev\components\DataSets\CORN\;C:\dev\corn\data_source\
+
+[Parameters]
+RunParams=c:\temp\test.sil
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+
+  <FILES>
+    <FILE type="override" value="..\..\..\..\..\GUI\recent\recent.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\..\Common\soil\SCS\SCS.CPP" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\..\common\soil\hydrology\pedotransfer_saxton_1986.cpp" translator="Auto">
+      <CFLAG1 value=" -H=c:\dev\corn\BCB5\corn_static_bcb.csm"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\..\common\soil\layering.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\..\Common\soil\texture.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+  </FILES>
+</PROJECT>

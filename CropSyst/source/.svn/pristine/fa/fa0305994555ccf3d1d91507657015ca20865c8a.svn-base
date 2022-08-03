@@ -1,0 +1,611 @@
+#ifndef crop_param_structH
+#define crop_param_structH
+#include "corn/primitive.h"
+#include "crop/crop_types.h"
+#include "corn/datetime/date.hpp"
+#include "corn/labeled_enum.h"
+#include "corn/measure/measures.h"
+#include "corn/metrology/units_clad.h"
+
+
+/* This module defines a crop parameters commonly used
+in a number crop simulation models.
+DO NOT DELETE any of these variable even though they dont appear
+in a particular model without consulting Roger Nelson rnelson@wsu.edu
+ */
+
+namespace CropSyst
+{
+#if (CROPSYST_VERSION == 4)
+//121219 These became deprecated in version 4.17.00 because dilution curves are now based on critical curve not maximum curve
+extern const float biomass_to_start_dilution_max_N_conc_default [PHOTOSYNTHETIC_PATHWAY_COUNT];  // T/ha  was in crop_N as biomass_to_start_dilution_max_N_conc_species
+extern const float biomass_to_start_dilution_max_to_crit_mult   [PHOTOSYNTHETIC_PATHWAY_COUNT];
+extern const float biomass_to_start_dilution_max_to_min_mult    [PHOTOSYNTHETIC_PATHWAY_COUNT];
+#endif
+extern const float biomass_to_start_dilution_crit_N_conc_default[PHOTOSYNTHETIC_PATHWAY_COUNT]; //T/ha these are the defaults for the parameter
+extern const float biomass_to_start_dilution_crit_to_max_mult   [PHOTOSYNTHETIC_PATHWAY_COUNT];
+extern const float biomass_to_start_dilution_crit_to_min_mult   [PHOTOSYNTHETIC_PATHWAY_COUNT];
+
+extern const float N_mature_max_conc_default                    [PHOTOSYNTHETIC_PATHWAY_COUNT];  // was in crop_N as N_max_conc_at_maturity_species
+extern const float N_mature_max_to_crit_mult                    [PHOTOSYNTHETIC_PATHWAY_COUNT];
+extern const float N_mature_max_to_min_mult                     [PHOTOSYNTHETIC_PATHWAY_COUNT];
+extern const float N_dilution_curve_slope_default               [PHOTOSYNTHETIC_PATHWAY_COUNT]; // 121219 was N_conc_slope_default
+};
+//______________________________________________________________________________
+namespace CropSyst {
+//______________________________________________________________________________
+struct Crop_parameters_struct
+{
+   struct Thermal_time
+   {
+      Thermal_response      thermal_response;                                    //151110
+
+      //151109 obsolete now always daily CORN::Units_clad  resolution_time_step;
+      // Currently in version 4 Thermal_time_parameters there an enumeration for Resolution
+      // resolution_time_step is the same information,
+      // I need to replace Resolution with resolution_time_step in version 4.
+      float32 base_temperature; // both daily linear, non-linear and hourly mode
+      float32 cutoff_temperature; // only for daily linear mode
+      float32 opt_temperature; // only for daily non-linear and hourly mode      //021124
+         // The optimum temperature must not be lower than base_temperature
+      float32 max_temperature; // only for daily linear and hourly mode          //021124
+    public:
+      inline Thermal_time() {}                                                   //150904
+   };
+   //_2002-06-28________________________________________________________________
+   struct Phenology
+   {
+      // These should actually all be nat32
+      struct Stage //150905 _thermal_time                                        //150831
+      {  // value in degree days
+         float32 emergence;
+         float32 accrescence; // active growth                                   //150913
+         float32 tuber;
+         float32 root_depth;                                                     //150913_070321
+         float32 flowering; // rename to anthesis
+         float32 filling;                                                        //100315
+            // Claudio is using the term yield_formation for filling
+         float32 rapid_fruit_growth;                                             //150929
+         float32 veraison;
+         float32 maturity;                                                       //050511_100316
+            //rename to begin_physiological_maturity_deg_day
+         // needs to be float to allow very larger numbers for long term perennials such as trees
+         float32 senescence;
+       public:
+         inline Stage()                                                          //160211
+            : emergence    (0)
+            , accrescence  (0)
+            , tuber        (0)
+            , root_depth   (0)
+            , flowering    (0)
+            , filling      (0)
+            , rapid_fruit_growth(0)
+            , veraison     (0)
+            , maturity     (0)
+            , senescence   (0)
+            {} // Clear constructor
+         inline Stage(const Stage &copy_from)                                    //160211
+            : emergence    (copy_from.emergence)
+            , accrescence  (copy_from.accrescence)
+            , tuber        (copy_from.tuber)
+            , root_depth   (copy_from.root_depth)
+            , flowering    (copy_from.flowering)
+            , filling      (copy_from.filling)
+            , rapid_fruit_growth(copy_from.rapid_fruit_growth)
+            , veraison     (copy_from.veraison)
+            , maturity     (copy_from.maturity)
+            , senescence   (copy_from.senescence)
+            {} // Copy constructor
+      };
+      Stage initiation;
+      Stage culmination;
+
+      //#define max_canopy      culmination.accrescence
+      //#define full_senescence culmination.senescence
+            // needs to be float to allow very larger numbers for long term perennials such as trees, (was vernalization)
+
+      //#define root_depth_max     culmination.root_depth
+      //#define rapid_fruit_growth culmination.filling
+         // 071127 it is possible that begin_rapid_fruit_growth_deg_day may become obsolete with new fruit growth model
+         // but I think it will be needed in the case of grapes
+
+      //150913 appears to be obsolete         float32 peak_LAI_or_rapid_fruit_growth();                               //030529
+
+      bool maturity_significant;                                                 //080319
+      // Some perennial crops Fruit trees do need physiological maturity even thought they are perennial
+      // Some crops although grown annually such as potatos and tomatos could keep growing indefinitely
+      // So, we now have an option for the user to select is physiological maturity is significant
+      // for growth equations.
+
+      nat32 stages_relevent;                                                     //150905
+
+      float32 phenologic_sensitivity_water_stress;
+      bool clipping_resets; // for alfalfa and grasses and probably other crops  //040719
+      #if (!defined(YAML_PARAM_VERSION) || (CROPSYST_VERSION==4))
+      float32 WUE_change;
+            // Degree days to crop change in water use efficiency for WUE_changes mode.//080510
+            // In version 5 WUE will be a temporaly adjustable parameters.
+      #endif
+    public:
+      inline Phenology()
+         : initiation            ()
+         , culmination           ()
+         , maturity_significant  (false)
+         , stages_relevent       (0) // probably should initialize to something realistic, Parameter calss is currently setting this up
+         , phenologic_sensitivity_water_stress (0)
+         , clipping_resets       (false)
+         #if (!defined(YAML_PARAM_VERSION) || (CROPSYST_VERSION==4))
+         , WUE_change            (0)
+            // Degree days to crop change in water use efficiency for WUE_changes mode.//080510
+            // In version 5 WUE will be a temporaly adjustable parameters.
+         #endif
+         {} // clear constructor
+      inline Phenology(const Phenology &copy_from)
+         : initiation            (copy_from.initiation)
+         , culmination           (copy_from.culmination)
+         , maturity_significant  (copy_from.maturity_significant)
+         , stages_relevent       (copy_from.stages_relevent)
+         , phenologic_sensitivity_water_stress (copy_from.phenologic_sensitivity_water_stress)
+         , clipping_resets       (copy_from.clipping_resets)
+         #if (!defined(YAML_PARAM_VERSION) || (CROPSYST_VERSION==4))
+         , WUE_change            (copy_from.WUE_change)
+            // Degree days to crop change in water use efficiency for WUE_changes mode.//080510
+            // In version 5 WUE will be a temporaly adjustable parameters.
+         #endif
+         {} // copy_constructor
+   };
+   //_2008-07-22________________________________________________________________
+   struct Transpiration
+   {  float32  ET_coef;                      // at maximum canopy cover was ET_crop_coef
+      float32  LWP_wilt_point;                     // J/kg    Wilting leaf water potential. //110208 was wilt_leaf_water_pot
+      float32  LWP_stomatal_closure;         // J/kg    Leaf water potential at the onset of stomatal closure. (020418 was critical_leaf_water_pot) (110208 was stomatal_closure_leaf_water_pot)
+      float32  normal_max_water_uptake_mm;   // mm/day  (kg/m2) For normal crops, not that fruit tree crops have max uptake by growth stage
+         /*130406
+            rename this to water_uptake_max_mm
+            This is dynamic at least certainly for fruit tree crops
+            In V4 this is dynmically adjusted based on the
+            max_water_uptake_during_XXX parameters
+         */
+      float32  a1; //intercept
+      float32  a2; //slope
+      //121114 a1 and a2 are parameters added specially for Jordi Marsal for testing.
+      // these are coefficients of a regression so.
+      // Values of 0 effectively disable these.
+   };
+   //_2011-02-08________________________________________________________________
+   struct Biomass_production
+   {  // This is stored under the section [growth] so may want to rename
+      bool WUE_changes;                                                          //080506
+         // Normally Water Use Efficiency coefficient is the same throughout
+         // vegetative growth, but some users way want a separate
+         // growth curve coefficients for active vegetative growth and
+         // reproductive/yield growth (after active vegetative) growth.
+         // When this is not enabled a single value (normal) TUE_at_1kPa_VPD,
+         // water_productivity, or reference_biomass_transpiration_coef  is used.
+         // The degree days at which there is a change in WUE is stored in phenology thermal time parameters //080514_
+
+         // This is only used in V4, in V5 all parameters are adjustable.
+      TUE_Equation TUE_equation;                                                 //080505
+      #if (CROPSYST_VERSION==4)
+      //V5 is now PAR basis
+      RUE_Basis RUE_basis;                                                       //080731
+      #endif
+      float32 continuous_cultivation_impact_factor;                              //151031
+         // Adjustment to biomass production due to continuous cultivation
+         // where there may occur soil compaction, pest damage and other
+         // deleterious effects.
+         // Was season_biomass_adjustment, now using parameter adjustment mechanism.
+      #if (defined(YAML_PARAM_VERSION))
+      // YAML version uses the new parameter adjustment mechanism
+      float32 TUE_at_1kPa_VPD_adjustable;   // g biomass /kg H20                 //080428
+         // Transpiration Use Efficiency when VPD is at 1kPa.
+         // Used by Tanner-Sinclair and TUE_curve TUE equations.
+      float32 TUE_scaling_coef_adjustable;   //  unitless    //080505
+         // (May need to rename this slope)
+         // Used by TUE_curve TUE_equation
+      float32 water_productivity_adjustable; // g biomass / m2                   //080428
+         //?Transpiration Use Efficiency? when VPD is at 1kPa.
+         // Use by AquaCrop TUE_equation
+      // The following are for the Tanner Sinclair equation
+      float32 reference_biomass_transpiration_coef_adjustable;   //Pascal Above ground biomass-transpiration coef. //040729
+      #endif
+      float32 season_biomass_adjustment[6];                                      //080731
+         // replaced with continuous_cultivation_impact_factor
+
+
+      // Used by Transpiration_dependent_growth_V5 (YAML)
+      #if (!defined(YAML_PARAM_VERSION) || (CROPSYST_VERSION==4))
+      // The following are for TUE curve mode    probably rename to WUE  water use VPD
+      float32  TUE_at_1kPa_VPD   // g biomass /kg H20                            //080428
+         [2] // Index 0 is normal mode (and/or after vegetative growth)
+         ;   // Index 1 is only during vegetative growth (for WUE_changes mode).
+         // Transpiration Use Efficiency when VPD is at 1kPa.
+      float32  TUE_scaling_coef   // May need to rename this slope  unitless     //080505
+         [2] // Index 0 is normal mode (and/or after vegetative growth)          //091201
+         ;   // Index 1 is only during vegetative growth (for WUE_changes mode).
+      float32  water_productivity  // g biomass / m2                             //080428
+         [2] // Index 0 is normal mode (and/or after vegetative growth)
+         ;   // Index 1 is only during vegetative growth (for WUE_changes mode).
+         //?Transpiration Use Efficiency? when VPD is at 1kPa.
+      // The following are for the Tanner Sinclair equation
+      float32  reference_biomass_transpiration_coef   //Pascal Above ground biomass-transpiration coef. //040729
+               [2]   // Index 0 is normal mode (and/or after vegetative growth)
+               ;     // Index 1 is only during vegetative growth (for WUE_changes mode).
+      #endif
+      // RUE='Radiation use efficiency'
+      //110825 float32 RUE_max;                      // g/MJ                              //080428
+      float32 RUE_global;                      // g/MJ                              //080428
+         //RUE global radiation basis at high relative humidity (low VPD)
+      float32 RUE_PAR;                      // g/MJ                              //080428
+         //RUE PAR basis at high relative humidity (low VPD)
+
+/*140317
+Eventually opt_mean_temperature_for_growth will be in V4 only but VIC crop it still using
+this so I am still providing this in crop_param_struct
+We are going to have a meeting with Jenny to decide if the crop files need to be redone.
+*/
+
+      float32 opt_mean_temperature_for_growth_V4; // C
+         //Optimum mean daily temperature for growth (was temp limit).           //080725
+      #define  early_growth_limit_temp_V4  opt_mean_temperature_for_growth_V4
+      // In CropSyst  early_growth_limit_temp used to be opt_mean_temperature_for_growth
+      // VIC uses opt_mean_temperature_for_growth
+      // Need to check with Claudio what he would prefer.
+
+      float32 min_tolerable_temp;                                                //130531
+      float32 max_tolerable_temp;                                                //130508
+      float32 low_threshold_limit_temp;                                          //130508
+      float32 high_threshold_limit_temp;                                         //130508
+
+      #define WUE_at_1_kPa_VPD TUE_at_1kPa_VPD[0]
+   };
+   //_2011-02-08________________________________________________________________
+   struct Vernalization
+   {  float32 low_temp;    // -4 - 5
+      float32 high_temp;   //  7 - 12
+      float32 start;       //  0 - vernReq C
+      float32 end;         //  0 - 50 C
+      float32 min_factor;  //  0 - 1
+      bool enabled;                                                              //020718
+   };
+   //_2002-04-05________________________________________________________________
+   struct Photoperiod
+   {  Photoperiodism photoperiodism;                                             //151122
+      //151122 Photoperiod_consideration consideration;
+      float32 stop_day_length; // 0-24 hours
+      float32 unconstrained_day_length; // 0-24 hours
+   };
+   //_2010-05-12___________________________________________________________________
+   struct Emergence_hydro_thermal // was Emergence_parameters                    //100325
+   {  Emergence_model emergence_model;  // rename to germination
+      float32 a_slope; // Emperical constant for computing  hydrothermal time  rename this to slope (although a is conventionally intercept it appears to be used as sloe in the eqauation
+      float32 b_intercept; // Emperical constant for computing  hydrothermal time  rename this to intercept (although b is conventionally slope, it appears to be used as intercept in the equation.
+      float32 seedling_leaf_area_cm2;           // cm2
+         // leaf area of seedling on first day of emergence
+      float32 germination_base_temperature;     // degress 0
+      float32 mean_base_soil_water_pot_J_kg;    // J/kg
+         // Mean base soil water potential (50% emergence)
+      float32 stdev_base_soil_water_pot_J_kg;   // J/kg
+         // Std deviation base soil water potential (?for 50% emergence?)
+   };
+   //_2010-03-25_2004-12-01_____________________________________________________
+   struct Quiescence //160326  was Inactive_period  // 150905 rename Quiescence
+   {
+      #if (CS_VERSION==4)
+      CORN::Date start_valid_date; // Only use the DOY part (end of season)
+      CORN::Date leave_valid_date; // Only use the DOY part (start of season)
+      #endif
+      nat16 start_DOY;  // Start of the inactive period, not the start of the season
+      nat16 end_DOY;    // End of the inactive period, not the end of the season
+
+      // Only use the DOY part
+      float32 inducement_temperature; // 'C                                      //080401
+         // was under dormancy
+      int16 consider_inactive_days;                                              //080401
+         // was hardcoded as 7 days  actually unsigned
+   };
+   //___________________________________________________________________________
+   struct Dormancy
+   {  float32 chill_hours; // chill units 1 unit equal 1 hour exposure at 6'C    //021125
+      // 081125 should rename this to chill_units?
+      float32 deg_day_bud_break_chill_req_sat;                                   //030515
+      float32 deg_day_bud_break_chill_req_not_sat;                               //030515
+      float32 senesce;                                                           //060317
+   };
+   //___________________________________________________________________________
+   struct Root
+   {  float32 max_depth; // m maximum rooting depth
+      float32 surface_density; // cm/cm3                                         //030722
+               // RLN I believe this is maximum                                  //140817
+               // For V5 this should probably be dynamic                         //140817
+      float32 density_distribution_curvature; // 0.0001-10                       //030722
+      float32 length_per_unit_mass_km_kg_V4;                                     //060612
+         // I don't see length_per_unit_mass_km_kg_V4 used anymore
+      float32 root_shoot_emergence_ratio;                                        //130624
+      float32 root_shoot_full_ratio;                                             //130624
+      float32 sensitivity_to_water_stress;                                       //061212
+      float32 length_at_emergence_cm;                                            //061212
+      float32 sow_depth;                                                         //110118   total depth at
+         // Added for VIC but eventually apply also to CropSyst
+         // Depth at which seed is sown
+      float32 initial_depth;                                                     //120817
+         // Root depth at above ground biomass emergence.
+         // This includes the root length and the sow_depth
+         //  (In the case of CropSyst, the evaporative layer thickness)
+      float32 at_pt_root_limit; // 0-1      Act/pot. transpiration ratio that limits root growth. (Used in CropSyst VB not used in CropSyst C++)
+   public:
+      inline float32 get_depth_emergence_m()                               const
+         {  return
+            initial_depth>0.00000001 ? initial_depth :                           //120817
+            ((length_at_emergence_cm / (float32)100.0) + sow_depth); }
+   };
+   //_2006-12-12________________________________________________________________
+   struct Morphology
+   {  Canopy_growth  canopy_growth;                                              //080725
+      float32 max_canopy_height;            // m                                 //990213
+         // maximum canopy height, not currently used.
+      float32 reduce_canopy_expansion_LWP;  // J/kg                              //080506
+         // was LWP_that_reduces_canopy_expansion
+      float32 stop_canopy_expansion_LWP;    // J/kg                              //080506
+         //// was LWP_that_stops_canopy_expansion
+      float32  kc;                          // 0-1
+         // Extinction coefficient for (total or photosynthetically active) solar radiation
+         // could be renamed to light_extinction_coef (move to canopy)
+   };
+   //_2011-02-18________________________________________________________________
+   struct Canopy_growth_cover_based
+   { // The following are for the canopy cover based canopy growth
+      float32 initial_cover; // fraction? // 0.01
+      float32 maximum_cover_no_CO2_adj; // fraction? // 0.9  //
+         //140205 Do not use maximum_cover_no_CO2_adj directly when using
+         // CO2, it needs to be adjusted for CO2
+      float32 full_senescence_green_cover_obsolete_150210; // fraction? // 0.1 Canopy Cover at full senesence
+      //141125 float32 mature_green_cover; // fraction? // 0.1 Canopy Cover at Maturity
+      float32 mature_total_cover; // fraction? // 0.1 total Canopy Cover at Maturity
+      float32 fract_season_to_reach_cover_max_half; /*150913was  fract_season_to_reach_half_max_cover*/;   // fraction (was 0.45 now use 0.5025 (value introduced in VIC))
+      float32 maximum_cover_CO2_adj; // fraction?                                //140205
+    public:
+      Canopy_growth_cover_based();                                               //140205
+      virtual bool initialize(float64 actual_biomass_gain_ratio_in_response_to_CO2) initialization_;//140205
+   };
+   //_2008-07-23________________________________________________________________
+   struct Canopy_growth_LAI_based
+   {  // LAI = Leaf Area Index
+      // GAI = Green (leaf) Area Index
+      float32 initial_GAI;                                                       //080207
+      float32 regrowth_GAI;                                                      //080207
+      float32 max_LAI;
+      float32 specific_leaf_area; // GAI m2/kg
+      float32 fract_LAI_mature;
+      float32 stem_leaf_partition; // GAI LAI curvature
+      float32 leaf_duration_deg_day;                                             //050628
+         // Needs to be float to allow very large numbers
+      float32 leaf_duration_sensitivity_stress; // New GAI 1-2
+      bool clipping_removes_newest_first;
+   };
+   //_2008-07-25________________________________________________________________
+   struct Temperature_sensitivity
+   {
+      struct Temperature                                                         //130416
+      {  float32 no_stress_threshold_temperature;
+         float32 max_stress_threshold_temperature;
+         float32 sensitivity;
+         int16 /*CORN::Hour*/    exposure_initial_hour;                           //130628
+         float32 exposure_damaging_hours;
+         inline void set_default()
+         {  sensitivity             =  1.0;
+            exposure_initial_hour   =  99;  // non 24hour indicates sunrise      //130624
+            exposure_damaging_hours =  4.0;
+         };
+         inline void copy_from(const Temperature &from_copy)
+         {  no_stress_threshold_temperature  = from_copy.no_stress_threshold_temperature;
+            max_stress_threshold_temperature = from_copy.max_stress_threshold_temperature;
+            sensitivity                      = from_copy.sensitivity;
+            exposure_initial_hour            = from_copy.exposure_initial_hour;  //130624
+            exposure_damaging_hours          = from_copy.exposure_damaging_hours;
+         };
+      };
+      Temperature cold;
+      Temperature heat;
+      inline void set_default()
+      {  cold.set_default();
+         cold.no_stress_threshold_temperature  = -0.5;
+         cold.max_stress_threshold_temperature = -2.0;
+         cold.exposure_initial_hour = 0;
+         heat.set_default();
+         heat.no_stress_threshold_temperature  = 31.0;
+         heat.max_stress_threshold_temperature = 44.0;
+         heat.exposure_initial_hour = 99;
+      };
+      inline void copy_from(const Temperature_sensitivity &from_copy)
+      {  cold.copy_from(from_copy.cold);
+         heat.copy_from(from_copy.heat);
+      };
+   };
+   //_2013-05-02________________________________________________________________
+   struct Tolerance //150913  was Hardiness
+   {
+      bool enabled;                                                              //021015
+      float32 temperature_cold_fruit_damage ;// 'C  begins to damage crop.       //150913_081129
+      float32 temperature_cold_fruit_lethal ;// 'C  is lethal to crop.           //150913_081129
+      // Cold temperature which:
+      float32 temperature_cold_leaf_damage  ; // 'C  begins to damage crop.      //150913_991116
+      float32 temperature_cold_leaf_lethal  ; // 'C  is lethal to crop.          //150913_991116
+      float32 salvageable_deg_day;                                               //150913_130502
+      float32 temperature_heat_tuber_critical;                                   //081109
+   };
+   //_2011-01-21________________________________________________________________
+   struct Harvest  // was Harvest_index
+   {  // Common harvest parameter for specific crops
+      float32  index_unstressed;       // 0-1 (rename to index_unstressed_or_fixed)
+      bool apply_adjustment_to_unstressed_harvest_index;
+      bool apply_heat_extreme_adjustment_to_unstressed_harvest_index;            //150206
+
+         // Note in V5 new crop file will not store these flags
+         // these options will be applied only if the
+         // adjustment parameters enabling the option are introduced:
+         // (translocation_fraction max) enables apply_adjustment_to_unstressed_harvest_index
+         // Temperature sensitivity enables apply_heat_extreme_adjustment_to_unstressed_harvest_index
+
+      float32  stress_sensitivity_growth;    // 0-1  (for leaf crops)            //150915_020419
+      // Harvest parameters for tuber crops
+      float32  stress_sensitivity_tuber_init;// 0-1                              //150915
+      float32  tuber_growth_sensitivity;     // 0-1
+
+      // The following apply to VIC_crop and now grain asymtotic mode
+
+      float32 translocation_fraction_max;
+      Temperature_sensitivity editor_grain_stress_sensitivity;                   //130428
+      // We now have a list of these but this  is used by the parameter editor
+      // It is not saved to the file
+   };
+   //_2002-04-09________________________________________________________________
+   struct Fruit
+   {public: // harvest parameters for all fruits
+      bool grape; // if true then we have veraison                               //021206
+      float32 fract_total_solids; // (0-1)                                       //000616
+      float32 max_fruit_load_kg_ha; // (fresh weight)                            //000616
+      float32 initial_fruit_mass;                                                //071127
+      float32 initial_reserves_release_rate;                                     //071127
+      int16 clusters_per_vine;                                                   //071127
+      int16 berries_per_cluster;                                                 //071127
+      int16 fruits_per_tree;                                                     //071127
+      Harvest_condition_mode harvest_condition_mode   /* labeled */ ;
+      float32 harvest_temperature;                                               //081204
+      int16 harvest_temperature_days;                                            //081204
+      int16 harvest_DOY_earliest; // or fixed date                               //081204
+      int16 harvest_DOY_latest;                                                  //081204
+      #define harvest_DOY_fixed harvest_DOY_latest
+      #ifdef YAML_PARAM_VERSION
+      // using adjustable parameter idiom
+      float32 growth_fraction_to_fruit;                                          //030521
+      #endif
+      #if ((CROPSYST_VERSION==4) || (!defined(YAML_PARAM_VERSION)))
+      // The following are probably going to be obsolete with the new fruit model  071120
+      float32 initial_growth_fraction_to_fruit;                                  //030521
+         // was development_fraction_to_fruit
+      float32 rapid_growth_fraction_to_fruit;                                    //030521
+         // was veraison_fraction_to_fruit
+      #endif
+      #ifdef YAML_PARAM_VERSION
+      // In V5 maximum water uptake will be adjustable parameters (using normal max_water_uptake)
+      #endif
+      #if ((CROPSYST_VERSION==4) || (!defined(YAML_PARAM_VERSION)))
+      float32 max_water_uptake_before_fruiting_mm;                               //091202
+      float32 max_water_uptake_during_initial_fruit_mm;                          //091202
+      float32 max_water_uptake_during_radid_fruit_mm;                            //091202
+      float32 max_water_uptake_during_veraison_mm;                               //091202
+      float32 max_water_uptake_after_maturity_mm;                                //091202
+      #endif
+   };
+   //_2002-04-08________________________________________________________________
+   struct Nitrogen
+   { // Nitrogen is optional (not used by row crops)
+      bool fixating; // all legumes fixate now
+      float32 legume_fraction; // legume_fraction of crop mix is a special parameter for the CFF (temporary) for pasture crops that are a mixture of legume and gremilia. //070105
+      float32 max_uptake_daily_rate_kg_ha; // kg/ha/day Maximum Nitrogen Uptake during rapid linear growth () //061129
+      float32 residual_N_not_available_for_uptake;                               //070209
+      float32 soil_N_conc_where_N_uptake_decreases;                              //070209
+      float32 PAW_where_N_uptake_rate_decreases;                                 //070209
+      float32 stubble_max_conc; // Max N content of standing stubble. kgN/kgDM
+      float32 root_conc; // Standard N content of root.kgN/kgDM
+      float32 dilution_curve_max_conc_mature; // was  N_mature_max_conc          //150913_120505
+      provided_ float32 dilution_curve_slope;                                    //120507  121219 was conc_slope
+            // rename in parameter editor to dilution_curve_slope 121219
+
+      #if (CROPSYST_VERSION == 4)
+      // The N dilution was changed from max_N curve to crit_N curve
+      float32 demand_adjust;                                                     //061213
+      float32 biomass_to_start_dilution_max_N_conc_T_ha; /* T/ha */              //120505
+      bool dilution_curve_based_on_max_conc;                                     //121219
+      //This was always true prior to V4.17
+      #endif
+      float32 emergence_max_conc;                                                //121219
+      float32 emergence_crit_conc;                                               //121219
+      float32 biomass_to_start_dilution_crit_N_conc_T_ha; /* T/ha */             //121219
+         // This is now entered as a positive number
+      int16   end_dilution_curve_deg_day;                                        //130408
+      Nitrogen_leaf_stress_mode nitrogen_leaf_stress_mode;                       //070224
+      float32 TUE_stress_sensitivity;                                            //151117
+    public:
+      inline float32 calc_N_mature_crit(Photosynthetic_pathway photosynthetic_pathway)  calculation_
+         { return dilution_curve_max_conc_mature * CropSyst::N_mature_max_to_crit_mult[photosynthetic_pathway]; }
+      inline float32 calc_N_mature_min(Photosynthetic_pathway photosynthetic_pathway)   calculation_
+         { return dilution_curve_max_conc_mature * CropSyst::N_mature_max_to_min_mult[photosynthetic_pathway]; }
+      #if (CROPSYST_VERSION == 4)
+      // The N dilution was changed from max_N curve to crit_N curve
+      inline float32 calc_biomass_to_start_dilution_crit_N_conc_T_ha(Photosynthetic_pathway photosynthetic_pathway)  calculation_   //120505
+         { return biomass_to_start_dilution_max_N_conc_T_ha * CropSyst::biomass_to_start_dilution_max_to_crit_mult[photosynthetic_pathway]; }
+      #endif
+      inline float32 calc_biomass_to_start_dilution_min_N_conc_T_ha(Photosynthetic_pathway photosynthetic_pathway)   calculation_
+         {  return
+               #if (CROPSYST_VERSION == 4)
+               dilution_curve_based_on_max_conc
+               ? biomass_to_start_dilution_max_N_conc_T_ha * CropSyst::biomass_to_start_dilution_max_to_min_mult[photosynthetic_pathway] :
+               #endif
+               biomass_to_start_dilution_crit_N_conc_T_ha * CropSyst::biomass_to_start_dilution_crit_to_min_mult[photosynthetic_pathway];  //121219
+         }
+      inline float32 calc_biomass_to_start_dilution_max_N_conc_T_ha_obsolete (Photosynthetic_pathway photosynthetic_pathway)   calculation_
+         { return biomass_to_start_dilution_crit_N_conc_T_ha * CropSyst::biomass_to_start_dilution_crit_to_max_mult[photosynthetic_pathway]; }
+   };
+   //_2002-04-05________________________________________________________________
+   struct Salinity
+   {  float32 osmotic_pot_50; // osmotic potential at 50% yield reduction KPa, J/Kg.For the Saturation extract
+         //150913 rename to  50percent_reduction_osmotic_pot
+      float32 salt_tolerance_P; // p_value. p exponent for the Van-Genucht"salinity tolerance exp
+         //150913 rename to P_emperical_exponent
+      // osmotic potential at 50% yield reduction KPa, J/Kg.For the Saturation extract
+      // p_value. p exponent for the Van-Genuchten salinity tolerance exp
+   };
+   //_2002-04-05________________________________________________________________
+   struct Canopy_characteristics_hedge_row // vineyard                           //0701116 now for both orchards and vinyards
+   {  float32 initial_width; // perpendicular to the row
+      float32 final_width;
+      float32 initial_breadth; // along the row                                  //071116
+      float32 final_breadth;                                                     //071116
+      float32 initial_height; // tree / trellis height                           //020405
+      float32 final_height;                                                      //020405
+      float32 branch_insertion_height;                                           //071116
+   };
+   //_2002-04-05________________________________________________________________
+   struct Layout // rename to tree layout
+   {public:
+      float32 row_spacing; // m  distance between rows
+      float32 row_azimuth_true_north_deg; // decimal degrees  true north basis 0 = North 90= East
+      float32 col_spacing; // m spacing of orchard   along the rows
+   };
+   //_2002-04-05________________________________________________________________
+   struct CO2_Response
+   {public: // CO2 specific parameters
+      //Non-rectangular Hyperbola Solution for Estimated Relative Growth
+      struct CO2_Concentration_when_measured                                     //131206
+      {  float32 TUE;
+         float32 RUE;
+      } CO2_concentration_when_measured;  //ppm
+      struct Non_rectagular_hyperbola_solution                                   //131205
+      {  float32 alpha;
+         float32 theta;
+         float32 growth_ratio_asymptotic;                                        //131206
+      } non_rectagular_hyperbola_solution;
+      // Use to determine ratio of gain (based on emperical measurements)
+
+   };
+   //_2002-04-08________________________________________________________________
+   /* 071115  parameters for new orchard interception model
+   Row_Azimuth = [A40]                                   // row_azimuth_deg   Layout
+   Tree_Spacing_Between_Rows = [A41]                     // row_spacing       Layout
+   Tree_Spacing_Along_The_Row = [A42]                    // col_spacing       Layout
+   Tree_Width_Perpendicular_To_The_Row = [A43]           // row_width (new)
+   Tree_Width_Along_The_Row = [A44]                      // col_width  (new)
+   Average_Tree_Height = [A45]                           //
+   Height_Of_Insertion_Of_Branches = [A46]
+   Terrain_Steepness = [A47]
+   Terrain_Aspect = [A48]
+    */
+   //_2011-01-21________________________________________________________________
+};
+//______________________________________________________________________________
+} // namespace CropSyst
+#endif
+// crop_param.h
+

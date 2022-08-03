@@ -1,0 +1,22 @@
+#include "common/weather/atmospheric_CO2_change_linear.h"
+//______________________________________________________________________________
+Atmospheric_CO2_change_linear::Atmospheric_CO2_change_linear
+(float32 _initial_CO2_conc
+,float32 _annual_CO2_conc_change
+)
+: Atmospheric_CO2_change_interface()
+, curr_CO2_conc()                                                                //150507
+, annual_CO2_conc_change(_annual_CO2_conc_change)
+{  curr_CO2_conc.set_ppm(_initial_CO2_conc,CORN::measured_quality); // presuming measured quality 150507
+}
+//______________________________________________________________________________
+bool Atmospheric_CO2_change_linear::end_year(CORN::Year year)       modification_
+{
+   // Warning NYI
+   curr_CO2_conc.set_ppm                                                         //150507
+      (curr_CO2_conc.ppm() + annual_CO2_conc_change
+      ,CORN::estimated_quality);
+   return true;
+}
+//______________________________________________________________________________
+#pragma package(smart_init)

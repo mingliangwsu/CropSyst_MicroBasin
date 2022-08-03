@@ -1,0 +1,17 @@
+#error obsolete
+include common_program_main_inc.cpp 
+instead of main_instanciate_CS_Suite_directory.cpp_incl
+/*
+This file should only be #included from .cpp source files.
+Do not add this to a project or attempt to compile it.
+
+This instanciates the CS_suite_directory and is used by
+almost every CS suite program.
+
+*/
+
+   CORN::Smart_file_name this_program_filename(ParamStr(0).c_str());
+   CORN::Smart_directory_name this_program_path;
+   this_program_filename.get_path(this_program_path);
+   CS::Suite_directory = new CS::Suite_Directory(this_program_path);
+

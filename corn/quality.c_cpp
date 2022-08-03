@@ -1,0 +1,68 @@
+#include "corn/quality.h"
+#include "corn/math/compare.h"
+//______________________________________________________________________________
+const char *quality_abbr_labels[] =
+{ "msrd."
+, "calc."
+, "intrp."
+, "other"  // reserved for future used
+, "est."
+, "frcst."
+, "gen."
+, ""  // reserved for future used
+, 0
+};
+//______________________________________________________________________________
+const char *quality_labels[] =
+{ "measured"
+, "calculated"
+, "interpolated"
+, "other"  // reserved for future used
+, "estimated"
+, "forecasted"
+, "generated"
+, ""  // reserved for future used
+  // Qualities above this are simply called 'derived'
+, 0
+};
+//______________________________________________________________________________
+Quality_code  degrade_quality(Quality_code initial_quality, Quality_code degrading_quality)
+{
+   uint8 new_quality = initial_quality;
+// the degrading_quality is additively aggregated
+// If the quality is < derived_quality then it has not been aggregated
+// When a quality is aggregated,
+// the upper 3 bits (bit 4 5 and 6 not including the most significant bit which denotes an invalid quality when set)
+// is the base and most significant quality. The significant quality is retained;
+// otherwise the lowest 3 bits denote the significant quality (all the upper bits will be 0 in this case)
+   if (is_valid_quality(initial_quality))  // Don't try to degrade invalid qualities
+   {  bool initial_is_undegraded  = initial_quality < derived_quality;
+         // If
+      Quality_code original_quality =  // The original base quality is stored in the upper 3 bits
+         initial_is_undegraded         // because it is the most significant quality factor.
+         ? initial_quality
+         : (Quality_code)((int8)initial_quality >> 4);
+      nat8 degredation_quality  = initial_is_undegraded ? 0 : (initial_quality & 0x0F) ;  //The current degredation quality is stored in the lower 4 bits.
+      degredation_quality += degrading_quality;  // simply add the degrading quality
+      if (degredation_quality > 0x0F)  // Don't let the degredaton quality exceed 0X0F
+          degredation_quality = 0x0F;  // or it will corrupt the initial quality.
+      new_quality = (original_quality  << 4) | degredation_quality; // The original quality is preserved, the degrading quality is additive
+   }
+   return (Quality_code) new_quality;
+}
+//______________________________________________________________________________
+Quality_code quality_calculated_from   (Quality_code  qual) {  return  degrade_quality(qual,calculated_quality); }
+Quality_code quality_other_real_from   (Quality_code  qual) {  return degrade_quality(qual,other_real_quality);  }
+Quality_code quality_interpolated_from (Quality_code  qual) {  return degrade_quality(qual,interpolated_quality);}
+Quality_code quality_estimated_from    (Quality_code  qual) {  return degrade_quality(qual,estimated_quality);   }
+Quality_code quality_forecasted_from   (Quality_code  qual) {  return degrade_quality(qual,forecasted_quality);  }
+Quality_code quality_generated_from    (Quality_code  qual) {  return degrade_quality(qual,generated_quality);   }
+//______________________________________________________________________________
+bool is_optimal_quality(Quality_code qual)
+{  bool is_real = is_valid_quality(qual) &&
+      (( qual <= other_real_quality) &&
+       ((((qual &0x70)>> 4)   <= other_real_quality)));
+   // I.e. measured, calculated, or interpolated from a real quality is assumed to be a real quality
+   return is_real;
+}
+//_2005-06-09___________________________________________________________________

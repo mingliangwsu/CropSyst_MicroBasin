@@ -1,0 +1,9 @@
+const char *TL_is_not_a_reasonable_value ="is not a reasonable value";
+const char *TL_must_be_greater_than ="must be greater than";
+const char *TL_must_be_less_than ="must be less than";
+const char *TL_must_range_from ="must range from";
+const char *TL_should_be_greater_than ="should be greater than";
+const char *TL_should_be_less_than ="should be less than";
+const char *TL_should_range_from ="should range from";
+const char *TL_Valid ="Valid";
+const char *TL_Validating ="Validating";

@@ -1,0 +1,254 @@
+#ifndef infiltrationH
+#define infiltrationH
+#include "mgmt_types.h"
+
+//170525#include "corn/datetime/date.hpp"
+#include "corn/chronometry/date_I.h"
+#include "corn/dynamic_array/dynamic_array_T.h"
+#include "soil/hydrology_interface.h"
+#include "soil/layers_interface.h"
+#include "corn/chronometry/time_types.hpp"
+#ifdef OLD_EVAPORATE
+#include "common/evaporator.h"
+#endif
+
+class Dynamic_water_entering_soil;
+class Soil_chemicals_profile;
+class Soil_interface;
+class Soil_wetting;
+namespace CropSyst {
+   class Soil_runoff;                                                            //130308
+   class Pond;                                                                   //141206
+}
+namespace Physical
+{
+   class Water_depth;                                                            //160412
+}
+//______________________________________________________________________________
+interface_ Soil_infiltration_interface
+{  // This infiltration model does nothing,
+   // so neither infiltration nor evaporation
+   // It is used when we need to test the model without
+ public:  // 'structors and initialization
+   inline virtual ~Soil_infiltration_interface() {}                              //170217
+   // Interface needs no constructor
+   virtual bool initialize()                                       modification_ =0;
+   virtual bool reinitialize(const soil_horizon_array32(H2O))      modification_ =0;
+   #ifdef DIRECTED_IRRIGATION
+   virtual Soil_infiltration_interface *copy(float64 fraction)             const =0;//140609
+   #endif
+ public: // Processes
+   virtual bool infiltrate
+      (float64               water_entering_soil_not_irrigation                  //070109
+      ,float64               management_irrigation
+      ,float64               management_auto_irrigation_concentration
+      ,Dynamic_water_entering_soil *non_runoff_water_entering_in_intervals_mm    //990204
+      ,Dynamic_water_entering_soil *irrigation_water_entering_in_intervals_mm    //optl//070119
+      ,const CORN::Dynamic_array<float32>    &runon_in_intervals                 //990409
+      ,CORN::Dynamic_array<float32>          &runoff_in_intervals) modification_ =0; //990409
+ public: // Get accessor
+   virtual float64 get_act_water_entering_soil()                           const =0; //150925
+   virtual modifiable_ float64 &mod_act_water_entering_soil()      modification_ =0; //160412_150925
+   virtual float64 get_water_table_input()                                 const =0;
+   virtual float64 get_water_table_depth()                                 const =0; //070309
+   virtual float64 get_balance_drainage()                                  const =0; //070118
+   virtual float64 get_reported_drainage()                                 const =0; //070118
+   virtual float64 get_infiltration()                                      const =0; //070118
+   virtual bool is_water_table_applicable()                                const =0;
+   virtual bool know_directed_irrigation_soil_wetting                                //130313
+      (const Directed_irrigation_soil_wetting *_soil_wetting)         cognition_ = 0;
+   RENDER_INSPECTORS_DECLARATION_PURE;                                               //150929
+};
+//_2006-05-12_______________________________class:Soil_infiltration_interface__/
+class Soil_infiltration_nominal
+: public Soil_infiltration_interface                                             //071012
+{  // This infiltration model does nothing,
+   // so neither infiltration nor evaporation
+   // It is used when we need to test the model without
+ protected: friend class Soil_base; // friendship for recording
+   float64   balance_drainage;   // m water depth                                //070118
+   float64   reported_drainage;  // m water depth                                //070118
+   float64   infiltration;       // m water depth  This is the water draining out of the bottom of the soil profile (usually the same as balance_drainage) 070118_
+   float64 act_water_entering_soil;// meter                                      //991204 moved from Soil_base
+      // This is the actual infiltration (including runoff, ponding ect..)
+ public:  // 'structors and initialization
+   inline Soil_infiltration_nominal()                                            //131001
+      : balance_drainage         (0.0)                                           //070118
+      , reported_drainage        (0.0)                                           //070118
+      , infiltration             (0.0)                                           //070118
+      ,act_water_entering_soil   (0.0)                                           //991204
+      {}
+   virtual Soil_infiltration_nominal *copy(float64 fraction)               const //140609
+      { return new Soil_infiltration_nominal();                                  //160525
+
+      }
+   inline virtual bool initialize()                 modification_{ return true;} //131221
+   inline virtual bool reinitialize(const soil_horizon_array32(H2O)) modification_{ return true;} //131221
+   inline virtual void know_chemicals                                            //070207
+      (Soil_chemicals_profile *_chemicals)                           mutation_{}
+#ifdef WATERTABLE
+   // The water table is optional and only used by F.D. model
+   inline virtual void set_water_table                                           //020620
+      (const char *water_table_filename
+      ,const CORN::date32 &today                                                 //170525_151128
+      ,const CORN::Date_const & first_date
+      ,const CORN::Date_const & last_date)                       modification_{}
+   inline virtual void water_table_limitations()                 modification_{} //131001
+#endif
+ public: // Processes
+   inline virtual bool infiltrate                                                //990409
+      (float64               water_entering_soil_not_irrigation                  //070109
+      ,float64               management_irrigation
+      ,float64               management_auto_irrigation_concentration
+      ,Dynamic_water_entering_soil *non_runoff_entering_in_intervals_mm          //990204
+      ,Dynamic_water_entering_soil *irrigation_entering_in_intervals_mm //option //070119
+      ,const CORN::Dynamic_array<float32>    &runon_in_intervals                 //990409
+      ,CORN::Dynamic_array<float32>          &runoff_in_intervals) modification_
+      { return true; }
+ public: // Get accessor
+   inline virtual float64 get_act_water_entering_soil()                          //150925_060508
+      const { return act_water_entering_soil;}
+   inline virtual modifiable_ float64 &mod_act_water_entering_soil()modification_//160412_150925_060508
+      { return act_water_entering_soil;}
+   inline virtual float64 get_water_table_input()             const{return 0.0;}
+
+   inline virtual float64 get_water_table_depth()             const{return 0.0;} //070309
+   inline virtual float64 get_balance_drainage()              const{return 0.0;} //070118
+   inline virtual float64 get_reported_drainage()             const{return 0.0;} //070118
+   inline virtual float64 get_infiltration()                  const{return 0.0;} //070118
+   inline virtual bool is_water_table_applicable()          const{return false;}
+   inline virtual float64 get_daily_error()                   const{return 0.0;}
+   inline virtual float64 get_deferred()                      const{return 0.0;} //07102
+ public: // Set accessors
+   inline virtual void set_override_leaching_depth                               //020620
+      (float64 i_leaching_depth)                                modification_ {}
+   inline virtual bool know_directed_irrigation_soil_wetting                     //130313
+      (const Directed_irrigation_soil_wetting *_soil_wetting)         cognition_
+      { return false;}
+   RENDER_INSPECTORS_DECLARATION;                                                //150916
+ private: // check abstraction
+   inline Soil_infiltration_nominal *test_abstraction()
+   {return new Soil_infiltration_nominal(); }
+};
+//_2006-05-12___________________________________________________________________
+class Soil_infiltration       // Rename this to Soil_infiltration_common
+: public Soil_infiltration_nominal                                               //071012
+{
+ protected:
+   const   Soil_layers_interface      &soil_layers;                              //070316
+   #ifndef __GNUC__
+   mutable
+   #endif
+      Soil_hydrology_interface        &soil_hydrology;                           //071012
+   const    Soil_hydraulic_properties_interface &soil_hydraulic_properties;      //071012
+   modifiable_ CropSyst::Pond         &pond;                                     //130308
+   CropSyst::Soil_runoff              *runoff;                                   //130308
+      // runoff (optional) is owned by land_unit_sim
+   mutable Soil_chemicals_profile     *chemicals;
+      // optional may be 0 if not chemical simulation
+      // (eventually split N rename this to nitrogen)
+      // eventually this should be an interface
+      // Actually should ask soil for chemicals, but I haven't finished
+      // making an interface for it.
+   float32   daily_error;
+      // was daily_finite_diff_error
+      // This stores any slight error in the integration
+   cognate_ const Directed_irrigation_soil_wetting *soil_wetting;                //130313
+ protected:  // Parameters
+   bool     override_leaching_depth;                                             //020527
+   float64  leaching_depth;                                                      //020527
+   Layer    layer_at_reported_drainage_depth;                                    //071013
+ public: // 'structors and initialization
+   Soil_infiltration                                                             //131001
+      (const Soil_layers_interface                 &soil_layers_                 //140424
+      ,const Soil_hydraulic_properties_interface   &soil_hydraulic_properties_   //140423
+      ,Soil_hydrology_interface                    &soil_hydrology_
+      ,CropSyst::Soil_runoff     *_runoff                                        //130308
+      ,CropSyst::Pond            &_pond);                                        //130308
+   virtual bool initialize()                                    modification_=0;
+   virtual bool reinitialize(const soil_horizon_array32(H2O))   modification_=0;
+   virtual inline void know_chemicals                                            //070207
+      (Soil_chemicals_profile *_chemicals)                             mutates_
+      { chemicals = _chemicals; }
+      // Makes known the soil profile chemical
+      // and enables the soil chemical transport submodel.
+ public: // process
+      // Returns true if the infiltration submodel uses
+      // water table information.
+      // Derived classes should override and return true if the
+      // water table is applicable
+ public: // Processes
+   virtual bool infiltrate
+      (float64               water_entering_soil_not_irrigation
+      ,float64               management_irrigation
+      ,float64               management_auto_irrigation_concentration
+      ,Dynamic_water_entering_soil *non_runoff_water_entering_in_intervals_mm    //990204
+      ,Dynamic_water_entering_soil *irrigation_water_entering_in_intervals_mm //optional 070119
+      ,const CORN::Dynamic_array<float32> &runon_in_intervals                    //990409
+      ,CORN::Dynamic_array<float32> &runoff_in_intervals)         modification_; //990409
+      // all derived classes should call this at the beginning of the infiltrate
+      // routine to clear accumulators
+      // Returns the amount of infiltration (m of water depth?)                  //030711
+#ifdef NOT_YET_IMPLEMENTED
+   virtual const Soil_hydrology_interface &get_hydrology_at                      //070117
+      (Seconds timestep)                                                const=0;
+      // Returns the recorded soil water hydrology at the specified timestep (seconds after midnight) of the current date
+      // Derived infiltration models must override.
+      // if the infiltration model does not resolution of the time step
+      // then the nearest timestep recorded should be returned.
+      // I.e. if the infiltration model is daily and water_content for 1:00am (timestep=3600) then the daily water_content is simply returned.
+#endif
+ public: // Get accessor
+   virtual inline float64 get_balance_drainage()  const {return balance_drainage;}  //070118
+   virtual inline float64 get_reported_drainage() const {return reported_drainage;} //070118
+   virtual inline float64 get_infiltration()       const { return infiltration;} //070118
+   virtual float64 get_water_table_input()                              const=0;
+   virtual float64 get_water_table_depth()                              const=0;//070309
+   virtual inline  float64 get_daily_error()       const { return daily_error; }
+ public: // Set accessor
+   virtual void set_override_leaching_depth
+      (float64 leaching_depth)                                    modification_; //020620
+ protected: // was in Soil_infiltration_cascade_hourly                           //071012
+   float64 get_field_capacity_ice_corrected(Layer layer)                  const; //070125
+   float64 redistribute_water // V.B.  SoilWaterRedistribution                   //070125
+      (Layer first_redistribution_layer                                          //070125
+      ,Layer last_redistribution_layer                                           //070125
+      ,soil_layer_array64(water_flow)                                            //080208
+         // works with either layer or node based depending on the infiltration model.
+      ,float64 hours_to_field_capacity                                           //080311
+      ,CORN::Seconds time_step)                                   modification_;
+   inline virtual bool know_directed_irrigation_soil_wetting                     //130313
+      (const Directed_irrigation_soil_wetting *_soil_wetting)         cognition_
+      { soil_wetting = _soil_wetting; return true;}
+};
+//____________________________________________________class:Soil_infiltration__/
+class Soil_infiltration_none
+: public Soil_infiltration_nominal
+{  // This infiltration model does nothing,
+   // so neither infiltration nor evaporation
+   // It is used when we need to test the model without
+ public:  // 'structors and initialization
+   inline Soil_infiltration_none()
+      : Soil_infiltration_nominal()
+      {}
+   inline virtual bool initialize()                  modification_{return true;}
+   inline virtual bool reinitialize
+      (const soil_horizon_array32(H2O))              modification_{return true;}
+ public: // Processes
+   inline virtual bool infiltrate
+      (float64               water_entering_soil_not_irrigation                  //070109
+      ,float64               management_irrigation
+      ,float64               management_auto_irrigation_concentration
+      ,Dynamic_water_entering_soil *non_runoff_water_entering_in_intervals_mm    //990204
+      ,Dynamic_water_entering_soil *irrigation_water_entering_in_intervals_mm    //070119
+             // irrigation_water_entering_in_intervals_mm is optional
+      ,const CORN::Dynamic_array<float32>    &runon_in_intervals                 //990409
+      ,CORN::Dynamic_array<float32>          &runoff_in_intervals) modification_ //990409
+      { return 0.0; }
+ public: // Get accessor
+   inline virtual float64 get_water_table_input()          const { return 0.0; }
+   inline virtual float64 get_water_table_depth()          const { return 0.0; } //070309
+};
+//_2006-05-12____________________________________class:Soil_infiltration_none__/
+#endif
+

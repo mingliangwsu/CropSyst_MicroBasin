@@ -1,0 +1,360 @@
+#include "corn/format/binary/binary_file_fstream.h"
+#include <fstream>
+//170215 #if ((__BCPLUSPLUS__ >= 0x0582) || defined (_MSC_VER))
+#if ((__BCPLUSPLUS__ >= 0x0582) || !defined (unix))
+// for _access
+#include <io.h>
+#endif
+#ifdef unix
+#include <unistd.h>
+// unix doesn't have, or is already, in binary mode?
+#  define OR_IOS_BINARY  | std:: ios::binary
+#else
+// I think this may be DOS/Windows specific, so the ifdef would be if not __MSDOS__
+#  define OR_IOS_BINARY   |std:: ios::binary
+#endif
+namespace CORN {
+//______________________________________________________________________________
+Binary_file_fstream::Binary_file_fstream
+(const char *_file_name                                                          //001206
+,bool        _big_endian
+,std::ios_base::openmode _openmode)                                              //111026
+: Binary_file_abstract(_file_name,_big_endian,_openmode)                         //111026
+, strm(0)                                                                        //080912
+{ }
+//______________________________________________________________________________
+Binary_file_fstream::~Binary_file_fstream()
+{  if (strm)                                                                     //080912
+   {
+      std::fstream *as_fstream = dynamic_cast<std::fstream *>(strm);             //110827
+      if (as_fstream) as_fstream->close();                                       //110820
+      //110827, shouldn't need to close for delete so the previous two lines should not be needed
+      //       but need to test this.
+      //110827 strm->close();
+      delete strm;
+      strm = 0;
+   }
+}  // This appears to be required in order for strm to close correctly and Binary_file_abstract destructor to be called.
+//_2007-06-28___________________________________________________________________
+std::STREAM_TYPE &Binary_file_fstream::provide_stream()           performs_IO_
+{  if (strm == NULL)
+   {
+      const char *strm_name = get_file_name();                                   //150129
+      std::ios::openmode                                                         //160812_111114
+          open_mode = openmode   OR_IOS_BINARY;                                  //111026
+      if ((openmode & std::ios::in) && (openmode & std::ios::out))
+      {  // If we are creating a file, we have to disable in mode
+         bool include_IOS_in_mode = true;                                        //091222
+             include_IOS_in_mode =
+               #if (defined(__BCPLUSPLUS__) || defined(__unix))
+                  access
+               #else
+                  _access // MicroSoft renamed these functions
+               #endif
+               /*170215
+               #  ifdef _MSC_VER
+                  _access
+               #  else
+                  access
+               #  endif
+               */
+                  (get_file_name(), 0) == 0;
+         open_mode = (std::ios::out)  OR_IOS_BINARY;
+         if (include_IOS_in_mode)
+            open_mode |= std::ios::in;
+      }
+/*170120
+#ifdef __linux__
+      strm = new std::fstream(strm_name,open_mode);                        //120701
+#else
+
+      if ((openmode & std::ios_base::in) && (openmode & std::ios_base::out))
+      {
+         bool include_IOS_in_mode = true;                                        //091222
+         #if (defined(__BCPLUSPLUS__) || defined(_MSC_VER))
+            // BC++ seems to have problems creating files in in/out mode
+               include_IOS_in_mode =
+               #  ifdef _MSC_VER
+                  _access
+               #  else
+                  access
+               #  endif
+                  (get_file_name(), 0) == 0;
+         #endif
+         open_mode = (std::fstream::out)  OR_IOS_BINARY;
+         if (include_IOS_in_mode) open_mode |= std::ios_base::in;
+      }
+      strm = new std::fstream(strm_name,
+         (
+      #if (defined(__BCPLUSPLUS__) || defined(_MSC_VER))
+         #  if (__BCPLUSPLUS__ <= 0x0550)
+         int
+         #  else
+            std::ios_base::openmode
+         #  endif
+         #else
+            std::_Ios_Openmode   // This is for GNUC may actually work with all compilers, I just haven't checked 090305
+      #endif
+         )
+         open_mode);
+#endif
+*/
+
+      strm = new std::fstream(strm_name,open_mode);                              //170120
+   }
+   return *strm;
+}
+//_2008-09-12__________________________________________________________________/
+bool Binary_file_fstream::goto_EOF()                                performs_IO_
+{ provide_stream().seekg(0, std::istream::end) /*== 0*/; return true; }
+//_1999-01-07___________________________________________________________________
+int8  Binary_file_fstream::write_int8(int8 value)                   performs_IO_
+{  provide_stream().put(value); return value; }
+//______________________________________________________________________________
+int16 Binary_file_fstream::write_int16(int16 value)                 performs_IO_
+{  CORN_endian_correction_16(value);
+   provide_stream().write((char *)(&value),sizeof(int16));
+   return value;
+}
+//______________________________________________________________________________
+int32 Binary_file_fstream::write_int32(int32 value)                 performs_IO_
+{  CORN_endian_correction_32(value);                                             //000129
+   provide_stream().write((char *)(&value),sizeof(int32));
+   return value;
+}
+//______________________________________________________________________________
+nat8 Binary_file_fstream::write_nat8(nat8 value)                   performs_IO_
+{  provide_stream().write((char *)(&value),sizeof(nat8));
+   return value;
+}
+//_1999-09-09___________________________________________________________________
+nat16 Binary_file_fstream::write_nat16(nat16 value)                 performs_IO_
+{  CORN_endian_correction_16(value);
+   provide_stream().write((char *)(&value),sizeof(nat16));
+   return value;
+}
+//______________________________________________________________________________
+nat32 Binary_file_fstream::write_nat32(nat32 value)                 performs_IO_
+{  CORN_endian_correction_32(value);                                             //000129
+   provide_stream().write((char *)(&value),sizeof(nat32));
+   return value;
+}
+//______________________________________________________________________________
+float64 Binary_file_fstream::write_float64(float64 value)           performs_IO_
+{  CORN_endian_correction_float64(value);                                        //001214
+   provide_stream().write((char *)(&value),sizeof(float64));
+   return value;
+}
+//______________________________________________________________________________
+float32 Binary_file_fstream::write_float32(float32 value)           performs_IO_
+{  CORN_endian_correction_float32(value);                                        //001214
+   provide_stream().write((char *)(&value),sizeof(float32));
+   return value;
+}
+//_1999-01-07___________________________________________________________________
+const nat8 *Binary_file_fstream::write_nat8_array(const nat8 *values,nat32 array_count) performs_IO_
+{  provide_stream().write((char *)(values),sizeof(nat8)*array_count);
+   return values;
+}
+//_2008-12-12___________________________________________________________________
+const int16   *Binary_file_fstream::write_int16_array(const int16 *values,nat32 array_count) performs_IO_
+{  provide_stream().write((char *)(values),sizeof(int16)*array_count);
+   return values;
+}
+//_2014-01-29___________________________________________________________________
+const int32   *Binary_file_fstream::write_int32_array(const int32 *values,nat32 array_count) performs_IO_
+{  provide_stream().write((char *)(values),sizeof(int32)*array_count);
+   return values;
+}
+//_2011-08-28___________________________________________________________________
+const float32 *Binary_file_fstream::write_float32_array
+(const float32 *values,nat32 array_count)                           performs_IO_
+{  for (uint32 i = 0; i < array_count; i++)
+      CORN_endian_correction_float32(values[i]);
+   provide_stream().write((char *)(values),sizeof(float32)*array_count);
+   return values;
+}
+//_1999-01-07___________________________________________________________________
+void Binary_file_fstream::write(const char *str, std::streamsize count) performs_IO_
+{  provide_stream().write(str,count);
+}
+//_2009-10-19___________________________________________________________________
+int8  Binary_file_fstream::read_int8()                              performs_IO_
+{  int8 value;
+   provide_stream().read((char *)(&value),sizeof(int8));
+   return value;
+}
+//_2008-11-21___________________________________________________________________
+int32 Binary_file_fstream::read_int32()                             performs_IO_
+{  int32 value;
+   provide_stream().read((char *)(&value),sizeof(int32));
+   CORN_endian_correction_32(value);                                             //000129
+   return value;
+}
+//_1999-01-03___________________________________________________________________
+int16  Binary_file_fstream::read_int16()                            performs_IO_
+{  int16 value;
+   provide_stream().read((char *)(&value),sizeof(int16));
+   CORN_endian_correction_16(value);                                             //000129
+   return value;
+}
+//______________________________________________________________________________
+nat8 Binary_file_fstream::read_nat8()                               performs_IO_
+{  nat8 value;                                                                   //081121
+   provide_stream().read((char *)(&value),sizeof(nat8));                         //081121
+   return value;                                                                 //081121
+}
+//_1999-09-09___________________________________________________________________
+nat16 Binary_file_fstream::read_nat16()                             performs_IO_
+{  nat16 value;
+   provide_stream().read((char *)(&value),sizeof(nat16));
+   CORN_endian_correction_16(value);                                             //000129
+   return value;
+}
+//______________________________________________________________________________
+nat32 Binary_file_fstream::read_nat32()                             performs_IO_
+{  nat32 value;
+   provide_stream().read((char *)(&value),sizeof(nat32));
+   CORN_endian_correction_32(value);                                             //000129
+   return value;
+}
+//_1999-01-03___________________________________________________________________
+float64 Binary_file_fstream::read_float64()                         performs_IO_
+{  float64 value;
+   provide_stream().read((char *)(&value),sizeof(float64));
+   CORN_endian_correction_float64(value);                                        //001214
+   return value;
+}
+//______________________________________________________________________________
+float32 Binary_file_fstream::read_float32()                         performs_IO_
+{  float32 value;
+   provide_stream().read((char *)(&value),sizeof(float32));
+   CORN_endian_correction_float32(value);                                        //001214
+   return value;
+}
+//_1999-01-07___________________________________________________________________
+nat8 *Binary_file_fstream::read_nat8_array(nat8 *values,uint32 array_count) performs_IO_
+{  provide_stream().read((char *)(values),sizeof(nat8)*array_count);             //081121
+   return values;                                                                //081121
+}
+//_2010-01-14___________________________________________________________________
+nat16 *Binary_file_fstream::read_nat16_array(nat16 *values,nat32 array_count) performs_IO_
+{  provide_stream().read((char *)(values),sizeof(nat16)*array_count);            //081121
+   return values;                                                                //081121
+}
+//_2010-01-14___________________________________________________________________
+nat32 *Binary_file_fstream::read_nat32_array(nat32 *values,nat32 array_count)    performs_IO_
+{  provide_stream().read((char *)(values),sizeof(nat32)*array_count);
+   return values;
+}
+//_2011-08-27___________________________________________________________________
+int32 *Binary_file_fstream::read_int32_array(int32 *values,nat32 array_count)    performs_IO_
+{  provide_stream().read((char *)(values),sizeof(int32)*array_count);
+   return values;
+}
+//_2011-08-27___________________________________________________________________
+int16 *Binary_file_fstream::read_int16_array(int16 *values,nat32 array_count)    performs_IO_
+{  provide_stream().read((char *)(values),sizeof(int16)*array_count);
+   return values;
+}
+//_2014-01-29___________________________________________________________________
+float32 *Binary_file_fstream::read_float32_array(float32 *values,uint32 count)   performs_IO_
+{  provide_stream().read((char *)(values),sizeof(float32)*count);
+   for (uint32 i = 0; i < count; i++)
+      CORN_endian_correction_float32(values[i]);
+   return values;
+}
+//_2008-12-12___________________________________________________________________
+void Binary_file_fstream::read(char *str, std::streamsize count)  performs_IO_
+{  provide_stream().read(str,count);
+}
+//_2009-10-19___________________________________________________________________
+bool Binary_file_fstream::seek
+(nat32 pos
+#ifdef __GNUC__
+, std::_Ios_Seekdir dir                                                          //090305
+#else
+, std::ios::seekdir dir
+#endif
+) performs_IO_
+{
+   bool success = true;                                                          //080911
+   #ifdef __unix
+   // UNIX usually needs long instead of streamoff
+      long seek_pos = pos;                                                       //021212
+   #else
+      std::streamoff seek_pos = pos;                                             //021212
+   #endif
+   provide_stream();
+   strm->clear(); // For some unknown reason seekg does not appear to be going to the right position hopeing clear will fix this   //100105
+
+   if (pos > 0x7FFFFFFF)                                                         //120110
+   {  // seekg only takes an unsigned long 32bit!!!
+      // so seekg to the highest addressable position
+      // then seek to the target position as an offset of that position.
+      // Note: it is unknown if this will work for all implementations of stdlib streams.
+      strm->seekg(0x7FFFFFFF);                                                   //120110
+      int32 offset = pos - 0x7FFFFFFF;                                           //120110
+      strm->seekg(offset,std::ios_base::cur);                                    //120110
+   } else                                                                        //120110
+      strm->seekg(seek_pos,dir);                                                 //050522
+
+#if (__BCPLUSPLUS__ >=	0x0570)
+   std::ios_base::iostate state = strm->rdstate();                               //080911
+   if ((state & std::ios_base::failbit) /*|| (state & ios_base::bad)*/)          //080911
+      success = false;                                                           //080911
+#else
+   if (!strm->good())                                                            //081121
+      success = false;                                                           //081129
+   strm->clear();                                                                //090514
+#endif
+   return success;
+}
+//_1999-01-07___________________________________________________________________
+uint32 Binary_file_fstream::get_file_length()                       performs_IO_
+{
+// Note, that I think I need to use both xxxp() and xxxg()
+// depending on the I/O mode, but I haven't figured out how to select this.
+//021212 update: tellg seems to be working irregardless of the open mode
+// Note: in Borland compilers, a newly open file return 0
+// in unix it returns -1 (an error condition?)
+// therefore curr_pos and file_length must be long and not unsigned!
+   long file_length = 0;
+   provide_stream();                                                             //080912
+   if (strm->good())                                                             //070628
+   {  long curr_pos =strm->tellg();                                              //070628
+      strm->seekg(0,std::istream::end);
+      file_length = strm->tellg();
+      strm->seekg(curr_pos);
+   }                                                                            //070628
+   return file_length;
+}
+//_1999-01-15___________________________________________________________________
+uint32 Binary_file_fstream::tell()                                   performs_IO_
+{  if (!strm) return 0xFFFFFFFF;
+   long tell_pos_long = provide_stream().tellg();
+   uint32 tell_pos =  tell_pos_long < 0 ? 0 : (uint32)tell_pos_long;             //081018
+   return tell_pos;                                                              //021212
+}
+//_1999-01-03___________________________________________________________________
+bool Binary_file_fstream::at_eof()                                   performs_IO_
+{  return provide_stream().eof();
+}
+//_2005-05-22___________________________________________________________________
+bool Binary_file_fstream::close()                                    performs_IO_
+{  std::fstream *as_fstream = dynamic_cast<std::fstream *>(strm);
+      if (as_fstream) as_fstream->close();
+   return true;
+}
+//_2007-06-22___________________________________________________________________
+bool Binary_file_fstream::reset()                                    performs_IO_
+{  std::fstream *as_fstream = dynamic_cast<std::fstream *>(strm);
+      if (as_fstream)
+      {  as_fstream->clear();
+         as_fstream->seekg(0);
+      }
+   return as_fstream != NULL;
+}
+//_2011-11-11___________________________________________________________________
+} // namespace CORN
+

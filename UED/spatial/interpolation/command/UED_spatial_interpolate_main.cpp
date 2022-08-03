@@ -1,0 +1,133 @@
+#include "UED/spatial/interpolation/ued_database_interpolator.h"
+#include "common/geodesy/geolocation.h"
+#include "UED/library/std_codes.h"
+#include "UED/library/UED_codes.h"
+#include "UED/spatial/interpolation/ued_database_interpolate_datarec.h"
+#include "corn/data_source/vv_file.h"
+#ifdef USE_OS_FS
+#include "corn/OS/file_system_engine.h"
+#include "corn/OS/file_system_logical.h"
+namespace CORN { namespace OS {
+File_system &file_system() { return CORN::OS::file_system_logical; };
+}};
+#endif
+
+// This performs the interpolation to a single UED target database
+// using one or more specified source UED databases.
+
+
+int main(int argc, const char *argv[])
+{
+   UED_database_interpolate_data_record  options;
+   VV_File response_file(argv[1]);
+   response_file.get(options);
+
+   // Warning
+   UED_variable_code available_variables_to_include[32] =
+      { 0 // (unspecified)
+      /* As of 2008/3/11*/
+      // Don't forget to update checklistbox_selected_elements
+      // if variables are added or rearranged here.
+      , UED_STD_VC_precip        // precipitation (liquid equivelent)
+      , UED_STD_VC_Tmax          // max. air temperature
+      , UED_STD_VC_Tmin          // min. air temperature
+      , UED_STD_VC_Tavg          // avg. air temperature
+      , UED_STD_VC_Tobs          // observed air temperature
+      , UED_STD_VC_Tdewmax       // max. dew pt. temperature
+      , UED_STD_VC_Tdewmin       // min. dew pt. temperature
+      , UED_STD_VC_Tdewavg       // avg. dew pt. temperature
+      , UED_STD_VC_RHmax         // max. relative humidity
+      , UED_STD_VC_RHmin         // min. relative_humidity
+      , UED_STD_VC_RHavg         // avg. relative_humidity
+      , UED_STD_VC_Srad          // solar radiation
+//NYI      , UED_STD_VC_isoLWnetrad   // isothermal longwave net radiation
+//NYI      , UED_STD_VC_rad_net       // net radiation
+      , UED_STD_VC_ws            // wind speed
+      , UED_STD_VC_WindDir       // wind direction
+      , UED_STD_VC_ETpot         // pot.evapotranspiration
+      , UED_STD_VC_ETact         // act.evapotranspiration
+      , UED_STD_VC_ETpan         // pan evaporation
+      , UED_STD_VC_PMETref       // ref.evapotranspiration Penman-Monteith
+      , UED_STD_VC_PTETref       // ref.evapotranspiration Priestly-Taylor
+      , UED_STD_VC_HarETref      // ref.evapotranspiration Hargraves
+      , UED_STD_VC_VPDdaytime    // daytime vapor pressure deficit
+      , UED_STD_VC_VPDfullday    // fullday vapor pressure deficit
+      , UED_STD_VC_VPD           // vapor pressure deficit
+      , UED_STD_VC_cloud_cover   // cloud cover
+      , UED_STD_VC_snow_fall     // snow fall
+      , UED_STD_VC_snow_depth    // snow depth
+      ,0,0,0,0,0};
+
+      UED_variable_code variables_to_include[32];
+      int variable_i = 0;
+   for (int bit = 1; bit < 32; bit ++)  // Bit 0 is currently reserved.
+   {  // The variables to include in the interpolation a selected
+      // in a bitmask.
+      variables_to_include[bit] = 0;
+      if (options.selected_elements & (1  << bit))
+        variables_to_include[variable_i++] = available_variables_to_include[bit]; // note that available_variables_to_include[0] is always unspecified
+   };
+
+
+// UED_database_interpolator
+/* Target diretory and filenames are used by the GUI control program,
+   This program targets the current file
+   std::cout << "Target directory:" << options.target_directory << std::endl;
+   Association_list  ensure_UED_target_files_are_created;
+   options.get_target_UED_filenames(ensure_UED_target_files_are_created,true);
+   ensure_UED_target_files_are_created.write(std::cout);
+*/
+   if (options.source_directory.length())
+      std::cout << "Source directory:" << options.source_directory.c_str() << std::endl;
+   Association_list  UED_source_files_to_be_interpolated;
+   options.get_source_UED_filenames(UED_source_files_to_be_interpolated);
+   std::cout << "Source files:" << UED_source_files_to_be_interpolated.count() << std::endl;
+   #ifdef DISABLED
+   UED_source_files_to_be_interpolated.write(std::cout);
+   #endif
+   /*100628 replaced by get_source_UED_filenames
+   FOR_EACH_IN(ued_filename,CORN::File_name ,options.source_UED_filenames,each_source_UED)
+   {  UED_source_files_to_be_interpolated.append(new CORN::File_name(ued_filename->c_str()));
+   } FOR_EACH_END(each_source_UED);
+   */
+
+   // The next section (NYI) we read the generated point stations.
+
+   Association_list  UED_files_not_interpolated; // returned
+
+   //#ifdef USE_OS_FS
+   const CORN::OS::Directory_name &target_UED_directory = options.current_target_UED_filename.get_parent_directory_name_qualified();
+   CORN::OS::file_system_engine.provide_directory/*180321 create_directory*/(target_UED_directory);
+   /*180321 #else
+   CORN::Smart_directory_name target_UED_directory;
+   options.current_target_UED_filename.get_path(target_UED_directory);
+   target_UED_directory.create();
+   #endif
+   */
+
+   std::cout << "Target file:" << options.current_target_UED_filename.c_str() << std::endl;
+
+      UED_database_interpolator UED_db_iterpol
+         (options
+         // options.current_target_UED_filename.c_str()
+         //,options.within_radius_km
+         //,options.estimate_environmental_lapse_rate_adjustment
+         ,variables_to_include
+         ,UED_source_files_to_be_interpolated
+         ,UED_files_not_interpolated
+         //,options.begin_year
+         //,options.end_year
+         );
+
+   int return_status = EXIT_FAILURE;
+   if (UED_db_iterpol.is_good())
+   {  switch (options.interpolation_mode_labeled.get())
+      {
+         case INVERSE_DISTANCE      :   UED_db_iterpol.interpolate_all_using_inverse_distance(); break;
+         case ONE_NEAREST_STATION   :   UED_db_iterpol.interpolate_all_using_nearest(); break;
+      };
+      return_status = EXIT_SUCCESS;
+   };
+   return return_status;
+};
+//_______________________________________________________________________main__/

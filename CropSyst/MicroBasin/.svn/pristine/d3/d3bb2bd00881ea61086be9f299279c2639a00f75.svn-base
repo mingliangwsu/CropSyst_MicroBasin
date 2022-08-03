@@ -1,0 +1,236 @@
+#ifndef CROPSYST_WEATHER
+#ifndef weatherstatedailyclassH
+#define weatherstatedailyclassH
+#include <list>
+#include <vector>
+//#include "datetime/date.hpp"
+#include "control/allcontrolclass.h"
+
+//160727 now perm #ifdef WEATHER_PROVIDER_VERSION
+#  include "common/weather/weather_provider.h"
+#  include "common/weather/parameter/WC_ET_reference.h"
+//160727 now perm #endif
+#ifdef CROPSYST_VERSION
+#  include "common/weather/weather_interface.h"
+#  include "common/solar/irradiance_extraterrestrial.h"
+#  ifdef CROPSYST_WEATHER_HOURLY
+#  include "common/weather/hour/weather_hours.h"
+#  endif
+#else
+#  ifdef CROPSYST_PROPER_CROP
+      class clsCrop;
+#  else
+#  include "crop/clscrop.h"
+#  endif
+#endif
+#ifdef CROPSYST_WEATHER
+#else
+#include "weathersingleyearhourlyclass.h"
+#endif
+
+
+
+//______________________________________________________________________________
+class AllControlClass;
+class clsCrop;
+//140221 unused class clsSimulation;
+//______________________________________________________________________________
+class WeatherStateDailyClass
+//#ifdef CROPSYST_VERSION
+: public implements_ Weather_spanning_interface
+//#endif
+{
+
+ public:
+   Weather_provider        daily_provider;                                       //151223_141222
+   ET_Reference_calculator ET_reference;                                         //150724
+   float64 air_temperature_min_tomorrow;                                         //151223
+   float64 air_temperature_max_yesterday;                                        //151223
+   const CORN::Date_const_interface &today;                                                      //151222
+
+    bool daily_weather_data; // NIY                                              //140417LML
+    double Screening_Height;
+    double Daily_Wind_Speed_At_10m;                               //(100, 367);
+    double Daily_Wind_Speed_At_Screening_Height;                  //(100, 367);
+    double Daily_Green_Canopy_Solar_Interception_Fraction;        //(100, 367);
+    double Daily_Canopy_Solar_Interception_Fraction;              //(100, 367);
+    double Daily_Standing_Stubble_Solar_Interception_Fraction;    //(100, 367);
+    double Daily_Surface_Residue_Solar_Interception_Fraction;     //(100, 367);
+    double Daily_Diffuse_Solar_Irradiance;                        //(367);
+    double Daily_Direct_Solar_Irradiance;                         //(367);
+    double Daily_Sunlit_LAI;                                      //(367);
+    double Daily_Shaded_LAI;                                      //(367);
+    double Daily_SunlitLAI_Solar_Interception_Fraction;           //(367);
+    double Daily_ShadedLAI_Solar_Interception_Fraction;           //(367);
+    #ifdef CROPSYST_WEATHER_HOURLY
+    CS::Weather_subdaily         subdaily;                                       //151222
+    CS::Weather_hours_calculated hourly;                                         //151222
+
+
+    #else
+    std::vector<double> Hourly_Temperature;                                     //(25);
+    std::vector<double> Hourly_Relative_Humidity;                               //(25);
+    std::vector<double> Hourly_Solar_Irradiance;                                //(MJ/m2/hour)
+    #endif
+    std::vector<double> Hourly_Precipitation;                                   //(mm) M.Liu Added
+    std::vector<double> Hourly_Rainfall;                                        //M.Liu Added
+    std::vector<double> Hourly_Snowfall;                                        //M.Liu Added
+    std::vector<double> Hourly_Wind_Speed_At_10m;                               //M.Liu Added
+    std::vector<double> Hourly_Wind;                                            //LML 140902 wind speed at screening hight
+
+    std::vector<double> Hourly_Canopy_Solar_Interception_Fraction;              //(25);
+    std::vector<double> Hourly_Standing_Stubble_Solar_Interception_Fraction;    //(25);
+    std::vector<double> Hourly_Surface_Residue_Solar_Interception_Fraction;     //(25);
+
+    double Slope_Saturation_Vapor_Pressure_Function_Of_Temperature; // As Double
+    double Aerodynamic_Resistance;                                  // As Double
+    double Unstressed_Canopy_Resistance;                            // As Double
+    double Cumulative_Chill_Hours;
+    bool Accumulate_Chill_Hours;
+    std::list<double> List_Daily_Mean_Temperature;         //Mean temperature over the last 30 days
+public:
+    //#ifdef CROPSYST_VERSION
+    const CS::Solar_irradiance_extraterrestrial /*160808RLN _hourly*/ &extraterrestrial_solar_irradiance_basin; //160808RLN_160404LML
+ private:
+    const  WeatherSingleYearHourlyClass *remember_weather;                       //160608
+        // remember_weather is currently just a hack to implement get_parameter_on
+        // Actually the weather probably should always referenced
+        // as it is passed every single day in copyHourlyWeatherFromStation
+
+private:
+    double Arcsin(double X);
+    void initMem();
+    void clearMem();
+
+public:
+
+    WeatherStateDailyClass
+       (const CORN::Date_const_interface      &today_                                            //151222RLN
+       ,const Geocoordinate   &geocoordinate_                                    //150629
+       //160404LML,const CS::Solar_irradiance_extraterrestrial                   //151022
+       ,const CS::Solar_irradiance_extraterrestrial/*160808RLN _hourly*/         //160808RLN_160404LML
+            &ET_solar_irradiance_
+        ,const float64    &day_length_hours_today_
+    );
+    virtual ~WeatherStateDailyClass();                                           //151222
+
+    double calcSatVP(double T);
+    double calcSkyEmissivity(double vapor_pressure,double Tair,double Cloud_Cover);
+    #ifndef CROPSYST_WEATHER_HOURLY
+    double calcHourlyTemperature(int HourOfDay,double Tmax_today,double Tmax_yesterday,
+                                   double Tmin_today,double Tmin_tomorrow);
+    double calcHourlyHumidity(int HourOfDay,double RHmax_today,double RHmax_tomorrow,
+                                double RHmin_today,double RHmin_yesterday);
+    #endif
+    void setScreeningHeight(double screenheight);
+    double getScreeningHeight();
+
+    void setDailyWindSpeedAt10m(double DWS10);
+    double getDailyWindSpeedAt10m();
+
+    #ifdef CROPSYST_WEATHER_HOURLY
+    //used? void setHourlyTemperature(int hour,double HT);
+    double getHourlyTemperature(int hour);
+    //used? void setHourlyRelativeHumidity(int hour,double HT);
+    double getHourlyRelativeHumidity(int hour);
+    #else
+    void setHourlyTemperature(int hour,double HT);
+    double getHourlyTemperature(int hour);
+    void setHourlyRelativeHumidity(int hour,double HT);
+    double getHourlyRelativeHumidity(int hour);
+    #endif
+    void setHourlyPrecipitation(int hour,double ppt);
+    double getHourlyPrecipitation(int hour);
+    void setHourlyRainfall(int hour,double rain);
+    double getHourlyRainfall(int hour);
+    void setHourlySnowfall(int hour,double snow);
+    double getHourlySnowfall(int hour);
+    void setHourlyWind10m(int hour,double wind);
+    double getHourlyWind10m(int hour);
+    double getHourlyWind(int hour){return Hourly_Wind[hour];};                      //LML 140902
+    //160404LML #ifndef CROPSYST_VERSION
+    void setHourlyFractionOfSolarIrradiance(int hour,double HFSI);
+    double getHourlyFractionOfSolarIrradiance(int hour);
+    //160404LML #endif
+    void setStressedPlantHourlyTemperature(int hour,double SPHT);
+    double getStressedPlantHourlyTemperature(int hour);
+        // This is actually a property of the crop - RLN
+
+    void setHourlyDiffuseSolarIrradiance(int hour,double x);
+    double getHourlyDiffuseSolarIrradiance(int hour);
+    void setHourlyDirectSolarIrradiance(int hour,double x);
+    double getHourlyDirectSolarIrradiance(int hour);
+    void setHourlySolarIrradiance(int hour,double x);
+    double getHourlySolarIrradiance(int hour);
+    void setHourlyExtraterrestrialSolarRadiation(int hour,double x);
+    double getHourlyExtraterrestrialSolarRadiation(int hour);
+    void setHourlyCanopySolarInterceptionFraction(int hour,double x);
+    double getHourlyCanopySolarInterceptionFraction(int hour);
+    void setHourlyStandingStubbleSolarInterceptionFraction(int hour,double x);
+    double getHourlyStandingStubbleSolarInterceptionFraction(int hour);
+    void setHourlySurfaceResidueSolarInterceptionFraction(int hour,double x);
+    double getHourlySurfaceResidueSolarInterceptionFraction(int hour);
+    void setHourlySunlitLAI(int hour,double x);
+    double getHourlySunlitLAI(int hour);
+    void setHourlyShadedLAI(int hour,double x);
+    double getHourlyShadedLAI(int hour);
+    void setHourlySunlitLAISolarInterceptionFraction(int hour,double x);
+    double getHourlySunlitLAISolarInterceptionFraction(int hour);
+    void setHourlyShadedLAISolarInterceptionFraction(int hour,double x);
+    double getHourlyShadedLAISolarInterceptionFraction(int hour);
+
+    void setDailyDiffuseSolarIrradiance(double x);
+    double getDailyDiffuseSolarIrradiance();
+    void setDailyDirectSolarIrradiance(double x);
+    double getDailyDirectSolarIrradiance();
+    void setDailyCanopySolarInterceptionFraction(double x);
+    double getDailyCanopySolarInterceptionFraction();
+    void setDailyGreenCanopySolarInterceptionFraction(double x);
+    double getDailyGreenCanopySolarInterceptionFraction();
+    void setDailyStandingStubbleSolarInterceptionFraction(double x);
+    double getDailyStandingStubbleSolarInterceptionFraction();
+    void setDailySurfaceResidueSolarInterceptionFraction(double x);
+    double getDailySurfaceResidueSolarInterceptionFraction();
+    void setDailySunlitLAI(double x);
+    double getDailySunlitLAI();
+    void setDailyShadedLAI(double x);
+    double getDailyShadedLAI();
+    void setDailySunlitLAISolarInterceptionFraction(double x);
+    double getDailySunlitLAISolarInterceptionFraction();
+    void setDailyShadedLAISolarInterceptionFraction(double x);
+    double getDailyShadedLAISolarInterceptionFraction();
+
+    void setUnstressedCanopyResistance(double UCR);
+    double getUnstressedCanopyResistance();
+    void setCumulativeChillHours(double CH);
+    double getCumulativeChillHours();
+    void setAccumulateChillHours(bool ACH);
+    int getAccumulateChillHours();
+
+    void copyHourlyWeatherFromStation
+       (const WeatherSingleYearHourlyClass *pweather);                           //160308RLN
+    void DetermineDailyWeatherFromHourlyData();
+    void DetermineTimeWindowMeanTemperature(int Period_Length, double &Period_Mean_Temperature);
+    void ProvideChillHours();
+    double CalculateSolarZenithAngle(int doy,int hour,double Latitude_Degrees);
+    void DetermineFurtherWeatherVariables();
+    void DetermineHourlyRH();
+    void DetermineHourlyPp();
+    void DetermineWindVelocityAtSpecifiedHeight
+       (int hour,double Specified_Height
+       ,double Roughness_Length,double Zero_Plane_Displacement,bool Default,double &u);
+
+ #ifdef CROPSYST_VERSION
+ public: // Weather_spanning_interface implementations
+   virtual bool get_parameter_on
+      (modifiable_ CS::Parameter &parameter
+      ,nat32  variable_code // Typically the variable code will be UED variable code
+      ,const CORN::Date_const_interface &on_date)                                 rectification_;//151222
+   virtual float64 get_air_temperature_min_tomorrow()                      const;//151222
+   virtual float64 get_air_temperature_max_yesterday()                     const;//151222
+ #endif
+
+};
+//_2014-02-??___________________________________________________________________
+#endif // WEATHERSTATEDAILYCLASS_H
+#endif

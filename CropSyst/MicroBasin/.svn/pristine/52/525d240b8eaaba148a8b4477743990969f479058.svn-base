@@ -1,0 +1,11 @@
+
+####### Compiler, tools and options
+CC            = gcc
+CXX           = g++
+LIBS          = $(SUBLIBS) -fopenmp -ldl -L../../../../../corn/build/gcc/Release/ -L../../../../../CS_suite/build/gcc/Release/ -lCS_suite_static -L../../../../../UED/library/build/gcc/Release/ -lUED_static -L../../library/gcc/Release/ -lCropSyst_elements -lcorn_complete_static -L../../../../../common/weather/build/gcc/Release/ -lweather_static_V5
+INCPATH       = -I../../Linux_gcc 
+$(TARGET): ../../../../../corn/build/gcc/Release/libcorn_complete_static.a ../../../../../CS_suite/build/gcc/Release/libCS_suite_static.a ../../../../../UED/library/build/gcc/Release/libUED_static.a ../../library/gcc/Release/libCropSyst_elements.a ../../../../../corn/build/gcc/Release/libcorn_complete_static.a ../../../../../common/weather/build/gcc/Release/libweather_static_V5.a $(OBJECTS)  
+	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
+
+include ../../Xcc/Release/Makefile
+

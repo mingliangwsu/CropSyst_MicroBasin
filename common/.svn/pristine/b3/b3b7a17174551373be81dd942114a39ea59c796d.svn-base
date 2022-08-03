@@ -1,0 +1,29 @@
+#include "common/weather/storm_event.h"
+#include "UED/library/std_codes.h"
+//______________________________________________________________________________
+Storm_event_creation_layout::Storm_event_creation_layout
+(Record_code            _storm_event_UED_record_type
+,Units_code             _storage_units
+,Units_code             _interval_time_length
+,CORN::Quality_code     _default_attribute_code)
+: UED::Data_record_creation_layout
+   (_storm_event_UED_record_type
+   ,UED::STD_VC_precipitation.get()     
+   ,_storage_units
+   ,_interval_time_length
+   ,UT_arbitrary_datetime
+   ,_default_attribute_code)
+{}
+//______________________________________________________________________________
+Storm_event_data_record::Storm_event_data_record
+(Record_code            _storm_event_UED_record_type
+,Datetime64             _date_time
+,Units_code             _storage_units
+,Units_code             _interval_time_length
+,CORN::Quality_code     _default_attribute_code)
+: UED::Binary_data_record_owns
+   (Storm_event_creation_layout(_storm_event_UED_record_type,_storage_units,_interval_time_length,_default_attribute_code)
+      ,_date_time
+      ,true) //storm events a are all generated and large data set so I will allow float16
+{}
+//______________________________________________________________________________

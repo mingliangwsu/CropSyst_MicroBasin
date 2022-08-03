@@ -1,0 +1,411 @@
+#include "corn/format/structural.h"
+#include "corn/string/strconv.hpp"
+#include <string.h>
+#include "corn/data_type_enum.h"
+using namespace CORN;
+namespace structural
+{
+nat16 write_indentation = 0;
+std::string  dummy_ASCII;
+std::wstring dummy_Unicode;
+
+//______________________________________________________________________________
+Pair_key_value_abstract::Pair_key_value_abstract
+(structural::Construct *specifier_given)
+: Pair_key_value()
+, specifier (specifier_given)
+{}
+//______________________________________________________________________________
+Pair_key_bool::Pair_key_bool
+(bool &value_
+,given_ Construct *key_given
+,given_ Construct *value_given)
+: Pair_key_scalar(key_given)
+, value (value_)
+{
+   //delete key_given_;
+  // key_given = key_given_;
+   if (value_given)
+   {
+      std::wstring value_string;
+      value_given->append_to_wstring(value_string);
+      set_value_wstring(value_string);
+      delete value_given;
+   }
+}
+//_2015-08-30___________________________________________________________________
+bool Pair_key_bool::set_value_wchr
+(const wchar_t *value_as_wstring)                                  modification_
+{
+   if      (wcscmp( value_as_wstring, L"true") ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"True") ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"TRUE") ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"yes")  ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"Yes")  ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"YES")  ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"false")==0) value = false;
+   else if (wcscmp( value_as_wstring, L"False")==0) value = false;
+   else if (wcscmp( value_as_wstring, L"FALSE")==0) value = false;
+   else if (wcscmp( value_as_wstring, L"no")   ==0) value = false;
+   else if (wcscmp( value_as_wstring, L"No")   ==0) value = false;
+   else if (wcscmp( value_as_wstring, L"NO")   ==0) value = false;
+   return true;
+}
+//______________________________________________________________________________
+Pair_key_value *Mapping_clad::find_key_value_pair
+(const structural::Construct &key_construct)                               const
+{
+   Pair_key_value *matching_KV_pair = dynamic_cast<Pair_key_value *>
+      (get_key_value_pairs().find_matching(key_construct));
+   return matching_KV_pair;
+}
+//_2015-10-18___________________________________________________________________
+Pair_key_enum::Pair_key_enum
+(Labeled_enum &labeled_enum_
+,given_ Construct *key_given
+,given_ Construct *value_given)
+: Pair_key_scalar(key_given)
+, labeled_enum(labeled_enum_)
+{
+   if (value_given)
+   {
+      std::string value_as_string; CORN::wstring_to_string
+         (value_given->get_text_wstr(),value_as_string);
+      labeled_enum.set_label(value_as_string.c_str());
+      delete value_given;
+   }
+}
+//_2016-07-03___________________________________________________________________
+
+/*
+
+
+modifiable_ Pair_key_value *Mapping_clad::find_key_value_pair_mod
+(const structural::Construct &key_construct)                       modification_
+{
+   Pair_key_value *matching_KV_pair = dynamic_cast<Pair_key_value *>(get_key_value_pairs().find_matching(key_construct));
+   return matching_KV_pair;
+}
+//_2015-10-18___________________________________________________________________
+const Pair_key_value *Mapping_clad::find_key_value_pair_ref
+(const structural::Construct &key_construct)                               const
+{
+   Pair_key_value *matching_KV_pair = dynamic_cast<const Pair_key_value *>(get_key_value_pairs().find_matching(key_construct));
+   return matching_KV_pair;
+}
+*/
+//_2015-10-18___________________________________________________________________
+int Mapping_clad::compare(const CORN::Item &other)                     const
+{  int comparison = -1;
+   const Mapping *mapping_to_compare = dynamic_cast<const Mapping *>(&other);
+   if (mapping_to_compare)
+   {
+      comparison = key_value_pairs.count() - mapping_to_compare->count();
+      if (comparison == 0)
+      {  // So far the mapping is superficially comparable because
+         // they have the same number of items.
+         // Now check each item
+         // (we don't care about the order of the items).
+         FOR_EACH_IN(KV_pair, Pair_key_value,key_value_pairs,each_KV_pair)
+         {  const Pair_key_value *other_matching_KV_pair
+               = find_key_value_pair(*(KV_pair->get_specifier()));
+            if (!other_matching_KV_pair) return -1;
+         } FOR_EACH_END(each_KV_pair)
+      }
+   }
+   return comparison;
+}
+//_2015-10-18___________________________________________________________________
+/*
+int Mapping_clad::Parameter_number::compare(const Item &key_to_compare) const
+{
+   const wchar_t *nk = number_keyed->get_key_wide();
+   const wchar_t *kc = key_to_compare.get_key_wide();
+//   std::wstring nk_wstring; CORN::append_ASCIIz_to_wstring(nk,nk_wstring);
+   return
+//      wcscmp(nk_wstring.c_str(),key_to_compare.get_key_wide());
+      wcscmp(number_keyed->get_key_wide(),key_to_compare.get_key_wide());
+      //strcmp(nk,kc);
+}
+*/
+//_2015-10-26___________________________________________________________________
+/* 180305 using template
+structural::Pair_key_string &Mapping_clad::expect_string
+(const char  *key_label, modifiable_ std::string &value) provision_
+{
+   Key_string *key_str = new Key_string(key_label);
+   items.append(new Pair_key_string(value,key);
+}
+//_2017-02-12___________________________________________________________________
+structural::Pair_key_string &Mapping_clad::expect_string
+(const wchar_t *key_label, modifiable_ std::string &value) provision_
+{
+   Key_string *key_str = new Key_string(key_label);
+   items.append(new Pair_key_string(value,key);
+}
+//_2017-02-12___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_number
+(const char  *key_label, modifiable_ float32 &value) provision_
+{
+   Key_string *key_str = new Key_string(key_label);
+   items.append(new Pair_key_number(key_str,value));
+}
+//_2017-02-12___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_number
+(const wchar_t *key_label, modifiable_ Value_T &value) provision_
+{
+   Key_string *key_str = new Key_string(key_label);
+   items.append(new Pair_key_number(key_str,value));
+}
+//_2017-02-12___________________________________________________________________
+*/
+bool  Mapping_clad::write(std::ostream &strm)                   performs_IO_
+{
+   //strm << std::endl;0
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   if (ref_specifier)
+   {
+      ref_specifier->write(strm);
+      strm << ": " << std::endl;
+   }
+   write_indentation += 3;
+   key_value_pairs.write(strm);
+   write_indentation -= 3;
+   return true;
+}
+//_2016-07-03___________________________________________________________________
+bool Pair_key_number::set_value_wstring
+(const std::wstring &value_as_wstring)                             modification_
+{  set_value_wchr(value_as_wstring.c_str());
+         return true;
+}
+//_2017-01-29___________________________________________________________________
+bool Pair_key_number::set_value_wchr
+(const wchar_t *value_as_wstr)                                     modification_
+{  bool result = false;
+   if (value_as_wstr)   // Not sure if atof already checks for nul
+   {  set_value_as_float64(CORN::wstr_to_float64(value_as_wstr));
+      result = true;
+   }
+   return result;
+}
+//_2017-01-29___________________________________________________________________
+float64 Pair_key_number::set_value_as_float64(float64 new_value)   modification_
+{  switch (mode)
+   {  case DT_int8:   *(value.as_int8)   = (int8)   new_value; break;
+      case DT_int16:  *(value.as_int16)  = (int16)  new_value; break;
+      case DT_int32:  *(value.as_int32)  = (int32)  new_value; break;
+      case DT_nat8:   *(value.as_nat8)   = (nat8)   new_value; break;
+      case DT_nat16:  *(value.as_nat16)  = (nat16)  new_value; break;
+      case DT_nat32:  *(value.as_nat32)  = (nat32)  new_value; break;
+      case DT_float32:*(value.as_float32)= (float32)new_value; break;
+      case DT_float64:*(value.as_float64)= (float64)new_value; break;
+   }
+   return new_value;
+   // may want to echo back the converted value but should be the same get_value_as_float64();
+}
+//_2017-01-29___________________________________________________________________
+/* NYN
+float32 Pair_key_number::set_value_as_float32(float32 new_value)   modification_
+{
+
+}
+*/
+//______________________________________________________________________________
+bool Pair_key_value_abstract::write(std::ostream &strm)             performs_IO_
+{
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   specifier->write(strm);
+   //std::string value_as_string;
+   strm << ": ";
+   //strm << value_as_string;
+   return true;
+}
+//______________________________________________________________________________
+bool Pair_key_string::write(std::ostream &strm)                     performs_IO_
+{
+   bool wrote = Pair_key_value_abstract::write(strm);
+   std::string value_as_string;
+   if (as_ASCII)
+      strm << value.ASCII.c_str();
+   else // warning there may be loss of Unicode character in translation
+   {  std::string value_ASCII;
+      CORN::append_wstring_to_string(value.Unicode,value_ASCII);
+      strm << value_ASCII.c_str();
+   }
+   return wrote;
+}
+//______________________________________________________________________________
+
+bool Pair_key_number::write(std::ostream &strm)                     performs_IO_
+{
+   bool wrote = Pair_key_value_abstract::write(strm);
+   std::string value_as_string;
+   strm << append_value_in_radix_to_string(value_as_string,3,10);
+   return wrote;
+}
+//______________________________________________________________________________
+const char *Pair_key_number::append_value_in_radix_to_string
+(std::string &buffer,nat8 precision,nat8 radix_preferred)                  const
+{
+   nat8 radix = (radix_preferred == 0) ? 10.0 : radix_preferred;
+   switch (mode)
+   {  case DT_int8:   append_int8_to_string  (*(value.as_int8) ,buffer,radix);break;
+      case DT_int16:  append_int16_to_string (*(value.as_int16),buffer,radix);break;
+      case DT_int32:  append_int32_to_string (*(value.as_int32),buffer,radix);break;
+      case DT_nat8:   append_nat8_to_string  (*(value.as_nat8) ,buffer,radix);break;
+      case DT_nat16:  append_nat16_to_string (*(value.as_nat16),buffer,radix);break;
+      case DT_nat32:  append_nat32_to_string (*(value.as_nat32),buffer,radix);break;
+      case DT_float32:append_float32_to_string(*(value.as_float32),precision,buffer);break;
+      case DT_float64:append_float64_to_string(*(value.as_float64),precision,buffer);break;
+   }
+   return  buffer.c_str();
+}
+//_2017-01-29___________________________________________________________________
+bool Pair_key_bool::write(std::ostream &strm)    performs_IO_
+{
+   //strm << std::endl;
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   key_given->write(strm);
+   //std::string value_as_string;
+   strm << ": " << value ? "true" : "false";
+   return true;
+}
+//______________________________________________________________________________
+bool Pair_key_enum::write(std::ostream &strm) performs_IO_
+{
+   //strm << std::endl;
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   key_given->write(strm);
+     strm << ": " << labeled_enum.get_label();
+   return true;
+}
+//______________________________________________________________________________
+bool  Pair_key_value_clad::write(std::ostream &strm)                performs_IO_
+{
+   //strm << std::endl;
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   if (specifier) // there should always be a specifier at this point
+   {
+      specifier->write(strm);
+      strm << ": " << std::endl;
+   }
+   write_indentation += 3;
+   if (value) // there will usually be value here
+   {
+      strm << "#value#";
+      // value->write(strm);
+   }
+   write_indentation -= 3;
+   return true;
+}
+//______________________________________________________________________________
+nat32 Sequence::append_text_list(CORN::Text_list &values)          appropriation_
+{  nat32 items_taken = 0;
+
+   FOR_EACH_IN(value,CORN::Text_list::Item,values,each_value)
+   {  items_taken += 1;
+
+
+   } FOR_EACH_END(each_value)
+   return items_taken;
+}
+//_2017-04-08___________________________________________________________________
+
+/* now using expect template method
+structural::Pair_key_string &Mapping_clad::expect_string
+(const char *key, modifiable_ std::string &value          ONTOLOGY_NAME) provision_
+{
+   Pair_key_string *KV_pair = new Pair_key_string(value,new Key_string(new std::string(key)));
+   key_value_pairs.take(KV_pair);
+   return *KV_pair;
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_string &Mapping_clad::expect_wstring
+(const char *key, modifiable_ std::string &value          ONTOLOGY_NAME) provision_
+{
+   return new Pair_key_string(new Key_string(value,new std::string(key)));
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_int8
+(const char *key, modifiable_ int8    & value             ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_int16
+(const char *key, modifiable_ int16   & value             ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_int32
+(const char *key, modifiable_ int32   & value             ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_nat16
+(const char *key, modifiable_ nat16   & value, nat8 _radix ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_nat8
+(const char *key, modifiable_ nat8    & value, nat8 _radix ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_nat32
+(const char *key, modifiable_ nat32   & value, nat8 _radix ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_float32
+(const char *key, modifiable_ float32 & value             ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_float64
+(const char *key, modifiable_ float64 & value             ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_bool   &Mapping_clad::expect_bool
+(const char *key, modifiable_ bool    & value             ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value,new std::string(key)));
+}
+//_2017-01-29___________________________________________________________________
+*/
+/* NYI
+structural::Pair_key_number &Mapping_clad::expect_date
+(const char *_key, modifiable_ Date         & value      ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value.ref_date32(),new std::string(key)));
+}
+//_2017-01-29___________________________________________________________________
+structural::Pair_key_number &Mapping_clad::expect_datetime64
+(const char *_key, modifiable_ Date_time_64 & value      ONTOLOGY_NAME) provision_
+{
+   return new structural::Pair_key_number(value.ref_datetime64(),new std::string(key)));
+}
+//_2017-01-29___________________________________________________________________
+*/
+} // namespace structural
+

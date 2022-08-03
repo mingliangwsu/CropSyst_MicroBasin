@@ -1,0 +1,729 @@
+<TITLE>
+translator_class:
+A foreign language message cataloging class.
+</TITLE>
+<CENTER>
+<H2>
+translator_class:
+A Foreign language message cataloging class
+</H2>
+by Roger Nelson
+<P>
+<BR>Biological Systems Engr. Dept.
+<BR>Washington State University
+<BR>Pullman, WA 99164-6120
+<BR>
+       rnelson@mail.wsu.edu
+<BR>
+       Phone: (509)335-1100
+<BR>   Home:  (509)332-8387
+<BR>   FAX  : (509)335-2722
+</CENTER>
+
+<H1>
+Overview
+</H1>
+
+   The translator class facilitates internationalization of programs.
+   It provides a memory efficient memory cataloger for loading
+   string "constants" for a language from a file of translated "phrases".
+
+   <P>
+   This unit differs from other similar libraries in the following ways:
+   <OL>
+   <LI>Phrase translations for all languages can be stored together in the same file.
+      This is advantageous because it is easier to maintain the phrases;
+      when you make a change to a phrase you can easily see that you need
+      to make the change for the other languages.
+
+      One problem with this approach is that the language name tag becomes redundent.
+      To resolve this problem I use short 2 or 3 character codes for the
+      language name tags.
+      I would recommend either the ISO (International Standards Organization)
+      <A HREF="http://www.stonehand.com/unicode/standard/cd639.html">
+      2 character language codes (ISO 639)
+      </A>
+      or the new
+      <A HREF="http://www.stonehand.com/unicode/standard/cd639-2.html">
+      3 character language codes (ISO CD 639-2).
+      </A>
+      <P>
+      The ISO 639-2 draft is still missing many languages.
+      For a code set covering significantly more languages, the
+      <A HREF="http://www.sil.org">
+      Summer Institute of Linguistics, Inc.
+      </A>
+      <A HREF="http://www.sil.org/ethnologue/languages.html">
+      Ethnologue language name index
+      </A>
+      has a
+      <A HREF="http://www.sil.org/ethnologue/language_codess.html">
+      code set
+      </A>
+      , which at this time, covers 6465 languages.
+
+      <P>
+      Another possible approach would be to store the phrases in seperate files
+      and or directories by language.
+      That approach would be advantageous if you were to distribute different
+      language versions of the program, but I find it more difficult to maintain,
+      and if all the translations are stored in a single file the user can
+      switch between languages.
+
+   <P>
+   <LI> The phrases file itself can be parsed by the compiler at compile time
+      as an enumeration of phrase IDs.
+      This makes it harder to inadvertently leave out a phrase from the
+      phrases file and also reduces the chances of duplication.
+
+   <LI>The phrases file format has a facility for the program to
+       tell the translator class to select which phrases to actually
+       loaded into memory.
+      This allows multiple programs to share a phrases file with optimal
+      memory usage. This has the added benefit of cutting down on
+      maintenance of phrases that are used in a suite of programs.
+
+   <LI>This class can be used in one of two modes:
+       The phrase translations can either be loaded by the program at runtime,
+       or compiled into the program
+       <A HREF="#hard_coded">
+       ("hard-coded")
+       </A>
+       .
+       <P>
+       Loading the phrases at runtime has the following advantages
+       <UL>
+       <LI>In operating systems with limited memory space for static string constants
+           (Such as MS-DOS and Windows 3.1), a programmer often has little option
+           but to dynamically load string constants from a file at runtime.
+
+       <LI>Only the translations for the language being used are loaded
+           into memory, significantly reducing memory usage.
+
+       <LI>Since the file with the translations is a simple text file,
+           The end user can edit the file and add additional language translations,
+           or make corrections.
+
+       <LI>The program can select a subset of phrases to actually
+           be loaded into memory.
+           Thus, if you have an application which consists of a suite of
+           programs with redundent usage of key phrases,
+           this allows multiple programs to share a single phrases file,
+           while only taking memory for the phrases actually used by
+           a given program.
+       </UL>
+       <P>
+       Loading the phrases file at runtime has the following disadvantages:
+       <UL>
+       <LI>The process of loading and parsing the phrases file at runtime
+           requires a slight additional startup time; however, I have used
+           this class with very large translation sets consisting of
+           several hundred phrases, and the file load time is only one to
+           two seconds.
+       <LI>The user may attempt to modify the phrases file and inadvertantly
+           corrupt the file format.
+       <LI>Normally only one language is loaded at a time; however,
+           You can support multiple languages simultaneously by
+           instantiating a translator class for each language you
+           want to use.
+       </UL>
+       <P>
+       Hardcoding the phrases at compile time has the following advantages:
+       <UL>
+       <LI>No startup time is lost loading and parsing the phrase file
+           other than the additional time required to load the additional
+           text with the executable.
+       <LI>Since all the translations for all the languages are loaded
+           in memory, text in different languages is always available.
+           (In this case, the translator class provides a method
+            translate_to() with which the target language can be selected).
+       </UL>
+       <P>
+       Hardcoding the phrases at compile time has the following disadvantages:
+       <UL>
+       <LI>The translations for all the languages are loaded into memory,
+           significantly increasing memory requirements.
+           Some operating systems (Such as MS-DOS and Windows) have a
+           limit on global static string space. With large translation
+           sets, you may experience "Data segement too large" compile
+           or link errors.
+       <LI>The list of phrases cannot be shared by different programs;
+           However, if your application consists of a single program,
+           this is not a problem.
+       </UL>
+
+       All in all I prefer to load the phrases at runtime unless I have
+       a small translation set or I am compiling the program under an
+       operating system with a true non-segmented virtual memory system
+       such as UNIX, or including the phrases file(s) would be inconvienent.
+
+   <P>
+   <LI> The format of the phrases file is very simple, making it easier
+      to add localizations or corrections.
+      Other message cataloging techinque, such as MS-Windows string table,
+      use slightly more complex enumeration techinques to facilitate
+      the foreign language selection. And while the string tables
+      can be shared by different programs, all the phrases and translations
+      are loaded into memory, unlike this class which allows a program
+      to select a subset of the phrases to be loaded.
+   <P>
+   <LI>This unit is intended for 7/8-bit European like character sets.
+      (Right to left or top to bottom orientation).  However this is a simple
+      message catalog and should work for any 7/8-bit character set language,
+      since displaying the phrase is left to the program.
+   <P>
+   <LI> This unit provides optimization features for
+        <A HREF="#dialects">
+        dialects
+        </A>
+        .
+        For example, you can provide translations for a base mother tongue,
+        which would normally be used and, in only those cases where there
+        a regional dialect variation for those particular phrases, would
+        need to be provided.
+       Most other localization cataloging libraries would require the dialect
+       to be setup as a separate language with a complete set of redundent
+       translations.
+
+   </OL>
+
+<H2>
+Phrases file
+</H2>
+   The phrases file has a very simple format.
+   The translator class header file includes the phrases file in an
+   enumeration; thus,
+   the compiler actually reads the phrases file, helping to insure that
+   all the phrases used by the program are included in the phrases file.
+   Consequently, you cannot inadvertantly leave out a phrase from your translations!!!!
+   No other message cataloging techinque does this!
+
+   <LISTING>
+    <I>phraseID</I>,
+    /* <I>programlist</I>
+    en <I>English phrase</I>
+    es <I>Spanish phrase</I>
+    it <I>Italian phrase</I>
+    fr <I>French phrase</I>
+       :
+       :
+    */
+    <I>nextphrasesID</I>,
+       :
+       :
+   </LISTING>
+
+   The <I>phraseID</I> must be a unique valid Identifier and must be
+   followed by a comma. The <I>phraseID</I> and comma must be on their own line.
+   <P>
+   After the first comment (on the same line) is a list of tags for
+    all programs in which the phrase is used, only those phrases used by the program will
+   be loaded by the translator class.
+   This is useful if your application consists of several programs,
+   but where not all phrases are used in all the programs.
+   <P>
+   An asterisk (*) in the 'used by' line can be used to indicate that the phrase should
+   always be included.
+   This can be used for phrases that may potentially be used by many/all
+   programs, where you don't want to list each program specifically.
+   <P>
+   Each language translation must be on its own line, preceded by the single
+   word, case sensitive language tag.
+   <P>
+   There only needs to be one space separating the language tag from the phrase.
+   Any additional spaces padding the beginning or end of phrase are not trimmed
+   and will be included in the phrase.
+   <p>
+   An asterisk (*) can be used for the language tag to indicate that the
+   phrase is the same for all languages.
+   <P>
+   The end of line character is not included in the phrase which will be
+   null-terminated when it is loaded.
+   <P>
+   There should be no blank lines in the file.
+   <P>
+   The lines starting with the <B>C</B> comment characters must have
+   /* or */ as the first characters on the line.
+   <P>
+   If the phrase is to be a null string, then use
+   an underscore character _,  Ie:  en _
+
+<H3>
+<A NAME="dialects">
+Language dialects
+</A>
+</H3>
+   When it comes to software, most users are happy just to get software
+   in their own language; however, if the programmer wants to make his
+   international users really happy, this translator class offers the option
+   of providing variations for regional dialects without significant overhead
+   and redundancy.
+   <P>
+   At the top of the phrases file is an optional dialect equivalences list.
+   For example:
+
+   <LISTING>
+   /* DIALEKTOJ
+   es es_castillian es_mexican es_colombian
+   fr fr_canadian fr_moroccan fr_hatian
+   */
+   </LISTING>
+
+   This says if the language to load is es_castillian, read and use the
+   Spanish phrase unless a Castilian phrase is specifically provided.
+   (Note that in this example, I have spelled out the regional dialect.
+    If you do use the dialects feature, I would recommend using the
+    ISO 3 character code set which covers many of the common dialects,
+    or the Summer Institute of Linguistics code set which covers most
+    of the even obscure dialects.
+    If there is still no code for the dialect,
+    I would recommend composing
+    the dialect name from the base language code and the
+    <A HREF="http://www.lib.uwaterloo.ca/country_codes.html">
+    ISO 3166 standard country code
+    </A>
+    or the dialect name as I have done in this example.
+   )
+   <P>
+	The first tag on the line is the base language, the remaining tags
+   are the dialects of that language.
+   <!--
+   <P>
+   In the Pascal version (Unless using Delphi 2.0)
+   The dialects line must not exceed 256 characters a dialect can be
+   continued on the next line with the first label repeating the base
+   language name.
+   -->
+   <P>
+   At this time it is not possible to make a hierachical dialect
+   dependency.  I.e. the following is NOT valid:
+   <LISTING>
+   /* DIALEKTOJ
+   es es_castilian es_mexican
+   es_mexican es_yukatan
+   */
+   </LISTING>
+   es_yukatan should be es.
+   <P>
+   If no dialects are provided, the DIALECTOJ section can be ommited.
+   <LISTING>
+   /* DIALECTOJ
+   */
+   </LISTING>
+<H3>
+Language equivalences
+</H3>
+   This <B>optional</B> optimization feature can be used to handle special cases of
+   dialect variations.  For example, one may have several dialects
+   of es (Spanish) where most phrases will be the same for most dialects,
+   but there may be a regional variation which is the same as another
+   regional variation, but not the same as the base language. I.e.
+   <LISTING>
+      L_a_phrase,
+      /* MYAPP
+      en aaaa bbbb ccc
+      es_colombian=es_mexican
+      es_mexican XXXXX wwww zzzz
+      es xxxx yyyy zzzz
+      */
+   </LISTING>
+
+   In this case, Castillian will simply use the <b>Spanish</b>
+	phrase, but Mexican will have a separate phrase which will also
+   be used by <B>Colombian</B>. The equivalence is used to avoid having the
+   <B>Mexican</B> phrase duplicated in the <b>Colombian</b> phrases.
+   <P>
+   This may also be useful for languages that are similar.
+<H3>
+The LINGVO entry
+</H3>
+   The very first phrase in the file phrases must be the translation for the
+   names of the languages/dialects for which translations have been provided,
+   I.e.:
+   <LISTING>
+      LINGVO,
+      /* *
+      en English
+      fr Francais
+      es Espanol
+      it Italiano
+      ca Catalan
+      */
+   </LISTING>
+
+   The LINGVO entry immediately follows the DIALEKTOJ.
+   <I>("dialektoj" and "lingvo" are the Esperanto words for
+      "dialects" and "language" respectively.)</I>
+
+<H2>
+Suggestions for building phrases files.
+</H2>
+
+   You may find that you reuse some phrases in many programs.
+   I usually use the runtime loading option with a single phrase
+   file when I distribute an application that includes several programs.
+   <P>
+   I normally create a phrases file (Without the DIALEKTOJ and LINGVO entries)
+   for each of my .cpp/.h source code files that use the translator class.
+   (For example, my date class library has translations for the names of
+    the months and days of the week).
+   Then, for my applications, I write a batch/shell script file which concatenates
+   all the phrase files used by the application into the single
+   phrases file (The first concatenated file contains the
+   the DIALEKTOJ, LINGVO, and translations specific to the application)
+   <P>
+   In order to help identify where a phrase originated from,
+   I usually prefix each <B>phraseID</B> with "L_" and the name of class
+   using the phrase.  I.e.:  L_DATE_January, or I put the name of the
+   class using defining the phrase in the <I>used by</I> comment line.
+   <P>
+
+<H3>
+Using multiple phrases files.
+</H3>
+   You may find it preferable to use several different phrases files.
+   For example, a phrases file for library modules, and a phrases file
+   for phrases used only by the main application.
+   <p>
+   In this case, simply define a phrases enumeration which includes
+   each phrases file separately, and create an instance of translator_class
+   for each phrases file.
+
+<H2>
+<A NAME="hard_coded">
+Using the hard coded phrases option.
+</A>
+</H2>
+    When the program is compiled with HARDCODE_PHRASES <B>#define</B>d.
+    The phrases are hardcoded in the executable.
+
+    <P>
+    Phrases are stored and maintained in a phrases file just like when
+    using the runtime load option.
+    (The same format used for the runtime loading option.)
+    The program <B>hcphrases</B> converts the phrases file into a header
+    file containing the phrase translation tables called <B>phrases.h</B>.
+    <p>
+    The <B>phrases.h</B> must be placed in your program development directory
+    with your source code.  (DO NOT put <B>phrases.h</B> in the library
+    include directory with the translator class header file.
+    The translator class header file should include <B>phrases.h</B>
+    from the current working directory.)
+   <P>
+
+<H2>
+Language translation and no language translation support
+</H2>
+
+   Often times you may share classes where you have used a translator
+   class to provide foreign language translations,
+   but another programmer might only want to output one language
+   and not want to bother with phrases files etc...
+   In this case the header file <B>cmmntrns.h</B> provides an example
+   of how to provide an emulation
+   of the common translator functions translate() and translate_to_stream()
+   which simply take character array constants when USE_RLIB_TRANSLATOR_CLASS
+   is not <B>#define</B>d or <B>#undef</B>ined.
+   <P>
+   For example in my date class I have the following:
+
+   <LISTING>
+   #include <rlib/cmmntrns.h>
+   #ifndef USE_RLIB_TRANSLATOR_CLASS
+   #define L_DATE_January   "January  "
+   :
+   :
+   #define L_DATE_December  "December "
+
+   #define L_DATE_Jan "Jan"
+   :
+   :
+   #define L_DATE_Dec "Dec"
+
+   #define L_DATE_Day "Day"
+
+   #define L_DATE_Sunday "Sunday"
+   :
+   :
+   #define L_DATE_Saturday "Saturday"
+   #endif
+   </LISTING>
+
+   Thus, if I don't define USE_RLIB_TRANSLATOR_CLASS, the
+   translate() function calls, in my date class,
+   will simply use the <B>#define</B>d character array constants
+   instead of using the common_translator translations.
+   In this manner, I don't have to maintain different versions of my
+   library class just to implement foreign language translation.
+
+<H2>
+Universal Character Set Conversion
+</H2>
+
+   By default, the translator class, simply provides the translated
+   phrases as they are stored in the phrases file.
+   However, if you define USE_UCSCU, the translator class will
+   convert the phrases to a different character set as they are
+   loaded using my Univeral Character Set Conversion Utility class.
+   (Refer to the UCSCU documentation on how to setup the UCSCU
+    parameter to the translator class constructor).
+   <P>
+   Most modern operating systems now uses the 256 character subset of the
+   ISO 8-bit standard multinational character set,
+   but USCSU may be helpful for internationalization of MS-DOS based
+   software or for use on terminals with other 7 or 8 bit character sets.
+   (UCSCU can convert almost all European, most Mid-east, and some Asian
+   character sets).
+
+<H2>
+Using the language translator class for general message cataloguing.
+</H2>
+
+   Since you get all the advantages of loading the phrases at runtime,
+   the language translator class makes a good general message cataloging
+   class even if you don't provide foreign language translations.
+   <P>
+   I have distributed programs (such as LaTex2hyp my LaTeX to hypertext/text
+   translator, REDT my UNIX/AmigaDos text editor, and UCSCU my Univeral
+   Character Set Conversion Utility)  with just the English phrases and
+   international users have returned to me their added translations.
+
+<H2>
+Instanciating translator classes
+</H2>
+
+   The translator class constructor requires four arguments:
+   <DL>
+   <DT>
+   <B>const char *</B> language_tag
+   <DD>
+      The <B>language_tag</B> case sensitive
+      parameter specifies the language
+      to be used for the translations.
+      For the hard coded phrases compilation option,
+      this is the default language for translations if
+      the language to translate to is not specified.
+      <P>
+      The selection of the language can be made any number of ways
+      (or any combination of ways).
+      Here are some suggestions:
+      <UL>
+      <LI>At the beginning of the program prompt the user for the language.
+      <LI>Provide some menu options for selecting the language.
+      <LI>Provide a startup file (I.e. MS-Windows Private profile/INI files),
+          response file or startup script.
+      <LI>Command line qualifier.
+      <LI>Get the language from an environment variable.
+          Many operating systems, such as AmigaDOS have an environment
+          variable reserved for specifying the default language code.
+      </UL>
+
+   <DT>
+   <B>const char *</B> use_tag
+   <DD>
+       The use_tag is a case insensitive code that is used to specify
+       which phrases are used by the program.
+       This parameter is not used for the hard coded phrases option.
+   <DT>
+   <B>const char *</B> phrases_full_filename
+   <DD>
+       This is the full filename of the phrases file.
+       (For case sensitive file systems, this is a case
+        sensitive parameter).
+        <P>
+       This parameter is not used for the hard coded phrases option.
+       <P>
+       I like to construct the phrases file filename from the program's
+        path and file name replacing the file name and extension with
+        my phrase file filename.
+        <P>
+        MS-DOS, and Console or EasyWin based MS-Windows
+        programs, argv[0] will contain the full path to the executable.
+        <P>
+        For MS-Windows native mode programs, the full path to the executable
+        is available with the Windows API function GetModuleFileName().
+        <P>
+        For UNIX based applications, there is no easy way to get the path
+        to the executable (unfortunatly argv[0] contains only the name of
+        program as it was typed on the command line, it does not
+        fully qualify program name).
+        One solution is to create an alias for the program that
+        contains the fully qualified path.
+        Because, under UNIX, you usually don't have any memory limitations to
+        contend with, you can alway use hard coded phrases.
+        <P>For AmigaDOS, it is quite common to assign logical device names to
+        an application's program directory using the AmigaDOS
+        <B>ASSIGN</B> command in the <B>user-startup</B> file.
+        <P>
+
+   <DT>
+   <B>int</B> num_phrases
+   <DD>
+      This is the number of phrases in the phrases file.
+      The XXX_PHRASES_COUNT from your phrases enumeration
+      is almost always used for this parameter.
+
+   <DT>
+   <B>struct UCSCU_options_layout *</B>i_ucscu_options <B>= 0</B>
+   <DD>
+       This optional parameter is used with the Universal Character Set
+       Conversion Utility compile option.
+   </DL>
+
+<H2>
+<A NAME="common_translator">The common translator</A>
+</H2>
+   When only using a single phrases file, I use an instance of the translator
+   class called <b>common_translator</b> (defined in the source files
+   "rlib/cmmntrns.h"), which I use for all my translations.
+   This module also defines the functions translate() and translate_to_stream()
+   which call the respective common_translator methods translate() and
+   translate_to_stream().
+   These functions give a short-hand to the common translator methods
+   and also emulates the C version of the language translator class.
+   <P>
+   In most applications a single translator class object and associated
+   phrases file is sufficient.
+   <P>
+   The common translator stub is provided for basic translation situations.
+   The following function gives an example of setting up the common_translator
+   object.  Additional translator objects can be similarly instanciated.
+   <BR>
+   cmmntrns.h defines PHRASES_FILE as phrases.lng,
+   you can override this define with a different name.
+   <P>
+   <LISTING>
+   void setup_common_translator(char *program_path_filename)
+   {
+
+     phrases_filename.set(program_path_filename);
+     phrases_filename.set_file_ext(PHRASES_FILE);
+
+     // Get the default language. In this case, the language is set in  the
+     // environment variable LANGUAGE, set before running the program.
+     // If the environment variable doesn't exist, then the default is English.
+
+
+     common_translator = new translator_class
+     (getenv("LANGUAGE")
+     #ifndef HARDCODE_PHRASES
+     ,"MYAPP",phrases_filename.get(),COMMON_PHRASES_COUNT
+     #endif
+     );
+
+     if (!common_translator->good())
+     { cerr << "Unable to open language translation file: " << phrases_filename << endl
+            << "This file should be placed in the same directory as " << argv[0]<< endl;
+       exit(1);
+     };
+   };
+   </LISTING>
+
+
+<H2>
+Borland OWL or TurboVision Notes
+</H2>
+  Here are some tips for restarting an OWL or  TurboVision application with a new language.
+  <P>
+  You may want to allow the user to change the language within the
+  application.  The following example shows how to load another language
+  when the HARDCODE_PHRASES options is <B>not</B> used.
+  <P>
+  The easiest thing to do is shutdown and restart your OWL or TurboVision
+  application object in OwlMain()/Main().
+  <OL>
+  <LI> Create a boolean variable that will be used to test for the actual exit
+     of the application.
+
+  <LI> Put a while loop using this variable as the test around the application
+     init, run and done procedures.
+
+  <LI> Call the language_init function near the beginning of the program.
+     Call the language_end function near the end of the program.
+
+  <LI> Usually object registration for TurboVision is done in the
+     application.init procedure.
+     Move these registrations to a point before the exit_application loop
+     otherwise TurboVision will complain about stream registration when
+     init gets call more than once.
+
+  <LI> Provide menu options for changing the language.
+     This may be a user preferences dialog box or submenus etc...
+
+  <LI> Provide an application event handler point for each language
+       change language event I.e.:
+    <LISTING>
+    char *change_language = 0;
+    switch (event)
+    {
+      :
+      :
+      case cmLanguageDefault : change_language = getenv("LANGUAGE"); break;
+      case cmLanguageEnglish : change_language = "en"; break;
+      case cmLanguageFrench  : change_language = "fr"; break;
+      case cmLanguageSpanish : change_language = "es"; break;
+      case cmLanguageItalian : change_language = "it"; break;
+      :
+      :
+      case cmExit_MyApp :
+      // When you actually want to exit the program with cmQUIT,
+      // set exit_application to true:
+          exit_application = true;
+          message(this,evCommand,cmQUIT,0);
+       break;
+    };
+    if (change_language)
+    {  language_load(change_language,phrases_filename);
+       message(this,evCommand,cmQUIT,0);
+    };
+    </LISTING>
+
+
+  <LI> To use a phrase translation simply call translate() with the phrase_Id
+     Ie.
+     <LISTING>
+     cout << translate(L_Hello_world) << endl;
+     or
+     translate_to_stream(cout,L_Hello_world);
+     </LISTING>
+  </OL>
+<H2>
+Simple example
+</H2>
+Just before main, declare the pointer to the common_translator object.
+<P>
+I.e. The main module of the program MYAPP would look something like this:
+
+<LISTING>
+   
+   //  Global variables at the beginning of the program file.
+   filename_class phrases_filename; 
+   int exit_application = 0;                    
+    :
+    :
+
+   int main(int argc, char *argv[0])   // OwlMain for OWL
+   {
+
+     setup_common_translator(argv[0]);
+     <!--
+     RegisterObjects;
+     RegisterViews;
+     RegisterMenus;
+     RegisterDialogs;
+     RegisterApp;
+     RegisterHelpFile;
+     -->
+
+     the_application_class the_application;
+
+     while (!exit_application)
+     {
+        the_application.Init;
+        the_application.Run;
+        the_application.Done;
+     };
+
+     delete common_translator;
+   };
+</LISTING>

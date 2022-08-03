@@ -1,0 +1,273 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">CPlusPlusBuilder.Personality</Option>
+			<Option Name="ProjectType">CppStaticLibrary</Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{465E2020-3882-4605-86AD-EBAE7EDA331A}</Option>
+		</Option>
+	</PersonalityInfo>
+	<CPlusPlusBuilder.Personality>
+		<Source>
+			<Source Name="MainSource">cropsyst_scenario_V5_static.cpp</Source>
+		</Source>
+		<BCBPROJECT>
+      <project version="10.0">
+        <property category="build.config" name="active" value="0"/>
+        <property category="build.config" name="count" value="1"/>
+        <property category="build.config" name="excludedefaultforzero" value="0"/>
+        <property category="build.config.0" name="builddir" value="Debug"/>
+        <property category="build.config.0" name="key" value="Debug_Build"/>
+        <property category="build.config.0" name="name" value="Debug Build"/>
+        <property category="build.config.0" name="settings.win32b" value="default"/>
+        <property category="build.config.0" name="type" value="Toolset"/>
+        <property category="build.config.0" name="win32.win32b.builddir" value="Debug_Build"/>
+        <property category="build.config.1" name="key" value="Release_Build"/>
+        <property category="build.config.1" name="name" value="Release Build"/>
+        <property category="build.config.1" name="settings.win32b" value="default"/>
+        <property category="build.config.1" name="type" value="Toolset"/>
+        <property category="build.config.1" name="win32.win32b.builddir" value="Release_Build"/>
+        <property category="build.node" name="libraries" value="vcl.lib rtl.lib"/>
+        <property category="build.node" name="name" value="cropsyst_scenario_V5_static.lib"/>
+        <property category="build.node" name="packages" value="vcl;rtl;vclx;xmlrtl;vclactnband;inet;IntrawebDB_80_100;Intraweb_80_100;IndyCore;IndySystem;bcbofficexp;IndyProtocols;bcbie;RNAutoControls_basic_package"/>
+        <property category="build.node" name="sparelibs" value="rtl.lib vcl.lib"/>
+        <property category="build.node" name="use_packages" value="0"/>
+        <property category="build.platform" name="active" value="win32"/>
+        <property category="build.platform" name="win32.Debug_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.Release_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.default" value="win32b"/>
+        <property category="build.platform" name="win32.enabled" value="1"/>
+        <property category="build.platform" name="win32.win32b.enabled" value="1"/>
+        <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.1" value="_DEBUG"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.Od.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.k.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.r.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.v.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.vi.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.y.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$O.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.1" value="DEBUG"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.V.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.Gn.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\debug"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.v.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.z.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zi.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.1" value="NDEBUG"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.O2.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.k.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.r.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.vi.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.$D.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.$O.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.V.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\release"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.z.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zi.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zn.enabled" value="1"/>
+        <optionset name="all_configurations">
+          <property category="node" name="displayname" value="All Configurations"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.arg.1" value="CROPSYST"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.arg.2" value="CS_VERSION=5"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.1" value="..\..\..\..\..\temp\obj\cropsyst\cpp\bds\cropsyst_scenario_v5_static.csm"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.merge" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.Hc.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.1" value="..\..\crop"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.10" value="$(BDS)\include"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.11" value="$(BDS)\include\dinkumware"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.12" value="$(BDS)\include\vcl"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.13" value="c:\dev"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.2" value="\dev\CANMS\src"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.3" value="..\..\soil"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.4" value="..\..\..\..\common\soil"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.5" value="..\..\..\..\ued\convert"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.6" value="..\..\..\..\common\residue"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.7" value="..\..\..\..\common\biomatter"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.8" value="..\.."/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.9" value="C:\dev\cropsyst\cpp\scenario\BDS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.b.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.1" value="_RTLDLL"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.2" value="NO_STRICT"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tW.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWC.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWD.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWM.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.1" value="..\..\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.2" value="..\..\soil"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.3" value="..\..\..\..\common\soil"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.4" value="..\..\..\..\ued\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.5" value="..\..\..\..\common\residue"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.6" value="..\..\..\..\common\biomatter"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.7" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.8" value="C:\dev\cropsyst\cpp\scenario\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.1" value="..\..\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.2" value="..\..\soil"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.3" value="..\..\..\..\common\soil"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.4" value="..\..\..\..\ued\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.5" value="..\..\..\..\common\residue"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.6" value="..\..\..\..\common\biomatter"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.7" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.8" value="C:\dev\cropsyst\cpp\scenario\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.1" value="..\..\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.2" value="..\..\soil"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.3" value="..\..\..\..\common\soil"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.4" value="..\..\..\..\ued\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.5" value="..\..\..\..\common\residue"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.6" value="..\..\..\..\common\biomatter"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.7" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.8" value="C:\dev\cropsyst\cpp\scenario\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.1" value="..\..\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.10" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.11" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.2" value="..\..\soil"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.3" value="..\..\..\..\common\soil"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.4" value="..\..\..\..\ued\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.5" value="..\..\..\..\common\residue"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.6" value="..\..\..\..\common\biomatter"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.7" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.8" value="C:\dev\cropsyst\cpp\scenario\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.9" value="C:\Users\rnelson\Documents\Borland Studio Projects"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.1" value="..\..\crop"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.2" value="..\..\soil"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.3" value="..\..\..\..\common\soil"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.4" value="..\..\..\..\ued\convert"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.5" value="..\..\..\..\common\residue"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.6" value="..\..\..\..\common\biomatter"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.7" value="..\.."/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.8" value="C:\dev\cropsyst\cpp\scenario\BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Gi.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.2" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.3" value="$(BDS)\lib\psdk"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpd.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpe.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpp.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.aa.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.ap.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.dynamicrtl.enabled" value="1"/>
+          <property category="win32.*.win32b.tlib" name="option.P.arg" value="128"/>
+          <property category="win32.*.win32b.tlib" name="option.P.arg.merge" value="1"/>
+          <property category="win32.*.win32b.tlib" name="option.P.enabled" value="1"/>
+          <property category="win32.*.win32b.tlib" name="option.dynamicrtl.enabled" value="0"/>
+        </optionset>
+      </project>
+      <FILELIST>
+        <FILE FILENAME="cropsyst_scenario_V5_static.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cropsyst_scenario_V5_static" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_paths.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_paths" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_project_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_project_directory" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_operation_codes.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_operation_codes" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_operation.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_operation" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_scenario.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_scenario" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_vars.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_vars" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_till.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_till" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_vars_abbrv.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_vars_abbrv" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\cs_scenario_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_scenario_directory" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\mgmt_param.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="mgmt_param" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\mgmt_types.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="mgmt_types" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\seeding_param.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="seeding_param" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\sim_param.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sim_param" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\static_phrases.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="static_phrases" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\common\residue\residue_decomposition_param.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="residue_decomposition_param" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\ued\convert\ED_tabular_format.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="ED_tabular_format" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\..\ued\convert\ED_tabular_format.h"/>
+        <FILE FILENAME="..\..\..\..\common\soil\texture.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="texture" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\soil\soil_param.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="soil_param" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\soil\soil_param_with_STATSGO.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="soil_param_with_STATSGO" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\crop\growth_stages.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="growth_stages" FORMNAME="" DESIGNCLASS=""/>
+      </FILELIST>
+      <IDEOPTIONS>
+        <VersionInfo>
+          <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+          <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+          <VersionInfo Name="MajorVer">1</VersionInfo>
+          <VersionInfo Name="MinorVer">0</VersionInfo>
+          <VersionInfo Name="Release">0</VersionInfo>
+          <VersionInfo Name="Build">0</VersionInfo>
+          <VersionInfo Name="Debug">False</VersionInfo>
+          <VersionInfo Name="PreRelease">False</VersionInfo>
+          <VersionInfo Name="Special">False</VersionInfo>
+          <VersionInfo Name="Private">False</VersionInfo>
+          <VersionInfo Name="DLL">False</VersionInfo>
+          <VersionInfo Name="Locale">1033</VersionInfo>
+          <VersionInfo Name="CodePage">1252</VersionInfo>
+        </VersionInfo>
+        <VersionInfoKeys>
+          <VersionInfoKeys Name="CompanyName"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileDescription"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="InternalName"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
+          <VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductName"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="Comments"></VersionInfoKeys>
+        </VersionInfoKeys>
+        <Debugging>
+          <Debugging Name="DebugSourceDirs"></Debugging>
+        </Debugging>
+        <Parameters>
+          <Parameters Name="RunParams"></Parameters>
+          <Parameters Name="Launcher"></Parameters>
+          <Parameters Name="UseLauncher">False</Parameters>
+          <Parameters Name="DebugCWD"></Parameters>
+          <Parameters Name="HostApplication"></Parameters>
+          <Parameters Name="RemoteHost"></Parameters>
+          <Parameters Name="RemotePath"></Parameters>
+          <Parameters Name="RemoteParams"></Parameters>
+          <Parameters Name="RemoteLauncher"></Parameters>
+          <Parameters Name="UseRemoteLauncher">False</Parameters>
+          <Parameters Name="RemoteCWD"></Parameters>
+          <Parameters Name="RemoteDebug">False</Parameters>
+          <Parameters Name="Debug Symbols Search Path"></Parameters>
+          <Parameters Name="LoadAllSymbols">True</Parameters>
+          <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+        </Parameters>
+        <Linker>
+          <Linker Name="LibPrefix"></Linker>
+          <Linker Name="LibSuffix"></Linker>
+          <Linker Name="LibVersion"></Linker>
+        </Linker>
+      </IDEOPTIONS>
+    </BCBPROJECT>
+		<buildevents/>
+	</CPlusPlusBuilder.Personality>
+</BorlandProject>

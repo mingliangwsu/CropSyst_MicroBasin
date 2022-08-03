@@ -1,0 +1,997 @@
+#############################################################################
+# Makefile for building: libUED_static.a
+# Project:  ../UED_static/UED_static.pro
+# Template: lib
+#############################################################################
+
+MAKEFILE      = Makefile
+
+####### Compiler, tools and options
+
+#CC            = gcc
+#CXX           = g++
+DEFINES       = -DCS_VERSION=5
+CFLAGS        = $(TARGET_64_32_BIT) -pipe -O2 -fPIC  -W -D_REENTRANT $(DEFINES)
+CXXFLAGS      = $(TARGET_64_32_BIT) -pipe -O2 -fPIC -g -fpermissive -Wno-unused-parameter -Wno-reorder -W -D_REENTRANT $(DEFINES)
+INCPATH       = -I../UED_static -I. -I../../../../..
+
+DEL_FILE      = rm -f
+CHK_DIR_EXISTS= test -d
+MKDIR         = mkdir -p
+COPY          = cp -f
+COPY_FILE     = cp -f
+COPY_DIR      = cp -f -R
+INSTALL_FILE  = install -m 644 -p
+INSTALL_PROGRAM = install -m 755 -p
+INSTALL_DIR   = cp -f -R
+DEL_FILE      = rm -f
+SYMLINK       = ln -f -s
+DEL_DIR       = rmdir
+MOVE          = mv -f
+TAR           = tar -cf
+COMPRESS      = gzip -9f
+DISTNAME      = UED_static1.0.0
+
+AR            = ar cqs
+RANLIB        = 
+SED           = sed
+STRIP         = strip
+
+####### Output directory
+
+OBJECTS_DIR   = ./
+
+####### Files
+
+SOURCES       = ../../../codes.cpp \
+		../../../varrec.cpp \
+		../../../variable_format.cpp \
+		../../../varcodes.cpp \
+		../../../unitsrec.cpp \
+		../../../units_def.cpp \
+		../../../UED_tuple_datasrc.cpp \
+		../../../UED_fname.cpp \
+		../../../std_variables.cpp \
+		../../../timeqry.cpp \
+		../../../std_codes.cpp \
+		../../../record.cpp \
+		../../../rec_io.cpp \
+		../../../index.cpp \
+		../../../datasetrec_creation.cpp \
+		../../../datasetrec.cpp \
+		../../../database_file.cpp \
+		../../../locrec.cpp 
+OBJECTS       = codes.o \
+		varrec.o \
+		variable_format.o \
+		varcodes.o \
+		unitsrec.o \
+		units_def.o \
+		UED_tuple_datasrc.o \
+		UED_fname.o \
+		std_variables.o \
+		timeqry.o \
+		std_codes.o \
+		record.o \
+		rec_io.o \
+		index.o \
+		datasetrec_creation.o \
+		datasetrec.o \
+		database_file.o \
+		locrec.o
+TARGET        = libUED_static.a
+
+
+first: all
+####### Implicit rules
+
+.SUFFIXES: .o .c .cpp .cc .cxx .C
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o "$@" "$<"
+
+####### Build rules
+
+staticlib: $(TARGET)
+
+$(TARGET):  $(OBJECTS) $(OBJCOMP) 
+	-$(DEL_FILE) $(TARGET)
+	$(AR) $(TARGET) $(OBJECTS)
+
+
+
+all: Makefile $(TARGET)
+
+clean: compiler_clean 
+	-$(DEL_FILE) $(OBJECTS)
+	-$(DEL_FILE) *~ core *.core
+
+
+distclean: clean 
+	-$(DEL_FILE) $(TARGET) 
+
+
+####### Sub-libraries
+
+mocclean: compiler_moc_header_clean compiler_moc_source_clean
+
+mocables: compiler_moc_header_make_all compiler_moc_source_make_all
+
+check: first
+
+compiler_rcc_make_all:
+compiler_rcc_clean:
+compiler_moc_header_make_all:
+compiler_moc_header_clean:
+compiler_moc_source_make_all:
+compiler_moc_source_clean:
+compiler_yacc_decl_make_all:
+compiler_yacc_decl_clean:
+compiler_yacc_impl_make_all:
+compiler_yacc_impl_clean:
+compiler_lex_make_all:
+compiler_lex_clean:
+compiler_clean: 
+
+####### Compile
+
+codes.o: ../../../codes.cpp ../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o codes.o ../../../codes.cpp
+
+varrec.o: ../../../varrec.cpp ../../../UED.h \
+		../../../UED_types.h \
+		../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../varrec.h \
+		../../../variable_format.h \
+		../../../../../corn/container/enumlist.h \
+		../../../../../corn/container/bilist.h \
+		../../../../../corn/container/unilist.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../varcodes.h \
+		../../../../../corn/parameters/parameter.h \
+		../../../../../corn/measure/units_enum.h \
+		../../../../../corn/parameters/number_keyed.h \
+		../../../../../corn/chronometry/date_32.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date.hh \
+		../../../../../corn/chronometry/time_I.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/data_type_enum.h \
+		../../../record.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../UED_options.h \
+		../../../../../corn/format/binary/binary_file_interface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o varrec.o ../../../varrec.cpp
+
+variable_format.o: ../../../variable_format.cpp ../../../../../corn/string/strconv.hpp \
+		../../../../../corn/string/strconv.h \
+		../../../../../corn/primitive.h \
+		../../../variable_format.h \
+		../../../../../corn/container/enumlist.h \
+		../../../../../corn/container/bilist.h \
+		../../../../../corn/container/unilist.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/const.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../varcodes.h \
+		../../../UED_types.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../../../corn/parameters/parameter.h \
+		../../../../../corn/measure/units_enum.h \
+		../../../../../corn/parameters/number_keyed.h \
+		../../../../../corn/chronometry/date_32.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date.hh \
+		../../../../../corn/chronometry/time_I.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/data_type_enum.h \
+		../../../std_codes.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o variable_format.o ../../../variable_format.cpp
+
+varcodes.o: ../../../varcodes.cpp ../../../varcodes.h \
+		../../../../../corn/const.h \
+		../../../UED_types.h \
+		../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o varcodes.o ../../../varcodes.cpp
+
+unitsrec.o: ../../../unitsrec.cpp ../../../unitsrec.h \
+		../../../record.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/primitive.h \
+		../../../../../corn/const.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../UED_types.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../UED_options.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../units_def.h \
+		../../../../../corn/container/unilist.h \
+		../../../UED.h \
+		../../../../../corn/format/binary/binary_file_interface.h \
+		../../../../../corn/data_type_enum.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o unitsrec.o ../../../unitsrec.cpp
+
+units_def.o: ../../../units_def.cpp ../../../../../corn/math/moremath.h \
+		../../../../../corn/primitive.h \
+		../../../units_def.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/container/unilist.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/const.h \
+		../../../UED_types.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o units_def.o ../../../units_def.cpp
+
+UED_tuple_datasrc.o: ../../../UED_tuple_datasrc.cpp ../../../UED_tuple_datasrc.h \
+		../../../database_file.h \
+		../../../UED.h \
+		../../../UED_types.h \
+		../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../../../corn/format/binary/binary_record_file.h \
+		../../../../../corn/container/bilist.h \
+		../../../../../corn/container/unilist.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/format/binary/binary_file_interface.h \
+		../../../../../corn/data_type_enum.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/measure/unitconv.h \
+		../../../units_def.h \
+		../../../index.h \
+		../../../../../corn/container/binary_tree.h \
+		../../../UED_options.h \
+		../../../datasetrec.h \
+		../../../../../corn/dynamic_array/dynamic_array_T.h \
+		../../../../../corn/math/moremath.h \
+		../../../../../corn/math/compare.hpp \
+		../../../../../corn/std/std_iomanip.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../record.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../datasetrec_creation.h \
+		../../../../../common/CS_parameter.h \
+		../../../../../common/physics/property.h \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/data_source/datasrc.h \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/data_source/datarec.h \
+		../../../../../corn/data_source/vv_entry.h \
+		../../../../../corn/container/association.h \
+		../../../../../corn/parameters/parameter.h \
+		../../../../../corn/measure/units_enum.h \
+		../../../../../corn/parameters/number_keyed.h \
+		../../../../../corn/chronometry/date_32.h \
+		../../../../../corn/chronometry/date.hh \
+		../../../../../corn/chronometry/time_I.h \
+		../../../../../corn/container/enumlist.h \
+		../../../../../corn/OS/directory_entry_name.h \
+		../../../../../corn/string/strconv.hpp \
+		../../../../../corn/string/strconv.h \
+		../../../../../corn/OS/file_system_types.h \
+		../../../timeqry.h \
+		../../../variable_format.h \
+		../../../varcodes.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o UED_tuple_datasrc.o ../../../UED_tuple_datasrc.cpp
+
+UED_fname.o: ../../../UED_fname.cpp ../../../UED_fname.h \
+		../../../../../corn/OS/directory_entry_name_concrete.h \
+		../../../../../corn/const.h \
+		../../../../../corn/OS/directory_entry_name_abstract.h \
+		../../../../../corn/OS/directory_entry_name.h \
+		../../../../../corn/primitive.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/string/strconv.hpp \
+		../../../../../corn/string/strconv.h \
+		../../../../../corn/OS/file_system_types.h \
+		../../../../../corn/OS/filtered_filename.h \
+		../../../../../corn/OS/file_type_description.h \
+		../../../../../corn/container/association.h \
+		../../../../../corn/container/bilist.h \
+		../../../../../corn/container/unilist.h \
+		../../../../../corn/container/container.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o UED_fname.o ../../../UED_fname.cpp
+
+std_variables.o: ../../../std_variables.cpp ../../../std_variables.h \
+		../../../std_codes.h \
+		../../../UED_types.h \
+		../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../varcodes.h \
+		../../../variable_format.h \
+		../../../../../corn/container/enumlist.h \
+		../../../../../corn/container/bilist.h \
+		../../../../../corn/container/unilist.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/parameters/parameter.h \
+		../../../../../corn/measure/units_enum.h \
+		../../../../../corn/parameters/number_keyed.h \
+		../../../../../corn/chronometry/date_32.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date.hh \
+		../../../../../corn/chronometry/time_I.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/data_type_enum.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o std_variables.o ../../../std_variables.cpp
+
+timeqry.o: ../../../timeqry.cpp ../../../../../corn/chronometry/date_32.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/primitive.h \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../../../corn/const.h \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date.hh \
+		../../../timeqry.h \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../UED_options.h \
+		../../../UED_types.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o timeqry.o ../../../timeqry.cpp
+
+std_codes.o: ../../../std_codes.cpp ../../../../../corn/math/compare.hpp \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/primitive.h \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../std_codes.h \
+		../../../UED_types.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../varcodes.h \
+		../../../../../corn/string/strconv.hpp \
+		../../../../../corn/string/strconv.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o std_codes.o ../../../std_codes.cpp
+
+record.o: ../../../record.cpp ../../../record.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/primitive.h \
+		../../../../../corn/const.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../UED_types.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../UED_options.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/format/binary/binary_file_interface.h \
+		../../../../../corn/data_type_enum.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o record.o ../../../record.cpp
+
+rec_io.o: ../../../rec_io.cpp ../../../marker.h \
+		../../../record.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/primitive.h \
+		../../../../../corn/const.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../UED_types.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../UED_options.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../controls.h \
+		../../../../../corn/format/binary/binary_file_interface.h \
+		../../../../../corn/data_type_enum.h \
+		../../../../../corn/string/strconv.hpp \
+		../../../../../corn/string/strconv.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o rec_io.o ../../../rec_io.cpp
+
+index.o: ../../../index.cpp ../../../index.h \
+		../../../../../corn/container/binary_tree.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/primitive.h \
+		../../../../../corn/const.h \
+		../../../UED_options.h \
+		../../../UED_types.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../datasetrec.h \
+		../../../../../corn/dynamic_array/dynamic_array_T.h \
+		../../../../../corn/math/moremath.h \
+		../../../../../corn/math/compare.hpp \
+		../../../../../corn/std/std_iomanip.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../record.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../datasetrec_creation.h \
+		../../../../../common/CS_parameter.h \
+		../../../../../common/physics/property.h \
+		../../../database_file.h \
+		../../../UED.h \
+		../../../../../corn/format/binary/binary_record_file.h \
+		../../../../../corn/container/bilist.h \
+		../../../../../corn/container/unilist.h \
+		../../../../../corn/format/binary/binary_file_interface.h \
+		../../../../../corn/data_type_enum.h \
+		../../../../../corn/measure/unitconv.h \
+		../../../units_def.h \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../varcodes.h \
+		../../../timeqry.h \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_const.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o index.o ../../../index.cpp
+
+datasetrec_creation.o: ../../../datasetrec_creation.cpp ../../../datasetrec_creation.h \
+		../../../UED_types.h \
+		../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../record.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../UED_options.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasetrec_creation.o ../../../datasetrec_creation.cpp
+
+datasetrec.o: ../../../datasetrec.cpp ../../../datasetrec_creation.h \
+		../../../UED_types.h \
+		../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../record.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../UED_options.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../datasetrec.h \
+		../../../../../corn/dynamic_array/dynamic_array_T.h \
+		../../../../../corn/math/moremath.h \
+		../../../../../corn/math/compare.hpp \
+		../../../../../corn/std/std_iomanip.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../../../common/CS_parameter.h \
+		../../../../../common/physics/property.h \
+		../../../varcodes.h \
+		../../../../../corn/chronometry/date_32.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date.hh \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/format/binary/binary_file_interface.h \
+		../../../../../corn/data_type_enum.h \
+		../../../../../corn/float16.h \
+		../../../../../corn/string/strconv.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasetrec.o ../../../datasetrec.cpp
+
+database_file.o: ../../../database_file.cpp ../../../database_file.h \
+		../../../UED.h \
+		../../../UED_types.h \
+		../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../../../corn/format/binary/binary_record_file.h \
+		../../../../../corn/container/bilist.h \
+		../../../../../corn/container/unilist.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/format/binary/binary_file_interface.h \
+		../../../../../corn/data_type_enum.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/measure/unitconv.h \
+		../../../units_def.h \
+		../../../index.h \
+		../../../../../corn/container/binary_tree.h \
+		../../../UED_options.h \
+		../../../datasetrec.h \
+		../../../../../corn/dynamic_array/dynamic_array_T.h \
+		../../../../../corn/math/moremath.h \
+		../../../../../corn/math/compare.hpp \
+		../../../../../corn/std/std_iomanip.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../record.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../datasetrec_creation.h \
+		../../../../../common/CS_parameter.h \
+		../../../../../common/physics/property.h \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/chronometry/date_32.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date.hh \
+		../../../../../corn/measure/measures.h \
+		../../../../../corn/string/strconv.h \
+		../../../controls.h \
+		../../../varrec.h \
+		../../../variable_format.h \
+		../../../../../corn/container/enumlist.h \
+		../../../varcodes.h \
+		../../../../../corn/parameters/parameter.h \
+		../../../../../corn/measure/units_enum.h \
+		../../../../../corn/parameters/number_keyed.h \
+		../../../../../corn/chronometry/time_I.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../unitsrec.h \
+		../../../marker.h \
+		../../../locrec.h \
+		../../../../../common/geodesy/geolocation.h \
+		../../../../../common/geodesy/geocoordinate.h \
+		../../../timeqry.h \
+		../../../../../corn/container/text_list.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o database_file.o ../../../database_file.cpp
+
+locrec.o: ../../../locrec.cpp ../../../locrec.h \
+		../../../datasetrec.h \
+		../../../UED_types.h \
+		../../../../../corn/primitive.h \
+		../../../codes.h \
+		../../../../../corn/validate/validtyp.h \
+		../../../../../corn/values_MSC.h \
+		../../../../../corn/measure/units.h \
+		../../../../../corn/metrology/units_code.hpp \
+		../../../../../corn/metrology/units_code.h \
+		../../../../../corn/metrology/units_code_SI.h \
+		../../../../../corn/metrology/units_code_common.h \
+		../../../../../corn/metrology/units_code_temporal.h \
+		../../../../../corn/metrology/units_code_CU.h \
+		../../../../../corn/metrology/units_measure.h \
+		../../../../../corn/metrology/units_clad.h \
+		../../../../../corn/metrology/units_symbology.h \
+		../../../../../corn/metrology/timestep.h \
+		../../../../../corn/measure/units_deprecated.h \
+		../../../../../corn/quality.hpp \
+		../../../../../corn/labeled_enum.h \
+		../../../../../corn/const.h \
+		../../../../../corn/quality.h \
+		../../../../../corn/math/compare.h \
+		../../../../../corn/dynamic_array/dynamic_array_T.h \
+		../../../../../corn/math/moremath.h \
+		../../../../../corn/math/compare.hpp \
+		../../../../../corn/std/std_iomanip.h \
+		../../../../../corn/std/std_check.h \
+		../../../../../corn/std/std_iostream.h \
+		../../../record.h \
+		../../../../../corn/format/binary/binary_record.h \
+		../../../../../corn/container/container.h \
+		../../../../../corn/container/item.h \
+		../../../../../corn/format/binary/binary_types.h \
+		../../../UED_options.h \
+		../../../../../corn/chronometry/time_types.hpp \
+		../../../../../corn/chronometry/time_types.hh \
+		../../../datasetrec_creation.h \
+		../../../../../common/CS_parameter.h \
+		../../../../../common/physics/property.h \
+		../../../../../common/geodesy/geolocation.h \
+		../../../../../common/geodesy/geocoordinate.h \
+		../../../../../corn/parameters/parameter.h \
+		../../../../../corn/measure/units_enum.h \
+		../../../../../corn/parameters/number_keyed.h \
+		../../../../../corn/chronometry/date_32.h \
+		../../../../../corn/chronometry/date_const.hpp \
+		../../../../../corn/chronometry/date_types.hpp \
+		../../../../../corn/chronometry/date_types.hh \
+		../../../../../corn/chronometry/date_const.h \
+		../../../../../corn/chronometry/temporal.h \
+		../../../../../corn/chronometry/date_time_I.h \
+		../../../../../corn/chronometry/date_format.h \
+		../../../../../corn/chronometry/date.hh \
+		../../../../../corn/chronometry/time_I.h \
+		../../../../../corn/chronometry/time_format.h \
+		../../../../../corn/chronometry/date_time_64.h \
+		../../../../../corn/data_type_enum.h \
+		../../../../../corn/measure/measures.h \
+		../../../UED.h \
+		../../../../../corn/format/binary/binary_file_interface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o locrec.o ../../../locrec.cpp
+
+####### Install
+
+install_target: first FORCE
+	@test -d $(INSTALL_ROOT)/usr/lib || mkdir -p $(INSTALL_ROOT)/usr/lib
+	-$(INSTALL_FILE) $(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+
+uninstall_target: FORCE
+	-$(DEL_FILE) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+	-$(DEL_DIR) $(INSTALL_ROOT)/usr/lib/ 
+
+
+install: install_target  FORCE
+
+uninstall: uninstall_target  FORCE
+
+FORCE:
+

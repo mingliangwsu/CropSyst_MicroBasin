@@ -1,0 +1,246 @@
+#include "CS_UED_recorder.h"
+#include "CS_suite/observation/CS_examination.h"
+#include "UED/library/database_file.h"
+#include "UED/library/varcodes.h"
+#include "UED/library/varrec.h"
+#include "corn/OS/file_system_engine.h"
+namespace CS
+{
+//______________________________________________________________________________
+Recorder_abstract::Recorder_abstract()
+: examination(provide_examination_global())
+{
+
+}
+//_2017-03-19___________________________________________________________________
+const char *Recorder_abstract::compose_conventional_name
+(std::string            &composed
+,const std::string      &ontology
+,nat8                    level_or_period
+,const std::string      &period_name // optional may be empty
+,bool                    stats
+,const CORN::Units_clad &timestep)                                         const
+{
+   composed += ontology;
+   // Append period indicator
+   composed+="@";
+   if (period_name.empty())
+         composed+= inspection_level_labels[level_or_period];
+         // inspection_level_codes
+   else  composed+=(period_name);
+   composed+="$"; // tally_store is always stats
+   // conceptual may want to output tally timestep
+   std::string timestep_dscr_unused; //unused
+   // std::string timestep_abbr;
+   timestep.compose_description_str(timestep_dscr_unused, composed);
+   //composed+=timestep_abbr;
+   return composed.c_str();
+}
+//______________________________________________________________________________
+bool UED_Recorder::UED_File_association::append_variable_definition
+(UED::Variable_code  var_code
+,CORN::Units_code    units_code
+,const std::string  &ontology)
+{  nat32 unused_array_index=0;
+   if (!committed_variables.is_in_array(var_code, unused_array_index))
+   {
+      UED::Variable_definition_format_ontological_record *var_dev_rec
+         = new UED::Variable_definition_format_ontological_record
+            (var_code,units_code,ontology.c_str());
+      UED_file->append_record(var_dev_rec,true); // UED_file should already be provided
+      committed_variables.append(var_code);
+   }
+   return true;
+}
+//_2016-06-19__________________________________________________________________
+UED_Recorder::UED_Recorder(const CORN::OS::Directory_name &output_directory_)
+: output_directory(output_directory_)
+{}
+//_2016-06-16___________________________________________________________________
+bool UED_Recorder::end_day()                                       modification_
+{
+   //170319 now member reference CS::Examination &examination = CS::provide_examination_global();              //161202
+   if (examination.inspections_completed_periodic.count())
+   {  commit_inspections(examination.inspections_completed_periodic);
+      /*160620 currently keeping UED file open in a single list
+      UED_dataset_files.delete_all(); // this should close the UED file
+      */
+   }
+   return true;
+}
+//_2016-06-16___________________________________________________________________
+bool UED_Recorder::end_year()                                      modification_
+{
+   //170319 now member reference    CS::Examination &examination = CS::provide_examination_global();              //161202
+   if (examination.inspections_completed_annual.count())
+   {  commit_inspections(examination.inspections_completed_annual);
+      /*160620 currently keeping UED file open in a single list
+      UED_dataset_files.delete_all(); // this should close the UED file
+      */
+   }
+   return true;
+}
+//_2016-06-16___________________________________________________________________
+bool UED_Recorder::stop()                                          modification_
+{
+   // All inspections can now be written to UED file
+   // The inspections_completed should at this point have been processed by end_day
+   // but just incase we will put them back on to the inspections list for final processing.
+   //170319 now member reference    CS::Examination &examination = CS::provide_examination_global();              //161202
+   commit_inspections(examination.inspections);
+   commit_tallies(examination.inspection_tallies);
+   UED_files.delete_all();
+   return true;
+}
+//_2016-06-16___________________________________________________________________
+bool UED_Recorder::commit_inspections(CORN::Container &inspections)
+{
+   //170319 now member reference    CS::Examination &examination = CS::provide_examination_global();              //161202
+   FOR_EACH_IN(inspection,Inspection,inspections,each_inspection)
+   {
+      if (inspection->records_dataset()) // 170317 (inspection->has_dataset())
+      {  // inspection requested to record the data set
+         UED_File_association &UED_file_assocation = provide_inspection_UED_file_association(*inspection);
+         UED::Database_file &UED_file = *UED_file_assocation.UED_file;
+         UED::Data_record_creation_layout creation_layout
+            (UED::Record_type_distinguisher_interface::UED_data_set_date_var_units,inspection->inspector.get_variable_code()
+            ,inspection->inspector.value_units_code.get(),UT_day,UT_date,simulated_quality);
+         CORN::Dynamic_array<float32> *tally_as_float32 = inspection->mod_tally_as_float32();
+         if (tally_as_float32)
+         {  // Currently only adding float32 data records to CropSyst UED files
+            UED::Binary_data_record_cowl *tally_record = new UED::Binary_data_record_cowl
+               (*tally_as_float32,creation_layout,inspection->initiation_date,false); // ref_phenology().get_initiation_date(NGS_RESTART).get_datetime64()
+            UED_file.append_record(tally_record,true); // actually submit_record
+             UED_file_assocation.append_variable_definition
+               (inspection->inspector.variable_code_clad.get()
+               ,inspection->inspector.value_units_code.get()
+               ,inspection->inspector.provide_ontology_qualified('/'));
+         }
+         // Actually I just want to delete the inspection, but need to check deletions
+      }
+      examination.deletable.take(each_inspection->detach_current());
+   } FOR_EACH_END(each_inspection)
+   return true;
+}
+//______________________________________________________________________________
+bool UED_Recorder::commit_tallies(CORN::Container &inspection_tallies)
+{
+   FOR_EACH_IN(tally_store ,Examination::Inspection_tally_store,inspection_tallies,each_tally)
+   {
+      UED_File_association &UED_file_assocation = provide_tally_UED_file_association(*tally_store);
+      UED::Database_file &UED_file = *UED_file_assocation.UED_file;
+      for (nat8 stat = count_statistic; stat < CORN::statistic_COUNT; stat++)
+      {
+        if (tally_store->stat_tally[stat])
+        {
+         // augment variable code to include statistic
+         UED::Variable_code_clad variable_code_with_stat(tally_store->inspector.get_variable_code() ,stat,true);
+         UED::Data_record_creation_layout creation_layout
+            (tally_store->level_or_period == annual_inspection
+             ? UED::Record_type_distinguisher_interface::UED_data_set_year_var_units
+             : UED::Record_type_distinguisher_interface::UED_data_set_date_var_units
+            ,variable_code_with_stat.get()
+            ,tally_store->inspector.value_units_code.get()
+            ,(tally_store->level_or_period == annual_inspection) ? UT_year : UT_arbitrary_date
+            ,(tally_store->level_or_period == annual_inspection) ? UT_year : UT_date
+            ,simulated_quality); // Quality is actually calculated from simulated_quality
+         CORN::Dynamic_array<float32> *store_as_float32 =
+                dynamic_cast<CORN::Dynamic_array<float32> *>(&tally_store->stat_tally[stat]->mod_dataset());
+         UED::Binary_data_record_cowl *store_record = new UED::Binary_data_record_cowl
+            (*store_as_float32,creation_layout,tally_store->inception_date,false);
+         UED_file.append_record(store_record,true); // actually submit_record
+         std::string ontology_with_stat(tally_store->inspector.provide_ontology_qualified('/'));
+         ontology_with_stat.append(".");
+         ontology_with_stat.append(CORN::statistic_label_table[stat]);
+             UED_file_assocation.append_variable_definition
+               (variable_code_with_stat.get()
+               ,tally_store->inspector.value_units_code.get()
+               ,ontology_with_stat);
+        } // if stat_tally
+      }
+   } FOR_EACH_END(each_tally)
+   return true;
+}
+//______________________________________________________________________________
+UED_Recorder::UED_File_association &UED_Recorder::provide_UED_file_association
+(CORN::OS::File_name_concrete *target_UED_filename_given)             provision_
+{  UED_Recorder::UED_File_association *provided
+      = dynamic_cast<UED_File_association *>
+         (UED_files.find_wstring(*target_UED_filename_given));
+   if (!provided)
+   {
+      CORN::OS::file_system_engine.create_directory
+         (target_UED_filename_given->get_parent_directory_name_qualified());
+      UED::Database_file *provided_UED_file = new UED::Database_file
+         (target_UED_filename_given->c_str(),std::ios::app,false);
+      provided = new UED_File_association
+         (target_UED_filename_given,provided_UED_file);
+      UED_files.append(provided);
+   } else
+      delete target_UED_filename_given;
+   return *provided;
+}
+//_2016-06-16___________________________________________________________________
+UED_Recorder::UED_File_association &UED_Recorder::provide_inspection_UED_file_association
+(const Inspection &inspection)
+{
+   CORN::Text_list context_qualified_instance;
+   inspection.inspector.context.list_instance_path(context_qualified_instance);
+   std::string context_name_qualified;
+   context_qualified_instance.string_items
+      (context_name_qualified,DEFAULT_DIRECTORY_SEPARATORa_chr);
+   CORN::OS::Directory_name_concrete target_directory
+      (output_directory,context_name_qualified);
+
+   std::string UED_name;
+   compose_conventional_name
+      (UED_name
+      ,inspection.inspector.context.ontology_domain
+      ,inspection.level_or_period
+      ,inspection.period_name // optional may be empty
+      ,!inspection.is_tally_statistic_applicable(STAT_value_bit)
+      ,inspection.timestep);
+
+   CORN::OS::File_name_concrete *target_UED_filename = new
+      CORN::OS::File_name_concrete(target_directory,UED_name,L"UED");
+   return provide_UED_file_association(target_UED_filename);
+}
+//_2016-06-17___________________________________________________________________
+UED_Recorder::UED_File_association &UED_Recorder::provide_tally_UED_file_association
+(const Examination::Inspection_tally_store &tally_store)
+{
+   CORN::Text_list context_qualified_instance;
+   tally_store.inspector.context.list_instance_path(context_qualified_instance);
+   std::string context_name_qualified;
+   context_qualified_instance.string_items
+      (context_name_qualified,DEFAULT_DIRECTORY_SEPARATORa_chr);
+   CORN::OS::Directory_name_concrete target_directory
+      (output_directory,context_name_qualified);
+   std::string UED_name;
+   compose_conventional_name
+      (UED_name
+      ,tally_store.inspector.context.ontology_domain
+      ,tally_store.level_or_period
+      ,tally_store.period_name
+      ,true  // tally_store is always stats
+      ,tally_store.timestep);
+
+   CORN::OS::File_name_concrete *target_UED_filename = new
+      CORN::OS::File_name_concrete(target_directory,UED_name,L"UED");
+   return provide_UED_file_association(target_UED_filename);
+}
+//_2016-06-16___________________________________________________________________
+UED_Recorder *UED_recorder_global = 0;
+//_2016-06-16___________________________________________________________________
+UED_Recorder &provide_global_UED_recorder(const CORN::OS::Directory_name &output_directory)
+{  if (!UED_recorder_global)
+      UED_recorder_global= new UED_Recorder(output_directory);
+   return *UED_recorder_global;
+}
+//_2016-06-16___________________________________________________________________
+UED_Recorder &ref_global_UED_recorder()
+{  return *UED_recorder_global; }
+//_2016-06-16___________________________________________________________________
+
+
+} // namespace CS

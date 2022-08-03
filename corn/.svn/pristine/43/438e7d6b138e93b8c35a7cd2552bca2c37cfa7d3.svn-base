@@ -1,0 +1,32 @@
+#ifndef HTML_FORM_REQUEST_H
+#define HTML_FORM_REQUEST_H
+
+/* This class parses submitted HTLM form data which can be get() to a data record.
+
+*/
+
+#include <corn/format/datasrc.h>
+#include <corn/string/cstrngem.h>
+
+namespace HTML
+{
+/*_______*/ class Common_form_IO; // for friendship
+
+/*_______*/ class HTML_form_request
+/*_______*/ : public CORN::Data_source
+/*_______*/ {  friend class Common_form_IO;
+/*_______*/    CORN::Ustring content;
+/*_______*/ public:
+/*_______*/    HTML_form_request();
+/*_______*/    virtual bool get(CORN::Data_record &data_rec);
+/*_______*/    virtual bool set(CORN::Data_record &data_rec);
+/*_______*/    virtual const char *label_cstr(char *buffer) const;
+/*_______*/    virtual bool validate (CORN::Ustring &errors) const = 0;
+/*050705_*/ protected:
+/*050705_*/    virtual bool set_data(Data_record &data_rec) { return true; /*NYI*/} ;
+
+/*_______*/  };
+}; // namespace HTML
+
+#endif
+

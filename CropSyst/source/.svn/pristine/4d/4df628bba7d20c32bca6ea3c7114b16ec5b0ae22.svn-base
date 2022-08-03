@@ -1,0 +1,216 @@
+#ifndef yieldH
+#define yieldH
+#include "corn/const.h"
+#include "corn/math/statistical/stats.h"
+#include "crop/extreme_temperature_response.h"
+#include "crop/phenology_interface.h"
+#include "weather/parameter/WP_temperature.h"
+namespace CropSyst {
+class Phenology_interface;
+//______________________________________________________________________________
+interface_ Yield
+{public:
+   virtual float64 calculate(float64 canopy_biomass_kg_m2)          calculation_ = 0;
+   //Qt compiler complains inline Yield() {}
+   virtual bool know_stress(float64 water_and_or_nitrogen_stress)   assignation_ { return true; }
+   virtual bool know_biomass_at_maturity(float64 _maturity_canopy_biomass_kg_m2) assignation_ { return true; }
+   virtual bool know_biomass_at_filling (float64 _maturity_canopy_biomass_kg_m2) assignation_ { return true; }
+   virtual float64 get_reported_harvest_index()                            const = 0;
+   virtual bool reset()                                           initialization_ { return true; }
+};
+//______________________________________________________________________________
+class Yield_complete
+: public implements_ Yield
+{
+ public:
+   inline Yield_complete()
+      {}
+   inline virtual float64 calculate(float64 canopy_biomass_kg_m2)   calculation_
+      {
+
+         // Currently this is doing the same thing as Yield_canopy
+         // I need to provide root biomass
+         float64 actual_yield = canopy_biomass_kg_m2
+            // NYI + root_biomass
+            ;
+         return actual_yield;
+      }
+   inline virtual float64 get_reported_harvest_index()                     const { return 1.0; }
+      // everything is harvested
+};
+//_2015-09-29___________________________________________________________________
+class Yield_unadjusted
+: public implements_ Yield
+{
+   float_P param_harvest_ndx_unstressed;
+ public:
+   inline Yield_unadjusted(float_P _param_harvest_ndx_unstressed)
+      :
+      //151207 Qt compiler complains Yield()       ,
+      param_harvest_ndx_unstressed(_param_harvest_ndx_unstressed)
+      {}
+   inline virtual float64 calculate(float64 canopy_biomass_kg_m2)   calculation_
+      {
+            // reported_harvest_index = param_harvest_ndx_unstressed;
+         float64 actual_yield = canopy_biomass_kg_m2 * param_harvest_ndx_unstressed;
+         return actual_yield;
+      }
+   inline virtual float64 get_reported_harvest_index()                     const { return param_harvest_ndx_unstressed; }
+};
+//______________________________________________________________________________
+class Yield_abstract
+: public implements_ Yield
+{
+ public:
+   float_P param_harvest_ndx_unstressed;
+   bool  param_apply_adjustment_to_unstressed_harvest_index;
+   const Phenology_interface  &phenology;  // reference to crop
+   contribute_ float64 reported_harvest_index;
+ public:
+   inline Yield_abstract
+      (float_P _param_harvest_ndx_unstressed
+      ,bool    _param_apply_adjustment_to_unstressed_harvest_index
+      ,const Phenology_interface  &_phenology)
+      :
+      //151207 Qt compile complains Yield() ,
+      param_harvest_ndx_unstressed   (_param_harvest_ndx_unstressed)
+      , param_apply_adjustment_to_unstressed_harvest_index
+         (_param_apply_adjustment_to_unstressed_harvest_index)
+
+      , phenology                      (_phenology)
+      , reported_harvest_index         (0.0)
+      //, canopy_biomass_kg_m2           (_canopy_biomass_kg_m2)
+      {}
+   inline virtual float64 get_reported_harvest_index()                     const { return reported_harvest_index; }
+
+ protected:
+   float64 sensitivity_effect
+      (float64 mean_period_stress
+      ,float64 harvest_ndx_period_sensitivity_index)                calculation_;
+   inline virtual bool know_biomass_at_filling(float64 _filling_canopy_biomass_kg_m2) assignation_
+      { return false; }; // do nothing, used only by Yield_grain
+   inline virtual bool know_biomass_at_maturity(float64 _maturity_canopy_biomass_kg_m2) assignation_
+      { return false; }; // do nothing, used only by Yield_grain
+};
+//______________________________________________________________________________
+class Yield_simple_harvest_index
+: public extends_ Yield_abstract
+{
+   float_P param_growth_sensitivity;
+   CORN::Statistical_running_tally  stress_since_emergence_stats;                //010726
+ public:
+   inline Yield_simple_harvest_index
+      (float_P _param_harvest_ndx_unstressed
+      ,bool    _param_apply_adjustment_to_unstressed_harvest_index
+      ,float_P _param_growth_sensitivity
+      ,const Phenology_interface  &_phenology)
+      : Yield_abstract
+         (_param_harvest_ndx_unstressed
+         ,_param_apply_adjustment_to_unstressed_harvest_index
+         ,_phenology)
+      , param_growth_sensitivity(_param_growth_sensitivity)
+      {}
+   virtual float64 calculate(float64 canopy_biomass_kg_m2)          calculation_;
+   inline virtual bool reset()                                    initialization_{ return stress_since_emergence_stats.reset(); }
+   inline virtual bool know_stress(float64 water_and_or_nitrogen_stress) assignation_
+      { if (phenology.has_emerged())
+         stress_since_emergence_stats.append((float_P)water_and_or_nitrogen_stress); return true; }
+ private:
+   float64 harvest_index_1_stress_period
+      (float64 harvest_ndx_unstressed
+      ,float64 mean_period_stress
+      ,float64 harvest_ndx_period_sensitivity)                      calculation_;
+};
+//______________________________________________________________________________
+class Yield_tuber
+: public extends_ Yield_abstract
+{
+   float_P param_tuber_init_sensitivity;
+   float_P param_tuber_growth_sensitivity;
+   float_P param_tuber_critical_temperature;
+   CORN::Statistical_running_index  tuber_init_temperature_stress_stats;         //010726
+   CORN::Statistical_running_index  tuber_growth_temperature_stress_stats;       //010726
+   const CS::Temperature            &soil_temperature;
+ public:
+   inline Yield_tuber
+      (float_P _param_harvest_ndx_unstressed
+      ,bool    _param_apply_adjustment_to_unstressed_harvest_index
+      ,float_P _param_tuber_init_sensitivity
+      ,float_P _param_tuber_growth_sensitivity
+      ,float_P _param_tuber_critical_temperature
+      ,const Phenology_interface  &_phenology
+      ,const CS::Temperature      &_soil_temperature
+      )
+      : Yield_abstract
+         (_param_harvest_ndx_unstressed
+         ,_param_apply_adjustment_to_unstressed_harvest_index
+         ,_phenology)
+      , param_tuber_init_sensitivity      (_param_tuber_init_sensitivity)
+      , param_tuber_growth_sensitivity    (_param_tuber_growth_sensitivity)
+      , param_tuber_critical_temperature  (_param_tuber_critical_temperature)
+      , tuber_init_temperature_stress_stats  (STAT_arithmetic_mean_bit)          //160803
+      , tuber_growth_temperature_stress_stats(STAT_arithmetic_mean_bit)          //160803
+      , soil_temperature                  (_soil_temperature)
+      {}
+   virtual float64 calculate(float64 canopy_biomass_kg_m2)          calculation_;
+   inline virtual bool reset()                                    initialization_
+      { return tuber_init_temperature_stress_stats.reset() && tuber_growth_temperature_stress_stats.reset(); }
+    virtual bool know_stress(float64 water_and_or_nitrogen_stress)     assignation_;
+ protected:
+   float64 sensitivity_effect_B(float64 mean_period_stress , float64 harvest_ndx_period_sensitivity) calculation_;
+      // Currently only used in tuber but was common to hold harvest index calculation
+   float64 initiation_temperature_stress_factor()                   calculation_;
+   float64 bulking_temperature_stress_factor()                      calculation_;
+
+};
+//______________________________________________________________________________
+class Yield_canopy
+: public extends_ Yield_abstract
+{
+ public:
+   inline Yield_canopy
+      (float_P _param_harvest_ndx_unstressed
+      ,bool    _param_apply_adjustment_to_unstressed_harvest_index
+      ,const Phenology_interface  &_phenology)
+      : Yield_abstract
+         (_param_harvest_ndx_unstressed
+         ,_param_apply_adjustment_to_unstressed_harvest_index
+         ,_phenology)
+      {}
+   virtual float64 calculate(float64 canopy_biomass_kg_m2)          calculation_;
+};
+//______________________________________________________________________________
+class Yield_grain
+: public extends_ Yield_abstract
+{
+   float_P param_translocation_fraction_max;
+   float64 biomass_at_maturity; //kg/m2
+   float64 biomass_at_filling;  //kg/m2
+ public: // So parameter scheduling can reset
+   Harvest_temperature_stress_factor_grain *extreme_temperature_stress_factor;
+      // temperature extremes are optional (crop parameeter
+ public:
+   Yield_grain
+      (float_P  _param_harvest_ndx_unstressed
+      ,bool     _param_apply_adjustment_to_unstressed_harvest_index
+      ,bool     apply_heat_extreme_adjustment_to_unstressed_harvest_index
+      ,float_P  _translocation_fraction_max
+      ,const Phenology_interface  &_phenology
+      ,const CORN::Local_time &_ref_sun_rise_time
+      ,const CORN::Dynamic_array<float32> &_stress_adj_hourly_temperature);
+   virtual float64 calculate(float64 canopy_biomass_kg_m2)          calculation_;
+   inline virtual bool know_biomass_at_filling
+      (float64 _filling_canopy_biomass_kg_m2)                       assignation_
+      { biomass_at_filling = _filling_canopy_biomass_kg_m2; return true; }
+   inline virtual bool know_biomass_at_maturity
+      (float64 _maturity_canopy_biomass_kg_m2)                      assignation_
+      { biomass_at_maturity = _maturity_canopy_biomass_kg_m2; return true; }
+   virtual bool know_stress(float64 water_and_or_nitrogen_stress)   assignation_;
+ private:
+
+
+};
+//______________________________________________________________________________
+
+} // namespace CropSyst
+#endif

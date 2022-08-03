@@ -1,0 +1,84 @@
+#  ifndef enumlistH
+#     include "corn/container/enumlist.h"
+#  endif
+#  ifndef strconvHPP
+#     include <stdlib.h>
+#     include "corn/string/strconv.hpp"
+#  endif
+
+namespace CORN {
+//______________________________________________________________________________
+Enumeration::Enumeration() : Item() {}
+//______________________________________________________________________________
+Enumeration::~Enumeration() {}
+//_2008-11-25___________________________________________________________________
+/* //170424 replaced with label_wstring
+const char *Enumeration::label_cstr(char *buffer)               const
+{  nat32_to_cstr(get_key_nat32(),buffer,10);
+   return buffer;
+}
+//_2003-01-20___________________________________________________________________
+*/
+const char *Enumeration::label_string(std::string &buffer)                 const
+{  append_nat32_to_string(get_key_nat32(),buffer,10);
+   return buffer.c_str();
+}
+//_2017-04-24___________________________________________________________________
+int Enumeration::compare(const Item &other) const
+{  nat32 this_key  = get_key_nat32();
+   nat32 other_key = ((const Enumeration &)other).get_key_nat32();
+   return (this_key < other_key)
+   ? -1 : (this_key > other_key)  ? 1 : 0;
+}
+//______________________________________________________________________________
+Enumeration *Enumeration_list::find(nat32 search_key) const
+{  FIND_FOR_EACH(found_enumeration,enumeration,Enumeration,true,enum_finder)     //030710
+   {  nat32 enumeration_key = enumeration->get_key_nat32();                      //060511
+      if (search_key == enumeration_key)
+         found_enumeration = enumeration;
+   } FOR_EACH_END(enum_finder)                                                   //030710
+   return found_enumeration;
+}
+//_2002-03-19___________________________________________________________________
+nat32 Enumeration_list::find_index(nat32 search_key)                       const
+{  nat32 found_index = std::string::npos;
+   nat32 index = 0;
+   FIND_FOR_EACH(found_enumeration,enumeration,Enumeration,true,enum_finder)
+   {  nat32 enumeration_key = enumeration->get_key_nat32();
+      if (search_key == enumeration_key)
+      {  found_enumeration = enumeration;
+         found_index = index;
+      }
+      else index++;
+   } FOR_EACH_END(enum_finder)
+   return found_index;
+}
+//_2013-01-25___________________________________________________________________
+nat32 Enumeration_list::remove_all_matching(nat32 search_key) modification_
+{  // Remove removes all matching entries from the list
+   // and deletes the associated data!
+   // Returns true if there was a matching deletion.
+   //bool at_least_one_item_removed = false;
+   nat32 matching_deletions = 0;
+   for (Enumeration *matching_item = find(search_key)
+       ;matching_item // search_key
+       ;matching_item = find(search_key))
+   {  remove(matching_item);
+      matching_deletions++;                                                      //140716
+   }
+   return matching_deletions;                                                    //140716
+}
+//_2002-03-19___________________________________________________________________
+Enumeration_list::Enumeration_list(bool unique_keys_)                            //160615
+: Bidirectional_list(unique_keys_)
+{}
+//_2005-10-10___________________________________________________________________
+Enumeration_list::Enumeration_list()
+: Bidirectional_list(false)
+{}
+//_2016-07-13_2005-10-10________________________________________________________
+Enumeration_list::~Enumeration_list() {}
+//_2008-11-25___________________________________________________________________
+
+} // namspace CORN
+

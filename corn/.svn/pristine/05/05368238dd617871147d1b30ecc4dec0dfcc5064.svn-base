@@ -1,0 +1,176 @@
+#ifndef progressH
+#define progressH
+//#include "corn/primitive.h"
+#include "corn/metrology/units_clad.h"
+#include "corn/const.h"
+#include "corn/datetime/time.h"
+namespace CORN
+{
+//______________________________________________________________________________
+/*
+This class is used to generate a textual indicator
+to display program processing progress for text based user interfaces
+*/
+
+/* progress-indicator type flag
+An application may also have one or more specialized progress indicators
+simple percent done or progress bar or processing throbber
+or ETC estimated time of completion
+*/
+#define PROGRESS_DEFAULT         0x01
+/*
+   default
+   however the program shows progress.
+*/
+#define PROGRESS_STEP            0x02
+/*
+   step{symbol}
+   show in indication of item processed
+   {symbol} is a single character.
+   (for example text output represented by a . printed at each iteration)
+*/
+#define PROGRESS_COUNT           0x04
+/*
+   count
+   show the number of items processed
+*/
+#define  PROGRESS_TIME           0x08
+/*
+   time
+   running time (time will be shown in the progress-units)
+*/
+#define PROGRESS_THROBBER        0x10
+/*
+   trobber{symbols}
+   throbber symbol is printed on the line (in the order specified)
+   The throbber is rendered by printing in sequence the specifyied symbols
+   with preceded by (carridge return or backspace character) (after the first one).
+   (The underscore is replaced with a space, giving the appearance of blinking)
+   I.e.
+   -/|\ would represent clock hands ticking away.
+   _* would represent a flashing light
+*/
+#define PROGRESS_BAR             0x20
+/*
+   bar{symbols}
+   progress bar optional
+   {symbols} specify the characters used to draw the bar,
+   The first character indicates not completed, the second is completed.
+   I.e.
+   -+ +++++-----
+   _X XXXXX_____
+   -= =====-----
+   =# #####=====
+*/
+#define PROGRESS_REMAINING       0x40
+/*
+   remaining
+   The amount of iterations or items or estimated time remaining
+   as indicated by the optional progress-units.
+   If progress units are also specified the units indicator will also be printed.
+   Otherwise progress units show as 99 years 99 days 99 hours 99 minutes 99seconds
+    (time option will show also the date if not today)
+               the program is expected to finish.
+*/
+
+#define PROGRESS_ETC             0x80
+/*
+  etc or ETC
+   The time the program is estimated to complete (ISO standard format).
+   If the progress-units is:
+   date: The date and time are both always printed.
+   time: The time is printed (if the finish time is not today the date is included).
+*/
+
+/*
+There may be multiple progress-indicator type options,
+although a program is not expected to implement any of them.
+The bit/flag value sort of indicates more complexity or overhead
+in preparing the indicator.
+
+Specifying progress indicators enables progress frequency
+(the default progress-frequency level)
+*/
+/* progress-frequency indicates how often the progress indicator is updated.
+The larger the number, the greater the frequency.
+The interpretation of the frequency is application specific.
+Typically it would be one of the following:
+- The number of items processed or main loop iterations.
+- Real world run time
+- Simulated time
+
+This could be a level or time interval however the program wishes to interpret.
+0 = no progress indicates no program during run
+   (although always show indicator at end)
+Typically the value (between 0 and 255) is run time
+
+obs For simulation models
+obs 1 = show progress at yearly time steps
+obs 2 = show progress at daily time steps
+
+*/
+/* progress-units specifies the units to interpret the frequency.
+The units are standard UED units code such as second, or minute or hour.
+The default units would be (count main loop iterations such as items processed)
+
+The progress_units argument could be omitted if the units are
+concatenated with the progress-frequency number
+I.e.
+--progress-frequency=10s   would be every 10 seconds
+--progress-frequency=20%   would be every 20 percent of completion
+*/
+
+//______________________________________________________________________________
+struct Progress_parameter
+{
+   nat8        indicators;  // flags/bitmask
+   std::string symbols;
+   nat32       frequency;
+   Units_clad  units;
+   nat8        marquee_width; // 0 indicates static mode
+   nat8        indicator_order[8]; nat8 indicator_count;
+ public:
+   inline Progress_parameter()
+      : indicators(0)
+      , symbols   ("")
+      , frequency (0)
+      , units     (UC_count)
+      , marquee_width(0)
+      {}
+   bool recognize_assignment
+      (const std::string &variable
+      ,const std::string &value)                                  modification_;
+   bool set_simple()                                              modification_;
+};
+//_2017-03-16__________________________________________________________________________
+class Progress_indicator
+{
+ private: // control
+   const Progress_parameter  &parameter;
+   nat16                      field_width;
+ protected: // status
+   CORN::Time                 start_time;
+      // This may need to be date time because the program run
+      // could very likely span days
+ public:
+   mutable std::string        specific;
+   // The class using this may want to have its own
+   // stepping indicator
+ public:
+   inline Progress_indicator
+      (const Progress_parameter  &parameter_
+      ,nat16                      field_width_=79)
+      : parameter          (parameter_)
+      , field_width        (field_width_)
+      , start_time         ()
+      , specific           ()
+      {}
+   bool step()                                                         updates_;
+      // return true if now would meet criteria for displaying progress.
+   void stream_to(std::ostream &stream, char delimiter = '\r')       stream_IO_;
+   void stop(std::ostream &stream, char delimiter = '\r')            stream_IO_;
+};
+//_2017-03-16__________________________________________________________________________
+} // namespace CORN
+#endif
+

@@ -1,0 +1,299 @@
+#include "rotation.h"
+#include "corn/OS/file_system_engine.h"
+#include "common/weather/database/CS_weather_daily_UED.h"
+#include "corn/data_source/vv_file.h"
+#include "UED/library/timeqry.h"
+#include "UED/library/std_codes.h"
+namespace CropSyst {
+//______________________________________________________________________________
+Rotation:: Rotation
+(const CORN::OS::File_name &rotation_filename_
+,bool rotation_cycling_enabled_
+)
+: CORN::Item()
+, parameters()
+, cyclable(false)
+, template_rotation_file_name(rotation_filename_)
+, rotation_cycling_enabled(rotation_cycling_enabled_)
+{
+   // Probably should have initialize (construct) method
+   CORN::VV_File rotation_file(rotation_filename_.c_str());
+   if (!rotation_file.get(parameters))
+   {
+         std::cerr << "error: Unable to load rotation: " << template_rotation_file_name << std::endl;
+   }
+}
+//_2016-07-07___________________________________________________________________
+nat32 Rotation::render_planting_events
+(modifiable_ CORN::Container &event_list
+,CORN::Year start_year
+,CORN::Year stop_year
+,nat8 cycle)                                                               const
+{
+   // Generates cycle shifted sowing events
+
+   nat8 build_years = parameters.years;
+   bool rotation_schedule_relative = build_years > 0;                            //140227
+   // Note that phenology adjustment could be moved to Rotator::start() but current
+   nat16 i;
+
+
+      // After determining phenology adjustments,
+      // we need to restart the weather for the starting date because
+      // the soil temperature initialization that follows needs
+      // the weather setup for the first day of the simulation.
+   CropSyst::Sowing_event *sow_events[SOW_EVENTS_ARRAY_ALLOC]; // an arbitrary large number
+   for (i = 0; i < SOW_EVENTS_ARRAY_ALLOC-1; i++)
+      { sow_events[i] = 0; }
+   nat8 template_sow_index = 0;
+   nat8 sowing_count = 0;
+   FOR_EACH_IN(sow_event,CropSyst::Sowing_event,parameters.sowing_events,each_sowing)
+   {  sow_events[template_sow_index] = sow_event;
+      rotation_schedule_relative &= sow_event->begin_sync.is_relative();         //140227
+      template_sow_index ++;
+      sowing_count++;
+   } FOR_EACH_END(each_sowing)
+   if (rotation_schedule_relative)                                               //140227
+   {
+/*
+      nat8 rotation_cycling_count = rotation_cycling_enabled                     //151008
+         ? build_years
+         : 1;
+   for (nat8 build_year_shift_index = 0
+       ;build_year_shift_index<rotation_cycling_count;build_year_shift_index++)
+   {
+*/
+
+      char build_year_shift_index_cstr[10];  // rename to cycle_cstr
+      /*
+      #ifdef _DEBUG
+      std::clog << "shifted:" << (int)build_year_shift_index  << std::endl;
+      #endif
+      */
+//      CORN::nat8_to_cstr((int)build_year_shift_index,build_year_shift_index_cstr,10);
+
+      CORN::nat8_to_cstr((int)cycle,build_year_shift_index_cstr,10);
+      /* call instanciates scenario
+      Rotated_scenario_simulation *shifted_scenario = render_scenario_simulation
+         (build_year_shift_index); // The shift index is used as the cycle
+      if (!shifted_scenario)
+      {
+         std::clog << "Rotator::initialize failed to render shifted_scenario"<< std::endl;
+         return false;                                                           //151227
+      }
+      land_unit_simulations.append(shifted_scenario);
+      */
+//160714       nat8 target_seq_year_index = build_year_shift_index;
+      nat8 target_seq_year_index = cycle;
+
+      for (Year year = start_year   // ref_start_date().get_year()                               //151008
+          ;year <= stop_year        // ref_stop_date().get_year()                                    //151008
+          ;year ++)
+      {  for (nat8 sow_index = 0; sow_index < sowing_count ;sow_index++)
+         {  CropSyst::Sowing_event *template_sow_event = sow_events[sow_index];
+            Year template_sow_seq_year =  template_sow_event->begin_sync.get_year();
+            if ((template_sow_event) && (template_sow_seq_year == target_seq_year_index))
+            {  CropSyst::Sowing_event *gen_event = new CropSyst::Sowing_event(); //130611
+               CropSyst::Sowing_operation &template_sow_op =  dynamic_cast<CropSyst::Sowing_operation &>(*(template_sow_event->get_operation()));
+               char sow_year_cstr[10]; CORN::nat16_to_cstr((int)year,sow_year_cstr,10);
+               gen_event->ID = "Sowing:";  gen_event->ID.append(build_year_shift_index_cstr); gen_event->ID.append(":");gen_event->ID.append(sow_year_cstr);
+               // We have to have a copy of the sowing operation because
+               // loaded events are transfer for each sowing event.
+               CropSyst::Sowing_operation *gen_sow_op =new CropSyst::Sowing_operation(template_sow_op); //130909 *(dynamic_cast<const CropSyst::Sowing_operation *>(template_sow_event->get_operation())));
+               gen_event->set_operation(gen_sow_op,true);                        //130906_130611
+               Year gen_event_year = year;                                       //130611
+               CORN::DOY gen_event_DOY =template_sow_event->begin_sync.get_DOY();//130611
+
+
+               gen_event->begin_sync.set_YD(gen_event_year,gen_event_DOY);       //130611
+               gen_event->begin_sync.sync_mode_labeled.set(ACTUAL_DATE_MODE);    //130611
+               gen_event->date.set_YD(gen_event_year,gen_event_DOY);             //130830
+               CORN::Date planting_date (year,gen_event_DOY);
+               const CORN::OS::Directory_name &rotation_dir = template_rotation_file_name.get_parent_directory_name_qualified();
+
+//std::clog << "temprot:" << template_rotation_file_name.c_str() << std::endl;
+//std::clog << "rot dir:" << rotation_dir.c_str() << std::endl;
+
+               CORN::OS::File_name_concrete crop_filename_unresolved(gen_sow_op->crop_filename.c_str());
+               CORN::OS::Directory_entry_name *crop_filename_reset
+                 = CORN::OS::file_system_engine.render_resolved_absolute_DEN
+                  (CORN::OS::Directory_entry_name_concrete(gen_sow_op->crop_filename.c_str()),rotation_dir);
+               if (crop_filename_reset)
+                  gen_sow_op->crop_filename.set_DEN(*crop_filename_reset);
+               delete crop_filename_reset;
+               CORN::OS::Directory_entry_name *management_filename_reset
+                  = CORN::OS::file_system_engine.render_resolved_absolute_DEN
+                   (CORN::OS::Directory_entry_name_concrete(gen_sow_op->management_filename.c_str()),rotation_dir);
+               if (management_filename_reset)
+                  gen_sow_op->management_filename.set_DEN(*management_filename_reset);
+               delete management_filename_reset;
+
+//std::clog << "planting:" << gen_event->date.as_string() << std::endl;
+
+               event_list.append(gen_event);                                     //160708
+               /* moved to caller
+               shifted_scenario->
+                  scenario_event_list.append(gen_event);                         //130830
+               shifted_scenario->schedule_planting_event
+                 (planting_date.get_date32(),*gen_sow_op,gen_event->ID.c_str());
+               know_sowing_for_phenology_adjustment(*gen_sow_op,planting_date);
+               */
+         }  }
+
+         target_seq_year_index ++;                                               //130611
+         if (target_seq_year_index >= build_years)                               //130611
+            target_seq_year_index = 0;                                           //130611
+
+      }
+   } // for build year
+//   }
+   return event_list.count();
+}
+//_2016-07-07___________________________________________________________________
+nat32 Rotation::render_planting_events_adjusted_for_weather_conditions
+(CS::Weather_database_daily   &weather
+,modifiable_ CORN::Container  &computed_plantings
+,CORN::Year start_year
+,CORN::Year stop_year
+,nat8 cycle)                                                               const
+{
+   CORN::Bidirectional_list plantings_fixed_or_computable;
+   nat32 planting_count = render_planting_events
+      (plantings_fixed_or_computable,start_year,stop_year,cycle);
+
+   CORN::Date start_date(start_year,1);
+   CORN::Date stop_date (stop_year,365);
+
+
+   CORN::Statistical_sample_with_dataset<float32,float32,float32>
+         sowing_precipitation_window_meter;
+
+   CORN::Statistical_sample_with_dataset<float32,float32,float32> avg_air_temp_for_window;
+   #define sowing_window_days 15
+   Sowing_event *next_sowing_event = dynamic_cast<Sowing_event *>
+      (plantings_fixed_or_computable.pop_first());
+   if (!next_sowing_event) return false; // (rotation not loaded?)
+
+   CORN::Date clear_window_date(next_sowing_event->date); clear_window_date.dec_day(sowing_window_days);
+
+   //const Weather_provider &weather_provider = weather.ref_weather_provider();
+    Weather_provider &weather_provider = const_cast <Weather_provider &> (weather.ref_weather_provider());
+/*160814 weather provider should have been provided by now.
+   weather.know_weather_provider(&weather_provider);                             //160801
+*/
+   for (CORN::Date today(start_date)
+      ;   (today.get() <= stop_date.get())
+       && next_sowing_event
+      ; today.inc())
+   {
+      weather.set_today(today);
+      weather.start_day();
+      if (today == clear_window_date)
+      {
+         sowing_precipitation_window_meter.reset();
+         avg_air_temp_for_window.reset();
+      }
+
+      Sowing_operation *sowing_operation = dynamic_cast<Sowing_operation *>(next_sowing_event->get_operation());
+
+      float32 precip = 0.0;                                                      //160726
+      precip = weather_provider.precipitation_actual.get_m();
+
+      sowing_precipitation_window_meter.append(precip);
+
+      float64 appreciable_precip_m = mm_to_m(sowing_operation->appreciable_precip_mm);                //020220
+      // See if there has been any appreciable preciptation in the last X days      //000330
+
+      while (sowing_precipitation_window_meter.get_count()>(Days)sowing_operation->delay_after_precip)//141105
+         sowing_precipitation_window_meter.remove_at(0);                         //141105
+      bool appreciable_rain_in_X_days = sowing_precipitation_window_meter.provide_max() > appreciable_precip_m; //141105
+
+      bool warm_enough = true;
+      nat8 window_size = 0;
+      switch (sowing_operation->sowing_date_mode_labeled.get())
+      {
+         case MIN_TEMP_REQ    :
+         {
+            float64 air_temp_avg = 0;
+            air_temp_avg = weather_provider.air_temperature_avg.Celcius();
+            avg_air_temp_for_window.append(air_temp_avg);
+            while ((window_size = avg_air_temp_for_window.get_count()) > (Days)15) //160708
+               avg_air_temp_for_window.remove_at(0);
+            float64 avg_temps = avg_air_temp_for_window.get_mean();              //131219
+            warm_enough = (avg_temps >= sowing_operation->sowing_avg_temp);
+
+            if ((today >= next_sowing_event->date)
+                && (window_size == 15)
+                /* NYI && appreciable_rain_in_X_days*/
+                && warm_enough)
+            {
+               CORN::Date computed_sowing_date(today); computed_sowing_date.dec_day(15);
+               next_sowing_event->date.set(computed_sowing_date);
+               //next_sowing_event->sync_mode_labeled.set(ACTUAL_DATE_MODE);
+               next_sowing_event->begin_sync.set(computed_sowing_date);
+               next_sowing_event->begin_sync.sync_mode_labeled.set(ACTUAL_DATE_MODE);
+               computed_plantings.append(next_sowing_event);
+
+//std::clog << "planting adjusted:" << next_sowing_event->date.as_string() << std::endl;
+
+               next_sowing_event = dynamic_cast<Sowing_event *>
+                  (plantings_fixed_or_computable.pop_first());
+               if (next_sowing_event)
+               {
+                  clear_window_date.set(next_sowing_event->date); clear_window_date.dec_day(sowing_window_days);
+               }
+               sowing_precipitation_window_meter.reset();
+               avg_air_temp_for_window.reset();
+            }
+            else
+            {
+               // Need to explain that could not be accurately determined
+               // because weather data unavailable.
+               // This is not necessarily an error because we may be nearing
+               // the end of a simulation period so planting may not be
+               // relevent anyway.
+            }
+         } break;
+         default :
+         {  // The other sowing date mode events a simply added to the planting events
+            computed_plantings.append(next_sowing_event);
+
+//std::clog << "planting fixed  :" << next_sowing_event->date.as_string() << std::endl;
+
+            next_sowing_event = dynamic_cast<Sowing_event *>
+               (plantings_fixed_or_computable.pop_first());
+            if (next_sowing_event)
+            {
+               clear_window_date.set(next_sowing_event->date); clear_window_date.dec_day(sowing_window_days);
+            }
+         }
+      }
+      weather.end_day();
+   } // date loop
+
+   return computed_plantings.count();
+}
+//_2016-07-07___________________________________________________________________
+//______________________________________________________________________________
+Rotations::Rotations()
+: CORN::Unidirectional_list(true) // unique
+{}
+//_2016-07-07___________________________________________________________________
+const Rotation *Rotations::provide
+(const CORN::OS::File_name &rotation_filename
+,bool rotation_cycling_enabled)
+{
+
+   const Rotation *existing_rotation = dynamic_cast<const Rotation *>
+      (find_wstring(rotation_filename.w_str()));
+   if (!existing_rotation)
+   {
+      existing_rotation = new Rotation(rotation_filename,rotation_cycling_enabled);
+      take(existing_rotation);
+   }
+   return existing_rotation; // NYI
+}
+//_2016-07-07___________________________________________________________________
+Rotations rotations_global;
+} // namespace CropSyst
+

@@ -1,0 +1,39 @@
+#  include "cs_events.h"
+#  include "corn/data_source/datarec.h"
+namespace CropSyst {                                                             //131101
+//______________________________________________________________________________
+bool Event::process_matching_date
+(Land_unit_simulation_VX &associated_sim,
+const CORN::Date  &process_date
+,std::ostream          &log_stream)                                              //991130
+{  bool processed = false;
+   if (date_matches(process_date) && (! deleted))                                //000317
+   {  if (process(associated_sim,process_date))
+      {  processed = true;
+         log(log_stream,false);
+         if (!get_date().format.is_style_relative()) //I think this is obsolete (I dont think reletive dates will appear in this list
+            deleted = true;  // check if reached
+   }  }
+   return processed;
+}
+//_2001-12-07___________________________________________________________________
+void Event::synchronize_to  // check used
+(const Synchronization  &from_sync
+,const CORN::Date &to_date)                                                      //020629
+{
+   if (begin_sync.sync_type_matches(from_sync))                                  //030608
+      date.set(begin_sync.determine(to_date));                                   //120314_030606
+}
+//_2001-12-07___________________________________________________________________
+void Event::setup_structure(CORN::Data_record &data_rec,bool for_write) modification_
+{  Common_event::setup_structure(data_rec, for_write);
+   data_rec.expect_bool (LABEL_growing_season_only,apply_only_to_growing_season,CROPSYST_VV_BOOL_FORM);
+}
+//______________________________________________________________________________
+} // namespace CropSyst                                                          //131101
+// line count
+// 060810 136
+// 100316  57
+// 140126  41
+
+

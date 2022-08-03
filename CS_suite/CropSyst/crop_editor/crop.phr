@@ -1,0 +1,193 @@
+L_Average_temperature_stress,
+/* crop CROPSYST CSW (  PARAMS )   it-gb
+en Avg. temperature stress
+fr Moyenne stress temperature
+it Stress temperatura medio
+es Stress total temperatura
+ca Stress total temperatura
+*/
+L_Average_water_stress,
+/* crop CROPSYST CSW (  PARAMS )
+en Average water stress
+fr Moyenne stress hydrique
+it Stress idrico medio
+es Stress hídrico medio
+ca Stress hídric mitjà
+*/
+L_Canopy_ground_cover,
+/* crop CROPSYST CSW (  PARAMS )    it-gb
+en Canopy ground cover
+fr Proportion du couvert végétal (%)
+it Frazione della copertura vegetale
+es Fracción cubierta por la vegetación
+ca Fracció coberta pel cultiu
+*/
+L_Crop_water_interception,
+/* crop CROPSYST CSW (  PARAMS )
+en Crop water interception
+fr Eau interc. par végétal
+it Intercettazione di acqua da parte della coltura
+es Intercep. de agua del cultivo
+ca Intercep. d'aigua del cultiu
+*/
+L_Crop_water_stress,
+/* crop CROPSYST CSW (  PARAMS )
+en Crop water stress
+fr stress hydrique (culture)
+it stress idrico (coltura)
+es Stress hídrico (cultivo)
+ca Stress hídric (cultiu)
+*/
+L_Dry_biomass,
+/* crop CROPSYST CSW (  PARAMS )
+en Above ground biomass
+fr Matière sèche
+it Biomassa epigeica
+es Biomasa aérea
+ca Biomassa aèria
+*/
+L_Leaf_area_index,
+/* crop  PARAMS CS VALIDATE CROPSYST  RPRTGRPH
+en Leaf area index
+fr Indice de surface foliaire
+it Indice di area fogliare (LAI)
+es Indice área foliar
+ca Index d'àrea foliar
+*/
+L_Temperature_stress,
+/* crop CROPSYST CSW (  PARAMS )
+en Temperature stress
+fr Stress temperature
+it Stress temperatura
+es Stress temperatura
+ca Stress temperatura
+*/
+L_Green_area_index,
+/* crop CROPSYST CSW (  PARAMS )
+en Green area index
+fr LAI verte
+it Indice di area fogliare verde
+es Indice de área foliar verde
+ca Index d'àrea foliar verda
+*/
+L_Growing_degree_days,
+/* crop CROPSYST CSW (  PARAMS )
+en Growing degree days
+fr Besoins en somme de températures
+it Gradi giorno
+es Grados-día
+ca Graus-dia
+*/
+L_Root_biomass,
+/* crop CROPSYST CSW (PARAMS )
+en Root biomass
+fr Biomasse des racines
+it Biomassa radicale
+es Biomasa radicular
+ca Biomassa radicular
+*/
+L_Root_depth,
+/* crop CROPSYST CSW (PARAMS )
+en Root depth
+fr Profondeur d'enracinement
+it Profondità radicale
+es Profundidad radicular
+ca Profunditat radicular
+*/
+L_Potential_transpiration,
+/* crop CROPSYST CSW (PARAMS )
+en Potential transpiration
+fr Transpiration potentielle
+it Traspirazione potenziale
+es Transp. potencial
+ca Transp. potencial
+*/
+L_transp_pot,
+/* crop CROPSYST CSW (PARAMS )
+en Transp pot.
+fr Transp pot.
+it Traspir pot.
+es Transp pot.
+ca Transp pot.
+*/
+L_Actual_transpiration,
+/* crop CROPSYST CSW (PARAMS )
+en Actual transpiration
+fr Transpiration réelle
+it Traspirazione effettiva
+es Transp. real
+ca Transp. actual
+*/
+L_transp_act,
+/* crop CROPSYST CSW (PARAMS )
+en Transp act.
+fr Transp réelle
+it Traspir eff.
+es Transp real
+ca Transp actual
+*/
+L_Emergence_date,
+/* crop CROPSYST CSW (PARAMS )
+en Emergence date
+fr Date de levée
+it Data di emergenza
+es Fecha de emergencia
+ca Data d'emergència
+*/
+L_Flowering_date,
+/* crop CROPSYST CSW (PARAMS )
+en Flowering date
+fr Date de floraison
+it Data di fioritura
+es Fecha de floración
+ca Data de floració
+*/
+L_Grain_filling_date,
+/* crop CROPSYST CSW (PARAMS )
+en Grain filling date
+fr Date_de remplissage grain
+it Data_di riempimento cariossidi
+es_ch Fecha_inic. llenado_de granos
+es Fecha_de_inicio llenado grano
+ca Data_d'inici ompliment del gra
+*/
+L_Leaf_senescence_date,
+/* crop CROPSYST CSW (PARAMS )
+en Leaf Senescence date
+fr Date_de sénescence foliare
+it Data_di senescenza fogliare
+es Fecha_inicio de senescencia
+ca Data_inici de la senescència
+*/
+L_Maturity_date,
+/* crop CROPSYST CSW (PARAMS )
+en Maturity date
+fr Date_de maturité physiologique
+it Data_di maturazione
+es Fecha_de madurez fisiológica
+ca Data_de maduresa fisiològica
+*/
+L_Harvest_date,
+/* crop CROPSYST CSW (PARAMS )
+en Harvest date
+fr Date_de recolt
+it Data_di raccolta
+es Fecha_de cosecha
+ca Data_de collita
+*/
+L_Yield,
+/* crop  CROPSYST PARAMS
+en Yield
+fr Récolte
+it Produzione
+es Rendimiento
+ca Rendiment
+*/
+L_Not_applicable_to_this_crop,
+/* crop  CROPSYST PARAMS   es-cs it-rn translate     ca-rn
+en Not applicable to this crop
+fr Non applicable pour cette culture
+it Non applicabile a questa coltura
+es Non aplica a este cultivo
+ca ?Non aplica aquest cultiu?
+*/

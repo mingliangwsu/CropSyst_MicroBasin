@@ -1,0 +1,211 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\CS_Suite_4\CS_explorer.exe"/>
+    <OBJFILES value="CS_explorer.obj ..\..\..\GUI\explorer\form_explorer_common.obj 
+      ..\CS_explorer_engine.obj ..\..\..\cropsyst\cpp\cs_paths.obj 
+      ..\..\..\cropsyst\cpp\cs_project_directory.obj 
+      ..\..\..\cropsyst\cpp\database_dir.obj 
+      ..\..\..\cropsyst\cpp\cs_scenario.obj 
+      ..\..\..\cropsyst\cpp\model_options.obj ..\..\..\ued\library\UED_fname.obj 
+      ..\..\..\common\weather\weather_types.obj 
+      ..\..\..\cropsyst\cpp\static_phrases.obj 
+      ..\..\..\cropsyst\cpp\cs_operation_codes.obj 
+      ..\..\..\CropSyst\cpp\output.obj 
+      ..\..\..\GUI\explorer\frame_navigation_ShellShock_BCB5.obj 
+      ..\..\..\cropsyst\cpp\organic_matter\OM_types.obj 
+      ..\..\..\corn\file_sys\smart_filename.obj 
+      ..\..\..\cropsyst\cpp\organic_matter\OM_params.obj 
+      ..\..\..\corn\OS\Windows\VCL\registry.obj 
+      ..\frame_CS_context_functions.obj ..\..\..\GUI\explorer\explorer_engine_abstract.obj 
+      ..\..\..\GUI\explorer\navigation_responder.obj 
+      ..\..\..\cropsyst\cpp\crop\growth_stages.obj 
+      ..\..\..\common\biometeorology\ET_model.obj 
+      ..\..\..\cropsyst\cpp\crop\crop_types.obj 
+      ..\..\..\GUI\explorer\frame_current_directory_common.obj"/>
+    <RESFILES value="CS_explorer.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) ..\..\..\GUI\explorer\form_explorer_common.dfm 
+      ..\..\..\GUI\explorer\frame_navigation_ShellShock_BCB5.dfm 
+      ..\frame_CS_context_functions.dfm 
+      ..\..\..\GUI\explorer\frame_current_directory_common.dfm"/>
+    <LIBFILES value="C:\temp\lib\BCB5\release\application_static.lib 
+      C:\temp\lib\BCB5\release\container_static.lib 
+      C:\temp\lib\BCB5\release\corn_static.lib 
+      C:\temp\lib\BCB5\release\CS_directory.lib 
+      C:\temp\lib\BCB5\release\datetime_static.lib 
+      C:\temp\lib\BCB5\release\file_sys_static.lib 
+      C:\temp\lib\BCB5\release\format_static.lib 
+      C:\temp\lib\BCB5\release\parameters_static.lib 
+      C:\temp\lib\BCB5\release\common_sim_static.lib"/>
+    <LIBRARIES value="VCLSMP50.lib tmsc5.lib AutoControls.lib"/>
+    <SPARELIBS value="Vcl50.lib K102_R51.lib VCLX50.lib AutoControls.lib BCBSMP50.lib tmsc5.lib 
+      VCLDB50.lib TEE50.lib VCLSMP50.lib VCLBDE50.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi TeeQR50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi 
+      Inet50.bpi NMFast50.bpi dclocx50.bpi bcb2kaxserver50.bpi Tee50.bpi 
+      VCLIB50.bpi K102_R51.bpi UED_components_package.bpi CORN_datasets.bpi 
+      TeeUI50.bpi TeeDB50.bpi autocontrols_simulation.bpi"/>
+    <PATHCPP value=".;..\..\..\GUI\explorer;..;..\..\..\cropsyst\cpp;..\..\..\ued\library;..\..\..\common\weather;..\..\..\cropsyst\cpp\organic_matter;..\..\..\corn\file_sys;..\..\..\corn\OS\Windows\VCL;..\..\..\cropsyst\cpp\crop;..\..\..\common\biometeorology"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="_DEBUG;CS_VERSION=4;frame_navigation_XXXX_h=&quot;GUI/explorer/frame_navigation_ShellShock_BCB5.h&quot;"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="CS_explorer.cpp"/>
+    <INCLUDEPATH value="..\;$(BCB)\include;$(BCB)\include\vcl;..;..\..\..\common\biometeorology;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;..\..\..;..\..\..\common"/>
+    <LIBPATH value="..\;..;..\..\..\common\biometeorology;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=C:\temp\obj\CS_suite\bcb5\cs_explorer.csm -Hc -Vx -Ve -X- -r- -a8 
+      -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-$YD -$W -$O- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="-D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[Excluded Packages]
+$(BCB)\Projects\Bpl\ThemeManagerC5D.bpl=Soft Gems Theme Manager
+
+[HistoryLists\hlIncludePath]
+Count=29
+Item0=$(BCB)\include;$(BCB)\include\vcl;..\;..;..\..\..\common\biometeorology;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;..\..\..;c:\dev\common
+Item1=..\;..;..\..\..\common\biometeorology;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item2=..;..\..\..\common\biometeorology;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item3=..\;..\..\..\common\biometeorology;..;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item4=..\..\..\common\biometeorology;..\;..;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item5=..\;..;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item6=..\;..\..\..\GUI\explorer;..;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item7=..\..\..\GUI\explorer;..;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item8=..\..\..\GUI\explorer;..\;..;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item9=..\;..\..\..\corn\OS\Windows\VCL;..;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item10=..\..\..\corn\OS\Windows\VCL;..\;..;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item11=..\;..\..\..\corn\file_sys;..;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item12=..\..\..\corn\file_sys;..\;..;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item13=..\;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item14=..\;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item15=..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\;..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item16=..\..\..\cropsyst\cpp;..\..\..\cropsyst\cpp\crop;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\common\weather;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\ued\library;..\..\CropSyst;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item17=..\..\..\cropsyst\cpp\crop;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item18=..\..\..\cropsyst\cpp\crop;..\;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item19=..\;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item20=..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item21=..\;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item22=..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item23=..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item24=..\..\..\cpp\crop;..\..\..\..\common\weather;..\..\..\..\ued\library;..\..\..\..\CS_suite\CropSyst;..\..\..\cpp;..\..\..\..\ued;..\..\..\..\CS_suite;..\..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item25=..\..\..\..\CS_suite\CropSyst;..\..\..\cpp;..\..\..\..\ued;..\..\..\..\CS_suite;..\..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item26=..\..;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item27=..\..;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;$(BCB)\include;$(BCB)\include\vcl
+Item28=$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=26
+Item0=..\;..;..\..\..\common\biometeorology;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item1=..;..\..\..\common\biometeorology;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item2=..\;..\..\..\common\biometeorology;..;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item3=..\..\..\common\biometeorology;..\;..;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item4=..\;..;..\..\..\GUI\explorer;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item5=..\;..\..\..\GUI\explorer;..;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item6=..\..\..\GUI\explorer;..;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item7=..\..\..\GUI\explorer;..\;..;..\..\..\corn\OS\Windows\VCL;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item8=..\;..\..\..\corn\OS\Windows\VCL;..;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item9=..\..\..\corn\OS\Windows\VCL;..\;..;..\..\..\corn\file_sys;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;..\..\..\components\AutoControls
+Item10=..\;..\..\..\corn\file_sys;..;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;C:\dev\components\AutoControls
+Item11=..\;..\..\..\corn\file_sys;..;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item12=..\..\..\corn\file_sys;..\;..;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;C:\dev\components\AutoControls\combined;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item13=..\..\..\corn\file_sys;..\;..;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item14=..\;..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item15=..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;C:\dev\components\Other\ShellShock\source_BCB5;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item16=..\..\..\cropsyst\cpp\organic_matter;..\..\..\CANMS;..\;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item17=..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item18=..\;..;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item19=..\;..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item20=..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item21=..\..\..\GUI;..\..\..\cropsyst\GUI\Builder\project_editor\batch;..\;..\..\..\cropsyst\GUI\Builder\CS_explorer;..\..\..\cropsyst\cpp\crop;..\..\..\common\weather;..\..\..\ued\library;..\..\CropSyst;..\..\..\cropsyst\cpp;..\..\..\ued;..\..;..\..\..\cropsyst\GUI;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\components\TMS_4.7\source_BCB5;..\..\..\components\AutoControls;..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item22=..\..\..\cpp\crop;..\..\..\..\common\weather;..\..\..\..\ued\library;..\..\..\..\CS_suite\CropSyst;..\..\..\cpp;..\..\..\..\ued;..\..\..\..\CS_suite;..\..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item23=..\..\..\..\CS_suite\CropSyst;..\..\..\cpp;..\..\..\..\ued;..\..\..\..\CS_suite;..\..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item24=..\..;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\components\TMS_4.7\source_BCB5;..\..\..\..\components\AutoControls;..\..\..\..\components\Other\ShellShock\source;$(BCB)\Projects\Bpl;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item25=$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=8
+Item0=_DEBUG;CS_VERSION=4;frame_navigation_XXXX_h=&quot;GUI/explorer/frame_navigation_ShellShock_BCB5.h&quot;
+Item1=_DEBUG;CS_VERSION=4;frame_navigation_XXXX_h=&quot;GUI/explorer/frame_navigation_ShellShock.h&quot;
+Item2=_DEBUG;CS_VERSION=4;frame_navigation_XXXX_h=&lt;GUI/explorer/frame_navigation_ShellShock.h&gt;
+Item3=_DEBUG;CS_VERSION=4;frame_navigation_XXXX_h &lt;GUI/explorer/frame_navigation_ShellShock.h&gt;
+Item4=_DEBUG;CS_VERSION=4;INCLUDE_frame_navigation_XXXX=#include &lt;GUI/explorer/frame_navigation_ShellShock.h&gt;
+Item5=_DEBUG;CS_VERSION=4
+Item6=_DEBUG;CS_VERSION=5
+Item7=_DEBUG
+
+[HistoryLists\hlFinalOutputDir]
+Count=3
+Item0=C:\CS_Suite_4\
+Item1=C:\CS_Suite_4\CropSyst\
+Item2=C:\CS_Suite_4\CropSyst
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

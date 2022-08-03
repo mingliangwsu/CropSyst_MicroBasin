@@ -1,0 +1,224 @@
+#include "corn/format/structural.h"
+#include "corn/string/strconv.hpp"
+#include <string.h>
+
+
+
+namespace structural
+{
+
+nat16 write_indentation = 0;
+
+//______________________________________________________________________________
+Mapping_abstract::Parameter_bool::Parameter_bool
+(bool &value_
+,given_ Construct *key_given_
+,given_ Construct *value_given_)
+: value (value_)
+{
+   //delete key_given_;
+   key_given = key_given_;
+   if (value_given_)
+   {
+      std::wstring value_string;
+      value_given_->append_to_wstring(value_string);
+      set_value_wstring(value_string);
+      delete value_given_;
+   }
+}
+//_2015-08-30___________________________________________________________________
+bool Mapping_abstract::Parameter_bool::set_value_wchr
+(const wchar_t *value_as_wstring)                                  modification_
+{
+   if      (wcscmp( value_as_wstring, L"true") ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"True") ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"TRUE") ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"yes")  ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"Yes")  ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"YES")  ==0) value = true;
+   else if (wcscmp( value_as_wstring, L"false")==0) value = false;
+   else if (wcscmp( value_as_wstring, L"False")==0) value = false;
+   else if (wcscmp( value_as_wstring, L"FALSE")==0) value = false;
+   else if (wcscmp( value_as_wstring, L"no")   ==0) value = false;
+   else if (wcscmp( value_as_wstring, L"No")   ==0) value = false;
+   else if (wcscmp( value_as_wstring, L"NO")   ==0) value = false;
+   return true;
+}
+//______________________________________________________________________________
+Key_value_pair *Mapping_abstract::find_key_value_pair
+(const structural::Construct &key_construct)                               const
+{
+   Key_value_pair *matching_KV_pair = dynamic_cast<Key_value_pair *>
+      (get_key_value_pairs().find_matching(key_construct));
+   return matching_KV_pair;
+}
+//_2015-10-18___________________________________________________________________
+Mapping_abstract::Parameter_labeled_enum::Parameter_labeled_enum
+(Labeled_enum &labeled_enum_
+,given_ Construct *key_given_
+,given_ Construct *value_given_)
+: Key_value_pair()
+, labeled_enum(labeled_enum_)
+, key_given(key_given_)
+{
+   if (value_given_)
+   {
+      std::string value_as_string; CORN::wstring_to_string
+         (value_given_->get_text_wstr(),value_as_string);
+      labeled_enum.set_label(value_as_string.c_str());
+      delete value_given_;
+   }
+}
+//_2016-07-03___________________________________________________________________
+
+/*
+
+
+modifiable_ Key_value_pair *Mapping_abstract::find_key_value_pair_mod
+(const structural::Construct &key_construct)                       modification_
+{
+   Key_value_pair *matching_KV_pair = dynamic_cast<Key_value_pair *>(get_key_value_pairs().find_matching(key_construct));
+   return matching_KV_pair;
+}
+//_2015-10-18___________________________________________________________________
+const Key_value_pair *Mapping_abstract::find_key_value_pair_ref
+(const structural::Construct &key_construct)                               const
+{
+   Key_value_pair *matching_KV_pair = dynamic_cast<const Key_value_pair *>(get_key_value_pairs().find_matching(key_construct));
+   return matching_KV_pair;
+}
+*/
+//_2015-10-18___________________________________________________________________
+int Mapping_abstract::compare(const CORN::Item &other)                     const
+{  int comparison = -1;
+   const Mapping *mapping_to_compare = dynamic_cast<const Mapping *>(&other);
+   if (mapping_to_compare)
+   {
+      comparison = key_value_pairs.count() - mapping_to_compare->count();
+      if (comparison == 0)
+      {  // So far the mapping is superficially comparable because
+         // they have the same number of items.
+         // Now check each item
+         // (we don't care about the order of the items).
+         FOR_EACH_IN(KV_pair, Key_value_pair,key_value_pairs,each_KV_pair)
+         {  const Key_value_pair *other_matching_KV_pair
+               = find_key_value_pair(*(KV_pair->get_specifier()));
+            if (!other_matching_KV_pair) return -1;
+         } FOR_EACH_END(each_KV_pair)
+      }
+   }
+   return comparison;
+}
+//_2015-10-18___________________________________________________________________
+/*
+bool Mapping_abstract::Parameter_number::matches_wstr(const wchar_t *other_text) const
+{
+   return std::wcscmp(number_keyed->get_key_wide(),other_text) == 0;
+}
+*/
+/*
+int Mapping_abstract::Parameter_number::compare(const Item &key_to_compare) const
+{
+   const wchar_t *nk = number_keyed->get_key_wide();
+   const wchar_t *kc = key_to_compare.get_key_wide();
+//   std::wstring nk_wstring; CORN::append_ASCIIz_to_wstring(nk,nk_wstring);
+   return
+//      wcscmp(nk_wstring.c_str(),key_to_compare.get_key_wide());
+      wcscmp(number_keyed->get_key_wide(),key_to_compare.get_key_wide());
+      //strcmp(nk,kc);
+}
+*/
+//_2015-10-26___________________________________________________________________
+/*151026
+Key_value_pair *Mapping_abstract::instanciate_key_value_pair
+(given_ Construct *key_given)
+{
+   Key_value_pair *KV_pair = new Key_value_pair_concrete(key_given);
+   return KV_pair;
+}
+*/
+//_2015-10-21___________________________________________________________________
+/*
+Key_value_pair *Mapping_abstract::render_key_value_pair
+(given_ Construct *key_given)
+{
+   Construct *value_construct = new Mapping_abstract
+   Key_value_pair *KV_pair = new Key_value_pair(key_given);
+   KV_pair->set_value(value_construct);
+
+}
+//_2015-10-18___________________________________________________________________
+*/
+bool  Mapping_abstract::write(std::ostream &strm)                 performs_IO_
+{
+   //strm << std::endl;0
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   if (ref_specifier)
+   {
+      ref_specifier->write(strm);
+      strm << ": " << std::endl;
+   }
+   write_indentation += 3;
+   key_value_pairs.write(strm);
+   write_indentation -= 3;
+   return true;
+}
+//_2016-07-03___________________________________________________________________
+bool Mapping_abstract::Parameter_number::write(std::ostream &strm)                       performs_IO_
+{
+   //strm << std::endl;
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   key_given->write(strm);
+   std::string value_as_string;
+   strm << ": " <<
+      number_keyed_known->append_value_in_radix_to(value_as_string,3,10);
+   return true;
+}
+//______________________________________________________________________________
+bool Mapping_abstract::Parameter_bool::write(std::ostream &strm)                       performs_IO_
+{
+   //strm << std::endl;
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   key_given->write(strm);
+   std::string value_as_string;
+   strm << ": " << value ? "true" : "false";
+   return true;
+}
+//______________________________________________________________________________
+bool  Mapping_abstract::Parameter_labeled_enum::write(std::ostream &strm)                       performs_IO_
+{
+   //strm << std::endl;
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   key_given->write(strm);
+     strm << ": " << labeled_enum.get_label();
+   return true;
+}
+//______________________________________________________________________________
+
+bool  Key_value_pair_concrete::write(std::ostream &strm)                       performs_IO_
+{
+   //strm << std::endl;
+   for (nat16 indent = 0; indent < write_indentation; indent++)
+      strm << " ";
+   if (specifier) // there should always be a specifier at this point
+   {
+      specifier->write(strm);
+      strm << ": " << std::endl;
+   }
+   write_indentation += 3;
+   if (value) // there will useuslayy be value here
+   {
+      strm << "#value#";
+      // value->write(strm);
+   }
+   write_indentation -= 3;
+   return true;
+}
+//______________________________________________________________________________
+
+} // namespace structural
+

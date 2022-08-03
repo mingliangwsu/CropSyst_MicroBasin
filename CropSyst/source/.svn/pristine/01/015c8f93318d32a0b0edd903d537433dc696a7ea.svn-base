@@ -1,0 +1,95 @@
+#ifndef CS_UED_datasrcH
+#define CS_UED_datasrcH
+
+#include "cs_vars.h"
+#include "cs_glob.h"
+#include "corn/data_source/datasrc.h"
+#include "cs_UED_db.h"
+
+/* This class derived from UED_indexed_database
+   is used to output CropSyst computed variables
+*/
+//______________________________________________________________________________
+struct format_var_CS_var_assoc
+{  nat16   format_var;
+   CS_UED_variable_code CS_var;
+};
+//______________________________________________________________________________
+struct accum_format_var_CS_var_assoc
+{  nat16   format_var;
+   CS_UED_variable_code CS_var_DLY;
+   CS_UED_variable_code CS_var_AN;
+   CS_UED_variable_code CS_var_GP;
+};
+//______________________________________________________________________________
+#define NOT_YET_DEFINED 0
+
+/*000321
+ CropSyst output data base is derived from UED database
+ In adds a current day timer.
+
+ At the end of each day each variable recorder is instructed to take the current rate variable
+ and inserted it into the respective day slot.
+
+ The timer is incremented.
+ If End of year, the data records are committed and the current record set is cleared.
+
+ Whenever the current record list is empty and variables are to be recorded,
+ the list is recreated.
+
+ An object (I.e. crop or soil) constructor will tell the cropsyst database
+ to register it as a recording object.
+ The database will immediately request the object to to add variable recorders for selected variables.
+
+ Variable recorders will keep an object_ID which is a pointer to the object.
+ And a reference to the variable to be recorded.
+
+ When an object is destroyed, it's destructor will tell the cropsyst database
+ to (commit and ) delete the recorders having the object ID(based on the ID).
+
+ At the end of every year the cropsyst database will commit and purge all records.
+ It will then ask all recording objects to submit a new set of recorders.
+*/
+//______________________________________________________________________________
+class CropSyst_UED_data_source
+: public Data_source_abstract                                                    //170216
+//170216 : public Data_source
+{private:
+   CropSyst_UED_database  &UED_file;                                             //070223
+ public:
+   inline CropSyst_UED_data_source
+      (CropSyst_UED_database  &_UED_file                                         //070223
+      ,CORN::Date_const_interface /*170525 Date */ &_current_record_time_stamp)
+      : Data_source()
+      , UED_file(_UED_file)                                                      //070223
+      {}
+ public: // Data_source method overrides
+   virtual bool get(Data_record &data_rec) ;
+      /*
+       This reads the data record from the current record position in the database
+       (I.e. current record in the database)
+       If the database is not in a state where is can read any data it returns false.
+       If the database could be read, but there were not maching entries (fields)
+       then it returns false.
+       Returns true if any record entries could be read.
+       Examine each data record entry to determine if it was encountered
+       in the data source.
+      */
+
+protected:
+   virtual bool set_data(Data_record &data_rec,bool append=false);               //170216
+      /*This writes data from data_rec to this data source.
+       Classes derived from Data_record may provide information such
+       as the position of the record in the data file an the Data_source
+       may then need to position the file pointer before writing the record.
+       In classes such as VV_file, a Data_record constitutes all the data in
+       a file, consequently the data can be written out to the file.
+       Returns true if the record could be written.
+       Returns true if there was a problem.
+       This abstract method must be provided by a derived class.
+      */
+};
+//_2901-02-15___________________________________________________________________
+#endif
+//ued_out.h
+

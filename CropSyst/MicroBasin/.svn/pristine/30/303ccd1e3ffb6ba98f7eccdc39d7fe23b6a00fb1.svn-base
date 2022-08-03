@@ -1,0 +1,114 @@
+#include "outputdailysoilclass.h"
+#include "util/pubtools.h"
+//______________________________________________________________________________
+OutputDailySoilClass::OutputDailySoilClass()//SoilProfileClass &_SoilProfileRef)
+    //:SoilProfileRef(_SoilProfileRef)
+:NuL(MAX_soil_layers_alloc)    //LML 140607
+//160415LML ,Current_Year(0)
+//160415LML ,Current_Month(0)
+//160415LML ,Current_DOM(0)
+//160415LML ,Current_DOY(0)
+,Current_Date(0,0)                                                               //160415LML
+,Crop_Name("NONE")
+,Management_Name("NONE")
+,Development_Stage("NONE")
+,Leaf_Area_Index(0)
+,Soil_Water_Actual_Evaporation(0)
+,Snow_Evaporation(0)
+,Plant_Transpiration(0)
+,Daily_Runoff_Excess_Infiltration(0)
+,Daily_Surface_Runoff(0)
+,Daily_Surface_Runon(0)
+,Daily_Lateral_Runoff(0)
+,Daily_Lateral_Runon(0)
+,Daily_Lateral_Up(0)
+,NO3_N_Fertilization(0)
+,NH4_N_Fertilization(0)
+,Nitrate_Leaching(0)
+,Ammonium_Leaching(0)
+,Drainage(0)
+,Fraction_Cover_Snow(0)
+,Daily_Snow_Depth(0)
+,Snow_Melt_Amount(0)
+,Avg_Snow_Surface_T(0)
+,Precipitation_m(0)
+,Mean_Temperature(0)
+,Pond_m(0)
+,Total_SWE(0)
+,Peak_SWE(0)
+,Total_LiqW_m(0)
+,Total_Ice_m(0)
+,AG_Residue_C_Mass(0)
+,BG_Residue_C_Mass(0)
+,SOM_C_Mass(0)
+,AG_Residue_N_Mass(0)
+,BG_Residue_N_Mass(0)
+,SOM_N_Mass(0)
+,NO3_N_Mass(0)
+,NH4_N_Mass(0)
+,Profile_SOM_Carbon_Lost_As_CO2(0)
+,Profile_Residue_Carbon_Lost_As_CO2(0)
+,Maintenance_Respiration(0)
+,Biosynthesis_Efficiency(0)
+,Gross_Canopy_Photosynthesis(0)
+,CO2_by_Plant_Respiration(0)
+,Biomass_Root_Today(0)
+,Biomass_Top_Today(0)
+,Cumulative_Thermal_Time(0)
+//,Potential_Cumulative_Biomass(0)
+//,Actual_Cumulative_Biomass(0)
+//,Actual_Cumulative_Root_Biomass(0)
+,Fraction_Solar_Rad_Intercepted_Green_Canopy(0)
+,Green_Area_Index(0)
+,Crop_Potential_Transpiration(0)
+,Actual_Nitrogen_Uptake(0)
+,Water_Stress_Index(0)
+,Nitrogen_Stress_Index(0)
+,Temperature_Stress_Index(0)
+,Temperature_Stress_Index_Mean(0)
+,Temperature_Stress_Current(0)
+,Root_Depth(0)
+,yield(0)
+,nitrification(0)
+,denitrification(0)
+,mineralization(0)
+,volatilization(0)
+{
+    const int num_solute_species = SL_COUNT;             //ControlRef.getSoluteSpecies();
+    dailyLateralInFlowSolute_kg.resize(num_solute_species,0);
+    dailyLateralOutFlowSolute_kg.resize(num_solute_species,0);
+    dailySurfaceInFlowSolute_kg.resize(num_solute_species,0);
+    dailySurfaceOutFlowSolute_kg.resize(num_solute_species,0);
+    for (int l = 0; l < MAX_soil_layers_alloc; l++) {
+        Layer_Water_Content[l]      = -9999;
+        Layer_Ice_Content[l]        = -9999;
+        Layer_Nitrate_N_Mass[l]     = -9999;
+        Layer_Ammonium_N_Mass[l]    = -9999;
+        Layer_Avg_Daily_Soil_T[l]   = -9999;
+    }
+}
+//______________________________________________________________________________
+OutputDailySoilClass::~OutputDailySoilClass()
+{
+#ifdef Destruct_Monitor
+    //std::cout<<"~OutputDailySoilClass ..."<<std::endl;
+#endif
+    //free(Layer_Water_Content);
+    //free(Layer_Ice_Content);
+    //free(Layer_Nitrate_N_Mass);
+    //free(Layer_Ammonium_N_Mass);
+    //free(Layer_Avg_Daily_Soil_T);
+#ifdef Destruct_Monitor
+    //std::cout<<"~OutputDailySoilClass done."<<std::endl;
+#endif
+}
+//______________________________________________________________________________
+double OutputDailySoilClass::ProfileSoilWater(SoilProfileClass *pSoilProfile)
+{
+    //(mm)
+    double soil_water_mm = 0;
+    for (int L = 1; L <= pSoilProfile->NumberOfLayers(); L++) {
+        soil_water_mm += Layer_Water_Content[L] * pSoilProfile->get_thickness_m(L) * 1000.0;
+    }
+    return soil_water_mm;
+}

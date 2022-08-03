@@ -1,0 +1,633 @@
+Crop:  #1
+Defaults #2
+Available default crop parameters #3
+To load default values, select the crop type.  All current parameter settings will be updated. #4
+Default crop parameters are available for some crop types. #5
+This button will launch the crop calibration utility to calibrate parameters for  location/cultivar. First select the default crop type above.  Note that crop calibration is currently only available for annual crops. #6
+This will open #7
+Calibrate crop parameters #8
+Legend #9
+Blue text indicates the parameter is sensitive and must be carefully calibrated.  Default values may not be adequate. #10
+Black text indicates the default settings are often adequate. #11
+Red text indicates advanced user parameters that are only displayed when the Advanced checkbox is enabled. #12
+Generally these parameters should not be modified unless you know what you are doing. #13
+Show advanced parameters (Normally not displayed) #14
+Classification #15
+Make sure to select the harvested biomass.  It must NOT be set as ''Unknown #16
+Crop model #17
+CropSyst generalized crops (grain, root, and leaf) #18
+CropSyst orchard/vineyard fruit model (fruit trees, stone fruit, grapes) #19
+CROPGRO (Peas, beans, soy, legumes) (not implemented) #20
+Grape #21
+Use this for tea leaf crops #22
+Tea #23
+Land use #24
+Fallow or untilled rows #25
+Row crops #26
+Small grain #27
+Closed seed legumes #28
+Pasture #29
+Life cycle #30
+Indeterminate #31
+Annual #32
+Biennial #33
+Perennial #34
+Photosynthetic pathway #35
+C3 #36
+C4 #37
+Harvested biomass #38
+Seed/ackene #39
+Root #40
+Tuber #41
+Leaf #42
+Fruit #43
+Unknown #44
+Stem type #45
+Herbaceous #46
+Woody #47
+Layout #48
+Orientation #49
+Canopy characteristics #50
+Canopy diameter (m) obsolete #51
+Initial #52
+Final #53
+Tree width across row (m) #54
+Tree height (m) #55
+Tree width along the row (m) #56
+Row azimuth #57
+units #58
+0 = North, 90 = East, 180 = South,  270 = West #59
+Spacing between rows #60
+units #61
+Spacing within rows #62
+units #63
+LAI of crown diameter area #64
+(obsolete) Maximum LAI of canopy crown diameter projected to soil surface #65
+units #66
+0.00 #67
+0.00 #68
+0.00 #69
+0.00 #70
+0.00 #71
+0.00 #72
+Row type (obsolete #73
+Hedge rows #74
+Standard rows (Not yet implemented) #75
+0.00 #76
+0.00 #77
+LAI of crown diameter area #78
+Branch insertion height #79
+m #80
+Emergence #81
+Emergence submodel #82
+Thermal time #83
+Hydrothermal time #84
+Hydrothermal time parameters #85
+Seedling leaf area #86
+cm² #87
+Germination base temperature #88
+units #89
+Mean base soil water potential for 50% emergenceunits #90
+StdDev base soil water potential #91
+units #92
+a #93
+units #94
+b #95
+units #96
+Thermal time accumulation #97
+Thermal time accumulation #98
+Hourly resolution #99
+Daily resolution #100
+Base temperature #101
+°C #102
+Optimum temperature #103
+°C #104
+Maximum temperature #105
+°C #106
+Cutoff temperature #107
+°C #108
+Transpiration #109
+Extinction coefficient for solar radiation #110
+0-1 #111
+ET crop coefficient at full canopy #112
+0.8-1.4 #113
+Maximum water uptake #114
+mm/day #115
+Leaf water potential at the onset of stomatal closure #116
+J/kg #117
+Wilting leaf water potential #118
+J/kg #119
+Maximum water uptake #120
+after maturity #121
+mm/day #122
+during veraison (if applicable) #123
+mm/day #124
+during rapid fruit filling #125
+mm/day #126
+during initial fruit filling #127
+mm/day #128
+before fruiting #129
+mm/day #130
+Attainable growth #131
+Transpiration dependent growth #132
+Otherwise water use efficiency calculated from water productivity, TUE or Tanner & Sinclair methods use the same coefficents through out active growth. #133
+Water use efficiency may differ during vegetative growth and reproductive growth #134
+OBSOLETE Select one of the following transpiration dependent growth submodels #135
+Biomass tranpiration coefficient during reproductive growth (or throughout the season depending on the WUE mode). #136
+Tanner && Sinclair #137
+In successive seasons, growth may be inhibited by various factors such as pests, soil compaction or biophysical changes. The biomass transpiration coefficient may be adjusted for these changes) #138
+Above ground biomass transpiration coefficient for perennials  (k) (obsolete) #139
+This could be a short season for fall planting. #140
+Season 1 #141
+Pa #142
+Transpiration coefficient during vegetative growth #143
+0.00 #144
+Biomass water ratio #145
+Season 2 #146
+Pa #147
+Transpiration coefficient during vegetative growth #148
+0.00 #149
+Biomass water ratio #150
+Season 3 #151
+Pa #152
+Transpiration coefficient during vegetative growth #153
+0.00 #154
+Biomass water ratio #155
+Season 4 #156
+Pa #157
+Transpiration coefficient during vegetative growth #158
+0.00 #159
+Biomass water ratio #160
+Season 5 and on #161
+Pa #162
+Transpiration coefficient during vegetative growth #163
+0.00 #164
+FAO AquaCrop water productivity #165
+In successive seasons, growth may be inhibited by various factors such as pests, soil compaction or biophysical changes. The biomass transpiration coefficient may be adjusted for these changes) #166
+Water productivity for perennials (obsolete) #167
+FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode). #168
+Season 1 #169
+g biomass/kg H2O #170
+Water productivity during vegetative growth #171
+0.00 #172
+FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode). #173
+Season 2 #174
+g biomass/kg H2O #175
+Water productivity during vegetative growth #176
+0.00 #177
+FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode). #178
+Season 3 #179
+g biomass/kg H2O #180
+Water productivity during vegetative growth #181
+0.00 #182
+FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode). #183
+Season 4 #184
+g biomass/kg H2O #185
+Water productivity during vegetative growth #186
+0.00 #187
+FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode). #188
+Season 5 and on #189
+g biomass/kg H2O #190
+Water productivity during vegetative growth #191
+0.00 #192
+Transpiration Use Efficiency curve #193
+In successive seasons, growth may be inhibited by various factors such as pests, soil compaction or biophysical changes. The biomass transpiration coefficient may be adjusted for these changes) #194
+Transpiration Use Efficiency when VPD is at 1kPa for perennials (obsolete) #195
+Transpiration Use Efficiency during reproductive growth (or throughout the season depending on the WUE mode). #196
+Season 1 #197
+g biomass/kg H2O #198
+Transpiration use efficiency during vegetative growth #199
+0.00 #200
+Transpiration Use Efficiency during reproductive growth (or throughout the season depending on the WUE mode). #201
+Season 2 #202
+g biomass/kg H2O #203
+Transpiration use efficiency during vegetative growth #204
+0.00 #205
+Transpiration Use Efficiency during reproductive growth (or throughout the season depending on the WUE mode). #206
+Season 3 #207
+g biomass/kg H2O #208
+Transpiration use efficiency during vegetative growth #209
+0.00 #210
+Transpiration Use Efficiency during reproductive growth (or throughout the season depending on the WUE mode). #211
+Season 4 #212
+g biomass/kg H2O #213
+Transpiration use efficiency during vegetative growth #214
+0.00 #215
+Transpiration Use Efficiency during reproductive growth (or throughout the season depending on the WUE mode). #216
+Season 5 and on #217
+g biomass/kg H2O #218
+Transpiration use efficiency during vegetative growth #219
+0.00 #220
+Thermal time for change of water use efficiency #221
+C-days #222
+Water use efficiency submodel #223
+Tanner && Sinclair #224
+FAO AquaCrop water productivity #225
+Transpiration Use Efficiency curve #226
+Tanner && Sinclair #227
+Biomass water ratio #228
+Above ground biomass transpiration coefficient (K) for annuals #229
+Pa #230
+Transpiration coefficient during vegetative growth #231
+0.00 #232
+FAO AquaCrop water productivity #233
+FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode). #234
+Water productivity  #235
+g biomass/kg water #236
+Water productivity during vegetative growth #237
+0.00 #238
+Transpiration Use Efficiency curve #239
+Transpiration Use Efficiency during reproductive growth (or throughout the season depending on the WUE mode). #240
+Transpiration Use Efficiency when VPD is at 1kPa #241
+g biomass/kg water #242
+Transpiration use efficiency during vegetative growth #243
+0.00 #244
+Scaling coefficient of TUE regression (power function) #245
+units #246
+Scaling coefficient of TUE regression during vegetative growth #247
+0.00 #248
+Radiation dependent growth #249
+Radiation use efficiency #250
+Maximum Radiation Use Efficiency (unstressed, low vapor pressure deficit) #251
+g/MJ #252
+Radiation dependent growth based on #253
+Total radiation #254
+Photosynthetically Active Radiation #255
+Mean daily temperature that limits early growth #256
+°C #257
+Radiation use efficiency #258
+Maximum Radiation Use Efficiency (unstressed, low vapor pressure deficit) PAR #259
+kg/MJ #260
+Seasonal adjustment #261
+In the case of perennials there may be a gradual change of biomass production in successive seasons. Enter multiplier values between 0 and 1 to decrease growth, or values greater than 0 to increase attainable growth. #262
+The first season (sowing year) is not adjusted #263
+Biomass adjustment #264
+Season 1 (Not applicable season 1 is not adjusted) #265
+g biomass/kg H2O #266
+Biomass adjustment season 2 #267
+Season 2 #268
+g biomass/kg H2O #269
+Biomass adjustment season 3 #270
+Season 3 #271
+g biomass/kg H2O #272
+Biomass adjustment season 4 #273
+Season 4 #274
+g biomass/kg H2O #275
+Biomass adjustment season 5 and any following seasons #276
+Season 5 and all following seasons #277
+g biomass/kg H2O #278
+Canopy growth #279
+Leaf Area Index based #280
+See also leaf duration parameters on /senescence\ page #281
+Initial green leaf area index #282
+m²/m² #283
+When there are clipping events or the crop comes out stress or dormancy conditions.this is the minimal green leaf area index available to restart growth. Applies to perennial and/or clipped annuals #284
+Min. green leaf area index for regrowth (perennial and/or clipped annuals) #285
+m²/m² #286
+For fruit tree crops, GAI will be limited to this value. For other crops this is used mainly for output. #287
+Maximum expected leaf area index  (required for fruit trees) #288
+m²/m² #289
+Specific leaf area at optimum temperature #290
+m²/kg #291
+Fraction of max. LAI at physiological maturity #292
+0-1 #293
+Stem/leaf partition coefficient #294
+1-10 #295
+If selected, clipping and grazing operations tend to high standing biomass preferentially #296
+(OBSOLETE) Clipping and grazing operations tend to take high standing new growth biomass preferentially (Claudio does not want this) #297
+Canopy cover based #298
+Initial canopy cover #299
+fraction #300
+Maximum canopy cover #301
+fraction #302
+Green canopy cover at maturity #303
+fraction #304
+Relative thermal time at half maximum canopy cover #305
+fraction #306
+Begin senescence (thermal time) #307
+°C days #308
+Total canopy cover at maturity  (green and senesced) #309
+°C days #310
+Leaf water potential that begins reduction of canopy expansion #311
+J/kg #312
+Leaf water potential that stops canopy expansion (must be more negative than value above that begins reduction) #313
+J/kg #314
+Phenology #315
+Emergence / Start of shoot growth #316
+°C-days #317
+Begin tuber initiation #318
+°C-days #319
+End vegetative growth #320
+°C-days #321
+Begin flowering #322
+°C-days #323
+0 indicates no effect, 1 indicates full effect. #324
+Adjustment factor for phenologic response to stress #325
+0-1 #326
+Physiological maturity #327
+°C-days #328
+Maximum root depth achieved #329
+°C-days #330
+Thermal time to reach: #331
+If enabled, clipping events will reset active growth stage (use for perennials, such as alfalfa, grass and other fodder crops) #332
+Clipping resets active growth #333
+(Generally physiologicial maturity is significant to annual crop and fruit trees and not perennials) #334
+Maturity is significant #335
+Begin filling (seed filling, or orchard fruit filling, or tuber bulking) #336
+°C-days #337
+Veraison for grapes #338
+Begin rapid fruit growth #339
+°C-days #340
+Vernalization #341
+Vernalization enabled #342
+Low temperature for optimal vernalization #343
+°C #344
+High temperature for optimal vernalization #345
+°C #346
+Vernalization days to enable vernalization  #347
+Vern days #348
+Vernalization days required to complete vernalization #349
+Vern days #350
+Minimum vernalization factor #351
+0-1 #352
+Root #353
+Established root depth for established fruit trees #354
+Maximum root depth #355
+m #356
+Root length per unit root mass #357
+km/kg #358
+Surface root density #359
+cm/cm³ #360
+Curvature of root density distribution #361
+0.0001-6.0 #362
+Act. to pot. transpiration ratio that limits root growth #363
+0-1 #364
+Fruit #365
+Ignore the following parameters for a new fruit model that is currently being developed and not yet implement #366
+Initial fruit mass #367
+grams #368
+Initial reserves rate of release #369
+units #370
+Maximum fruit load (fresh mass) #371
+kg/ha #372
+For grapes this may be referred to as ''Fraction of total solids #373
+Fraction of fruit dry matter #374
+0-1 #375
+(Obsolete 071127)  Fraction of above ground biomass apportioned to fruit after flowering #376
+kg/ha #377
+During veraison for grapes. After fruit set for other fruits #378
+(Obsolete 071127) Fraction of above biomass apportioned to fruit during accelerated fruit growth #379
+0-1 #380
+Grape #381
+Clusters per vine #382
+clusters #383
+Berries per cluster #384
+units #385
+Pome, Drupe, Hesperidium etc.. #386
+Target fruits per tree #387
+Fruits #388
+CROPGRO #389
+CropGro Input file (.INP) #390
+Photo-period #391
+Photo-period enabled (obsolete) #392
+Day length (obsolete) #393
+Day length to inibit flowering #394
+hours #395
+Day length for insensitivity #396
+hours #397
+Consideration #398
+none #399
+Short-day crop #400
+Long-day crop #401
+Day length affects flowering development #402
+day length above which #403
+day length below which #404
+development is stopped #405
+hours #406
+development is not constrained #407
+hours #408
+Harvest #409
+Unstressed harvest index #410
+0-1 #411
+Sensitivity to water and nitrogen stress during active growth #412
+0-1 #413
+Grain #414
+Sensitivity to water and nitrogen stress during flowering #415
+0-1 #416
+OBSOLETE 981125 #417
+during grain filling #418
+0-1 #419
+OBSOLETE 081125 #420
+Translocation to grain factor #421
+0-1 #422
+obsolete always available to all grains #423
+Sensitive to temperature stress #424
+Temperature stress sensitivity during flowering #425
+units #426
+Duration of grain filling period (unstressed) #427
+days #428
+Tuber #429
+Sensitivity to water and nitrogen stress #430
+during tuber initiation #431
+0-1 #432
+during tuber growth #433
+0-1 #434
+Fruit #435
+(Obsolete 071127) Translocation to fruit factor #436
+0-1 #437
+Harvest conditions #438
+Harvest is scheduled in management file #439
+Harvest on a fixed date #440
+Harvest between specified dates considering minimum air temperature #441
+Harvest between specified dates considering average air temperature #442
+description_label #443
+units #444
+description_label #445
+units #446
+description_label #447
+units #448
+description_label #449
+units #450
+Dormancy/Seasonal #451
+Single season #452
+This mode is has no additional parameters and the crop tends to remain in maturity until harvest. #453
+This mode is most commonly used for annual, biennial or (sometimes) perennial crops that are not allowed to (or cannot) grow to a second season.  This mode is also usually used for winter crops. #454
+Multiple season #455
+Plants may go into a state of inactivity (but not necessarily dormancy) that typifies the end of the season. #456
+This mode is use for biennial or perennial crops or plants that can propogate themselves and tend to persist for multiple seasons (I.e. grasses). #457
+Number of days of consective zero thermal time accumulation that represents (obsolete 080401) #458
+the end of the growing season(obsolete 080401)units #459
+the start of the growing season (obsolete 080401) #460
+units #461
+Dormancy #462
+Dormancy is important for perennials, biannuals, and orchard/vineyard fruits, but may be applicable to certain other crops as well.  Plants will become inactive so the inactive period parameters are significant. #463
+For perennial crops that hold on to canopy biomass through winter.  Use 100% if there is full leaf drop. #464
+Biomass that senesces at the onset of dormancy% #465
+For perennials, grapes and fruit trees  (Obsolete, now select dormancy season model) #466
+Dormancy enabled #467
+Chill requirements for fruit trees #468
+Thermal time to bud break (chill requirement satisfied) #469
+°C-days #470
+Thermal time to bud break (chill requirement not satisfied) #471
+°C-days #472
+Chill requirement #473
+hours #474
+Threshold temperature for chill requirement (not currently used) #475
+°C #476
+7-day average temperature for bud break (obsolete) #477
+°C #478
+Inactive period #479
+First date to start looking for inactive period (end of season) #480
+First date to start looking for restart after inactive period (start of season) #481
+Number of days of consecutive of average daily temperature below the inducement temperature that identifies #482
+Average temperature over these consecutive days below which inactivity is induced #483
+Average temperature over these consecutive days below which inactivity is induced #484
+°C #485
+date #486
+date #487
+an end or restart of growth activity #488
+days #489
+Senescence #490
+For "shed" mode, after dormancy, senesced biomass (from the previous season) sloughs of immediately.  Biomass produced during the current season is retained until dormancy. #491
+Lingers mode may be needed for perennials (I.e. grasses) where senesced biomass (typically leaf and stem) remains ''on'' the plant before falling off and becoming decomposing residue. #492
+What happens to biomass as it dies on the plant #493
+Senesced biomass fate #494
+Endures - Senesced biomass is retained on the plant as long as it is alive (annuals and some perennials). #495
+Sheds - Senesced biomass is retained until dormancy (perennials) or termination (annuals). #496
+Lingers - Senesced biomass lingers with the plant but eventually sloughs off. #497
+Deciduous #498
+Senesces (note that perennials may now have leaf senescence) #499
+LAI duration (for LAI based canopy growth) #500
+This is a critical growth parameter. #501
+Leaf area duration #502
+units #503
+Leaf area duration sensitivity to water stress #504
+0-3 #505
+Time that senesced leaves linger with (remain standing/attached to) the plant #506
+days #507
+Hardiness #508
+Cold temperature sensitivity #509
+leaf/canopy #510
+Cold temperature which beings to damage crop°C #511
+Cold temperature which is lethal to crop #512
+°C #513
+Number of days before maturity to salvage yield #514
+Days #515
+Fruit #516
+0.00 #517
+0.00 #518
+Sensitive to cold temperatures #519
+Residue #520
+Top biomass #521
+Root biomass #522
+deprecated #523
+For organic matter and residue submodes there is only a single residue pool and C/N ratio is calculated. #524
+Fast cycling #525
+Slow cycling #526
+Lignified biomass #527
+deprecated #528
+All biomass #529
+(0-1) #530
+(0-1) #531
+(0-1) #532
+Checksum #533
+Area of residue cover to residue biomass ratio (obsolete) #534
+m²/kg #535
+Top and root carbon fraction #536
+units #537
+0.00 #538
+0.00 #539
+0.00 #540
+0.00 #541
+0.00 #542
+0.00 #543
+deprecated #544
+0.00 #545
+deprecated #546
+0.00 #547
+deprecated #548
+0.00 #549
+Stubble area covered to mass ratio #550
+m²/kg #551
+Flattened surface residue area covered to mass ratio #552
+m²/kg #553
+deprecated #554
+0 #555
+0.00 #556
+0.00 #557
+RUSLE2 residue type #558
+unknown (defaults to moderate) #559
+fragile/very small (I.e.soybeans) #560
+mod. tough/short (I.e.wheat) #561
+nonfragile/med. (I.e. corn) #562
+woody/large #563
+Generally these don''t need to be modified. #564
+Advanced parameters #565
+Number of days to reach 50% decomposition (days) #566
+Accounts for disintegration as a result of physical processes such as wind damage, abrasion, photodegradation, etc.. #567
+Days to 50% detrition #568
+0.00 #569
+0.00 #570
+0.00 #571
+Accounts for disintigration as a result of physical processes such as wind damage, abrasion, photodegradation, etc.. #572
+0.00 #573
+Carbon/Nitrogen ratio (no longer in UI) #574
+Number of days to decompose 63% (obsolete) #575
+Days #576
+Number of days to decompose 50% obsolete #577
+Days #578
+Nitrogen #579
+Minimum N concentration at harvest  (obsolete) #580
+kgN/kgDM #581
+Potential N uptake submodel (obsolete) #582
+Original with N availability, and residual N  adjustments (will be obsolete in V5) #583
+New  improved root length factor  (added V4.6) #584
+Potential N uptake (obsolete) #585
+Nitrogen availability adjustment #586
+0-2 #587
+Residual nitrogen per soil layer #588
+kg/ha #589
+Nitrogen concentration ranges (deprecated) #590
+Maximum N concentration during early growth #591
+kgN/kgDM #592
+Maximum N concentration at maturity #593
+kgN/kgDM #594
+Minimum N concentration at maturity #595
+kgN/kgDM #596
+Leaf expansion is reduced when canopy N concentration falls below  #597
+No effect of nitrogen stress (as prior to version 4.07.05) #598
+the critical level with full stress at the minimum level #599
+the midpoint between  the maximum and critical levels with full stress at the midpoint between the critical and minimum levels #600
+Demand #601
+N demand adjustment #602
+kgN/kgDM #603
+Maximum N concentration of chaff and stubblekgN/kgDM #604
+Maximum N concentration of roots #605
+kgN/kgDM #606
+Potential uptake #607
+Maximum uptake during rapid linear growth #608
+kgN/ha/day #609
+Residual N not available for uptake #610
+ppm #611
+Soil N concentration at which N uptake starts decreasing #612
+ppm #613
+Plant available water at which N uptake starts decreasing #614
+0-1 #615
+Nitrogen uptake adjustment (obsolete) #616
+0-2 #617
+These parameters are optional but frequently desirable.  They are not used unless the nitrogen simulation submodel is enabled (Under scenario model options) #618
+Nitrogen fixation (I.e. for legumes) #619
+Salinity #620
+These parameters are optional.  They are not used unless the salinity simulation submodel is enabled (in the scenario model options) #621
+Soil solution osmotic potential for 50% yield reduction #622
+kPa #623
+Salinity tolerance exponent (p) #624
+1-5 #625
+CO2 #626
+These parameters are optional.  They are not used unless the CO2 simulation submodel is enabled (in the scenario model options) #627
+Baseline reference atmospheric CO2 concentration #628
+ppm #629
+Elevated reference atmospheric CO2 concentration #630
+ppm #631
+Elevated to baseline growth ratio #632
+1-2 #633

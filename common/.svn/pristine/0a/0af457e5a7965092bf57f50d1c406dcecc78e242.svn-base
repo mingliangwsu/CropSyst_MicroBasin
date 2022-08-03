@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="weather_static" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="libweather_static" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-I ~/dev" />
+					<Add option="-Wno-unknown-pragmas" />
+					<Add option="-Wno-reorder" />
+					<Add option="-DCS_VERSION=4" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="libweather_static" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="../../../../weather" />
+			<Add directory="../../../../../common" />
+		</Compiler>
+		<Unit filename="../../../GEN_DAT_filename.cpp" />
+		<Unit filename="../../../any_timestep/min_max_to_timestep_estimator.cpp" />
+		<Unit filename="../../../any_timestep/relhumid_est.cpp" />
+		<Unit filename="../../../any_timestep/temperature_est.cpp" />
+		<Unit filename="../../../atmospheric_CO2_change_interface.cpp" />
+		<Unit filename="../../../atmospheric_CO2_change_linear.cpp" />
+		<Unit filename="../../../atmospheric_CO2_change_recalibration.cpp" />
+		<Unit filename="../../../daily.cpp" />
+		<Unit filename="../../../database/common_weather_creators.cpp" />
+		<Unit filename="../../../database/common_weather_monthly_creators .cpp" />
+		<Unit filename="../../../database/weather_DAT_GEN_database.cpp" />
+		<Unit filename="../../../database/weather_UED_database.cpp" />
+		<Unit filename="../../../database/wthrfile.cpp" />
+		<Unit filename="../../../day/sun_days.cpp" />
+		<Unit filename="../../../day/vapor_pressure_day.cpp" />
+		<Unit filename="../../../day/weather_day.cpp" />
+		<Unit filename="../../../hour/ET_irrad_hour.cpp" />
+		<Unit filename="../../../hour/solar_irrad_hour.cpp" />
+		<Unit filename="../../../hour/sun_hours.cpp" />
+		<Unit filename="../../../hour/weather_hours.cpp" />
+		<Unit filename="../../../loc_param.cpp" />
+		<Unit filename="../../../parameter/WP_air_temperature.cpp" />
+		<Unit filename="../../../parameter/WP_atmospheric_pressure.cpp" />
+		<Unit filename="../../../parameter/WP_dew_point_temperature.cpp" />
+		<Unit filename="../../../parameter/WP_precipitation.cpp" />
+		<Unit filename="../../../parameter/WP_relative_humidity.cpp" />
+		<Unit filename="../../../parameter/WP_solar_radiation.cpp" />
+		<Unit filename="../../../parameter/WP_temperature.cpp" />
+		<Unit filename="../../../parameter/WP_vapor_pressure.cpp" />
+		<Unit filename="../../../parameter/WP_vapor_pressure_act.cpp" />
+		<Unit filename="../../../parameter/WP_vapor_pressure_deficit.cpp" />
+		<Unit filename="../../../parameter/WP_wind_speed.cpp" />
+		<Unit filename="../../../parameter/weather_parameter.cpp" />
+		<Unit filename="../../../sky.cpp" />
+		<Unit filename="../../../snow.cpp" />
+		<Unit filename="../../../solar_rad.cpp" />
+		<Unit filename="../../../storm_event.cpp" />
+		<Unit filename="../../../stormgen.cpp" />
+		<Unit filename="../../../sun.cpp" />
+		<Unit filename="../../../weather.cpp" />
+		<Unit filename="../../../weather_types.cpp" />
+		<Unit filename="../../../wind.cpp" />
+		<Unit filename="../../../wthr.cpp" />
+		<Unit filename="../../../wthrbase.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,52 @@
+#include <corn/image/gif/common.h>
+#include <corn/image/gif/control.h>
+
+/*______*/
+/*______*/  void GIF_control_extension::read(Binary_fstream &in_strm)
+/*______*/  {
+/*______*/    // extension introducer and graphic control label
+/*______*/    // will already have been read in order to determine
+/*______*/    // that this is a graphic control extension.
+/*______*/    uint8 block_size = in_strm.get();  // block size is not used, should be 4
+/*______*/
+/*______*/    uint8 packed = in_strm.get();
+/*______*/    disposal_method = (packed & 0x1C) >> 2;
+/*______*/    user_input = (packed & 0x02) != 0;
+/*______*/    use_transparent_color = packed & 0x01;
+/*______*/
+/*______*/    delay_time = in_strm.read_uint16();
+/*______*/    transparent_color = in_strm.get();
+/*______*/    uint8 block_terminator = in_strm.get();  // block terminator, should be 0
+/*______*/
+/*______*/    enabled = true;
+/*______*/  };
+/*______*/
+/*______*/  void GIF_control_extension::write(Binary_fstream &out_strm)
+/*______*/  {
+/*______*/    out_strm.put(GIF_extension_introducer);
+/*______*/    out_strm.put(GIF_graphic_control_extension);
+/*______*/    out_strm.put((uint8)4); // size of the control block
+/*______*/    uint8 packed
+/*______*/    = ((byte)disposal_method << 2)
+/*______*/    | (user_input ? 0x02 : 0x00)
+/*______*/    | (use_transparent_color ? 0x01 : 0x00);
+/*______*/
+/*______*/    out_strm.put(packed);
+/*______*/    out_strm.write_uint16(delay_time);
+/*______*/    out_strm.put(transparent_color);
+/*______*/    out_strm.put((uint8)0);
+/*______*/  };
+/*______*/
+/*______*/  void GIF_control_extension::copy_from(const GIF_control_extension& to_be_copied)
+/*______*/  {
+/*______*/      disposal_method = to_be_copied.disposal_method;
+/*______*/      user_input = to_be_copied.user_input;
+/*______*/      use_transparent_color = to_be_copied.use_transparent_color;
+/*______*/      delay_time = to_be_copied.delay_time; // number of hundreths of a second
+/*______*/      transparent_color = to_be_copied.transparent_color;
+/*______*/      enabled = to_be_copied.enabled;
+/*______*/  };
+
+
+
+

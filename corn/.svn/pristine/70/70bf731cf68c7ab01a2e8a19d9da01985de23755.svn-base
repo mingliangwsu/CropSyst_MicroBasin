@@ -1,0 +1,45 @@
+#ifndef import_export_tableH
+#define import_export_tableH
+#include "corn/tabular/tabular_text.h"
+#include "corn/OS/directory_entry_name.h"
+//___________________________________________________________________________
+namespace CORN { namespace MicroSoft { namespace Access {
+/*161013
+class Import_export_table_delineation
+: public CORN::Delineation_layout
+{public:
+   Import_export_table_delineation();
+};
+//___________________________________________________________________________
+*/
+
+struct Import_export_table_format
+: public extends_ Tabular_format_text_file
+{public:
+   Import_export_table_format();
+};
+//_2016-10-13___________________________________________________________________
+/*161013
+extern Import_export_table_delineation delineation;
+extern CORN::Extent_layout             extent;
+*/
+//______________________________________________________________________________
+class Import_export_table
+: public CORN::Tabular_text_file
+{  CORN::Dynamic_array<nat32>    NA_column_widths; // Not applicable
+   CORN::Dynamic_array<nat32>    NA_column_start;  // Not applicable
+ public:
+   Indexer/*150731 _abstract*/        *indexer_known;
+   CORN::Data_record       *record_for_indexing_owned;
+ public:
+   Import_export_table
+      (const CORN::OS::File_name &_filename
+      ,bool                   _keep_read_records_in_memory
+      ,Indexer /*150731 _abstract*/      *_optional_indexer_known = 0
+      ,CORN::Data_record     *_record_for_indexing_given = 0);                   //111024
+   virtual ~Import_export_table();
+   bool goto_file_position(nat32 file_pos)                          performs_IO_;
+};
+//___________________________________________________________________________
+ } } } //namespace CORN MicroSoft Access
+#endif

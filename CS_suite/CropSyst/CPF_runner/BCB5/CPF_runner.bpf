@@ -1,0 +1,18 @@
+USELIB("C:\temp\lib\BCB5\release\ued_static.lib");
+USELIB("C:\temp\lib\BCB5\release\corn_complete_static.lib");
+USELIB("C:\temp\lib\BCB5\release\common_sim_static.lib");
+USELIB("C:\temp\lib\BCB5\release\CS_directory.lib");
+USEUNIT("..\..\..\..\corn\format\binary\binary_file_abstract.cpp");
+USEUNIT("..\..\..\..\corn\format\binary\binary_file_fstream.cpp");
+USEUNIT("..\CPF_runner_main.cpp");
+USEUNIT("..\..\..\..\CropSyst\source\project\optimization\crop_production_function\CPF_water.cpp");
+USEUNIT("..\..\..\..\CropSyst\source\cs_scenario_directory.cpp");
+USEUNIT("..\..\..\file_system\database_directory.cpp");
+USEUNIT("..\..\..\..\CropSyst\source\crop\growth_stages.cpp");
+USEUNIT("..\..\..\..\CropSyst\source\management\management_param_class.cpp");
+USEUNIT("..\..\..\..\CropSyst\source\management\management_param_struct.cpp");
+USEUNIT("..\..\..\..\CropSyst\source\management\management_param_V4.cpp");
+//---------------------------------------------------------------------------
+This file is used by the project manager only and should be treated like the project file
+
+main

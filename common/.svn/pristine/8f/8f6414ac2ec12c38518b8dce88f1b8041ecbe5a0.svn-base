@@ -1,0 +1,4 @@
+char *TL_Precipitation ="Precipitation";
+char *TL_Solar_radiation ="Solar radiation";
+char *TL_Snow_storage ="Snow storage";
+char *TL_Temperature ="Temperature";

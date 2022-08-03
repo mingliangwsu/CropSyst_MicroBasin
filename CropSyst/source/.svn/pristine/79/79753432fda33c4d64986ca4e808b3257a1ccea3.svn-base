@@ -1,0 +1,35 @@
+#ifndef disturbanceH
+#define disturbanceH
+
+#include "corn/datetime/date.hpp"
+#include "common/soil/layering.h"
+#include "mgmt_param.h"
+class Soil_hydrology_interface;
+class Soil_texture_interface;
+//______________________________________________________________________________
+class Soil_disturbance
+{
+ private:
+   nat8                       deepest_layer_affected;
+   const Soil_hydrology_interface   &hydrology;
+   const Soil_texture_interface     &texture;
+   soil_layer_array64         (rating); // soil_disturbance_rating (from NRCS SDR table,  this is additive for each operation performed).
+   soil_layer_array64         (decomposition_adjustment_factor);   // A value of one has no effect
+   CropSyst::Tillage_operation::Oxidation_effect oxidation_effect;               //100121
+ public:
+   Soil_disturbance
+      (const Soil_hydrology_interface  &hydrology
+      ,const Soil_texture_interface    &texture);                                //131001
+   bool process();
+   // Returns true if soil disturbance is still significant
+   // (if not significant, the soil disturbance can be deleted).
+   float64  add_rating(float64 _rating, uint8 affected_layers_now); // applied to all affected layers
+   inline float64 get_decomposition_adjustment_factor(uint8 layer)         const { return decomposition_adjustment_factor[layer];}
+   void set_oxidation_effect(const CropSyst::Tillage_operation::Oxidation_effect &_oxidation_effect);  //100121
+ private:
+   float64  calc_tillage_intensity(float64 clay, float64 SDR)              const;
+   float64  decay(float64 available_water)                                 const;//070801
+};
+//_2006-08-07___________________________________________________________________
+#endif
+

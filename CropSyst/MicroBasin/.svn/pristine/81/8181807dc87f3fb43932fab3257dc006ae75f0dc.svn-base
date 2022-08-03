@@ -1,0 +1,149 @@
+#include "weathersingleyearclass.h"
+#include "util/pubtools.h"
+#include "control/allcontrolclass.h"
+
+#include "stdlib.h"
+#include <iostream>
+#include <fstream>
+#ifdef _MSC_VER
+#include <sstream>
+#endif
+
+//extern AllControlClass control;
+
+WeatherSingleYearClass::WeatherSingleYearClass(int _ndays)
+{
+    num_days = _ndays;
+    initMem();
+};
+
+WeatherSingleYearClass::~WeatherSingleYearClass()
+{
+#ifdef Destruct_Monitor
+    std::cout<<"~WeatherSingleYearClass:"<<std::endl;
+#endif
+
+    clearMem();
+#ifdef Destruct_Monitor
+    std::cout<<"~WeatherSingleYearClass done."<<std::endl;
+#endif
+};
+
+void WeatherSingleYearClass::initDayMet()
+{
+    //Initialize daily met data with invalid label
+    for(int yday = 0; yday < num_days; yday++){
+        P[yday] = control.getInvalidMetLabel();
+        T_max[yday] = control.getInvalidMetLabel();
+        T_min[yday] = control.getInvalidMetLabel();
+        Srad[yday] = control.getInvalidMetLabel();
+        Rel_Hum_Max[yday] = control.getInvalidMetLabel();
+        Rel_Hum_Min[yday] = control.getInvalidMetLabel();
+        Wind[yday] = control.getInvalidMetLabel();
+    }
+}
+
+void WeatherSingleYearClass::initMem()
+{
+    //Day_Of_Year = alloc_1d_array<double>(num_days,"WeatherSingleYearClass::Day_Of_Year");
+    P = alloc_1d_array<double>(num_days,"WeatherSingleYearClass::Precip");                     //(370) As Double
+    T_max = alloc_1d_array<double>(num_days,"WeatherSingleYearClass::T_max");                      //(370) As Double
+    T_min = alloc_1d_array<double>(num_days,"WeatherSingleYearClass::T_min");                      //(370) As Double
+    Srad = alloc_1d_array<double>(num_days,"WeatherSingleYearClass::Srad");                       //(370) As Double
+    Rel_Hum_Max = alloc_1d_array<double>(num_days,"WeatherSingleYearClass::Rel_Hum_Max");                //(370) As Double
+    Rel_Hum_Min = alloc_1d_array<double>(num_days,"WeatherSingleYearClass::Rel_Hum_Min");                //(370) As Double
+    Wind = alloc_1d_array<double>(num_days,"WeatherSingleYearClass::Wi_nd");                      //(370) As Double
+};
+
+void WeatherSingleYearClass::clearMem()
+{
+    //free(Day_Of_Year);
+    free(P);
+    free(T_max);
+    free(T_min);
+    free(Srad);
+    free(Rel_Hum_Max);
+    free(Rel_Hum_Min);
+    free(Wind);
+};
+
+void WeatherSingleYearClass::Read_Weather_File(const char* filename)
+{
+    int d,i;
+    double prec,Tx,Tn,SR,HRx,HRn,WS;
+    char errormessage[200];
+    std::string line;
+#ifdef _MSC_VER
+    std::stringstream ss;
+#else
+    char ss[300];
+#endif
+
+    std::ifstream metFile;
+
+    initDayMet();
+
+    //i = 0;
+    metFile.open(filename);
+    if(metFile.is_open()){
+        while(std::getline(metFile,line)){
+#ifdef _MSC_VER
+            ss.clear();
+            ss.str(line);
+#else
+            memset(&ss[0], 0x00, sizeof(ss));
+            line.copy(ss,line.length(),0);
+#endif
+
+#ifdef _MSC_VER
+            if(ss >> d >> prec >> Tx >> Tn >> SR >> HRx >> HRn >> WS){
+#else
+            if(sscanf(ss,"%d %lf %lf %lf %lf %lf %lf %lf",&d,&prec,&Tx,&Tn,&SR,&HRx,&HRn,&WS) == 8){
+#endif
+                //Day_Of_Year[i] = d;
+                P[d-1] = prec;
+                T_max[d-1] = Tx;
+                T_min[d-1] = Tn;
+                Srad[d-1] = SR;
+                Rel_Hum_Max[d-1] = HRx;
+                Rel_Hum_Min[d-1] = HRn;
+                Wind[d-1] = WS;
+            }
+        }
+    }
+    else{
+        sprintf(errormessage,"Can't ope file %s",filename);
+        nrerror(errormessage);
+    }
+
+    metFile.close();
+};
+
+double WeatherSingleYearClass::getPrecipitation(int doy)
+{
+    return(P[doy]);
+};
+double WeatherSingleYearClass::getTmax(int doy)
+{
+    return(T_max[doy]);
+};
+double WeatherSingleYearClass::getTmin(int doy)
+{
+    return(T_min[doy]);
+};
+double WeatherSingleYearClass::getSolRad(int doy)
+{
+    return(Srad[doy]);
+};
+double WeatherSingleYearClass::getRelHumMax(int doy)
+{
+    return(Rel_Hum_Max[doy]);
+};
+double WeatherSingleYearClass::getRelHumMin(int doy)
+{
+    return(Rel_Hum_Min[doy]);
+};
+double WeatherSingleYearClass::getWind(int doy)
+{
+    return(Wind[doy]);
+};

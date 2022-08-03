@@ -1,0 +1,4 @@
+char *TL_Precipitation =" translate(L_Precipitation );
+char *TL_Solar_radiation =" translate(L_Solar_radiation );
+char *TL_Snow_storage =" translate(L_Snow_storage );
+char *TL_Temperature =" translate(L_Temperature );

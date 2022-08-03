@@ -1,0 +1,51 @@
+#  include <string.h>
+#  include <math.h>
+#  include "corn/math/moremath.h"
+#  include "UED/library/units_def.h"
+
+// for fpreset
+#include <float.h>
+namespace UED {                                                                  //070718
+//______________________________________________________________________________
+#ifdef UED_DUMP
+using namespace std;
+void Units_definition::dump(std::ostream &txt_strm)
+{  char units_code_label[512];
+   label_cstr(units_code_label);                                                 //030208
+   txt_strm << units_code_label << " | Units code " << endl;
+   txt_strm << description.c_str() << " | Description" << endl;
+}
+#endif
+//_1998-08-05___________________________________________________________________
+const char *Units_definition::label_cstr(char *buffer)                     const
+{  if (description.length())                                                     //980624
+      strcpy(buffer,description.c_str()) ;
+   else Units_clad::label_cstr(buffer);                                          //020126
+   return buffer;
+}
+//_2003-01-23___________________________________________________________________
+const std::string &Units_definition::get_abbreviation(std::string &result) const
+{  result.assign(abbreviation);
+   return result;
+}
+//_1999-05-07__2002-01-30_______________________________________________________
+Units_definition::Units_definition(UED_units_code _code)
+:Item()
+,Units_clad(_code)
+,description()
+,abbreviation()
+{  char desc_cstr[100]; desc_cstr[0] = 0;                                        //030123
+   char abbr_cstr[100]; abbr_cstr[0] = 0;
+   compose_description(desc_cstr,abbr_cstr);
+   description.assign(desc_cstr);                                                //030123
+   abbreviation.assign(abbr_cstr);                                               //030123
+}
+//_1999-04-12___________________________________________________________________
+nat32 Units_definition::compute_units_format_size() const
+{  return sizeof(UED_units_code)
+      + description.length()+1
+      + abbreviation.length()+1;
+}
+//_1998-06-24___________________________________________________________________
+} // namespace UED
+

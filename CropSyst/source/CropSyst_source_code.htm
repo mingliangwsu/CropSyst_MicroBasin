@@ -1,0 +1,683 @@
+<H1>CropSyst source code</H1>
+
+<H2>Distribution</H3>
+
+The files in this directory and subdirectories comprise the CropSyst cropping simulation model.
+The CropSyst source code is <B>not public domain</B>.
+At this time the source code should not be considered fully open source
+only in that the authors be should be informed of its use and derivative work
+there of; and we would prefer that this code not be distributed without informing the authors:
+Claudio Stockle stockle@wsu.edu, Roger Nelson rnelson@wsu.edu.
+We would prefer/recommend the source code be distributed by means and
+mechanisms provided by the authors 
+(Currently we are using the 
+<A HREF="http://subversion.tigris.org">
+Subversion (SVN) revision control server software
+</A>) which facilites distributing the latest version of
+the provided source code.
+
+<P>
+Otherwise this source code should be considered to fall under the terms
+of the 
+<A HREF="http://opensource.org/licenses/academic.php"> 
+The Academic Free License
+</A>
+If you happen to have received this source code and would like to use 
+all or portions of it in your own models, 
+please inform the authors so that announcements of current versions, updates and corrections 
+and other notifications can be provided.
+<P>
+The authors would not like to see many CropSyst model clones that are 
+not well maintained and not using the latest model.
+<P>
+As in the spirit of  open source software, the authors 
+reserve the right to obtain and inspect executable software and
+the source code that has been derived from this source code.
+
+
+<P>
+CropSyst was developed using the Borland/CodeGear/Embarcadero C++ Builder compiler.
+We also currently actively maintain versions for Linux using Qt and GCC C++ and Intel ICC compilers.
+We have compiled most of the source code using: Sun FORTE, SunStudio,
+HPUX C++, Qt, and Code::Blocks  under Sun Unix, HPUX and Linux respectively
+although these build projects have not been recently used and may need to be updated.
+<P>
+<H2>Localization / Foreign language </H2>
+ 
+CropSyst has some support for providing outputs in foreign languages.
+Contact me (rnelson@wsu.edu) if you need foreign language outputs.
+
+<P>
+<H2>Compiling the executable</H2>
+While this directory contains all the source code used by the <B>CropSyst proper</B> model
+[<B ID="proper">CropSyst proper</B> refers to  the full CropSyst model that is
+compiled and distributed as part of the CropSyst Suite modeling package.]
+This is a single site simulation.
+We also have a more specialized version suitable for running region scale simulations
+on a Linux cluster.
+<P>
+In order to compile and link to the CropSyst code to produce a working executable, 
+other source files and libraries created and maintained by the authors are required
+to be obtained and built before compiling the CropSyst executable, see the table below.
+<P>
+Solutions/Projects for building the executable (as well as the supporting libries) are found in the
+directory <B>build</B> with a separate subdirectory for each
+supported Integrated Development Environment (IDE), and subsubdirectories
+for the various versions of the respective IDE.  
+For compiling with a vanilla C++ compiler such as gcc or icc, 
+Makefiles are provided in the gcc and icc directories.
+Since the gcc and icc compilers are so very similary, for most
+programs and libraries, most of the Makefile options common to both compilers
+are found in a Makefile included from the Xcc directory.
+<EM>
+Note that the projects for the older versions of the various IDE softare are not likely 
+maintained and kept up to date.
+</EM>
+Currently only the C++Builder RadStudio 2010(Windows) 
+Qt (Windows and Linux)
+and Code::Blocks (Linux) (to a limited extent)
+projects have been recently actively maintained for CropSyst version 4.
+(a Qt project can be easily provided if needed, please ask).
+Gcc and Icc Makefiles for many projects are generally maintained,
+but these are not used as frequently as C++Builder and Qt projects.
+
+ 
+<H2>Creating a new model derived from  the CropSyst simulation engine</H2>
+
+CropSyst has a monolithic modeling engine.
+There are 4 classes that can serve as a superclass to derive
+a new model having the basic simulation control structure of <A HREF="#proper">CropSyst proper</A>
+using this engine.
+
+<TABLE BORDER=1>
+<CAPTION>CropSyst model
+</CAPTION>
+<TR><TH>Class<TH>Source unit file<TH>Description<TH>Suitability
+<TR><TD>Land_unit_simulation_VX
+    <TD>land_unit_sim (.cpp .h)
+    <TD>The core modeling engine used by all versions of CropSyst
+    <TD>Use this class if you don't need the features of the specific CropSyst version.
+<TR><TD>Land_unit_simulation
+    <TD>land_unit_sim (.cpp .h)
+    <TD>The modeling engine supporting features unique to 
+        a specific version of CropSyst (I.e. only in version 4 or only in version 5).
+    <TD>Use this class if you want to extend of the features of the specific version
+        to your new model.
+        This class is conditionally compiled.
+        You must #define  the macro for the target version in the IDE project
+        (or  macro definition list in a makefile)
+        (currently either  CROPSYST_VERSION=4 or CROPSYST_VERSION=5)
+<TR><TD>Land_unit_with_output
+    <TD>land_unit_output (.cpp .h)
+    <TD>This extends the Land_unit_simulation class 
+        to the various provided output files (UED files and reports)
+    <TD>Extend from this class if you want the CropSyst output files.
+        (Note that in version 5 Excel reports are no longer generated at run time.)
+        If you don't want the CropSyst canonical outputs,
+        I.e. if you intend to store the model outputs directly to
+        custom reports or send to a database system, this class probably won't be needed.
+<TR><TD>Cropping_system_simulation
+    <TD>cs_simulation  (.cpp .h)
+    <TD>This is used for simultaneous simulation of multiple land units
+        The class stores the weather provider shared by all the land units
+        (all the land units have the same weather).
+        This class is used in conjunction with  Land_unit_simulation_VX
+        derived classes.
+    <TD>This class is used when there is some sort of interaction between the
+       land units.  For example this is used by the watershed hydrology,
+       It would be used for other spatially significant simulations, I.e. intercropping
+       or where other models are integrated with CropSyst with the same (daily) timestep
+       (I.e. whole farm systems with multiple fields).
+       This class does not define or process the interaction between the land units,
+       or other models it only synchronizes the time step and provides the common weather store.
+<TR><TD>CropSyst_Model
+    <TD>cs_mod  (.cpp .h)
+    <TD>This class extends Cropping_system_simulation to provide
+        specialize features of <A HREF="#proper">CropSyst proper</A> (some of which are becoming obsolete).
+    <TD>Usually it will not be necessary to include or extend this class
+        for other models based on the CropSyst engine.
+</TABLE>
+
+
+<H2>Using CropSyst submodels in another model</H2>
+
+Although the CropSyst simulation engine is considered to be monolithic,
+the CropSyst submodels are, for the most part, modularized
+within the C++ programming context.  
+Where there are interactions between modules (I.e. crop and soil and weather),
+abstract interface classes have been defined.
+For example, if you want to use the CropSyst crop submodel in  a model that already
+has a soil hydrology submodel, one should only need to write a class that
+implements the CropSyst soil hydrology interface to connect the submodels.
+<P>
+Contact Roger Nelson for further guidence and suggestions on this.
+<P>
+The original CropSyst source code was not modular and submodels have been
+gradually modularized and interfaced as needed,
+so let me know if there is a submodel you need modularized.
+<P>
+Submodels have been implemented either as components or specializations.
+The crop nitrogen submodel is an (optional) component of the general crop model.
+The soil chemical (salinity and nitrogen) submodels are specializations 
+of the soil profile submodel.
+The single pool and multiple pool organic matter and residue models are specializations
+of the basic organic matter model.
+Most of the submodels are components of the land unit unit simulation engine
+and usually they are replacable with other submodels that 
+implement the defined interfaces.
+<P>
+The CropSyst submodels have been successfully interfaced and used in model engines written in C
+by 'wrapping'  C++ classes in C.  
+<P>
+This has been done for some of the submodels (C wrappers are not included with these files in this directory tree)
+contact me for examples, and suggestions.
+
+<H2>Pluggins</H2>
+
+Support has recently added to provided submodels using pluggin dynamic linked library(s)
+although it has not yet been used by the authors.
+
+<H2>Libraries</H2>
+
+CropSyst uses only the standard C++ libraries and a small set of libraries
+created by Roger Nelson which are used by CropSyst Suite and other packages.
+These libraries are staticaly linked with the executable.
+<P>
+The libraries can be downloaded from the Biological Systems Engineering 
+SVN repository server using the URLs listed here.
+<P>
+I usually have all my sandboxes in a directory called <B>dev</B> in my 
+account home directory (Linux) or C: root drive in Windows
+but <em>dev</em> can be named whatever you want and stored in any directory.
+The sandbox diretory must be named as shown below 
+CASE IS SIGNIFICANT
+
+
+
+<TABLE border = 1>
+<CAPTION>Libraries used by CropSyst</CAPTION>
+
+<TR><TH>Library / SVN URL / recommended sandbox directory<TH>Description<TH>Applicability
+<TR><TD>CORN 
+<BR> http://nas1.bsyse.wsu.edu/dev/CORN/trunk
+<BR><EM>~/dev</EM>/corn
+<TD>The 'corn' directory is the target for my general purpose class and function library.
+It defines low level types and provides functions used in all the CropSyst Suite programs.
+<TD>
+All the CropSyst source files include header files from the <B>corn</B> directory.
+This library must be included to compile any of the CropSyst code.
+CropSyst uses many, but not all the CORN library,
+there are several sub libraries in the corn directory.
+If there is a problem compiling the complete CORN library package,
+it may be easier to compile and use the separate CORN libraries
+needed only by CropSyst.
+
+<TD>Note that the sandbox directory name is lower case
+  (I should have used uppercase but it has been 20 years
+   and there are thousands of includes to for these files
+   so I haven't attempted to correct this.)
+   
+
+<TR><TD>common
+<BR>http://nas1.bsyse.wsu.edu/dev/common/trunk
+<BR><EM>~/dev</EM>/common
+<TD>
+The 'common' directory has several  low level scientific classes and functions for
+physics and chemistry, biometeorology, soil, biomatter, etc.. that are used by several of our models.
+The common directory has a subdirectory 'residue' which has the residue, manure
+and part of the organic matter submodels and another directory for <A HREF="#weather_lib">weather data management</A>.
+The classes in simulation subdiretory implementing the simulation engine are mostly obsolete
+(replaced by CS_suite/simulation/directory source file classes).
+
+<TD>CropSyst uses most of the files in the common directory.
+Usually one simply adds/references the files in the common directory from the IDE project (makefile) 
+directly, so there currently  is no library for all the common code.
+(Except for <A HREF="#weather_lib">weather</A>).
+
+<TR><TD>CS_suite
+<BR>http://nas1.bsyse.wsu.edu/dev/CS_suite/trunk
+<BR><EM>~/dev</EM>/CS_suite
+<TD>
+Directory paths, application directory support, parameter files, simulation engine and other
+class and functions used by the various CropSyst suite modules including the CropSyst model.
+<TD>CropSyst uses most of the files in the CS_suite source code directory,
+The CS_suite_static library is required for all our simulation models including CropSyst.
+
+
+<TR><TD>UED
+
+<BR>http://nas1.bsyse.wsu.edu/dev/UED
+<BR><EM>~/dev</EM>/UED
+<TD><A HREF="#proper">CropSyst proper</A> stores weather data (input) and outputs
+the Universal Environmental Database (UED) format developed by the authors.
+The UED library is used to read/write UED files.
+<TD>
+If it is desired to use  other data sources and/or file formats, 
+the UED library would be optional.
+See <A HREF="#alt_sources"> Alternate Input and Outputs data sources</A>.
+If your weather data is stored text files and/or is from various sources,
+it may be recommend to use UED files to store your weather data.
+UED files are very efficient and allow very fast access by programs.
+
+
+<TR><TD>STATSGO2 and SSURGO
+<BR>http://nas1.bsyse.wsu.edu/dev/USDA/trunk
+<BR><EM>~/dev</EM>/USDA
+<TD>Soil data is available for all of the USA provided by the USDA NRCS.
+    Version 4 could access STATSGO (version 1) data directly.
+    However, STATSGO version 1 data is no longer available so this
+    feature is obsolete and the STATSGO conditional compilation should be
+    disabled.
+<TD>
+   Currently we do not intend to have CropSyst (version 5) read 
+   directly STATSGO2/SSURGO data files directly for simple single land unit simulations
+   (prefering soil data be imported into CropSyst parameter files).
+   However for large scale spatial GIS based simulations it may be
+   more appropriate and convenient to get soil data directly
+   from the STATSGO2 files.
+<TD>
+   We have created a C++ class library that can read STATSGO2 and SSURGO data.  
+   Contact use for more information on using this library.
+   (We also have  another library that is be needed to  
+    compile and aggregate the soil data for use by CropSyst.
+    (We don't yet have an SVN repository for the STATSGO2/SSURGO
+    soil generator yet, so contact use if you intend to use STATSGO2/SSURGO data).
+</TABLE>
+
+<H2>Weather</H2>
+The weather data management source files are usually compiled together as a static library (See below).
+<P>
+
+<H2 ID="alt_sources">
+Alternate Input and Outputs data sources.
+</H2>
+
+The CropSyst Suite software uses specializes file formats to provide model input parameters,
+weather data and to record output.
+<P>
+The code has been designed to facilitate  input/output data form/to various data sources.
+
+<P>
+When using CropSyst for spatial simulations, where weather data is provided in a
+grid, we have used netCDF(classic).  C++ classes for reading/writing 
+weather and elevation data stored in netCDF(classic) file are available
+ <P>
+Contact me for additional information and direction on alternate data storage and file formats
+and interacting with GIS software such as ArcGIS.
+
+<H2>
+Database data sources
+</H2>
+
+I would very strongly discourage using relation databases to store parameters that
+would be used for the model.  And also not for storing weather data.
+Contact me for suggestions on effective use of relation database for organization
+and selection of simulation parameter datasets.
+
+<H2>
+Graphical user interface
+</H2>
+
+This source code, is for the CropSyst simulation model itself,
+this does not include the parameter user interfaces nor the other utilities
+in the CS Suite package.
+<P>
+It is not recommended to integrate the simulation model engine  with a GUI.
+(At least not if you want a fast running engine).
+In CropSyst Suite the model is a standalone console mode program that is run from the GUI.
+People who have created simulation models that are heavily integrated with a GUI have usually regretted it!
+
+<H2>
+Compiling CropSyst proper with another C++ compiler and/or IDE
+</H2>
+
+If you do not have one of the C++ development environments provided in the <B>build</B>
+directory projects.
+<P>
+You should be able to easily create a build project or make file for your compiler/IDE.
+
+See the <A HREF="#versions">  versions section </A> for a list of macros and options
+that you need to add to your Project's  define.
+
+
+
+
+<H2>
+New programming projects
+</H2>
+If creating a new programming project using the CropSyst source code,
+it is recommended to create that project in a completely separate directory.
+Avoid putting new source files in CropSyst source directories.
+Make sure that your project's source directory in listed
+first in the include search directory list followed
+by the CropSyst source code directory.
+
+<H3>
+Submodel options
+</H3>
+CropSyst has a number of optional versions, submodels and outputs
+In many cases options accomodated in the model, 
+by simply adding the source code file for the C++ class that 
+that implements the option in the IDE project.
+Some options are provided by using conditional compilation 
+When you create a new programming project, 
+you should create a options.h file 
+in your project's source code directory.
+
+The CropSyst options.h file has a number of  #define macros that enable the
+various options.
+
+Your project's version of the options.h file.
+should #include the CropSyst source options.h file.
+The various options can be disabled by using #undef
+for the macro that enables the respective option.
+
+
+For example, if your are not interested in the simulation of nitrogen,
+your options.h file should look something like this:
+
+<HR>
+<PRE>
+#ifndef my_project_optionsH
+#define my_project_optionsH
+#include "CropSyst/source/options.h"
+#undef NITROGEN
+#endif
+</PRE>
+<HR>
+<FONT COLOR="RED">
+Again it is critical that your project's source directory
+appear first in the list of include directories in your IDE project
+</FONT>
+
+<H3>Source files </H3>
+
+All .cpp files in the CropSyst   <B>source</B> directory and the following
+subdirectories need to be added to your project/makefile.
+<P>
+<UL>
+<LI>crop, soil, organic_matter, management
+</UL>
+with the exeption of the following files:
+<UL>
+<LI>All files with the prefix <B>v_</B>  (These classes are used by the parameter editor to validate user inputs)
+<LI>makeCVSC_main.cpp  (This program is used to generate the CSVC.h file).
+<LI>Files with <B>LADSS</B> in the name (This is used only with the LADSS version of CropSyst).
+<LI>fmt_to_TDF  (This is used by the report format editor or other utilities to generate TDF files have the same format defined by the fmt file).
+<LI>File with <B>darcian</B> in the name. (The Darcian  infiltration model is not currently implemented in CropSyst).
+<LI><B>evaporation_vapor_path</B>. (This submodel is deprecated).
+<LI><B>evaporation_no_vapor_path</B>. (This submodel is deprecated).
+<LI><B>crop/crop_canopy_biomass_GAI</B>. (This submodel is not used by CropSyst proper).
+<LI><B>crop/canopy_portion</B>. (This submodel is obsolete).
+<LI><B>crop/canopy_biomass_continuum</B>. (This submodel is not used by CropSyst proper).
+<LI><B>crop/canopy_growth_continuum</B>. (This submodel is not used by CropSyst proper).
+</UL>
+<P>
+If V4 or V5 appears in the file name only add the file for the respective 
+version you are compiling.
+<P>
+Only add the C++ files with the .cpp extension.  
+There are a few pure C files with the .c extension, do not add these files
+(they will be #included by C++ code and wrapped in namespaces).
+<P>
+The following individual source .cpp files from the <B>common</B> directory:
+<UL>
+<LI>soil directory
+   <UL>
+   <LI>layering.cpp
+   <LI>textri.cpp
+   <LI>texture.cpp
+   <LI>texture.cpp
+   <LI>txtrhydr.cpp
+   <LI>USDA_texture.cpp
+   </UL>
+<LI>residue directory
+    <UL>
+    <LI>residue_const.cpp
+    <LI>residue_decomposition_limitations.cpp
+    <LI>residue_decomposition_param.cpp
+    <LI>residues_common.cpp
+    <LI>residue_V4_common.cpp
+    <LI>residue_balancer.cpp
+    <LI>residue_pool_simple.cpp
+    <LI>residues_cycling.cpp
+    <LI>residue_biomatter_profile_simple.cpp
+    <LI>residue_single_pool.cpp
+    </UL>
+<LI>biomatter directory
+    <UL>
+    <LI>manure_form.cpp
+    <LI>biomass_decomposition_param.cpp
+    <LI>organic_biomatter_balance.cpp
+    <LI>biomass_abstract.cpp
+    <LI>biomass.cpp
+    </UL>
+<LI>environment directory
+    <UL>
+    <LI>enviornment_base.cpp
+    </UL>
+<LI>geolocation
+    <UL>
+    <!--<LI>USA_state_FIPS_code.cpp-->
+    <LI>geolocation.cpp
+    <LI>geocoordinate.cpp
+    </UL>
+<LI>physics directory
+   <UL>
+   <LI>mass.cpp
+   <LI>mass_common.cpp
+   <LI>property.cpp
+   </UL>
+<LI>simulation
+   <UL>
+   <!-- 151217 <LI>simulation.cpp -->
+   <LI>event.cpp
+   <!--151217 <LI>scenario.cpp -->
+   </UL>
+</UL>
+<H4>
+Also the following files:
+</H4>
+<UL>
+<!-- <LI> /UED/convert/UED_tabular_format.cpp -->
+<LI>~/dev/USDA/NRCS/soil/survey/domains.h
+<LI>
+</UL>
+
+<H4>
+Add the following include paths to your project/makefile
+</H4>
+<UL>
+<LI>~/dev/USDA/NRCS
+</UL>
+<P>
+Also add the compiled library file for the CORN static and UED.
+The exact filenames and location of these library files will vary
+depending on the compiler:  when compiled for Windows the library will have
+<B>.lib</B> extension, under Linux/Unix the extension is usually <B>.a</B>
+Note that some compilers (I.e. kdevelop) do not support libraries, in this case, you 
+will have to add the specific cpp files from the respective library 
+source file directories.
+Under MicroSoft Visual Studio, libraries are added to the solution as dependencies.
+
+
+<H3>
+Namespaces
+</H3>
+
+I have been slowly putting classes under namespaces.
+Hopefully by the time version 5 is released, all the code will be with namespaces.
+There are two namespaces for the CropSyst code:
+
+<DL>
+<DT><B>CS</B></DT>
+<DD>This code is common to one or more of the  Common Simulation suite programs and utilities
+including CropSyst and other simulation models that share this programs and utilities with CropSyst.
+
+<DT><B>CropSyst</B></DT>
+<DD>This code is used predominately with the CropSyst model and the CropSyst file format.
+</DL>
+
+The other libraries used by CropSyst will have their own namespaces.
+
+<H3>
+Versions
+</H3>
+
+Currently there are only two versions of CropSyst:  4 and 5.
+We are currently distributing version 4, version 5 is under development.
+<P>
+You must have the following global compiler 'conditional defines'
+to indicate the CropSyst version to be based on.
+(usually this is done in the IDE project or makefile)
+<PRE>
+CROPSYST
+CROPSYST_VERSION=4
+CS_VERSION=4
+</PRE>
+The following additional macro definitions 
+(which should also be defined in the project or makefile)
+are currently used for version 4.
+(these options are in addition to the options specified in the option.h file):
+
+<TABLE BORDER=1>
+<TR><TH>Macro (Case senstive) <TH>Explaination<TH>Application
+<TR><TD>CROPSYST_PROPER=4
+    <TD>This ensures that all modules are included to compile <A HREF="#proper">CropSyst proper</A>
+    <TD>Models using only some of the CropSyst submodels need not define this.
+<TR><TD>CROPSYST_VERSION=4 (CROPSYST_VERSION=5 version 5 is not yet fully implemented )
+        Version 4 does have some source files that were originally intended
+		to be added to version 5,
+		but it have been expidited and be implemented in version 4.
+		So you will see some source file name with the suffix _V4 and _V5,
+		Some of these will be included for both version for and version 5,
+		Some _V4 files are actually now obsolete and not included in projects.
+<TR><TD>CO2_V4 or CO2_V5
+    <TD>This is the atmospheric CO2 change crop reponse model.
+    <TD>The new CO2 model (CO2_V5) which is still under development was originally slated for version 5,
+        but it has been expidited and will be implemented in version 4
+        by the end of March (2012)        
+        For now use CO2_V4 but it will soon be obsolete.
+<TR><TD>XLS_OUTPUT  
+    <TD>Enables runtime generation of output reports as XLS spreadsheets.
+    <TD>Not recommended. The run time spreadsheet generation will not be in version 5.
+<TR><TD>APPTYPE_CONSOLE
+    <TD>Certains runtime and status info is written to standard output
+        and in certain  conditions (usually detectable error), 
+        the program will pause and wait for user input from the keyboard.
+    <TD>Usually this is enabled for simulation models that
+        are simulating a single land block.
+        <P>For multiple land block simulations (I.e. GIS and/or Watershed model
+        this probably would be disabled
+<TR><TD>NEW_RESIDUE_BALANCE
+    <TD>The new residue balance should now always be enabled
+    <TD>This macro is probably obsolete, but enable it just in case I haven't cleaned this up all occurances yet.
+        <BR> This could be disabled if not simulating residues, but usually the residue submodel is enabled.
+<TR><TD>OLD_ORCHARD
+    <TD>The new orchard model is still under development
+    <TD>This macro could be omitted if not using the fruit tree orchard/vineyard submodel.
+<TR><TD>USE_WEATHER_PROVIDER
+    <TD>I am changing/simplifying the way weather data  data will be 
+accessed by the CropSyst simulation engine and provided to the 
+CropSyst submodels.
+        Originally this change was slated for version 5,
+        Much of this work has already been completed, and we are using the
+new weather provider idiom in some of our other models.
+This new idiom is intended to facilite providing weather data from 
+<A HREF="#alt_sources">alternate sources</A>.
+
+    <TD>For now this should be disabled however this maybe useful soon so this may be needed
+        for version 4. I will notify later when this should be used.
+        I am hoping to have this ready in the April-May time frame,
+        but I may be expiditing this.
+        
+</TABLE>
+
+
+<H3>
+Coding conventions
+</H3>
+
+Refer to the source file naming, identifier naming and coding style conventions
+used in CropSyst and the associated libraries, this will help you find your
+way around the code.
+
+<H3>
+Compiling CropSyst and Libraries in various IDEs
+</H3>
+
+CropSyst and the libraries used by CropSyst are primarily maintained 
+using Windows and the Embarcadero (formally Borland and CodeGear) C++ Builder (currently version 10).
+Under Linux Qt.
+<P>
+Occasionally I use Code:Blocks, or simply compile with Makefiles so these
+IDE projects and Makefiles are included in the revision control repository
+but I don't regularly update the project files for these IDE's 
+(I.e. I may have new source files that are not yet added to the project or Makefile).
+<P>
+Only C++ source files (with the extension .cpp) should be included in a project's sources list.
+There are a few files that are pure C and have the extension .c  or .c_cpp
+these must not be included in Makefile or IDE projects.
+These files will be #included by matching files with .cpp extension.
+The including .cpp wraps the included code in C++ namespaces
+and/or has other magic to make the pure C code more compatible with C++.
+<em> Some IDE's such has MicroSoft (:-<) studio always compile 
+files with .c extension as pure C even when  #included by a C++ file.
+(For this  reason some files have the extension .c_cpp instead of .c , 
+which effectively  overrides the compiler's annoying  peccadillo).
+</EM>
+<P>
+The distributed source code does not include
+user specific options, object, library, desktop layouts,
+precompiled headers, other temporary  files, and target directories created by the IDEs.
+<P>
+These will  usually be created by the IDE when you compile the project.
+The IDE may show messages saying such files are missing.
+
+<H2>
+Qt
+</H2>
+
+The Qt IDE might display the following message(s):
+<DL>
+<DT><B>No .user settings file created by this instance of Qt Creator was found.
+      <BR>
+      Did you work with this project on another machine or using a different settings path before?
+      <BR>
+      Do you still want to load the settings file  xxxx.user?
+      </B>
+ <DD>
+      If it prompts do you still want to load the settings file  xxxx.user?
+      Reply [Yes].
+
+<DT><B>Configure project</B>
+<DD>The project configuration is stored in the (usually not included) .user file.
+So when you open the Qt .pro project.
+You will be prompted with the <B>Configure project</B> dialog window.
+You can use the the default target Debug and Release directories and simply press <B>[Configure Project]</B>
+But I usually rename these to <B>Debug</B> and <B>Release</B> b
+because the default directory name recapitulates the directory names in the path.
+so the name is rather redundant.
+
+ <TD><B>Build settings</B>
+<DD>
+
+
+<TD><B>Session manager</B>
+<DD>
+Unlike C++ Builder and VisualStudio,
+Qt manages multiple projects (I.e. the main program project and library projects used by the program)
+with the 'Session manager'  
+This differs from VisualStudio 'Solutions' and C++ Builder 'project groups'
+in there is not as strong affiliation between the session manager and the project.
+The session is stored separate from the source code directory tree
+and thus not included in the revision control repository distributed with the source code.
+<P>
+I usually create session for the program I am compiling and add the
+Qt project (.pro) for the main program and each of the libraries (listed above)
+but this isn't necessary. Just remember to compile the libraries 
+first so they will be available to link when you build the main program.
+</DL>     
+
+
+

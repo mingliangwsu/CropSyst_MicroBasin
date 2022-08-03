@@ -1,0 +1,457 @@
+#ifndef basinclassH
+#define basinclassH
+#include "CS_suite/simulation/CS_simulation_engine.h"
+//161205RLN #include "CS_suite/CropSyst/file_system/project_directory_CropSyst.h"
+#include "basincellclass.h"
+#include "control/allcontrolclass.h"
+#include "util/esrigridclass.h"
+#ifdef CROPSYST_WEATHER
+//NYN #include "common/weather/database/weather_UED_database.h"
+//NYN #include "common/weather/weather.h"
+//160808 #include "weather_provider_temporary.h"
+#else
+#include "weather/weatherlocationinputclass.h"
+#include "weather/weathersingleyearhourlyclass.h"
+#endif
+#ifdef CROPSYST_VERSION
+#include "CS_suite/file_system/CS_database_directory.h"
+#include "CS_suite/CS_arguments.h"
+#include "common/weather/hour/sun_hours.h"
+#include "common/weather/day/sun_days.h"
+#include "common/weather/sun.h"
+#include "common/solar/irradiance_extraterrestrial.h"
+//#include "CS_suite/simulation/CS_reporter.h"
+#include "CropSyst/source/rot_param.h"
+#else
+#include "control/clssimulation.h"
+#endif
+
+#include "datetime/date.hpp"
+#include "util/pubtools.h"
+#include <vector>
+
+//______________________________________________________________________________
+class BasinClass
+: public extends_ CS::Simulation_engine                                          //150629
+{
+ private:
+   CS::Arguments command_line_arguments;                                         //160406RLN 160909LML obs?
+   std::string model_name;                                                       //150629RLN
+   std::wstring control_file_name_unqual;                                        //150629RLN
+ private:
+    long num_cells;                      //number of grid cells in this basin
+    double basin_area_km2;                                                       //150921LML
+    int num_outlets;                    //LML 140904 number of outlets
+    std::vector<long> parr_outlet_inner_id_list;     //LML 140904 outlets inner id list
+    std::vector<long> l_soiltypes;                                               //list of soil types in basin
+    std::vector<long> l_rotationtypes;                                           //160317LML list of rotation types in basin
+    std::vector<long> l_crop_management_zones;                                   //150519
+    void initMem();                      //gridcells
+    void clearMem();
+    void calcMainSlopesAndAspect();
+    bool Hour_Head_Printed;                                                     //Check if the head for hourly output have been printed out
+    bool Daily_Head_Printed;                                                    //Check if the head for daily output have been printed out
+    bool Daily_Growth_Head_Printed;                                              //150222LML
+public:
+    CORN::Command_options_data_source command_line_options;                      //160909LML
+    CORN::OS::Directory_name_concrete scenario_directory_name;                   //150629RLN
+       // Must instanciate before ControlRef
+       // For now default to current working directory
+       // Eventually we will add command line arguments
+    mutable AllControlClass   ControlRef;
+    Geolocation               centroid;                                          //151206RLN
+    //160301RLN these are now members.
+    //160301RLN AllControlClass&    ControlRef;
+    //160301RLN const Geolocation&  centroid;                                    //151206RLN
+                                                                                 //160111LML suggest to set values from grid or weather control file, rather than "centroid.CS_geocoordinate" file.
+    CORN::OS::Directory_name_concrete output_directory_name;                     //150629RLN
+    long total_hourth; //  total hour counting                                   //150629RLN
+       // total_hourth used to be in runSimulation
+       // Now a member to all new process_day() method.
+
+    std::vector<BasinCellClass *> basin_cells;
+    std::vector<std::vector<long> > inner_id;                     //inner ID for indexing gridcells
+    EsriGridClass<int> gFlowDir;        //Flow direction grid
+    EsriGridClass<int> gGridMask;
+    EsriGridClass<int> gGridOutputMask;                                          //151007LML
+    EsriGridClass<int> gGridID;         //Gridcell ID
+    EsriGridClass<int> gOutlets;        //(1:Basin outlets 2: gauges) Outlets grid cells
+    EsriGridClass<double> gElev;        //(m) Elevation
+    EsriGridClass<double> gSlop;        //(degree) Slope
+    EsriGridClass<double> gAspect;      //(degree) Slope
+    EsriGridClass<double> gArea;        //(degree) Slope
+    EsriGridClass<double> gLatitude;    //(degree) Slope
+    EsriGridClass<double> gLongitude;   //(degree) Slope
+    EsriGridClass<int> gSoilType;       //Soil texture or chemical types
+    EsriGridClass<int> gRotationID;     //Crop Rotation Type ID
+    EsriGridClass<int> gCropManagementZone; //LML 150515
+    //EsriGridClass<double> gAnnualTavg;   //Annual Mean Temperature (Celsius degree)
+    //Add other information
+    double Vertical_flow_balance_allCells;      //(m)
+    double cum_Update_PWT;              //(h) Time when perched water table conditions are updated (h)
+    //double Outletflow;              //(m3/T) Lateralflow (baseflow) per lateralflow time loop (T)
+    //double OutletflowLayer0;        //(m3/T) Surface flow (ponded water) per lateralflow time loop (T)
+    //double SoluteOutletflow;
+    //double SoluteOutletflowLayer0;
+    double Update_PWT;
+    //double cum_Outlet_flow;           //(m3) total outflow (baseflow + surface flow) over simulation period
+    //double cum_Solute_Outlet_flow;    //
+    //double cum_Outlet_Lateral_Flow;   //(m3) accumulated lateral flow (baseflow) over simulation period
+    //double cum_Outlet_Runoff;         //(m3) accumulated surface flow (or ponded water) over simulation period
+
+    //Temporal variables for lateral flow
+    //Soil_layer 0: aboveground layer. Soil layers is from 1 (top) to NuL (bottom)
+    std::vector<std::vector<double> > Theta;                     //(m3/m3)[innerid][soil_layer]
+    std::vector<std::vector<double> > Theta_s;                   //(m3/m3)[innerid][soil_layer]
+    std::vector<std::vector<double> > L_thickness;               //(m) [innerid][soil_layer]
+    std::vector<std::vector<double> > K_Theta;                   //(m/h) [innerid][soil_layer]
+    std::vector<std::vector<double> > Hydro_Standard_Slope;      //[innerid][soil_layer]
+    //Temporary variables for calculating watershed properties
+    std::vector<std::vector<std::vector<std::vector<double> > > > comb_Share_flow;         //[soil_layer][row][col][direction] 0-7: eight direction 8:total fraction
+    std::vector<std::vector<std::vector<std::vector<double> > > > v_Share_flow;            //[soil_layer][row][col][direction]
+    //double ****Share_flow;            //[soil_layer][row][col][direction]
+    std::vector<std::vector<std::vector<double > > > KS;                         //(m/h) [soil_layer][row][col]
+    std::vector<std::vector<std::vector<double> > > vHydroElevation;             //(m) [soil_layer][row][col]
+    std::vector<std::vector<std::vector<double> > > vSum_Downhillslopes;         //(m/m) [soil_layer][row][col]
+    std::vector<std::vector<std::vector<double> > > vHydroStandardslope;         //(m/m) [soil_layer][row][col]
+    //Need seperate state variables from flux variables
+    std::vector<double> Ponded_m;                     //(m) [innerid] Ponded from local grid
+    std::vector<double> Runoff_m;                     //(m) [innerid] Runoff from upper stream grids
+    //151028LML std::vector<std::vector<std::vector<double> > > SoluteConc;                  //(g/L or kg/m3) [gridid][soil_layer][species] molecular_mass
+    std::vector<std::vector<std::vector<double> > > SoluteAmount;                //(kg/m2) [gridid][soil_layer][species] molecular_mass
+    std::vector<std::vector<std::vector<double> > > TempSoluteConc;              //(g/L or kg/m3) [gridid][soil_layer][species]
+    std::vector<std::vector<std::vector<double> > > TempSoluteAmount;            //(kg/m2) [gridid][soil_layer][species]
+    //water
+    std::vector<std::vector<double> > InFlow_m;                    //(m) [innerid][soil_layer]
+    std::vector<std::vector<double> > OutFlow_m;                   //(m) [innerid][soil_layer]
+    std::vector<std::vector<double> > OutFlow_fraction;            //151028LML (0-1) [innerid][soil_layer]
+
+    std::vector<std::vector<double> > UpFlow_m;                    //(m) [innerid][soil_layer]
+    std::vector<std::vector<std::vector<double> > > OutFlowEachDir_m;           //(m) [innerid][soil_layer][flow_direction]
+    std::vector<std::vector<double> > TempInFlow_m;                //(m) [innerid][soil_layer]
+    std::vector<std::vector<double> > TempOutFlow_m;               //(m) [innerid][soil_layer]
+    std::vector<std::vector<std::vector<double> > > TempOutFlowEachDir_m;       //(m) [innerid][soil_layer][flow_direction]
+    //solute
+    std::vector<std::vector<std::vector<double> > > InFlowSolute;               //(kg/cell) [innerid][soil_layer][species]
+    std::vector<std::vector<std::vector<double> > > UpFlowSolute;               //(kg/cell) [innerid][soil_layer][species]
+    std::vector<std::vector<std::vector<double> > > UpFlowSoluteConc;           //(kg/m3) [innerid][soil_layer][species] 160324LML
+    std::vector<std::vector<std::vector<double> > > OutFlowSolute;              //(kg/cell) [innerid][soil_layer][species]
+    std::vector<std::vector<std::vector<double> > > TempInFlowSolute;           //(kg/cell) [innerid][soil_layer][species]
+    std::vector<std::vector<std::vector<double> > > TempOutFlowSolute;          //(kg/cell) [innerid][soil_layer][species]
+    std::vector<std::vector<std::vector<std::vector<double> > > > TempOutFlowSoluteEachDir;      //(kg) [innerid][soil_layer][flow_direction][species]
+    std::vector<std::vector<std::vector<double> > > BalanceFlowSolute;
+    std::vector<std::vector<std::vector<std::vector<double> > > > OutFlowSoluteEachDir;      //(kg) [innerid][soil_layer][flow_direction][species]
+    std::vector<std::vector<std::vector<double> > > UpFlowSoluteRate;           //(g/m2/h) [innerid][soil_layer][species]
+    //Temporal variable
+    std::vector<std::vector<double> > Unused_store_m;              //(m) [innerid][soil_layer]
+    std::vector<std::vector<double> > Temp_Cell_Layer_Var;         //(m) [innerid][soil_layer]
+   #ifdef CROPSYST_VERSION
+    std::wstring scenario_filename_extension;                                    //160118
+    #ifdef CELL_METEOROLOGY
+    Sun                 sun;
+    Sun_days            sun_days;
+    Sun_hours           sun_hours;
+    #else
+    CS::Land_unit_meteorological *meteorology;
+    #endif
+    CS::Solar_irradiance_extraterrestrial_hourly *extraterrestrial_solar_irradiance;  //150707_141222RLN
+   #endif
+
+   #ifdef CROPSYST_WEATHER
+   	/* NYN
+   	Geolocation geolocation_unused;
+   	Extraterrestrial_solar_irradiance_day ET_irr_unused;
+   	Weather_UED_database weather_database;
+   	//140214  Weather *weather;
+   	*/
+//160809         Weather_provider        weather_provider;
+   #else
+    int num_weather_stations;           //number of weather stations
+    int num_weather_stations_over_study_domain;
+    std::vector<WeatherLocationInputClass> weather_stations;
+    std::vector<WeatherSingleYearHourlyClass *> weather_station_annual_hourly_data;
+                                            //All weather station data
+
+    #ifdef CELL_METEOROLOGY
+    #else
+    //160808 There is now only one weather for the entire basin
+    WeatherStateDailyClass *pWeatherDaily;
+    #endif
+   #endif
+    #ifdef CROPSYST_SOIL
+    Soil_properties_sublayers **soil_properties;
+    Soil_parameters *soil_parameters;
+    #endif
+    std::vector<SoilProfileClass *> parrSoilProfile;
+    std::vector<InitialSoilStateClass *> parrInitSoilState;                      //160317LML
+    #ifdef MICROBASIN_VERSION_SINGLE_ROTATION_READING_WORKING
+    std::vector<CropSyst::Rotation_parameters *> parrRotation_params;            //160317LML
+    #endif
+    std::vector<std::vector<double> > TotalDownhillflow;    //(m)
+    std::vector<double> CellFrictionSlope_X;                //(m/m)              //131217FMS
+    std::vector<double> CellFrictionSlope_Y;                //(m/m)              //131217FMS
+    std::vector<double> CellFlowIn_X;                       //(m2/s)             //131217FMS
+        // connection with left cell. :+:inflow -:inflow
+    std::vector<double> CellFlowIn_Y;                       //(m2/s)             //131217FMS
+        // connection with upper cell :+:inflow -:inflow
+    std::vector<double> CellFlowOut_X;                                           //140122FMS
+    std::vector<double> CellFlowOut_Y;                                           //140122FMS
+    std::vector<double> ManningCoef;                                             //131217FMS
+    double Flow_upward_to_Ponded;                                                //140120FMS debug
+    std::vector<double> CellWaterDepth;                                          //140127FMS
+    std::vector<double> InitialCellWaterDepth;              //(m)                //140127FMS
+    std::vector<double> OldCellWaterDepth;                                       //140127FMS
+    //std::vector<double> temp_neighbor_hydro_elev;           //(m)              //LML
+    //Basin outputs                                                              //140418LML
+    //Acumulated or net changes
+    double cum_precipitation_m3;
+    double cum_nonintercepted_ppt_m3;
+    double cum_irrigation_m3;
+    double cum_outlet_lateralflow_m3;
+    double cum_outlet_runoff_m3;
+    double cum_vertical_drainage_m3;
+    double cum_actual_crop_transpiration_m3;
+    double cum_actual_soil_evaporation_m3;                                       //150921LML note: including pond evaporation, soil evap, and residue evap
+       // This is actual pond and soil (should include residue?)
+    double cum_net_sublimation_m3;
+    double cum_N_movein_basin_kg;
+    double cum_N_movein_soil_kg;
+    double cum_NO3_N_flowout_basin_kg;                                           //Overland and lateralflow
+    double cum_NH4_N_flowout_basin_kg;                                           //Overland and lateralflow
+    double cum_NO3_N_drainage_kg;                                                //150921LML
+    double cum_NH4_N_drainage_kg;                                                //150921LML
+    double cum_N_volatization_kg;
+    double cum_crop_N_uptake_kg;
+    double cum_C_residue_to_soil_kg;
+    double cum_CO2_emission_from_residue_kg;
+    double cum_CO2_emission_from_soil_kg;
+    double initial_residue_intercept_m3;                                         //161011LML
+    double initial_soil_water_m3;
+    double initial_soil_ice_m3;
+    #ifdef MBVB_SNOW
+    double initial_snowpack_water_m3;
+    double initial_snowpack_ice_m3;
+    double final_snowpack_water_m3;
+    double final_snowpack_ice_m3;
+    #else
+    double initial_snowpack_swe_m3;                                              //161011LML
+    double final_snowpack_swe_m3;                                                //161011LML
+    #endif
+    double initial_pond_m3;
+    double final_residue_intercept_m3;                                           //161011LML
+    double final_soil_water_m3;
+    double final_soil_ice_m3;
+    double final_pond_m3;
+    //LML 141013 hourly basin outputs
+    std::vector<double> hourlyBasinSurfaceOutFlow_m3;               //(m3/hour) 
+    std::vector<double> hourlyBasinDrainage_m3;                     //(m3/hour)
+    //std::vector<std::vector<double> > hourlyBasinDrainageSolute_kg;              //(kg/hour) [hour][solute]
+    std::vector<double> hourlyBasinLateralOutFlow_m3;               //(m3/hour)
+    std::vector<std::vector<double> > hourlyBasinLateralOutFlowSolute_kg;        //(kg/hour) [hour][solute] 150921LML
+    std::vector<std::vector<double> > hourlyBasinSurfaceOutFlowSolute_kg;        //(kg/hour) [hour[solute]
+
+    std::vector<double> Nitrate_Apply_By_Crop_Management_Zones;                  //150319FMS
+    std::vector<double> Nitrate_Content_In_Crop_Management;                      //150319FMS
+    std::vector<double> Ammounium_Apply_By_Crop_Management_Zones;                //150319FMS
+    std::vector<double> Ammonium_Content_In_Crop_Management;                     //150319FMS
+    std::vector<double> Number_Crop_Management_Zones;                            //150319FMS
+
+    double output_dailyBasinSurfaceOutFlow_m3;                                   //(m3/day) 150917LML
+    double output_dailyBasinDrainage_m3;                                         //(m3/day) 150917LML
+    double output_dailyBasinDrainageSolute_kg[SL_COUNT];                         //(kg/day) 150921LML
+    double output_dailyBasinLateralOutFlow_m3;                                   //(m3/day) 150917LML
+    double output_dailyBasinLateralOutFlowSolute_kg[SL_COUNT];                   //(kg/day) [solute] 150917LML
+    double output_dailyBasinSurfaceOutFlowSolute_kg[SL_COUNT];                   //(kg/day) [solute] 150917LML
+
+    double initial_soil_C_kg;                           //(kgC) SOM    
+    double initial_residue_C_kg;                        //(kgC) Residue
+    double final_soil_C_kg;                             //(kgC) SOM
+    double final_residue_C_kg;                          //(kgC) Residue
+
+#ifdef PREDEFINE_N_APPLICATION_PER_CELL
+    std::vector<std::vector<double> > predefined_N_fertilization_kgN_per_ha;     //170320LML [grid_index][crop]
+    std::vector<std::string> predefined_N_fertilization_crop_name;                                //170320LML the crop name shown in the head, which is consistant with crop parameter file name.
+#endif
+    //Hourly fluxes
+ #ifdef CROPSYST_VERSION
+ public:
+    //161205RLN CORN::OS::Directory_entry_name *project_directory;   //owned              //160301RLN
+    //161205RLN CORN::OS::Directory_entry_name *project_directory_name; //owned              //160301RLN
+    //161205RLN CropSyst::Project_directory *project_directory;         //owned              //160301RLN
+        // rendered by discovery
+    CS::Database_directory *project_database_directory;  //owned
+
+    RENDER_INSPECTORS_DECLARATION;                                               //150916
+    virtual nat32 dump_inspectors(std::ostream &strm, CS::Inspection_level level); //151002RLN
+    //160323RLN virtual const CS::Simulation_control &ref_simulation_scenario_const() const {return ControlRef;}                    //16309LML
+
+   virtual const       CS::Simulation_control &ref_simulation_control()    const { return ControlRef; } //160321RLN
+   virtual const       CS::Simulation_control &ref_simulation_scenario()   const { return ControlRef; } //160321RLN
+   virtual modifiable_ CS::Simulation_control &mod_simulation_control()  modification_ { return ControlRef; } //160321RLN
+   virtual modifiable_ CS::Simulation_control &mod_simulation_scenario() modification_ { return ControlRef; } //160321RLN
+
+    virtual const std::wstring &get_control_file_name_extension()         const {return scenario_filename_extension;}   //160309LML
+ #endif
+
+    #ifdef MACA_V1_MBMET
+    EsriGridClass<int> gWeatherStationID;//Weather station ID
+    std::list<int> weather_station_list_in_study_domain;
+    #endif
+
+ public:
+    BasinClass(int argc = 0, const char *argv[] = 0);
+    ~BasinClass();
+ public: // Simulation engine implementation
+   virtual const std::string &get_model_name()                             const { return model_name; } //150629
+   virtual const CORN::OS::Directory_name &provide_scenario_directory_name() provision_ { return scenario_directory_name ; } //150629
+   virtual const CORN::OS::Directory_name &get_output_directory_name()     const { return output_directory_name; } //150629
+   virtual const std::wstring &get_control_file_name_unqual()              const { return control_file_name_unqual;} //150629
+ public: // Simulation element implementation
+    virtual bool initialize()                                    initialization_;//141221
+    virtual bool start()                                           modification_;//150629RLN
+    virtual bool start_year()                                      modification_;//141221RLN
+    virtual bool start_day()                                       modification_;//150629RLN
+    virtual bool process_day()                                     modification_;//150629RLN
+    virtual bool end_day()                                         modification_;//150629RLN
+    virtual bool stop()                                            modification_;//150629RLN
+    inline virtual const std::wstring &get_scenario_file_name_extension()  const //160118RLN
+        { return scenario_filename_extension; }
+   inline virtual CORN::Data_record &provide_scenario_data_rec()      provision_
+      {  return ControlRef; }
+   inline virtual modifiable_ CS::Arguments *get_arguments()       modification_ { return &command_line_arguments; } //160406RLN
+   //_2016-01-14_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _/
+ public:
+    long NumCells();
+    virtual bool start_hour()                                     modification_;
+       //160724RLN initializeHourlyFluxesForAllGridCells renamed to start_hour
+    void initializeBasinLateralFluxes();
+    void initializeBasinLateralFluxesAtLayer(const int layer);                   //141125LML
+    void initializeBasinOutputs();
+    void cumBasinOutputsFromHourly(int hour,int total_hourth);
+    void cumBasinOutputsFromDaily();                                             //141017LML
+    void finalizeBasinOutputs();
+
+   #ifdef CROPSYST_WEATHER
+   #else
+    void initializeWeatherStations();
+    void initializeWeatherStationsDataVector();
+    void readWeatherStationAnnualHourlyData(const int year);
+   #endif
+    void initializeSoilProperties();
+    #ifdef MICROBASIN_VERSION_SINGLE_ROTATION_READING_WORKING
+    void initializeRotationParameters();                                         //160317LML
+    #endif
+    void initializeCropManagementZones();
+    long getNumSoiltypes();
+
+    //double getNeighborElev(int row,int col,int nb);   //For calculating slops
+    //150519 long getInnerIDSoiltypes(long soiltype);  //Searching soil parameter
+    template <class Type> long BasinClass::getInnerIDFromVectorList(std::vector<Type> &vector_list, Type target);
+
+	#ifndef CROPSYST_WEATHER
+    int getInnerIDWeatherStation(const int stationid);
+	#endif
+
+    std::string getSoilPropertyFileName(int soiltype_id);
+    int runLateralFlow(const double t_start,const double t_length);
+    #ifdef LIU_OLD_OVERLANDFLOW
+    void OverlandflowTimeloop8D(const double t_start,const double t_length);    //8 direction scheme
+    #endif
+    void OverlandflowTimeloop8D_Simple(const double t_start, const double t_length);   //141201LML
+    //LML 150110 obsolete void OverlandflowTimeloop4D(const CORN::Date& today,const double t_start,const double t_length);  //New code from F
+    //void OverlandflowSpaceloop(CORN::Date today,const double t_start,const double t_length);
+    void SoilLateralflowTimeloop(const double t_start,const double t_length);
+    #ifdef MBVB_INFILTRATION
+    void CalculateInstantRunoff();
+    #endif
+    long getNeighborInnerID(long itself_inner_id, int nb);
+
+    BasinCellClass *getCellPointer(int row,int col);
+    //void PrintBasinHourlyOutputs(CORN::Date outday,int hour);
+    //void PrintBasinHourlyOutputsHead();
+    void PrintBasinOutputs();
+    #ifdef VBBASIN_STRUCTURE
+    void calcMainSlopesAndAspect(double **Elevation_array,int center_i,int center_j, double center_length, double &Aspect,double &Slope);
+    void calcSurroundingElevations(double **Elevation_array,double **outarray);  //141002LML bad design, just for testing
+    #endif
+    void setDownhillSlops();
+    //void calcStandardslope();
+    int getNeighborRow(int irow,int nb);
+    int getNeighborCol(int icol,int nb);
+    //long getOutletInnerID(long inum);
+    //void setOutletInnerID(int inum,int innerid) {parr_outlet_inner_id_list[inum] = innerid;};
+    int getNumOutlets() {return num_outlets;};                                   //140904LML
+    void setNumOutlets(const int nums) {num_outlets = nums;};
+    std::vector<long>& get_crop_management_zone_vector() {return l_crop_management_zones;};
+    double getGridSoilWater_m(const int innerid);
+    double getGridSoilNitrate_kg_m2(const int innerid);
+    double getGridSoilAmonia_kg_m2(const int innerid);
+#ifndef CROPSYST_WEATHER
+    void setDailyWeather
+       (//160308RLN now member const CORN::Date& today,
+        #ifndef MACA_V1_MBMET
+        int stationid
+        #endif
+        );
+#endif
+    //Some initialize for new dates
+    void WatershedPropertiesCalculation(const int hour);
+    void calcSum_Downhillslopes(const std::vector<std::vector<double> > &elev, std::vector<std::vector<double> > &output);
+    void calcFlow_share(const std::vector<std::vector<double> > &elev, 
+                        const std::vector<std::vector<double> > &sumslop, 
+                        std::vector<std::vector<std::vector<double> > > &output);
+    void calcStandardslope(const std::vector<std::vector<double> > &elev, 
+                           const std::vector<std::vector<long> > &mask, 
+                           std::vector<std::vector<double> > &output);
+    //void readFlowDir(const char *asciifile);
+    //void readGridID(const char *asciifile);
+    //void readOutlets(const char *asciifile);
+    //void readElev(const char *asciifile);
+    //void readSlop(const char *asciifile);
+    //void readSoilType(const char *asciifile);
+    double getAvgUpperHydroSlop(int Cell_Index,int layer);      //M.Liu calculate average upper stream hydroslope
+    double getBasinTotalWaterStorage_m3();                      //Ponded water + soil profile moisture
+    double getBasinPond_m3();                                                    //141121LML
+    double getBasinSoilWaterStorage_m3();                                        //141121LML
+    double getBasinSWE_m3();                                                     //141121LML
+    double getHourlyBasinTotalDrainage_m3();
+    double getBasinTotalSoilInorganicNmass_kg();                                 //140910LML
+    double getBasinTotalSoilNO3_kg();
+    double getBasinTotalSoilNH4_kg();
+    double getBasinSurfaceChemicalMass_kg(const Solute solute);                  //160317LML
+    #ifdef MBVB_SOIL
+    //160722 This is actually never used
+    double getHourlyTotalWaterFluxToSoil_m3();             //+: net flow in -: net flow out Hour: 0-23
+    #endif
+    double getHourlyBasinFlowOutInorganicN_kg();                                 //140910LML
+       // Inorganic N leaving the basin
+    double getHourlyBasinOverlandFlowOutSolute_kg(Solute solute_name_index);     //141013LML
+    double getHourlyBasinLaterFlowOutSolute_kg(Solute solute_name_index);        //141013LML
+    void saveHourlyBasinOutFLow(int hourth);
+    double getHourlyBasinTotalFlowOut_m3();
+    double getHourlyBasinOverlandFlowOut_m3();
+    double getHourlyBasinLaterFlowOut_m3();
+    #ifdef VB_SAME_CSV_OUTPUT
+    void PrintTextAllOutputForAllGrids();
+    void PrintTextAnnualOutputForAllGrids();
+    void PrintTextDailyOutputForAllGrids();
+    void PrintEsriGridDailyOutput();
+    void PrintEsriGridHourlyOutput();
+    void PrintEsriGridGrowthSeasonOutput();
+    void PrintEsriGridOutputVariable
+       (int timeseq,std::string varname,int soil_layer,std::string timestep);
+    void PrintTextGrowthDailyOutputForAllGrids();
+    void PrintTextGrowthSeasonOutputForAllGrids();
+    void PrintTextHourlyOutputForAllGrids();
+    #endif
+    double getMinElevAround(int row,int col);                                    //150526
+    inline double getBasinAreakm2() {return basin_area_km2;}                     //150921LML
+#ifdef PREDEFINE_N_APPLICATION_PER_CELL
+    bool readPredefinedNFertilization();                                         //170320LML
+    int getGridIndex(const int grid_id);                                         //170320LML
+#endif
+ private:
+//   BasinClass *abstract_check() { new BasinClass(AllControlClass); }
+};
+//______________________________________________________________________________
+#endif // BASINCLASS_H

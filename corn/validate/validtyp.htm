@@ -1,0 +1,63 @@
+
+Roger Nelson's valid type module.
+
+Purpose
+
+   This class can be used to help insure that float and int
+   values stay within a specified warning or error range.
+
+
+   These classes can be used to valididate a user's input.
+   The class is intended to be used to perform a batch validation.
+   For example the program could prompt the use for a set
+   of input values then perform a validate on all of them, I.e:
+
+   // prompt for values x,y,z
+   valid_float v_x(x,0,PIC3,3,0.0,-100.0,100.0,-1000.0,1000.0,"m","Length");
+   valid_float v_y(x,0,PIC3,3,0.0,-100.0,100.0,-1000.0,1000.0,"m","Width");
+   valid_float v_z(x,0,PIC3,3,0.0,-100.0,100.0,-1000.0,1000.0,"m","Breadth");
+
+   bool all_valid =
+      v_x.validate(cerr) && v_y.validate(cerr) && v_z.validate(cerr);
+
+   Although batch processing is generally how this class is used,
+   it can also be used to validate individual entries as is done
+   by my valid_intger_edit and valid_float_edit ROWL classes.
+
+Features
+
+   - The class can optionally support translation of error messages
+     into foreign languages.
+
+   - For validation of  int long and float
+
+Limitations
+
+   - double type not currently supported.
+
+   - validation error/warning message should go to any kind of
+     output string including strstream, but this has not been checked.
+
+Required modules
+
+   This module uses the new ANSI type  bool.
+   If your C++ compiler doesn't define bool, then include first rlib/types.h
+
+Optional modules
+
+   language.c language.h  (Roger Nelson's)
+
+      This module provides foreign language translation and/or message
+      cataloging for optimal memory usage.
+
+      Inorder to use translations, #define LANGUAGE_TRANSLATION
+
+      Under Borland C++ set the language.c compile attributes to C++ compile.
+
+Other
+
+   These classes are used by my ROWL integer and floating point
+   edit validators.
+
+   These classes are used by my RLIB INI file class for
+   validatation and annotation of INI files.

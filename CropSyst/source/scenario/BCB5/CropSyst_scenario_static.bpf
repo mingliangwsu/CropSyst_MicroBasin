@@ -1,0 +1,53 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+USEUNIT("..\..\cs_scenario.cpp");
+USEUNIT("..\..\cs_operation.cpp");
+USEUNIT("..\..\fmt_param.cpp");
+USEUNIT("..\..\mgmt_param.cpp");
+USEUNIT("..\..\model_options.cpp");
+USEUNIT("..\..\rot_param.cpp");
+USEUNIT("..\..\..\..\Common\soil\texture.cpp");
+USEUNIT("..\..\..\..\Common\soil\USDA_texture.cpp");
+USEUNIT("..\..\..\..\Common\soil\TEXTTRI.CPP");
+USEUNIT("..\..\..\..\Common\weather\snow.cpp");
+USEUNIT("..\..\cs_operation_codes.cpp");
+USEUNIT("..\..\LADSS.cpp");
+USEUNIT("..\..\mgmt_types.cpp");
+USEUNIT("..\..\cs_till.cpp");
+USEUNIT("..\..\..\..\Common\soil\SCS\SCS.cpp");
+USEUNIT("..\..\..\..\Common\biomatter\manure_form.cpp");
+USEUNIT("..\..\seeding_param.cpp");
+USEUNIT("..\..\..\..\common\soil\layering.cpp");
+USEUNIT("..\..\project_types.cpp");
+USEUNIT("..\..\..\..\Common\weather\weather_types.cpp");
+USEUNIT("..\..\cs_scenario_directory.cpp");
+USEUNIT("..\..\cs_vars_abbrv.cpp");
+USEUNIT("..\..\cs_vars.cpp");
+USEUNIT("..\..\..\..\Common\residue\residue_decomposition_param.cpp");
+USEUNIT("..\..\N_sources.cpp");
+USEUNIT("..\..\..\..\common\residue\residue_const.cpp");
+USEUNIT("..\..\..\..\common\soil\txtrhydr.cpp");
+USEUNIT("..\..\organicn.cpp");
+USEUNIT("..\..\..\..\common\biomatter\biomass_decomposition_param.cpp");
+USEUNIT("..\..\..\..\CS_suite\CS_application_directory.cpp");
+USEUNIT("..\..\soil\soil_param.cpp");
+USEUNIT("..\..\organic_matter\OM_types.cpp");
+USEUNIT("..\..\organic_matter\OM_params.cpp");
+USEUNIT("..\..\crop\crop_types.c");
+USEUNIT("..\..\..\..\common\biometeorology\ET_model.cpp");
+USEUNIT("..\..\crop\growth_stages.cpp");
+USEUNIT("..\..\soil\soil_param_V4.cpp");
+USEUNIT("..\..\soil\soil_param_class.cpp");
+USEUNIT("..\..\crop\crop_param_class.cpp");
+USEUNIT("..\..\crop\crop_param_struct.cpp");
+USEUNIT("..\..\crop\crop_param_V4.cpp");
+USEUNIT("..\..\..\..\common\physics\property.cpp");
+USEUNIT("..\..\..\..\corn\application\context_directory_OS_FS.cpp");
+//---------------------------------------------------------------------------
+#define Library
+
+// To add a file to the library use the Project menu 'Add to Project'.
+
+ 

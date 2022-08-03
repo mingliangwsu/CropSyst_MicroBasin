@@ -1,0 +1,154 @@
+
+<H2>
+Table Records
+</H2>
+The record format is the same for all versions.
+<P>
+The records follow the header in the table file.
+Data records are preceded by one byte, that is
+space (20h) if the record is not deleted,
+asterisk (2Ah) if the record is deleted.
+<P>
+Fields are packed into records without field separators or record terminators.
+<P>
+The end of the file is marked by a single byte,
+with the end-of-file marker, an OEM code page character value of 26 (1Ah).
+
+<H2>
+Binary, Memo, and OLE Fields And .DBT Files
+</H2>
+
+Memo fields store data in .DBT files consisting of blocks numbered sequentially (0, 1, 2, and so on).
+<P>
+In version III the size of these blocks are internally set to 512 bytes.
+<BR>
+In version IV on, the block size is set with the command SET BLOCKSIZE.
+<P>
+The first block in the .DBT file, block 0, is the .DBT file header.
+<P>
+Memo field of each record in the .DBF file contains the number of the block (in OEM code page values) where the field's data actually begins.
+<BR>
+If a field contains no data, the .DBF file contains blanks (20h) rather than a number.
+<P>
+When data is changed in a field, the block numbers may also change and the
+number in the .DBF may be changed to reflect the new location.
+<P>
+Unlike dBASE III PLUS, if you delete text in a memo field,
+dBASE 5.0 for DOS may reuse the space from the deleted text when you input new text.
+dBASE III PLUS always appends new text to the end of the .DBT file.
+In dBASE III PLUS, the .DBT file size grows whenever new text is added, even if other text in the file is deleted.
+
+<P>
+<TABLE BORDER=3>
+<CAPTION>
+<H2>
+dBase header format
+</H2>
+</CAPTION>
+<TR><TH>Bytes<TH>Length    <TH>Description                  <TH>III+<TH>IV 2.0<TH>5.0 Dos<TH>5.0 Win</TR>
+<TR><TD>0    <TD>1 byte    <TD>dBase version                <TD><A HREF="#version_note">note</A><TD><A HREF="#version_note">note</A><TD><A HREF="#version_note">note</A><TD><A HREF="#version_note">note</A>
+<TR><TD>1-3  <TD>3 bytes   <TD>Update date YYMMDD           <TD>yes <TD>yes   <TD>yes    <TD>yes
+<TR><TD>4-7  <TD>32-bit    <TD>Record count                 <TD>yes <TD>yes   <TD>yes    <TD>yes
+<TR><TD>8-9  <TD>16-bit    <TD>Header length                <TD>yes <TD>yes   <TD>yes    <TD>yes
+<TR><TD>10-11<TD>16-bit    <TD>Record length                <TD>yes <TD>yes   <TD>yes    <TD>yes
+<TR><TD>12-13<TD>2 bytes   <TD>Reserved 0's                 <TD>00  <TD>00    <TD>00     <TD>00
+<TR><TD>14   <TD>1 byte    <TD>Incomplete transaction flag  <TD>0   <TD>yes   <TD>yes?   <TD>yes?
+<TR><TD>15   <TD>1 byte    <TD>Encryption flag              <TD>rsvd<TD>yes   <TD>yes?   <TD>yes?
+<TR><TD>16-27<TD>2 bytes   <TD>Rsrv multi user processing   <TD>LAN <TD>multi usr<TD>multi usr<TD>multi usr
+<TR><TD>28   <TD>1 byte    <TD><A HREF="#prod_MDX_flag">Production MDX flag</A>          <TD>0   <TD>yes   <TD>yes<TD>yes
+<TR><TD>29   <TD>1 byte    <TD>Language driveID             <TD>0   <TD>yes   <TD>yes<TD>yes
+<TR><TD>30-31<TD>2 bytes   <TD>Reserved 0's                 <TD>00  <TD>00    <TD>00     <TD>00
+<TR><TD>32-n <TD>32 bytes @<TD>Field descriptor array       <TD>Yes <TD>Yes   <TD>Yes    <TD>Yes
+<TR><TD>n+1  <TD>1 byte    <TD>Field terminator             <TD>ODh <TD>ODh   <TD>ODh    <TD>ODh
+</TABLE>
+<P>
+n above is the last byte in the field descriptor array. The size of the
+array depends on the number of fields in the table file.
+
+<TABLE BORDER=3>
+<CAPTION>
+<H2>
+<A NAME="version_note">
+dBase version byte encoding
+</A>
+</H2>
+</CAPTION>
+
+<TR><TH ALIGN=CENTER>7
+   <TH ALIGN=CENTER>6-5-4
+   <TH ALIGN=CENTER>3
+   <TH ALIGN=CENTER>2-1-0
+<TR>
+   <TD>.DBT memo file present <BR>(all versions)
+   <TD>SQL table present<BR> (version IV on)
+   <TD>dBase IV or Windows memo file present <BR>(version IV on)
+   <TD>Version number <BR>(all versions)
+</TABLE>
+
+<H3>
+<A NAME="prod_MDX_flag">
+Production MDX flag:
+</A>
+</H3>
+01h stored in this byte if a production .MDX file exists for this table;
+<BR>
+00h if no .MDX
+
+<TABLE  BORDER=3>
+<CAPTION>
+<H2>
+Field descriptor
+</H2>
+</CAPTION>
+<TR><TH>Bytes<TH>Length<TH>Description <TH> Version info.
+<TR><TD>0-10  <TD>11 bytes    <TD>Field name in ASCII (zero-filled).
+<TR><TD>11    <TD>1 byte      <TD>Field type in ASCII (B, C, D, F, G, L, M, or N).
+<TR><TD>12-15 <TD>4 bytes     <TD>Reserved.
+                              <TD>Version III Field data address (address is set in memory; not useful on disk).
+                                  This may have been dropped in later versions.
+<TR><TD>16    <TD>1 byte      <TD>Field length in binary.
+<TR><TD>17    <TD>1 byte      <TD>Field decimal count in binary.
+<TR><TD>18-19 <TD>2 bytes     <TD>Reserved.
+                              <TD>Version III used for dBase III+ on a LAN
+<TR><TD>20    <TD>1 byte      <TD>Work area ID.
+<TR><TD>21-22 <TD>2 bytes     <TD>Reserved.
+                              <TD>Version III used for dBase III+ on a LAN
+<TR><TD>23    <TD>1 byte      <TD>SET FIELDS flag.
+                              <TD>Version III only (This appears to have been dropped in later versions).
+<TR><TD>24-30 <TD>7 bytes     <TD>Reserved
+<TR><TD>31    <TD>1 byte      <TD>Production .MDX field flag;
+                              <BR>01h if field has an index tag in the production .MDX file;
+                              <BR>00h if the field is not indexed.
+                              <BR>Version IV on
+</TABLE>
+
+<TABLE BORDER = 3>
+<CAPTION>
+<H2>
+Field data type codes
+</H2>
+</CAPTION>
+<TR><TH>Code<TH>Type       <TH>Data Input  <TH>Versions
+<TR><TD>B   <TD>Binary     <TD>All OEM code page characters (stored internally as 10 digits representing a .DBT block number).
+                           <TD>Version 5 on.
+<TR><TD>C   <TD>Character  <TD>All OEM code page characters.
+                           <TD>All versions
+<TR><TD>D   <TD>Date       <TD>Numbers and a character to separate month, day, and year (stored internally as 8 digits in YYYYMMDD format).
+                           <TD>All versions
+<TR><TD>F   <TD>Floating   <TD>- . 0 1 2 3 4 5 6 7 8 9 point binary      numeric
+                           <TD>Version IV on.
+<TR><TD>G   <TD>General    <TD>All OEM code page characters (stored internally as 10 digits or OLE) representing a .DBT block number).
+                           <TD>Version 5 on.
+<TR><TD>N   <TD>Numeric    <TD>- . 0 1 2 3 4 5 6 7 8 9
+                           <TD>All versions
+<TR><TD>L   <TD>Logical    <TD>? Y y N n T t F f (? when not initialized).
+                           <TD>All versions
+<TR><TD>M   <TD>Memo       <TD>All OEM code page characters (stored internally as 10 digits representing a .DBT block number).
+                           <TD>All versions
+</TABLE>
+<P>
+This information is from the dBASE for DOS Language Reference manual,
+Appendix C.
+
+http://community.borland.com/article/0,1410,15838,00.html
+

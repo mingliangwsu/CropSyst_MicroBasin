@@ -1,0 +1,295 @@
+#ifndef CS_documentH
+#define CS_documentH
+
+// Rename this file to CS_Document or CS_Parameters
+// because this isn't necessarily YAML
+
+#include "corn/format/structural.h"
+#include "corn/container/text_list.h"
+#include "corn/parameters/parameters_datarec.h"
+#include "corn/parameters/parameter.h"
+#include "corn/math/numerical/interpolate.h"
+#include "corn/OS/uniform_resource_locator.h"
+#include "common/simulation/synchronization.h"
+
+//______________________________________________________________________________
+namespace CS {
+enum Crop_submodels
+{  unknown_submodels
+,  model_TUE_efficiency
+,  GENERALLY_APPLICABLE
+};
+//______________________________________________________________________________
+class Parameter_adjustment_settings
+: public implements_ CORN::Item
+{
+   modifiable_ float32       &normalization;
+   CORN::Interpolation_curve_type   interpolation_curve_type;
+   CORN::Unidirectional_list *interpolation; // optional list of observations
+   CORN::Unidirectional_list *observations;  // optional list of observations
+ public:
+   inline Parameter_adjustment_settings
+      (modifiable_ float32 &_normalization)
+      : normalization            (_normalization)
+      , interpolation_curve_type (CORN::step_curve)
+      , interpolation            (0)
+      , observations             (0)
+      {}
+};
+//_2015-09-04___________________________________________________________________
+#define ADJUSTABLE       true
+#define NOT_ADJUSTABLE  false
+#define POT_ADJUSTABLE   true
+   // potentially ajustable
+
+#define OBSERVABLE       true
+#define NOT_OBSERVABLE  false
+#define POT_OBSERVABLE   true
+   // potentially observable
+//______________________________________________________________________________
+struct Parameter_association
+: public implements_ CORN::Item
+{
+ public:
+   bool encountered;
+ public:
+   Parameter_association()
+      : CORN::Item()
+      , encountered(false)
+      {}
+};
+//______________________________________________________________________________
+struct Parameter_association_numeric
+: public extends_ Parameter_association
+, public extends_ CORN::Number_keyed
+{
+   bool adjustable;
+   bool observable;
+   Crop_submodels applicable_submodels[];
+      // submodels this parameter is known to be applicable
+      // 0 if generally applicable
+
+ public:
+   inline virtual const char *get_key()                                    const
+      { return CORN::Number_keyed::get_key(); }
+
+   inline Parameter_association_numeric(int8    &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(nat8    &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(int16   &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(nat16   &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(int32   &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(nat32   &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(float32 &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(float64 &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+
+   inline Parameter_association_numeric(const int8    &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(const nat8    &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(const int16   &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(const nat16   &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(const int32   &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(const nat32   &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(const float32 &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+   inline Parameter_association_numeric(const float64 &_value,const char *_structure,bool _adjustable, bool _observable, Crop_submodels *_applicable_submodels = 0) : CORN::Number_keyed(_value), adjustable(_adjustable), observable(_observable) { know_key_cstr(_structure);}
+};
+//_2015-09-07___________________________________________________________________
+struct Parameter_association_enum
+: public extends_ Parameter_association
+{
+   Labeled_enum &labeled_enum;
+   std::string key_ontological;
+ public:
+    inline virtual const char *get_key()                                   const
+      { return key_ontological.c_str(); }
+   inline Parameter_association_enum
+      (Labeled_enum &labeled_enum_
+      ,const char *structure_)
+      : labeled_enum(labeled_enum_)
+      , key_ontological(structure_)
+      {}
+};
+//_2015-11-22___________________________________________________________________
+struct Parameter_association_bool
+: public extends_ Parameter_association
+{
+   bool &bool_value;
+   std::string key_ontological;
+ public:
+    inline virtual const char *get_key()                                    const
+      { return key_ontological.c_str(); }
+   inline Parameter_association_bool
+      (bool &bool_value_
+      ,const char *structure_)
+      : bool_value(bool_value_)
+      , key_ontological(structure_)
+      {}
+};
+//_2015-11-22___________________________________________________________________
+class Parameter_adjustment
+: public extends_ structural::Mapping
+, public extends_interface_ structural::Pair_key_value
+{
+   Parameter_adjustment_settings &settings;
+ public:
+   inline Parameter_adjustment(Parameter_adjustment_settings &_settings)
+      : settings(_settings)
+      {}
+   virtual structural::Pair_key_value *instanciate_key_value_pair(structural::Construct *key_given) ;
+};
+//_2015-09-04___________________________________________________________________
+class Document
+: public extends_ structural::Mapping_clad
+// A document is considered a key value pair (The key would be the document file name)
+// Note that documents (in a directory are essentially a mapping)
+// The directory itself and thus the entire file system is effectively a mapping!
+// Directory entry names are keys in this mapping.
+{
+ public:
+   struct Edition
+   {
+      std::string    email;
+      std::wstring   name;
+      CORN::Date_32_clad /*170525 Date */     date;
+      std::string    program;
+      nat32          program_version;
+   };
+   struct Description
+   {
+      std::wstring brief;
+   };
+ public:
+   Edition edition;
+   Document();
+};
+//_2015-09-19___________________________________________________________________
+
+//_2016-02-27___________________________________________________________________
+class Document_configured
+: public extends_ Document
+{
+ public:
+   //___________________________________________________________________________
+   class Parameter_pertinence
+   : public implements_ CORN::Item
+   {public:
+      std::wstring structure;
+      const Labeled_enum &enumeration;
+      nat32       enum_option;
+    public:
+      inline Parameter_pertinence
+         (const char *structure_     // ontology
+         ,const Labeled_enum &enumeration_
+         ,nat32       enum_option_)
+         : CORN::Item()
+         , structure    ()
+         , enumeration  (enumeration_)
+         , enum_option  (enum_option_)
+         {  CORN::ASCIIZ_to_wstring(structure_,structure);
+         }
+   };
+   //_2016-06-30________________________________________________________________
+ public:
+   CORN::Unidirectional_list parameter_pertinencies;                             //160630
+   CORN::Text_list           parameter_essentials;                               //160630
+ protected:
+   CORN::Unidirectional_list parameter_associations;
+ public: // construction
+   inline Document_configured()
+      : Document()
+      {}
+   virtual bool initialize()                                    initialization_;
+   virtual bool initialize_parameter_associations()             initialization_ = 0; //160630
+   virtual bool initialize_relevencies()                        initialization_;
+   virtual bool initialize_parameter_pertinencies()             initialization_  { return true; } //160630
+   virtual bool initialize_parameter_essentials()               initialization_  { return true; } //160630
+
+ public: // Mapping implementations
+   //virtual structural::Pair_key_value *instanciate_key_value_pair(structural::Construct *key_given) ;
+
+ public: // Priming with configured structures
+   bool know(modifiable_ Parameter_association *param_assoc)      appropriation_;
+   //ol take(modifiable_ Parameter_association_numeric *param_assoc_given) appropriation_;
+      // Actually we should now be able to process any type but NYI
+
+   bool is_pertinent_wstring(const std::wstring &parameter_or_propery_qualified)         affirmation_; //160630
+   bool is_pertinent_cstr(const char *parameter_or_propery_qualified)                    affirmation_; //160630
+       /// \returns true if the specified element is pertinent according to
+       /// selected parameter file options
+   bool is_essential_wstring(const std::wstring &parameter_or_propery_qualified) affirmation_; //160630
+       /// \returns true if the specified element is essential
+       /// (critical to the model).
+   bool get_value_as_string                                                      //160701
+      (const std::wstring &parameter_or_propery_qualified
+      ,modifiable_ std::string &value
+      ,modifiable_ std::string &units)                                    const;
+ private:
+   bool compose_structure()                                     initialization_;
+   bool know_parameter_association
+      (modifiable_ structural::Mapping &in_mapping
+      ,modifiable_ Parameter_association *param_assoc_know
+      ,modifiable_ CORN::Text_list &key_list_given);
+/*
+   bool take_parameter_association_numeric
+      (modifiable_ structural::Mapping &in_mapping
+      ,modifiable_ Parameter_association_numeric *param_assoc_given
+      ,modifiable_ CORN::Text_list &key_list_given);
+*/
+   virtual nat32 count()                                                   const
+      {
+         // I don't remember what would the the mappings is this context
+         // so I need to check this
+         return parameter_associations.count();
+      }
+};
+//_2015-09-19___________________________________________________________________
+#ifdef DISABLED
+//151121 Curently using Document_configured
+class Document_structured
+: public extends_ Document
+{
+ public:
+   class Mapping
+   : public extends_ Document::Mapping_abstract
+/*BC++ compiler complains need to fix
+   , public extends_ structural::Pair_key_value_clad
+*/
+   {
+    public:
+      inline Mapping(structural::Construct *specifier_ = 0)
+         : Document::Mapping_abstract(specifier_)
+         , structural::Pair_key_value_clad(specifier_)
+         {
+         }
+         // Document structured items generally don't keep the specifier
+      inline virtual int compare(const CORN::Item &key_to_compare)                  const
+      {  // interface method uses interface methods.
+         const Construct *key = Pair_key_value_clad::get_specifier();
+         return key ? key->compare(key_to_compare) : -1;
+      }
+
+   };
+   //_2015-10-18________________________________________________________________
+   class Description
+   : public extends_ Mapping                                                     //151018
+   {
+      modifiable_ Common_parameters::Description &description;
+    public:
+      inline Description
+         (Common_parameters::Description &_description)
+         : Mapping(0)
+         , description(_description)
+         {}
+      virtual structural::Pair_key_value *instanciate_key_value_pair(structural::Construct *key_given) ;
+   };
+   //___________________________________________________________________________
+ public:
+   Common_parameters common_parameters; //I had this as a reference but would then need to initialize
+public:
+   Document_structured(Associated_directory_mode _associated_directory_mode);
+   virtual structural::Pair_key_value *instanciate_key_value_pair(given_ structural::Construct *key_given) ;
+};
+#endif
+//_2015-01-11_________________________________________________CS_YAML_Document_/
+} // namespace CS
+#endif
+// CS_YAML_DOCUMENT_H
+

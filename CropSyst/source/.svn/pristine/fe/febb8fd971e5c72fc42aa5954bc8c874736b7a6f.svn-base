@@ -1,0 +1,139 @@
+#ifndef canopy_growth_continuumH
+#define canopy_growth_continuumH
+#include "crop/canopy_growth.h"
+#include "crop/crop_param_struct.h"
+// Parameters for cover
+typedef struct CropSyst::Crop_parameters_struct::Phenology                 Phenology_parameters ;
+typedef struct CropSyst::Crop_parameters_struct::Canopy_growth_cover_based Canopy_parameters;
+typedef struct CropSyst::Crop_parameters_struct::Morphology                Canopy_growth_common_parameters;
+// Parameters for biomass
+typedef struct CropSyst::Crop_parameters_struct::Biomass_production        Biomass_parameters;
+typedef struct CropSyst::Crop_parameters_struct::Thermal_time              Thermal_time_parameters;
+class Weather_provider;
+class Air_temperature_average;                                                   //150803
+class Solar_radiation;                                                           //150803
+class Vapor_pressure_deficit_daytime;                                            //150803
+namespace CropSyst                                                               //150803
+{  class Crop_CO2_response;                                                      //150803
+}
+#include <ostream>
+
+#define Ref_to_const_float         const float64 *
+#include "crop/phenology_interface.h"
+#include "crop/transpiration_interface.h"
+#include <math.h>
+#include "corn/math/moremath.h"
+
+// WARNING CO2 response (as in VIC) not yet implemented!!!!!!!
+
+#include "crop/canopy_cover_continuum.h"
+#include "crop/canopy_biomass_continuum.h"
+
+// This should be in CropSyst namespace
+
+//______________________________________________________________________________
+class Canopy_growth_continuum
+: public virtual Canopy_growth_interface
+{
+   const CropSyst::Phenology_interface &phenology;                               //101101
+   Canopy_biomass_continuum_reference   biomass_reference;
+   Canopy_biomass_continuum_actual      biomass_actual;
+   CropSyst::Canopy_cover_reference     cover_reference;
+   CropSyst::Canopy_cover_actual        cover_actual;
+
+   contribute_ float64                  LWP_yesterday;                           //150803_110901
+      // set daily by calling know_LWP_yesterday();
+public:
+   Canopy_growth_continuum
+      (const CropSyst::Crop_parameters       &crop_parameters
+      ,const CropSyst::Phenology_interface   &phenology
+      ,const Transpiration_interface         &transpiration
+      ,const Weather_provider                &weather
+      ,const CropSyst::Crop_CO2_response     *CO2_response_optional);
+public: // interface implementation
+   inline virtual bool initialize()                               modification_;
+   virtual float64 know_LWP_yesterday(_LWP_yesterday)                cognition_;
+
+   inline virtual bool invalidate()                               modification_;
+   inline virtual bool update()                                        updates_;
+   inline virtual bool process_day()                              modification_; //170111_080910
+   inline virtual bool start()                                    modification_; //080811
+   inline virtual bool restart_with
+      (float64 restart_biomass,float64 restart_GAI
+      ,bool use_clumping_factor = true)                           modification_;
+   // Temporal processiong
+   virtual bool start_day()                                       modification_;
+   inline virtual bool emerge_coyledon                                           //080728
+      (float64 new_cotalydon_GAI                                                 //080728
+      ,float64 new_cotalydon_BM)                                  modification_; //080728
+   inline virtual bool end_season(bool apply_dormancy)            modification_; //080401
+   // Event processiong
+   inline virtual bool respond_to_clipping()                      modification_;
+   inline virtual void die_back(float64 fraction_to_die)          modification_;
+   inline virtual void terminate()                                modification_; //080728
+   inline virtual float64 remove_biomass
+      (float64 biomass_to_remove
+      ,float64 retain_living // GAI or fCCg retain_GAI       // biomass won't be removed if it takes the GAI below this level. Use 0.0 for no limitation
+      ,bool remove_newest_first
+      ,bool reserve_todays_portion
+      ,Crop_biomass &removed_biomass)                             modification_;
+       // Return about of biomass removed          //070412
+   inline virtual float64 remove_all_biomass
+      (Crop_biomass &removed_biomass)                             modification_;
+   // status query
+   inline virtual float64 get_biomass_current(uint8 include_biomass)      const; // The current biomass (Some may have decomposed) 060601
+   inline virtual float64 get_influence_on_root_activity_factor
+      (bool after_end_of_vegetative_growth)                               const; //080805
+   inline virtual float64 get_fract_canopy_cover()                        const; // eventually rename to get_fract_canopy_cover_total
+
+//081105/*080801_*/    inline virtual float64 get_yesterday_fract_green_canopy_solrad_interception() const ;  // This is used only for transpiration
+
+   virtual modifiable_ float64 &reference_fract_canopy_cover()    modification_;
+   inline virtual void know_residues(Residues_interface *residues)   cognition_; //060531
+   #ifdef CHECK_NEEDED
+   inline virtual float64 get_peak_LAI()                                  const; //080728
+   #endif
+   #if (CO2_RESPONSE_VERSION==4)
+   // actually this did not appear to be used anymore
+   #ifdef CO2_CHANGE
+   inline virtual float64 get_GAI_at_baseline_conc()                      const; //080728
+      // get_GAI_at_baseline_conc is used only for calc_water_use_efficiency_CO2_response_adjustment
+   #endif
+   #endif
+   inline virtual float64 get_fract_green_cover()                         const;  // Appears to be used only for CO2
+
+   // The following will require something equivelent in the canopy based model
+   inline virtual float64 calc_fract_cover
+      (float64 xAI
+      , bool photosynthetic_active_rad_based
+      ,bool use_clumping_factor = true                                           //080801
+      ,bool record_shading_porosity_interception = false)                 const; //000623
+      // for fruit trees the record_shading_porosity_interception is true 081104
+   inline virtual float64 get_senescence_reduction_factor()               const; //080807
+   inline virtual float64 get_adjusted_ET_crop_coefficient()              const; //080811
+   inline virtual float64 calc_plant_development                                 //990215
+      (float64 length_max
+      ,float64 last_length
+      ,float64 overall_growth_stress)                                     const; //080805
+      // probably only for output. canopy cover based will probaby not need this
+   inline virtual float64 get_GAI(uint8 include_GAI)                      const;
+   inline virtual float64 get_LAI()                                       const; //060824
+   inline virtual float64 get_LAI(bool from_canopy)                       const; //080728
+   // probably used elsewhere in the model
+   inline virtual float64 get_live_green_biomass
+      (bool include_vital,bool include_effete)                            const;
+   // The following only apply the LAI based mode
+   inline virtual bool age_leaf
+      (float64  thermal_time_growing_degree_day
+      ,float64 water_stress_index)                                modification_; //070328
+   inline virtual bool develop_leaf
+     (bool continue_leaf_growth
+     ,float64 canopy_growth
+     ,float64 LAI_related_growth  // Today's LAI related growth
+     ,float64  thermal_time_growing_degree_day)                   modification_; //080728
+   inline virtual float64 update_LAI_for_self_shading_response
+      (float32 accum_deg_days)                                    modification_;
+};
+//_2011-08-23___________________________________________________________________
+#endif
+

@@ -1,0 +1,96 @@
+U_cm_hr,
+/* units  CSW PARAMS
+* cm/hr
+*/
+U_degrees_C,
+/* units  *
+* °C
+*/
+U_m,
+/* units *
+* m
+*/
+U_mm,
+/* units  *
+* mm
+*/
+U_m2_kg,
+/* units  *
+* m²/kg
+*/
+U_m2_m2,
+/* units  *
+* m²/m²
+*/
+U_m3_m3,
+/* units  *
+* m³/m³
+*/
+U_MJ_m2_day,
+/* units  *
+en MJ/m²/day
+*/
+U_unitless,
+/* units  *
+* (-)
+*/
+U_0_1,
+/* units *
+* 0-1
+*/
+U_1_2,
+/* units *
+* 1-2
+*/
+U_0_0_0_1,
+/* units  *
+* 0.0-0.1
+*/
+U_inch,
+/* units *
+* inch
+*/
+U_percent,
+/* units *
+* %
+*/
+U_m_day,
+/* units *
+* m/day
+*/
+U_cm_day,
+/* units *
+* cm/day
+*/
+U_mm_day,
+/* units *
+* mm/day
+*/
+U_in_day,
+/* units *
+* in/day
+*/
+U_cm,
+/* units *
+* cm
+*/
+U_lbs_acre,
+/* units *
+* lbs/acre
+*/
+U_g_cm3,
+/* units *
+* g/cm³
+*/
+U_ppm,
+/* units * PARAMS CS 980220
+* ppm
+*/
+U_m_s,
+/* units * PARAMS CS 980220
+* m/s
+*/
+U_J_kg,
+/* units * PARAMS CS 980220
+* J/kg
+*/

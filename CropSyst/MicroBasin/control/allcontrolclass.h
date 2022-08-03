@@ -1,0 +1,214 @@
+#ifndef allcontrolclassH
+#define allcontrolclassH
+
+#include "cs_scenario.h"
+#ifndef CROPSYST_VERSION
+#ifdef CROPSYST_PROPER_CROP
+#else
+#include "crop/cropparametercollection.h"
+class CropParameterCollection;
+#endif
+class OrganicResidueParameterClass;
+#endif
+//#include "datetime/date.hpp"
+#include <string>
+#include <vector>
+#include "util/constants.h"
+//______________________________________________________________________________
+class ManageScheduleClass;  //LML 140827
+enum Auto_N_grid_option {AUTO_N_DEFAULT,AUTO_N_GRID_FIXED,AUTO_N_GRID_VARIED,AUTO_N_ACCOUNT};  //170331LML
+extern const char *Auto_N_grid_option_table[];
+DECLARE_LABELED_ENUM(Auto_N_grid_option_labeled, Auto_N_grid_option, Auto_N_grid_option_table)
+
+struct Initial_N_and_water
+{
+    double depth;                                                                //(m) to depth
+    double NO3_N;                                                                //(kgN/ha)
+    double NH4_N;                                                                //(kgN/ha)
+    double avail_water;                                                          //(0-1)
+    Initial_N_and_water():depth(0),NO3_N(0),NH4_N(0),avail_water(0) {};
+};
+
+//_____________________________________________________________________________/
+class AllControlClass
+: public extends_ CropSyst::Scenario
+{
+ public:
+    //CORN::Date today;                                                              //140214
+    CORN::Date_32_cowl &end_date;
+      //RLN  end_date is just an alias to stop_date
+      // eventually end_date should be replaced with stop date.
+    int      hour; //(0-23) WARNING not sure about hour loops                    //140214
+
+//160225RLN already in CS_scenario    CS::Annual_temperature annual_temperature;                                   //141222
+    /*141222 Moved from WeatherLocationInputClass (phase, amplitude
+          It really isn't necessary to have these values for every site.
+    This is just used to initialize soil temperature
+    phase and amplitude do not vary much in a region
+    The average annual temperature, if significantly varying, should be calculated
+    from provided daily data (but this really isn't necessary).
+
+    (In CROPSYST_VERSION these are in CropSyst::Scenario).
+    */
+
+ private:
+    nat8 max_soil_layers;                                //maximum soil layers
+    nat8 solute_species;                             //number of solute species
+    #ifndef CROPSYST_VERSION
+    nat8 max_num_crops_each_grid;                    //maximum croptypes in each grid cell
+    #endif
+    //141211 obsolete bool b_hourly_met;                              //141211 obsolete 1: hourly met data
+    double TimeStep_Lateralflow;                    //(h) timestep for overall lateral flow time loop
+                                                    //(contains soil lateral flow & overland flow)//
+    double TimeStep_SoilLateralflow;                //(h)
+    double TimeStep_Overlandflow;                   //(h)
+    double TimeStep_Cascadeflow;                    //(h)
+    double Invalid_Met_Label;                       //The value that indicate the met record is invalid
+    //bool do_Spatial_Simulation;                   //LML 140813 if false, none soil lateral flow, and overlandflow is instant
+    bool b_soil_lateralflow;
+    bool b_instant_overlandflow;                    //
+
+    //bool Use_MicroBasin_Soil_Profile;
+    nat8 total_crop_types;                           //Total crop types in study region
+public:
+   #ifdef LIU_FD_RICHARD
+    int FD_Bottom_BC_type;          //Bottom layer condition: 1: water table 2: none flux 3: Constant water potential
+    int FD_Delt;                    //(second) time step for FD (should be divided by 3600 second, eg. 36, 72 etc.)
+    double FD_Delx;                 //(meter) node delta-x for FD (Should be divided by 0.05, eg. 0.05, 0.025 etc.)
+   #endif
+    //150617LML bool doSurfaceFlowSimulation;
+    nat8 Overlandflow_Method;    //1:8-direction 2:4-direction
+    bool use_Hourly_Runoff;
+    bool PerchedWT_Enabled;                                                      //151019LML note: if enabled, hydroelevation considers pond depth and the watershed property should be calculated every hour.
+    bool PerchedWT_Disabled_Watershed_Property_Calculated;                       //151019LML
+    //170424LML nat8 method_outlet_flowrate; //1: constant elevation 2: constant slop        //140425LML
+    //151028LML obs double constant_outlet_slop_or_elevation;                                    //140425LML
+    //double Outlet_Slope;    //(m/m)
+    double Current_CO2_Concentration;
+
+    //150708RLN  unused?     bool RecalculateSoilProperties;
+    bool bOutput_Format_Esri_Grid;  //1: Output Esri Grid-Ascii file 0: Output text file
+    bool bWrite_Hourly_Output;
+    bool bWrite_Daily_Output;
+    bool bWrite_Growth_Season_Output;
+    bool bWrite_Growth_Daily_Output;
+    bool bWrite_Annual_Output;
+    //150708RLN  unused?         bool bPrintedBasinHead;
+    bool Flux_Carbon_Daily_unused;                                               //140702FMS
+    bool Hourly_Outputs;                                                         //140605FMS
+      // check used
+    double Culm_Snow_Melt;              //m SWE                                  //140501FMS
+    bool Worksheet_Output_all_Cell_MB;                                           //140606FMS
+    CORN::Date_32_clad Start_Date_Hourly_Output;
+    CORN::Date_32_clad End_Date_Hourly_Output;
+    CORN::Date_32_clad Start_Date_Hourly_Esri_Grid_Output;                               //140527LML
+    CORN::Date_32_clad End_Date_Hourly_Esri_Grid_Output;                                 //140527LML
+    #ifdef CROPSYST_VERSION
+    #else
+    #  ifdef CROPSYST_PROPER_CROP
+    #  else
+    std::string Crop_Name_Lists[30];                                             //150721RLN
+    CropParameterCollection *pCrop_Parameter_Collection;
+    #  endif
+    OrganicResidueParameterClass *pOrganic_Residue_Parameters;
+    #endif
+    #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_MANAGEMENT))
+    #else
+    nat8 num_management_types;                                                   //140827LML
+    std::string Management_Name_Lists[200];                                      //150721RLN
+    ManageScheduleClass *parrManagementSchedule;                                 //140827LML
+    #endif
+    CORN::OS::File_name_concrete weathercontrol_name;
+    //150708RLN appears obsoleteCORN::OS::File_name_concrete flowdir_name;
+    CORN::OS::File_name_concrete gridid_name;
+    CORN::OS::File_name_concrete gridmask_name;
+    CORN::OS::File_name_concrete gridoutputmask_name;                            //151007LML for outputs debug
+    CORN::OS::File_name_concrete outlets_name;
+    CORN::OS::File_name_concrete elev_name;
+    CORN::OS::File_name_concrete slop_name;
+    CORN::OS::File_name_concrete aspect_name;
+    CORN::OS::File_name_concrete area_name;
+    CORN::OS::File_name_concrete latitude_name;
+    CORN::OS::File_name_concrete longitude_name;
+    CORN::OS::File_name_concrete soiltype_name;
+    //    CORN::OS::File_name_concrete  annualtavg_name;
+    CORN::OS::File_name_concrete croprotation_name;
+    CORN::OS::File_name_concrete cropmanagementzone_name;                        //LML 150515
+//170331LML #ifdef PREDEFINE_N_APPLICATION_PER_CELL
+    Auto_N_grid_option_labeled auto_N_grid_option;                               //170331LML
+    CORN::OS::File_name_concrete predefined_N_fertilization_name;                //170320LML
+//170331LML #endif
+    bool use_even_soil_N_and_FC;                                                 //170404LML
+    CORN::OS::File_name_concrete initial_soil_N_and_available_water_name;        //170404LML
+    std::vector<struct Initial_N_and_water> initial_N_and_water;                 //170404LML
+    #ifdef MACA_V1_MBMET
+    CORN::OS::File_name_concrete weatherstationID_name;
+    #endif
+    //std::string weatherdata_prefix_name;
+    //std::string weatherdata_suffix_name;
+    #ifndef CROPSYST_VERSION
+    CORN::OS::File_name_concrete soilproperty_filename;
+    CORN::OS::File_name_concrete cropproperty_filename;
+    CORN::OS::File_name_concrete rotation_filename;
+    CORN::OS::File_name_concrete management_filename;
+    CORN::OS::File_name_concrete organic_residue_filename;
+    #endif
+    CORN::OS::File_name_concrete soilstate_filename;
+    CORN::OS::File_name_concrete annual_output_filename;
+    CORN::OS::File_name_concrete growth_daily_output_filename;
+    CORN::OS::File_name_concrete growth_season_output_filename;
+    CORN::OS::File_name_concrete daily_output_filename;
+    CORN::OS::File_name_concrete hourly_output_filename;
+    CORN::OS::File_name_concrete basin_hour_output_filename;
+
+    struct                                                                       //150721RLN
+    {
+    double excess_water;            //Debug only
+    double infiltrated;             //Debug only
+    double water_applied;           //Debug only
+    double water_in_vertical;       //Debug only
+    double vertical_drainage;       //Debug only
+    } debug;                                                                     //150721RLN
+public:
+    AllControlClass(const CORN::OS::Directory_name &_scenario_directory);
+    virtual ~AllControlClass();                                                  //150707RLN
+    int getMaxSoilLayers()                                      const;
+	#ifndef CROPSYST_VERSION
+    void setStartDate(CORN::Date& sdate);
+        void setEndDate(CORN::Date& edate);
+	#endif
+    const CORN::Date_32_cowl &getStartDate()                                    const;
+    CORN::Date_const &getEndDate()                                      const;
+    void setToday(CORN::Date_const &_today);
+    double getTSLateralFlow()                                   const;
+    double getTSSoilLateralFlow()                               const;
+    double getTSOverlandFlow()                                  const;
+    double getTSCascadeFlow()                                   const;
+    int getSoluteSpecies()                                   const;
+    double getInvalidMetLabel()                                 const;
+    bool getBHourlyMet()                                        const;
+    void setBHourlyMet(bool _hourly);
+    void setMaxNumCropsEachGrid(int MNCEG);
+    int getMaxNumCropsEachGrid();
+    int getTotalCropTypes();
+    bool isDoSoilLaterFlow();
+    bool isInstantOverlandFLow();
+    void setDoSoilLaterFlow(bool setvalue);
+    void setInstantOverlandFLow(bool setvalue);
+    //bool UseMicroBasinSoilProfile();
+    bool useHourlyRunoff();
+    //bool isDoSpatialSimulation()/*LML 140813 doSpatialSimulation()*/;
+    virtual bool expect_structure(bool for_write);                               //150702
+    virtual bool get_end();                                                      //150702
+    void print_allcontrol();
+    bool automatic_validate();                                                   //150611LML
+    bool readInitialSoilState();                                                 //170404LML
+    int getInitializationLayer(const double depth_m, const int top_layer, const int bottom_layer);                            //170404LML
+    #if (defined(CROPSYST_VERSION) || defined(CROPSYST_PROPER_MANAGEMENT))
+    #else
+    void read_management_files();
+    int find_management_index(std::string management_name);
+    #endif
+};
+//_2014-02-??___________________________________________________________________
+#endif // ALLCONTROLCLASS_H

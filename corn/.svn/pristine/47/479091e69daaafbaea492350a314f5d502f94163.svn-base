@@ -1,0 +1,59 @@
+
+Begin test
+3.14159
+-----------------------------------------
+
+Bad index
+
+
+An exception has been thrown
+Logic error:- out of range
+string index error
+Trace: Block A.
+
+-----------------------------------------
+
+Bad pos value
+
+
+An exception has been thrown
+Logic error:- out of range
+string index error
+Trace: Block B.
+
+-----------------------------------------
+
+0 in place of char*
+
+
+An exception has been thrown
+Logic error:- invalid argument
+string constructor: char* s = 0
+Trace: Block C.
+
+-----------------------------------------
+
+string too long
+
+
+An exception has been thrown
+Logic error:- length error
+string length = npos
+Trace: Block D.
+
+-----------------------------------------
+
+string too long
+
+
+An exception has been thrown
+Logic error:- length error
+string length >= npos
+Trace: Block E.
+
+-----------------------------------------
+
+(The following memory checks are probably not valid with all
+compilers - see newmat documentation)
+Checking for lost memory (large block): 9060304 9060304  - ok
+Checking for lost memory (small block): 9060304 9060304  - ok

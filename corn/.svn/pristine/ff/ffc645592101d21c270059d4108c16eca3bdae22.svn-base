@@ -1,0 +1,349 @@
+#ifndef CORN_BNFPARSE_H
+#define CORN_BNFPARSE_H
+
+#include <corn/std/std_fstream.h>
+#include <corn/association.h>
+#include <corn/filename.h>
+
+/*
+This class implements a bnf parser:
+
+The class takes as input a set of rules.
+The set is in the form of an association list.
+Each association defines a rule
+The key of the association is the rule identifier.
+The label (string) of the association is rule expression.
+
+For convenience a VV_file (variable value file) section may be
+submitted to the BNF parser as the rule set.
+The rules will be parsed and the BNF rules will be generated.
+
+The following conventions are slight modifications of BNF
+
+The BNF meta symbol ::=  is written as =
+
+Rule identifiers (Catagory names) are NOT enclosed in <> brackets
+the rule identifiers are distinquished from literals by simply having an associated rule.
+
+Brackets <> are used to denote text formatted for a specific primitive data type to be read/parsed by another parser.
+This other parser could be a stream class or an object that can specifically
+read the expected text (I.e. another BNF_parser or an object that
+knows a specific format of the following text).
+Bracketed factors are literals and must be the only term in the expression.
+The name of the type in enclosed in brackets.
+The base BNF_parser class recognizes the following primitive data types:
+<char> reads on 8bit character.
+<int8> reads an 8bit signed integer (binary representation).
+<int16> reads a 16bit signed integer (binary representation).
+<int32> reads a 32bit signed integer (binary representation).
+<uint8> reads an 8bit unsigned integer (binary representation).
+<uint16> reads a 16bit unsigned integer (binary representation).
+<uint32> reads a 32bit unsigned integer (binary representation).
+<float32> reads a 16bit float (binary form).
+<float32> reads a 32bit float (binary form).
+<integer> reads a integer (text form) (into a signed long int).
+<number> reads number (text form) into a float (16bit).
+<string> reads a character string terminated by white space (as in the C++ string class read_token() method).
+
+A Bracketed factor will usually have its own rule.
+If a bracked factor appears within an expression the data will be read and ignored.
+
+
+The value will be sent with the rule identifier using a respective
+process_XXX() method.
+I.e.  process_float32("value",value);
+For parsing of text, a fixed size of integer, number float and string data may be specified as in the following
+<string@10> is an character string always 10 characters long.
+<integer@2>  is an integer always  two digits long.
+<number@8> is a floating point number always 8 characters long.
+For integer and numbers, leading spaces and zeros are eaten.
+The number is read until the first character that does not comprise an integer/float is encountered.
+When the size is used, the specified number of characters are always read,
+even if a character that does not comprise a number is encountered.
+The behaviour of this case (which should be considered a malformed BNF)
+is not predicatable, but usually only those valid digits will be used to
+compose the number.
+
+Integers and numbers are expected to be formatted using C++ stream formatting convetions.
+
+Literal terminals are enclosed in double quotes.
+These will be parsed and presented to the parser (I.e. white space, syntactic sugar etc.)
+in a character string with the quotes stripped.
+
+Non printing characters follow C/C++ literal character string notation I.e. "\n"
+is a terminal containing a single new line character "\t"  is a tab.
+
+Every thing else is considered a terminal and will be presented to derived
+class using with the method terminal().
+
+There must be at lease one rule with the identifier 'syntax'.
+
+Example
+
+syntax=header_line { detail_line }
+header_line=station_code "-" "date" variable_column_associations "\n"
+station_code=FIPS_code station_number
+station_number=<integer>
+FIPS_code=<string@2>
+variable_column_associations={"\t" variable}
+variable=<string@4>
+detail_line=MMDDYY {"\t" value} "\n"
+value=<number>
+MMDDYY=month day year
+month=<integer@2>
+day=<integer@2>
+year<integer@2>
+
+Describes a file such as the following:
+
+WA6789-date	tmax	tmin	tavg	prcp	snwd	snow	stn1	stn2	stn3	stx1	stx2	stx3
+010181	46.00	40.00	43.00	0.00	0.00	0.00
+010281	42.00	37.00	39.50	0.00	0.00	0.00
+010381	43.00	36.00	39.50	0.00	0.00	0.00
+010481	38.00	35.00	36.50	0.00	0.00	0.00
+
+For a class derived from BNF_parser which knows how to read the formatted detail lines:
+the following may be sufficient
+
+syntax=header_line { detail_line }
+header_line=station_code "-" "date" variable_column_associations "\n"
+station_code=FIPS_code station_number
+station_number=<integer>
+FIPS_code=<string@2>
+variable_column_associations={"\t" variable}
+variable=<string@4>
+detail_line=<daily_data>
+
+
+
+*/
+
+class BNF_rule;
+class BNF_data_factor;
+class BNF_token;
+class BNF_token_tree;
+//______________________________________________________________________________
+class BNF_parser
+{
+	CORN_association_list rules;
+public:
+	BNF_parser(CORN_association_list &raw_rules);
+
+	inline BNF_parser()
+	:rules()
+	{} ;
+
+	void add_rules(CORN_association_list &raw_rules);
+
+	bool parse_file(const char *name_of_file_to_parse);
+
+	bool has_a_rule_identifier(const CORN_string &label);
+
+	BNF_rule *get_rule_identifier(const CORN_string &label);
+
+
+	virtual BNF_data_factor *identify_data_type_factor(const CORN_string data_type_label);
+};
+//______________________________________________________________________________
+class BNF_expression
+{  // consists of one or more terms separated by |
+	CORN_association_list terms;
+
+public:
+	BNF_expression(BNF_parser				 &i_parent_parser
+	,BNF_token_tree &i_tokenized_expression);
+
+	virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+class BNF_factor
+: public CORN_list_item
+{
+public:
+	inline BNF_factor()
+	:CORN_list_item()
+	{};
+	inline virtual int compare(const Item &/*other*/) const { return 0;}
+
+	inline virtual const char *label_string(std::string &buffer) const {return buffer.c_str();}
+
+	virtual bool parse_stream(istream &strm_to_parse) = 0;
+};
+//______________________________________________________________________________
+class BNF_data_factor
+:public BNF_factor
+{ //  <datatype>
+protected:
+	uint8 required_chars; // 0 indicates read until character not conforming to the data is encountered
+								 // otherwise read exactly the specified number of characters.
+
+public:
+	inline BNF_data_factor(uint8 i_required_chars = 0)
+	:BNF_factor()
+	,required_chars(i_required_chars)
+	{};
+
+	virtual bool parse_stream(istream &strm_to_parse) = 0;
+
+
+};
+//______________________________________________________________________________
+class BNF_char_data_factor
+: public BNF_data_factor
+{
+public:
+	inline BNF_char_data_factor()
+	:BNF_data_factor(1)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse);
+};
+//______________________________________________________________________________
+class BNF_integer_data_factor
+: public BNF_data_factor
+{
+public:
+	inline BNF_integer_data_factor(uint8 i_required_chars = 0)
+	:BNF_data_factor(i_required_chars)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse);
+
+};
+//______________________________________________________________________________
+class BNF_number_data_factor
+: public BNF_data_factor
+{
+public:
+	inline BNF_number_data_factor(uint8 i_required_chars = 0)
+	:BNF_data_factor(i_required_chars)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse);
+
+};
+//______________________________________________________________________________
+class BNF_string_data_factor
+: public BNF_data_factor
+{
+protected:
+   CORN_string string_encountered;
+public:
+	inline BNF_string_data_factor(uint8 i_required_chars = 0)
+	:BNF_data_factor(i_required_chars)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse);
+
+};
+//______________________________________________________________________________
+class BNF_rule_identifier
+: public BNF_factor
+{
+	BNF_rule *rule;
+public:
+	inline BNF_rule_identifier(BNF_rule *i_rule)
+	:BNF_factor()
+	, rule(i_rule)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+class BNF_terminal
+: public BNF_factor
+{
+	CORN_string terminal;
+public:
+	inline BNF_terminal(const BNF_token &token)
+	:BNF_factor()
+	,terminal((CORN_string &)token)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+class BNF_literal_terminal
+: public BNF_terminal
+{//  "synbol"
+public:
+	inline BNF_literal_terminal(const BNF_token &token)
+	: BNF_terminal(token)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+class BNF_repetition
+: public BNF_factor
+, public BNF_expression
+{ // { expression }
+public:
+	inline BNF_repetition
+	(BNF_parser				 &i_parent_parser
+	,const BNF_token_tree &tokenized_expression)
+	:BNF_factor()
+	,BNF_expression(i_parent_parser,tokenized_expression)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+class BNF_optional
+: public BNF_factor
+, public BNF_expression
+{ // [ expression ]
+public:
+	inline BNF_optional
+	(BNF_parser				 &i_parent_parser
+	,const BNF_token_tree &tokenized_expression)
+	:BNF_factor()
+	,BNF_expression(i_parent_parser,tokenized_expression)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+class BNF_precedence
+: public BNF_factor
+, public BNF_expression
+{ // ( expression )
+
+public:
+	inline BNF_precedence
+	(BNF_parser				 &i_parent_parser
+	,const BNF_token_tree &tokenized_expression)
+	:BNF_factor()
+	,BNF_expression(i_parent_parser,tokenized_expression)
+	{};
+	virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+class BNF_term
+: public CORN_list_item
+{  // consists of one or more factors
+   CORN_association_list factors;
+   //BNF_parser				 &parent_parser;
+ public:
+   BNF_term
+      (BNF_parser		 &i_parent_parser
+      ,BNF_token_tree &tokenized_term);
+   inline virtual int compare(const Item &) const { return 0;}
+   //170424 replaced with label_wstring inline virtual const char *label_cstr(char *buffer) const {return buffer;}
+   inline virtual const char *label_string(std::string &buffer) const {return buffer.c_str();}
+
+//	inline bool is_a_rule_identifier(const CORN_string &label)
+//	{ parent_parser.has_a_rule_identifier(label); };
+
+   virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+class BNF_rule
+:public CORN_association
+{  // consists of the rule identifer (category name) and an expression
+	CORN_string 	identifier;
+	BNF_expression expression;
+public:
+	 BNF_rule
+	 (const CORN_string &i_identifier
+	 ,BNF_parser				 &i_parent_parser
+	,BNF_token_tree &i_tokenized_expression);
+
+	inline virtual CORN_string &get_key(CORN_string &key) const
+	{ key.assign(identifier); return key; };
+
+	virtual bool parse_stream(istream &strm_to_parse) ;
+};
+//______________________________________________________________________________
+#endif

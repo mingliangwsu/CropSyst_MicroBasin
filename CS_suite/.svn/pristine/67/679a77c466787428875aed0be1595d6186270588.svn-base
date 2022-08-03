@@ -1,0 +1,175 @@
+#------------------------------------------------------------------------------
+VERSION = BWS.01
+#------------------------------------------------------------------------------
+!ifndef ROOT
+ROOT = $(MAKEDIR)\..
+!endif
+#------------------------------------------------------------------------------
+MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
+DCC = $(ROOT)\bin\dcc32.exe $**
+BRCC = $(ROOT)\bin\brcc32.exe $**
+#------------------------------------------------------------------------------
+PROJECTS = corn_complete_static.lib corn_static.lib container_static.lib \
+  datetime_static.lib file_sys_static.lib format_static.lib parameters_static.lib \
+  application_static.lib common_sim_static.lib statsgo_static.lib UED_static.lib \
+  weather_static.lib ICASA_static.lib CropSyst_scenario_static.lib \
+  CS_directory.lib rotation_editor.exe format_editor.exe management_editor.exe \
+  biomatter_editor.exe scenario_editor.exe project_editor.exe weather_editor.exe \
+  crop_editor.exe GIS_runner.exe carbon_sequestration_optimizer.exe \
+  carbon_sequestration_viewer.exe output_manager_advanced.exe export_wizard.exe \
+  import_wizard.exe CPF_controller.exe soil_editor.exe batch_runner.exe \
+  crop_calibrator.exe fastgrph.exe fix_CS_XLS.exe CPF_runner.exe \
+  schedule_viewer.exe
+#------------------------------------------------------------------------------
+default: $(PROJECTS)
+#------------------------------------------------------------------------------
+
+rotation_editor.exe: ..\..\CropSyst\GUI\Builder\rotation_editor\rotation_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+file_sys_static.lib: ..\..\corn\file_sys\BCB5\file_sys_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+crop_calibrator.exe: ..\..\CropSyst\GUI\Builder\crop_calibrator\crop_calibrator.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+format_editor.exe: ..\..\CropSyst\GUI\Builder\format_editor\format_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+management_editor.exe: ..\..\CropSyst\GUI\Builder\management_editor\management_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+scenario_editor.exe: ..\..\CropSyst\GUI\Builder\scenario_editor\scenario_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+schedule_viewer.exe: ..\..\CropSyst\GUI\Builder\schedule_viewer\schedule_viewer.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+project_editor.exe: ..\..\CropSyst\GUI\Builder\project_editor\project_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+datetime_static.lib: ..\..\corn\datetime\BCB5\datetime_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+format_static.lib: ..\..\corn\format\BCB5\format_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+soil_editor.exe: ..\..\CropSyst\GUI\Builder\soil_editor\soil_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+weather_editor.exe: ..\..\CropSyst\GUI\Builder\weather_editor\weather_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+crop_editor.exe: ..\..\CropSyst\GUI\Builder\crop_editor\crop_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+common_sim_static.lib: ..\..\Common\simulation\BCB5\common_sim_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+output_manager_advanced.exe: ..\..\CropSyst\GUI\Builder\output_manager_advanced\output_manager_advanced.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+container_static.lib: ..\..\corn\container\BCB5\container_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+GIS_runner.exe: ..\..\CropSyst\GUI\Builder\project_editor\GIS\GIS_runner.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+carbon_sequestration_optimizer.exe: ..\..\CropSyst\GUI\Builder\project_editor\optimizers\carbon_sequestration\carbon_sequestration_optimizer.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+carbon_sequestration_viewer.exe: ..\..\CropSyst\GUI\Builder\project_editor\optimizers\carbon_sequestration\carbon_sequestration_viewer.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+batch_runner.exe: ..\..\CropSyst\GUI\Builder\project_editor\batch\batch_runner.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+statsgo_static.lib: ..\..\STATSGO\library\BCB5\statsgo_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+fastgrph.exe: ..\..\UED\fast_graph\cbuilder\fastgrph.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+parameters_static.lib: ..\..\corn\parameters\BCB5\parameters_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+export_wizard.exe: ..\..\ued\import_export_wizard\export_wizard\export_wizard.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+ICASA_static.lib: ..\..\ICASA\library\BCB5\ICASA_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+import_wizard.exe: ..\..\ued\import_export_wizard\import_wizard\import_wizard.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+CPF_controller.exe: ..\..\cropsyst\GUI\Builder\CPF_controller\CPF_controller.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+biomatter_editor.exe: ..\..\cropsyst\GUI\Builder\biomatter_editor\biomatter_editor.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+application_static.lib: ..\..\corn\application\BCB5\application_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+fix_CS_XLS.exe: ..\..\cropsyst\utilities\fix_CS_XLS\fix_CS_XLS.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+weather_static.lib: ..\..\common\weather\BCB5\weather_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+CPF_runner.exe: ..\CropSyst\CPF_runner\BCB5\CPF_runner.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+corn_complete_static.lib: ..\..\corn\build\BCB5\corn_complete_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+corn_static.lib: ..\..\corn\build\BCB5\corn_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+UED_static.lib: ..\..\UED\library\build\BCB5\UED_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+CropSyst_scenario_static.lib: ..\..\CropSyst\source\scenario\BCB5\CropSyst_scenario_static.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+CS_directory.lib: ..\build\BCB5\CS_directory.bpr
+  $(ROOT)\bin\bpr2mak -t$(ROOT)\bin\deflib.bmk $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+

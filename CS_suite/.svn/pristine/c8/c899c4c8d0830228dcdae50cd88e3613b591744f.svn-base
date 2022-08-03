@@ -1,0 +1,57 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+#include <cropsyst/cpp/cs_paths.h>
+#include <common/simulation/paths.h>
+#include "CropSyst/source/options.h"
+USERES("CS_suite.res");
+USEFORM("cs_suite_frm.cpp", CS_suite_form);
+USELIB("..\corn\file_sys\BCB5\file_sys_static.lib");
+USEUNIT("..\Common\simulation\paths.cpp");
+USEUNIT("..\CropSyst\cpp\cs_paths.cpp");
+USEUNIT("..\CropSyst\cpp\database_dir.cpp");
+USELIB("..\corn\format\BCB5\format_static.lib");
+USELIB("..\Common\simulation\BCB5\common_sim_static.lib");
+USELIB("..\corn\BCB5\corn_static.lib");
+USELIB("..\corn\datetime\BCB5\datetime_static.lib");
+USEUNIT("..\cropsyst\cpp\project_types.cpp");
+USELIB("..\corn\container\BCB5\container_static.lib");
+USELIB("..\corn\parameters\BCB5\parameters_static.lib");
+USEUNIT("..\cropsyst\cpp\CS_suite_directory.cpp");
+USELIB("..\corn\application\BCB5\application_static.lib");
+//---------------------------------------------------------------------------
+WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+   try
+   {
+
+      // I can use my setup_paths include because the program is not in the
+      // \cs_suite\Cropsyst\ directory
+/* can not use setup_CS_suite_paths
+      CORN::File_name      this_exe_filename(ParamStr(0).c_str());
+      CORN::Directory_name cs_suite_dir;
+      this_exe_filename.get_path(cs_suite_dir,true);
+      CORN::Directory_name cropsyst_dir;
+      cs_suite_dir.subdirectory_path("CropSyst",cropsyst_dir);
+      cs_suite_paths = new CS_suite_paths(cropsyst_dir);
+*/
+      setup_CS_suite_paths(ParamStr(0).c_str());
+
+      setup_simulation_paths(CS_VERSION_NUMBERS,"CS_suite");
+      //simulation_paths = new Simulation_paths;
+
+       Application->Initialize();
+
+       Application->CreateForm(__classid(TCS_suite_form), &CS_suite_form);
+       Application->Run();
+       setdown_CS_suite_paths();
+       setdown_simulation_paths();
+   }
+   catch (Exception &exception)
+   {
+       Application->ShowException(&exception);
+   }
+   return 0;
+}
+//---------------------------------------------------------------------------

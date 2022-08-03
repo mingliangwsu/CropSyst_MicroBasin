@@ -1,0 +1,44 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+//---------------------------------------------------------------------------
+USEFORM("..\..\form_CS_explorer.cpp", form_CS_context);
+USEFORM("..\frame_navigation_JAM.cpp", navigation_frame); /* TFrame: File Type */
+//---------------------------------------------------------------------------
+bool LADSS_mode = false;
+
+#  include <CS_suite/application/CS_suite_directory.h>
+CS::Suite_directory *CS_Suite_directory = 0;
+
+WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+   CORN::Smart_file_name this_program_filename(ParamStr(0).c_str());
+   CORN::Smart_directory_name this_program_path;
+   this_program_filename.get_path(this_program_path);
+   CS_Suite_directory = new CS::Suite_directory(this_program_path);
+
+   try
+   {
+       Application->Initialize();
+       Application->CreateForm(__classid(Tform_CS_context), &form_CS_context);
+       Application->Run();
+   }
+   catch (Exception &exception)
+   {
+       Application->ShowException(&exception);
+   }
+   catch (...)
+   {
+       try
+       {
+          throw Exception("");
+       }
+       catch (Exception &exception)
+       {
+          Application->ShowException(&exception);
+       }
+   }
+   return 0;
+}
+//---------------------------------------------------------------------------

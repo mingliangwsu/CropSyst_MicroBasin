@@ -1,0 +1,131 @@
+#ifndef CS_emanatorH
+#define CS_emanatorH
+#include "corn/container/enumlist.h"
+#include "corn/container/text_list.h"
+#include "corn/datetime/date.hpp"
+namespace CS {
+//______________________________________________________________________________
+class Emanator
+: public extends_ CORN::Enumeration ////Enumeration
+{public:
+   enum Status
+      { unknown_status
+      , normal_status
+      , period_status
+         // Indicates the emanating object has started a special period
+         // for with special period inspector may be created
+         // Ie. In CropSyst the Crop may have a growing season
+         // where recording and tallying will be active the.
+      , deleted_status};
+ public:
+      // We dont reference this Meta information in the emanating object
+      // because it may be deleted at any time.
+   std::string                instance_name;
+      // Partial path used to compose instance qualification.
+      // Typically this will the ID/key used to uniquely identify
+      // the instanciated objected.
+      // This is usually provided by the user.
+      // Recoder will use this to compose directory
+   std::string                ontology_domain; // of the property of the object's class
+      // Partial path used to compose property ontology
+      // Typically this will be a single word representing.
+      // It is analygous to the ontology specified for inspectors.
+      // It will be included in the composition of qualified ontolgy
+
+   /*170321 the emanator's ontology is actually always a domain which may be a root domain or qualified path
+   bool                       domainX; // was ontology_root;
+      // ontology_root indicates that although the emanator is
+      // instanciated with a context, its ontology definition is distinct
+      // For example, the meteorology, soil, crop, biometeorology
+      // evapotranspiration objects
+      // are instanciated within the land unit (context),
+      // but they each have their own ontology definition tree.
+   */
+   /* NYN
+   std::string                URL;
+      // The unqualified URL name may be used to specify the target of inspection outputs.
+      // By default URL is the same as the instance label
+      // However it may be set specifically.
+      // For example, in CropSyst the URL will match the crop parameter file name
+      // (so the outputs for the same time of crop go in the same
+      //  target directory UED file(s)).
+   */
+      bool ephemeral;
+ protected:
+   nat32                      ID;
+   const Emanator         *context;
+      // Parent container.
+      // Will be 0 when root.
+ protected:
+   Status      status;
+ public:
+   Emanator
+      (nat32                ID
+      ,const std::string   &instance_name
+      ,const std::string   &ontology
+      ,bool                 ephemeral
+      ,const Emanator      *context);
+      //170321 ,bool                 domain);
+   virtual ~Emanator();
+ public: // enumeration implementation
+   inline virtual nat32 get_key_nat32()                                    const { return ID; }
+ public:
+   inline bool   is_ephemeral()                                     affirmation_ { return ephemeral; }
+   inline bool   is_relevant_annually()                             affirmation_ //170319
+      { return !ephemeral; }
+      // Currently ephemeral objects are not tallied annually
+   //170321 inline bool   is_domain()                               affirmation_ { return domainX; }
+   //170317 replaced with is_domain() inline bool   is_ontology_root()                                 affirmation_ { return ontology_root; }
+   inline Status get_status()                                              const { return status; }
+   inline Status set_status(Status new_status)                     assignation_
+      { status = new_status; return status; }
+   /*170322
+   nat16 list_ontology_path   (CORN::Text_list &qualified_ontology)       const;
+      // Recursively lists the elements of the ontology path
+   */
+   const char *append_ontology_domain_name_to
+      (std::string &append_to,char delimiter=0)                           const; //170322
+   nat16 list_instance_path   (CORN::Text_list &qualified_instance)       const;
+      // Recursively lists the elements of the instance path
+      // The instance path would typically represent the
+      // structural composition of object instances.
+      // In CropSyst this is used to compose output directory/filenames.
+};
+//_2015-08-18___________________________________________________class Emanator_/
+class Emanators
+: public extends_ CORN::Enumeration_list // list of Emanators
+{
+ public:
+   Emanators();
+   Emanator &know
+      (nat32                recorder_ID
+      ,const std::string   &instance_name
+      ,const std::string   &ontology
+      ,bool                 ephemeral                                            //160616
+      ,const Emanator      *context
+      //170321 ,bool                 domain
+      ,CORN::Datetime64     inception_date);                                     //170319
+      // A recording object will register itself with
+      // with the global variable recorders list.
+      // It can either do this in its constructor (or initializer)
+      // or whenever it starts adding listeners.
+      // (this can be called multiple times, but only
+      //  one Variable recorder is uniquely added to the list).
+      // \returns the identified Emanator
+   nat32 know_deletion(nat32 emanator_ID)                            cognition_;
+      // A emanator object destructor should deregister
+      // itself with the global recorders.
+      // \return the number of recorders.
+   Emanator::Status get_status_of(nat32 recorder_ID)                      const;
+
+   bool start_year(CORN::Datetime64 inception_date)               modification_;
+   bool end_year()                                                modification_;
+   bool start(CORN::Datetime64 inception_date)                    modification_; //170413
+   bool stop()                                                    modification_;
+};
+//_2015-08-18_________________________________________________class Emanators__/
+extern Emanators &provide_emanators();                                           //150822
+extern Emanators &provide_inactive_emanators();                                  //160613
+} // namespace CS
+#endif
+

@@ -1,0 +1,437 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">CPlusPlusBuilder.Personality</Option>
+			<Option Name="ProjectType">CppStaticLibrary</Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{5958FE40-16B2-478C-A5BC-3BF5E2A1558D}</Option>
+		</Option>
+	</PersonalityInfo>
+	<CPlusPlusBuilder.Personality>
+		<Source>
+			<Source Name="MainSource">UED_convertor_static_debug.cpp</Source>
+		</Source>
+		<BCBPROJECT>
+      <project version="10.0">
+        <property category="build.config" name="active" value="0"/>
+        <property category="build.config" name="count" value="1"/>
+        <property category="build.config" name="excludedefaultforzero" value="0"/>
+        <property category="build.config.0" name="builddir" value="Debug"/>
+        <property category="build.config.0" name="key" value="Debug_Build"/>
+        <property category="build.config.0" name="name" value="Debug Build"/>
+        <property category="build.config.0" name="settings.win32b" value="default"/>
+        <property category="build.config.0" name="type" value="Toolset"/>
+        <property category="build.config.0" name="win32.win32b.builddir" value="Debug_Build"/>
+        <property category="build.config.1" name="key" value="Release_Build"/>
+        <property category="build.config.1" name="name" value="Release Build"/>
+        <property category="build.config.1" name="settings.win32b" value="default"/>
+        <property category="build.config.1" name="type" value="Toolset"/>
+        <property category="build.config.1" name="win32.win32b.builddir" value="Release_Build"/>
+        <property category="build.node" name="lastconfig" value="Debug_Build"/>
+        <property category="build.node" name="libraries" value="vcl.lib rtl.lib"/>
+        <property category="build.node" name="name" value="UED_convertor_static_debug.lib"/>
+        <property category="build.node" name="packages" value="rtl;vcl;vclx;xmlrtl;vclie;inet;inetdbbde;inetdbxpress;vclactnband;dbrtl;vcldb;bdertl;TMSD2006;tmsexd2006;bcbofficexp;bcbsmp;soaprtl;dsnap;bcbie;K102_R70;RNAutoControls_CORN_package;EasyListviewD10;VirtualTreesD10;VirtualShellToolsD10;JamShellD2006Win32"/>
+        <property category="build.node" name="sparelibs" value="rtl.lib vcl.lib"/>
+        <property category="build.node" name="use_packages" value="0"/>
+        <property category="build.platform" name="active" value="win32"/>
+        <property category="build.platform" name="win32.Debug_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.Release_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.default" value="win32b"/>
+        <property category="build.platform" name="win32.enabled" value="1"/>
+        <property category="build.platform" name="win32.win32b.enabled" value="1"/>
+        <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.1" value="_DEBUG"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.2" value="CS_VERSION=4"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.1" value="c:\dev"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.2" value="c:\dev\common"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.Od.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.k.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.r.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.v.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.vi.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.y.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.brcc32" name="option.16.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.brcc32" name="option.31.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$O.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.1" value="DEBUG"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.V.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.Gn.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\debug"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.v.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.z.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zi.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.arg" value="128"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.arg.1" value="C:\temp\lib\BDS\debug"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.arg.merge" value="0"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.1" value="NDEBUG"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.O2.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.k.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.r.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.vi.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.$D.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.$O.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.V.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\release"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.z.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zi.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zn.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.arg.1" value="C:\temp\lib\BDS\release"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.arg.merge" value="0"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.enabled" value="1"/>
+        <optionset name="all_configurations">
+          <property category="node" name="displayname" value="All Configurations"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.1" value="$(BDS)\lib\vcl100.csm"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.Hc.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.1" value="..\..\..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.10" value="..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.11" value="..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.12" value="..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.13" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.14" value="..\..\..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.15" value="..\..\.."/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.16" value="..\..\..\BDS\BDS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.17" value="..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.18" value="..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.19" value="..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.2" value="..\..\..\..\..\common\geomatics"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.20" value="..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.21" value="..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.22" value="..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.23" value="..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.24" value="..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.25" value="..\..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.26" value="..\..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.27" value="..\..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.28" value="..\..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.29" value="..\..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.3" value="..\..\..\..\..\CS_suite\file_system"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.30" value="..\..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.31" value="..\..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.32" value="..\..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.33" value="C:\dev\ued\convert"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.34" value="$(BDS)\include"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.35" value="$(BDS)\include\dinkumware"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.36" value="$(BDS)\include\vcl"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.4" value="..\build\BDS\2006"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.5" value="..\"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.6" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.7" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.8" value="..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.9" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.b.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.1" value="_RTLDLL"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.2" value="NO_STRICT"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tW.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWC.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWD.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWM.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.1" value="..\..\..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.10" value="..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.11" value="..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.12" value="..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.13" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.14" value="..\..\..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.15" value="..\..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.16" value="..\..\..\BDS\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.17" value="..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.18" value="..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.19" value="..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.2" value="..\..\..\..\..\common\geomatics"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.20" value="..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.21" value="..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.22" value="..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.23" value="..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.24" value="..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.25" value="..\..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.26" value="..\..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.27" value="..\..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.28" value="..\..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.29" value="..\..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.3" value="..\..\..\..\..\CS_suite\file_system"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.30" value="..\..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.31" value="..\..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.32" value="..\..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.33" value="C:\dev\ued\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.4" value="..\build\BDS\2006"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.5" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.6" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.7" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.8" value="..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.9" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.1" value="..\..\..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.10" value="..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.11" value="..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.12" value="..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.13" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.14" value="..\..\..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.15" value="..\..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.16" value="..\..\..\BDS\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.17" value="..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.18" value="..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.19" value="..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.2" value="..\..\..\..\..\common\geomatics"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.20" value="..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.21" value="..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.22" value="..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.23" value="..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.24" value="..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.25" value="..\..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.26" value="..\..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.27" value="..\..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.28" value="..\..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.29" value="..\..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.3" value="..\..\..\..\..\CS_suite\file_system"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.30" value="..\..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.31" value="..\..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.32" value="..\..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.33" value="C:\dev\ued\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.4" value="..\build\BDS\2006"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.5" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.6" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.7" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.8" value="..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.9" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.1" value="..\..\..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.10" value="..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.11" value="..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.12" value="..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.13" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.14" value="..\..\..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.15" value="..\..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.16" value="..\..\..\BDS\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.17" value="..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.18" value="..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.19" value="..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.2" value="..\..\..\..\..\common\geomatics"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.20" value="..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.21" value="..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.22" value="..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.23" value="..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.24" value="..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.25" value="..\..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.26" value="..\..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.27" value="..\..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.28" value="..\..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.29" value="..\..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.3" value="..\..\..\..\..\CS_suite\file_system"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.30" value="..\..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.31" value="..\..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.32" value="..\..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.33" value="C:\dev\ued\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.4" value="..\build\BDS\2006"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.5" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.6" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.7" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.8" value="..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.9" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.1" value="..\..\..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.10" value="..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.11" value="..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.12" value="..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.13" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.14" value="..\..\..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.15" value="..\..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.16" value="..\..\..\BDS\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.17" value="..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.18" value="..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.19" value="..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.2" value="..\..\..\..\..\common\geomatics"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.20" value="..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.21" value="..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.22" value="..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.23" value="..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.24" value="..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.25" value="..\..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.26" value="..\..\..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.27" value="..\..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.28" value="..\..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.29" value="..\..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.3" value="..\..\..\..\..\CS_suite\file_system"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.30" value="..\..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.31" value="..\..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.32" value="..\..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.33" value="C:\dev\ued\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.34" value="C:\Documents and Settings\rnelson\My Documents\Borland Studio Projects"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.35" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.36" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.4" value="..\build\BDS\2006"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.5" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.6" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.7" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.8" value="..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.9" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.1" value="..\..\..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.10" value="..\..\..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.11" value="..\..\..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.12" value="..\..\..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.13" value="..\build\BDS\2006"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.14" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.15" value="..\"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.16" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.17" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.18" value="..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.19" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.2" value="..\..\..\..\..\common\geomatics"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.20" value="..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.21" value="..\..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.22" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.23" value="..\..\..\Climgen\source"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.24" value="BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.25" value="..\..\common\geolocation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.26" value="..\..\common\weather"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.27" value="..\..\common\weather\database"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.28" value="..\..\common\simulation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.29" value="..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.3" value="..\..\..\..\..\CS_suite\file_system"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.30" value="..\..\common\weather\stations"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.31" value="..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.32" value="..\..\Climgen\source"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.33" value="..\Climgen\cropsyst\common\weather\CS_suite\common\common\weather\common\common\geolocation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.34" value="C:\dev\ued\convert"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.4" value="..\..\.."/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.5" value="..\..\..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.6" value="..\..\..\..\..\common\weather"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.7" value="..\..\..\..\..\common\weather\database"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.8" value="..\..\..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.9" value="..\..\..\..\..\CS_suite\ClimGen"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Gi.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.2" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.3" value="$(BDS)\lib\psdk"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpd.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpe.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpp.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.aa.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.ap.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.dynamicrtl.enabled" value="1"/>
+          <property category="win32.*.win32b.tlib" name="option.dynamicrtl.enabled" value="0"/>
+          <property category="win32.*.win32b.tlib" name="option.outputdir.arg.merge" value="1"/>
+          <property category="win32.*.win32b.tlib" name="option.outputdir.enabled" value="1"/>
+        </optionset>
+      </project>
+      <FILELIST>
+        <FILE FILENAME="UED_convertor_static_debug.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="UED_convertor_static_debug" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\convertor.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="convertor" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\convert_response.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="convert_response" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\station_database.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="station_database" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\validator.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="validator" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\sun.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sun" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\solar_rad.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="solar_rad" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\database\common_weather_creators.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="common_weather_creators" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\CS_suite\ClimGen\ClimGen_settings.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="ClimGen_settings" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\stations\all_stations.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="all_stations" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\stations\ncdc_stations.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="ncdc_stations" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\stations\AgriMet_stations.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="AgriMet_stations" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\stations\UCAR_stations.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="UCAR_stations" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\stations\WMO_stations.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WMO_stations" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\stations\CC_station_datarec.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="CC_station_datarec" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\stations\PAWS_stations.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="PAWS_stations" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\Climgen\source\options.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="options" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\weather\GEN_DAT_filename.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="GEN_DAT_filename" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\CS_suite\file_system\database_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="database_directory" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\..\..\CS_suite\file_system\database_directory.h"/>
+        <FILE FILENAME="..\..\..\..\..\common\geomatics\USA_state_FIPS_code.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="USA_state_FIPS_code" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\geomatics\Canada_province_code.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="Canada_province_code" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\geodesy\geocoordinate.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="geocoordinate" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\..\..\common\geodesy\geolocation.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="geolocation" FORMNAME="" DESIGNCLASS=""/>
+      </FILELIST>
+      <IDEOPTIONS>
+        <VersionInfo>
+          <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+          <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+          <VersionInfo Name="MajorVer">1</VersionInfo>
+          <VersionInfo Name="MinorVer">0</VersionInfo>
+          <VersionInfo Name="Release">0</VersionInfo>
+          <VersionInfo Name="Build">0</VersionInfo>
+          <VersionInfo Name="Debug">False</VersionInfo>
+          <VersionInfo Name="PreRelease">False</VersionInfo>
+          <VersionInfo Name="Special">False</VersionInfo>
+          <VersionInfo Name="Private">False</VersionInfo>
+          <VersionInfo Name="DLL">False</VersionInfo>
+          <VersionInfo Name="Locale">1033</VersionInfo>
+          <VersionInfo Name="CodePage">1252</VersionInfo>
+        </VersionInfo>
+        <VersionInfoKeys>
+          <VersionInfoKeys Name="CompanyName"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileDescription"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="InternalName"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
+          <VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductName"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="Comments"></VersionInfoKeys>
+        </VersionInfoKeys>
+        <Debugging>
+          <Debugging Name="DebugSourceDirs"></Debugging>
+        </Debugging>
+        <Parameters>
+          <Parameters Name="RunParams">"D:\assist\cropsyst\chen\convert.rsp"</Parameters>
+          <Parameters Name="Launcher"></Parameters>
+          <Parameters Name="UseLauncher">False</Parameters>
+          <Parameters Name="DebugCWD"></Parameters>
+          <Parameters Name="HostApplication"></Parameters>
+          <Parameters Name="RemoteHost"></Parameters>
+          <Parameters Name="RemotePath"></Parameters>
+          <Parameters Name="RemoteParams"></Parameters>
+          <Parameters Name="RemoteLauncher"></Parameters>
+          <Parameters Name="UseRemoteLauncher">False</Parameters>
+          <Parameters Name="RemoteCWD"></Parameters>
+          <Parameters Name="RemoteDebug">False</Parameters>
+          <Parameters Name="Debug Symbols Search Path"></Parameters>
+          <Parameters Name="LoadAllSymbols">True</Parameters>
+          <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+        </Parameters>
+        <Linker>
+          <Linker Name="LibPrefix"></Linker>
+          <Linker Name="LibSuffix"></Linker>
+          <Linker Name="LibVersion"></Linker>
+        </Linker>
+      </IDEOPTIONS>
+    </BCBPROJECT>
+	</CPlusPlusBuilder.Personality>
+	<StarTeamAssociation></StarTeamAssociation>
+	<StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>

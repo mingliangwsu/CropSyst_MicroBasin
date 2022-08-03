@@ -1,0 +1,63 @@
+
+#include "LADSS_database.h"
+
+LADSS_database_parameters *LADSS_database = 0;
+//______________________________________________________________________________
+LADSS_database_parameters::LADSS_database_parameters()
+: CORN::Data_record("-")
+, user_ID()
+, password()
+, proj_ID(0)
+, alloc_ID(0)
+, SR_xxx("SR_ACT")                                                               //040217
+, scenarios_dir("")
+, weather_dir("")                                                                //040618
+#ifdef unix
+, projects_dir("~/Simulation/Projects")                                          //071022
+#endif
+#ifdef _Windows
+, projects_dir("C:\\Simulation\\Projects")                                       //071022
+#endif
+, daily_output(false)                                                            //030415
+{};
+//_2003-01-09___________________________________________________________________
+void LADSS_database_parameters::expect_structure(bool for_write)
+{  CORN::Data_record::expect_structure(for_write);                               //120314
+
+   set_current_section(LABEL_database);                                          //010417
+   expect_string(LABEL_user_ID,user_ID,255);                                     //010417
+   expect_string(LABEL_password,password,255);                                   //010417
+   expect_int32 (LABEL_proj_ID,proj_ID);                                         //020611
+   expect_int32 (LABEL_alloc_ID,alloc_ID);                                       //020611
+   expect_string("SR",SR_xxx,10);                                                //040217
+   //150912 now perm #ifdef USE_OS_FS
+   expect_directory_name("directory",scenarios_dir);                             //021214
+   expect_directory_name("weather_directory",weather_dir);                       //040618
+   expect_directory_name("projects_directory",projects_dir);                     //071022
+   /*150912
+   #else
+   expect_string("directory",scenarios_dir,255);                                 //021214
+   expect_string("weather_directory",weather_dir,255);                           //040618
+   expect_string("projects_directory",projects_dir,255);                         //071022
+   #endif
+   */
+   expect_bool("daily_output",daily_output);                                     //030415
+#ifdef NYI
+   expect_string(LABEL_LBF_table,LBF_table_name);
+//   expect_string(LABEL_rotation_table,rotation_table_name);
+//   expect_string(LABEL_management_table,management_table_name);
+   expect_string(LABEL_soil_table,LBF_soil_table_name);
+//   expect_string(LABEL_location_table,location_table_name);
+//   expect_string(LABEL_crop_table_name,crop_table_name);
+#endif
+   structure_defined = true;                                                     //120314
+};
+//______________________________________________________________________________
+bool LADSS_output_data_source::delete_allocation(int32 alloc_ID)
+{
+   // We need to make sure that this h_out_ID record does not already exists in the table
+   // otherwise we'll get an Error - ORA-00001: unique constraint violated error.
+   where_long("ALLOC_ID",alloc_ID);
+   return delete_records();
+};
+//_2003-03-31___________________________________________________________________

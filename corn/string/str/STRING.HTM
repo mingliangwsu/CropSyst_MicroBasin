@@ -1,0 +1,1132 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-nz">
+<meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="description" content="C++ string library">
+<meta name="keywords" content="string, c++, cplusplus">
+<title>String</title>
+<link rel="stylesheet" type="text/css" href="rbd.css">
+<link REL="SHORTCUT ICON" HREF="favicon.ico">
+</head>
+
+<body>
+
+<h1><a name="top"></a>Character string manipulation library</h1>
+
+<p><i>May, 2005</i><ul>
+  <li><a href="#intro">Introduction</a><ul>
+      <li><a href="#files">Files in this package</a></li>
+      <li><a href="#testing">Testing and getting started</a></li>
+    </ul>
+  </li>
+  <li><a href="#public">The public member functions</a><ul>
+      <li><a href="#static">Static variable</a></li>
+      <li><a href="#construct">Constructors, destructor, operator=</a></li>
+      <li><a href="#storage">Storage control</a></li>
+      <li><a href="#character">Character access</a></li>
+      <li><a href="#editing">The <em>editing</em> functions</a></li>
+      <li><a href="#data">Pointer to data</a></li>
+      <li><a href="#find">The <em>find</em> functions</a></li>
+      <li><a href="#substring">The <em>substring</em> function</a></li>
+      <li><a href="#compare">The <em>compare</em> functions</a></li>
+    </ul>
+  </li>
+  <li><a href="#binary">The binary String functions</a></li>
+  <li><a href="#policies">The policies</a><ul>
+      <li><a href="#realloc">Reallocation policy</a></li>
+      <li><a href="#plus">Policy on operator+, operator+= and append</a></li>
+    </ul>
+  </li>
+  <li><a href="#functions">String functions</a></li>
+  <li><a href="#command">Command line class</a></li>
+  <li><a href="#todo">To do list</a></li>
+  <li><a href="#history">History</a><ul>
+      <li><a href="#Aug98">August, 1998 changes</a></li>
+      <li><a href="#Sep98">September, 1998 changes</a></li>
+      <li><a href="#Feb01">July, 2001 changes</a></li>
+      <li><a href="#Jan02">January, 2002 changes</a></li>
+      <li><a href="#Apr04">April, 2004 changes</a></li>
+      <li><a href="#Jun04">June, 2004 changes</a></li>
+		<li><a href="#May05">May, 2005 changes</a></li>
+    </ul>
+  </li>
+  <li><a HREF="ol_doc.htm">To online documentation page</a></li>
+</ul>
+
+<h2><a name="intro"></a>Introduction</h2>
+
+<p>This is a string library that is intended to be compatible with the <em>class string</em>
+library in the C++ standard. My version is for strings of characters of type <em>char</em>
+only. </p>
+
+<p>It is for people who do not have access to an official version of the string library or
+wish to use a version without templates. </p>
+
+<p>It follows the standard class string as I understand it, except that a few functions
+that are relevant only to the template version are omitted, and all the functions involving
+iterators are omitted. </p>
+
+<p>I use the name <em>String</em> rather than <em>string</em> to prevent conflicts with
+other string libraries (as in BC 5.0). </p>
+
+<p>I claim copyright for this program. The initial version was taken from Tony Hansen's
+book <em>The C++ answer book</em>, but very little of Tony's code remains. </p>
+
+<p>Permission is granted to use this. If you distribute it or put it on your web
+site please include a link to my site. I take no responsibility for
+errors, omissions etc, but please tell me about them. </p>
+
+<p>This library links into my exception package. You need to edit the file include.h to
+determine whether to use simulated exceptions or compiler supported exceptions or simply
+to disable exceptions. More information on the exception package is given in the
+documentation for my matrix library, <a href="ol_doc.htm">newmat11</a>. </p>
+
+<p>The package uses a limited form of <em>copy-on-write</em> (see Tony Hansen's book for
+more details) and also attempts to avoid repeated reallocation of the string storage
+during a multiple sum. This results in some saving in space and time for some operations
+at the expense of an increase in the complexity of the program and an increase in the time
+used by a few operations. As with <i>newmat</i> it is still an open question whether the extra
+complexity is really warranted. Or under what circumstances it is really warranted. </p>
+
+<p>This package includes <a href="#functions">simple functions</a> for 
+manipulating strings and a <a href="#command">class</a> for extracting 
+information from the command line.</p>
+
+<p>It also includes  class libraries to help <a href="format.htm">format numerical output</a> 
+and to <a href="gstring.htm">edit ASCII files</a>. They documented in separate 
+files. </p>
+
+<h3><a name="files"></a>Files in this package</h3>
+
+<p>The following files are included in this package </p>
+<div align="left">
+
+<table border="0" width="100%" cellspacing="1" style="border-collapse: collapse" bordercolor="#111111" cellpadding="0">
+  <tr>
+    <td width="33%">str.h</td>
+    <td width="67%">header file for the string library</td>
+  </tr>
+  <tr>
+    <td width="33%">str.cpp</td>
+    <td width="67%">function bodies</td>
+  </tr>
+  <tr>
+    <td width="33%">str_fns.h</td>
+    <td width="67%">header file for string functions</td>
+  </tr>
+  <tr>
+    <td width="33%">str_fns.cpp</td>
+    <td width="67%">string functions bodies</td>
+  </tr>
+  <tr>
+    <td width="33%">commline.h</td>
+    <td width="67%">command line class header</td>
+  </tr>
+  <tr>
+    <td width="33%">commline.cpp</td>
+    <td width="67%">command line bodies</td>
+  </tr>
+  <tr>
+    <td width="33%">boolean.h</td>
+    <td width="67%">simulation of the standard Boolean type</td>
+  </tr>
+  <tr>
+    <td width="33%">myexcept.h</td>
+    <td width="67%">header for the exceptions simulator</td>
+  </tr>
+  <tr>
+    <td width="33%">myexcept.cpp</td>
+    <td width="67%">bodies for the exceptions simulator</td>
+  </tr>
+  <tr>
+    <td width="33%">include.h</td>
+    <td width="67%">options header file (see documentation in newmat10)</td>
+  </tr>
+  <tr>
+    <td width="33%">strtst.cpp</td>
+    <td width="67%">test program</td>
+  </tr>
+  <tr>
+    <td width="33%">strtst.dat</td>
+    <td width="67%">data file used by test program</td>
+  </tr>
+  <tr>
+    <td width="33%">strtst.txt</td>
+    <td width="67%">output from the test program</td>
+  </tr>
+  <tr>
+    <td width="33%">test_exs.cpp</td>
+    <td width="67%">test exceptions</td>
+  </tr>
+  <tr>
+    <td width="33%">test_exs.txt</td>
+    <td width="67%">output from test_exs</td>
+  </tr>
+  <tr>
+    <td width="33%">readme.txt</td>
+    <td width="67%">readme file</td>
+  </tr>
+  <tr>
+    <td width="33%">string.htm</td>
+    <td width="67%">this file</td>
+  </tr>
+  <tr>
+    <td width="33%">rbd.css</td>
+    <td width="67%">style sheet for use with htm files</td>
+  </tr>
+  <tr>
+    <td width="33%">st_gnu.mak</td>
+    <td width="67%">make file for gnu c++</td>
+  </tr>
+  <tr>
+    <td width="33%">st_cc.mak</td>
+    <td width="67%">make file for CC compiler</td>
+  </tr>
+  <tr>
+    <td width="33%">st_b55.mak</td>
+    <td width="67%">make file for Borland C++ 5.5</td>
+  </tr>
+  <tr>
+    <td width="33%">st_b56.mak</td>
+    <td width="67%">make file for Borland C++ 5.6</td>
+  </tr>
+  <tr>
+    <td width="33%">st_m5.mak</td>
+    <td width="67%">make file for Visual C++ version 5</td>
+  </tr>
+  <tr>
+    <td width="33%">st_m6.mak</td>
+    <td width="67%">make file for Visual C++ version 6 or 7</td>
+  </tr>
+  <tr>
+    <td width="33%">st_i5.mak</td>
+    <td width="67%">make file for Intel compiler for Windows</td>
+  </tr>
+  <tr>
+    <td width="33%">st_il5.mak</td>
+    <td width="67%">make file for Intel compiler for Linux</td>
+  </tr>
+  <tr>
+    <td width="33%">st_i8.mak</td>
+    <td width="67%">make file for Intel compiler for Windows, v8.1</td>
+  </tr>
+	<tr>
+    <td width="33%">st_il8.mak</td>
+    <td width="67%">make file for Intel compiler for Linux, v8.1</td>
+  </tr>
+  <tr>
+    <td width="33%">st_ow.mak</td>
+    <td width="67%">Make file for Open Watcom compiler</td>
+  </tr>
+  <tr>
+    <td width="33%">str.lfl</td>
+    <td width="67%">library file list for make file generator</td>
+  </tr>
+  <tr>
+    <td width="33%">st_targ.txt</td>
+    <td width="67%">target file for make file generator</td>
+  </tr>
+  <tr>
+    <td width="33%">format.h</td>
+    <td width="67%">header file for format program</td>
+  </tr>
+  <tr>
+    <td width="33%">format.cpp</td>
+    <td width="67%">bodies for format program</td>
+  </tr>
+  <tr>
+    <td width="33%">formtest.cpp</td>
+    <td width="67%">test program for format program</td>
+  </tr>
+  <tr>
+    <td width="33%">formtest.txt</td>
+    <td width="67%">output from test program</td>
+  </tr>
+  <tr>
+    <td width="33%">format.htm</td>
+    <td width="67%">documentation for format program</td>
+  </tr>
+  <tr>
+    <td width="33%">gstring.h</td>
+    <td width="67%">header file for gstring ascii file editor</td>
+  </tr>
+  <tr>
+    <td width="33%">gstring.cpp</td>
+    <td width="67%">bodies for gstring program</td>
+  </tr>
+  <tr>
+    <td width="33%">liststr.cpp</td>
+    <td width="67%">bodies for gstring program</td>
+  </tr>
+  <tr>
+    <td width="33%">lstst.cpp</td>
+    <td width="67%">test program</td>
+  </tr>
+  <tr>
+    <td width="33%">fox.dat</td>
+    <td width="67%">test data file</td>
+  </tr>
+  <tr>
+    <td width="33%">lstst.dat</td>
+    <td width="67%">test data file</td>
+  </tr>
+  <tr>
+    <td width="33%">lstst.txt</td>
+    <td width="67%">output from test program</td>
+  </tr>
+  <tr>
+    <td width="33%">gstring.htm</td>
+    <td width="67%">documentation for gstring program</td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="testing"></a>Testing and getting started</h3>
+
+<p>I have tested this program on the Borland 5.0, 5.5, 5.6 (32 bit only, test program won't
+run under 16 bit); MS VC++  6, 7; Gnu 3.3, 3.4; Intel 8.1 and Sun CC (version 8?) compilers.</p>
+
+<p>For the Borland 5.0, and CC (version 5 and earlier) edit <i>include.h</i> to use my 
+simulated exceptions rather than the compiler supported exceptions. See the 
+<i>newmat</i> documentation for more information about editing <i>include.h</i>.</p>
+
+<p>Activate the <tt>_STANDARD_</tt> option to use the form of include statements 
+used in standard C++.</p>
+
+<p>Activate the <tt>use_namespace</tt> to put the string library in namespace
+<tt>RBD_STRING</tt> (if your compiler really does support namespaces).</p>
+
+<p>The <a href="gstring.htm">GString</a> library which is included in this 
+package uses nested classes and will not compile under older compilers.</p>
+
+<p>The CC compilers generate 33 error messages when running the <i>strtst</i> test program. I suspect
+these are due to a slightly different convention in deleting temporaries and don't matter.</p>
+
+<p>For the indexes, lengths etc I use <b>unsigned int</b> (typedefed to uint). This is
+instead of size_type in the official package. Using size_type as a type of
+variable seems too bizarre for me to use (as yet).</p>
+
+<p>You will need to #include files <i>include.h</i> and <i>str.h</i> in your programs that use this
+package. Don't forget to edit <i>include.h</i> to determine whether exceptions are to be used,
+simulated or disabled. If you use the simulated exceptions you should turn off the
+exception capability of a compiler that does support exceptions.</p>
+
+<p>I have included make files for a variety of compilers for compiling the test 
+programs. Make files for some 
+other compilers can be generated using my <a href="genmake.htm">genmake</a> 
+utility. The file <i>st_targ.txt</i> gives the list of targets for <i>genmake</i> and
+<i>str.lfl</i> has the list of names of the libraries. See the <a href="genmake.htm">genmake</a> 
+documentation for more details about the make files.</p>
+
+<h2><a name="public"></a>The public member functions</h2>
+
+<h3><a name="static"></a>Static variable</h3>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>static uint npos</tt></td>
+    <td width="50%" valign="top">String::npos is the largest possible value of uint and is
+    used to indicate that a find function has failed to find its target. All Strings must have
+    length strictly less than String::npos</td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="construct"></a>Constructors, destruction, operator=</h3>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>String()</tt> </td>
+    <td width="50%" valign="top">construct a String of zero length</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String(const String&amp;str)</tt> </td>
+    <td width="50%" valign="top">copy constructor (not explicitly in standard)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String(const String&amp;str, uint pos, uint n = npos)</tt>
+    </td>
+    <td width="50%" valign="top">construct a String from str starting at location pos (first
+    location = 0) and continuing for the length of the String or for n characters, whichever
+    occurs first</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String(const char* s, uint n)</tt> </td>
+    <td width="50%" valign="top">construct a String from s taking a maximum of n characters or
+    the length of the String</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String(const char* s)</tt> </td>
+    <td width="50%" valign="top">construct a String from s</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String(uint n, char c)</tt> </td>
+    <td width="50%" valign="top">construct a String consisting of n copies of the character c</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>~String()</tt> </td>
+    <td width="50%" valign="top">the destructor</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; operator=(const String&amp; str)</tt> </td>
+    <td width="50%" valign="top">copy a String (except that it may be able to avoid copying)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; operator=(const char* s)</tt> </td>
+    <td width="50%" valign="top">set a String equal to a c-style character string pointed to
+    by s</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; operator=(const char c)</tt> </td>
+    <td width="50%" valign="top">set a String equal to a character</td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="storage"></a>Storage control</h3>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>uint size() const</tt></td>
+    <td width="50%" valign="top">the length of the String (does not include a trailing zero -
+    in most cases there isn't one)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint length() const</tt></td>
+    <td width="50%" valign="top">same as size</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint max_size() const</tt></td>
+    <td width="50%" valign="top">the maximum size of a String, I have set it to npos-1</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>void resize(uint n, char c = 0)</tt></td>
+    <td width="50%" valign="top">change the size of a String, either by truncating or filling
+    out with copies of character c (std does default separately)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint capacity() const</tt></td>
+    <td width="50%" valign="top">the total space allocated for a String (always &gt;= size())</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>void reserve(uint res_arg = 0)</tt></td>
+    <td width="50%" valign="top">change the capacity of a String to the maximum of res_arg and
+    size(). This may be an increase or a decrease in the capacity.</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>void clear()</tt></td>
+    <td width="50%" valign="top">erase the contents of the string</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>bool empty() const</tt></td>
+    <td width="50%" valign="top">true if the String is empty; false otherwise</td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="character"></a>Character access</h3>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>char operator[](uint pos) const</tt></td>
+    <td width="50%" valign="top">return the pos-th character; return 0 if pos = size()</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>char&amp; operator[](uint pos)</tt></td>
+    <td width="50%" valign="top">return a reference to the pos-th character; undefined if
+    pos&gt;=size() - I throw an exception. This reference may become invalid after almost any
+    manipulation of the String</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>char at(uint n) const</tt></td>
+    <td width="50%" valign="top">same as operator[] const</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>char&amp; at(uint n)</tt></td>
+    <td width="50%" valign="top">same as operator[]. Throw an exception of pos &gt;=size()</td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="editing"></a>The <em>editing</em> functions</h3>
+
+<p>For conditions under which references and pointers to data are invalidated by these
+functions see <a href="#realloc">policy on reallocation</a>.</p>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; operator+=(const String&amp; rhs)</tt></td>
+    <td width="50%" valign="top">append rhs to a String</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; operator+=(const char* s)</tt></td>
+    <td width="50%" valign="top">append the c-string defined by s to a String</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; operator+=(char c)</tt></td>
+    <td width="50%" valign="top">append the character c to a String</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; append(const String&amp; str)</tt></td>
+    <td width="50%" valign="top">append str to a String</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; append(const String&amp; str, uint pos, uint
+    n)</tt></td>
+    <td width="50%" valign="top">append String(str,pos,n)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; append(const char* s, uint n)</tt></td>
+    <td width="50%" valign="top">append String(s,n)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; append(const char* s)</tt></td>
+    <td width="50%" valign="top">append String(s)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; append(uint n, char c)</tt></td>
+    <td width="50%" valign="top">append character c</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>void push_back(char c)</tt></td>
+    <td width="50%" valign="top">operator+=(c)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; assign(const String&amp; str)</tt></td>
+    <td width="50%" valign="top">replace the String by str (this function is not explicitly in
+    the standard)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; assign(const String&amp; str, uint pos, uint
+    n)</tt></td>
+    <td width="50%" valign="top">replace the String by String(str,pos,n)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; assign(const char* s, uint n)</tt></td>
+    <td width="50%" valign="top">replace the String by String(s, n)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; assign(const char* s)</tt></td>
+    <td width="50%" valign="top">replace the String by String(s)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; assign(uint n, char c)</tt></td>
+    <td width="50%" valign="top">replace the String by String(c)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; insert(uint pos1, const String&amp; str)</tt></td>
+    <td width="50%" valign="top">insert str before character pos1</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; insert(uint pos1, const String&amp; str, uint
+    pos2, uint n)</tt></td>
+    <td width="50%" valign="top">insert String(str,pos2,n) before character pos1</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; insert(uint pos, const char* s, uint n =
+    npos)</tt></td>
+    <td width="50%" valign="top">insert String(s,n) before character pos (std does default
+    separately)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; insert(uint pos, uint n, char c)</tt></td>
+    <td width="50%" valign="top">insert character c(s,n) before character pos</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; erase(uint pos = 0, uint n = npos)</tt></td>
+    <td width="50%" valign="top">erase characters starting at pos and continuing for n
+    characters or till the end of the String. This was originally called <em>remove</em></td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; replace(uint pos1, uint n1, const String&amp;
+    str)</tt></td>
+    <td width="50%" valign="top">erase(pos1,n1); insert(pos1,str)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; replace(uint pos1, uint n1, const String&amp;
+    str, uint pos2, uint n2)</tt></td>
+    <td width="50%" valign="top">erase(pos1,n1); insert(pos1,str,pos2,n2)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; replace(uint pos, uint n1, const char* s,
+    uint n2 = npos)</tt></td>
+    <td width="50%" valign="top">erase(pos,n1); insert(pos,s,n2); (std does default
+    separately)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>String&amp; replace(uint pos, uint n1, uint n2, char c)</tt></td>
+    <td width="50%" valign="top">erase(pos,n1); insert(pos,n2,c)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint copy(char* s, uint n, uint pos = 0) const</tt></td>
+    <td width="50%" valign="top">copy a maximum of n characters from a string starting at
+    position pos to memory starting at location given by s. Return the number of characters
+    copied. I assume that the program has already allocated space for the characters</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>void swap(String&amp;)</tt></td>
+    <td width="50%" valign="top">a.swap(b) swaps the contents of Strings a and b. The standard
+    also provides for a function swap(a,b) - see <a href="#binary">binary operators</a></td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="data"></a>Pointer to data</h3>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>const char* c_str() const</tt></td>
+    <td width="50%" valign="top">return a pointer to the contents of a String after appending
+    (char)0 to the String. This pointer will be invalidated by almost any operation on the
+    String</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>const char* data() const</tt></td>
+    <td width="50%" valign="top">return a pointer to the contents of a String. This pointer
+    will be invalidated by almost any operation on the String</td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="find"></a>The <em>find</em> functions</h3>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>uint find(const String&amp; str, uint pos = 0) const</tt></td>
+    <td width="50%" valign="top">find the first location of str in a String starting at
+    position pos. The location is relative to the beginning of the parent String. Return <a
+    href="#static">String::npos</a> if not found</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find(const char* s, uint pos, uint n) const</tt></td>
+    <td width="50%" valign="top">find(String(s,n),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find(const char* s, uint pos = 0) const</tt></td>
+    <td width="50%" valign="top">find(String(s),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find(const char c, uint pos = 0) const</tt></td>
+    <td width="50%" valign="top">find(String(1,c),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint rfind(const String&amp; str, uint pos = npos) const</tt></td>
+    <td width="50%" valign="top">find the last location of str in a String starting at
+    position pos. ie begin the search with the first character of str at position pos of the
+    target String. The location is relative to the beginning of the parent String. Return <a
+    href="#static">String::npos</a> if not found</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint rfind(const char* s, uint pos, uint n) const</tt></td>
+    <td width="50%" valign="top">rfind(String(s,n),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint rfind(const char* s, uint pos = npos) const</tt></td>
+    <td width="50%" valign="top">rfind(String(s),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint rfind(const char c, uint pos = npos) const</tt></td>
+    <td width="50%" valign="top">rfind(String(1,c),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_first_of(const String&amp; str, uint pos = 0)
+    const</tt></td>
+    <td width="50%" valign="top">find first of any element in str starting at pos. Return <a
+    href="#static">String::npos</a> if not found</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_first_of(const char* s, uint pos, uint n) const</tt></td>
+    <td width="50%" valign="top">find_first_of(String(s,n),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_first_of(const char* s, uint pos = 0) const</tt></td>
+    <td width="50%" valign="top">find_first_of(String(s),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_first_of(const char c, uint pos = 0) const</tt></td>
+    <td width="50%" valign="top">find_first_of(String(1,c),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_last_of(const String&amp; str, uint pos = npos)
+    const</tt></td>
+    <td width="50%" valign="top">find last of any element in str starting at pos. Return <a
+    href="#static">String::npos</a> if not found</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_last_of(const char* s, uint pos, uint n) const</tt></td>
+    <td width="50%" valign="top">find_last_of(String(s,n),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_last_of(const char* s, uint pos = npos) const</tt></td>
+    <td width="50%" valign="top">find_last_of(String(s),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_last_of(const char c, uint pos = npos) const</tt></td>
+    <td width="50%" valign="top">find_last_of(String(1,c),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_first_not_of(const String&amp; str, uint pos =
+    0) const</tt></td>
+    <td width="50%" valign="top">find first of any element not in str starting at pos. Return <a
+    href="#static">String::npos</a> if not found</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_first_not_of(const char* s, uint pos, uint n)
+    const</tt></td>
+    <td width="50%" valign="top">find_first_not_of(String(s,n),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_first_not_of(const char* s, uint pos = 0) const</tt></td>
+    <td width="50%" valign="top">find_first_not_of(String(s),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_first_not_of(const char c, uint pos = 0) const</tt></td>
+    <td width="50%" valign="top">find_first_not_of(String(1,c),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_last_not_of(const String&amp; str, uint pos =
+    npos) const</tt></td>
+    <td width="50%" valign="top">find last of any element not in str starting at pos. Return <a
+    href="#static">String::npos</a> if not found</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_last_not_of(const char* s, uint pos, uint n)
+    const</tt></td>
+    <td width="50%" valign="top">find_last_not_of(String(s,n),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_last_not_of(const char* s, uint pos = npos)
+    const</tt></td>
+    <td width="50%" valign="top">find_last_not_of(String(s),pos)</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>uint find_last_not_of(const char c, uint pos = npos)
+    const</tt></td>
+    <td width="50%" valign="top">find_last_not_of(String(1,c),pos)</td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="substring"></a>The <em>substring</em> function</h3>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>String substr(uint pos = 0, uint n = npos) const</tt></td>
+    <td width="50%" valign="top">return String(*this, pos, n)</td>
+  </tr>
+</table>
+</div>
+
+<h3><a name="compare"></a>The <em>compare</em> functions</h3>
+<div align="left">
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%" valign="top"><tt>int compare(const String&amp; str) const</tt></td>
+    <td width="50%" valign="top">a.compare(b) compares a and b in normal sort order. Return
+    -1, 0 or 1</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>int compare(uint pos, uint n, const String&amp; str)
+    const</tt></td>
+    <td width="50%" valign="top">a.compare(pos,n,b) compares String(a,pos,n) and b in normal
+    sort order. Return -1, 0 or 1</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>int compare(uint pos1, uint n1, const String&amp; str,
+    uint pos2, uint n2) const</tt></td>
+    <td width="50%" valign="top">a.compare(pos1,n1,b,pos2,n2) compares String(a,pos1,n1) and
+    String(b,pos2,n2) in normal sort order. Return -1, 0 or 1</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>int compare(const char* s) const</tt></td>
+    <td width="50%" valign="top">return compare(String(s))</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><tt>int compare(uint pos1, uint n1, const char* s, uint n2 =
+    npos) const</tt></td>
+    <td width="50%" valign="top">return compare(pos1, n1, String(s,n2))</td>
+  </tr>
+</table>
+</div>
+
+<h2><a name="binary"></a>The binary String functions</h2>
+
+<p>+ means concatenate, otherwise the meanings are obvious.</p>
+
+<pre>String operator+(const String&amp; lhs, const String&amp; rhs)
+String operator+(const char* lhs, const String&amp; rhs)
+String operator+(char lhs, const String&amp; rhs)
+String operator+(const String&amp; lhs, const char* rhs)
+String operator+(const String&amp; lhs, char rhs)</pre>
+
+<pre>bool operator==(const String&amp; lhs, const String&amp; rhs)
+bool operator==(const char* lhs, const String&amp; rhs)
+bool operator==(const String&amp; lhs, const char* rhs)</pre>
+
+<pre>bool operator!=(const String&amp; lhs, const String&amp; rhs)
+bool operator!=(const char* lhs, const String&amp; rhs)
+bool operator!=(const String&amp; lhs, const char* rhs)</pre>
+
+<pre>bool operator&lt;(const String&amp; lhs, const String&amp; rhs)
+bool operator&lt;(const char* lhs, const String&amp; rhs)
+bool operator&lt;(const String&amp; lhs, const char* rhs)</pre>
+
+<pre>bool operator&gt;(const String&amp; lhs, const String&amp; rhs)
+bool operator&gt;(const char* lhs, const String&amp; rhs)
+bool operator&gt;(const String&amp; lhs, const char* rhs)</pre>
+
+<pre>bool operator&lt;=(const String&amp; lhs, const String&amp; rhs)
+bool operator&lt;=(const char* lhs, const String&amp; rhs)
+bool operator&lt;=(const String&amp; lhs, const char* rhs)</pre>
+
+<pre>bool operator&gt;=(const String&amp; lhs, const String&amp; rhs)
+bool operator&gt;=(const char* lhs, const String&amp; rhs)
+bool operator&gt;=(const String&amp; lhs, const char* rhs)</pre>
+
+<pre>void swap(const String&amp; A, const String&amp; B)
+</pre>
+
+<p>The stream functions - slightly rough implementation as yet:</p>
+
+<pre>istream&amp; operator&gt;&gt;(istream&amp; is, String&amp; str)</pre>
+
+<p>&nbsp;&nbsp; ... read token from istream</p>
+
+<pre>ostream&amp; operator&lt;&lt;(ostream&amp; os, const String&amp; str)</pre>
+
+<p>&nbsp;&nbsp; ... output a String</p>
+
+<pre>istream&amp; getline(istream is, String&amp; str, char delim = '\n')</pre>
+
+<p>&nbsp;&nbsp; ... read a line<br>
+</p>
+
+<h2><a name="policies"></a>The policies</h2>
+
+<h3><a name="realloc"></a>Reallocation policy</h3>
+
+<p>This section discusses under what circumstances the String data in a String object will
+be moved. It is unclear to me what the standard allows. Moving the String data invalidates
+the const char* returned by .data() and .c_str() and any reference returned by the
+non-const versions of .at() or operator[] (and any iterators referring to the string).</p>
+
+<p>I describe here what my program does. Another standard String package may (and probably
+does) follow different rules.</p>
+
+<p>The value returned by .c_str will most likely become invalid under almost any operation
+of the String which changes the value of the String. Also a call to .c_str will invalidate
+a const char* returned by .data() and any reference returned by .at() or operator[].</p>
+
+<p>If A is a String that has been assigned a capacity with the reserve function then the
+following functions will not cause a reallocation (so the value returned by .data() etc.
+will remain valid)</p>
+
+<pre>   A += ...
+   A.assign(...)
+   A.append(...)
+   A.insert(...)
+   A.erase(...)
+   A.replace(...)</pre>
+
+<p>where ... denotes a legitimate argument, providing the resulting String will fit in the
+assigned capacity (as set by a call to reserve).</p>
+
+<p>If the resulting String will not fit into the assigned capacity the String data will be
+moved (so the value returned by .data() etc. will not remain valid). Also the String will
+no longer be regarded as having an assigned capacity.</p>
+
+<p>The concept of having an assigned capacity is important in considering the behaviour of
+assign, erase and replace when the parameters are such that length of the String is
+reduced. For example</p>
+
+<pre>   String A = &quot;0123456789&quot;;
+   A.reserve(1); // will set capacity to A.size() = 10
+   const char* d = A.data();
+   A.erase(1,9);</pre>
+
+<p>will leave a valid value in <em>d</em> whereas</p>
+
+<pre>   String A = &quot;0123456789&quot;;
+   const char* d = A.data();
+   A.erase(1,9);
+</pre>
+
+<p>will not leave a valid value in d since the storage of the String data will have been
+moved.</p>
+
+<p>The operator= does not conform to these rules. A = <em>something</em> will always
+remove any assigned capacity for A (and will not pick up any capacity from the <em>something</em>).</p>
+
+<p>In this package A.reserve() or A.reserve(0) will remove any assigned capacity. ie it
+will be as though no capacity had ever been assigned. So an erase or a replace that
+changes a length will cause a reallocation.</p>
+
+<p>But don't expect anyone else's package to follow these rules. <br>
+</p>
+
+<h3><a name="plus"></a>Policy on operator+, operator+= and append</h3>
+
+<p>The evaluation of the concatenation expression A+B is delayed until the expression is
+used or until the value is referred to twice. This means the expressions such as A+B+C are
+evaluated in one sweep rather than having A+B formed as a temporary before evaluating
+A+B+C.</p>
+
+<p>Unfortunately, this means that in expressions such as A + <em>c_string</em> the
+c-string <em>c_string</em> will be converted to a String object, before the overall String
+is formed. Since c-strings will usually be small I don't see this as a serious problem.</p>
+
+<p>Likewise A+=X or A.append(X) will not be evaluated until the result is used (unless A
+has been assigned a capacity that is large enough to accommodate X). This means that
+sequences like</p>
+
+<pre>   A += X1;
+   A += X2;
+   ...</pre>
+
+<p>will not cause repeated reallocations of the space used by the String data.</p>
+
+<h2><a name="functions"></a>String functions</h2>
+
+<p>These are a set of simple functions for manipulating strings. You need the 
+header file <i>str_fns.h</i> and body file <i>str_fns.cpp</i>.</p>
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%"><tt>String ToString(int i)</tt></td>
+    <td width="50%">Convert int to string</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>String ToString(long i)</tt></td>
+    <td width="50%">Convert long to string</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>String ToString(double f, int ndec = 4)</tt></td>
+    <td width="50%">Convert double to string; ndec determines the number of 
+    decimal places</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>void UpperCase(String&amp; S)</tt></td>
+    <td width="50%">Convert string to upper case</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>void LowerCase(String&amp; S)</tt></td>
+    <td width="50%">Convert string to lower case</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>bool IsInt(const String&amp; S)</tt></td>
+    <td width="50%">Does a string represent an integer?</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>bool IsFloat(const String&amp; S)</tt></td>
+    <td width="50%">Does a string represent a floating point number (includes 
+    integer, does  allow for E format)?</td>
+  </tr>
+  <tr>
+    <td width="50%">
+    <tt>inline bool Contains(const String&amp; S, const String&amp; str)<br>
+    inline bool Contains(const String&amp; S, const char* s)<br>
+    inline bool Contains(const String&amp; S, char c)</tt>
+    </td>
+    <td width="50%">Does S contain str, s or c, respectively?</td>
+  </tr>
+  <tr>
+    <td width="50%">
+    <tt>inline bool ContainsAnyOf(const String&amp; S, const String&amp; str)<br>
+    inline bool ContainsAnyOf(const String&amp; S, const char* s)<br>
+    inline bool ContainsAnyOf(const String&amp; S, char c)</tt>
+    </td>
+    <td width="50%">Does S contain any of the characters of str, s or c, 
+    respectively?</td>
+  </tr>
+  <tr>
+    <td width="50%">
+    <tt>inline bool ContainsOnly(const String&amp; S, const String&amp; str)<br>
+    inline bool ContainsOnly(const String&amp; S, const char* s)<br>
+    inline bool ContainsOnly(const String&amp; S, char c)</tt>
+    </td>
+    <td width="50%">Does S contain only characters of str, s or c, respectively?</td>
+  </tr>
+  <tr>
+    <td width="50%">
+    <tt>int sf(String&amp; S, const String&amp; s1, const String&amp; s2);<br>
+    int sl(String&amp; S, const String&amp; s1, const String&amp; s2);<br>
+    int sa(String&amp; S, const String&amp; s1, const String&amp; s2);</tt></td>
+    <td width="50%">Suppose S contains a contains a copy of s1. The function sf 
+    replaces the first copy by s2, sl replaces the last copy and sa replaces all 
+    copies. Return number of changes (0 or 1 for sf and sl).</td>
+  </tr>
+  </table>
+
+<h2><a name="command"></a>Command line class</h2>
+
+<p>This is a simple class for extracting the information from the command line 
+(when you call a program from a text window). See the <a href="genmake.htm">
+genmake</a> program as an example. I assume you call your program with a 
+command like</p>
+
+<pre>   program -options A B C</pre>
+<p>where <i>program</i> is the name of the program, <i>options</i> is a sequence 
+of single letter options with no spaces and <i>A B C</i> is a sequence of names separated by 
+spaces.</p>
+
+<p>Start your main program with</p>
+
+<pre>   #include &quot;str.h&quot;
+   #include &quot;commline.h&quot;
+   
+   int main(int argc, char** argv)
+   {
+      CommandLine CL(argc, argv);
+      ...
+</pre>
+
+<p>Here are the member functions for the <i>CommandLine</i> class.</p>
+
+
+<table border="1" width="100%" cellpadding="2">
+  <tr>
+    <td width="50%"><tt>CommandLine(int argc, char** argv)</tt></td>
+    <td width="50%">Constructor: <i>argc</i>, <i>argv</i> from <i>main(int argc, char** argv)</i></td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>int argc()</tt></td>
+    <td width="50%">Return argc</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>char** argv()</tt></td>
+    <td width="50%">Return argv</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>String GetArg(int i)</tt></td>
+    <td width="50%">Get the <i>i</i>-th name; <i>i</i>=1 for first name after 
+    options</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>String GetOptions()</tt></td>
+    <td width="50%">Get option sequence</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>int NumberOfArgs()</tt></td>
+    <td width="50%">Return number of arguments excluding options</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>bool Options()</tt></td>
+    <td width="50%">True if there are options</td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>bool HasOption(const String&amp; s)</tt></td>
+    <td width="50%">True if <i>options</i> has any character in <i>s</i></td>
+  </tr>
+  <tr>
+    <td width="50%"><tt>bool HasOptionCI(const String&amp; s)</tt></td>
+    <td width="50%">Case independent version of <i>HasOption</i></td>
+  </tr>
+  </table>
+
+
+<h2><a name="todo"></a>To do list</h2>
+
+<ul>
+  <li>Can there be memory leaks following an exception?</li>
+  <li>Tests for failure to allocate memory (?)</li>
+  <li>Avoid virtual call by operator[] and at</li>
+  <li>Inline functions where appropriate</li>
+  <li>Try to reduce the number of virtual function calls</li>
+  <li>Try to remove repeated pieces of code</li>
+  <li>Check all code is exercised by test program</li>
+  <li>Redo IO routines</li>
+  <li>Implement iterators</li>
+  <li>Better comments</li>
+  <li>Document policy on operator[] and at.</li>
+</ul>
+
+<p>&nbsp;</p>
+
+<h2><a name="history"></a>History</h2>
+
+<ul>
+  <li>April, 1996: First version</li>
+  <li>November, 1996: Fix problems with <em>find</em> and <em>rfind</em>, change <em>string</em>
+    to <em>String</em>, update simulated exceptions.</li>
+  <li>August, 1998: Minor fixes, align with January '96 working paper.</li>
+  <li>September, 1998: Align with official standard, minor improvements.</li>
+  <li>July, 2001: Fix IO, minor changes, include format and gstring programs and 
+  string functions.</li>
+  <li>January, 2002: Updates to gstring and string functions.</li>
+  <li>October, 2002: Fixes for modern compilers, update include.h, namespace 
+  option</li>
+</ul>
+
+<h3><a name="Aug98"></a>August, 1998 changes</h3>
+
+<ul>
+  <li>remove replaced by <a href="#editing">erase</a></li>
+  <li>order of arguments changed in <a href="#compare">compare</a></li>
+  <li>replace(str, pos, n, c) changed to <a href="#editing">replace(str, pos, n1, n2, c)</a>
+    [make sure you update your program if you are using this, since the old version will still
+    compile and will give wrong answers]</li>
+  <li>update behaviour of <a href="#storage">reserve</a> (see <a href="#realloc">notes</a>).</li>
+  <li><a href="#storage">clear()</a></li>
+  <li><a href="#binary">swap(A,B)</a></li>
+  <li>some defaults for arguments deleted</li>
+  <li>updated exception library</li>
+  <li>fixed global variable problem (?)</li>
+  <li>html version of documentation</li>
+</ul>
+
+<h3><a name="Sep98"></a>September, 1998 changes</h3>
+
+<ul>
+  <li>align with C++ standard - delete a number of default values for parameters</li>
+  <li>minor improvements - particularly remove some unnecessary copies</li>
+</ul>
+
+<h3><a name="Feb01"></a>July, 2001 changes</h3>
+
+<ul>
+  <li>Fix IO routines; other minor fixes</li>
+  <li>Include <a href="format.htm">format program</a>, <a href="gstring.htm">
+  gstring program</a>, <a href="#functions">string functions</a>, 
+  <a href="#command">command line class</a></li>
+</ul>
+<h3><a name="Jan02"></a>January, 2002 changes</h3>
+<ul>
+  <li>Upgrade of <a href="gstring.htm">
+  gstring program</a>, minor additions to <a href="#functions">string functions</a> 
+  and 
+  <a href="#command">command line class</a>.</li>
+</ul>
+<h3><a name="Apr04"></a>April, 2004 changes</h3>
+<ul>
+  <li>More <a href="#functions">string functions</a> and s function in <a href="gstring.htm">
+  gstring program</a>.</li>
+</ul>
+<h3><a name="Jun04"></a>June, 2004 changes</h3>
+<ul>
+  <li>Minor updates, <a href="#functions">sa, sf, sl functions</a> return number 
+  of changes.</li>
+</ul>
+<h3><a name="May05"></a>May, 2005 changes</h3>
+<ul>
+	<li>Additional make files, additional option in <a href="format.htm">format 
+	program</a>, reinstate simulated booleans</li>
+</ul>
+<p>&nbsp;</p>
+<ul>
+  <li><a href="#top">Go to top</a></li>
+  <li><a HREF="ol_doc.htm">To online documentation page</a></li>
+</ul>
+</body>
+</html>

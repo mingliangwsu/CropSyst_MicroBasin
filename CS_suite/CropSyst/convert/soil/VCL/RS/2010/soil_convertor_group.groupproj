@@ -1,0 +1,84 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{EDE578BA-28AA-4880-9906-046F0C5689B9}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="..\..\..\..\..\..\..\corn\build\RS\2010\corn_complete_V5_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\..\..\..\ICASA\library\build\RadStudio\2010\ICASA_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\..\..\..\USDA\NRCS\soil\survey\database\build\RS\2010\STATSGO2_SSURGO_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\..\..\build\RS\2010\CS_directory.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="soil_convertor.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="corn_complete_V5_static">
+			<MSBuild Projects="..\..\..\..\..\..\..\corn\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_V5_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\..\..\corn\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_V5_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\..\..\corn\build\RS\2010\corn_complete_V5_static.cbproj"/>
+		</Target>
+		<Target Name="ICASA_static">
+			<MSBuild Projects="..\..\..\..\..\..\..\ICASA\library\build\RadStudio\2010\ICASA_static.cbproj"/>
+		</Target>
+		<Target Name="ICASA_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\..\..\ICASA\library\build\RadStudio\2010\ICASA_static.cbproj"/>
+		</Target>
+		<Target Name="ICASA_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\..\..\ICASA\library\build\RadStudio\2010\ICASA_static.cbproj"/>
+		</Target>
+		<Target Name="STATSGO2_SSURGO_static">
+			<MSBuild Projects="..\..\..\..\..\..\..\USDA\NRCS\soil\survey\database\build\RS\2010\STATSGO2_SSURGO_static.cbproj"/>
+		</Target>
+		<Target Name="STATSGO2_SSURGO_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\..\..\USDA\NRCS\soil\survey\database\build\RS\2010\STATSGO2_SSURGO_static.cbproj"/>
+		</Target>
+		<Target Name="STATSGO2_SSURGO_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\..\..\USDA\NRCS\soil\survey\database\build\RS\2010\STATSGO2_SSURGO_static.cbproj"/>
+		</Target>
+		<Target Name="CS_directory">
+			<MSBuild Projects="..\..\..\..\..\..\build\RS\2010\CS_directory.cbproj"/>
+		</Target>
+		<Target Name="CS_directory:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\..\build\RS\2010\CS_directory.cbproj"/>
+		</Target>
+		<Target Name="CS_directory:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\..\build\RS\2010\CS_directory.cbproj"/>
+		</Target>
+		<Target Name="soil_convertor">
+			<MSBuild Projects="soil_convertor.cbproj"/>
+		</Target>
+		<Target Name="soil_convertor:Clean">
+			<MSBuild Targets="Clean" Projects="soil_convertor.cbproj"/>
+		</Target>
+		<Target Name="soil_convertor:Make">
+			<MSBuild Targets="Make" Projects="soil_convertor.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="corn_complete_V5_static;ICASA_static;STATSGO2_SSURGO_static;CS_directory;soil_convertor"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="corn_complete_V5_static:Clean;ICASA_static:Clean;STATSGO2_SSURGO_static:Clean;CS_directory:Clean;soil_convertor:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="corn_complete_V5_static:Make;ICASA_static:Make;STATSGO2_SSURGO_static:Make;CS_directory:Make;soil_convertor:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

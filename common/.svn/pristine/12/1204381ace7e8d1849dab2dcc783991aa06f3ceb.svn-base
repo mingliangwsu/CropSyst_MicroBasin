@@ -1,0 +1,53 @@
+#ifndef Geolocation_itemH
+#define Geolocation_itemH
+#include "common/geodesy/geolocation.h"
+#include "corn/string/strconv.hpp"
+
+// This class is deprecated, it is being replaced with Coordinate                //180425
+
+//______________________________________________________________________________
+class Geolocation_item
+: public implements_ CORN::Item
+, public extends_ Geolocation
+{
+public:
+   Geolocation_item();                                                           //130529
+   inline Geolocation_item(const Geolocation &copy_from)
+      : CORN::Item()
+      , Geolocation(copy_from)
+      {}
+   inline virtual const char *get_key()  const {return station_ID_code.c_str();}
+   virtual const char *label_string(std::string &buffer)                  const; //170423
+};
+//______________________________________________________________________________
+class Geocoordinate_item
+: public implements_ CORN::Item
+, public extends_ Geocoordinate
+{
+   contribute_ std::string key; // this is only temporary until I replace container get_key to take the buffer
+public:
+   Geocoordinate_item();                                                         //130529
+   inline Geocoordinate_item(const Geocoordinate &copy_from)
+      : CORN::Item()
+      , Geocoordinate(copy_from)
+      {}
+   inline Geocoordinate_item(float32 latitude,float32 longitude)                 //170831
+      : CORN::Item()
+      , Geocoordinate(latitude,longitude)
+      {}
+   inline Geocoordinate_item(const std::string &from_string)                     //171103
+      : CORN::Item()
+      , Geocoordinate(from_string)
+      {}
+   inline Geocoordinate_item(const std::wstring &from_string)                    //171103
+      : CORN::Item()
+      , Geocoordinate(CORN::wstring_to_string(from_string,key))
+      {} // will surmise the format of from_string
+   virtual const char *get_key()                                          const;
+   virtual const char *label_string(std::string &buffer)                  const; //170423
+   virtual int compare(const CORN::Item &other_item)                      const;
+   virtual Geocoordinate_item *clone()                                    const; //170823
+};
+//_2014-01-24____________________________________________________________________
+#endif
+

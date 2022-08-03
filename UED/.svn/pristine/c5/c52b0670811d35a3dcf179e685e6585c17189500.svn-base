@@ -1,0 +1,104 @@
+#include "UED/convert/text_dBase_Excel_with_TDF/tuple_index.h"
+#include "corn/container/bilist.h"
+using namespace std;
+namespace UED
+{
+//______________________________________________________________________________
+Tuple_index::Tuple_index()
+:level_time_step(0)
+, sublevel_index(0)
+, tuples(0)
+, tuple_level(0)
+, count(0)
+{};
+//_2000-07-15___________________________________________________________________
+void Tuple_index::setup
+(Units_code  tuple_time_step   // This is the timestep of the output file detail lines
+,Units_code _level_time_step   // This is the timestep of this index level
+,Year   year            // Optional
+,nat16  years)          // Optional
+{  tuple_level = (tuple_time_step == _level_time_step)
+            && tuple_time_step; // If a timestep has not been specified in the format file, the default value 0 will exit the setup.   //010624
+   level_time_step = _level_time_step;
+   count = 0;
+   Units_code next_level_time_step = 0;
+   switch (_level_time_step)
+   {  case UT_year :
+         count                = years;
+         first_year           = year;
+         next_level_time_step = UT_day;
+      break;
+      case UT_day :
+         count                = 366;
+         next_level_time_step = UT_hour;
+      break;
+      case UT_hour :
+         count                = 24;
+         next_level_time_step = UT_minute;
+      break;
+      case UT_minute :
+         count                = 60;
+         next_level_time_step = UT_second;
+      break;
+      case UT_second:
+         count                = 60;
+         // currently no more levels than seconds
+      break;
+   }
+   if (tuple_level)
+   {  tuples = new Export_tuple_pointer[count];
+      for (int tpl = 0; tpl < count ; tpl++)
+         tuples[tpl] = 0;
+   }
+   else
+   {  sublevel_index = new Tuple_index[count];
+      for (int tpl_i = 0; tpl_i < count ; tpl_i++)
+          sublevel_index[tpl_i].setup(tuple_time_step,next_level_time_step);
+   }
+}
+//______________________________________________________________________________
+Tuple_index::~Tuple_index()
+{  if (tuple_level)
+   {  for (int i = 0; i < count; i++)
+      {  if (tuples[i])
+         delete tuples[i];
+      }
+      delete [] tuples;
+   } else delete [] sublevel_index;
+}
+//______________________________________________________________________________
+void Tuple_index::extract_tuples(Bidirectional_list &sorted_tuples) renunciation_
+{  for (nat16 i = 0; i < count; i++)
+      if (tuple_level)
+      {  if (tuples[i])
+            sorted_tuples.append(tuples[i]);
+         tuples[i] = 0;
+      } else
+         sublevel_index[i].extract_tuples(sorted_tuples);
+   count = 0;
+}
+//______________________________________________________________________________
+Export_tuple *Tuple_index::find_matching(const Date_time_64_clad &index_date_time)
+{  int32 index = 0;
+   switch (level_time_step)
+   {  case UT_year   : index = index_date_time.get_year() - first_year;       break;
+      case UT_day    : index = index_date_time.get_DOY() - 1;       break;
+      case UT_hour   : index = index_date_time.get_hour() - 1 ;       break;
+      case UT_minute : index = index_date_time.get_minute() - 1;       break;
+      case UT_second : index = index_date_time.get_second() - 1;       break;
+      default :
+         index = -1;                                                             //120610
+         cout << "Warning database index time step not implemented" << endl; break;
+   }
+   if (index < 0)
+      return 0;
+   // The record date is before the date to start exporting
+   if (tuple_level)
+      if (!tuples[index])
+         tuples[index] = new Export_tuple(index_date_time.get_datetime64());       //170531
+   return  (tuple_level)
+   ?  tuples[index]
+   :  sublevel_index[index].find_matching(index_date_time);
+}
+//______________________________________________________________________________
+} // namespace UED

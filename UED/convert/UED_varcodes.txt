@@ -1,0 +1,23 @@
+5820001 precipitation
+2870001 max_temperature
+3870001 min_temperature
+1870001 avg_temperature
+870001 obs_temperature
+2870002 max_dew_point_temperature
+3870002 min_dew_point_temperature.code
+2830001 max_relative_humidity
+3830001 min_relative_humidity
+1860201 solar_radiation
+1a20001 wind_speed
+5830003 pot_evapotranspiration
+5830002 act_evapotranspiration
+5830402 pan evaporation
+5830004 ref_ET_penman_monteith
+5830005 ref_ET_priestly_taylor
+5830006 ref_ET_hargraves
+1830601 avg_daytime_vapor_pressure_deficit
+1830601 avg_fullday_vapor_pressure_deficit
+2830601 max_vapor_pressure_deficit
+1830010 cloud_cover
+5820002 snow_fall
+820003 snow_depth

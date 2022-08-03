@@ -1,0 +1,1800 @@
+/* To do
+I need to continue with the following:
+
+use new UED_tuple_data_source for output of daily harvest and annual
+
+Need to call add_field for each field
+
+Implement CropSyst daily record which will be used with UED_tuple_data_source.
+
+Add output of annual and harvest variables with  as UED_tuple_data_source
+create records of the annual and harvest accumulators probably what are currently the reports,
+we will dump all variables to harvest and annual reports.
+*/
+#ifdef USE_PCH
+#  include <CropSyst/cpp/simulation/CropSyst_sim_pch.h>
+#else
+#  include <CropSyst/cpp/cs_accum.h>
+   // CS_accum must be first
+#  include <CropSyst/cpp/csvc.h>
+#  include <CropSyst/cpp/cs_simulation.h>
+#  include <CropSyst/cpp/land_unit_sim.h>
+#  include <CropSyst/cpp/crop/crop_param.h>
+#  include <CropSyst/cpp/crop/crop_interfaced_cropsyst.h>
+#  include <CropSyst/cpp/crop/crop_N_balancer.h>
+#  include <CropSyst/cpp/cs_ET.h>
+#  include <CropSyst/cpp/rot_param.h>
+
+#  include <CropSyst/cpp/cs_scenario_directory.h>
+#  include <CropSyst/cpp/wshedio.h>
+#  include <CropSyst/cpp/organic_matter/multiple_pool/OM_residues_profile_multiple_cycling.h>
+#  include <CropSyst/cpp/organic_matter/simple/OM_residues_profile_simple.h>
+#  include <CropSyst/cpp/organic_matter/single_pool/OM_residues_profile_single_pool.h>
+
+#  include <CropSyst/cpp/cs_chem_pot_mineral_N.h>
+#  include  <common/residue/residues_interface.h>
+#  include  <common/residue/residue_balancer.h>
+
+#  include <corn/data_source/vv_file.h>
+#  include <common/recorder/recorder_datasrc.h>
+#  include <common/simulation/log.h>
+#  include <CropSyst/cpp/cs_mgmt.h>
+#  include <CropSyst/cpp/soil.h>
+#  include <CropSyst/cpp/soil/dynamic_water_entering.h>
+#  include <soil/chemicals_profile.h>
+#  include <CropSyst/cpp/soil/runoff.h>
+#  include <CropSyst/cpp/soil/erosion_RUSLE.h>
+#  include <CropSyst/cpp/crop/crop_n.h>
+
+#  include <common/weather/stormgen.h>
+#  include <common/weather/weather.h>
+#  include <common/weather/database/weather_database.h>
+#  include <CropSyst/cpp/storm.h>
+#  include <CropSyst/cpp/cs_irrdy.h>
+//091130#  include <CropSyst/cpp/cs_rain.h>
+#  include <CropSyst/cpp/cs_project.h>
+#  include <CropSyst/cpp/cs_event.h>
+#  include <CropSyst/cpp/database_dir.h>
+#  include <CropSyst/cpp/soil/freezing_jumakis.h>
+#  include <CropSyst/cpp/soil/salinity_profile.h>
+
+#  include <common/biomatter/decomposition_const.h>
+#  include <CropSyst/cpp/soil/hydrology_finite_diff.h>
+#  include <CropSyst/cpp/soil/hydrology_cascade.h>
+#include <CropSyst/cpp/soil/infiltration_finite_diff.h>
+#include <CropSyst/cpp/soil/infiltration_cascade_daily.h>
+#include <CropSyst/cpp/soil/infiltration_cascade_hourly.h>
+#  ifdef LADSS_MODE
+#     include "LADSS.h"
+      extern bool LADSS_mode;
+#  endif
+#  ifdef BUILDER_API
+#     include <stdlib.h>
+#     include <corn/std/std_fstream.h>
+#  endif
+#endif
+#pragma hdrstop
+#include <CropSyst/phrases/validate.ph>
+#include <CropSyst/phrases/soilfile.ph>
+#include <CropSyst/phrases/mgmtfile.ph>
+
+#ifdef STATSGO_DATABASE
+#include <CropSyst/cpp/soil/soil_param_with_STATSGO.h>
+#endif
+
+#include <CropSyst/cpp/soil/temperature_hourly.h>
+#  include <CropSyst/cpp/watertab.h>
+#include "soil/nitrogen_profile.h"
+#include "soil/chemical_mass_profile.h"
+
+using namespace std;
+
+extern bool harvest_event_failed_today; // This is here only for Mike Rivington's spreadsheet
+
+/*_______*/ Land_unit_simulation::Land_unit_simulation
+/*020504_*/ (sint32 /*091203 int16 */                 i_LBF_ID   // negative values indicate offsite
+/*030308_*/ ,Common_simulation_log &i_event_log
+/*050619_*/ , CropSyst_scenario_directory *_scenario_directory
+/*_______*/ )
+/*020309_*/ :CropSyst_scenario()
+/*070227_*/ ,simulation(0)
+/*060803_*/ ,environment()
+/*021007_*/ ,event_log(i_event_log)
+/*_______*/ ,storms(0)
+/*050314_*/ ,daily_eff_precipitation(0)
+//071117/*_______*/ ,ID_obsolete("obsolete" )
+/*020310_*/ ,LBF_ID(i_LBF_ID)
+/*030830_*/ ,ET(0)
+/*050307_*/ ,latest_simulated_date(0)
+//091206 moved to Soil_erosion_RUSLE member/*050314_*/ ,RUSLE_rainfall_erosivity_factor(0)   // default 0 no erosion
+/*050314_*/ ,automatic_irr_amount(0)
+/*081212_*/ ,earliest_irrigation_start_hour(0)
+/*050314_*/ ,table_irr_amount(0)
+/*050428_*/ ,total_irrigation_today(0)
+/*070107_*/ ,management_irrigation_duration_hours(24)  // Default to 24 (this was the default for previous version) this will then be set for the more recent irrigation event.
+/*050314_*/ ,total_soil_water_content(0)
+/*050726_*/ ,organic_matter_residues_profile_kg_m2(0)
+/*060510_*/ ,soil_abiotic_environment_profile(0)
+/*000406*/  ,auto_irrig_start_date((Year)0,CORN::DOY(0))
+/*000406*/  ,auto_irrig_end_date((Year)0,CORN::DOY(0))
+#ifdef WSHEDMOD
+/*990409_*/ ,cell_in_db(0)
+/*990409_*/ ,cell_out_db(0)
+#endif
+#  ifdef LADSS_MODE
+/*_______*/ ,LADSS_daily_database_table_enabled(false)
+/*_______*/ ,LADSS_daily_database_table  (0)   // These are set below
+/*_______*/ ,LADSS_harvest_database_table(0)
+/*_______*/ ,LADSS_annual_database_table (0)
+#endif
+/*991102_*/ ,pond()
+/*070227_*/ ,crop_at_start_season(0)
+/*_______*/ ,crop_active(0)
+/*070227_*/ ,crop_at_end_season(0)
+/*070227_*/ ,crop_terminated(0)
+/*070514_*/ ,crop_sowing_postponed(0)
+MGMT        ,curr_management(0)  // new Management  // 030711 No longer have a default management
+/*020913_*/ ,curr_automatic_clip_mode(0)
+/*020913_*/ ,curr_automatic_irrigation_mode(0)
+/*060804_*/ ,curr_N_application_soil_observation_mode(0)
+/*020310_*/ ,triggered_synchronizations(0)
+/*050107_*/ ,grazing_BM_demand_today_kg_m2(0)
+/*050115_*/ ,CONTINUOUS_accumulators_active(0)
+/*050115_*/ ,ANNL_accumulators_active(0)
+/*050115_*/ ,GP_accumulators_active(0)
+/*050115_*/ ,FALLOW_accumulators_active(0)
+//070828/*050115_*/ ,ANNL_accumulators_ready_for_output_then_delete(0)
+//070828/*051012_*/ ,GP_accumulators_start_tomorrow(0)
+//070828/*051012_*/ ,GP_accumulators_ready_for_output(false)
+//070828/*051012_*/ ,FALLOW_accumulators_start_tomorrow(0)
+//070828/*051012_*/ ,FALLOW_accumulators_ready_for_output(false)
+/*060627_*/ ,scenario_directory(_scenario_directory)
+/*070220_*/ ,crop_nitrogen_mass_balance_ref(0)
+//070627/*070626_*/ ,crop_biomass_fate_to_be_distributed(MULTIPLE_CAUSES,0.0,0.0)
+//070627/*070626_*/ ,crop_N_mass_fate_to_be_distributed(MULTIPLE_CAUSES,0.0,0.0)
+/*070627_*/ ,crop_mass_fate_to_be_distributed(0)
+/*070824_*/ ,soil_freezing_optional(0)
+/*070825_*/ ,soil_hydrology_ref(0)
+/*_______*/ {  // If we don't delete the database, it will add records
+#  ifdef LADSS_MODE
+/*_______*/    if (LADSS_mode)
+/*_______*/    {
+/*_______*/       LADSS_daily_database_table    = new LADSS_output_data_source(table("daily_output")   ,"D_OUT_ID" /*i_LBF_ID*/);   // Not currently used in LADSS
+/*_______*/       LADSS_harvest_database_table  = new LADSS_output_data_source(table("season_output") ,"S_OUT_ID" /*i_LBF_ID*/);
+/*_______*/       LADSS_annual_database_table   = new LADSS_output_data_source(table("annual_output")  ,"A_OUT_ID" /*i_LBF_ID*/);
+/*_______*/       AUTOMATICALLY_SEQUENCE_PRIMARY_KEY(LADSS_daily_database_table);
+/*_______*/       AUTOMATICALLY_SEQUENCE_PRIMARY_KEY(LADSS_harvest_database_table);
+/*_______*/       AUTOMATICALLY_SEQUENCE_PRIMARY_KEY(LADSS_annual_database_table);
+/*_______*/       sint32 alloc_ID = LBF_ID; // FOR LADSS, LBF_ID is the alloc_ID
+/*_______*/       if (LADSS_daily_database_table_enabled)
+/*_______*/          LADSS_daily_database_table->delete_allocation(alloc_ID);
+/*_______*/       LADSS_harvest_database_table->delete_allocation(alloc_ID);
+/*_______*/       LADSS_annual_database_table->delete_allocation(alloc_ID);
+/*_______*/    };
+#endif
+/*041220_*/    grazing_hold_manure_application.org_N_amount_kg_ha = 0.0;
+/*041220_*/    grazing_hold_manure_application.NH3_amount_kg_ha = 0.0;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ Land_unit_simulation::~Land_unit_simulation()
+/*_______*/ {
+#ifdef DISABLED
+090204 This is crashing then the crop is still active when the simulation ends.
+Normally this does not occur because simulations are usually set to end after
+crops have all been harvested.
+/*_______*/    if (crop_active)           delete crop_active;           crop_active = 0;
+/*050209_*/    if (crop_at_start_season)  delete crop_at_start_season;  crop_at_start_season = 0;
+/*050209_*/    if (crop_at_end_season)    delete crop_at_end_season;    crop_at_end_season = 0;
+/*050209_*/    if (crop_terminated)       delete crop_terminated;       crop_terminated = 0;
+#endif
+/*010214_*/    if (ET)                    delete ET;                    ET = 0;
+/*050726_*/    if (organic_matter_residues_profile_kg_m2) delete organic_matter_residues_profile_kg_m2;  organic_matter_residues_profile_kg_m2 = 0;
+/*060510_*/    if (soil_abiotic_environment_profile)      delete soil_abiotic_environment_profile;       soil_abiotic_environment_profile      = 0;
+#ifdef WSHEDMOD
+/*990429_*/    if (cell_in_db)                        delete cell_in_db;
+/*990429_*/    if (cell_out_db)                       delete cell_out_db;
+#endif
+/*020401_*/    if (CONTINUOUS_accumulators_active)    delete CONTINUOUS_accumulators_active;    CONTINUOUS_accumulators_active = 0;
+/*020401_*/    if (ANNL_accumulators_active)          delete ANNL_accumulators_active;          ANNL_accumulators_active = 0;
+/*020401_*/    if (FALLOW_accumulators_active)        delete FALLOW_accumulators_active;        FALLOW_accumulators_active = 0;
+/*020401_*/    if (GP_accumulators_active)            delete GP_accumulators_active;            GP_accumulators_active = 0;
+/*070824_*/    if (soil_freezing_optional)                     delete soil_freezing_optional;                     soil_freezing_optional = 0;
+/*070825_*/    // do not delete soil_hydrology_ref is is relinquished to soil
+/*_______*/ };
+//______________________________________________________________________________
+/*020620_*/ bool Land_unit_simulation::setup_soil(STATSGO::Database *STATSGO_database)
+/*_______*/ {
+/*_______*/    bool loaded_OK = false;
+/*060803_*/    Soil_cropsyst_specific *soil = 0;
+#ifdef LADSS_MODE
+/*_______*/   if (LADSS_mode)
+/*_______*/   {   LADSS_soil_data_source soil_datasrc(soil_ID);
+/*_______*/       //LADSS always has a soil
+/*061005_*/       Smart_soil_parameters *soil_parameters_relinquished_to_soil = new Smart_soil_parameters;
+/*010110_*/       loaded_OK = soil_datasrc.get(*soil_parameters_relinquished_to_soil);
+/*060803_*/       environment.soil = soil = new Soil_cropsyst_specific(soil_parameters_relinquished_to_soil);
+//030303          In last, initial soil profile is stored in the SOIL_LAYER table
+//                (although I disagree with this).
+//                We need to copy the value to the simulation arrays
+/*030303_*/       for (uint8 h = 1; h <= soil->parameters->number_horizons; h++)
+/*030303_*/       {
+/*030303_*/          horizon_H2O[h]   = horizon_LADSS_H2O[h];
+/*030303_*/          horizon_N_NO3[h] = horizon_LADSS_N_NO3[h];
+/*030303_*/          horizon_N_NH4[h] = horizon_LADSS_N_NH4[h];
+/*030303_*/          horizon_percent_organic_matter[h]  = horizon_LADSS_percent_organic_matter[h];
+/*090202_*/          // CropSyst now has an option to load organic matter from soil parameter file.
+/*090202_*/          // This is not implemented in LADSS.
+/*030303_*/       };
+/*_______*/   } else
+#endif
+/*_______*/   {
+/*061005_*/          Smart_soil_parameters *soil_parameters_relinquished_to_soil
+/*061005_*/          =
+#ifdef STATSGO_DATABASE
+/*060213_*/             (STATSGO_database)? new Smart_soil_parameters_with_STATSGO :
+#endif
+/*_______*/             new Smart_soil_parameters;
+/*010110_*/          VV_file soil_datasrc(soil_filename.c_str());
+/*010110_*/          loaded_OK = soil_datasrc.get(*soil_parameters_relinquished_to_soil);
+/*090605_*/          if (loaded_OK)
+/*_______*/             environment.soil = soil = new Soil_cropsyst_specific(soil_parameters_relinquished_to_soil);
+/*_______*/          else
+/*090605_*/          {
+/*090605_*/             delete soil_parameters_relinquished_to_soil;  // failed to load so clean up
+/*_______*/             cerr << TL_Unable_to_open_file << ':' << TL_Soil_file  << " (" << soil_filename << ')' << endl;
+/*090605_*/          };
+/*_______*/   }
+/*060712_*/    if (active_model_options->run_erosion && soil)       // must be done before soil->Initialize()
+/*060712_*/       soil->take_erosion_submodel(new Soil_erosion_RUSLE(*soil));
+/*020620_*/   return loaded_OK;
+/*030527_*/ };
+//______________________________________________________________________________
+/*080213_*/ bool Land_unit_simulation::initialize_salinity
+/*_______*/ (Soil_cropsyst_specific *soil
+/*_______*/ ,bool               water_table_file_exists
+/*_______*/ ,const char        *water_table_filename
+/*080402_*/ ,float64            ECw_to_TDS_water_table
+/*_______*/ ,Infiltration_model infiltration_model_check_used /*was mislabled initialize_salinity*/)
+/*_______*/ {  bool salinity_enabled = false;
+#ifdef SALINITY
+/*020620_*/    if (active_model_options->run_salinity)
+               {
+/*051120_*/       soil_layer_array64(sublayer_salt_concentration_dSm);
+/*051120_*/       soil->distribute_property(horizon_salinity_dSm,sublayer_salt_concentration_dSm);
+#ifdef WATERTABLE
+/*080213_*/       Water_table_curve *salt_water_table_salt_curve =   // salt concentration curve
+/*071214_*/          (water_table_file_exists/* || !is_essentially(param_initial_water_table_salinity(),0.0,0.0000001)*/)
+/*071214_*/          ? new Water_table_curve
+/*071214_*/             (water_table_filename
+/*071214_*/             ,"salt"
+/*071214_*/             ,active_model_options->starting_date
+/*071214_*/             ,active_model_options->ending_date
+/*071214_*/             ,(float64)param_initial_water_table_salinity()
+/*080402_*/             ,ECw_to_TDS_water_table  // Usually about 0.64
+//080402 /*071214_*/             ,0.64  xxx this is ECw conversion
+/*071214_*/             )
+/*071214_*/          :0;
+/*080213_*/       if (salt_water_table_salt_curve && !salt_water_table_salt_curve->is_valid())
+/*080213_*/       {  // It is possible the water table file didn't have any 'salt' entries
+/*080213_*/          // and the initial_water_table_salinity is unspecified (0.0)
+/*080213_*/          // In this case we simply delete the water table.
+/*080213_*/          delete salt_water_table_salt_curve;
+/*080213_*/          salt_water_table_salt_curve = 0;
+/*080213_*/       };
+#endif
+/*051120_*/       soil->set_salinity
+/*_______*/       (  new Soil_salt
+/*_______*/          (*soil
+/*080117_*/          ,active_model_options->infiltration_model_labeled.get()
+/*_______*/          , sublayer_salt_concentration_dSm
+WATERTAB             , salt_water_table_salt_curve
+/*080403_*/          , ECe_to_TDS
+/*_______*/          ), true   // Let the soil delete
+/*_______*/       );
+/*080213_*/       salinity_enabled = true;
+/*_______*/    };
+#endif
+/*080213_*/    return salinity_enabled;
+/*030527_*/ };
+//______________________________________________________________________________
+/*030527_*/ bool Land_unit_simulation::initialize_soil()
+/*_______*/ {  // We must set up submodel options after initialize soil because we need soil sublayer.
+/*060803_*/    Soil_cropsyst_specific *soil = get_soil();
+/*060803_*/    if (! soil) return false; // The soil was not specified (which is valid, for no limitations simulation
+/*990311_*/    float64 init_total_water_content = 0;
+/*060206_*/    Infiltration_model infiltration_model=active_model_options->infiltration_model_labeled.get();
+/*060206_*/    Soil_infiltration_nominal *infiltration_submodel = 0;   // will be relinquished to soil
+/*060512_*/    Soil_hydrology_abstract    *soil_hydrology = 0;          // will be relinquished to soil
+/*060509_*/    const Soil_layers_interface &layers = *(soil->get_layers());
+/*060512_*/    const Soil_hydraulic_properties *hydraulic_properties = (Soil_hydraulic_properties *)soil->get_hydraulic_properties_constant();
+/*071001_*/    unmodifiable_ Soil_structure_interface *soil_structure = soil->get_structure_unmodifiable();
+/*060505_*/    switch (infiltration_model)
+/*060505_*/    {
+/*060505_*/       case FINITE_DIFFERENCE_INFILTRATION :
+/*060512_*/       {  Soil_hydrology_finite_difference *soil_hydrology_FD = new Soil_hydrology_finite_difference(&layers,hydraulic_properties,soil_structure);
+/*060512_*/          soil_hydrology        = soil_hydrology_FD;
+/*060512_*/          infiltration_submodel = new Soil_infiltration_finite_difference(*soil,pond,*soil_hydrology_FD,true);
+/*060505_*/       } break;
+/*060505_*/       case CASCADE_DAILY_INFILTRATION :
+/*060512_*/       {  Soil_hydrology_cascade *soil_hydrology_cascade = new Soil_hydrology_cascade(&layers,hydraulic_properties,soil_structure);
+/*060512_*/          soil_hydrology = soil_hydrology_cascade;
+/*060512_*/          infiltration_submodel = new Soil_infiltration_cascade_daily(*soil, *soil_hydrology_cascade);
+/*060505_*/       } break;
+/*060505_*/       case CASCADE_HOURLY_INFILTRATION :
+/*060512_*/       {  Soil_hydrology_cascade *soil_hydrology_cascade = new Soil_hydrology_cascade(&layers,hydraulic_properties,soil_structure);
+/*060512_*/          soil_hydrology = soil_hydrology_cascade;
+/*060512_*/          infiltration_submodel = new Soil_infiltration_cascade_hourly(*soil, *soil_hydrology_cascade);
+/*060505_*/       } break;
+/*060512_*/       case NO_INFILTRATION:
+/*060512_*/       {  Soil_hydrology_cascade *soil_hydrology_cascade = new Soil_hydrology_cascade(&layers,hydraulic_properties,soil_structure);
+/*060512_*/          soil_hydrology = soil_hydrology_cascade;
+/*060512_*/          infiltration_submodel = new Soil_infiltration_none(*soil);
+/*060512_*/       } break;
+/*070724_*/       case NO_LIMITATION :
+/*060512_*/       {  // Default to no soil hydrology, this should disable infiltration
+/*060512_*/       }; break;
+/*060512_*/       default :  // default to daily cascade
+/*060512_*/       {  // Default to no soil hydrology, this should disable infiltration
+/*060512_*/       }; break;
+/*060505_*/    };
+/*070825_*/    soil_hydrology_ref = soil_hydrology;
+/*060803_*/    Weather *weather = get_weather();
+/*091130_*/    if (soil->erosion)
+/*091130_*/       soil->erosion->know_weather(weather
+
+                  ,has_mean_peak_rainfall()
+                     ? mean_peak_rainfall
+                     : 0
+
+                     // YET IMPLEMENTED: (would only apply to V4
+                     // If using old location file, get the monthly means from
+                     // the location file;
+
+
+
+                  );
+/*060922_*/    Soil_temperature_profile_hourly *soil_temperature_profile_hourly = 0;
+///*060922_*/    if ( active_model_options->requires_hourly_soil_profile_temperature())
+//060922 Need to verify carefully that soil temperature profile is created only when need.
+//060922 currently always creating it. Previously the soil created it when needed.
+/*060922_*/    {
+/*060922_*/       soil_temperature_profile_hourly = new Soil_temperature_profile_hourly(*soil,*weather,(float64)annual_temperature_avg,(float64)annual_temperature_avg_half_amplitude,annual_temperature_phase);
+/*060922_*/       soil_temperature_profile_hourly->initialize();
+/*060922_*/    };
+/*_______*/    soil->initialize
+/*_______*/       (horizon_H2O
+/*_______*/       ,init_total_water_content
+/*041116_*/       ,active_model_options->infiltration_model_labeled.get()
+/*060206_*/       ,infiltration_submodel
+/*060512_*/       ,soil_hydrology
+/*060922_*/       ,soil_temperature_profile_hourly);
+/*060206_*/    soil->reinitialize(horizon_H2O,true,active_model_options->subdivide_horizons
+/*990311_*/       ,init_total_water_content);
+/*071012_*/    infiltration_submodel->initialize();  // Must not be initialized before soil
+/*_______*/   //Here we set the desired soil submodel options
+/*_______*/    if (active_model_options->leaching_observation_depth_mode_labeled.get() == LEACH_AT_SPECIFIED_DEPTH)
+/*070118_*/       infiltration_submodel->set_override_leaching_depth((float64)active_model_options->leaching_observation_depth);
+
+#ifdef WATERTABLE
+/*080213_*/    bool water_table_file_exists = water_table_filename.exists();
+/*020620_*/    if (water_table_file_exists)
+/*020620_*/       soil->infiltration_submodel->set_water_table
+/*020620_*/       (water_table_filename.c_str()
+/*020620_*/       ,active_model_options->starting_date
+/*020620_*/       ,active_model_options->ending_date);
+#endif
+#ifdef RUNOFF
+/*020620_*/    soil->enable_runoff(active_model_options->runoff_model_labeled.get());
+#endif
+/*080213_*/    initialize_salinity
+/*080213_*/       (soil
+#ifdef WATERTABLE
+/*080213_*/       ,water_table_file_exists
+/*080213_*/       ,water_table_filename.c_str()
+#else
+/*090818_*/       ,false
+/*090818_*/       ,""
+#endif
+/*080402_*/       ,ECw_to_TDS
+/*080213_*/       ,infiltration_model);
+#ifdef NITROGEN
+/*020620_*/    if (active_model_options->run_nitrogen)
+/*080213_*/    {
+#ifdef WATERTABLE
+/*080213_*/       Water_table_curve *water_table_NO3_N_curve =   // salt concentration curve
+/*080213_*/          (water_table_file_exists)
+/*080213_*/          ? new Water_table_curve
+/*080213_*/             (water_table_filename.c_str()
+/*080213_*/             ,"NO3-N"
+/*080213_*/             ,active_model_options->starting_date
+/*080213_*/             ,active_model_options->ending_date
+/*080213_*/             ,(float64)param_initial_water_table_NO3_N()
+/*080213_*/             ,N_to_NO3_conv // element N to molecular NO3
+/*080213_*/             )
+/*080213_*/          :0;
+/*080213_*/       if (water_table_NO3_N_curve && !water_table_NO3_N_curve->is_valid())
+/*080213_*/       {  // It is possible the water table file didn't have any 'salt' entries
+/*080213_*/          // and the initial_water_table_salinity is unspecified (0.0)
+/*080213_*/          // In this case we simply delete the water table.
+/*080213_*/          delete water_table_NO3_N_curve;
+/*080213_*/          water_table_NO3_N_curve = 0;
+/*080213_*/       };
+
+/*080213_*/       Water_table_curve *water_table_NH4_N_curve =   // salt concentration curve
+/*080213_*/          (water_table_file_exists/* || !is_essentially(param_initial_water_table_NH4_N(),0.0,0.0000001)*/)
+/*080213_*/          ? new Water_table_curve
+/*080213_*/             (water_table_filename.c_str()
+/*080213_*/             ,"NH4-N"
+/*080213_*/             ,active_model_options->starting_date
+/*080213_*/             ,active_model_options->ending_date
+/*080213_*/             ,(float64)param_initial_water_table_NH4_N()
+/*080213_*/             ,N_to_NH4_conv  // element N to molecular NH4
+/*080213_*/             )
+/*080213_*/          :0;
+/*080213_*/       if (water_table_NH4_N_curve && !water_table_NH4_N_curve->is_valid())
+/*080213_*/       {  // It is possible the water table file didn't have any 'salt' entries
+/*080213_*/          // and the initial_water_table_salinity is unspecified (0.0)
+/*080213_*/          // In this case we simply delete the water table.
+/*080213_*/          delete water_table_NH4_N_curve;
+/*080213_*/          water_table_NH4_N_curve = 0;
+/*080213_*/       };
+
+#endif
+/*020620_*/       soil->enable_nitrogen
+/*070502_*/          (active_model_options->hourly & HOURLY_nitrogen_transformations
+/*_______*/          ,active_model_options->infiltration_model_labeled.get()
+/*_______*/          ,provide_soil_abiotic_environment_profile()
+/*_______*/          ,param_max_transform_depth()
+///*081014_*/          ,param_adjust_denitrify_V4_1()
+/*090127_*/          ,param_adjust_denitrify()
+/*_______*/          ,param_adjust_nitrify_V4_1()
+//090721 /*081024_*/          ,pot_denitrify_rate
+/*_______*/          ,horizon_N_NO3
+/*_______*/          ,horizon_N_NH4
+#ifdef WATERTABLE
+/*080213_*/          ,water_table_NO3_N_curve
+/*080213_*/          ,water_table_NH4_N_curve
+#else
+/*090818_*/          ,0,0
+#endif
+/*_______*/          );
+/*080213_*/    };
+#endif
+CHEM           if (soil->chemicals)
+CHEM           {
+CHEM               soil->chemicals->initialize(); // complete initialization of soil chemical
+CHEM              infiltration_submodel->know_chemicals(soil->chemicals);
+CHEM           }
+#ifdef SOIL_FREEZING
+/*020620_*/    if (active_model_options->run_freezing)
+/*070824_*/    {
+/*040714_*/       soil_freezing_optional = (Soil_freezing_profile_interface *)new Soil_freezing_profile_jumakis(
+/*051201_*/             *(soil->get_layers())
+/*070725_*/             ,*(soil->get_structure_unmodifiable())
+/*051202_*/             ,*(soil->get_hydraulic_properties_constant())
+/*051201_*/             ,*(soil->get_hydrology_modifiable())
+/*_______*/             ,*(soil->provide_temperature_profile()));
+/*060505_*/       soil_hydrology->know_freezing_profile(soil_freezing_optional);
+/*070824_*/    };
+#endif
+#ifdef PESTICIDE
+// NYI
+/*_______*/       soil->Xchemicals->enable_pesticies
+/*_______*/       (initial_chemical_profiles
+WATERTAB          ,water_table_filename.c_str()
+WATERTAB          ,active_model_options->starting_date
+WATERTAB          ,active_model_options->ending_date
+/*_______*/       );
+#endif
+/*041111_*/    return true;
+/*_______*/ };
+//______________________________________________________________________________
+/*060810_*/ Soil_abiotic_environment_profile *Land_unit_simulation::provide_soil_abiotic_environment_profile()
+/*_______*/ {
+/*060803_*/    Soil_cropsyst_specific *soil = get_soil() ;
+/*_______*/    if (!soil_abiotic_environment_profile
+//070712 we need to give it to the requestor if it asks for it the requestor knows if it needs it or not /*060629_*/       && active_model_options->requires_hourly_soil_profile_temperature()
+/*080709_*/       )
+/*080904_*/       soil_abiotic_environment_profile = new Soil_abiotic_environment_profile(soil);
+/*_______*/    return soil_abiotic_environment_profile;
+/*_______*/ };
+//______________________________________________________________________________
+/*010202_*/ bool Land_unit_simulation::initialize(Cropping_system_simulation   *_simulation)
+/*_______*/ {
+/*070227_*/    simulation = _simulation;
+/*070220_*/    if (active_model_options->run_nitrogen)  // We also only need to create the crop_nitrogen_mass_balance if outputs are desired
+/*070220_*/       crop_nitrogen_mass_balance_ref = new Crop_nitrogen_mass_balancer;
+/*070227_*/    simulation->take_balancer(crop_nitrogen_mass_balance_ref); // But we keep a link
+///*090408_*/    for (int pos = 0; pos < OM_POSITION_COUNT;  pos++)
+/*090408_*/    simulation->take_balancer(residue_mass_balance[OM_subsurface_position]        = new Residue_balancer_subsurface);
+/*090408_*/    simulation->take_balancer(residue_mass_balance[OM_flat_surface_position]      = new Residue_balancer_surface_flat);
+/*090408_*/    simulation->take_balancer(residue_mass_balance[OM_stubble_surface_position]   = new Residue_balancer_surface_stubble_or_attached(OM_stubble_surface_position));
+/*090408_*/    simulation->take_balancer(residue_mass_balance[OM_attached_to_plant_position] = new Residue_balancer_surface_stubble_or_attached(OM_attached_to_plant_position));
+/*021122_*/    scenario_directory->create_output_directories(watershed_simulation());
+//             Note we can pass here if we want to record an only instanciate the database if recording
+/*_______*/
+#ifdef BUILDER_API
+               randomize();
+#else
+#if defined(__MSDOS__) || defined(_Windows)
+/*960828P*/   randomize;
+#endif
+#endif
+/*_______*/
+NITRO          daily_organic_N_applied = 0.0;
+NITRO          daily_NH3_volatilization_loss = 0.0;
+NITRO          daily_inorganic_NH4_to_atmosphere = 0.0;
+/*_______*/    daily_eff_precipitation = 0.0;
+/*030527_*/    initialize_soil();
+
+// DEBUGGING ONLY!!!!!!!!!!!!!!!!
+//soil->dust_mulching(cm_to_m(10.0),100);
+//soil->update_water_potentials(false,false);
+
+//981120      // We cannot setup residue until soil is initialized
+/*060803_*/    Soil_cropsyst_specific *soil = get_soil() ;
+/*051120_*/    soil_sublayer_array_64(sublayer_percent_organic_matter);
+/*090202_*/    if (use_soil_parameter_organic_matter)
+/*090202_*/       copy_layer_array32(horizon_percent_organic_matter,soil->parameters->organic_matter);
+/*051120_*/    soil->distribute_property(horizon_percent_organic_matter,sublayer_percent_organic_matter);
+/*050726_*/    switch (active_model_options->organic_matter_and_residue_model_labeled.get())
+/*050726_*/    {
+/*060628_*/       case NO_ORGANIC_MATTER_AND_RESIDUE  : organic_matter_residues_profile_kg_m2 = 0; break;
+/*060327_*/       case V4_4_ORGANIC_MATTER_AND_RESIDUE: organic_matter_residues_profile_kg_m2 = new Organic_matter_residues_profile_multiple_cycling(soil,*provide_soil_abiotic_environment_profile(),horizon_percent_organic_matter,organic_matter_initialization_parameters,organic_matter_decomposition_parameters);break;
+/*070707_*/       case V4_9_ORGANIC_MATTER_AND_RESIDUE: organic_matter_residues_profile_kg_m2 = new Organic_matter_residues_profile_single_pool(soil,*provide_soil_abiotic_environment_profile(),horizon_percent_organic_matter,organic_matter_decomposition_parameters); break;
+/*050726_*/       case V4_1_ORGANIC_MATTER_AND_RESIDUE:    default :
+/*_______*/       {
+/*070828_*/          uint8 transformation_layers = soil->layers->get_layer_at_depth_or_last_layer(param_max_transform_depth());
+/*_______*/          organic_matter_residues_profile_kg_m2 = new Organic_matter_residues_profile_simple
+/*040919_*/          (soil
+/*060206_*/          ,active_model_options->infiltration_model_labeled.get()
+/*040919_*/          ,sublayer_percent_organic_matter
+/*_______*/          ,active_model_options->constant_organic_matter
+/*_______*/          ,transformation_layers
+/*_______*/          ,param_V3_adjust_mineralize()
+/*040919_*/          ,active_model_options->run_nitrogen
+/*_______*/          );
+/*_______*/       } break;
+/*050726_*/    };
+/*060310_*/    if (soil->chemicals && organic_matter_residues_profile_kg_m2)
+/*060310_*/    {
+/*060116_*/       Pot_mineralizable_N_profile *pot_min_N_prof = organic_matter_residues_profile_kg_m2->get_pot_mineralizable_N_profile();
+/*060731_*/       if (pot_min_N_prof)
+/*060116_*/          soil->chemicals->chemical_profiles.append(pot_min_N_prof);
+/*060504_*/       NO3_Profile *NO3_prof =  soil->chemicals->NO3;
+/*060731_*/       if (NO3_prof)
+/*_______*/       {
+/*060504_*/          NO3_prof->know_CO2_C_loss_subsurface(organic_matter_residues_profile_kg_m2->
+/*081030_*/                get_CO2_C_loss_profile_residue_and_OM()
+/*_______*/             );
+/*_______*/       };
+/*060310_*/    };
+/*_______*/    load_profile_recal_events(recalibration_filename.c_str()); // Optional file
+/*060103_*/    setup_cropping_system();
+/*_______*/    clear_30_day_wettings();
+#ifdef SOILR
+/*_______*/    crop = new Crop_cropsyst_specific
+/*_______*/       (soil,residue_pools
+/*010110x*/       ,0 // Grass does not have grows
+/*010110x*/       ,false // grass is not fallow
+/*_______*/       ,false,false);
+/*070220_*/    crop->track_nitrogen_mass_balance(crop_nitrogen_mass_balance);
+/*010110x*/    {  VV_file grass_file(grass_filename);
+/*010110x*/       grass_file.get(crop)
+/*010110x*/    };
+/*060911_*/    if (organic_matter_residues_profile_kg_m2)
+/*060531_*/       crop->know_residues(organic_matter_residues_profile_kg_m2->get_residues())
+/*_______*/    // Use simulation overrides
+/*970614_*/    if (override_crop)
+/*970608_*/    { crop->max_root_depth       = SoilR_max_root_depth;
+/*970608_*/      crop->max_LAI = SoilR_max_LAI;
+/*970608_*/      crop->ET_crop_coef = SoilR_ET_crop_coef;
+/*970608_*/      crop->induce_dormancy_temp = SoilR_induce_dormancy_temp;           // 'C
+/*970608_*/      crop->start_dormancy_valid_date = SoilR_start_dormancy_valid_date;
+/*970608_*/      crop->leave_dormancy_valid_date = SoilR_leave_dormancy_valid_date;
+/*970608_*/    };
+#endif
+/*_______*/     // default management no planting date yet so no auto irrig.
+/*_______*/    //We must load_reports_options BEFORE opening output files
+/*_______*/    //We must initialize soil before openning output files
+/*_______*/
+/*_______*/    //soil must be available and initialized by this point
+/*_______*/    //The report options must be available and initialized by this point
+/*_______*/
+#ifdef WSHEDMOD
+//020308       Setup for watershed model
+/*030530_*/    if (watershed_simulation())  //(LBF_ID > 0)
+/*020403_*/    {
+/*990525_*/       cell_in_db  = new Enumerated_database(scenario_directory->output_watershed_in_ued.c_str() /*watershed_cell_in_filename(LBF_ID)*/);
+/*990525_*/       cell_in_db->initialize();
+/*990525_*/       cell_out_db = new Enumerated_database(scenario_directory->output_watershed_out_ued.c_str() /*watershed_cell_out_filename(LBF_ID)*/);
+/*990525_*/       cell_out_db->initialize();
+/*020403_*/    };
+#endif
+/*010205x*/    return true; // 070227 initialized;
+/*_______*/ };
+//______________________________________________________________________________
+/*060103_*/ bool Land_unit_simulation::setup_cropping_system()
+/*_______*/ {  bool setup_good = false;
+/*_______*/    Date32 single_or_established_sowing_date = 0;
+/*_______*/    switch (cropping_system_mode_labeled.get())
+/*_______*/    {  case  no_cropping_system : /*Nothing to do in this mode */  break;
+/*_______*/       case single_cropping_system:
+/*_______*/       {
+/*_______*/          if (single_sowing_date.get_year() < 1000)  // Appears to be a relative year
+/*_______*/             single_sowing_date.set_year(active_model_options->starting_date.get_year());
+/*_______*/          single_or_established_sowing_date = single_sowing_date.get();
+/*_______*/       } break;
+/*_______*/       case established_cropping_system:
+/*_______*/       {  //  simply create a sowing event being the start of simulation and add it to event queue
+/*_______*/         single_or_established_sowing_date = active_model_options->starting_date.get();
+/*_______*/       } break;
+/*_______*/       case rotation_cropping_system : default :
+/*020309_*/          setup_good = load_rotation_planting_events();
+/*_______*/       break;
+/*_______*/    };
+/*_______*/    if (single_or_established_sowing_date)
+/*_______*/    {
+/*_______*/       CORN::Date_time_64 now;
+/*_______*/       char single_sowing_event_ID[100];
+/*_______*/       strcpy(single_sowing_event_ID,CORN_float64_to_str(now.get_datetime64(),15));
+/*_______*/       Sowing_operation *single_sowing_op = new Sowing_operation(single_crop_filename.c_str(),single_management_filename.c_str());
+/*_______*/       schedule_planting_event(single_or_established_sowing_date,*single_sowing_op,single_sowing_event_ID );
+/*_______*/       Sowing_event * single_sowing_event= new Sowing_event;
+/*_______*/       single_sowing_event->begin_sync.set_as_actual(CORN::Date(single_or_established_sowing_date));
+/*_______*/       single_sowing_event->set_operation(single_sowing_op,true);
+/*_______*/       Synchronization act_date_sync(ACTUAL_DATE_MODE);
+/*_______*/       single_sowing_event->synchronize(act_date_sync,CORN::Date(),SYNCHRONIZE_ALL_OBJECTS );  // this should cause actual date syncs to be set in the events
+/*_______*/       event_list.append(single_sowing_event);
+/*_______*/       setup_good = true;
+/*_______*/    };
+/*_______*/    return setup_good;
+/*_______*/ };
+//______________________________________________________________________________
+/*010207_*/ void Land_unit_simulation::set_weather
+/*060922_*/ (Weather                      *_weather
+/*_______*/ ,Storm_database_or_generator  *_storms
+/*_______*/ )
+/*_______*/ {
+/*_______*/    environment.weather  = _weather;
+/*_______*/    storms = _storms;
+// 050916   Currently ET model selection is made in .loc file
+// but .LOC is going away and when only the .UED file is selected
+// then we need a selection for ET model move this to ET model option.
+// if a .LOC file (old version of CS) then we will use the .LOC selection
+// otherwise we use the scenario's selection.
+// Perhaps in scenario editor, if location file selected then add to option.
+// to select the ET model specified in the .LOC file.  (only for earlier version compatibility)
+/*_______*/    ET = new CropSyst_ET(*_weather
+/*051231_*/    ,active_model_options->evapotranspiration_model_labeled.get()
+/*051231_*/    ,(float64)active_model_options->Priestley_Taylor_constant_32
+//090708#ifdef NEW_CO2_CONC
+//090316 now atmospheric CO2 change is simply available from weather               ,Atmospheric_CO2_change    *_atmospheric_CO2_change // optional
+//090708#else
+//090708CO2            ,active_model_options->simulate_CO2
+//090708CO2            ,param_initial_CO2_conc()  // ppm
+//090708CO2            ,param_annual_CO2_change()  // ppm/year
+//090708#endif
+/*_______*/    );
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ bool Land_unit_simulation::start(const CORN::Date &i_start_date)
+/*_______*/ {
+/*060803_*/    Soil_cropsyst_specific *soil = get_soil();
+/*_______*/    bool started = true;
+/*060628_*/    if (organic_matter_residues_profile_kg_m2)
+/*970421P*/    {  soil_sublayer_array_64(subsurface_residue);
+/*070607_*/       soil->distribute_amount
+/*070606_*/          (horizon_incorporated_residue // horizon amounts
+/*070606_*/          ,subsurface_residue);         // to sublayer amounts
+/*980321P*/       subsurface_residue[2] += param_incorporated_residue();  // Note that this is to read values from versions prior to 4.4.1  (probably should be handled in the scenario get_end)
+/*060115_*/       Residues_interface *local_residue_pools_kg_m2 = organic_matter_residues_profile_kg_m2->get_residues();
+/*060225_*/       Crop_parameters previous_crop_residue_parameter;   // actually only need the residue decomposition parameters
+/*060115_*/       if (previous_residue_crop_filename.exists())
+/*060115_*/       {
+/*060115_*/          VV_file prev_residue_crop(previous_residue_crop_filename.c_str());
+/*060115_*/          prev_residue_crop.get(previous_crop_residue_parameter);
+/*060115_*/       // NYI  eventually specify the name of the crop that produced
+/*060115_*/       // the initial residue and load these parameters from that.
+/*060115_*/       }  else // just use the default crop parameters
+/*060225_*/       {  // eventually the else will be obsolete, this is to read CSN files prior to V4.3
+//080908/*060219_*/          previous_crop_residue_parameter.residue_decomposition->decomposition_time_63 = decomposition_time_residue_63;
+/*060219_*/          previous_crop_residue_parameter.residue_decomposition->decomposition_time_50 = decomposition_time_residue_50;
+/*060219_*/       };
+/*060116_*/       local_residue_pools_kg_m2->add_surface_plant_pool
+/*040517_*/          (OM_stubble_surface_position  // true currently assuming initial residue is laid down flat
+/*060219_*/          ,OM_ORIGINAL_CYCLING   // In V4.3 the cycling is split by add_straw_pool
+/*_______*/          ,param_stubble_residue()
+//090311 #if (CROPSYST_VERSION < 5)
+//090311 // 070118 becoming obsolete Claudio decided to always be initialy 0.0 (as in V.B. code)
+//090311 /*980206P*/          ,param_water_hold_const_residue()    // this is available for compatility versions
+//090311 #endif
+NITRO                ,param_N_conc_residue()
+/*060225_*/          ,*previous_crop_residue_parameter.residue_decomposition
+/*060225_*/          );
+/*060116_*/       local_residue_pools_kg_m2->add_surface_plant_pool
+/*040517_*/          (OM_flat_surface_position  // falsecurrently assuming initial residue is laid down flat
+/*060219_*/          ,OM_ORIGINAL_CYCLING   // In V4.3 the cycling is splite by add_straw_pool
+/*_______*/          ,param_surface_residue()
+//090311 #if (CROPSYST_VERSION < 5)
+//090311 // 070118 becoming obsolete Claudio decided to alway be initialy 0.0 (as in V.B. code)
+//090311 // currently always 0 event for scenarios that specified (was a constant for a long time recently) value for the flat surface because adding the hold here will exceed the maximum
+//090311 /*980206P*/          ,0.0
+//090311 #endif
+NITRO                ,param_N_conc_residue()
+/*060225_*/          ,*previous_crop_residue_parameter.residue_decomposition
+/*060225_*/          );
+/*060116_*/       local_residue_pools_kg_m2->add_subsurface_plant_pool
+/*060219_*/          (
+//061231              OM_ORIGINAL_CYCLING,   // In V4.3 the cycling is splite by add_straw_pool
+/*970421P*/           subsurface_residue
+NITRO                ,param_N_conc_residue()
+/*060225_*/          ,*previous_crop_residue_parameter.residue_decomposition
+/*_______*/          );
+/*_______*/    };
+
+#ifdef NYI
+
+I need to add to the parameter editor the
+manure type, source etc..
+
+
+//040830  Not sure why scaling by  0.7
+/*990301P*/    {float32 real_decomposition_time_63 = CORN_max((float32)decomposition_time_manure_63 * 0.7,1.0);
+/*981212P*/     decomposition_time_manure_63 =  real_decomposition_time_63; }
+/*990301P*/    {float32 real_decomposition_time_50 = CORN_max((float32)decomposition_time_manure_50 * 0.7,1.0);  // 040826 don't know what this is
+/*981212P*/     decomposition_time_manure_50 =  real_decomposition_time_50; } // check used, something may be off here
+/*_______*/    float64 manure_decomposition_constant =   convert to decomposition constant
+/*060628_*/    if (local_residue_pools_kg_m2)
+/*010723_*/    {  soil_sublayer_array_64(subsurface_manure);
+
+                  now the user can enter the whole soil horizon profile
+
+/*010723_*/       subsurface_manure[2] = param_incorporated_manure();
+/*010723_*/       local_residue_pools_kg_m2->add_manure_pool_ligninous
+/*010723_*/         (param_surface_manure()
+/*010723_*/         ,subsurface_manure
+/*010723_*/         ,param_water_hold_const_manure()
+NITRO               ,param_N_conc_manure(),param_N_conc_manure()
+/*060202_*/          ,manure_decomposition_constant
+/*010723_*/         ,5.0);
+/*010723_*/    };
+#endif
+/*060803_*/    Weather *weather = get_weather() ;
+#ifdef EROSION
+//             Setup Erosion.  Must follow weather start because
+//             we must have monthly values to run erosion
+
+//050916  NYI   WARNING  in the case we are selecting UED for weather
+//                we should check if there is 1/2 precip, if not then
+//                also disable run_erosion
+/*050619_*/    if ((weather->weather_data->get_location_parameters() && !weather->weather_data->get_location_parameters()->has_mean_peak_rainfall())
+                   && !has_mean_peak_rainfall())
+/*_______*/       active_model_options->run_erosion = false;
+#ifdef MOVED
+091130 now local to the erosion model and setup in start year
+/*_______*/    RUSLE_rainfall_erosivity_factor = (active_model_options->run_erosion)
+/*_______*/    ? rainfall_erosivity_factor
+/*_______*/     (i_start_date.get_year()
+/*990402_*/     ,*weather
+/*_______*/     )
+/*_______*/    : 0.0;
+#endif
+#endif
+MGMT           load_events_for_simulation(fixed_management_filename); //  Special simulation events
+#ifdef SOILR
+/*_______*/    crop->plant_crop(start_date);
+#endif
+
+//             Initialize soil temperatures (must be done after starting soil)
+// 041111 Note, should beable to move this initialization to soil start because
+// we now pass weather to soil start
+
+/*020620_*/    if (soil->temperature_profile)
+/*990120_*/        soil->temperature_profile->long_term_initialization
+/*060502_*/        (annual_temperature_avg
+/*_______*/        ,weather->get_curr_avg_air_temperature()
+/*_______*/        );
+//041111_*/    Note: Don't need to initialize soil_temperature profile hourly here because this is done in constructor at startup
+
+/*990312_*/    CONTINUOUS_accumulators_active = new Period_accumulators(*this,soil->water_content_profile(true),0.0);
+/*990312_*/    ANNL_accumulators_active       = new Annual_accumulators(*this,soil->water_content_profile(true),0.0);
+/*990312_*/    FALLOW_accumulators_active     = new Period_accumulators(*this,soil->water_content_profile(true),0.0);
+#ifdef CONTINUOUS_CROP
+/*990313_*/    GP_accumulators_active         = new Period_accumulators(*this,soil->water_content_profile(true),0.0);
+#else
+/*990313_*/    GP_accumulators_active         = 0;
+#endif
+/*010207_*/    return started;
+/*_______*/ }
+//______________________________________________________________________________
+/*_______*/ bool Land_unit_simulation::stop(const CORN::Date &/*unused act_stop_date*/)
+/*_______*/ {  // act_stop_date is not used here, but is used in derived classes
+/*030907_*/    return true;
+/*_______*/ }
+//______________________________________________________________________________
+/*070227_*/ bool Land_unit_simulation::start_growing_season()
+/*_______*/ {
+/*_______*/    crop_active = crop_at_start_season;    // Don't delete active crop if it is a perennial, it will be the same value.
+/*_______*/    crop_at_start_season = 0;
+/*070227_*/    if (FALLOW_accumulators_active) delete FALLOW_accumulators_active; FALLOW_accumulators_active = 0;
+/*070227_*/    if (GP_accumulators_active) delete GP_accumulators_active;
+/*070227_*/    GP_accumulators_active = new Period_accumulators(*this,get_soil_read_only()->water_content_profile(true),0.0);
+/*070227_*/    return true;
+/*_______*/ }
+
+
+///*_______*/    float64 debug_surface_residue_biomass   ;
+///*060116_*/    float64 debug_subsurface_residue_biomass;
+
+//______________________________________________________________________________
+/*020309_*/ bool Land_unit_simulation::start_day(const CORN::Date &today)
+/*060817_*/ {  bool started = true;
+
+/*_______*/       CORN::Date tdy = today;
+/*_______*/       tdy.format(D_YMD,D_YYYY|D_Mmm,' ',true);
+/*_______*/       cout << tdy.c_str();
+//if (today.get_date32() ==1991176)
+//cout << "reached" << endl;
+
+
+/* debugging
+Residues_interface *local_residue_pools_kg_m2 = organic_matter_residues_profile_kg_m2 ? organic_matter_residues_profile_kg_m2->get_residues() : 0;
+debug_surface_residue_biomass     = local_residue_pools_kg_m2->get_surface_all_biomass();
+debug_subsurface_residue_biomass  = local_residue_pools_kg_m2->get_subsurface_all_biomass();
+cout << "SDA:" << debug_surface_residue_biomass << '\t' << debug_subsurface_residue_biomass<< endl;
+*/
+
+
+/*070227_*/    if (crop_at_end_season &&
+/*070227_*/        crop_nitrogen_mass_balance_ref)
+/*070227_*/       crop_nitrogen_mass_balance_ref->deactivate_seasonal();
+/*070227_*/    if (crop_at_start_season) start_growing_season();
+/*070227_*/    crop_at_harvest = 0;
+/*001126_*/    today.format(D_YMD,D_YYYY|D_Mmm|D_lead_zero,'/',true);
+/*041107_*/    latest_simulated_date = today.get_date32();
+/*040528_*/    total_irrigation_today = 0.0;
+/*060227_*/    canopy_intercepted_precipitation_m = 0.0;
+AUTOIRRG       fixed_irrigation_scheduled_today = false;
+AUTOIRRG       automatic_irr_amount = 0.0;
+NITRO          daily_NH3_volatilization_loss = 0.0;
+NITRO          daily_inorganic_NH4_to_atmosphere = 0.0;
+NITRO          daily_organic_N_applied = 0.0;
+/*050107_*/    grazing_BM_demand_today_kg_m2 = 0;
+/*060323_*/    unsatisfied_harvest_BM_today_kg_m2 = 0.0;
+/*081212_*/    earliest_irrigation_start_hour = 0;
+/*_______*/    table_irr_amount = 0.0;
+/*080118_*/    if (organic_matter_residues_profile_kg_m2)
+/*060817_*/       organic_matter_residues_profile_kg_m2->start_day();
+/*060803_*/    Soil_cropsyst_specific *soil = get_soil();
+/*051205_*/    soil->start_day();
+AUTOIRRG /*051120_*/ {  Soil_salt_interface *soil_salinity = soil->get_salinity_modifiable();
+/*061026_*/             if (soil_salinity)
+/*061026_*/                soil_salinity->start_day();
+AUTOIRRG /*051120_*/ };
+CHEM           Soil_chemicals_profile       *soil_chemicals = get_soil_chemicals();
+CHEM           if (soil_chemicals )      soil_chemicals->start_day(today,soil->layers->get_number_uninundated_layers() /*080211 get_number_effective_layers()*/);
+/*070227_*/    if (crop_terminated)
+/*070227_*/    {
+/*070227_*/       if (crop_at_end_season == crop_terminated) crop_at_end_season = 0;
+/*070227_*/       delete crop_terminated; crop_terminated = 0;}
+/*070228_*/    crop_at_end_season = 0;
+/*040206x*/    if (crop_active)
+/*_______*/       crop_active->start_day();
+
+/*_______*/    return started;
+/*_______*/ };
+//______________________________________________________________________________
+/*_______*/ bool Land_unit_simulation::process
+/*040331_*/ (const CORN::Date &today
+/*030308_*/ ,Common_simulation_log *_event_log) // Not const, we use our own date format
+/*_______*/ {  bool result = true;
+/*060803_*/    Weather *weather = get_weather() ;
+/*060115_*/       Residues_interface *local_residue_pools_kg_m2 = organic_matter_residues_profile_kg_m2 ? organic_matter_residues_profile_kg_m2->get_residues() : 0;
+
+//cout << "DA:" << debug_surface_residue_biomass << '\t' << debug_subsurface_residue_biomass<< endl;
+
+
+// residue_biomass_beg_day = local_residue_pools_kg_m2.get_mass
+//debug_surface_residue_biomass     = local_residue_pools_kg_m2->get_surface_all_biomass();
+//debug_subsurface_residue_biomass  = local_residue_pools_kg_m2->get_subsurface_all_biomass();
+
+
+
+
+/*040206x*/    if (crop_active)
+/*081204_*/    {
+/*081204_*/       if (crop_active->is_fruit_harvestable())
+/*081204_*/       {  // I am not sure this is the best place to put this
+/*081204_*/          Harvest_or_clipping_operation default_fruit_harvest;
+/*081204_*/          default_fruit_harvest.terminate_crop = false;
+/*081204_*/          /*unused event_status = */perform_harvest_or_clipping(default_fruit_harvest,today,*_event_log);
+/*081204_*/
+/*081204_*/       };
+/*081204_*/    };
+
+/*CO2____*/    if (active_model_options->simulate_CO2)
+/*CO2____*/       ET->set_reference_canopy_resistance(crop_active ? crop_active->get_canopy_resistance() : canopy_resistance_constant);
+/*010202_*/    ET->update();
+/*070228_*/    float64 pot_ref_evapotranspiration_m = ET->get_pot_reference_evapotranspiration_m();
+
+
+//if (crop_active)
+//crop_active->update_pot_evapotranspiration(pot_ref_evapotranspiration_m );
+
+
+
+/*070228_*/    float64 pot_crop_evapotranspiration_m
+               =  ( crop_active)
+/*100315_*/       ? crop_active->update_pot_evapotranspiration(pot_ref_evapotranspiration_m )
+/*011129_*/       : pot_ref_evapotranspiration_m;
+/*100318_*/    ET->pot_crop_evapotransp_m = pot_crop_evapotranspiration_m;
+//081022 WARNING probably should move the update of canopy interception here but need to becareful of dependicies
+// Currently the hourly canopy interception is initialized to 1.0
+
+
+/*060628_*/    float64 fract_residue_cover = local_residue_pools_kg_m2 ? local_residue_pools_kg_m2->get_total_fract_ground_cover(INCLUDE_POSITION_FLAT_SURFACE| INCLUDE_POSITION_STUBBLE_SURFACE) : 0;
+/*060803_*/    Soil_cropsyst_specific *soil = get_soil() ;
+/*070228_*/    float64 crop_fract_canopy_cover  // This is used in a number of places
+/*070228_*/       = (crop_active ? crop_active->get_fract_canopy_cover() : 0.0);
+/*080508_*/    float64 snow_water_equivelent_depth = weather->get_curr_snow_water_equivelent_depth();
+
+//cout << endl << "WR:" << organic_matter_residues_profile_kg_m2->get_CO2_C_loss_profile_residue_and_OM()[2] << "  SOM:" << organic_matter_residues_profile_kg_m2->get_CO2_C_loss_profile_OM()[2] << endl;
+
+
+pot_crop_evapotranspiration_m = pot_ref_evapotranspiration_m; // 100318 WARNING only to check something this is wrong
+
+
+/*010910_*/    soil->set_pot_crop_evapotranspiration
+/*010910_*/       (pot_crop_evapotranspiration_m
+/*070228_*/       ,crop_fract_canopy_cover
+/*010910_*/       ,fract_residue_cover
+/*080407_*/       ,snow_water_equivelent_depth
+/*010910_*/       );
+CHEM           Soil_chemicals_profile *soil_chemicals = get_soil_chemicals();
+/*070228_*/    soil->current_plant_available_water(crop_active ? crop_active->get_total_fract_root_length_m(): 0);
+MGMT           total_irrigation_today += table_irr_amount;
+/*071017_*/    process_any_automatic_irrigation(today);
+/*990402_*/    Dynamic_water_entering_soil non_runoff_water_entering_in_intervals_mm((uint8)(active_model_options->rainfall_intensity ?48:24));
+/*010202_*/    daily_eff_precipitation = weather->get_curr_effective_precipitation();
+
+//if (daily_eff_precipitation>0)
+//cout << "reached" << endl;
+
+/*070107_*/    bool any_surface_water =  daily_eff_precipitation > 0.0 || total_irrigation_today > 0.0;
+/*990505_*/    CORN_time storm_start_time;
+/*070116_*/    Minutes water_entering_soil_timestep_minutes =  (!active_model_options->rainfall_intensity || (active_model_options->infiltration_model_labeled.get() == CASCADE_HOURLY_INFILTRATION))
+/*070116_*/              ? 60
+/*070116_*/              : 30;
+/*990402_*/    if (storms &&
+/*_______*/          (  (active_model_options->infiltration_model_labeled.get() == FINITE_DIFFERENCE_INFILTRATION)
+/*070118_*/           ||(active_model_options->infiltration_model_labeled.get() == CASCADE_HOURLY_INFILTRATION)))
+/*070116_*/    {  daily_eff_precipitation = mm_to_m(storms->get_eff_precipitation_mm_by_interval
+/*_______*/          (active_model_options->rainfall_intensity
+/*070117_*/          ,water_entering_soil_timestep_minutes // active_model_options->rainfall_intensity  ? 30 : 60 /*minutes*/
+/*080801_*/          ,active_model_options->default_event_duration_minutes
+/*990505_*/          ,storm_start_time
+/*_______*/          ,non_runoff_water_entering_in_intervals_mm
+/*030103_*/          ,today.get_date32()));
+
+
+//for (int h = 0 ; h < 24; h++)
+//cout << h << '\t' << non_runoff_water_entering_in_intervals_mm.get_no_resize(h) << endl;
+
+
+
+/*070116_*/    };
+/*070228_*/    float64 crop_LAI = crop_active ? crop_active->get_LAI(false) : 0.0;
+#ifdef SOIL_TEMPERATURE
+//980921C      We need soil temp before freezing,but after snow storage
+SOILTEMP       if (soil->temperature_profile)
+SOILTEMP          soil->temperature_profile->find_soil_temp          // 041111 this should actually be and Update
+SOILTEMP          (*weather
+SOILTEMP          ,crop_LAI
+SOILTEMP          ,any_surface_water
+SOILTEMP          ,local_residue_pools_kg_m2
+SOILTEMP          ,crop_fract_canopy_cover
+SOILTEMP          ,crop_active ? crop_active->get_plant_height_m() : 0.0
+SOILTEMP          );
+//#ifndef MATCH_VB
+/*041111_*/    if (soil->temperature_profile_hourly)
+/*041111_*/    {
+/*041111_*/       float64 stubble_AI = local_residue_pools_kg_m2 ? (local_residue_pools_kg_m2)->get_total_area_index(INCLUDE_POSITION_STUBBLE_SURFACE) : 0.0;
+/*041111_*/       float64 residue_AI = local_residue_pools_kg_m2 ? (local_residue_pools_kg_m2)->get_total_area_index(INCLUDE_POSITION_FLAT_SURFACE)    : 0.0;
+/*041111_*/       soil->temperature_profile_hourly->update(crop_LAI,stubble_AI,residue_AI);
+/*041111_*/    };
+//#endif
+#endif
+/*070824_*/    if (soil_freezing_optional)
+/*070825_*/    {  // Eventually move this to a function freezing and thawing inside hydrology
+/*070824_*/       soil_freezing_optional->
+/*_______*/       freezing_and_thawing
+/*_______*/          (weather->get_curr_avg_air_temperature()
+/*991004_*/          ,weather->get_curr_snow_water_equivelent_depth()
+/*991004_*/          ,weather->get_snow_melted() > 0.0
+/*_______*/          );
+/*070825_*/       soil_hydrology_ref->update_liquid_and_ice_water_content();
+/*070825_*/    };
+/*070228_*/    if (crop_active)
+/*060227_*/       canopy_intercepted_precipitation_m += crop_active->rain_interception(daily_eff_precipitation);
+/*990402_*/    non_runoff_water_entering_in_intervals_mm.deduct(m_to_mm(canopy_intercepted_precipitation_m));
+/*010202_*/    float64 non_crop_intercept_precip =
+/*_______*/             daily_eff_precipitation - canopy_intercepted_precipitation_m;
+/*060115_*/    float64 residue_interception=local_residue_pools_kg_m2 ? local_residue_pools_kg_m2->water_interception(non_crop_intercept_precip) : 0.0;
+/*010202_*/    float64 non_red_intercept_precip = non_crop_intercept_precip - residue_interception;
+/*990402_*/    non_runoff_water_entering_in_intervals_mm.deduct(m_to_mm(residue_interception ));
+/*020719_*/    Land_treatment management_land_treatment =
+MGMT                 curr_management ?  curr_management->param_land_treatment() :
+/*020719_*/          DEFAULT_land_treatment;
+#ifdef RUNOFF
+/*020620_*/    if (soil->runoff)
+/*020620_*/    {
+/*990422_*/       soil->runoff->estimated_runoff = 0.0; // WARNING this needs to be moved
+/*020719_*/       soil->runoff->calculate_crop_storage
+/*020719_*/          (management_land_treatment
+/*070228_*/          , crop_active ? (Land_use)crop_active->param_land_use() :  FALLOW
+/*020719_*/          , crop_fract_canopy_cover );
+/*060628_*/       float64 fract_residue_cover = local_residue_pools_kg_m2 ?  local_residue_pools_kg_m2->get_total_fract_ground_cover(INCLUDE_POSITION_FLAT_SURFACE| INCLUDE_POSITION_STUBBLE_SURFACE) : 0.0;
+/*990528_*/       soil->runoff->calculate_residue_storage(fract_residue_cover);
+/*020620_*/    };
+#endif
+/*981120*/     float64 daily_est_runoff =
+#ifdef RUNOFF
+/*991110P*/    (soil->runoff && (active_model_options->runoff_model_labeled.get() == CURVE_NUMBER_RUNOFF_MODEL))
+/*_971204*/       ? soil->runoff->runoff
+/*070228_*/            (crop_active ? crop_active->param_land_use(): FALLOW
+/*971011_*/            ,(Hydrologic_condition)soil->parameters->hydrologic_condition_labeled.get()
+/*020719_*/            , management_land_treatment
+/*070228_*/            ,crop_active ? crop_active->get_growth_stage() : NOCROP
+/*070228_*/            ,crop_fract_canopy_cover
+/*_______*/            ,non_red_intercept_precip)
+/*_______*/        :
+#endif
+/*_971204*/        0.0;
+
+
+
+/*090504
+daily_est_runoff = 0;
+cout << "warning runoff disabled for debugging " << endl;
+
+*/
+
+
+
+
+
+/*010202_*/    float64 non_runoff_precip = non_red_intercept_precip - daily_est_runoff;
+/*990402_*/    non_runoff_water_entering_in_intervals_mm.deduct(m_to_mm(daily_est_runoff));
+/*070107_*/    float64 total_water_entering_soil =
+//NYI /*090306_*/       +  local_residue_pools_kg_m2 ? local_residue_pools_kg_m2->get_water_from_change_in_biomass() : 0.0
+/*070107_*/       total_irrigation_today + non_runoff_precip ;
+/*990716_*/    set_30_day_wettings(total_water_entering_soil);
+/*_______*/    // We adjust random roughness after any tillage events
+/*_______*/    // and before infiltration because presumablely
+/*_______*/    // the farmer will not perform tillage after rainfall.
+#ifdef RUNOFF
+/*020620_*/    if (soil->runoff)
+/*060628_*/    {  float64 fract_residue_cover = local_residue_pools_kg_m2 ? local_residue_pools_kg_m2->get_total_fract_ground_cover(INCLUDE_POSITION_FLAT_SURFACE| INCLUDE_POSITION_STUBBLE_SURFACE)  : 0.0;
+/*990422_*/       soil->runoff->adjust_random_roughness
+/*_______*/       (daily_eff_precipitation
+/*070228_*/       ,crop_fract_canopy_cover
+/*_______*/       ,fract_residue_cover);
+/*060628_*/    };
+#endif
+/*990409X*/    {  // If we have a runon database
+/*990409X*/          Dynamic_float_array runon_in_intervals(0,1);
+#ifdef WSHEDMOD
+/*990525*/           soil_sublayer_array_64(lateral_flow_in);
+/*990525*/           soil->clear_sublayer_array(lateral_flow_in);
+/*990409X*/          if (cell_in_db)
+/*990525_*/          {  cell_in_db->get_runon_in_intervals(today,runon_in_intervals);
+/*990525_*/             cell_in_db->get_lateral_flow_in_by_layer(today,soil->layers->get_number_layers(),lateral_flow_in);
+/*990728_*/             if (soil->runoff && (active_model_options->runoff_model_labeled.get() == CURVE_NUMBER_RUNOFF_MODEL))
+/*990728_*/                 soil->runoff->add_runoff_from_runon_curve_number(runon_in_intervals.sum());
+#ifdef LATERAL
+/*990525_*/             soil->subsurface_flow_in(lateral_flow_in);
+#endif
+/*_______*/          };
+#endif
+/*990409X*/          Dynamic_float_array runoff_in_intervals(0,1);
+/*070810_*/          // if automatic irrigation then override any irrigation salinity that may have been applied with fixed event
+/*020327_*/          float64 irrigation_salinity =
+MGMT                    (curr_automatic_irrigation_mode)
+MGMT                    ? curr_automatic_irrigation_mode->get_salinity() :
+/*_______*/             0.0;
+/*051121_*/          CORN::Quality min_rel_humidity_quality ; float64 min_rel_humidity = weather->get_curr_min_relative_humidity(min_rel_humidity_quality);
+//081107 /*051121_*/          CORN::Quality/*081030_code*/ &min_rel_humidity_quality = weather->get_min_relative_humidity_quality();
+/*051121_*/          soil->set_minimum_relative_humidity(min_rel_humidity_quality.is_valid() ? min_rel_humidity : 50.0);
+/*070107_*/          Dynamic_water_entering_soil *irrigation_water_entering_in_intervals_mm // will be 0 if no irrigation
+/*070107_*/             = create_irrigation_in_intervals_mm
+/*070107_*/                (water_entering_soil_timestep_minutes);
+
+
+//for (int h = 0 ; h < 24; h++)
+//cout << h << '\t' << non_runoff_water_entering_in_intervals_mm.get_no_resize(h) << endl;
+
+
+
+/*990211P*/          if (!(soil->infiltrate
+/*990308_*/                ((Infiltration_model)active_model_options->infiltration_model_labeled.get()
+/*070107_*/                ,non_runoff_precip
+MGMT                       ,total_irrigation_today
+MGMT                       ,irrigation_salinity
+/*_______*/                ,today
+/*070119_*/                ,non_runoff_water_entering_in_intervals_mm
+/*070119_*/                ,irrigation_water_entering_in_intervals_mm
+/*990409X*/                ,runon_in_intervals
+/*990409X*/                ,runoff_in_intervals  // output
+/*_______*/                ))) // additional runoff is local to soil classes in C++ version
+/*080122_*/          {  cerr << "Soil water infiltration failed:\nThis usually occurs when the finite difference method is unable to converge with water table conditions." << endl;
+/*080122_*/             return false;
+/*080122_*/          };
+#ifdef WSHEDMOD
+/*990722_*/          if (cell_out_db)
+/*990722_*/          {  // if either cascade or finite_diff with curve number
+/*020620_*/             if (!soil->using_numerical_runoff_model() && soil->runoff)
+/*990722_*/             {  // distribute todays runoff into intervals following the
+/*990722_*/                // same interval distribution pattern as todays precip.
+/*990722_*/                soil->runoff->distribute_runoff_in_intervals(runoff_in_intervals,non_runoff_water_entering_in_intervals_mm);
+//Warning not sure about including irrigation /*990722_*/                soil->runoff->distribute_runoff_in_intervals(runoff_in_intervals,water_entering_in_intervals_mm);
+/*990722_*/             };
+/*990422_*/             float32 total_runoff_today = runoff_in_intervals.sum();
+/*990409X*/             if (total_runoff_today > 0.0)
+/*_______*/                 cell_out_db->set_runoff_in_intervals(today,runoff_in_intervals);
+/*990722_*/          };
+#endif
+/*070119_*/          if (irrigation_water_entering_in_intervals_mm) delete irrigation_water_entering_in_intervals_mm;
+/*990409X*/    };
+#ifdef MATCH_VB
+/*041111_*/    if (soil->temperature_profile_hourly)
+/*041111_*/    {
+/*041111_*/       float64 stubble_AI = local_residue_pools_kg_m2 ? (local_residue_pools_kg_m2)->get_total_area_index(true) : 0.0;
+/*041111_*/       float64 residue_AI = local_residue_pools_kg_m2 ? (local_residue_pools_kg_m2)->get_total_area_index(false): 0.0;
+/*041111_*/       soil->temperature_profile_hourly->update(crop_LAI,stubble_AI,residue_AI);
+/*041111_*/    };
+#endif
+/*060628_*/    if (organic_matter_residues_profile_kg_m2)
+/*_______*/       organic_matter_residues_profile_kg_m2->process
+/*_______*/       (today                                    // Needed for 4.2 & 4.1
+/*060214_*/       ,weather->get_curr_avg_air_temperature() );  // Needed for 4.2
+/*080508_*/    if (is_essentially(snow_water_equivelent_depth,0.0,0.00001 ))
+/*080508_*/    {  // snow cover prevents evaporation
+/*060628_*/       if (local_residue_pools_kg_m2)
+/*_______*/          local_residue_pools_kg_m2->evaporate_all
+/*_______*/          (pot_crop_evapotranspiration_m,crop_fract_canopy_cover );
+/*991102C*/       float64 pond_act_evaporation = pond.evaporate(soil->pot_evaporation);
+/*031119_*/       bool no_crop_cover =is_fallow() ||  ((crop_active->get_growth_stage() == NOCROP) || (crop_active->get_growth_stage() == PREPLANTING));
+
+/*980730_*/       soil->evaporate(no_crop_cover,weather->summer_time(today));
+//991102P         This is a temporary hack until I add pond to water balance
+/*991102P*/       soil->act_evaporation += pond_act_evaporation;
+/*990321P*/       // Because evap changes water content, we need to update the water pot
+/*080508_*/    };
+/*_______*/    if (crop_active)
+/*_______*/    {
+#ifdef CO2_CHANGE
+/*CO2____*/       crop_active->set_daily_ratio_elevated_to_baseline_ppm_CO2(ET->get_daily_ratio_elevated_to_baseline_ppm_CO2_ET());
+#endif
+//100315 I had moved know_pot_evapotranspiration here, that was wrong because the soil doesn't have today's value
+//100316 /*081105_*/       crop_active->know_pot_evapotranspiration(pot_crop_evapotranspiration_m);
+/*_______*/       crop_active->process(today.get_date32());
+/*990913P*/       process_any_automatic_clipping(today,false);
+/*020310_*/       triggered_synchronizations |= crop_active->relinquish_triggered_synchronizations();
+/*070228_*/    }; // else just fallow
+#ifdef CHEM_PROFILE
+/*_______*/    if (soil_chemicals )
+/*_______*/    {
+/*_______*/       Seconds preferred_transformation_timestep = seconds_per_day;
+/*_______*/       if (active_model_options->organic_matter_and_residue_model_labeled.get() == V4_4_ORGANIC_MATTER_AND_RESIDUE)
+/*_______*/       {  preferred_transformation_timestep = seconds_per_hour;
+//*_______*/          // Transformation is run at least hourly irregardless of the hydrology_time_step_resolution_today.
+//*_______*/          if (active_model_options->infiltration_model_labeled.get() == FINITE_DIFFERENCE_MODEL)
+//*_______*/             preferred_transformation_timestep = CORN_min(seconds_per_hour,soil->get_hydrology_timestep_resolution_today());
+/*_______*/       };
+/*_______*/       soil_chemicals->chemical_transformations(preferred_transformation_timestep);
+/*_______*/    };
+#endif
+#ifdef EROSION
+/*_______*/    if (soil->erosion) // obs active_model_options->run_erosion
+/*_______*/       soil->erosion->RUSLE_daily_cover_factor
+/*_______*/          (crop_fract_canopy_cover
+/*011011_*/          ,local_residue_pools_kg_m2 ? local_residue_pools_kg_m2->get_surface_all_biomass()    : 0.0
+/*011011_*/          ,local_residue_pools_kg_m2 ? local_residue_pools_kg_m2->get_subsurface_all_biomass() : 0.0
+/*_______*/          ,local_residue_pools_kg_m2 ? local_residue_pools_kg_m2->get_curr_water_hold() : 0.0
+/*_______*/          ,weather->get_curr_max_temperature()
+/*_______*/          ,weather->get_curr_min_temperature()
+/*_______*/          ,today.get_DOY());
+#endif
+/*_______*/    total_soil_water_content = soil->water_content_profile(true);  // 040603  May be obsolete
+/*_______*/    {
+#ifndef BUILDER_API
+//#  ifdef unix
+///*061023_*/       Date32 tdy = today.get_date32();  // SunStudio is not liking date << operator
+///*_______*/       cout << tdy;
+//#  else
+///*_______*/       CORN::Date tdy = today;
+///*_______*/       tdy.format(D_YMD,D_YYYY|D_Mmm,' ',true);
+///*_______*/       cout << tdy.c_str();
+//#  endif
+/*070228_*/       if (crop_active)
+/*_______*/            cout << crop_active->describe_growth_stage();
+/*070228_*/       else cout << "fallow";
+/*_______*/       cout << "                          " << '\r';
+#endif
+/*060628_*/       if (local_residue_pools_kg_m2)
+/*980718P*/          local_residue_pools_kg_m2->balance(active_model_options->run_nitrogen);
+//000322          Save today's values
+//000322          At the end of the year tell the database to flush all recorders;
+/*_______*/    };
+//990318_//    We now do all annual things on Dec31
+#ifdef LATERAL
+/*990513_*/    if (is_GIS_cell() && subsurface_flow)
+/*990513_*/    {
+/*990513_*/          soil_sublayer_array_64(lateral_flow_depth_m);
+/*990526_*/          soil->clear_sublayer_array(lateral_flow_depth_m);
+/*990513_*/          if (soil->subsurface_flow_out(cell_width,lateral_flow_depth_m))
+/*990513_*/             cell_out_db->set_lateral_flow_out_by_layer
+/*990513_*/             (today
+/*990513_*/             ,soil->layers->get_number_layers()
+/*990513_*/             ,lateral_flow_depth_m
+/*990513_*/             );
+/*990513_*/    };
+#endif
+/*070801_*/    if (soil)
+/*070801_*/    {
+
+
+
+// The following is for debugging
+/*
+NO3_Profile *NO3_prof =  soil->chemicals->NO3;
+if (NO3_prof)
+{
+NO3_prof->know_CO2_C_loss_subsurface(organic_matter_residues_profile_kg_m2->
+ get_CO2_C_loss_profile_residue_and_OM()
+//                        get_CO2_C_loss_profile_OM()
+                        );
+
+};
+*/
+
+
+
+
+
+/*051205_*/       soil->process(today.get_date32());
+/*070801_*/       // must let the OM/residues no the current soil disturbance immediately
+/*080118_*/       if (organic_matter_residues_profile_kg_m2)
+/*070801_*/          organic_matter_residues_profile_kg_m2->know_soil_disturbance(soil->get_disturbance());
+/*070801_*/    };
+
+//if (debug_surface_residue_biomass != 0)
+//{
+//cout << "BD:" <<debug_surface_residue_biomass << '\t' << debug_subsurface_residue_biomass<< endl;
+//debug_surface_residue_biomass    = local_residue_pools_kg_m2->get_surface_all_biomass();
+//debug_subsurface_residue_biomass = local_residue_pools_kg_m2->get_subsurface_all_biomass();
+//cout << "ED:" << debug_surface_residue_biomass << '\t' << debug_subsurface_residue_biomass<< endl;
+//};
+/*010207_*/    return result;
+/*_______*/ };
+//______________________________________________________________________________
+/*050115*/ bool Land_unit_simulation::end_day(const CORN::Date &today)
+/*_______*/ {
+/*070227_*/    if (crop_active)
+/*070227_*/    {  crop_active->commit_biomass_fate(today.get_date32());
+/*070227_*/       crop_active->end_day();
+/*070227_*/    };
+CHEM           Soil_chemicals_profile       *soil_chemicals = get_soil_chemicals();
+CHEM           if (soil_chemicals)
+CHEM           {
+CHEM              soil_chemicals->chemical_balances();  // balances are needed before output
+CHEM           };
+/*_______*/    update_accumulators(today);
+/*070227_*/    if (crop_at_end_season
+#ifdef decided_not_to_do_this
+/*091119_*/       && (today.get() != simulation_start_date())
+/*091119_*/          // the not simulaton start date is a hack because orchard fruit start() triggers start of dormancy event.
+/*091119_*/          // it would be better to trigger the event on the initial start but I don't think I have that
+/*091119_*/          // information available in the start.
+#endif
+/*091119_*/        )
+/*070227_*/       end_growing_season();
+/*070625_*/    distribute_any_crop_biomass_fate();
+/*050209_*/    return true;
+/*_______*/ };
+//______________________________________________________________________________
+/*070227_*/ bool Land_unit_simulation::end_growing_season()
+/*_______*/ {
+/*041220_*/    if ( (grazing_hold_manure_application.org_N_amount_kg_ha  > 0.0)||(grazing_hold_manure_application.NH3_amount_kg_ha))
+/*041220_*/    {  // For the grazing model, we hold all the manure applications until the end of the season
+/*041220_*/       // This is to prevent thousands of manure pools from being generated.
+#if ((CS_VERSION > 0) && (CS_VERSION <5))
+
+/*040126x*/       Organic_nitrogen_operation manure_op;
+/*040126x*/       manure_op.org_N_source_labeled.set(BEEF_FRESH);
+/*040126x*/       manure_op.org_N_volatilization_calculated=true;    // NH3_volatilization_calculated
+/*040126x*/       manure_op.decomposition_time_calculated=true;    // decomposition_time will be calculated
+/*040126x*/       manure_op.decomposition_time_63=60.0;                           // decomposition_time will be calculated
+/*040126x*/       manure_op.decomposition_time_50=40.0;                           // decomposition_time will be calculated
+/*040126x*/       manure_op.solid_liquid_form_labeled.set(SOLID);   // solid manure
+
+#else
+                  // In V5, use biomatter_application_operation
+                  Biomatter_application_operation manure_op;
+                  manure_op.provide_decomposition_parameters(beef_fresh_manure);
+                  // decomposition time is set up in the decomposition parameters.
+                  // 100216 I need to trace here to see out the solid form is now handled.
+#endif
+/*040126x*/                manure_op.SCS_code=42; // fertilization drip or dry
+/*060725_*/                manure_op.NRCS_operation_description = "Graze, rotational";                // This was originally intended for Oumarou's rotational grazing optimization model
+/*040126x*/                manure_op.org_N_kg_ha=grazing_hold_manure_application.org_N_amount_kg_ha;  // need to pass in kg/ha because these are the units in the parameter file
+/*040126x*/                manure_op.NH3_N_kg_ha=grazing_hold_manure_application.NH3_amount_kg_ha;    // need to pass in kg/ha because these are the units in the parameter file
+/*041220x*/                manure_op.org_N_appl_method_labeled.set(SURFACE_BROADCAST_INCORPORATION); // we now inject instead of trampling SURFACE_BROADCAST_NO_INCORPORATION);
+/*040126x*/                manure_op.long_term_org_N_volatilization_loss_percent=0.0;     // NH3_volatilization will be calculated
+#if ((CS_VERSION > 0) && (CS_VERSION <5))
+/*040126x*/       perform_organic_nitrogen(manure_op,simulation->get_today());
+#else
+                  perform_biomatter_application(manure_op,simulation->get_today());
+#endif
+/*041220_*/       grazing_hold_manure_application.org_N_amount_kg_ha = 0.0;
+/*041220_*/       grazing_hold_manure_application.NH3_amount_kg_ha   = 0.0;
+/*041220_*/    };
+#ifdef LADSS_MODE
+/*021206_*/       if (LADSS_harvest_database_table)
+/*021206_*/       {
+/*040217_*/          LADSS_season_output_data_record LADSS_harvest_record(LBF_ID,*this,crop_active);
+/*RECORD_*/              LADSS_harvest_database_table->set(LADSS_harvest_record);
+/*021206_*/       } else
+#endif
+/*070227_*/    if (crop_active->is_terminate_pending())  // There has to be a crop_active at this point
+/*060424_*/       dispose_crop_and_start_fallow();
+/*040514_*/    if (crop_active) // if the crop is still active then is simply the end of the season  // 070228 !crop_terminated /* crop_active->is_terminate_pending()*/ || (/*070228 crop_active &&*/ crop_active->is_perennial()))
+/*021219x*/       { // is simply the end of the season
+CHEM                 Soil_chemicals_profile       *soil_chemicals = get_soil_chemicals();
+CHEM                 if (soil_chemicals )
+CHEM                   soil_chemicals->reinitialize_for_harvest();     // resets accumulators
+/*021219x*/       };
+/*_______*/    if (crop_nitrogen_mass_balance_ref) crop_nitrogen_mass_balance_ref->end_season();
+/*_______*/    return true;
+/*_______*/ };
+//______________________________________________________________________________
+/*0211114*/ void  Land_unit_simulation::dispose_crop_and_start_fallow()
+/*_______*/ {
+/*_______*/    //Warning       Need to check if biomatter fate is already  processed in all cases (of terminate)
+/*050209_*/    //    Note at this point crop_for_output should have already been cleared by start_day;
+/*030912_*/    crop_active = 0;    // crop must be set to 0 for set_fallow_crop_if_necessary to work
+/*040514_*/    curr_automatic_clip_mode = 0; // Make sure that clipping is disabled
+/*060803_*/    Soil_cropsyst_specific *soil = get_soil();
+/*051012_*/    FALLOW_accumulators_active = new Period_accumulators(*this,soil->water_content_profile(true),0.0);
+/*070228_*/    soil->reinitialize_for_crop(-1500.0,0.001); // in this case fallow conditions
+/*_______*/ };
+//______________________________________________________________________________
+/*030516_*/ uint16 Land_unit_simulation::perform_triggered_synchronizations(const CORN::Date &  today)
+/*_______*/ {
+/*030606_*/    if (triggered_synchronizations & PLANTING)
+/*070228_*/          crop_at_start_season = crop_active;  // Note: sowing does set the active crop, but we set crop_at_start_season to activate the start of season
+/*041112_*/    if ((triggered_synchronizations & BUD_BREAK) || (triggered_synchronizations & RESTART))
+/*070228_*/          crop_at_start_season = crop_active;
+/*040623_*/    if (crop_active)
+/*040623_*/    {
+/*050114_*/       if (((crop_active->get_growth_stage() == ACTIVE_GROWTH)&&  !GP_accumulators_active)
+/*_______*/           || (triggered_synchronizations & START_SEASON))
+/*070228_*/          crop_at_start_season = crop_active;
+/*070227_*/       if (crop_active->is_terminate_pending())
+/*070227_*/          crop_terminated = crop_active;  // Crop remains active because we still need to end day
+/*041205_*/       if ((triggered_synchronizations & DORMANT_or_INACTIVE   )  ||(triggered_synchronizations & END_SEASON   )  || crop_terminated)
+/*070227_*/             { crop_at_end_season = crop_active; /*crop_active =0; still need it active so we can end the day */ };
+/*070228_*/       if ((triggered_synchronizations & HARVESTED  ) || crop_terminated
+/*070228_*/    || harvest_event_failed_today      // <- 060315 This was a hack for Mike Rivington's Excel macro.
+/*070228_*/                  )
+/*070228_*/          crop_at_harvest = crop_active;
+/*040623_*/    };
+/*_______*/    triggered_synchronizations = 0;
+/*_______*/    return 0;
+/*_______*/ };
+//______________________________________________________________________________
+/*040624_*/ bool Land_unit_simulation::distribute_any_crop_biomass_fate()
+/*_______*/ {
+/*_______*/    if (crop_mass_fate_to_be_distributed )
+/*_______*/    {   Crop_mass_fate *biomass_to_be_distributed = crop_mass_fate_to_be_distributed->biomass;
+/*040605_*/        float64 removed_for_grazing= biomass_to_be_distributed->grazing_to_manure;
+/*_______*/        // Note the crop_biomass_fate->grazing_to_manure
+/*_______*/       // has no meaning it is not reapplied to the field, it is simply lost.
+/*_______*/       // At this point it is presumed to be outside the simulation balance.
+/*_______*/       // I should simply add it to the loss for biomatter balance.
+/*_______*/       biomass_to_be_distributed->disposal += biomass_to_be_distributed->grazing_to_disposal;
+/*070625_*/       biomass_to_be_distributed->grazing_to_disposal = 0.0;
+/*040126x*/       if (removed_for_grazing > 0.0)
+/*040126x*/       {  // At this point we should have total_removed_plant_N
+/*040126x*/          // which is already deducted from the balance.
+/*040126x*/          // Actually we should keep a separate variable for the
+/*040126x*/          // total grazed plant N because it is possible that there
+/*040126x*/          // is a recular clipping on the same day as grazing,
+/*040126x*/          // that however, is very unlikely management.
+/*040126x*/          float32 grazing_manure_N_production =biomass_to_be_distributed->grazing_to_manure;
+/*040126x*/          // Now generate an organic fertilization event to process today
+/*040202_*/          if (!is_essentially(grazing_manure_N_production,0.0,0.00000001))
+/*040126x*/          {  float32 org_N_amount_kg_ha= over_m2_to_ha *(grazing_manure_N_production * curr_management->latest_grazing_percent_N_as_OM / 100.0);
+/*040126x*/             float32 NH3_amount_kg_ha  = over_m2_to_ha *(grazing_manure_N_production * curr_management->latest_grazing_percent_N_as_NH3/ 100.0);
+/*041220_*/             grazing_hold_manure_application.org_N_amount_kg_ha +=org_N_amount_kg_ha;
+/*041220_*/             grazing_hold_manure_application.NH3_amount_kg_ha += NH3_amount_kg_ha;
+/*040202_*/          };
+/*040126x*/       };
+/*060628_*/       Residues_interface *local_residue_pools_kg_m2 = organic_matter_residues_profile_kg_m2 ? organic_matter_residues_profile_kg_m2->get_residues() : 0;
+/*070625_*/       Crop_interfaced *fated_crop = get_crop_active_or_at_end_of_season();
+/*060219_*/       Residue_decomposition_parameters *residue_decomp_params = fated_crop? fated_crop->get_residue_decomposition_parameters() : 0;
+/*060219_*/       if (residue_decomp_params && local_residue_pools_kg_m2)
+/*060219_*/       {  const Crop_nitrogen_interface *crop_N_kg_m2 = fated_crop->get_nitrogen();;
+/*061215_*/          float64 crop_surface_residue_N_conc = crop_N_kg_m2 ? crop_N_kg_m2->get_residue_concentration() : 0;
+#ifdef DEBUG_CARBON_TEST
+biomass_to_be_distributed->chaff_or_leaf_litter = 0.25;
+biomass_to_be_distributed->stubble_dead         = 0.25;
+Soil_cropsyst_specific *local_soil = get_soil();
+for (uint8 layer = 1; layer <=local_soil->layers->get_number_layers(); layer++)
+{  biomass_to_be_distributed->roots_dead[layer] = 0.0;
+};
+#endif
+/*_______*/          if (biomass_to_be_distributed->chaff_or_leaf_litter > 0.0)
+/*_______*/          {  local_residue_pools_kg_m2->add_surface_plant_pool(OM_flat_surface_position /* false laying flat, not standing */
+/*060219_*/                ,OM_ORIGINAL_CYCLING // In V4.3 the cycling is splite by add_straw_pool
+/*_______*/                ,biomass_to_be_distributed->chaff_or_leaf_litter
+/*_______*/                ,crop_surface_residue_N_conc
+/*060219_*/                ,*residue_decomp_params);
+/*070625_*/             biomass_to_be_distributed->chaff_or_leaf_litter = 0;
+/*_______*/          };
+/*_______*/          if (biomass_to_be_distributed->stubble_dead > 0.0)
+/*_______*/          {  local_residue_pools_kg_m2->add_surface_plant_pool(OM_stubble_surface_position /* false laying flat, not standing */
+/*060219_*/                ,OM_ORIGINAL_CYCLING // In V4.3 the cycling is splite by add_straw_pool
+/*_______*/                ,biomass_to_be_distributed->stubble_dead
+/*_______*/                ,crop_surface_residue_N_conc
+/*060219_*/                ,*residue_decomp_params );
+/*070625_*/             biomass_to_be_distributed->stubble_dead = 0;
+/*_______*/          };
+/*_______*/          if (biomass_to_be_distributed->get_dead_roots_residue() > 0.0)
+/*061215_*/          {  float64 root_N_conc = crop_N_kg_m2 ? crop_N_kg_m2->get_root_concentration(include_vital) : 0.0;
+/*_______*/             local_residue_pools_kg_m2->add_subsurface_plant_pool
+/*_______*/                (biomass_to_be_distributed->roots_dead
+/*_______*/                ,root_N_conc
+/*060219_*/                ,*residue_decomp_params);
+/*070625_*/             clear_sublayer_array(biomass_to_be_distributed->roots_dead);
+/*_______*/          };
+/*060219_*/       };
+/*070627_*/       delete crop_mass_fate_to_be_distributed;
+/*070627_*/       crop_mass_fate_to_be_distributed = 0;
+/*_______*/    };
+/*_______*/    return true; // 070625  had_biomass_fate;
+/*_______*/ };
+//______________________________________________________________________________
+/*010202_*/ void Land_unit_simulation::end_year(CORN::Year year)
+/*_______*/ {
+#ifdef EROSION
+/*060803_*/    Soil_cropsyst_specific *soil = get_soil();
+/*020529_*/    if (soil->erosion)
+/*980731_*/    {   soil->erosion->annual_RUSLE_soil_loss
+/*_______*/             (
+//091206 moved to Soil_erosion_RUSLE member RUSLE_rainfall_erosivity_factor
+MGMT                     curr_management ? curr_management->get_soil_conservation_factor() : DEFAULT_soil_conservation_factor
+/*_______*/             );
+#ifdef MOVED
+091130 to start_year
+/*_______*/             RUSLE_rainfall_erosivity_factor
+/*990402_*/             = rainfall_erosivity_factor(year, *get_weather());
+#endif
+/*_______*/       if (active_model_options->erode_soil)
+/*_______*/       {  soil->erode(simulation->get_today());
+/*060115_*/          Residues_interface *local_residue_pools_kg_m2 = organic_matter_residues_profile_kg_m2 ? organic_matter_residues_profile_kg_m2->get_residues() : 0;
+/*060628_*/          if (local_residue_pools_kg_m2)
+/*060122_*/             local_residue_pools_kg_m2->identify_residue_horizons();
+/*_______*/       };
+/*010208_*/    };
+#endif
+#ifdef LADSS_MODE
+/*RECORD_*/        if (LADSS_annual_database_table)
+/*RECORD_*/        {
+/*RECORD_*/           LADSS_annual_output_data_record local_annual_record(LBF_ID,year,*this);
+/*RECORD_*/           LADSS_annual_database_table->set(local_annual_record);
+/*RECORD_*/        }
+#endif
+//090707obs#ifndef NEW_CO2_CONC
+//090707obs//090316 becoming obsolete, ET used to adjust the CO2 change, this has been moved to
+//090707obs/*081108 */    ET->end_year();
+//090707obs//090316 becoming obsolete, the crop will update itself
+//090707obs/*081113_*/    if (crop_active)
+//090707obs/*081113_*/    {  Weather *weather = get_weather() ;
+//090707obs/*081113_*/       crop_active->know_curr_atmsopheric_CO2_concentration(weather->get_curr_CO2_conc_ppm());
+//090707obs/*081113_*/    };
+//090707obs#endif
+/*_______*/ };
+//______________________________________________________________________________
+/*010202_*/ bool Land_unit_simulation::start_year(CORN::Year year )
+/*_______*/ {
+MGMT           load_events_for_year(year);
+/*060803_*/    const Soil_cropsyst_specific *soil = get_soil_read_only();
+/*070227_*/    if (ANNL_accumulators_active) delete ANNL_accumulators_active;
+/*050114_*/    ANNL_accumulators_active = new Annual_accumulators(*this,soil->water_content_profile(true),0.0);
+/*050114_*/    ANNL_accumulators_active->init_total_water_content = soil->water_content_profile(true);
+/*050114_*/    total_soil_water_content = soil->water_content_profile(true); // may be obsolete need to make sure water_content_profile has no side effects
+#ifdef EROSION
+/*_______*/    if (soil->erosion) soil->erosion->start_year(year); // 091130 init_RUSLE();
+#endif
+//081108 moved to end year /*041108_*/    ET->start_year();
+/*070510_*/    if (organic_matter_residues_profile_kg_m2) organic_matter_residues_profile_kg_m2->start_year();
+/*041014_*/    return true;
+/*_______*/ };
+//______________________________________________________________________________
+/*010208_*/ void Land_unit_simulation::update_accumulators(const CORN::Date &today)
+/*_______*/ {
+/*060115_*/    Residues_interface *local_residue_pools_kg_m2 = organic_matter_residues_profile_kg_m2 ? organic_matter_residues_profile_kg_m2->get_residues() : 0;
+/*060803_*/    const Soil_cropsyst_specific *soil = get_soil_read_only();
+/*990203x*/    ET->act_crop_evapotransp_m = soil->act_evaporation
+/*_______*/       + (local_residue_pools_kg_m2 ? local_residue_pools_kg_m2->get_act_evaporation() : 0.0)
+/*000323_*/       + (crop_active ? crop_active->get_recorded_act_transpiration_m() : 0.0);
+/*050114_*/    ANNL_accumulators_active->accumulate(today,active_model_options->run_nitrogen);
+/*050114_*/    CONTINUOUS_accumulators_active->accumulate(today,active_model_options->run_nitrogen);
+/*990414P*/    if (GP_accumulators_active)
+/*_______*/       GP_accumulators_active->accumulate(today,active_model_options->run_nitrogen);
+/*990312_*/    if (FALLOW_accumulators_active)
+/*_______*/        FALLOW_accumulators_active->accumulate(today,active_model_options->run_nitrogen);
+/*071024_*/    float64 curr_soil_water_content_profile = soil->water_content_profile(true);
+/*071024_*/    float64 infiltration_submodel_daily_error = soil->infiltration_submodel->get_daily_error();
+/*071024_*/    float64 infiltration_deferred = soil->infiltration_submodel->get_deferred();
+/*990407_*/    if (CONTINUOUS_accumulators_active)
+/*_______*/       CONTINUOUS_accumulators_active->compute_water_balance
+/*990316C*/       ( curr_soil_water_content_profile
+/*030710_*/       , soil->infiltration_submodel->get_daily_error()
+/*000501X*/       , pond.get_depth()
+/*071024_*/       , infiltration_deferred
+/*000626_*/       , true
+/*051115_*/       , (active_model_options->infiltration_model_labeled.get() != FINITE_DIFFERENCE_INFILTRATION)   // Actually I only want to disable if this is a batch run. but quick and dirty I just need to disable for F.D.
+/*_______*/       );
+/*990407_*/    if (GP_accumulators_active)
+/*_______*/       GP_accumulators_active->compute_water_balance
+/*990316C*/       ( curr_soil_water_content_profile
+/*030710_*/       , infiltration_submodel_daily_error
+/*000501X*/       , pond.get_depth()
+/*071024_*/       , infiltration_deferred
+/*000626_*/       , false,false);
+/*990407_*/    if (FALLOW_accumulators_active)
+/*_______*/       FALLOW_accumulators_active->compute_water_balance
+/*990602_*/       ( curr_soil_water_content_profile
+/*030710_*/       , infiltration_submodel_daily_error
+/*000501X*/       , pond.get_depth()
+/*071024_*/       , infiltration_deferred
+/*000626_*/       , false,false);
+/*990407_*/    if (ANNL_accumulators_active)
+/*_______*/       ANNL_accumulators_active->compute_water_balance
+/*990316C*/       ( curr_soil_water_content_profile
+/*030710_*/       , infiltration_submodel_daily_error
+/*000501X*/       , pond.get_depth()
+/*071024_*/       , infiltration_deferred
+/*000626_*/       , false,false);
+NITRO         if (soil->chemicals && soil->chemicals->NO3 && soil->chemicals->NH4)
+NITRO             for (uint8 layer = 1; layer <= soil->layers->get_number_layers(); layer++)
+NITRO                soil->chemicals->total_N_E[layer]
+NITRO                    = soil->chemicals->NO3->chem_to_element_factor * (soil->chemicals->NO3->mass->get_layer(layer))
+NITRO                    + soil->chemicals->NH4->chem_to_element_factor * (soil->chemicals->NH4->mass->get_layer(layer));
+/*_______*/ };
+//______________________________________________________________________________
+/*020309_*/ void Land_unit_simulation::load_profile_recal_events(const char *filename )
+/*_______*/ { ifstream recal_file(filename);
+/*_______*/   if (recal_file.good())
+/*_______*/   {  while (!recal_file.eof())
+/*_______*/      {   Year  year;
+/*_______*/          DOY   doy;
+/*_______*/          recal_file >>  year >> doy;
+/*_______*/          if (year && doy) // Make sure the line is reading OK
+/*_______*/          {  Date  recal_date(year,doy);
+/*_______*/             Recalibration_operation *recalib_op = new Recalibration_operation(recal_file);
+/*021105_*/             event_list.append(new Common_event(recal_date,recalib_op,true));
+/*_______*/          };
+/*_______*/       };
+/*_______*/       recal_file.close();
+/*_______*/    };
+/*_______*/ };
+//______________________________________________________________________________
+/*020309_*/ void Land_unit_simulation::load_events_for_year(Year year)
+/*_______*/ {  char buf[10];
+
+//060907 I think this is actually obsolete, since we now have fixed management schedule and this was kind of intended for DOS.
+
+/*001116x*/    File_name year_mgt(CORN_int16_to_str(year,buf,10),".MGT");
+/*090520_*/    const Smart_directory_name &management_dir =
+//090807obs#if (CS_VERSION_CODE >=  0x040D00)
+/*090520_*/        scenario_directory->provide_database_directory(false).provide_management_directory(false);
+//090807obs#else
+//090807obs/*090520_*/        scenario_directory->database->management_dir;
+//090807obs#endif
+//090520/*040817_*/    if (scenario_directory->database->management_dir.exists())
+/*090520_*/    if (management_dir.exists())
+/*_______*/    {  // we check that the management dir exists because
+/*_______*/       // if we don't it would be created which we don't need to do
+/*_______*/       // Load any specific management events by year
+/*060907_*/       Smart_file_name sim_year_mgt(year_mgt.c_str());sim_year_mgt.set_path(management_dir /*090520 scenario_directory->database->management_dir*/);
+/*_______*/       if (sim_year_mgt.exists())
+/*010109x*/       {  Management special_management;
+/*010109x*/          VV_file special_management_file(sim_year_mgt.c_str());
+/*010109x*/          special_management_file.get(special_management);
+MGMT                 special_management.transfer_all(event_list,true,0,sim_year_mgt.c_str()); // These are not associated with a crop
+/*_______*/       };
+/*_______*/    };
+/*_______*/ };
+//______________________________________________________________________________
+/*90616P_*/ void Land_unit_simulation::load_events_for_simulation(const MGT_filename  &mgt_filename)
+/*_______*/ {  Management special_management;
+/*031203_*/    if (mgt_filename.exists())
+/*031203_*/    {  VV_file special_management_file(mgt_filename.c_str());
+/*010109x*/       special_management_file.get(special_management);
+/*030614_*/       Common_event_list specific_events;
+/*031010_*/       special_management.transfer_all(specific_events,true,this,mgt_filename.c_str()); // these are not associated with a crop
+/*030614*/        Synchronization act_date_sync(ACTUAL_DATE_MODE);
+/*031010_*/       specific_events.synchronize(ACTUAL_DATE_MODE,CORN::Date(),this );  // this should cause actual date syncs to be set in the events
+/*060906_*/       Synchronization relative_to_sim_begin_sync(SIMULATION_BEGIN_DATE);
+/*060906_*/       Synchronization relative_to_sim_end_sync(SIMULATION_END_DATE);
+/*060906_*/       specific_events.synchronize(relative_to_sim_begin_sync,active_model_options->starting_date,this );  // this should cause syncs reletive to the simulatin starting period to be set in the events
+/*060906_*/       specific_events.synchronize(relative_to_sim_end_sync,active_model_options->ending_date,this );  // this should cause syncs reletive to the simulatin starting period to be set in the events
+/*030614_*/       event_list.transfer_all_from(specific_events);
+/*031203_*/    };
+/*_______*/ };
+//______________________________________________________________________________
+/*030606_*/ void Land_unit_simulation::trigger_synchronization(uint32 trigger)
+/*_______*/ {  triggered_synchronizations |= trigger; };
+//______________________________________________________________________________
+/*030714_*/ CORN::Date32 Land_unit_simulation::get_today_date32() const
+/*_______*/ { return get_weather_read_only()->get_today_date32(); };
+//______________________________________________________________________________
+/*070229_*/ Crop_interfaced *Land_unit_simulation::get_crop_active_or_at_end_of_season()     const
+/*_______*/ {  return crop_at_end_season ? crop_at_end_season : crop_active;};
+//______________________________________________________________________________
+/*060803_*/ const Weather *Land_unit_simulation::get_weather_read_only() const
+/*_______*/ {  return (const Weather *)environment.weather; };
+//______________________________________________________________________________
+/*060803_*/ Weather *Land_unit_simulation::get_weather() const
+/*_______*/ {  return environment.weather ; };
+//______________________________________________________________________________
+/*060803_*/ const Soil_cropsyst_specific *Land_unit_simulation::get_soil_read_only() const
+/*_______*/ {  return (const Soil_cropsyst_specific *)environment.soil; };   // NYI may be able to return an interface now, need to check
+//______________________________________________________________________________
+/*060803_*/ Soil_cropsyst_specific *Land_unit_simulation::get_soil() const
+/*_______*/ {  return (Soil_cropsyst_specific *)environment.soil; };        // NYI may be able to return an interface now, need to check
+//______________________________________________________________________________
+/*060803_*/ Soil_chemicals_profile  *Land_unit_simulation::get_soil_chemicals() const
+/*_______*/ {
+/*_______*/    Soil_cropsyst_specific *soil = get_soil();
+/*_______*/    Soil_chemicals_profile  *got_chemicals = soil ? soil->chemicals : 0;
+/*_______*/    return got_chemicals;
+/*_______*/ };
+//______________________________________________________________________________
+/*070119_*/ Dynamic_water_entering_soil *Land_unit_simulation::create_irrigation_in_intervals_mm
+/*_______*/ (Minutes                      water_entering_soil_timestep_minutes
+/*_______*/ )  const
+/*_______*/ {
+/*070107_*/    Dynamic_water_entering_soil *irrigation_water_entering_in_intervals_mm = 0;
+/*000413_*/    if (total_irrigation_today > 0.0)
+/*000413_*/    {  // (Split it into intervals consistent with precip intervals added it to water entering in time step control
+/*_______*/              irrigation_water_entering_in_intervals_mm = new Dynamic_water_entering_soil((uint8)(active_model_options->rainfall_intensity ?48:24));
+/*_______*/       uint8 irrigation_start_interval = 0;
+/*000413_*/             uint16 irrigation_duration_intervals = 1;
+/*070107_*/             switch (water_entering_soil_timestep_minutes)
+/*070107_*/             {
+/*070107_*/                case 60 :   irrigation_duration_intervals =  management_irrigation_duration_hours;
+/*081212_*/                            irrigation_start_interval = earliest_irrigation_start_hour;
+/*_______*/                            if ((irrigation_start_interval + irrigation_duration_intervals) >= 24)
+/*_______*/                               irrigation_start_interval = 0; // Just start at the beginning of the day (midnight)
+
+/*_______*/                break;
+/*070107_*/                case 30 :   irrigation_duration_intervals =   management_irrigation_duration_hours * 2;
+/*081212_*/                            irrigation_start_interval = earliest_irrigation_start_hour * 2;
+/*_______*/                            if ((irrigation_start_interval + irrigation_duration_intervals) >= 48)
+/*_______*/                               irrigation_start_interval = 0; // Just start at the beginning of the day (midnight)
+/*070107_*/                default : irrigation_duration_intervals = 1; break;
+/*070107_*/             };
+/*000413_*/              // We need to increment because there could still be precipitation.
+/*000413_*/              float32 interval_irrig_mm = m_to_mm(total_irrigation_today) / irrigation_duration_intervals;
+/*000413_*/              for (int i = 0; i < irrigation_duration_intervals; i++)
+/*000413_*/                 irrigation_water_entering_in_intervals_mm->set(i+irrigation_start_interval,interval_irrig_mm);
+/*000413_*/    };
+/*070107_*/    return irrigation_water_entering_in_intervals_mm;
+/*_______*/ };
+//______________________________________________________________________________
+#ifdef AUTOMATIC_IRRIGATION
+/*071017_*/ bool Land_unit_simulation::process_any_automatic_irrigation(const CORN::Date &today) not_const
+/*_______*/ {  bool irrigation_added = false;
+/*_______*/    if (curr_management)
+/*_______*/    {
+/*_______*/       if (curr_automatic_irrigation_mode
+/*090722_*/           && !fixed_irrigation_scheduled_today)
+/*_______*/       {  bool apply_irrigation = false;
+/*060803_*/          Soil_cropsyst_specific *soil = get_soil() ;
+
+//float32 LWP = crop_active->get_leaf_water_pot();
+//std::cout << LWP << std::endl;
+
+
+/*091208_*/          if ((curr_automatic_irrigation_mode->consideration_mode_labeled.get() == consider_leaf_water_potential)
+/*091208_*/              && (crop_active->get_leaf_water_pot() <= /* more negative */ curr_automatic_irrigation_mode->leaf_water_potential ))
+/*091208_*/          {
+/*091208_*/              apply_irrigation = true;
+/*091208_*/              // Note, probably could do soil recharge but currently only setup for a fixed amount.
+/*091208_*/          }
+/*091208_*/          else // consider_soil_water_depletion
+/*091208_*/          {
+/*_______*/          // Note eventually just call process_irrigation but we need to do the following
+/*_______*/          // 1. Set the amount in the operation before calling process_irrigation
+/*_______*/          // 2. in process irrigation, we need to soil->set_daily_rrig_salinity
+/*060719_*/          float64 depletion_observe_depth = curr_automatic_irrigation_mode->get_depletion_observe_depth();
+
+/*070606_*/          switch (curr_automatic_irrigation_mode->get_depletion_observation_depth_mode())
+/*070606_*/          {
+/*070606_*/             case  constant_fixed_depth_mode :
+/*070606_*/             {   depletion_observe_depth = curr_automatic_irrigation_mode->get_depletion_observe_depth();
+/*070606_*/             } break;
+/*070606_*/             case  fraction_of_root_depth_mode :
+/*060719_*/             {   if (crop_active)
+/*060719_*/                   depletion_observe_depth = crop_active->get_recorded_root_depth_m();
+/*070606_*/             }break;
+/*070606_*/             case  soil_profile_depth_mode :
+/*070606_*/             {  const Soil_layers_interface *layers = soil->get_layers();
+/*070606_*/                depletion_observe_depth = layers->get_depth_profile_m() ;
+/*070606_*/             } break;
+                        default:
+                        /*070606_*/             {   depletion_observe_depth = curr_automatic_irrigation_mode->get_depletion_observe_depth();
+/*070606_*/             } break;
+
+/*070606_*/             // This case and default is already set above
+/*070606_*/          };
+/*_______*/          if (soil->check_automatic_irrigation
+/*_______*/                   (curr_automatic_irrigation_mode->get_max_allowable_depletion()
+/*_______*/                   ,depletion_observe_depth ))
+/*091208_*/             apply_irrigation = true;
+/*091208_*/          };
+/*070109_*/          management_irrigation_duration_hours = curr_automatic_irrigation_mode->get_duration_hours();
+/*090722_*/          earliest_irrigation_start_hour = curr_automatic_irrigation_mode->get_start_hour();
+/*091208_*/          if (apply_irrigation)
+/*051120_*/          {
+/*091209_*/             switch (curr_automatic_irrigation_mode->application_mode_labeled.get())
+/*091209_*/             {  case irrigate_soil_condition :
+/*_______*/                {
+/*091209_*/                   automatic_irr_amount =
+/*_______*/                   soil->determine_recharge_requirements
+/*_______*/                   (curr_automatic_irrigation_mode->get_net_irrigation_mult()
+/*_______*/                   ,crop_active ? crop_active->get_root_length_m() : 0.0
+/*_______*/                   ,curr_automatic_irrigation_mode->get_refill_point());
+/*_______*/                   float64 auto_irrig_max_application =  curr_automatic_irrigation_mode->get_max_application_m();
+/*_______*/                   if (auto_irrig_max_application > 0.0)
+/*_______*/                      automatic_irr_amount = CORN_must_be_less_or_equal_to(automatic_irr_amount,auto_irrig_max_application);
+/*060719_*/                   if (automatic_irr_amount < curr_automatic_irrigation_mode->get_min_application_m())
+/*060719_*/                      automatic_irr_amount = 0; // The irration system cannot not deliver this minimal amount
+/*_______*/                } break;
+/*091209_*/                case irrigate_fixed_amount :
+/*091209_*/                {
+/*091209_*/                   automatic_irr_amount = automatic_irr_amount = curr_automatic_irrigation_mode->get_amount();;
+/*091209_*/                } break;
+/*091209_*/             }; // case application mode
+/*_______*/             Soil_salt_interface *soil_salinity = soil->get_salinity_modifiable();
+/*051120_*/                 if (soil_salinity) soil_salinity->set_daily_irrig_salinity
+/*051120_*/                   (curr_automatic_irrigation_mode->get_salinity()
+/*080402_*/                   ,curr_automatic_irrigation_mode->get_ECw_to_total_dissolved_solids()  // Typically 0.64 (used to be a constant)
+/*051120_*/                   ,automatic_irr_amount
+/*081212_*/                   ,curr_automatic_irrigation_mode->start_hour
+/*081212_*/                   ,curr_automatic_irrigation_mode->duration_hours
+//081212 /*051120_*/                   ,0,24
+/*051120_*/                   );  // 081212 Note that we may want to all the start and duration in the automatic event
+/*071017_*/                 irrigation_added = true;
+/*051120_*/          };
+/*_______*/          if (table_irr_amount != 0.0) automatic_irr_amount = 0;
+/*_______*/          if (automatic_irr_amount > 0.0)
+/*_______*/             log_automatic_irr_event(today,automatic_irr_amount);
+/*_______*/          total_irrigation_today += automatic_irr_amount;
+/*_______*/       };
+/*_______*/    };
+/*_______*/    return irrigation_added; // note that false is not an error
+/*_______*/ };
+#endif
+//______________________________________________________________________________
+//060306 1578 lines
+//060529 1720 lines
+//060730 1600 lines
+//060922 1460 lines
+//071001 1670 lines
+

@@ -1,0 +1,195 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\CS_suite_4\CS_suite.exe"/>
+    <OBJFILES value="C:\temp\obj\CS_suite\BCB5\\CS_suite.obj 
+      C:\temp\obj\CS_suite\BCB5\\cs_suite_frm.obj 
+      C:\temp\obj\CS_suite\BCB5\\paths.obj 
+      C:\temp\obj\CS_suite\BCB5\\database_dir.obj 
+      C:\temp\obj\CS_suite\BCB5\\project_types.obj 
+      C:\temp\obj\CS_suite\BCB5\\registry.obj 
+      C:\temp\obj\CS_suite\BCB5\\smart_dirname.obj"/>
+    <RESFILES value="CS_suite.res"/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) ..\cs_suite_frm.dfm"/>
+    <LIBFILES value="C:\temp\lib\BCB5\release\common_sim_static.lib 
+      C:\temp\lib\BCB5\release\CS_directory.lib 
+      C:\temp\lib\BCB5\release\corn_complete_static.lib"/>
+    <LIBRARIES value="K102_R51.lib VCLSMP50.lib TMSC5.lib AutoControls.lib"/>
+    <SPARELIBS value="Vcl50.lib bcbie50.lib Vclx50.lib NMFast50.lib AutoControls.lib 
+      BCBSMP50.lib TMSC5.lib VCLDB50.lib TEE50.lib VCLSMP50.lib K102_R51.lib 
+      VCLBDE50.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi TeeUI50.bpi TeeDB50.bpi Tee50.bpi TeeQR50.bpi 
+      VCLIB50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi Inet50.bpi NMFast50.bpi 
+      dclocx50.bpi bcb2kaxserver50.bpi"/>
+    <PATHCPP value=".;..;..\..\Common\simulation;..\..\CropSyst\cpp;..\..\corn\OS\Windows\VCL;..\..\corn\file_sys"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="tlink32"/>
+    <USERDEFINES value="SUPPORT_STRING;CROPSYST;TILLAGE2;_DEBUG;CS_VERSION=4;USE_OLD_CS_PATHS"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
+    <MAINSOURCE value="CS_suite.cpp"/>
+    <INCLUDEPATH value="..\..\corn\file_sys;..\..\corn\OS\Windows\VCL;..\;..;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\components\Other\ShellShock\source_BCB5;..\..\components\TMS_4.7\source_BCB5;..\..\common\measure;..\..\components\autocontrols;..\..\GUI\project_selector;..\..\Common\simulation;..\..\CropSyst\GUI\Builder\database_editor;..\..\cropsyst\cpp;..\..\UED\export_wizard;&quot;C:\Program Files\Borland\BCB5\Bin\&quot;;$(BCB)\include;$(BCB)\include\vcl;..\..\CropSyst\GUI\Builder\scenario_editor\dev;..\.."/>
+    <LIBPATH value="..\..\corn\file_sys;..\..\corn\OS\Windows\VCL;..\;..;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\components\Other\ShellShock\source_BCB5;..\..\components\TMS_4.7\source_BCB5;..\..\common\measure;..\..\components\autocontrols;..\..\components\autocontrols\combined;..\..\GUI\project_selector;..\..\Common\simulation;..\..\CropSyst\GUI\Builder\database_editor;..\..\cropsyst\cpp;..\..\UED\export_wizard;$(BCB)\Projects\Lib;&quot;C:\Program Files\Borland\BCB5\Bin\&quot;;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\CS_suite\BCB5\&quot; -N0&quot;C:\temp\obj\CS_suite\BCB5\&quot; -$Y+ -$W 
+      -$O- -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-I&quot;C:\temp\obj\CS_suite\BCB5\&quot; -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=1
+AutoIncBuild=1
+MajorVer=4
+MinorVer=1
+Release=5
+Build=23
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=4.1.5.23
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[Excluded Packages]
+$(BCB)\Bin\TwineCompilePlugin5.bpl=TwineCompile Plugin
+
+[HistoryLists\hlIncludePath]
+Count=22
+Item0=..\;..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\components\Other\ShellShock\source_BCB5;..\..\components\TMS_4.7\source_BCB5;..\..\common\measure;..\..\components\autocontrols;..\..\GUI\project_selector;..\..\Common\simulation;..\..\CropSyst\GUI\Builder\database_editor;..\..\cropsyst\cpp;..\..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\..\CropSyst\GUI\Builder\scenario_editor\dev;..\..
+Item1=..\;..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\components\Other\ShellShock\source;..\..\components\TMS_4.7\source_BCB5;..\..\common\measure;..\..\components\autocontrols;..\..\GUI\project_selector;..\..\Common\simulation;..\..\CropSyst\GUI\Builder\database_editor;..\..\cropsyst\cpp;..\..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\..\CropSyst\GUI\Builder\scenario_editor\dev;..\..
+Item2=..\;C:\Program Files\Borland\CBuilder5\Projects\;..\..\components\Other\ShellShock\source;..\..\components\TMS_4.7\source_BCB5;..\..\common\measure;..\..\components\autocontrols;..\..\GUI\project_selector;..\..\Common\simulation;..\..\CropSyst\GUI\Builder\database_editor;..\..\cropsyst\cpp;..\..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\..\CropSyst\GUI\Builder\scenario_editor\dev;..\..
+Item3=C:\Program Files\Borland\CBuilder5\Projects\;..\components\Other\ShellShock\source;..\components\TMS_4.7\source_BCB5;..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..
+Item4=C:\Program Files\Borland\CBuilder5\Projects;..\components\Other\ShellShock\source;..\components\TMS_4.7\source_BCB5;..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..
+Item5=C:\Program Files\Borland\CBuilder5\Projects;..\components\Other\ShellShock\source;..\components\TMS_4.1\source_BCB5;..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..
+Item6=..\components\Other\ShellShock\source;..\components\TMS_4.1\source_BCB5;..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..
+Item7=..\components\Other\ShellShock\source;C:\dev\components\TMS_4.1\source_BCB5;..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..
+Item8=..\components\Other\ShellShock\source;..\components\TMS_4.1\source;..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..;..\components\Other\TShellChangeNotifier_1.40\Source
+Item9=..\components\Other\ShellShock\source;C:\dev\components\TMS_4.1\source;..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..;..\components\Other\TShellChangeNotifier_1.40\Source
+Item10=..\components\Other\ShellShock\source;..\components\TMS;..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..;..\components\Other\TShellChangeNotifier_1.40\Source
+Item11=..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..;..\components\Other\TShellChangeNotifier_1.40\Source
+Item12=..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..;C:\dev\components\Other\TShellChangeNotifier_1.40\Source
+Item13=..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..
+Item14=..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;..
+Item15=..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev;c:\dev
+Item16=..\UED\export_wizard;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev
+Item17=C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;..\CropSyst\GUI\Builder\scenario_editor\dev
+Item18=C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;\dev
+Item19=C:\Program Files\Borland\BCB5\Bin\;$(BCB)\include;$(BCB)\include\vcl;dev
+Item20=C:\Program Files\Borland\BCB5\Bin;$(BCB)\include;$(BCB)\include\vcl;\dev
+Item21=C:\Program Files\Borland\BCB5\Bin;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=17
+Item0=..\;..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\components\Other\ShellShock\source_BCB5;..\..\components\TMS_4.7\source_BCB5;..\..\common\measure;..\..\components\autocontrols;..\..\components\autocontrols\combined;..\..\GUI\project_selector;..\..\Common\simulation;..\..\CropSyst\GUI\Builder\database_editor;..\..\cropsyst\cpp;..\..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\;..;C:\Program Files\Borland\CBuilder5\Projects\;..\..\components\Other\ShellShock\source;..\..\components\TMS_4.7\source_BCB5;..\..\common\measure;..\..\components\autocontrols;..\..\components\autocontrols\combined;..\..\GUI\project_selector;..\..\Common\simulation;..\..\CropSyst\GUI\Builder\database_editor;..\..\cropsyst\cpp;..\..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\;C:\Program Files\Borland\CBuilder5\Projects\;..\..\components\Other\ShellShock\source;..\..\components\TMS_4.7\source_BCB5;..\..\common\measure;..\..\components\autocontrols;..\..\components\autocontrols\combined;..\..\GUI\project_selector;..\..\Common\simulation;..\..\CropSyst\GUI\Builder\database_editor;..\..\cropsyst\cpp;..\..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item3=C:\Program Files\Borland\CBuilder5\Projects\;..\components\Other\ShellShock\source;..\components\TMS_4.7\source_BCB5;..\common\measure;..\components\autocontrols;..\components\autocontrols\combined;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item4=C:\Program Files\Borland\CBuilder5\Projects;..\components\Other\ShellShock\source;..\components\TMS_4.7\source_BCB5;..\common\measure;..\components\autocontrols;..\components\autocontrols\combined;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item5=C:\Program Files\Borland\CBuilder5\Projects;..\components\Other\ShellShock\source;..\components\TMS_4.1\source_BCB5;..\common\measure;..\components\autocontrols;..\components\autocontrols\combined;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\components\Other\ShellShock\source;..\components\TMS_4.1\source_BCB5;..\common\measure;..\components\autocontrols;..\components\autocontrols\combined;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\components\Other\ShellShock\source;C:\dev\components\TMS_4.1\source_BCB5;..\common\measure;..\components\autocontrols;..\components\autocontrols\combined;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item8=..\components\Other\ShellShock\source;..\components\TMS_4.1\source;..\common\measure;..\components\autocontrols;..\components\autocontrols\combined;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item9=..\components\Other\ShellShock\source;C:\dev\components\TMS_4.1\source;..\common\measure;..\components\autocontrols;..\components\autocontrols\combined;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item10=..\components\Other\ShellShock\source;..\components\TMS;..\common\measure;..\components\autocontrols;..\components\autocontrols\combined;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item11=..\common\measure;..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item12=..\components\autocontrols;..\GUI\project_selector;..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item13=..\Common\simulation;..\CropSyst\GUI\Builder\database_editor;..\cropsyst\cpp;..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item14=..\UED\export_wizard;$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item15=$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin\;$(BCB)\lib\obj;$(BCB)\lib
+Item16=$(BCB)\Projects\Lib;C:\Program Files\Borland\BCB5\Bin;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=2
+Item0=$(BCB)\source\vcl;C:\dev\components\Other\ShellShock\source
+Item1=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=11
+Item0=SUPPORT_STRING;CROPSYST;TILLAGE2;_DEBUG;CS_VERSION=4;USE_OLD_CS_PATHS
+Item1=SUPPORT_STRING;CROPSYST;TILLAGE2;_DEBUG;CS_VERSION=4
+Item2=SUPPORT_STRING;CROPSYST;TILLAGE2;_DEBUG
+Item3=SUPPORT_STRING;CROPSYST;TILLAGE2
+Item4=SUPPORT_STRING;CROPSYST;_DEBUG;TILLAGE2
+Item5=SUPPORT_STRING;CROPSYST;_DEBUG
+Item6=SUPPORT_STRING;CROPSYST
+Item7=_DEBUG;SUPPORT_STRING;CROPSYST
+Item8=_DEBUG;SUPPORT_STRING
+Item9=_DEBUG;SUPPORT_STRING;VERSION_NUMBERS=4,1,1
+Item10=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=3
+Item0=C:\temp\obj\CS_suite\BCB5\
+Item1=C:\temp\obj\CS_suite\BCB5\
+Item2=C:\temp\obj\CS_suite\BCB5\
+
+[HistoryLists\hlFinalOutputDir]
+Count=3
+Item0=C:\CS_suite_4\
+Item1=C:\CS_suite\
+Item2=C:\CS_suite
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl;C:\dev\components\Other\ShellShock\source
+
+[Parameters]
+RunParams=reg_file_types
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+
+  <FILES>
+    <FILE type="override" value="..\..\CropSyst\cpp\database_dir.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\Common\simulation\paths.cpp" translator="Auto">
+      <CFLAG1 value=" -H=c:\dev\common\simulation\common_sim_static_BCB.csm"/>
+    </FILE>
+    <FILE type="override" value="..\..\cropsyst\cpp\project_types.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+  </FILES>
+</PROJECT>

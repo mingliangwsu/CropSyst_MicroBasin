@@ -1,0 +1,477 @@
+#ifndef crop_interfaced_cropsystH
+#define crop_interfaced_cropsystH
+
+#include "options.h"
+#include "crop/crop_param.h"
+#include "crop/crop_interfaced.h"
+#include "crop/crop_cropsyst.h"
+#include "crop/yield.h"
+#ifdef FRUIT_CROP_MODEL
+#ifndef OLD_ORCHARD
+//071120 don't delete this is new
+#include "crop/crop_fruit.h"
+#endif
+#endif
+
+class Crop_row;
+class Weather_for_crop_abstract;
+class Weather;
+class Atmospheric_CO2_change_interface;
+class Soil_nitrogen_interface;
+
+namespace CropSyst {
+class Harvest_or_clipping_operation;
+class Crop_nitrogen_mass_balancer;
+class Orchard_interface;
+//______________________________________________________________________________
+class Crop_interfaced_complete
+: public virtual CropSyst::Crop_interfaced                                       //110905  131008_NS
+, public CropSyst::Crop_complete
+{
+ private:
+   contribute_ Air_temperature_maximum air_temp_max;                             //151124
+   contribute_ Air_temperature_minimum air_temp_min;                             //151124
+ public:
+   Crop_interfaced_complete
+      (Crop_parameters *_parameters_given
+      ,const CORN::Date          &_today                                         //130818_110824
+      ,CORN::Unidirectional_list &performable_operations_                        //151004
+      ,modifiable_ Crop_CO2_response         *Crop_CO2_response_given_optional   //151201
+      // Actually I want the following in all versions, just need to check
+      ,const Air_temperature_maximum         &_air_temperature_max               //140916
+      ,const Air_temperature_minimum         &_air_temperature_min               //140916
+      ,const Air_temperature_average         &_air_temperature_avg               //140916
+      ,const Solar_radiation                 &_solar_radiation                   //140916
+
+      ,const Vapor_pressure_deficit_daytime  &_vapor_pressure_deficit_daytime    //140916
+      ,const Vapor_pressure_deficit_max      &_vapor_pressure_deficit_max        //140916
+      ,const Psychrometric_constant          &_psychrometric_constant            //140508
+      ,const float64                         &_snow_pack_thickness_m             //141205
+      ,const Weather_spanning_interface      &weather_                           //151201
+      ,const CORN::Local_time  &_ref_sun_rise_time                               //150907
+      ,const float64           &_ref_day_length_hours                            //140812
+
+      ,Soil_interface          *_soil = 0                 // Soil is optional, but ususally specified. If not specified, we assum full water content (no water limitations //050721
+      ,Soil_nitrogen_interface *_soil_chem = 0    // If chemical profile is 0, nitrogen is not simulated. //050721
+      ,modifiable_ Soil_salt_interface *_soil_salinity = 0                     //051118_
+      ,Seeding_parameters      *_seeding_parameters = 0   // May be 0 if not using the seeding model  //041201
+
+      ,Crop_nitrogen_model      _nitrogen_model = CROP_NITROGEN_DISABLED                              //050722
+      #ifdef NITROGEN
+      ,const Slope_saturated_vapor_pressure_plus_psychrometric_resistance            //referenced
+         *slope_saturated_vapor_pressure_plus_psychrometric_resistance_reference = 0
+      #endif
+      ,Orchard_interface      *_orchard = 0                                      //071117
+      );
+   virtual ~Crop_interfaced_complete();
+   inline Crop_interfaced_complete()
+      :CropSyst::Crop_interfaced(0)
+      {}
+      // Constructor used only for abstract class check
+   //___________________________________________________________________________
+   inline void abstract_check() { new Crop_interfaced_complete; }
+ public:  // The following accessors are used for processing
+   virtual void *get_association_for_events()                              const { return (void *) Crop_complete::get_parameters(); } //060411
+   ///< CropSyst returns the parameters object pointer as the identifier for event association
+   /// other classes simply need to return a unique identifier
+   virtual       CropSyst::Phenology_interface &ref_phenology_modifiable()       { return phenology; } //130903
+   virtual const CropSyst::Phenology_interface &ref_phenology()            const { return phenology; } //130903
+
+   inline virtual bool        in_growing_season()                          const { return Crop_complete::in_growing_season(); }
+   inline virtual bool        is_terminate_pending()                       const { return Crop_complete::is_terminate_pending(); } //040514
+   inline virtual bool        is_fallow_deprecated()                       const { return fallow_deprecated; }
+   virtual bool is_orchard()                                         affirmation_{ return Crop_complete::is_orchard(); } //150720
+          virtual float64     get_fract_canopy_cover()                     const
+    { return Crop_complete::get_fract_canopy_cover(); }
+   inline virtual void       *get_unique_identifier()                      const { return Crop_complete::get_unique_identifier(); }
+   inline virtual Crop_model  get_crop_model()                             const { return Crop_complete::get_parameters()->crop_model_labeled.get(); }
+   inline virtual float64     get_canopy_resistance()                      const { return Crop_complete::get_canopy_resistance(); }
+   inline virtual float64     get_root_length_m()                          const { return get_root_length(); }
+   inline virtual float64     get_plant_height_m()                         const { return plant_height; }
+   inline virtual bool        set_fallow_deprecated(bool _fallow)   modification_{ return fallow_deprecated = _fallow; }
+      // Use set fallow to indicate this crop represents biomass cover
+      // during fallow period (will not be recorded for output) has no signicant growth.
+   inline virtual bool        set_no_more_clippings_this_season()  modification_ //040721
+      {  Crop_complete::no_more_clippings_this_season = true;
+         return true; }                                                          //071111
+   inline virtual bool        get_no_more_clippings_this_season()          const { return Crop_complete::no_more_clippings_this_season; }   //040721
+   inline virtual bool        end_season_if_no_dormancy()                        { return Crop_complete::end_season_if_no_dormancy(); }   //050818
+   inline virtual bool        end_season()                         modification_ { return Crop_complete::end_season(); } //160629
+   inline virtual void        set_terminate_pending()                            { Crop_complete::set_terminate_pending(); } //040514
+   virtual int16        get_days_after_flowering()                         const { return Crop_complete::days_after_flowering;}    //040830
+ public:  // The following are for report details only,
+         // Eventually they may be replaced by data_record I/O
+   virtual float64      get_accum_degree_days(bool adjusted_for_clipping)  const;//040830
+   virtual const float64 &ref_thermal_time_cumulative()                    const;//130613
+#ifdef CROP_ORCHARD
+#ifndef CROP_CALIBRATION
+// This is just for debugging
+virtual int16 get_fruit_chill_hours_remaining()                            const { return Crop_complete::get_fruit_chill_hours_remaining(); }
+#endif
+   virtual float64      get_fruit_dry_biomass_kg_ha()                      const;
+   virtual float64 get_orchard_solid_canopy_interception()                 const;//081020
+   virtual float64 get_orchard_shaded_area_GAI()                           const;//081020
+   virtual float64 get_orchard_canopy_porosity()                           const;//081020
+#endif
+//081022 applied only to fruit moved to fruit crop and done hourlyvirtual float64 get_solid_canopy_interception() const { return  Crop_complete::get_solid_canopy_interception(); }
+   virtual float64      get_dry_biomass_kg_ha()                            const;
+   virtual float64      get_live_green_canopy_biomass_kg_ha()              const;//060313
+   virtual float64      get_act_root_biomass_kg_ha()                       const;
+   virtual float64 calc_root_biomass                                             //071215
+      (float64 *output_root_biomass_by_layer=0)                            const;
+   virtual float64      get_canopy_biomass_kg_ha()                         const;
+   virtual float64      get_VPD_daytime()                                  const;
+   virtual float64      get_VPD_daytime_mean()                             const;
+   virtual float64      get_intercepted_PAR_MJ_m2()                        const;
+ public:  // The following are seasonal accumulations
+   virtual float64      get_intercepted_PAR_accum_MJ_m2()                  const;
+   virtual float64      get_intercepted_PAR_season_accum_MJ_m2()           const;
+   virtual float64      get_peak_LAI(bool reported)                        const;//040929
+   virtual float64      get_total_season_collected_biomass_kg_m2()         const;//040728
+   virtual float64      get_total_season_biomass_production_kg_m2()        const;//040719
+   inline virtual float64      update_root_depth(float64 soil_rooting_depth,float64 total_soil_depth )//981023
+      { return
+#ifdef OLD_ROOTS
+         Crop_complete::CROP_ROOT update_root_depth(soil_rooting_depth,total_soil_depth );
+#else
+#ifndef CROP_CALIBRATION
+         Crop_complete::CROP_ROOT update_root_depth(terminate_pending);
+#else
+         0.0;
+#endif
+#endif
+      }
+public:  // The following accessors are used only for output
+   RENDER_INSPECTORS_DECLARATION;                                                //150916
+
+   // The following are accessors used only for output that are being
+   // replaced by CS::Inspectors
+   // I need to move the get_XXX() methods from below as I clean these up.
+
+   inline virtual float64     get_pot_transpiration_m(bool CO2_adjusted)   const { return pot_transpiration_m[CO2_adjusted]; } //151031
+   //160416 inline virtual float64     get_intercepted_precipitation_m()            const { return intercepted_precipitation_m; }
+   inline virtual float64     get_intercepted_precipitation_m_stored()            const { return intercepted_precipitation_m_stored; } //160414
+   inline virtual float64     get_intercepted_precipitation_m/*_today*/()            const { return intercepted_precipitation_m_today; } //160414
+   inline virtual float64 intercept_precipitation(float64 water_reaching_plant) modification_ { return Crop_complete::intercept_precipitation(water_reaching_plant); } //140320
+   inline virtual const char *get_description()                            const { return get_parameters()->description.brief.c_str(); } //150112RLN
+          virtual const char *describe_growth_stage()                      const { return Crop_complete::describe_growth_stage(); }
+   inline virtual float64     get_recorded_root_depth_m()                  const { return Crop_complete::get_recorded_root_depth(); }
+#ifdef NITROGEN
+   inline virtual float64 get_N_mass_canopy_kg_m2 (bool before_harvest)    const { return Crop_complete::get_N_mass_canopy_kg_m2(before_harvest); }
+#endif
+   inline virtual float64     get_active_fract_root_length_m                     //050331
+      (nat8 sublayer)                                                      const { return transpiration->get_active_fract_root_length(sublayer); }
+   inline virtual const float64 *get_total_fract_root_length_m()           const
+      { return
+#ifdef OLD_ROOTS
+total_fract_root_length;
+#else
+#ifndef CROP_CALIBRATION
+      Crop_complete::roots_current->get_total_fract_root_length_m();
+#else
+                  0;
+#endif
+#endif
+      }
+   inline virtual float64     get_latest_yield_kg_m2()                     const { return biomass_fate_today ? biomass_fate_today->get_total_harvested() : 0.0; }
+ public:  /// These functions return when events occured during the season
+      /// They are used in CropSyst in the season and harvest reports.
+      /// They can be called at any time but will return 0 date if the
+      /// event has not occured yet.
+   inline virtual const CORN::Date &get_planting_date()                    const { return phenology.start_date[NGS_PLANTING]  /*141202 planting_date*/; }       //041205
+   inline virtual const CORN::Date &get_restart_date()                     const { return phenology.start_date[NGS_RESTART]   /*141202 restart_date*/; }        //041205
+   inline virtual const CORN::Date &get_emergence_date()                   const { return phenology.start_date[NGS_EMERGENCE] /*141202 emergence_date*/; }      //031119
+   inline virtual const CORN::Date &get_flowering_date()                   const { return phenology.start_date[NGS_ANTHESIS]  /*141202 flowering_date*/; }      //031119
+   inline virtual const CORN::Date &get_tuber_init_date()                  const { return phenology.start_date_tuber_initiation; } //141217_081111
+   inline virtual const CORN::Date &get_grain_filling_date()               const { return phenology.start_date[NGS_FILLING]   /*141202 grain_filling_date*/; }
+   inline virtual const CORN::Date &get_initial_fruit_growth_date()        const
+      {
+#ifdef OLD_ORCHARD
+ return initial_fruit_growth_date;
+#else
+ return phenology.start_date[NGS_FILLING]; // N/A Just for something to return
+#endif
+      }
+ #ifdef OLD_ORCHARD
+   inline virtual void know_weather_hourly(const CS::Weather_hours *_hourly_weather)
+      { Crop_complete::know_weather_hourly(_hourly_weather);}                    //080908
+   inline virtual const CORN::Date &get_bud_break_date()                   const { return bud_break_date;}                   //081013
+   inline virtual const CORN::Date &get_rapid_fruit_growth_date()          const { return rapid_fruit_growth_date;}          //081013
+   inline virtual const CORN::Date &get_chill_requirement_satisfied_date() const { return chill_requirement_satisfied_date;} //081013
+ #else
+ #endif
+   inline virtual const CORN::Date &get_inactive_begin_date()              const { return phenology.start_date[NGS_DORMANT_or_INACTIVE]; /*141202 inactive_begin_date;*/ }  //081013
+   inline virtual const CORN::Date &get_inactive_end_date()                const { return inactive_end_date;}    //081013
+   inline virtual const CORN::Date &get_maturity_date()                    const { return phenology.start_date[NGS_MATURITY]; }       //031119
+   inline virtual const CORN::Date &get_harvest_date()                     const { return latest_harvest_date; } //031119
+   inline virtual const CORN::Date &get_largest_GAI_date()                 const { return largest_GAI_date;}     //040211
+ public:  // The following are parameter accessors
+   virtual int32     param_LADSS_land_use_ID()                             const { return get_parameters()->LADSS_land_use_ID; }                     //040217
+   virtual const char *get_sowing_event_ID()                               const { return get_parameters()->sowing_event_ID.c_str(); }               //051129
+   virtual Land_use  param_land_use()                                      const { return get_parameters()->land_use_labeled.get(); }
+   virtual float64   param_emergence_deg_day()                             const { return get_parameters()->phenology.initiation.emergence; }
+   virtual float64   param_max_canopy_deg_day()                            const { return get_parameters()->phenology.culmination.accrescence/*150913initiation.max_canopy*/; }
+   virtual float64   param_wilt_leaf_water_pot()                           const { return get_parameters()->param_wilt_leaf_water_pot(); }
+   virtual float64   param_base_temp()                                     const { return get_parameters()->param_base_temp(); }
+   #ifdef RESIDUES
+   inline virtual Residue_decomposition_parameters &get_residue_decomposition_parameters() const
+      { return get_parameters()->residue_decomposition; }                        //060219_110613
+   #endif
+   virtual bool get_name(modifiable_ std::wstring &active_crop_name)       const { active_crop_name = get_parameters()->name; return active_crop_name.length() != 0; } //150720
+
+ public: // The following parameters are used for scaling runtime graph
+   inline virtual float64    param_max_LAI()                               const { return get_parameters()->canopy_growth_LAI_based.max_LAI;}
+   inline virtual float64    param_max_root_depth_m()                      const
+      {
+#ifdef OLD_ROOTS
+                   return get_parameters()->max_root_depth;
+#else
+                  return get_parameters()->root.max_depth;
+#endif
+       }
+ public: // The following are for LADSS only
+   inline virtual int32 get_LADSS_land_use_ID()                            const { return get_parameters()->LADSS_land_use_ID; }                     //040923
+ public: // data record output
+   #if (CROPSYST_VERSION==4)
+   virtual void setup_structure
+      (CORN::Data_record &data_rec
+      ,bool for_write
+      ,const CropSyst::Desired_variables &desired_vars);
+   #endif
+   virtual bool track_nitrogen_mass_balance                                      //070220
+      (CropSyst::Crop_nitrogen_mass_balancer *_mass_balance)           mutation_;
+ public:  // The following are used for accumulation and/or output
+   // Typically they are called at the end of the daily timestep loop
+   // after events have been handled and the crop process_day() is finished.
+   virtual        float64 get_act_transpiration_m()                        const;
+   virtual        float64 get_act_uptake_m()                               const;//160414
+
+   inline virtual float64 get_recorded_act_transpiration_m()               const { return Crop_complete::recorded_act_transpiration_m; }
+   inline virtual float64 get_reported_harvest_index()                     const
+      { return Crop_complete::yield->get_reported_harvest_index(); }             //150826
+   inline virtual float64 get_reported_N_mass_yield()                      const { return Crop_complete::reported_N_mass_yield; }
+   inline virtual float64 get_canopy_biomass_kg_m2()                       const { return Crop_complete::get_canopy_biomass_kg_m2_including(include_vital|include_effete); }
+   inline virtual float64 get_act_root_biomass_kg_m2()                     const { return act_root_biomass; }
+   inline virtual float64 get_LAI(bool from_canopy)                        const { return Crop_complete::get_LAI(from_canopy); }                     //060828
+   inline virtual float64 get_GAI(uint8 include_GAI)                       const { return Crop_complete::get_GAI(include_GAI); }                     //060921
+   inline virtual float64 get_GAI_today()                                  const { return Crop_complete::get_GAI_today_vital(); }
+   inline virtual float64 get_temperature_stress()                         const { return temperature_stress_stats.get_current(); }
+   inline virtual float64 get_water_stress()                               const { return water_stress_stats.get_current(); }
+   inline virtual float64 get_water_stress_index()                         const { return water_stress_stats.index; }
+   inline virtual float64 get_water_stress_index_mean()                    const { return 1.0- water_stress_stats.get_mean(); ; }
+   inline virtual float64 get_temperature_stress_index()                   const { return temperature_stress_stats.index; }
+   inline virtual float64 get_temperature_stress_index_mean()              const { return  1.0 - temperature_stress_stats.get_mean(); }
+   /*160531 obsolete
+   #if (CROPSYST_VERSION==4)
+   #ifdef OLD_YIELD
+   inline virtual float64 get_flower_temperature_stress_index_mean()       const { return 1.0 - flowering_temperature_stress_factor;  }              //081125
+   inline virtual float64 get_tuber_init_temperature_stress_index()        const { return tuber_init_temperature_stress_stats.index; }               //081111
+   inline virtual float64 get_tuber_fill_temperature_stress_index()        const { return tuber_growth_temperature_stress_stats.index; }             //081111
+   inline virtual float64 get_tuber_init_temperature_stress_index_mean()   const { return  1.0 - tuber_init_temperature_stress_stats.get_mean(); }   //081114
+   inline virtual float64 get_tuber_fill_temperature_stress_index_mean()   const { return  1.0 - tuber_growth_temperature_stress_stats.get_mean(); } //081114
+   #endif
+   #endif
+   */
+
+   inline virtual float64 get_overall_growth_stress()                      const { return overall_growth_stress; }
+   inline virtual float64 get_C_mass_canopy()                              const { return C_mass_canopy_est; }                                       //110915_060818
+   inline virtual float64 get_C_mass_roots()                               const { return C_mass_root_est; }                                         //110915_060818
+   inline virtual float64 get_leaf_water_pot()                             const { return Crop_complete::transpiration->get_leaf_water_pot(); }      //071115
+   inline virtual const Crop_nitrogen_interface *get_nitrogen()            const { return nitrogen;}                                                  //050722
+      ///< \returns 0 if not simulating nitrogen.
+   inline virtual const Crop_mass_fate *get_biomass_fate_today_record()    const { return biomass_fate_today;}                                       //040624
+      ///< get_biomass_fate_today() may be called usually once a day at the end of the daily time step loop
+      /// to get the daily total biomatter fates.
+   inline virtual Crop_mass_fate *get_biomass_fate_season()                const { return biomass_fate_season;} //040624
+         // was not const so GCC may complain
+
+      ///< get_biomass_fate_season() may be called (usually once) at the end of the season
+      /// to get the seasonal total biomatter fates.
+ public:
+      /// The following are processes used by the calling program.
+      /// They are almost always used.
+      /// Some are required!
+   inline virtual bool sow(bool fall_sowing);                                    //140813_020220
+      ///< sow() must be called once on the date the crop is to be planted.
+   inline virtual bool start_day()                                  modification_{ return Crop_complete::start_day();} //130903_040205
+      ///< start_day() should be called once at the start of the daily timestep loop.
+      /// It should be called first, before initiating any crop events,
+      /// performing management and before calling process_day().
+   inline virtual bool end_day()                                    modification_{ return Crop_complete::end_day(); }  //130903_070221
+   inline virtual float64  update_pot_evapotranspiration                         //100318
+      (float64 _pot_ref_ET)                                         modification_
+         { return Crop_complete::update_pot_evapotranspiration(_pot_ref_ET); }
+      ///< know_pot_evapotranspiration() must be called every day
+      /// before calling process_day() to provide the Crop with the potential reference evaportransiration.
+   bool process_day();                                                           //150611_020711
+      ///< process_day() must be called every day
+      /// This must come after start_day() and usually after any event.
+      /// Returns true if processing was successful
+   virtual                                                                       //040621
+      Crop_mass_fate_biomass_and_nitrogen *                                      //070625
+      process_biomass_fate
+      (Biomass_fated_cause fated_cause
+      ,Harvest_amount_mode harvest_amount_mode                                   //050822
+      ,float64 remove_amount_kg_m2              // if harvest_amount_mode=HARVEST_REMOVE_FIXED_AMOUNT_BIOMASS  else 0.0 //050822
+      ,float64 retain_GAI                       // if harvest_amount_mode=HARVEST_RETAIN_GAI                   else 0.0 //050822
+      ,float64 retain_biomass                                                    //110603
+      ,const Biomass_fate_parameters  &biomass_fate_parameters
+      ,bool terminate
+      ,float64 yield_now);
+      ///< This moves plant biomass to various pools, harvest yield, residue, loss etc..
+      /// \returns the fate of the material (call must delete the returned fate object)   //060323
+   inline virtual void commit_biomass_fate()                                     { Crop_complete::commit_biomass_fate();}  //040610
+      ///< This should be called daily (usually at the end of the daily time step loop.
+      ///it checks if there is any biomatter fate and generates a log
+   inline virtual                                                                //060323
+      Crop_mass_fate_biomass_and_nitrogen *harvest                               //070625
+      (float64 remove_amount_kg_m2              // if harvest_amount_mode=HARVEST_REMOVE_FIXED_AMOUNT_BIOMASS  else 0.0  //050822
+      ,const CropSyst::Harvest_or_clipping_operation_struct *harvest_or_clipping_params
+      ,bool terminate)                                                           //140811
+      { return Crop_complete::harvest
+            (remove_amount_kg_m2, harvest_or_clipping_params,terminate);         //140811
+      }
+      ///< For annuals harvest() is usually called once at some point at
+      /// the end of the season (I.e. 10 days after maturity) (usually specify terminate).
+      /// For perennials or clipped crops, this can be called throughout the
+      /// season (based on favorable clipping conditions or scheduled dates)
+      /// with terminate=false  (unless you finally terminate the crop).
+      /// See also terminate() which will be called if the terminate parameter is true.
+      /// In CropSyst, this method is called when management parameters
+      /// schedule harvest for the day.
+      ///\return the fate of the biomass if it could harvest otherwise 0 (must be deleted by the caller)
+ public: /// Optional methods that may be overridden in derived classes
+      ///< Do not call these functions they are handled automatically within the crop process.
+      /// If you do override any of these methods, do call the respective Crop_interfaced_complete method().
+      /// (usually at the beginning of the overridden method).
+   virtual bool initialize();
+      ///< It may be overridden in derived classes to initialize
+      /// any additional variables at sowing (this called by sow()).
+   virtual void    restart_after_inactive_period();                              //970219
+   virtual void    restart(float64 initial_biomass,float64 restart_GAI,bool use_clumping_factor, bool after_dormancy);  //980724
+   virtual bool    initiate_emergence();
+   virtual float64 update_solid_canopy_interception()              modification_;//151128
+#ifdef CROP_ORCHARD
+   virtual bool is_fruit_harvestable()                                     const;//081204
+#endif
+   inline virtual bool respond_to_clipping()                        modification_{ return Crop_complete::respond_to_clipping();}
+      ///< But this function can be overridden to add additional
+      /// response to clipping events.
+   inline virtual float64 damage_GAI(float64 GAI_damage)            modification_{ return Crop_complete::damage_GAI(GAI_damage); } //151226
+   inline virtual
+      Crop_mass_fate_biomass_and_nitrogen *harvest_crop                          //070625_050822
+      (Harvest_amount_mode harvest_amount_mode
+      ,float64 remove_amount_kg_m2              // if harvest_amount_mode=HARVEST_REMOVE_FIXED_AMOUNT_BIOMASS  else 0.0
+      ,float64 retain_GAI                       // if harvest_amount_mode=HARVEST_RETAIN_GAI                   else 0.0
+      , const Biomass_fate_parameters &harvest_biomass_fate_parameters
+      ,bool terminate)
+      { return  Crop_complete::harvest_crop
+         (harvest_amount_mode,remove_amount_kg_m2,retain_GAI
+         ,harvest_biomass_fate_parameters, terminate); }
+      ///< This method is called by event_harvest()
+      /// Do not call harvest_crop() directly,
+ public: // optional setup
+   inline virtual void know_event_log(Common_simulation_log *_event_log)         //130715_050725
+      { Crop_complete::know_event_log(_event_log); }
+      ///< You can use this have the crop record events and status
+      /// to the simulation log (text) file.
+      /// Pass 0 to stop recording.
+   inline virtual void know_residues(Residues_interface *_residues)              { Crop_complete::know_residues(_residues); } //060531
+   #ifdef DIRECTED_IRRIGATION
+   virtual bool know_directed_irrigation_soil_wetting
+      (const Directed_irrigation_soil_wetting *_soil_wetting)         cognition_;
+   #endif
+ public: // Useful calculations
+   virtual float64 est_degree_days_X_days_from_now                               //000330
+      (const CORN::Date & today, CORN::Days days_from_now)                 const;//010202
+      ///< This returns an estimate (in this case the actual)
+      /// of the thermal time the crop will have in the specified
+      /// number of days from the current date.
+      /// It doesn't do anything to the crop.
+      /// It is used by CropSyst to predict emergence or
+      /// anticipate crop growth stages.
+   inline virtual float64 get_adjusted_ET_crop_coefficient()              const {return Crop_complete::get_adjusted_ET_crop_coefficient();} //150915RLN
+ public:
+      ///< The following methods provided daily parameters required by optional submodels
+      /// If using any of these models, the respective methods must be called
+      /// prior to calling process_day().
+
+   #ifdef NITROGEN
+   inline virtual void set_automatic_nitrogen_mode(bool enable)                  //040525
+      { Crop_complete::set_automatic_nitrogen_mode(enable); }
+   #endif
+      ///< This puts the crop in automatic nitrogen mode (applying sufficient nitrogen to satisfy the plant).
+      /// This mode may be started or stopped at any time.
+      /// In CropSyst this implements the automatic nitrogen period management event.
+private:
+   Orchard_interface *orchard;                                                   //071116
+};
+//______________________________________________________________________________
+class Crop_interfaced_CropSyst_with_parameter_file
+{  Crop_interfaced_complete   *crop;
+ public:
+   Crop_interfaced_CropSyst_with_parameter_file
+      (const char *crop_parameter_file_name
+      #if (CROPSYST_VERSION==4)
+      ,Weather_for_crop_abstract       &_weather                                 //050722
+      #else
+
+      #endif
+      ,Soil_interface          *_soil = 0                 // Soil is optional, but ususally specified. If not specified, we assum full water content (no water limitations) //050721
+      ,Soil_nitrogen_interface *_soil_chem = 0    // If chemical profile is 0, nitrogen is not simulated.   //050721
+      ,Seeding_parameters     *_seeding_parameters = 0   // May be 0 if not using the seeding model   //041201
+      ,Crop_nitrogen_model     _nitrogen_model = CROP_NITROGEN_DISABLED          //050722
+      ,ET_reference_interface *_ET =0   // Optional. Although ET is optional, if it is not specified, there will be no correction for transpiration
+      ,bool i_run_salinity    = false
+      ,Atmospheric_CO2_change_interface *_atmospheric_CO2_change=NULL //optional //090316
+#ifdef NYI
+      ,Crop_row     *i_crop_row = 0
+#endif
+      );
+   virtual ~Crop_interfaced_CropSyst_with_parameter_file();
+   inline Crop_interfaced_complete   *get_crop() { return crop;}
+};
+//_2005-07-25___________________________________________________________________
+#ifdef FRUIT_CROP_MODEL
+#ifndef OLD_ORCHARD
+
+//071121  This is new, don't delete it
+
+class Crop_interfaced_CropSyst_orchard_fruit
+: public CropSyst::Crop_interfaced
+, public Crop_CropSyst_orchard_fruit
+{public:
+   Crop_interfaced_CropSyst_orchard_fruit
+      (Crop_parameters         *_parameters
+      #if (CROPSYST_VERSION==4)
+
+      ,Weather                 &_weather                                         //060922
+      #else
+
+      #endif
+      ,Soil_interface          *_soil = 0                 // Soil is optional, but ususally specified. If not specified, we assum full water content (no water limitations) //050721
+      ,Soil_nitrogen_interface *_soil_chem = 0    // If chemical profile is 0, nitrogen is not simulated.   //050721
+      ,modifiable_ Soil_salt_interface *_soil_salinity = 0                       //051118
+      ,Crop_nitrogen_model _nitrogen_model = CROP_NITROGEN_DISABLED              //050722
+#ifdef NITROGEN
+      ,ET_reference_interface       *_ET =0   // Optional. Although ET is optional, if it is not specified, there will be no correction for transpiration
+#endif
+#ifdef CO2_CHANGE
+      ,bool                    _simulate_CO2     = false
+      ,float64                 _current_CO2_conc = 350.0
+#endif
+      ,Orchard_interface      *_orchard = 0);                                    //071117
+
+   inline virtual const CORN::Date &get_initial_fruit_growth_date()        const { return initial_fruit_growth_date; }
+   virtual float64 get_fruit_dry_biomass_kg_ha()                           const;
+   virtual float64 get_dry_biomass_kg_ha()                                 const;//071120
+   bool process_day();                                                           //150611_020711
+};
+#endif
+#endif
+//_2007-11-21___________________________________________________________________
+} // namespace CropSyst
+
+
+#endif
+

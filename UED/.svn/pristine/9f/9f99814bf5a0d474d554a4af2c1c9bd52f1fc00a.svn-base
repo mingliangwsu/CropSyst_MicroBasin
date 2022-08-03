@@ -1,0 +1,15 @@
+#include "UED/convert/cropsyst/cropsyst_convertor.h"
+#include "corn/OS/file_system_logical.h"
+namespace CORN { namespace OS {
+File_system &file_system() { return CORN::OS::file_system_logical; }
+}}
+// Standalone (eventually being replaced by all_in_one
+//______________________________________________________________________________
+int main(int argc,const  char *argv[])
+{  date_setup_phrases();
+   CropSyst_text_convertor  convertor(argc,argv);
+   int result =  convertor.convert();
+   convertor.notify_climgen();
+   return result;
+};
+//______________________________________________________________________________

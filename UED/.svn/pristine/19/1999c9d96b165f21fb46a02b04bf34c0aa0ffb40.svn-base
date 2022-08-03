@@ -1,0 +1,20 @@
+Weather editor todo
+
+Allow units to be detected in column header 
+(in same line or one of the columne header lines)
+have a checkbox indicating this case
+
+
+On column header tab, add button to detect columns from 
+column header delimination in an example file.
+
+
+Allow user to enter ETref to UED in weather editor
+Three types of ETref
+FAO Pan evap
+FAO Ro?d
+FAO Penman-Monteith
+Add option in CropSyst to use ETref from weather UED file if available.
+
+
+

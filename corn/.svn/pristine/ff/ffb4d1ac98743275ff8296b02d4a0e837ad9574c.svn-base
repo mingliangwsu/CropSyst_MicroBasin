@@ -1,0 +1,100 @@
+#ifndef tabularH
+#define tabularH
+
+/* This class defines the tabular ordering of tabular files
+
+// used by
+// ued\convert\export.h
+// ICASA I/O classes
+*/
+#ifndef data_type_enumH
+#  include "corn/data_type_enum.h"
+#endif
+#ifndef labeled_enumH
+#  include "corn/labeled_enum.h"
+#endif
+#ifndef associationH
+#  include "corn/container/association.h"
+#endif
+#ifndef datetime64H
+#  include "corn/datetime/datetime64.h"
+#endif
+#ifndef validtypH
+#  include "corn/validate/validtyp.h"
+#endif
+#ifndef parameterH
+#  include "corn/parameters/parameter.h"
+#endif
+
+namespace CORN {
+//______________________________________________________________________________
+class Tabular_column     // meta properties
+: public Parameter_properties_string                                             //100116
+, public Parameter_number_properties                                             //100116
+{
+public:
+   Data_type_labeled data_type_labeled;
+   std::string       sheet;
+      // For workbook programs (I.e. Excel, this is the worksheek the column occurs on)
+      // It may be left blank if there is only one worksheet in the workbook
+      // or if all worksheets have the same format.
+   int16             start_1based;   // For text files this is the character position. For Excel, this is the cell column.
+
+                     // rename this to start_number  (vs start_index)
+
+   /*actually nat16*/// This is 1 based for text file.
+   /*but need for */ // In the case of FORTRAN like carridge control,
+   /*editor */       // carridge control character is at position 0,
+                     // so data is reletive to the first character after the carriage control.
+                     // Plain text file character positions are counted from 1.
+                     // (there should be no column defined for the carridge control characters position.
+                     // This is 1 based for excel columns
+                     // start_1based will be 0 if the column is not delineated by position and width
+                     // (but rather delineated by delimitors)
+   bool              spread_over_columns;
+   int16             spread_columns;   // This is the number of columns including this column to reserve for spreading data set and layered variables (not character columns)
+   std::string       missing_value;    // For text this might be the word "missing" or "N/A", for numbers this might be "99999.99" //070524
+ public: // constructor
+   Tabular_column();
+ public:
+   void setup_structure(Data_record &data_rec,bool for_write);
+};
+//______________________________________________________________________________
+class Tabular_data_column
+// maybe rename to Tabular field (column) this is where data is stored (in memory)
+: public Association
+{  // This is used to store data values that are read from a record
+ public:
+   CORN::Tabular_column  &TC_layout;
+ public: // When the file is read the record column values will be read into one of the following (expect structure needs a place to store values)
+   // Consider these values as like a union, only one of these is relevent depending on the column's field type
+   bool           value_bool;
+   std::string    value_string;
+   Date_time_64   value_datetime;  // Use for date, time and datetime values.
+   float32        value_float32;
+   float64        value_float64;
+   int16          value_int16;
+   int32          value_int32;
+   Validation_status validation_status;
+ public: // constructor
+   Tabular_data_column(CORN::Tabular_column  &_layout);
+ public:
+   inline virtual const char *get_key()                                    const //030109
+      { return TC_layout.get_key(); }
+   float32 get_value_as_float32()                                          const;
+   int16 get_value_as_int16()                                              const;//050412
+   int16 set_int_value(int16 from_int16)                           modification_;//070203
+   // set_int_value  is used in UED export for date component fields
+   // It sets each of the integer fields because at any time the user could change the data type of the field
+   float64 set_float64_value(float64 from_float64)                 modification_;//141021
+   float32 set_float_value(float32 from_float32)                   modification_;//070203
+   // set_float_value  is used in UED export for date component fields
+   // It sets each of the float fields because at any time the user could change the data type of the field
+   void clear_values();                                                          //100126
+};
+//______________________________________________________________________________
+//Note when parsing the input record, store the int value and float value into each compatible value_xxx
+//(this will be done by the data source
+} // namespace CORN
+#endif
+

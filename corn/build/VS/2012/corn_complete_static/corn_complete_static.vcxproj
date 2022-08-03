@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7DC4707D-A556-490C-A72A-225A2FEFBA3E}</ProjectGuid>
+    <RootNamespace>corn_complete_static</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>\dev\corn;\dev;%(AdditionalIncludeDirectories);USE_OS_FS</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\application\project_directory_OS_FS.cpp" />
+    <ClCompile Include="..\..\..\..\container\array.cpp" />
+    <ClCompile Include="..\..\..\..\container\association.cpp" />
+    <ClCompile Include="..\..\..\..\container\bilist.cpp" />
+    <ClCompile Include="..\..\..\..\data_source\dbase_datasrc.cpp" />
+    <ClCompile Include="..\..\..\..\data_source\generic_datarec.cpp" />
+    <ClCompile Include="..\..\..\..\format\binary\binary_file_abstract.cpp" />
+    <ClCompile Include="..\..\..\..\format\binary\binary_file_fstream.cpp" />
+    <ClCompile Include="..\..\..\..\format\binary\binary_record.cpp" />
+    <ClCompile Include="..\..\..\..\format\binary\binary_record_file.cpp" />
+    <ClCompile Include="..\..\..\..\container\binary_tree.cpp" />
+    <ClCompile Include="..\..\..\..\container\container.cpp" />
+    <ClCompile Include="..\..\..\..\data_source\datarec.cpp" />
+    <ClCompile Include="..\..\..\..\data_source\datasrc.cpp" />
+    <ClCompile Include="..\..\..\..\datetime\date.cpp" />
+    <ClCompile Include="..\..\..\..\datetime\date_format.cpp" />
+    <ClCompile Include="..\..\..\..\datetime\date_time_format.cpp" />
+    <ClCompile Include="..\..\..\..\datetime\date_translator.cpp" />
+    <ClCompile Include="..\..\..\..\datetime\datetime64.cpp" />
+    <ClCompile Include="..\..\..\..\file_sys\dir_ent.cpp" />
+    <ClCompile Include="..\..\..\..\file_sys\dirname.cpp" />
+    <ClCompile Include="..\..\..\..\container\enumlist.cpp" />
+    <ClCompile Include="..\..\..\..\file_sys\file_system.cpp" />
+    <ClCompile Include="..\..\..\..\file_sys\filename.cpp" />
+    <ClCompile Include="..\..\..\..\file_sys\filtered_filename.cpp" />
+    <ClCompile Include="..\..\..\..\container\indexer.cpp" />
+    <ClCompile Include="..\..\..\..\container\item.cpp" />
+    <ClCompile Include="..\..\..\..\labeled_enum.cpp" />
+    <ClCompile Include="..\..\..\..\measure\measures.cpp" />
+    <ClCompile Include="..\..\..\..\OS\directory_entry_name.cpp" />
+    <ClCompile Include="..\..\..\..\OS\directory_entry_name_abstract.cpp" />
+    <ClCompile Include="..\..\..\..\OS\directory_entry_name_logical.cpp" />
+    <ClCompile Include="..\..\..\..\OS\file_system.cpp" />
+    <ClCompile Include="..\..\..\..\OS\file_system_engine.cpp" />
+    <ClCompile Include="..\..\..\..\OS\file_system_engine_common.cpp" />
+    <ClCompile Include="..\..\..\..\OS\file_system_engine_Windows.cpp" />
+    <ClCompile Include="..\..\..\..\OS\file_system_logical.cpp" />
+    <ClCompile Include="..\..\..\..\parameters\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\parameters\parameters.cpp" />
+    <ClCompile Include="..\..\..\..\parameters\parameters_datarec.cpp" />
+    <ClCompile Include="..\..\..\..\parameters\parameters_directory_OS_FS.cpp" />
+    <ClCompile Include="..\..\..\..\quality.cpp" />
+    <ClCompile Include="..\..\..\..\container\SDF_list.cpp" />
+    <ClCompile Include="..\..\..\..\container\search_tree.cpp" />
+    <ClCompile Include="..\..\..\..\file_sys\smart_dirname.cpp" />
+    <ClCompile Include="..\..\..\..\file_sys\smart_filename.cpp" />
+    <ClCompile Include="..\..\..\..\math\statistical\stats.cpp" />
+    <ClCompile Include="..\..\..\..\string\strconv.cpp" />
+    <ClCompile Include="..\..\..\..\datetime\temporal_base.cpp" />
+    <ClCompile Include="..\..\..\..\container\text_list.cpp" />
+    <ClCompile Include="..\..\..\..\datetime\time.cpp" />
+    <ClCompile Include="..\..\..\..\datetime\time_format.cpp" />
+    <ClCompile Include="..\..\..\..\string\uiostring.cpp" />
+    <ClCompile Include="..\..\..\..\container\unilist.cpp" />
+    <ClCompile Include="..\..\..\..\measure\unitconv.cpp" />
+    <ClCompile Include="..\..\..\..\metrology\units_clad.cpp" />
+    <ClCompile Include="..\..\..\..\metrology\units_symbology.cpp" />
+    <ClCompile Include="..\..\..\..\string\ustring.cpp" />
+    <ClCompile Include="..\..\..\..\validate\validtyp.cpp" />
+    <ClCompile Include="..\..\..\..\data_source\vv_entry.cpp" />
+    <ClCompile Include="..\..\..\..\data_source\vv_file.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="corn_complete_static.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

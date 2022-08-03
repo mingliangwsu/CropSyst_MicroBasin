@@ -1,0 +1,81 @@
+
+http://www.usbr.gov/pn/agrimet/webarcread.html
+
+
+Example URL to download data:
+
+http://www.usbr.gov/pn-bin/webarccsv.pl?station=RXGI&year=1983&month=1&day=1&year=2011&month=12&day=31&pcode=ET&pcode=ETRS&pcode=ETOS&pcode=MN&pcode=MX&pcode=MM&pcode=PC&pcode=PP&pcode=PU&pcode=SR&pcode=TA&pcode=TG&pcode=YM&pcode=UA&pcode=UD&pcode=WG&pcode=WR&pcode=BN&pcode=BP&pcode=BX&pcode=SR2&pcode=RHN&pcode=PE
+
+
+
+Weather Parameters Available at Most AgriMet Stations: 
+ET = Evapotranspiration Kimberly-Penman (in) 
+ETrs = Evapotranspiration ASCE-EWRI Alfalfa (in) 
+ETos = Evapotranspiration ASCE-EWRI Grass (in) 
+MN = Minimum Daily Air Temperature (F) 
+MX = Maximum Daily Air Temperature (F) 
+MM = Mean Daily Air Temperature (F) 
+PC = Accumulated Precipitation Since Recharge/Reset (in) 
+PP = Daily (24 hour) Precipitation (in) 
+PU = Accumulated Water Year Precipitation (in) 
+SR = Daily Global Solar Radiation (langleys) 
+TA = Mean Daily Humidity (%) 
+TG = Growing Degree Days (base 50F) 
+YM = Mean Daily Dewpoint Temperature (F) 
+UA = Daily Average Wind Speed (mph) 
+UD = Daily Average Wind Direction (deg az) 
+WG = Daily Peak Wind Gust (mph) 
+WR = Daily Wind Run (miles) 
+
+Weather Parameters Available at Specific AgriMet Stations: 
+BN = Minimum Daily Barometric Pressure (in. Hg Correct to Sea Level) 
+BP = Average Daily Barometric Pressure (in. Hg Correct to Sea Level) 
+BX = Maximum Daily Barometric Pressure (in. Hg Correct to Sea Level) 
+SR2= Daily Diffuse Solar Radiation (langleys) 
+RHN= Minimum Daily Humidity (%) 
+PE = 24 Hour Pan Evaporation (in) 
+
+Special Parameters Available at Specific AgriMet Stations: 
+XB = Minimum Daily 1" Soil Temperature (F)	
+XF = Maximum Daily 1" Soil Temperature (F) 
+YL = Mean Daily 1" Soil Temperature (F) 
+ZL = Minimum Daily 2" Soil Temperature (F) (Deg C at COVM) (3" BRKO) 
+ZK = Maximum Daily 2" Soil Temperature (F) (Deg C at COVM) (3" BRKO) 
+ZM = Mean Daily 2" Soil Temperature (F) (Deg C at COVM) (3" BRKO) 
+XC = Minimum Daily 4" Soil Temperature (F) (Deg C at COVM) (6" BRKO) 
+XG = Maximum Daily 4" Soil Temperature (F) (Deg C at COVM) (6" BRKO) 
+YW = Mean Daily 4" Soil Temperature (F) (Deg C at COVM) (6" BRKO) 
+XD = Minimum Daily 8" Soil Temperature (F) (12" BRKO) 
+XH = Maximum Daily 8" Soil Temperature (F) (12" BRKO) 
+XJ = Mean Daily 8" Soil Temperature (F) (12" BRKO) 
+ZG = Minimum Daily 20" Soil Temperature (F) 
+ZH = Maximum Daily 20" Soil Temperature (F) 
+ZCN = Minimum Daily 40" Soil Temperature (F) 
+ZCX = Maximum Daily 40" Soil Temperature (F) 
+ZCM = Mean Daily 40" Soil Temperature (F) 
+YA = Maximum Daily Canopy Air Temperature (F) (Shielded) 
+YB = Minimum Daily Canopy Air Temperature (F) (Shielded) 
+Z1 = Minimum Daily Canopy Air Temperature (F) (Un-shielded) 
+Z2 = Maximum Daily Canopy Air Temperature (F) (Un-shielded) 
+Z3 = Average Daily Canopy Air Temperature (F) (Un-shielded) 
+YC = Maximum Daily Shelter Temperature (F) 
+YD = Minimum Daily Shelter Temperature (F) 
+SP = Snow Water Content (in) 
+
+
+
+Data is returned in a HTML document
+The data iself is in a preformated <PRE> text block with UNIX style newlines
+All the columns are option.
+Unfortunately the column header fields are NOT aligned with the detail line fields.
+The data values are separated with an inconsistent combination of tabs and spaces.
+
+
+BEGIN DATA
+RXGI
+      DATE           ET       ETRS       ETOS         MN         MX         MM         PC         PP         PU         SR         TA         TG         YM         UA         UD         WG         WR         BN         BP         BX         SR 
+01/01/1983   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   	NO RECORD   
+12/26/1989      MISSING 	NO RECORD   	NO RECORD         0.67      27.64      10.29      11.70       0.00       1.50     184.01      71.12       0.00       2.43    MISSING      58.58 	NO RECORD      MISSING 	NO RECORD   	NO RECORD   	NO RECORD       184.01 
+12/27/1989         0.03 	NO RECORD   	NO RECORD        -1.45      28.42      12.46      11.70       0.00       1.50     171.26      70.43       0.00       4.31       7.30      46.82 	NO RECORD       175.28 	NO RECORD   	NO RECORD   	NO RECORD       171.26 
+12/28/1989         0.02 	NO RECORD   	NO RECORD         6.25      31.25      17.79      11.70       0.00       1.50     144.26      72.08       0.00      10.00       6.85      73.70 	NO RECORD       164.32 	NO RECORD   	NO RECORD   	NO RECORD       144.26 
+END DATA

@@ -1,0 +1,334 @@
+#include "CS_simulation_rotator.h"
+#ifdef OLD_ROTATION
+#include "corn/data_source/vv_file.h"
+#endif
+#include "crop/crop_interfaced.h"
+#include "crop/phenology_interface.h"
+#include "common/weather/weather.h"
+#include "soil.h"
+#include "CS_suite/UED/aggregation/aggregate_UEDs.h"
+#include "csvc.h"
+#include <assert.h>
+#include <iostream>
+#include "CS_suite/observation/CS_desired_vars.h"
+#include "cs_scenario_directory.h"
+#include "rotation.h"
+//______________________________________________________________________________
+extern CORN::Parameter_properties_literal PP_crop_biomass_yield;
+extern CORN::Parameter_properties_literal PP_crop_biomass_useful;
+extern CORN::Parameter_properties_literal PP_crop_biomass_disposal;
+extern CORN::Parameter_properties_literal PP_crop_biomass_produced_above_ground ;
+extern CORN::Parameter_properties_literal PP_crop_canopy_N_mass;
+//______________________________________________________________________________
+bool prevent_multiple_harvests_in_same_day;                                      //141230
+namespace CS
+{
+//______________________________________________________________________________
+Rotator::Rotator
+(Command_options_data_source    &command_line_options_                           //160829
+,const CS::Identification       &ID_
+,bool                            CPF_mode_)                                      //151026
+: Simulation_engine     (command_line_options_)                                  //160829_160222
+, ID                    (ID_)                                                    //151028
+, meteorological_ref    (0)                                                      //160525
+, land_unit_simulations (sub_elements)                                           //160304_160222
+, template_scenario     (CPF_mode_)                                              //150513
+, weather_DB_daily      (0)                                                      //160708
+{}
+//_2013-06-20_______________________________________________Rotator::Rotator()_/
+bool Rotator::initialize()                                       initialization_
+{
+   bool initialized = true;                                                      //150209_140722
+   if (verbose)
+   {
+      std::clog
+         << "info: creating directory" << std::endl
+         << "dir=  " << get_output_directory_name().c_str() << std::endl;
+   }
+   CORN::Date hold_today(today);                                                 //170220
+
+   CORN::OS::file_system_engine.create_directory(get_output_directory_name());
+//170310    if (is_rotation_cycling_enabled())                                            //160929
+//170310    {
+      const CORN::OS::File_name &template_rotation_file_name = provide_template_rotation_file_name();
+
+   const CropSyst::Rotation *rotation = CropSyst::rotations_global.provide
+      (template_rotation_file_name,is_rotation_cycling_enabled());               //160708
+   nat16 computed_planting_count = rotation->count_computed_plantings();          //170310
+   nat8 cycles = is_rotation_cycling_enabled() ? rotation->get_cycles() : 1;     //170211
+   nat8 cycle = 0;
+   //170310 for (nat8 cycle = 0; cycle < cycles; cycle++)
+   do
+   {
+      Rotated_scenario_simulation *cycled_scenario = render_scenario_simulation(cycle);
+      if (!cycled_scenario)
+      {
+         std::clog << "Rotator::initialize failed to render shifted_scenario"<< std::endl;
+         return false;                                                           //151227
+      }
+      land_unit_simulations.append(cycled_scenario);
+      if (computed_planting_count)
+      {
+         CORN::Unidirectional_list cycled_plantings;
+         if (verbose) std::clog << "Rendering planting events adjusted for weather conditions cycle=" << (int)cycle << std::endl;
+            // Render planting events uses today for the iteration
+            // we need to restore after rendering.
+         rotation->render_planting_events_adjusted_for_weather_conditions
+            (provide_weather_database_daily_with_meteorology()                   //170311
+            //170311 provide_weather_database_daily()                            //160728
+            ,cycled_plantings
+            ,ref_start_date().get_year()
+            ,ref_stop_date().get_year()
+            ,cycle);
+
+         CropSyst::Sowing_event *cycled_planting = 0;
+         while ((cycled_planting = dynamic_cast<CropSyst::Sowing_event *>(cycled_plantings.pop_at_head())))
+         {  cycled_scenario->scenario_event_list.append(cycled_planting);
+
+            CropSyst::Sowing_operation *sow_op = cycled_planting->sowing_op;
+            cycled_scenario->schedule_planting_event
+               (cycled_planting->date.get_date32(),*sow_op,cycled_planting->ID.c_str());
+            know_sowing_for_phenology_adjustment(*sow_op,cycled_planting->date.get_date32());
+         }
+      } else cycled_scenario->CropSyst:: LAND_UNIT_SIMULATION_SUPERCLASS::setup_cropping_system();
+      cycle ++;                                                                  //170311
+   } while (cycle < cycles);                                                     //170310
+
+/*170310  now processed for cycle 0 above
+   }
+   else // not a relative rotation schedule                                    //140126
+   {  // This is the case using rotation shifting, just a single land unit
+      std::clog << "warning: The rotation is not relative, shifting rotations disabled" << std::endl;
+      Rotated_scenario_simulation *single_scenario=render_scenario_simulation(0);//170220_140126
+      single_scenario->CropSyst:: LAND_UNIT_SIMULATION_SUPERCLASS::setup_cropping_system();                                  //140224
+      land_unit_simulations.append(single_scenario);                             //140126
+   } // if rotation relative
+*/
+   today_driving.set(hold_today);                                                //170220
+   initialized &= Simulation_engine::initialize();                               //150731
+   if (!initialized) std::clog << "Rotator::initialize Simulation_engine::initialize failed" << std::endl;
+   return initialized;
+}
+//______________________________________________________________________________
+bool Rotator::stop()                                               modification_
+{  bool stopped = true;
+   stopped &= Simulation_engine::stop();
+      // Engine must be stopped first because we need UED outputs to be written.
+   #ifdef AGGREGATE_CYCLES_SEASONAL
+   CORN::OS::File_name_concrete aggregated_season_UED_filename(get_output_directory_name(),"season.UED");     //140119
+   UED::Aggregator season_aggregator(UED::Aggregator::merge  , aggregated_season_UED_filename.c_str(),true); //140119_140829 now writing 16bit floats
+   #if (CROPSYST_VERSION < 5)
+   FOR_EACH_IN(scenario_sim,Rotated_scenario_simulation,land_unit_simulations,each_rotated_scenario_simulation)
+   {
+      if (scenario_sim->season_UED_db) season_aggregator.append_source(*scenario_sim->season_UED_db); //140119
+   } FOR_EACH_END(each_rotated_scenario_simulation)
+   #endif
+   // else each rotated cycle has its own enumerated directory for the outputs
+   stopped &= season_aggregator.finalize();
+   #endif
+
+   //NYN    CORN::OS::File_name_concrete harvest_UED_filename(output_dir,"harvest.UED");
+   CORN::OS::File_name_concrete aggregated_annual_UED_filename(get_output_directory_name(),"annual_aggr.UED");     //140119
+   //NYN UED::Aggregator harvest_aggregator(UED::Aggregator::merge,harvest_UED_filename.);       //140119
+   #if (CROPSYST_VERSION < 5)
+   UED::Aggregator annual_aggregator(UED::Aggregator::average, aggregated_annual_UED_filename.c_str(),true); //140119_140829 now writing 16bit floats
+   FOR_EACH_IN(scenario_sim,Rotated_scenario_simulation,land_unit_simulations,each_rotated_scenario_simulation)
+   {
+      CORN::OS::File_name_concrete cycle_annual_UED(scenario_sim->get_output_directory_name(),"annual.UED");
+      annual_aggregator.append_source_file(cycle_annual_UED.c_str());
+   } FOR_EACH_END(each_rotated_scenario_simulation)
+   stopped &= annual_aggregator.finalize();
+   #endif
+   return stopped;                                                               //160308_140728
+}
+//_2013-10-30___________________________________________________________________
+bool Rotator::end_year()                                           modification_
+{  bool ended = true;                                                            //151218
+   CORN::Date over_a_year_ago((CORN::Year)(today.get_year()-1),(CORN::DOY)1); // Don't need to keep lots weather data in memory //141103
+   #ifndef REACCH_VERSION
+   // I think REACCH was having a problem because multiple years in one record
+   #if (CROPSYST_PROPER==4)
+   weather->done_with_dates_before(over_a_year_ago);                             //141103
+   #endif
+   #endif
+   ended &= Simulation_engine::end_year();                                       //140105
+   return ended;
+}
+//______________________________________________________________________________
+//170225 CS::Desired_variables debug_desired_variables_(true);                   //140515
+char buffer_numeric_conversion[20];
+//______________________________________________________________________________
+Rotator::Rotated_scenario_simulation::Rotated_scenario_simulation
+(const CS::Identification &LBF_ID_                                               //151026
+,nat32                     cycle_shift_                                          //151026
+,CropSyst::Scenario  &scenario_control_and_model_options_
+,const CORN::Date    &today_
+,const Geocoordinate &geocoordinate_                                             //151116
+,const Land_unit_meteorological &meteorology_
+,const CropSyst::Scenario_directory *scenario_directory_
+,bool want_detailed_output_
+,const CORN::OS::Directory_name &rotator_output_directory_                       //160311
+,CS::Desired_variables *desired_variables_daily_)                                //170227
+: CropSyst::LAND_UNIT_SIMULATION_SUPERCLASS
+   (LBF_ID_
+   ,cycle_shift_                                                                 //151026
+   ,scenario_control_and_model_options_
+   ,today_
+   ,geocoordinate_                                                               //151116
+   ,meteorology_
+   #if (CS_VERSION==4)
+   // Need to remove this replace with explainations
+   ,event_log_currently_unused
+   #endif
+   ,scenario_directory_
+   #if (LAND_UNIT_SIMULATION_SUPERCLASS==Land_unit_with_output)
+   ,desired_variables_daily_                                                     //170225_150225
+   #endif
+   /* 170225 Now the user can provide inspection_journal files
+      to output desired variable
+   #if (CROPSYST_VERSION < 5)
+   ,want_detailed_output_                                                        //151227
+      ? &debug_desired_variables_ : 0
+   #endif
+   */
+   )
+, rotator_output_directory(rotator_output_directory_)                            //160311
+, provided_cycle_directory(0)                                                    //160310
+{}
+//______________________________________________________________________________
+const CORN::OS::Directory_name &Rotator::Rotated_scenario_simulation::provide_cycle_directory() provision_ //160310
+{  if (!provided_cycle_directory)
+      provided_cycle_directory = new CORN::OS::Directory_name_concrete
+         (rotator_output_directory
+         ,CORN::nat32_to_cstr(cycle_shift,buffer_numeric_conversion,10));
+   CORN::OS::file_system_engine.create_directory(*provided_cycle_directory);
+   return *provided_cycle_directory;
+}
+//_2016-03-11___________________________________________________________________
+bool Rotator::Rotated_scenario_simulation::setup_cropping_system()
+{  // We disable the cropping system mode because we generate from
+   // rotation template which sets up the cropping system
+   scenario_control_and_model_options.cropping_system_mode_labeled.set(rotation_cropping_system);
+   return true;
+}
+//______________________________________________________________________________
+bool Rotator::Rotated_scenario_simulation::start()                 modification_
+{  bool started = CropSyst:: LAND_UNIT_SIMULATION_SUPERCLASS::start();
+   return started;
+}
+//______________________________________________________________________________
+bool Rotator::start_year()                                         modification_
+{  bool started = Simulation_engine::start_year();
+   // we must have the rotation sim started inorder to have var recorders
+   // to print the headers
+   return started;
+}
+//______________________________________________________________________________
+bool Rotator::Rotated_scenario_simulation::end_day()               modification_
+{  perform_triggered_synchronizations_today(); // triggered sync may need to be in process method as it is with
+   bool ended = CropSyst::  LAND_UNIT_SIMULATION_SUPERCLASS::end_day();
+   // Not sure if I should commit before or after Land_unit_simulation::end_day
+   // after because there may be last minute cleanup and variables to be settled
+   // however before because end day might
+   return ended;
+}
+//_2013-08-02__________________________________________________________________/
+bool Rotator::Rotated_scenario_simulation::stop()                  modification_
+{
+   bool stopped = CropSyst::  LAND_UNIT_SIMULATION_SUPERCLASS::stop();
+   return stopped;
+}
+//_2016-03-06___________________________________________________________________
+const CORN::OS::Directory_name &Rotator::Rotated_scenario_simulation
+::get_output_directory_name()                                              const
+{ return provide_cycle_directory();                                              //160311
+}
+//_2015-01-08___________________________________________________________________
+bool Rotator::start_day()
+{  bool started = true;
+   prevent_multiple_harvests_in_same_day = false;                                //141231
+   weather_DB_daily->start_day();                                                //160802
+      // weather_DB_daily currently is not on elements list
+   started &= Simulation_engine::start_day();
+   return started;
+}
+//_2013-08-30__________________________________________________________________/
+bool Rotator::end_day()
+{
+   weather_DB_daily->end_day();                                                  //160802
+      // weather_DB_daily currently is not on elements list
+
+   return Simulation_engine::end_day();
+}
+//_2013-08-30__________________________________________________________________/
+modifiable_ Rotator::Rotated_scenario_simulation *Rotator::render_scenario_simulation
+(nat32 cycle_shift_)                                              /*rendition_*/
+{
+   const CropSyst::Scenario_directory *scenario_directory                        //160530
+      = provide_scenario_directory();
+   return new Rotator::Rotated_scenario_simulation
+      (ID
+      ,cycle_shift_
+      ,template_scenario
+      ,today
+      ,geolocation
+      ,*meteorological_ref                                                       //160525
+      ,scenario_directory
+      ,true // CropSyst Proper and OFoot we want_detail_output
+      ,get_output_directory_name()
+      ,desired_variables_daily);                                                 //170225
+}
+//_2016-05-14___________________________________________________________________
+/*170311
+CS::Weather_database_daily &Rotator::provide_weather_database_daily() provision_
+{  if (!weather_DB_daily)
+   {
+      CORN::Date32 actual_preclude_date                                          //170310
+      = (template_scenario.weather_preclude_date > 1000000)
+      ? template_scenario.weather_preclude_date
+      : template_scenario.start_date.get_year() * 1000
+         + template_scenario.weather_preclude_date;
+      weather_DB_daily = new Weather_database_daily_UED
+           (template_scenario.weather_filename,today
+           ,template_scenario.extend_available_weather
+           ,template_scenario.substitute_year_offset                             //161207
+           ,actual_preclude_date);                                               //170310
+      weather_DB_daily->know_weather_provider(&(meteorological_ref->mod_weather_provider()));
+   }
+   return *weather_DB_daily;
+}
+//_2016-07-29___________________________________________________________________
+*/
+CS::Weather_database_daily &Rotator::provide_weather_database_daily() provision_
+{  if (!weather_DB_daily)
+   {
+      CORN::Date32 actual_preclude_date                                          //170310
+      = (template_scenario.weather_preclude_date > 1000000)
+      ? template_scenario.weather_preclude_date
+      : template_scenario.start_date.get_year() * 1000
+         + template_scenario.weather_preclude_date;
+      weather_DB_daily = new Weather_database_daily_UED
+           (template_scenario.weather_filename,today
+           ,template_scenario.extend_available_weather
+           ,template_scenario.substitute_year_base                               //170323
+           ,template_scenario.start_date.get_year()                              //170331
+           ,template_scenario.substitute_year_offset                             //161207
+           ,actual_preclude_date);                                               //170310
+      /*
+      weather_DB_daily->database_file->enable_substitute_dates                   //170313
+         (template_scenario.substitute_year_offset
+         ,actual_preclude_date
+         ,template_scenario.extend_available_weather);
+      */
+   }
+   return *weather_DB_daily;
+}
+//_2016-07-29___________________________________________________________________
+CS::Weather_database_daily &Rotator::provide_weather_database_daily_with_meteorology() provision_
+{  provide_weather_database_daily();
+   weather_DB_daily->know_weather_provider(&(meteorological_ref->mod_weather_provider()));
+   return *weather_DB_daily;
+}
+//_2017-03-11___________________________________________________________________
+} //namespace CS
+

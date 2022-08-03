@@ -1,0 +1,72 @@
+
+<H2>Cladistic files</H2>
+
+Often similar crops have the same parameters
+usually corresponding to their phylogenetics.
+<P>
+The CropSyst crop parameter files can be organized
+in a cladistic  specialization structure using directory trees.
+(Currently assuming only a monophyletic like deriviation). 
+<P>
+There may be any number of cladic deriviations
+but usually there were only be 2 or three that a user will be storing/working with
+which would roughly correspond to  species/variety and cultivar, but could potentially 
+be a full  phylogenetic derivation of a prefered phylogenetic or taxanomic cladistic system.
+<P>
+Crop parameters are stored in tree structures generally a directory in the file system.  
+A directory distinquishes a clade.
+Files in a directory define the clade. These will include a parameter file
+and additional documents, images, notes, version, etc.. 
+<P>
+Subdirectories would denote derivative clades.
+<P>
+Parameter files in a clade store  only those parameters that are different
+from the parent (basal) clade.  So parameters are loaded first from the 
+parameter file in uppermost basel (ancestor) clad listed in the corresponding 
+qualified directory name path, then the next directory in the path, 
+and so on insequence until the most specialize clade parameter file in the path 
+(directory tree leaf) is loaded.
+The parameters specified in the more specialized clade parameter files override any parameters 
+that may exist in the parent clade parameter files as the are loaded in this prescribed sequence.
+<P>
+
+For example one might have a cladistic directory structure such as
+<PRE>
+Poaceae\Triticeae\Triticum\aestivum\Durum\Stanton
+Poaceae\Pooideae\Aveneae\Avena\sativa
+</PRE>
+
+<H3>Cladistic derivation in a single file (optional, conceptual)</H3>
+
+It is not necessary to use the cladistic directory structure,
+one can have a single file specifying all parameters for a crop cultivar.
+Sections denoted by { <em>clade name</em> } distinquish a clade name.
+<P>
+
+If using cladistic derivations sometimes it may be convenient to store a complete a clade deriviation line 
+in a single file this is done by having sections denoted by  the symbols {}.
+So, the cladistic form of the Crop Parameter files is an optional extension of 
+the basic crop parameter file.
+Listed in the order of deriviation for example, if one were using the phylogenetic 
+system, the file for a specific cultivar of winter wheat might look something like this.
+<P>
+<PRE>
+{Poaceae}
+eters common to all members of the Poaceae family.</EM>
+{Triticeae}
+<EM>parameters common to all members of the Triticeae Tribe.</EM>
+
+{Triticum}
+<EM>parameters common to all members of the genus Triticum.</EM>
+
+{aestivum}
+<EM>parameters common to all members of the species aestivum.</EM>
+
+{Durum}
+<EM>parameters common to all members of the durum varieties</EM>
+
+{Stanton} 
+<EM>parameters specific to the Stanton variety</EM>
+
+</PRE>
+

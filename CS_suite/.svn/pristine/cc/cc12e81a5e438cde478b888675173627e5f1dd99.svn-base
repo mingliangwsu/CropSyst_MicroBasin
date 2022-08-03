@@ -1,0 +1,43 @@
+#  include "CS_suite/simulation/CS_simulation_control.h"
+//______________________________________________________________________________
+DECLARE_CONTAINER_ENUMERATED_SECTION(Common_event,comment_event_section_VV,true);
+//NYI not sure if Common_event goes in CS namespace
+
+namespace CS {
+//______________________________________________________________________________
+bool Simulation_control::expect_structure(bool for_write)
+{  bool expected = Common_parameters_data_record::expect_structure(for_write);   //11023
+   structure_defined = false;                                                    //120314
+   EXPECT_ENUMERATED_SECTION("event",comment_event_section_VV,control_event_list);//131020
+
+   set_current_section("simulation");
+      expect_date("start_date",start_date,false);                                //110101
+      expect_date("stop_date" ,stop_date,false);                                 //110101
+      #if (CS_VERSION <= 5)
+      // In version 4 it used to be called starting_date and ending_date
+      // we will continue to recognize in version 5
+      if (!for_write)
+      {  expect_date("starting_date",start_date,false);                          //110101
+         expect_date("ending_date" ,stop_date,false);                            //110101
+      }
+      #endif
+      expect_bool("rotation_cycling",rotation_cycling);                          //160219_151008
+      expect_nat32("inspection",inspection_levels,2);                            //150919
+   structure_defined = true;                                                     //120314
+   return expected;                                                              //161023
+}
+//______________________________________________________________________________
+Simulation_control::Simulation_control(nat8  _major,nat8  _release,nat8  _minor)
+: Common_parameters_data_record(OPTIONAL_ASSOCIATED_DIRECTORY,"section",_major, _release, _minor)
+,ID(0)
+,control_event_list()
+,rotation_cycling(false)                                                         //151008
+,inspection_levels(0)                                                            //151013
+{}
+//______________________________________________________________________________
+Simulation_control::~Simulation_control()
+{  control_event_list.delete_all(); }
+//______________________________________________________________________________
+} // namespace CS
+// Simulation_control.cpp
+

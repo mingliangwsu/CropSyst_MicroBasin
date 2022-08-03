@@ -1,0 +1,28 @@
+#ifndef PARAMETER_INTERPOLATIONH
+#define PARAMETER_INTERPOLATIONH
+#include "corn/math/numerical/interpolate.h"
+#include "corn/parameters/number_keyed.h"
+namespace CORN
+{
+//______________________________________________________________________________
+class Parameter_interpolation_dated
+: public implements_ CORN::Item
+{
+   const       CORN::Date   &today;
+   modifiable_ Number_keyed &parameter;
+   Interpolation_curve_dated curve;   // owned always instanciated
+ public:
+   Parameter_interpolation_dated
+      (Interpolation_curve_type curve_type
+      ,const CORN::Date     &_today
+      ,Number_keyed  &_parameter);
+
+   bool update();
+
+   inline virtual const char *get_key()                                    const { return parameter.get_key(); }
+   inline virtual const wchar_t  *get_key_wide()                           const { return parameter.get_key_wide(); } //110828
+
+};
+//_2015-01-11__________________________________________Parameter_interpolation_/
+} // namespace CORN
+#endif // PARAMETER_INTERPOLATION_H

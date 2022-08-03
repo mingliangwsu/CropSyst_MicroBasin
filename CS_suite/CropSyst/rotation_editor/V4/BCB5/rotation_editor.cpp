@@ -1,0 +1,176 @@
+#include <vcl.h>
+#pragma hdrstop
+#include "form_rotation_editor.h"
+#include "GUI/parameter/form_param_file.h"
+#include "CropSyst/GUI/help/rotation.h"
+#include "CropSyst/source/options.h"
+#include "CropSyst/source/cs_scenario_directory.h"
+//140124 #include "CropSyst/source/cs_project_directory.h"
+USEFORM("..\..\..\..\..\GUI\parameter\form_param_file.cpp", parameter_file_form);
+USEFORM("..\form_sowing_event1.cpp", sowing_event_form);
+USEFORM("..\form_rotation_editor.cpp", rotation_editor_form);
+//---------------------------------------------------------------------------
+#include "CropSyst/source/rotfile.h"
+#include "corn/data_source/vv_file.h"
+#include "CropSyst/source/rot_param.h"
+#include "CS_Suite/common_editor_main_inc.cpp"
+//______________________________________________________________________________
+/*140124
+bool rotation_file_is_version3(const char *rot_filename_cstr)
+{
+   // I determine that the file is version 3 if the first character
+   // is not a section bracket [section]
+   std::ifstream rot_file(rot_filename_cstr);
+   char first_char;
+   rot_file >> first_char;
+   bool is_V3 = first_char != '[';
+   return is_V3;
+}
+//______________________________________________________________________________
+void convert_V3_to_V4_rotation
+(const ROT_filename &rotation_filename)
+{
+   CropSyst::Rotation_parameters V4_rotation;
+   Rotation_file V3_rotation;
+   V3_rotation.load(rotation_filename);
+   FOR_EACH_IN(rot_entry,Rotation_entry,V3_rotation,each_entry)
+   {
+      CropSyst::Sowing_event *sowing_event = new CropSyst::Sowing_event();
+      CropSyst::Sowing_operation &sow_op = sowing_event->provide_sowing_operation(); //130415
+      //130415       CropSyst::Sowing_operation *sow_op = sowing_event->get_sowing_operation();
+      sow_op.crop_filename.set_DEN(rot_entry->crop_filename);
+      sow_op.management_filename.set_DEN(rot_entry->management_filename);
+
+      // create a new sowing event and append to V4 rotation;
+      sowing_event->begin_sync.sync_mode_labeled.set(ACTUAL_DATE_MODE);
+      sowing_event->date.set(rot_entry->planting_date);                          //120316
+      sowing_event->begin_sync.set(rot_entry->planting_date);
+      V4_rotation.sowing_events.add_sorted(sowing_event);
+   } FOR_EACH_END(each_entry);
+   VV_File V4_file(rotation_filename.c_str());
+   V4_file.set(V4_rotation);
+}
+//______________________________________________________________________________
+*/
+DECLARE_EDITOR_DIRECTORY
+//______________________________________________________________________________
+WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+// Arguments
+// 0  the program
+// 1  rotation filename
+// 2  master database  (if omitted C:\Simulation\Database will be assumed)
+// 3  project database (may be omitted, in which case only the master database will be available)
+// 4  scenario database (may be omitted, if so, only master and project database will be available)
+
+   try
+   {
+      /* 140124
+      setup_simulation_paths(CS_VERSION_NUMBERS,LABEL_CS_suite );   // CS_suite_4
+      */
+      INSTANCIATE_EDITOR_DIRECTORIES
+      Application->Initialize();
+       Application->CreateForm(__classid(Tparameter_file_form), &parameter_file_form);
+       Application->CreateForm(__classid(Trotation_editor_form), &rotation_editor_form);
+       Application->CreateForm(__classid(Tsowing_event_form), &sowing_event_form);
+       CropSyst::Rotation_parameters  rotation_params;                           //130415
+       int paramcount =  ParamCount();
+
+
+continue here replace this with the new CropSyst::Context_directory CS::Context_directory
+
+      CORN::Smart_directory_name  *master_dirname = 0;
+      CORN::Smart_directory_name  *project_dirname = 0;
+      CORN::Smart_directory_name  *scenario_dirname = 0;
+      /*140124   //Most of the time crop and management are stored in the project directory
+      if (paramcount >= 1)
+      {
+         master_dirname =
+         (paramcount == 1)
+         ?  new   CORN::Smart_directory_name(simulation_paths->get_simulation_dir().c_str())
+         :  new   CORN::Smart_directory_name(ParamStr(2).c_str());    // <- becoming obsolete
+      }
+      */
+
+
+
+      CORN::OS::File_name_logical /*140124 ROT_filename*/ ROT_filename(ParamStr(1).c_str());
+      int enarios_pos = ROT_filename.find(L"enarios");                           //070424 these may need to be find_substring
+      if (enarios_pos != CORN_npos)
+      {
+            int scenario_dir_end_pos =  ROT_filename.rfind(L"atabase");
+            if (scenario_dir_end_pos != std::string::npos)
+            {  scenario_dir_end_pos -= 2;
+               Ustring scenario_dir_name(ROT_filename.substr(0,scenario_dir_end_pos));
+
+               CropSyst::Scenario_directory scenario_dir(scenario_dir_name.c_str()); // Although this normally takes a scenario filename, it should also work with the dir name
+               scenario_dirname = new  CORN::Smart_directory_name(scenario_dir.c_str());
+               project_dirname  = new  CORN::Smart_directory_name(scenario_dir);
+		         scenario_dir.get_project_directory(*project_dirname);             // 100310
+            }
+      }
+
+
+         if (!project_dirname)
+         {
+            int project_dir_end_pos =  ROT_filename.rfind("atabase");
+            if (project_dir_end_pos != CORN_npos)
+            {
+               project_dir_end_pos -= 2;
+               std::string project_dir_name(ROT_filename.substr(0,project_dir_end_pos));
+               if (project_dir_name != master_dirname->c_str())
+               {
+                    project_dirname = new CORN::Smart_directory_name (project_dir_name.c_str()); // I may need to append the project extions.
+
+               } // else we are editing a rotation file in the master database.
+            }
+         }
+         /*140124 obsolete
+         #if (CROPSYST_VERSION < 5)
+         // convert V3 to V4 if needed.
+         bool is_V3 =
+            ROT_filename.exists() &&
+            rotation_file_is_version3(ParamStr(1).c_str());
+         if (is_V3)
+            convert_V3_to_V4_rotation(ParamStr(1).c_str());
+         #endif
+         */
+
+         Association_list file_type_descriptions;                                //140124
+         file_type_descriptions.append(new File_type_description
+            (CS_rotation_EXT,"CropSyst Rotation",CS_rotation_wildcard));
+
+         rotation_editor_form->bind_to(&rotation_params
+         ,parameter_file_form
+         ,master_dirname->c_str()                        // master database
+         ,project_dirname ? project_dirname->c_str() : 0// project database
+         ,scenario_dirname? scenario_dirname->c_str() : 0 // (paramcount >=4) ? ParamStr(4).c_str() : 0   // scenario database
+         /*140124
+         #if (CROPSYST_VERSION < 5)
+         ,is_V3
+         #endif
+         */
+         );
+         BIND_EDITOR_FORM_AND_PARAMETERS_TO_PARAMETER_FILE_FORM(rotation_params,rotation_editor_form
+            ,ROT_filename
+            ,&file_type_descriptions);                                          //140124
+            //140124  ,&ROT_filename.get_file_type_descriptions());                        //130415
+      Application->Run();
+      if (master_dirname)  delete master_dirname;
+      if (project_dirname) delete project_dirname;
+      if (scenario_dirname)delete scenario_dirname;
+      /*140124 obsolete
+      setdown_simulation_paths();
+      */
+   }
+   catch (Exception &exception)
+   {  Application->ShowException(&exception);
+   }
+   return 0;
+}
+//______________________________________________________________________________
+bool LADSS_mode = false;
+//---------------------------------------------------------------------------
+// "C:\Simulation" "C:\Simulation\Projects\test"
+
+

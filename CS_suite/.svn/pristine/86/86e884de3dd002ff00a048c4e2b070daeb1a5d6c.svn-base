@@ -1,0 +1,156 @@
+//______________________________________________________________________________
+#include <vcl.h>
+#pragma hdrstop
+#include "CropSyst/source/options.h"
+#include "form_sowing_event.h"
+#include "CropSyst/source/rot_param.h"
+//130415 #include "CropSyst/source/cs_paths.h"
+#include "CropSyst/GUI/help/rotation.h"
+#include "GUI/parameter/form_param_file.h"
+#include "CropSyst/source/database_dir.h"
+#include "CS_suite/CS_suite_directory.h"
+#include "CropSyst/source/cs_event.h"
+#include "corn/OS/file_system_engine.h"
+//______________________________________________________________________________
+#pragma package(smart_init)
+#pragma link "AutoDateButton"
+#pragma link "AutoFileEditBar"
+#pragma link "AutoFloat32EditBar"
+#pragma link "AutoInt16EditBar"
+#pragma link "AutoRadioGroup"
+#pragma link "AutoStringEdit"
+#pragma link "FlCtrlEx"
+#pragma link "AutoSimDatabaseFileEditBar"
+#pragma link "AutoSimDatabaseDropdownFileEditBar"
+#pragma resource "*.dfm"
+Tsowing_event_form *sowing_event_form;
+//______________________________________________________________________________
+__fastcall Tsowing_event_form::Tsowing_event_form(TComponent* Owner)
+   : TForm(Owner)
+,master_database_crop_directory(0)
+,project_database_crop_directory(0)
+,scenario_database_crop_directory(0)
+,master_database_management_directory(0)
+,project_database_management_directory(0)
+,scenario_database_management_directory(0)
+{}
+//______________________________________________________________________________
+void Tsowing_event_form::bind_to
+(CropSyst::Sowing_event *_sowing_event
+,Tparameter_file_form   *_parameter_form
+,Database_directory     *master_database_directory
+,Database_directory     *project_database_directory
+,Database_directory     *scenario_database_directory)
+{
+   parameter_form =  _parameter_form;
+   sowing_event =    _sowing_event;
+   if (sowing_event)
+   {
+      sowing_op = &sowing_event->
+         provide_sowing_operation();                                             //130416
+         //130416 get_sowing_operation();
+
+      if (sowing_op)
+      {
+         /*140124 disabling master directory because I don't think
+            it is really used for crop and management 
+         if (master_database_directory)
+         {  master_database_crop_directory         = new CORN::Smart_directory_name(master_database_directory->provide_crop_directory(false));
+            master_database_management_directory   = new CORN::Smart_directory_name(master_database_directory->provide_management_directory(false));
+         };
+         */
+         if (project_database_directory)
+         {  project_database_crop_directory        = new CORN::Smart_directory_name(project_database_directory->provide_crop_directory(false));
+            project_database_management_directory  = new CORN::Smart_directory_name(project_database_directory->provide_management_directory(false));
+         };
+         if (scenario_database_directory)
+         {  scenario_database_crop_directory       = new CORN::Smart_directory_name(scenario_database_directory->provide_crop_directory(false));
+            scenario_database_management_directory = new CORN::Smart_directory_name(scenario_database_directory->provide_management_directory(false));
+         };
+         sowing_date_button      ->bind_to(&(sowing_event->begin_sync),"Sowing target date",false  V4_HELP_URL(HELP_P_rotation_planting_date));
+         radiogroup_sowing_date  ->bind_to(&(sowing_op->sowing_date_mode_labeled)                  V4_HELP_URL(HELP_P_rotation_sowing_date_mode));
+
+         crop_database_dropdownfilebar   ->bind_to
+         (&(sowing_op->crop_filename)
+         ,"Crop file"
+         ,"this parameter is obsolete"
+         ,"\\Crop\\"    // i_database_marker
+         ,master_database_crop_directory    // I.e. "C:\Simulation\Database\Soil"
+         ,project_database_crop_directory   // I.e. "C:\Simulation\projects\database\Soil"
+         ,scenario_database_crop_directory  // I.e. "C:\Simulation\projects\Scenarios\senario1\database\Soil"
+         V4_HELP_URL(HELP_P_rotation_crop)
+         ,0 // NYI CORN::Validation_status   *i_status = 0
+         ,0 // NYI CORN::Smart_file_name     *i_validation_filename = 0
+         );
+         crop_database_dropdownfilebar->set_editor
+            (CS::Suite_directory->CropSyst().crop_editor_executable().c_str(),"");
+         DragAcceptFiles(crop_database_dropdownfilebar->Handle,true);
+         management_database_dropdownfilebar   ->bind_to
+         (&(sowing_op->management_filename)
+         ,"Management file"
+         ,"this parameter is obsolete"
+         ,"\\Management\\"    // i_database_marker
+         ,master_database_management_directory    // I.e. "C:\Simulation\Database\Soil"
+         ,project_database_management_directory   // I.e. "C:\Simulation\projects\database\Soil"
+         ,scenario_database_management_directory  // I.e. "C:\Simulation\projects\Scenarios\senario1\database\Soil"
+          V4_HELP_URL(HELP_P_rotation_management)
+         ,0 // NYI CORN::Validation_status   *_status = 0
+         ,0 // NYI CORN::Smart_file_name     *_validation_filename = 0
+         );
+         management_database_dropdownfilebar->set_editor
+             (CS::Suite_directory->CropSyst().management_editor_executable().c_str(),"");
+         DragAcceptFiles(management_database_dropdownfilebar->Handle,true);
+         // sowing conditions
+         delay_after_precip_edit ->bind_to(&(sowing_op->v_delay_after_precip)             V4_HELP_URL(HELP_P_rotation_sow_delay_after_precip));
+         appreciable_precip_edit ->bind_to(&(sowing_op->v_appreciable_precip_mm)          V4_HELP_URL(HELP_P_rotation_sow_appreciable_precip));
+         min_required_PAW_edit   ->bind_to(&(sowing_op->v_sowing_min_PAW)                 V4_HELP_URL(HELP_P_rotation_sow_min_required_PAW));
+         max_required_PAW_edit   ->bind_to(&(sowing_op->v_sowing_max_PAW)                 V4_HELP_URL(HELP_P_rotation_sow_max_required_PAW));
+         temperature_evaluation_radiogroup->bind_to(&(sowing_op->sowing_date_mode_labeled)V4_HELP_URL(HELP_P_rotation_sow_temperature_evaluation));
+         expected_days_to_emerge_edit    ->bind_to(&(sowing_op->v_expected_days_to_emerge)V4_HELP_URL(HELP_P_rotation_sow_expected_days_to_emerge));
+         temperature_5_days_edit          ->bind_to(&(sowing_op->v_sowing_avg_temp)       V4_HELP_URL(HELP_P_rotation_sow_temperature_5_days));
+         { // Seeding option
+            seeding_rate_edit    ->bind_to(&(sowing_op->seeding_parameters.v_rate_seeds     )V4_HELP_URL(HELP_P_rotation_seed_application_rate));
+            emergence_rate_edit  ->bind_to(&(sowing_op->seeding_parameters.v_emergence_rate )V4_HELP_URL(HELP_P_rotation_seed_emergence_rate));
+            sowing_depth_edit    ->bind_to(&(sowing_op->seeding_parameters.v_sowing_depth   )V4_HELP_URL(HELP_P_rotation_sowing_depth));
+         };
+      };
+   };
+   sowing_date_radiogroup_onclick(0);
+};
+//______________________________________________________________________________
+void __fastcall Tsowing_event_form::sowing_date_radiogroup_onclick(TObject *Sender)
+{  if (sowing_op)
+      conditions_tabsheet->TabVisible = sowing_op->sowing_date_mode_labeled.get() > CropSyst::FIXED_DATE;
+}
+//______________________________________________________________________________
+void __fastcall Tsowing_event_form::ok_button_onclick(TObject *Sender)
+{  sowing_op->description.assign("");
+   sowing_op->description.append("crop:");
+   std::wstring name_buffer;                                                     //140124
+   sowing_op->crop_filename.append_name_with_extension_to(name_buffer/*140124 sowing_op->description*/);              //140124_120625
+   CORN::append_wstring_to_string(name_buffer,sowing_op->description);           //140124
+   sowing_op->description.append(" | management:");
+   sowing_op->management_filename.append_name_with_extension_to(name_buffer/*140124 sowing_op->description*/);    //140124_120625
+   CORN::append_wstring_to_string(name_buffer,sowing_op->description);
+
+}
+//______________________________________________________________________________
+void __fastcall Tsowing_event_form::help_buttonClick(TObject *Sender)
+{
+   /*140124
+   Smart_file_name manual_filename_buffer;
+   parameter_file_form->provide_program_directory().Documentation()
+      .compose_manual_subdirectory_filename
+         ("sowing_event.htm",parameter_file_form->composed_filename_buffer).c_str();
+   */
+   CORN::OS::File_name* sowing_event_docs =
+      parameter_file_form->provide_program_directory().Documentation()
+      .find_document_filename_cstr("sowing_event.htm");
+   if (sowing_event_docs)
+   {
+      CORN::OS::file_system_engine.view_file(*sowing_event_docs);
+      delete sowing_event_docs;
+   }
+}
+//_2014-01-24___________________________________________________________________
+

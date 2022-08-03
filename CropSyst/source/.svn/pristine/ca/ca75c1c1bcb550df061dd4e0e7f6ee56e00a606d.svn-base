@@ -1,0 +1,171 @@
+#ifndef cs_accumH
+#define cs_accumH
+#include "options.h"
+#include "corn/datetime/date.hpp"
+#include "corn/math/statistical/sample_cumulative_T.h"
+#define key_profile_sum_depths_COUNT 7
+namespace CropSyst {
+class Land_unit_simulation_VX;
+class Pond;                                                                      //160408
+extern float32 key_profile_sum_depths[];                                         //160629
+//______________________________________________________________________________
+class Water_balance_accumulators
+{
+ protected:
+   CropSyst::Land_unit_simulation_VX &simulation;                                //141206
+   const Pond              &pond;                                                //160408_991102
+ public:
+   float64 init_total_water_content;  //131004 actually this is water depth
+   float64 water_depletion;
+   float64 initial_ponded;
+   float64 eff_precipitation;
+   float64 irrigation;
+   float64 runoff;
+   float64 act_transpiration;
+   float64 act_uptake;                                                           //160414
+   float64 crop_intercept;                                                       //160419
+   float64 residue_interception;
+   float64 act_residue_evaporation;
+   float64 act_soil_evaporation;
+   float64 act_pond_evaporation;                                                 //160724
+   float64 water_table_input;                                                    //981019
+#ifdef WSHEDMOD
+   float64 lateral_flow_in;
+   float64 lateral_flow_out;
+#endif
+   float64 reported_drainage;
+   float64 balance_drainage;                                                     //990106
+   float64 finite_diff_error; //  for water balance
+   float64 water_cont_recalib; // For recalibration                              //000313
+   float64 water_balance;
+   float64 water_balance_last;                                                   //151225
+ public:
+   Water_balance_accumulators
+      (CropSyst::Land_unit_simulation_VX &simulation                             //010202
+      ,float64 init_total_water_content
+      ,float64 initial_ponded);
+   virtual void accumulate(const CORN::Date & today,bool run_nitrogen);
+   void compute_water_balance
+      (float64 total_soil_water_content_today
+      ,float64 daily_finite_diff_error_today
+      //160408 now member reference to pond ,float64 ponded
+      ,float64 deferred // F.D.                                                  //071024
+      ,bool  main_water_balance                                                  //000626
+      ,bool show_water_balance_errors);                                          //051115
+};
+//_1999-03-10________________________________class Water_balance_accumulators__/
+class Period_accumulators
+: public Water_balance_accumulators
+{
+ public: // Mass units are all in kg/m²
+      float64
+      gaseous_N_loss,
+      pot_evapotranspiration,
+      act_evapotranspiration,
+      ref_evapotranspiration,                                                    //130723
+      pot_transpiration,
+//already in Water_balance_accumulators       crop_intercept,                                                            //160414
+      //160419 crop_intercept_stored,                                                     //160414
+
+      pot_soil_evaporation,
+      pot_residue_evaporation,
+      precip_m,
+      act_water_entering_soil,  // <- This is now what we want to report
+      #ifdef MICROBASIN_VERSION
+      water_stress_index,                                                        //161101LML
+      nitrogen_stress_index,                                                     //161101LML
+      #endif
+      soil_infiltration,
+      total_N_applied, // inorganic and organic                                  //150323
+      inorganic_N_applied,                                                       //160323
+      organic_N_applied,
+      NH3_volatilization_loss,                                                   //021212
+      inorganic_NH4_to_atmosphere,
+      N_fert_requirements,
+      N_fixation,
+      N_uptake,                                                                  //120514
+
+      //050118 we now only have mineralization from organic matter
+      straw_mineralization_V4_1,    // These only apply to version 4.1
+      manure_mineralization_V4_1,
+      OM_N_mineralization,                                                       //110918
+      N_immobilization,                                                          //040209
+      biomass_grazed,                                                            //040209
+      biomass_unsatisfied,                                                       //040627
+      gaseous_CO2_C_loss_OM,                                                     //060426
+      gaseous_CO2_C_loss_SOM, // Including microbial                             //060811
+      gaseous_CO2_C_loss_residue,                                                //060811
+
+      C_decomposed_SOM_profile,                                                  //090520
+      C_decomposed_SOM_5cm,                                                      //090520
+      C_decomposed_SOM_10cm,                                                     //090520
+      C_decomposed_SOM_15cm,                                                     //090520
+      C_decomposed_SOM_30cm,                                                     //090520
+      C_decomposed_SOM_60cm,                                                     //090520
+      C_decomposed_SOM_90cm,                                                     //090520
+
+      C_decomposed_residue_profile,  // was C_decomposed_residue_subsurface      //090520
+      C_decomposed_residue_5cm,                                                  //090520
+      C_decomposed_residue_10cm,                                                 //090520
+      C_decomposed_residue_15cm,                                                 //090520
+      C_decomposed_residue_30cm,                                                 //090520
+      C_decomposed_residue_60cm,                                                 //090520
+      C_decomposed_residue_90cm,                                                 //090520
+
+      C_decomposed_residue_flat,                                                 //060811
+      C_decomposed_residue_stubble,                                              //060811
+      C_decomposed_residue_attached,                                             //060811
+      C_incorporated_by_tillage,                                                 //060811
+      C_removed_by_harvest,                                                      //060811
+      plant_C_mass_canopy,                                                       //060811_110915
+      plant_C_mass_roots,                                                        //060811_110915
+
+      N_mass_yield,                                                              //120117
+
+      N2O_loss_denitrification,                                                  //060606
+      N2O_loss_nitrification                                                     //090722
+      ;
+      float64 N_OM_mineralization[key_profile_sum_depths_COUNT];                 //160629
+      float64 N_OM_immobilization[key_profile_sum_depths_COUNT];                 //160629
+      /*160629
+      N_OM_mineralization_profile,                                               //061116
+      N_OM_mineralization_5cm,                                                   //061116
+      N_OM_mineralization_10cm,                                                  //090415
+      N_OM_mineralization_15cm,                                                  //090415
+      N_OM_mineralization_30cm,                                                  //061116
+      N_OM_mineralization_60cm,                                                  //061116
+      N_OM_mineralization_90cm,                                                  //061116
+      N_OM_immobilization_profile,                                               //061116
+      N_OM_immobilization_5cm,                                                   //061116
+      N_OM_immobilization_10cm,                                                  //090415
+      N_OM_immobilization_15cm,                                                  //090415
+      N_OM_immobilization_30cm,                                                  //061116
+      N_OM_immobilization_60cm,                                                  //061116
+      N_OM_immobilization_90cm                                                   //061116
+      ;
+      */
+   CORN::Statistical_sample_cumulative<float32,float32>air_temperature_stats;    //160324
+      // Tina wanted this
+ public:
+   float64 N_uptake_today ;                                                      //120514
+      // this is not an accumulator, just storying it so we don't have duplicate
+ public:
+   Period_accumulators
+      (CropSyst::Land_unit_simulation_VX &i_simulation
+      ,float64 i_init_total_water_content
+      ,float64 i_initial_ponded);
+   virtual void accumulate(const CORN::Date & today,bool run_nitrogen);
+ };
+//_2001-02-02_______________________________________class Period_accumulators__/
+class Annual_accumulators : public Period_accumulators
+{
+public:
+   Annual_accumulators
+      (CropSyst::Land_unit_simulation_VX & i_simulation
+      ,float64 i_init_total_water_content
+      ,float64 i_initial_ponded);
+};
+//_2001-02-02_______________________________________class Annual_accumulators__/
+} // namespace CropSyst
+#endif
+//cs_accum.h

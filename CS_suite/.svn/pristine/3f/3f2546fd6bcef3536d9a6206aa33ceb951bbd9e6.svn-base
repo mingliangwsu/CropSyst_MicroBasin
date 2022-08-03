@@ -1,0 +1,52 @@
+/* When using C++, this file is #included by the .cpp file so do not
+add this .c file to to be linked with C++ project makefiles or IDE's.
+You can compile this file (to check for errors),
+but don't then link the .o file to C++ programs.
+For a C program/library do link the .o file compiled for the .cpp file.
+*/
+#include "CS_suite/file_system/CS_file_ext.hh"
+#include "corn/string/strconv.h"
+//______________________________________________________________________________
+Alternate_extensions alternate_extension[] =
+{{"N/A"                 ,"scenario"            ,{CS_scenario_LEXT_V5      ,CS_scenario_LEXT_V4}}
+,{"parameter_filenames" ,"weather"             ,{L"UED"                   ,L"UED"}}
+//obsolete ,{"parameter_filenames","weather_database"    ,{L"UED"                   ,L"UED"}}
+,{"parameter_filenames" ,"soil"                ,{CS_soil_LEXT_V5          ,CS_soil_LEXT_V4}}
+,{"parameter_filenames" ,"management"          ,{CS_management_LEXT_V5    ,CS_management_LEXT_V4}}
+,{"parameter_filenames" ,"fixed_management"    ,{CS_management_LEXT_V5    ,CS_management_LEXT_V4}}
+,{"parameter_filenames" ,"water_table"         ,{CS_water_table_LEXT_V5   ,CS_water_table_LEXT_V4}}
+,{"cropping_system"     ,"rotation"            ,{CS_rotation_LEXT_V5      ,CS_rotation_LEXT_V4}}
+,{"parameter_filenames" ,"recalibration"       ,{CS_recalibration_LEXT_V5 ,CS_recalibration_LEXT_V4}}
+,{"incorporated_residue","previous_crop"       ,{CS_crop_LEXT_V5          ,CS_crop_LEXT_V4}}
+,{"parameter_filenames" ,"crop"                ,{CS_crop_LEXT_V5          ,CS_crop_LEXT_V4}}
+,{"parameter_filenames" ,"organic_matter"      ,{L"organic_matter"        ,L"organic_matter"}}
+
+#if (CS_VERSION <6)
+// provide for V4 scenario files
+,{"parameter_filenames" ,"weather_database"    ,{L"UED"                   ,L"UED"}}
+#endif
+// not applicable to scenarios ,{XXXXX                 ,{CS_biomatter_LEXT         ,CS_biomatter_LEXT} // same in V4 and V5
+,{0,0 , {0,0} }
+};
+//_2016-11-01___________________________________________________________________
+Alternate_extensions *lookup_alternate_extensions_by_variable
+(const char *variable)
+{
+   Alternate_extensions *found = 0;
+   for (int e = 0; !found && alternate_extension[e].variable; e++)
+      if (stricmp/*170213RLN strcmp*/(alternate_extension[e].variable,variable) == 0)
+         found = &alternate_extension[e];
+   return found;
+}
+//_2016-11-01___________________________________________________________________
+Alternate_extensions *lookup_alternate_extensions_by_extension
+(const wchar_t *extension)
+{
+   Alternate_extensions *found = 0;
+   for (int e = 0; !found && alternate_extension[e].variable; e++)
+      if (  (stricmpw(alternate_extension[e].extension[0],extension) == 0)
+          ||(stricmpw(alternate_extension[e].extension[1],extension) == 0))
+         found = &alternate_extension[e];
+   return found;
+}
+//_2016-11-01___________________________________________________________________

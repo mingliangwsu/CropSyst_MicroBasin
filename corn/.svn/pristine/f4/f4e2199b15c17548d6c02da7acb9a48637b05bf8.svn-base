@@ -1,0 +1,733 @@
+#include <string>
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "corn/OS/file_system_engine_common.h"
+#include "corn/container/text_list.h"
+#include "corn/string/strconv.hpp"
+#include "corn/seclusion.h"
+
+#include <sys/stat.h>
+// for struct stat and stat()  (Unix, Linux, Windows)
+#if (defined(_WIN32)  || defined(_WIN64) || defined(__MSDOS__))
+#  include <dir.h>
+#else
+#  include <errno.h>
+#endif
+#ifdef __unix
+//__MINGW_ANSI_STDIO__
+#include <unistd.h>
+#endif
+// for getcwd()  dir.h may be Windows specific
+
+#ifdef _MSC_VER
+#include <direct.h>
+#endif
+#include <stdlib.h>
+#include <stdio.h>
+#include <fstream>
+#include <iostream>
+
+namespace CORN { namespace OS {
+std::wstring name_ext; // This is here as a hack because the compiler doesn't like this as a declaration local for some unknown reason
+//______________________________________________________________________________
+File_system::Directory::Type File_system_engine_common::identify_type
+(const Directory_entry_name &entry_name)                                   const
+{  // This code is the same for Unix, Linux, Windows and POSIX complient OS.
+#ifdef WINAPI
+   struct _stat st_buf;                                                          //120209
+   if ((entry_name.w_str()[1] == L':') && (entry_name.w_str()[2] == 0))          //150305
+      return directory_entry;                                                    //150305
+   int status = _wstat(entry_name.w_str(),&st_buf);                              //120209
+#  else
+   // I don't know if Unix/Linux have wide versions of these functions
+   struct stat st_buf;
+   int status = stat(entry_name.c_str(),&st_buf);
+#  endif
+   File_system::Directory::Type identified_type
+      = (status == 0) ? ((File_system::Directory::Type )((st_buf.st_mode & S_IFMT) >> 12)) :unknown_entry;
+
+   // For other OS's will likely need to reimplement this method in a derived class.
+   return identified_type;
+}
+//_______________________________________________________________identify_type_/
+Directory_name *File_system_engine_common::render_current_working_directory() const
+{  char cwd[1024];
+#  ifdef _MSC_VER
+      _getcwd
+#  else
+      getcwd                                                                     //981104
+#  endif
+      (cwd,1023);
+   return new Directory_name_concrete(cwd);                                      //160206
+      //160206 Directory_entry_name_concrete(cwd,directory_entry);
+}
+//_2009-12-08________________________________render_current_working_directory__/
+Directory_name *File_system_engine_common::render_current_working_directory_on_drive(const Drive_designator &logical_drive_name) const
+{
+   // Only Windows, DOS, OS2? and AmigaDOS have drive designators
+   // For all others, we simply get the current working directory.
+   return render_current_working_directory();
+}
+//_2012-04-30___________________________________________________________________
+#ifndef ENOENT
+//120711 Some older compilers (I.e. BCB5) might not have ENOENT defined
+#define ENOENT 2
+#endif
+
+bool File_system_engine_common::log_any_delete_error
+( int unlink_or_rm_dir_error,CORN::Text_list &error_log)                   const
+{  bool in_error = unlink_or_rm_dir_error > 0;
+   if (in_error)                                                                 //091219
+   {  std::string error_message("Error (");
+      char error_no[10];
+      int16_to_cstr(unlink_or_rm_dir_error,error_no,10);
+      error_message.append(error_no);
+      error_message.append(
+                  (unlink_or_rm_dir_error == ENOENT )
+                  ? ") Path or file function not found"
+                  : ") Permission denied");
+      error_log.add_cstr(error_message.c_str());
+   }
+   return in_error;
+}
+//_______________________________________________________log_any_delete_error__/
+Directory_entry_name *File_system_engine_common::render_resolved_absolute_DEN //161013 directory_entry_name
+(const Directory_entry_name &filename_abs_or_rel
+//case 1:..\..\..\X\Y\z.ext
+//case 2:X\Y\z.ext
+//case_3:z.ext
+//case_4:.\z.ext
+
+,const Directory_name &with_respect_to_directory_name_qualified)                rendition_
+//Case A: C:\L\M\N\O
+{
+/*
+//Result 1A: C:\L\X\Y\z.ext
+//Result 2A: C:\L\M\N\C\X\Y\z.ext
+*/
+
+
+//std::clog << "rel DE:" << filename_abs_or_rel.c_str() << std::endl;
+//std::clog << "respt :" << with_respect_to_directory_name_qualified.c_str() << std::endl;
+   bool appears_to_be_relative
+     = filename_abs_or_rel.is_relative();//160204
+   bool qualified = filename_abs_or_rel.is_qualified(true);
+   if (!appears_to_be_relative && qualified)                                     //160204
+      return new CORN::OS::Directory_entry_name_concrete(filename_abs_or_rel.w_str());
+
+   bool stop_decomposing_relative_paths = false;
+   CORN::Text_list relative_path_dir_names;
+   filename_abs_or_rel.append_path_list_to
+      (relative_path_dir_names
+      ,CORN::OS::Directory_entry_name::include_path_designated);
+
+   //relative_path_dir_names case1:  .. .. .. X Y
+//std::clog << "rel:" << filename_abs_or_rel.c_str() << std::endl;
+//relative_path_dir_names.write(std::clog);
+
+   CORN::Text_list left_absolute_path_dir_names;
+//std::clog << "respt :" << with_respect_to_directory_name_qualified.c_str() << std::endl;
+
+   with_respect_to_directory_name_qualified.append_path_list_to
+      (left_absolute_path_dir_names
+      ,CORN::OS::Directory_entry_name::include_path_designated | CORN::OS::Directory_entry_name::include_name);
+
+   // left_absolute_path_dir_names caseA: C: L M N O
+//left_absolute_path_dir_names.write(std::clog);
+
+  CORN::Text_list right_absolute_path_dir_names;
+
+   bool abort = false;
+   bool found_relative = false;
+   bool continue_resolving = true;
+   while (!abort && continue_resolving)
+   {  //Warning: currently unicode filenames are converted to ASCII
+      // I need a wide version of Text list
+      // (Actually I need to eliminate Text_list and add string_items to container).
+      CORN::Text_list::Item *curr_rel_dirname = dynamic_cast<CORN::Text_list::Item *>(relative_path_dir_names.pop_at_head());
+      if (curr_rel_dirname)
+      {
+         if ((*curr_rel_dirname) == ".")
+         {  found_relative = true;/* do nothing, eat the . */
+            delete curr_rel_dirname;                                             //120615
+         } else if ((*curr_rel_dirname) == "..")
+         {  found_relative = true;
+            if (stop_decomposing_relative_paths)
+               abort = true;
+            else
+            {
+               CORN::Text_list::Item *dropped_dir = dynamic_cast<CORN::Text_list::Item *>(left_absolute_path_dir_names.pop_at_tail());
+               delete dropped_dir;
+            }
+            delete curr_rel_dirname;                                             //120615
+         }
+         else if ((*curr_rel_dirname) == "~")
+         { // user home directory on Linux and Unix                              //120615
+             // std::string home_dir(getenv("HOME"));                            //120615
+             const char *current_home_dir(getenv("HOME"));
+             Directory_name_concrete HOME_dir_name(current_home_dir ? current_home_dir : DEFAULT_DIRECTORY_SEPARATORa_str); //120627
+             CORN::Text_list home_actual_dir_names;                              //120627
+             HOME_dir_name .append_path_list_to(home_actual_dir_names,CORN::OS::Directory_entry_name::include_all); //120527
+             right_absolute_path_dir_names.transfer_all_from(home_actual_dir_names); //120527
+             left_absolute_path_dir_names.delete_all();                          //120627
+             delete curr_rel_dirname;                                            //120615
+             found_relative = true;                                              //120627
+         }                                                                       //120615
+         else // it is a directory name
+         {  right_absolute_path_dir_names.append(curr_rel_dirname);
+            stop_decomposing_relative_paths = true;
+         }
+      } else
+         continue_resolving = false;
+   }
+
+   // right_absolute_path_dir_names case1A:
+//left_absolute_path_dir_names.write(std::clog);
+   // left_absolute_path_dir_names case_1a  C: L
+
+
+   Directory_entry_name_concrete *resolved_DEN = 0;
+   if (!abort)
+   {  if (found_relative)
+      {  left_absolute_path_dir_names.transfer_all_from(right_absolute_path_dir_names);
+         std::string resolved_path;
+         char *directory_separator = DEFAULT_DIRECTORY_SEPARATORa_str; //filename_abs_or_rel.get_directory_separator();
+
+      // For Unix/Linux filenames prepend the root directory separator.
+      // warning, this has not been checked for all cases
+           if (directory_separator[0] == 47 /*'//'*/)
+             resolved_path.append(directory_separator);
+      left_absolute_path_dir_names.string_items(resolved_path,directory_separator[0]);
+      if (left_absolute_path_dir_names.count())
+         resolved_path.append(directory_separator);
+      //std::wstring name_ext;  this should be defined here but compiler is complaining
+      name_ext.clear();
+      filename_abs_or_rel.get_name_with_extension(name_ext);
+      CORN::append_wstring_to_string (name_ext,resolved_path);                   //120209
+      resolved_DEN = new Directory_name_concrete(resolved_path);
+      } else
+      {  resolved_DEN = new Directory_name_concrete
+            (with_respect_to_directory_name_qualified                            //160128
+            ,filename_abs_or_rel);
+      }
+   }
+   return resolved_DEN;
+}
+//_2012-04-30___________________________________________________________________
+bool File_system_engine_common::create_directory
+(const Directory_name &directory_name
+,bool create_parents_as_needed)                                           const//121222
+{  // This method only recursively creates the parent path as needed.
+   // Derived classes will override the method and first call this method
+   // then create the actual final directory in the path
+   const CORN::OS::Directory_name *parent_path = directory_name.get_path_directory_name();//140101
+   return
+      create_parents_as_needed                                                   //121222
+      ? directory_name.is_root()
+        ? true
+        : parent_path                                                            //140101
+          ? create_directory(*parent_path,true)                                  //120522
+          : 0                                                                    //140101
+      : true;
+}
+//_2012-05-22_______________________________________File_system_engine_common__/
+bool File_system_engine_common::provide_directory
+(const Directory_name &directory_name
+,bool create_parents_as_needed)                                            const
+{  bool provided = create_directory(directory_name,create_parents_as_needed);
+   if (!provided) //If it failed to create it may already exist
+       provided = CORN::OS::file_system_engine.exists(directory_name);
+   return provided;
+}
+//_2014-08-25__________________________________________________________________/
+bool File_system_engine_common::rename
+(const Directory_entry_name &old_name
+,const Directory_entry_name &new_name)                                     const
+{
+   // This function works only for filenames that are ASCII
+   // The Windows version should use the Windows API function
+   // supporting UNICODE
+   return ::rename(old_name.c_str(),new_name.c_str()) == 0; //stdio
+}
+//_2012-12-09__________________________________________________________rename__/
+Directory_entry_name *File_system_engine_common::find_qualified_name_in_path
+(const std::wstring &unqualified_name
+,const CORN::OS::Directory_name &from_directory
+,Inclusion include_path_directories_in_search)                        rendition_ //140210
+{  Directory_entry_name_concrete *filename_in_this_dir =                         //140217
+      new Directory_entry_name_concrete(from_directory,unqualified_name);        //140217
+   Directory_entry_name *found_filename =  filename_in_this_dir;                 //140217
+   bool filename_in_this_dir_exists = exists(*filename_in_this_dir);
+   if (!filename_in_this_dir_exists)
+   {  delete filename_in_this_dir;
+      found_filename = filename_in_this_dir =0;
+      if (include_path_directories_in_search)                                    //140210
+      {  Inclusion next_include_path_directories_in_search =                     //140210
+            (include_path_directories_in_search & Directory_entry_name::include_ancestors_path) //140210
+            ? include_path_directories_in_search                                 //140210
+            : 0; // only search the parent                                       //140210
+         const Directory_name *parent_dir = from_directory.get_path_directory_name();
+         if (parent_dir)
+            found_filename = find_qualified_name_in_path
+               (unqualified_name,*parent_dir
+               ,next_include_path_directories_in_search);                        //140210
+      }
+   }
+   return found_filename;
+}
+//_2013-11-11_____________________________________find_qualified_name_in_path__/
+CORN::OS::File_name *File_system_engine_common::find_file_name
+(const std::wstring             &target_filename //160922 can now have wild card
+,const CORN::OS::Directory_name &from_directory
+,File_system::Recursion          recursion                                       //150908
+,const Directory_name            *logical_root
+,bool                            case_insensitive)                      rendition_ //160924
+{
+   Unidirectional_list matching_filename_list;
+   list_DENs // list_entry_names
+      (from_directory
+      ,&matching_filename_list
+      ,0 // no directory
+      ,CORN::Inclusion(target_filename,case_insensitive)
+      ,recursion                                                                 //150908
+      ,logical_root
+      ,Directory_entry_name::full_qualification // I think                       //150908
+      );
+   /*160922 now using seclusion form
+   list_file_names
+      (from_directory
+      ,matching_filename_list
+      ,recursion                                                                 //150908
+      ,Directory_entry_name::full_qualification // I think                       //150908
+      ,target_filename.c_str());
+   */
+   return  dynamic_cast<CORN::OS::File_name *>(matching_filename_list.pop_at_head());
+}
+//_2015-04-12___________________________________________________________________
+bool File_system_engine_common::delete_directory
+      (const Directory_name & directory_name_to_delete
+      ,bool recurse_subdirectories
+      ,CORN::Container *remember_deleted_file_names               //optional
+      ,CORN::Container *remember_not_deleted_file_names           //optional
+      ,CORN::Container *remember_deleted_subdirectory_names       //optional
+      ,CORN::Container *remember_not_deleted_subdirectory_names   //optional
+      ,CORN::Text_list *error_log                                 //optional
+      ,bool delete_only_file_and_preserve_folder_and_subfolders )          const
+{   // problem_files_SDF   is in System Data Format
+   bool directory_deleted = true;
+   CORN::Unidirectional_list file_name_list;
+   CORN::Unidirectional_list directory_name_list;
+   nat32 sub_entry_count = list_entry_names_deprecated
+      (directory_name_to_delete
+      ,&file_name_list
+      ,&directory_name_list
+      ,recurse_subdirectories ? File_system::subdirectory_recursion_inclusive : File_system::none_recursion_inclusive
+      ,Directory_entry_name::full_qualification);                                  //150908
+
+// NYI   should  not need record the CWD so we can return to it when done
+//       however, if the directory or one of its subdirectories is
+//       the CWD the delete will fail on that directory.
+//       May need to to temporarily jump out away.
+//       I think the way I have this coded, the CWD will simply not be deleted.
+
+   bool all_files_deleted = true;
+   for (CORN::OS::File_name *filename = dynamic_cast<CORN::OS::File_name *>(file_name_list.pop_at_head())
+       ;filename
+       ;filename = dynamic_cast<CORN::OS::File_name *> (file_name_list.pop_at_head()))
+   {
+      bool this_file_deleted = recycle(*filename,true);
+      all_files_deleted &= this_file_deleted;
+      if (this_file_deleted)
+      {  if (remember_deleted_file_names)
+             remember_deleted_file_names->append(filename);
+      }
+      else
+      {  if (remember_not_deleted_file_names)
+             remember_not_deleted_file_names->append(filename);
+      }
+   } // for each file
+   directory_deleted &= all_files_deleted;
+   if (recurse_subdirectories)
+   {  bool all_subdirs_deleted = true;
+      for (CORN::OS::Directory_name *subdir_to_del = dynamic_cast<CORN::OS::Directory_name *>(file_name_list.pop_at_head())
+          ;subdir_to_del
+          ;subdir_to_del = dynamic_cast<CORN::OS::Directory_name *>(file_name_list.pop_at_head()))
+      {  bool subdir_deleted = delete_directory
+            ( *subdir_to_del
+            ,recurse_subdirectories
+            //  ,find_name_wild_card
+            ,remember_deleted_file_names
+            ,remember_not_deleted_file_names
+            ,remember_deleted_subdirectory_names
+            ,remember_not_deleted_subdirectory_names
+            ,error_log
+            ,delete_only_file_and_preserve_folder_and_subfolders);
+         all_subdirs_deleted &= subdir_deleted;
+         if (subdir_deleted)
+         {  if (remember_deleted_subdirectory_names)
+                remember_deleted_subdirectory_names->append(subdir_to_del);
+            else delete subdir_to_del;
+         } else
+         {  if (remember_not_deleted_subdirectory_names)
+                remember_not_deleted_subdirectory_names->append(subdir_to_del);
+            else delete subdir_to_del;
+         }
+      } // for subdir_to_del
+      directory_deleted = all_subdirs_deleted;
+   } // if recurse
+   // Now delete this directory
+   if (!delete_only_file_and_preserve_folder_and_subfolders
+      && directory_deleted)
+   {
+      directory_deleted &= recycle(directory_name_to_delete,true);
+   }
+   return directory_deleted;
+}
+//_2015-03-19_________________________________________________delete_directory_/
+nat32 File_system_engine_common::list_entry_names_deprecated
+(const Directory_name & directory_name
+,CORN::Container *file_DEN_list
+,CORN::Container *directory_DEN_list
+,File_system::Recursion recursion                                                //150908
+,Directory_entry_name::Qualification qualification                               //150908
+,const wchar_t *file_name_wild_card       // Optional windcard pattern (any valid Unix/Windows/DOS wild card) //091212_
+,const wchar_t *file_extension_filter     // This can be used to limit the list to certain extensions  (without dot) //020208_
+,const CORN::Text_list *exclude_directories)                               const
+{  //nat32 files_listed = 0;
+  // nat32 dirs_listed = 0;
+   CORN::Text_list file_names_unqual;
+   CORN::Text_list subdir_names_unqual;
+
+
+//std::clog << "directory_name:" << directory_name.c_str() << std::endl;
+
+   if (directory_name.is_root())
+      return 0;
+      // We need to exit if it is root directory because file listing API
+      // interprets the drive designator as the current working directory
+   std::wstring name_with_ext; directory_name.get_name_with_extension(name_with_ext);
+   if (exclude_directories && matches_any_in(name_with_ext,*exclude_directories))
+      return 0; // any excluded directory encountered breaks the recursion.
+   if (recursion & FILE_SYSTEM_RECURSION_SUPERDIRECTORY)
+   {
+      if (!directory_name.is_root() )
+      {
+         list_entry_names_deprecated
+            (directory_name.get_parent_directory_name_qualified()
+            ,file_DEN_list
+            ,directory_DEN_list
+            ,FILE_SYSTEM_RECURSION_SUPERDIRECTORY
+              // Do not propogate the exclusion or both bits in recursed directories
+            ,qualification
+            ,file_name_wild_card
+            ,file_extension_filter
+            ,exclude_directories);
+      }
+   }
+   // get list of unqualified names actually in this current directory
+   list_entry_names_in_deprecated //161013 list_entry_names_in
+      (directory_name
+      ,&file_names_unqual
+      ,0
+      ,file_name_wild_card
+      ,file_extension_filter
+      ,exclude_directories);
+   list_entry_names_in_deprecated //161013 list_entry_names_in
+      (directory_name
+      ,0
+      ,&subdir_names_unqual
+      ,0
+      ,0
+      ,exclude_directories);
+
+   bool inclusive = !(recursion & FILE_SYSTEM_RECURSION_EXCLUSIVE);
+   if (file_DEN_list /*160227 always list files && inclusive*/ )
+   {  // Add to requested list matching filenames in this directory
+      CORN::Text_list *file_name_text_list = dynamic_cast<CORN::Text_list *>(file_DEN_list);
+
+      // This function should not handle text list
+      // and qualification (it actually currently doesn't handle this correctly
+      // I should have a separate function that takes lists of DENs
+      // and generated text lists of file names with desired qualification.
+
+      FOR_EACH_IN(filename_unqual ,CORN::Text_list::Item,file_names_unqual,each_filename)
+      {
+         switch (qualification)                                                  //151225
+         {
+            case CORN::OS::Directory_entry_name::none_qualification :
+            {
+               if (file_name_text_list)
+                  file_name_text_list->add_string(*filename_unqual);
+               else
+                  file_DEN_list->take(new CORN::OS::File_name_concrete(filename_unqual));
+            } break;
+            case CORN::OS::Directory_entry_name::full_qualification :
+            default: // relative qualification is currently not handled
+               // What I should do is get the filenames full qualified
+               // then qualify relatively
+            {
+               CORN::OS::File_name_concrete *qualified_name
+                  = new CORN::OS::File_name_concrete(directory_name,*filename_unqual);
+               if (file_name_text_list)
+               {  file_name_text_list->add_wstr(qualified_name->w_str());
+                  delete qualified_name; // The caller only wants names as text strings
+               } else file_DEN_list->take(qualified_name);
+            } break;
+         } // switch
+      } FOR_EACH_END(each_filename)
+   }
+   CORN::Unidirectional_list subdir_list;
+   CORN::Text_list *dir_name_text_list = dynamic_cast<CORN::Text_list *>(directory_DEN_list);
+   if (directory_DEN_list)
+   {  // Add to requested list matching directory names in this directory
+      CORN::Text_list *dir_name_text_list = dynamic_cast<CORN::Text_list *>(directory_DEN_list);
+      FOR_EACH_IN(subdir_unqual,CORN::Text_list::Item,subdir_names_unqual,each_subdir)
+      {
+          //CORN::OS::Directory_name_concrete *qualified_name
+          //  = new CORN::OS::Directory_name_concrete(directory_name,*subdir_unqual);
+          //if (dir_name_text_list)
+          //{  dir_name_text_list->add_wstr(qualified_name->w_str());
+          //   //dirs_listed++;
+          //} // else we append to the the sub directory_DEN_list after recursing down
+          //subdir_list.take(qualified_name);
+
+         switch (qualification)                                                  //151225
+         {
+            case CORN::OS::Directory_entry_name::none_qualification :
+            {
+               if (dir_name_text_list)
+                  dir_name_text_list->add_string(*subdir_unqual);
+               else
+                  directory_DEN_list->take(new CORN::OS::File_name_concrete(subdir_unqual));
+            } break;
+            case CORN::OS::Directory_entry_name::full_qualification :
+            default: // relative qualification is currently not handled
+               // What I should do is get the filenames full qualified
+               // then qualify relatively
+            {
+               CORN::OS::Directory_name_concrete *qualified_name
+                  = new CORN::OS::Directory_name_concrete(directory_name,*subdir_unqual);
+               if (dir_name_text_list)
+               {  dir_name_text_list->add_wstr(qualified_name->w_str());
+                  delete qualified_name; // The caller only wants names as text strings
+               } else directory_DEN_list->take(qualified_name);
+            } break;
+         } // switch
+      } FOR_EACH_END(each_subdir)
+   }
+   if (recursion & FILE_SYSTEM_RECURSION_SUBDIRECTORY)
+   {    // Now recurse down
+      FOR_EACH_IN(subdir_unqual,CORN::Text_list::Item,subdir_names_unqual,each_subdir2)
+      {
+         CORN::OS::Directory_name_concrete subdir(directory_name,*subdir_unqual);
+            list_entry_names_deprecated
+             (subdir
+             ,file_DEN_list
+             ,directory_DEN_list
+             ,FILE_SYSTEM_RECURSION_SUBDIRECTORY
+              // Do not propogate the exclusion or both bits in recursed directories
+             ,qualification
+             ,file_name_wild_card
+             ,file_extension_filter
+             ,exclude_directories);
+      } FOR_EACH_END(each_subdir2);
+   }
+   return ((file_DEN_list ? file_DEN_list->count() : 0)
+          +(directory_DEN_list ? directory_DEN_list->count(): 0));
+}
+//_2015-12-12__________________________________________________________________/
+nat32 File_system_engine_common::list_DENs //161013 list_entry_names                                                //160814
+(const Directory_name & directory_name
+,CORN::Container *file_DEN_list       //= 0 // Optional, pass null if file list not wanted
+,CORN::Container *directory_DEN_list  //= 0 // optional, pass null if file list not wanted
+,const Seclusion &seclusion
+,File_system::Recursion recursion
+,const Directory_name *logical_root_preferred
+,Directory_entry_name::Qualification qualification)                        const
+{
+   CORN::Text_list file_names_unqual;
+   CORN::Text_list subdir_names_unqual;
+std::clog << "directory_name:" << directory_name.c_str() << std::endl;
+
+   CORN::OS::Directory_name *logical_root_rendered = 0;
+   const CORN::OS::Directory_name *logical_root_used = logical_root_preferred;
+
+   if (directory_name.is_root())
+      return 0;
+      // We need to exit if it is root directory because file listing API
+      // interprets the drive designator as the current working directory
+   if (recursion & FILE_SYSTEM_RECURSION_SUPERDIRECTORY)
+   {
+      if (logical_root_preferred == 0)  // recursion stop point not specified    //161025
+         logical_root_rendered = render_home(); // stop at home                  //161025
+      logical_root_used = logical_root_rendered                                  //161025
+         ? logical_root_rendered : logical_root_preferred;                       //161025
+      if (!directory_name.is_root()
+         && (logical_root_used->compare_including(directory_name) != 0))         //161025
+      {
+         list_DENs // entry_names
+            (directory_name.get_parent_directory_name_qualified()
+            ,file_DEN_list
+            ,directory_DEN_list
+            ,seclusion
+            ,FILE_SYSTEM_RECURSION_SUPERDIRECTORY
+              // Do not propogate the exclusion or both bits in recursed directories
+            ,logical_root_used
+            ,qualification);
+      }
+   }
+
+   // seclusion occurs as we recurse down because seclusion
+   // rules are applied to directory names as they are encountered
+   // traversing down the file system.
+   /* NYI
+   if (seclusion.is_excluded_DEN(directory_name))
+      return 0;
+   */
+
+   std::wstring name_with_ext; directory_name.get_name_with_extension(name_with_ext);
+
+   // get list of unqualified names actually in this current directory
+   list_names_in //161013 list_entry_names_in
+      (directory_name
+      ,&file_names_unqual
+      ,0
+      ,seclusion
+      );
+   list_names_in //161013 list_entry_names_in
+      (directory_name
+      ,0
+      ,&subdir_names_unqual
+      ,seclusion);
+
+   bool inclusive = !(recursion & FILE_SYSTEM_RECURSION_EXCLUSIVE);
+   if (file_DEN_list)
+   {  // Add to requested list matching filenames in this directory
+      CORN::Text_list *file_name_text_list = dynamic_cast<CORN::Text_list *>(file_DEN_list);
+
+      // This function should not handle text list
+      // and qualification (it actually currently doesn't handle this correctly
+      // I should have a separate function that takes lists of DENs
+      // and generated text lists of file names with desired qualification.
+
+      FOR_EACH_IN(filename_unqual ,CORN::Text_list::Item,file_names_unqual,each_filename)
+      {
+         switch (qualification)                                                  //151225
+         {
+            case CORN::OS::Directory_entry_name::none_qualification :
+            {
+               if (file_name_text_list)
+                  file_name_text_list->add_string(*filename_unqual);
+               else
+                  file_DEN_list->take(new CORN::OS::File_name_concrete(filename_unqual));
+            } break;
+            case CORN::OS::Directory_entry_name::full_qualification :
+            default: // relative qualification is currently not handled
+               // What I should do is get the filenames full qualified
+               // then qualify relatively
+            {
+               CORN::OS::File_name_concrete *qualified_name
+                  = new CORN::OS::File_name_concrete
+                     (directory_name,*filename_unqual,CORN::OS::file_entry);
+               //if (seclusion.is_included_DEN(*qualified_name))                    //161024
+               //{
+               if (file_name_text_list)
+               {  file_name_text_list->add_wstr(qualified_name->w_str());
+                  delete qualified_name; // The caller only wants names as text strings
+               } else file_DEN_list->take(qualified_name);
+               //} else delete qualified_name;                                     //161024
+            } break;
+         } // switch
+      } FOR_EACH_END(each_filename)
+   }
+   CORN::Unidirectional_list subdir_list;
+   CORN::Text_list *dir_name_text_list = dynamic_cast<CORN::Text_list *>(directory_DEN_list);
+   if (directory_DEN_list)
+   {  // Add to requested list matching directory names in this directory
+      CORN::Text_list *dir_name_text_list = dynamic_cast<CORN::Text_list *>(directory_DEN_list);
+      FOR_EACH_IN(subdir_unqual,CORN::Text_list::Item,subdir_names_unqual,each_subdir)
+      {
+          //CORN::OS::Directory_name_concrete *qualified_name
+          //  = new CORN::OS::Directory_name_concrete(directory_name,*subdir_unqual);
+          //if (dir_name_text_list)
+          //{  dir_name_text_list->add_wstr(qualified_name->w_str());
+          //   //dirs_listed++;
+          //} // else we append to the the sub directory_DEN_list after recursing down
+          //subdir_list.take(qualified_name);
+
+         switch (qualification)                                                  //151225
+         {
+            case CORN::OS::Directory_entry_name::none_qualification :
+            {
+               if (dir_name_text_list)
+                  dir_name_text_list->add_string(*subdir_unqual);
+               else
+                  directory_DEN_list->take(new CORN::OS::File_name_concrete(subdir_unqual));
+            } break;
+            case CORN::OS::Directory_entry_name::full_qualification :
+            default: // relative qualification is currently not handled
+               // What I should do is get the filenames full qualified
+               // then qualify relatively
+            {
+/*
+if (*subdir_unqual == "Database")
+std::clog << "reached" << std::endl;
+*/
+               CORN::OS::Directory_name_concrete *qualified_name
+                  = new CORN::OS::Directory_name_concrete
+                     (directory_name,*subdir_unqual,CORN::OS::directory_entry);
+               //if (seclusion.is_included_DEN(*qualified_name))                   //161024
+               //{  // although we have secluded name parts
+                  // we also want to check the composed path/name
+               if (dir_name_text_list)
+               {  dir_name_text_list->add_wstr(qualified_name->w_str());
+                  delete qualified_name; // The caller only wants names as text strings
+               } else directory_DEN_list->take(qualified_name);
+               //} //else delete qualified_name;                                       //161024
+            } break;
+         } // switch
+      } FOR_EACH_END(each_subdir)
+   }
+   if (recursion & FILE_SYSTEM_RECURSION_SUBDIRECTORY)
+   {    // Now recurse down
+      FOR_EACH_IN(subdir_unqual,CORN::Text_list::Item,subdir_names_unqual,each_subdir2)
+      {
+         if (!seclusion.is_excluded_string(*subdir_unqual,true,false))
+         {
+          CORN::OS::Directory_name_concrete subdir(directory_name,*subdir_unqual);
+            list_DENs //161013 list_entry_names
+             (subdir
+             ,file_DEN_list
+             ,directory_DEN_list
+             ,seclusion
+             ,FILE_SYSTEM_RECURSION_SUBDIRECTORY
+              // Do not propogate the exclusion or both bits in recursed directories
+             ,0 // not recursion up
+             ,qualification
+             );
+         }
+      } FOR_EACH_END(each_subdir2);
+   }
+   delete logical_root_rendered;
+   return ((file_DEN_list ? file_DEN_list->count() : 0)
+          +(directory_DEN_list ? directory_DEN_list->count(): 0));
+}
+//_2016-08-14___________________________________________________________________
+bool File_system_engine_common::matches_any_in
+(const std::wstring &name_with_ext
+,const CORN::Text_list &wild_card_patterns_to_compare
+,bool case_insensitive)                                             affirmation_
+{
+   // WARNING NYI actually would check wild card characters, I need
+   // to implement.
+
+   // When I implement this, I presume Linux and Windows would have
+   // such wild card parsing in their respective API's and thus would
+   // reimplement this method.
+   // However if I need to implement this from scratch, I would
+   // just implement here.
+
+   return wild_card_patterns_to_compare.find_wstring(name_with_ext) != 0;
+}
+//_2015-12-12___________________________________________________________________
+} } // namespace CORN OS
+

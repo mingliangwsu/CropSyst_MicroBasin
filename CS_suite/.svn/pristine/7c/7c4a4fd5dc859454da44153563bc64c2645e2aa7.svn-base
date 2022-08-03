@@ -1,0 +1,89 @@
+#ifndef CS_InspectionH
+#define CS_InspectionH
+#include "corn/container/item.h"
+#include "CS_suite/observation/CS_inspector.h"
+#include "corn/math/statistical/sample_cumulative_T.h"
+#include "corn/math/statistical/sample_dataset_T.h"
+//______________________________________________________________________________
+namespace CS
+{
+   enum Inspection_level
+      { continuous_inspection
+      , annual_inspection
+      , COUNT_inspection
+      };
+//______________________________________________________________________________
+class Inspection
+: public extends_ CORN::Item
+{
+public:
+int32 debug_ID;
+
+ public:
+   const Inspector  &inspector;
+   nat8              level_or_period;
+   std::string       tally_name;    // I.e. continuous, annual, season, {growth stage}
+   std::string       dataset_name;  // I.e. daily
+   //   std::string       label;
+   CORN::Datetime64  initiation_date;
+ private:
+   CORN::Statistical_sample_interface *tally;
+   bool record_dataset;
+   CORN::Statistical_sample_with_dataset<float64,float32,float32> *tally_as_float;
+ public:
+   Inspection
+      (const Inspector &inspector
+      ,nat8             level_or_period
+      // ,const char      *label
+      ,CORN::Datetime64 initiation_date
+      ,const char      *tally_name
+      ,const char      *dataset_name
+      //160617 ,bool             record_dataset
+      ,nat32            applicable_descriptive_summary_elements);
+      // The instanciator of the inspector list
+      // may specify the types of statistics that will be tallied.
+      // However certain statistics may only be applicable to a variable
+      // This inspector's instanciator will further filter
+      // the desired descriptve summary elements to what is actually applicable.
+      // The record dataset if provided will recording all the commited values.
+      // This is useful to apply additional analysis our output collected data.
+   virtual ~Inspection();
+   virtual int   compare(const CORN::Item &)                                     const;
+
+   virtual bool commit()                                           modification_;
+   /*conceptual write desired tally elements
+   virtual bool write(std::ostream &)                               performs_IO_;
+      // Currently this write simply identifies the qualified string
+      // Eventually I may have a write 'mode'
+      // to optionally write the observed value (or values) and statistics.
+   */
+   inline virtual bool reset()
+      { return tally->reset(); }
+   inline bool has_dataset()                                        affirmation_
+      { return record_dataset; }
+   CORN::Dynamic_array<float32> *mod_tally_as_float32()            modification_;//160609
+   bool is_tally_statistic_applicable(CORN::Statistic statistic)    affirmation_;//160617
+   float64 get_tally_statistic(CORN::Statistic statistic)                  const;//160617
+};
+//_2016-06-13___________________________________________________________________
+class Inspections
+: public CORN::Unidirectional_list // of Inspection (Inspector_tally)
+{
+ public:
+   nat32 desired_descriptive_summary_elements;                                   //150818
+ public:
+   inline Inspections()
+      : CORN::Unidirectional_list(true)
+      {}
+   bool reset()                                                    modification_;//150819
+   bool commit()                                                  rectification_;
+/*obsolete
+   bool eliminate(const Inspector *inspector_to_eliminate)         modification_;//150919
+      // After rendering all potential inspectors, this
+      // function can be used to cull inspectors that are not needed/wanted.
+*/
+};
+//_2016-06-13__________________________________________________________________/
+} // namespace CS
+
+#endif

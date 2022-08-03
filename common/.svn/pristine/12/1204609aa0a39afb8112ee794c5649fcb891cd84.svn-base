@@ -1,0 +1,31 @@
+#ifndef atmospheric_CO2_change_recalibrationH
+#define atmospheric_CO2_change_recalibrationH
+#include "common/weather/atmospheric_CO2_change_interface.h"
+#include "corn/math/numerical/interpolate.h"
+
+//______________________________________________________________________________
+class Atmospheric_CO2_change_recalibration
+: public Atmospheric_CO2_change_interface
+{
+private:
+   contribute_ CS::CO2_atmospheric_concentration curr_CO2_conc;                  //150507
+   CORN::Interpolation_curve_dated *interpolation;                               //150112RLN was Dated_interpolation_linear_curve
+   const CORN::Date_const_interface /*170525 Date */ &today;                     //150315
+public:
+   Atmospheric_CO2_change_recalibration
+      (const char *CO2_recalibration_filename
+      ,const CORN::Date_const_interface /*170525 Date */ &start_date
+      ,const CORN::Date_const_interface /*170525 Date */ &end_date
+      ,const CORN::Date_const_interface /*170525 Date */ &_today                 //150315
+      ,float32 initial_CO2_conc// used for default absissa in the interpolation
+      ,bool &CO2_data_encountered);
+   virtual ~Atmospheric_CO2_change_recalibration();
+public:
+   virtual bool update()                                           rectification_;//150315
+   virtual bool end_year(CORN::Year year)                           modification_;
+   inline virtual float64 get_current_CO2_conc()                           const { return curr_CO2_conc; }
+   inline virtual const CS::CO2_atmospheric_concentration &ref_CO2_current_conc() const
+      { return curr_CO2_conc; }
+};
+//______________________________________________________________________________
+#endif

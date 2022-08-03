@@ -1,0 +1,45 @@
+Auto controls replacements
+
+AutoCheckBox.h  -> RNAutoCheckBox.h
+TAutoCheckBox -> TRNAutoCheckBox
+
+
+AutoBitCheckListBox.h->RNAutoBitCheckListBox.h
+TAutoBitCheckListBox->RNAutoBitCheckListBox
+
+AutoFloat32EditBar.h -> RNAutoParameterEditBar.h
+TAutoFloat32EditBar -> TRNAutoParameterEditBar
+
+AutoInt16EditBar.h -> RNAutoParameterEditBar.h
+TAutoInt16EditBar -> TRNAutoParameterEditBar
+
+AutoRadioGroup.h -> RNAutoRadioGroup.h
+TAutoRadioGroup -> TRNAutoRadioGroup
+
+AutoFloat32Edit.h -> RNAutoFloatEdit.h
+TAutoFloat32Edit -> TRNAutoFloatEdit
+
+AutoInt16Edit.h -> RNAutoIntegerEdit.h
+TAutoInt16Edit -> TRNAutoIntegerEdit 
+
+AutoFileEditBar.h -> 
+TAutoFileEditBar -> 
+
+AutoContainerCheckListBox.h -> RNAutoContainerCheckListBox.h
+TAutoContainerCheckListBox -> TRNAutoContainerCheckListBox
+
+AutoContainerComboBox.h->RNAutoContainerComboBox.h
+TAutoContainerComboBox->TRNAutoContainerComboBox
+
+AutoContainerListBox.h -> RNAutoContainerListBox.h
+TAutoContainerListBox -> TAutoContainerListBox
+
+AutoStringEdit.h->RNAutoStringEdit.h
+TAutoStringEdit->TRNAutoStringEdit
+
+AutoContainerTreeView.h
+->
+
+In DFM files
+Description_label -> Caption
+Units_label

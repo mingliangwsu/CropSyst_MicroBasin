@@ -1,0 +1,102 @@
+#ifndef form_rotation_editorH
+#define form_rotation_editorH
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include "AutoContainerListBox.h"
+#include "AutoDateButton.h"
+#include "AutoFileEditBar.h"
+#include "AutoInt16Edit.h"
+#include <Buttons.hpp>
+#include <Dialogs.hpp>
+#include "AutoRadioGroup.h"
+#include <ExtCtrls.hpp>
+#include "AutoContainerCheckListBox.h"
+#include <CheckLst.hpp>
+#include "AutoSimDatabaseDropdownFileEditBar.h"
+#include "AutoSimDatabaseFileEditBar.h"
+//---------------------------------------------------------------------------
+#include <ComCtrls.hpp>
+
+#include "CropSyst/source/options.h"
+#include "AutoCheckBox.h"
+#ifndef cs_filenamesH
+#include "cropsyst/source/cs_filenames.h"
+#endif
+/*140124 now use OS FS
+#ifndef smart_dirnameH
+#  include "corn/file_sys/smart_dirname.h"
+#endif
+*/
+#include "corn/OS/directory_entry_name_logical.h"
+#ifndef dateHPP
+#  include "corn/datetime/date.hpp"
+#endif
+//______________________________________________________________________________
+namespace CropSyst
+{
+class Rotation_parameters;
+}
+namespace CS                                                                     //140124
+{
+class Database_directory;
+}
+class Tparameter_file_form;
+//______________________________________________________________________________
+class Trotation_editor_form : public TForm
+{
+__published:	// IDE-managed Components
+   TSaveDialog *save_as_dialog;
+   TAutoContainerCheckListBox *rot_listbox;
+   TPanel *Panel1;
+   TBitBtn *insert_button;
+   TBitBtn *edit_button;
+   TBitBtn *delete_button;
+   TGroupBox *groupbox_build_rotation;
+   TLabel *end_label;
+   TAutoInt16Edit *end_edit;
+   TBitBtn *build_button;
+   TBitBtn *button_sort;
+   TLabel *years_in_rot_label;
+   TAutoInt16Edit *years_in_rot_edit;
+   TAutoCheckBox *checkbox_relative;
+   void __fastcall insert_button_onclick(TObject *Sender);
+   void __fastcall rot_listbox_onclick(TObject *Sender);
+   void __fastcall delete_button_onclick(TObject *Sender);
+   void __fastcall build_button_onclick(TObject *Sender);
+   void __fastcall edit_button_onclick(TObject *Sender);
+   void __fastcall button_sortClick(TObject *Sender);
+   void __fastcall checkbox_relativeClick(TObject *Sender);
+private:	// User declarations
+   Tparameter_file_form *parameter_form;
+   CropSyst::Rotation_parameters  *rotation;
+   ROT_filename   *rotation_filename;
+   void __fastcall save_rotation();
+   CORN::OS::Directory_name_logical /*140124 CORN::Smart_directory_name*/ rotation_directory;
+   CS::Database_directory    *master_database_dir;
+   CS::Database_directory    *project_database_dir;
+   CS::Database_directory    *scenario_database_dir;
+public:		// User declarations
+   __fastcall Trotation_editor_form(TComponent* Owner);
+   void __fastcall bind_to
+   (CropSyst::Rotation_parameters   *rotation                                    //130415
+   ,Tparameter_file_form            *parameter_form
+   ,const char                      *master_database_dir
+   ,const char                      *project_database_dir
+   ,const char                      *scenario_database_dir
+   /*040124
+   #if (CROPSYST_VERSION < 5)
+   ,bool converting_from_V3
+   #endif
+   */
+   );
+   virtual void __fastcall Update();
+   inline TPageControl *get_main_page_control() const { return 0;};
+      // The rotation editor doesn't have page control
+};
+//---------------------------------------------------------------------------
+extern PACKAGE Trotation_editor_form *rotation_editor_form;
+//---------------------------------------------------------------------------
+#endif

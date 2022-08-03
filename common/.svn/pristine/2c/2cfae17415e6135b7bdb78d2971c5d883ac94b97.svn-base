@@ -1,0 +1,26 @@
+#ifndef atmospheric_CO2_change_linearH
+#define atmospheric_CO2_change_linearH
+#include "common/weather/atmospheric_CO2_change_interface.h"
+#include "corn/primitive.h"
+//______________________________________________________________________________
+class Atmospheric_CO2_change_linear
+: public Atmospheric_CO2_change_interface
+{
+private:
+   float32 annual_CO2_conc_change ;  // ppm
+   //150507 float32 curr_CO2_conc_ppm;
+   CS::CO2_atmospheric_concentration  curr_CO2_conc;                             //150507
+public:
+   Atmospheric_CO2_change_linear
+      (float32 _initial_CO2_conc
+      ,float32 _annual_CO2_conc_change);
+   virtual bool update()                                           rectification_ {return true; }
+      // The linear increase model is stepped by year
+   virtual bool end_year(CORN::Year year)                           modification_;
+   inline virtual float64 get_current_CO2_conc()                           const { return curr_CO2_conc.ppm(); }
+   //150507   inline virtual const float32 &ref_current_CO2_conc()                    const { return curr_CO2_conc_ppm; }
+   inline virtual const CS::CO2_atmospheric_concentration &ref_CO2_current_conc() const //150507
+      { return curr_CO2_conc; }
+};
+//______________________________________________________________________________
+#endif

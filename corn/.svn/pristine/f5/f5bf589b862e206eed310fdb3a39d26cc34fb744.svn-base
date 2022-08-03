@@ -1,0 +1,63 @@
+#ifndef corn_gif_fileH
+#define corn_gif_fileH
+
+// Temporary until we switch over to binrec class
+#include <stdio.h>
+#include <corn/file_sys/file.h>
+#include <corn/image/gif/gif_image.h>
+
+namespace CORN {
+//______________________________________________________________________________
+class GIF_file
+{
+ protected:
+	File_name file_name;
+	uint16 screen_width;
+	uint16 screen_height;
+	uint8 background_color;
+	uint8 pixel_aspect_ratio;
+      //*______*/  				Aspect Ratio = (Pixel Aspect Ratio + 15) / 64
+
+      //*______*/  				The Pixel Aspect Ratio is defined to be the quotient of the pixel's
+      //*______*/  				width over its height.  The value range in this field allows
+      //*______*/  				specification of the widest pixel of 4:1 to the tallest pixel of
+      //*______*/  				1:4 in increments of 1/64th.
+	color_map              *global_color_table;  // 0 if no color table.
+   bool                    animation;
+   uint16                  animation_iterations;
+   GIF_control_extension   last_graphic_control;
+   CORN_bidirectional_list images;                                                  //991115
+ public:
+   // Open an existing file
+	GIF_file(const char *i_filename);
+   // Create a new file
+   GIF_file(const char *i_filename,unsigned int i_screen_width ,unsigned int i_screen_height );
+   ~GIF_file();
+	void read();
+	void write();
+   inline void append(GIF_image *image_to_append);
+ private:
+   void write_animation_control_block(Binary_fstream &out_strm);
+   void write_global(Binary_fstream &out_strm);
+   // The GIF header, global color map (if any)
+   // and animation control (if any)
+
+   void write_current_image(Binary_fstream &out_strm);
+   //woid read_animation_control_block();  not implemented yet
+ public: // Graphic control extension accessors
+   inline void set_transparent_color(uint8 color_index)
+   {  last_graphic_control.enabled = true;
+      last_graphic_control.use_transparent_color = true;
+      last_graphic_control.transparent_color = color_index;
+   };
+	inline color_map *get_global_color_table() { return global_color_table;};
+	inline color_map *take_global_color_table(color_map *i_global_color_table)
+	{
+      global_color_table = i_global_color_table;
+	   return global_color_table;
+	};
+};
+//______________________________________________________________________________
+} // namespace CORN
+#endif
+

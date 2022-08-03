@@ -1,0 +1,866 @@
+<!DOCTYPE HTML PUBLIC "-//SoftQuad Software//DTD HoTMetaL PRO 5.0::19981217::extensions to HTML 4.0//EN" "hmpro5.dtd">
+ 
+<HTML>
+ 
+<HEAD>
+<meta http-equiv="Content-Language" content="en-nz">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252"> 
+<TITLE>G-string editor</TITLE>
+<META NAME="GENERATOR" CONTENT="Microsoft FrontPage 5.0"> 
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<link rel="stylesheet" type="text/css" href="rbd.css">
+<link REL="SHORTCUT ICON" HREF="favicon.ico">
+</HEAD>
+
+<BODY>
+<H1 ALIGN="left"><A NAME="Top"></A>G-String ascii file
+editor</H1>
+<p ALIGN="left"><i>Version of June, 2004</i></p>
+<UL>
+<LI><A HREF="#StringList"><EM>StringList</EM> class</A></LI>
+<LI><A HREF="#GString"><EM>GString</EM> classes</A></LI>
+<LI><A HREF="#TaggedStringList"><EM>TaggedStringList</EM> classes</A></LI>
+<LI><A HREF="#Examples">Examples</A></LI>
+<LI><a href="#History">History</a></LI>
+<LI><A HREF="#ToDo">To do</A></LI>
+<LI><a href="string.htm">return to string library</a></LI>
+  <li><a HREF="ol_doc.htm">To online documentation page</a></li>
+</UL>
+<P>The GString class library is distributed as part of the <a href="string.htm">string
+library</a>. See the string library documentation on how to customise the
+<tt>include.h</tt> file for your compiler and for the file list.</P>
+<P>The GString class library is an editor similar, in concept, to the Unix <EM>SED</EM> editor. One
+writes a series commands to edit an ASCII file such as, for example, HTML or
+C++ source. This is useful if you want to do the same editing job over and over
+again on one or several files. For example you might want to change the name of
+a class in a C++ program and have to go through all your source files to make
+the change.</P>
+<P>This editor, however, is a C++ library, and the series of commands, are
+written in C++. So one has a full power of C++ and one does not have to learn a
+new language. This editor, by itself, is slightly less ambitious than the SED editor.
+However, when you add in the extra flexibility and capabilities provided by it
+being embedded in C++, you get a much more powerful product, that is as easy to
+use if you already know the basics of C++. At least that is the intention.</P>
+<P>This is a <EM>concept testing</EM> version and there are a number of rough 
+edges. It needs further testing and
+development.</P>
+<P>There are three components </P>
+<UL>
+<LI>the <A HREF="#StringList"><EM>StringList</EM> class</A></LI>
+<LI>the <A HREF="#GString"><EM>GString</EM> classes</A></LI>
+<LI>the <A HREF="#TaggedStringList"><EM>TagggedStringList</EM> classes</A></LI>
+</UL>
+<P>The StringList class stores the file as a linked list of strings, each
+string corresponding to a line in the original file. The GString
+(<EM>generalised</EM> strings) family of classes provide the editing
+capability. The TaggedStringList family of classes allow one to edit subsets of 
+the strings making up the original file.</P>
+<P>See the <A HREF="#Examples">example</A> section for some simple examples. 
+</P>
+<P>This library uses my <A HREF="string.htm">string library</A>.</P>
+<P>GString uses nested classes so will not run on older compilers.</P>
+<P>&nbsp;</P>
+<P>I have tested this on Borland 5.02, Borland Builder 5, Microsoft VC++  6 and 7, Intel 5 
+and 8 for Windows (all in console mode); Gnu G++ 
+2.96, 3.1 for Linux and Intel 6 for Linux; Gnu G++ 2.95 on Cygwin; and Gnu G++ 2.95 
+and Sun CC 6 on a Sun. There was a problem with the test program on Intel 5 for 
+Linux, CC generates a number of warning messages, otherwise everything was fine.</P>
+<H2><A NAME="StringList"></A><EM>StringList</EM>
+class</H2>
+<p>This is similar to an implementation of the standard template class 
+<i>list</i> explicitly for <i>String</i>s.</p>
+<H3>The member functions and friends</H3>
+<DIV ALIGN="left">
+<TABLE BORDER="1" WIDTH="100%" style="border-collapse: collapse" bordercolor="#111111" cellpadding="0" cellspacing="1">
+<TR>
+<TD WIDTH="50%" valign="top"><TT>StringList SL;</TT> </TD>
+<TD WIDTH="50%" valign="top">Construct a StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>StringList(StringList&amp; SL);</TT> </TD>
+<TD WIDTH="50%" valign="top">Construct a StringList from another StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>~StringList();</TT> </TD>
+<TD WIDTH="50%" valign="top">The destructor.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void operator=(StringList&amp; SL);</TT> </TD>
+<TD WIDTH="50%" valign="top">Copy a StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void push_back(const String&amp; s);</TT> </TD>
+<TD WIDTH="50%" valign="top">Insert a new string at the end of a StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void push_front(const String&amp; s);</TT></TD>
+<TD WIDTH="50%" valign="top">Insert a new string at the beginning of a StringList</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>String pop_back();</TT> </TD>
+<TD WIDTH="50%" valign="top">Return the string at the end of a StringList and erase it from
+the StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>String pop_front();</TT></TD>
+<TD WIDTH="50%" valign="top">Return the string at the beginning of a StringList and erase it
+from the StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void CleanUp();</TT> </TD>
+<TD WIDTH="50%" valign="top">Erase all the strings from the StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>int size();</TT> </TD>
+<TD WIDTH="50%" valign="top">Return the number of strings in the StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void Format(int width, StringList&amp; sl);</TT> </TD>
+<TD WIDTH="50%" valign="top">Word-wrap the document represented by the StringList to fit in
+a page of the given <EM>width</EM>. Return the result to <EM>sl.</EM></TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>friend ostream&amp; operator&lt;&lt;(ostream&amp; os,
+StringList&amp; sl);</TT> </TD>
+<TD WIDTH="50%" valign="top">Output the entire StringList to a file.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>friend void operator&gt;&gt;(istream&amp; is,
+StringList&amp; sl);</TT> </TD>
+<TD WIDTH="50%" valign="top">Read an entire file to a StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>StringList_String operator()(const String&amp; s);</TT>
+</TD>
+<TD WIDTH="50%" valign="top">Return a StringList_String by selecting strings containing the
+string <EM>s</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>StringList_GString operator()(GString&amp; g);</TT> </TD>
+<TD WIDTH="50%" valign="top">Return a StringList_GString by selecting strings conforming to
+the pattern <EM>g</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>StringList_Range operator()(const String&amp; s1, const
+String&amp; s2, int ends = 3);</TT> </TD>
+<TD WIDTH="50%" valign="top">Return a StringList_Range by selecting ranges delimited by the
+strings <EM>s1</EM> and <EM>s2</EM>. See note below.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>TaggedStringList All();</TT> </TD>
+<TD WIDTH="50%" valign="top">Return a TaggedStringList containing all of the
+StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>iterator begin();</TT> </TD>
+<TD WIDTH="50%" valign="top">Return an iterator pointing to the beginning of the
+StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>iterator end();</TT> </TD>
+<TD WIDTH="50%" valign="top">Return an iterator pointing to one past the end of the
+StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>reverse_iterator rbegin();</TT> </TD>
+<TD WIDTH="50%" valign="top">Return a reverse iterator pointing to the end of the
+StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>reverse_iterator rend();</TT> </TD>
+<TD WIDTH="50%" valign="top">Return a reverse iterator pointing one before the beginning of
+the StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>iterator find(const String&amp; s);</TT> </TD>
+<TD WIDTH="50%" valign="top">Return an iterator pointing to the first string 
+equal to
+<EM>s</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>reverse_iterator rfind(const String&amp; s);</TT> </TD>
+<TD WIDTH="50%" valign="top">Return a reverse iterator pointing to the last 
+string equal to <EM>s</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>iterator find(const String&amp; s, iterator i);</TT> </TD>
+<TD WIDTH="50%" valign="top">Return an iterator pointing to the first string 
+equal to
+<EM>s</EM> after <EM>i</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>reverse_iterator rfind(const String&amp; s,
+reverse_iterator i);</TT> </TD>
+<TD WIDTH="50%" valign="top">Return a reverse iterator pointing to the last 
+string equal to <EM>s</EM> before <EM>i</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void erase(iterator i);</TT> </TD>
+<TD WIDTH="50%" valign="top">Erase the string corresponding to <EM>i</EM>. See note
+below.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void erase(reverse_iterator i);</TT> </TD>
+<TD WIDTH="50%" valign="top">Erase the string corresponding to <EM>i</EM>. See note
+below.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void insert_before(const String&amp; s, iterator i);</TT>
+</TD>
+<TD WIDTH="50%" valign="top">Insert a string, s, before iterator <EM>i</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>void insert_after(const String&amp; s, iterator i);</TT>
+</TD>
+<TD WIDTH="50%" valign="top">Insert a string, s, after iterator <EM>i</EM>.</TD>
+</TR>
+</TABLE>
+</DIV>
+<H3>Notes</H3>
+<P>The parameter <EM>ends</EM> in</P>
+<P><TT>&nbsp;&nbsp; StringList_Range operator()(const String&amp; s1, const
+String&amp; s2, int ends = 3); </TT></P>
+<P>determines which of the range ends are included in the range. </P>
+<DIV ALIGN="center">
+<CENTER>
+<TABLE BORDER="1" WIDTH="75%" style="border-collapse: collapse" bordercolor="#111111" cellpadding="0" cellspacing="0">
+<TR>
+<TD WIDTH="50%"><b>ends</b></TD>
+<TD WIDTH="50%"><b>range ends included in TaggedStringList</b></TD>
+</TR>
+<TR>
+<TD WIDTH="50%">0</TD>
+<TD WIDTH="50%">neither</TD>
+</TR>
+<TR>
+<TD WIDTH="50%">1</TD>
+<TD WIDTH="50%">second</TD>
+</TR>
+<TR>
+<TD WIDTH="50%">2</TD>
+<TD WIDTH="50%">first</TD>
+</TR>
+<TR>
+<TD WIDTH="50%">3</TD>
+<TD WIDTH="50%">both</TD>
+</TR>
+</TABLE>
+</CENTER>
+</DIV>
+<P>After erasing a string corresponding to an iterator <EM>i</EM> you cannot
+manipulate <EM>i</EM>, for example, with <EM>i++</EM>. This means that special
+care must be taken with loops which erase elements from a StringList. For
+example, use</P>
+<PRE>StringList::iterator i1;
+for (StringList::iterator i = SL.begin(); i != SL.end(); i=i1)
+{
+   i1 = i; ++i1; SL.erase(i);
+}</PRE>
+
+<P>rather than</P>
+<PRE>for (StringList::iterator i = SL.begin(); i != SL.end(); ++i)
+{
+   SL.erase(i);
+}</PRE>
+
+<H3>Iterator functions</H3>
+<DIV ALIGN="left">
+<TABLE BORDER="1" WIDTH="100%" style="border-collapse: collapse" bordercolor="#111111" cellpadding="0" cellspacing="1">
+<TR>
+<TD WIDTH="33%"><b>Function</b></TD>
+<TD WIDTH="33%"><b>iterator</b></TD>
+<TD WIDTH="33%"><b>reverse iterator</b></TD>
+</TR>
+<TR>
+<TD WIDTH="33%"><TT>++i</TT></TD>
+<TD WIDTH="33%">point to next string</TD>
+<TD WIDTH="33%">point to previous string</TD>
+</TR>
+<TR>
+<TD WIDTH="33%"><TT>--i</TT></TD>
+<TD WIDTH="33%">point to previous string</TD>
+<TD WIDTH="33%">point to next string</TD>
+</TR>
+<TR>
+<TD WIDTH="33%"><TT>i++</TT></TD>
+<TD WIDTH="33%">return current value of iterator, but increment value of
+iterator</TD>
+<TD WIDTH="33%">return current value of iterator, but increment value of
+iterator</TD>
+</TR>
+<TR>
+<TD WIDTH="33%"><TT>i--</TT></TD>
+<TD WIDTH="33%">return current value of iterator, but decrement value of
+iterator</TD>
+<TD WIDTH="33%">return current value of iterator, but decrement value of
+iterator</TD>
+</TR>
+<TR>
+<TD WIDTH="33%"><TT>*i</TT></TD>
+<TD WIDTH="33%">return the string corresponding to the iterator</TD>
+<TD WIDTH="33%">return the string corresponding to the iterator</TD>
+</TR>
+<TR>
+<TD WIDTH="33%"><TT>i==j</TT></TD>
+<TD WIDTH="33%">true if the iterators are the same</TD>
+<TD WIDTH="33%">true if the iterators are the same</TD>
+</TR>
+<TR>
+<TD WIDTH="33%"><TT>i!=j</TT></TD>
+<TD WIDTH="33%">true if the iterators are different</TD>
+<TD WIDTH="33%">true if the iterators are different</TD>
+</TR>
+<TR>
+<TD WIDTH="33%"><TT>i-&gt;</TT></TD>
+<TD WIDTH="33%"><TT>(*i).</TT></TD>
+<TD WIDTH="33%"><TT>(*i).</TT></TD>
+</TR>
+</TABLE>
+</DIV>
+<P>&nbsp;</P>
+<H2><EM><A NAME="GString"></A>GString</EM> classes</H2>
+<P>These comprise the family of classes for describing a pattern that one might
+match a string to.</P>
+<P>A GString expression is a C++ expression involving any of the operators
+<TT>+</TT>, <TT>|</TT>, <TT>&amp;</TT>, <TT>^</TT>, <TT>~</TT>, <TT>&lt;</TT>;
+and <TT>&gt;</TT> and character strings, Strings and other GString objects.</P>
+<P>For a string to match a GString expression the entire string must be
+matched. This is in contrast to just a segment as is the case with string
+expressions in SED. For example the GString expression</P>
+<PRE>   DOTS + &quot;quick&quot; + DOTS</PRE>
+
+<P>does match <EM>The quick brown fox</EM> whereas</P>
+<PRE>   GS + &quot;quick&quot;</PRE>
+
+<P>does not. In these expressions <TT>+</TT> means concatenate; <EM>DOTS</EM>
+will match any string; <EM>GS</EM> is included purely to make the C++ compiler
+recognise the character string as a GString expression.</P>
+<P>GString expressions typically occur in any of three places. In the statement
+</P>
+<PRE>   SL(gs1).s(gs2,gs3);</PRE>
+
+<P>where <EM>gs1</EM>, <EM>gs2</EM> and <EM>gs3</EM> are GString expressions,
+<EM>gs1</EM> determines which strings from the StringList <EM>SL</EM> are
+selected for editing; <EM>gs2</EM> (which may be the same as <EM>gs1</EM>)
+represents the target for editing and <EM>gs3</EM> determines the results of
+the editing. If <EM>gs2</EM> had failed to match there would have been no
+editing. In this statement <EM>gs2</EM> and <EM>gs3</EM> must have exactly the
+same pattern of operators, with two exceptions described below. Suppose I wish
+to find all strings in SL which contain the word <EM>quick</EM> and change
+<EM>brown</EM> to <EM>black</EM> in these strings. Then I could use the
+expression</P>
+<PRE>   SL(DOTS + &quot;quick&quot; + DOTS).s(DOTS+&quot;brown&quot;+DOTS,
+                               DOTS+&quot;black&quot;+DOTS);</PRE>
+
+<P>where I have put the <EM>gs3</EM> expression under the <EM>gs2</EM>
+expression to make sure the operators match. (Where <i>brown</i> occurs more 
+than once in an individual string, only the first will be changed). In this particular instance it
+would have been simpler to use</P>
+<PRE>   SL(&quot;quick&quot;).sf(&quot;brown&quot;,&quot;black&quot;)</PRE>
+
+<P>where <EM>sf</EM> means <EM>substitute first</EM>. Where only simple strings
+are involved, the program does follow the SED convention of requiring only that
+the search string be included rather than having an exact match of the whole
+string.</P>
+<P>Here is the list of GString classes, objects and operators.</P>
+<DIV ALIGN="left">
+<TABLE BORDER="1" WIDTH="100%" style="border-collapse: collapse" bordercolor="#111111" cellpadding="0" cellspacing="1">
+<TR>
+<TD WIDTH="50%" valign="top">gs.Matches(s)</TD>
+<TD WIDTH="50%" valign="top">true if GString <i>gs</i> matches a String <i>s</i></TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top">CI(A)</TD>
+<TD WIDTH="50%" valign="top">matches if A matches with a case-insensitive 
+compare</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>A | B</TT></TD>
+<TD WIDTH="50%" valign="top">matches if either <EM>A</EM> or <EM>B</EM> matches</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>A &amp; B</TT></TD>
+<TD WIDTH="50%" valign="top">matches if both <EM>A</EM> and <EM>B</EM> match</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>A ^ B</TT></TD>
+<TD WIDTH="50%" valign="top">matches of one but not both of <EM>A</EM> and <EM>B</EM>
+match</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>A + B</TT></TD>
+<TD WIDTH="50%" valign="top">matches if the target string can be divided into two parts; the
+first matching <EM>A</EM> and the second matching <EM>B</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>A &gt; B</TT></TD>
+<TD WIDTH="50%" valign="top">same as + but first match <EM>A</EM>, then see if <EM>B</EM>
+matches</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>A &lt; B</TT></TD>
+<TD WIDTH="50%" valign="top">same as + but first match <EM>B</EM>, then see if <EM>A</EM>
+matches</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>~ A</TT></TD>
+<TD WIDTH="50%" valign="top">matches if <EM>A</EM> does not match</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>AnyString</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match any string (including a zero length string); remember the
+string that is matched</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>LongestString</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match any string but try to find the longest possibility;
+remember the string that is matched</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>ShortestString</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match any string but try to find the shortest possibility;
+remember the string that is matched</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>FixedLengthString(int n)</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match any string of length <EM>n</EM>, remember the string that
+is matched</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>.Value()</TT></TD>
+<TD WIDTH="50%" valign="top">get string stored by any of previous 4 classes</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>Dots</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match any string (including a zero length string)</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>LongestDots</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match any string but try to find the longest possibility</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>ShortestDots</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match any string but try to find the shortest possibility</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>FixedLengthDots(int n)</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match any string of length <EM>n</EM></TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>WhiteSpace</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match white space - try to match as much as possible (length
+must be greater than zero)</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>OptionalWhiteSpace</TT></TD>
+<TD WIDTH="50%" valign="top">class derived from GString: match white space - try to match as much as possible (length
+may be zero)</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>InitialGString</TT></TD>
+<TD WIDTH="50%" valign="top">A dummy class to enable the C++ compiler to recognise a
+character string or a String as a GString object</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>DOTS</TT></TD>
+<TD WIDTH="50%" valign="top">A globally declared Dots object</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>LDOTS</TT></TD>
+<TD WIDTH="50%" valign="top">A globally declared LongestDots object</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>SDOTS</TT></TD>
+<TD WIDTH="50%" valign="top">A globally declared ShortestDots object</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>DOT</TT></TD>
+<TD WIDTH="50%" valign="top">A globally declared FixedLengthDots object with length 1</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>WS</TT></TD>
+<TD WIDTH="50%" valign="top">A globally declared WhiteSpace object</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>OWS</TT></TD>
+<TD WIDTH="50%" valign="top">A globally declared OptionalWhiteSpace object</TD>
+</TR>
+<TR>
+<TD WIDTH="50%" valign="top"><TT>GS</TT></TD>
+<TD WIDTH="50%" valign="top">A globally declared InitialGString object</TD>
+</TR>
+</TABLE>
+</DIV>
+<P>The <EM>objects</EM> constructed by LongestString, ShortestString, and
+FixedLengthString will match any string but remember the string that they
+matched. This is returned in the editing phase of the program. If there is any
+ambiguity in the way the match is carried out LongestString will try to match
+the longest possible string and ShortestString will try to match the shortest
+possible string. (The rules governing LongestString and
+ShortestString need more refining).</P>
+<P>Use <EM>DOTS</EM> to match any string. Use <EM>LDOTS</EM> or <EM>SDOT</EM>
+to remove ambiguities by matching the longest or shortest possible string.</P>
+<P>Use <EM>DOT</EM> to match a single character.</P>
+<P>The <EM>GS</EM> object should be used when a String object or a character
+string needs to be converted to a GString object and the C++ syntax rules don't
+do this automatically. For example,</P>
+<PRE>   GS | &quot;cat&quot; | &quot;dog&quot;</PRE>
+
+<P>means <EM>cat</EM> or <EM>dog</EM>,</P>
+<PRE>   GS + &quot;<EM style="font-style: normal">The</EM>&quot; + DOTS + &quot;<EM style="font-style: normal">dog</EM>&quot; + DOTS</PRE>
+
+<P>means <EM>The</EM> (or <EM>There</EM>, <EM>Then</EM> etc) at the beginning
+of the string and <EM>dog</EM> somewhere within the string. If the <EM>GS</EM>
+is left out you will get a C++ syntax error. The need for this trick is one of
+the downsides of embedding the editor in C++. At the moment <tt>+</tt>,
+<tt>|</tt>, <tt>&amp;</tt>, etc are implemented as member functions so you need 
+a <i>GS</i> as shown in the preceding expressions and also in expressions such 
+as</P>
+<pre>   DOTS + &quot;one&quot; &gt; GS + &quot;two&quot; + DOTS</pre>
+<p>In the final editing stage the values returned to the string are determined
+by the second argument (<EM>gs3</EM>) of <EM>s</EM>. <EM>DOTS</EM> means copy
+from the corresponding part of the string before editing. A String object or a
+character string or&nbsp;means replace the corresponding text in the original
+text with this text. A LongestString, ShortestString, and FixedLengthString
+object means copy the text remembered by that object. In each case where there
+are alternative matching strings in the GString expression only those strings
+leading to the match are copied.</p>
+<P>It doesn't seem possible to track expressions preceded by <TT>~</TT> in a
+sensible way. So I don't try to do this. The whole <TT>~</TT> clause, including
+the <TT>~</TT> can be replaced by a single character string or by <EM>DOTS</EM>
+(if we want to copy the original string).</P>
+<P>Some <A HREF="#Examples">examples</A> are given at the end of this document.
+</P>
+<h4>Concatenated GStrings:</h4>
+<P>Try to avoid concatenated sequences using <tt>+</tt> with more than 3
+objects of unknown length. Otherwise the speed may be very slow. If possible
+use <TT>&lt;</TT> or <TT>&gt;</TT> in place of <TT>+</TT> to improve speed. That 
+is use</P>
+<pre>   A &gt; B &gt; C &gt; D</pre>
+<p>or</p>
+<pre>   A &lt; B &lt; C &lt; D</pre>
+<p>in preference to</p>
+<pre>   A + B + C + D</pre>
+<p>where <tt>A</tt>, <tt>B</tt>, <tt>C</tt> and <tt>D</tt> are <i>GStrings</i> and we 
+are trying to match the concatenation of <tt>A</tt>, <tt>B</tt>, <tt>C</tt> and <tt>D</tt>. If the 
+length of these <i>GStrings</i> can't be determined in advance the expression with <tt>+</tt> 
+will search all possible combinations of the lengths until a match is found. 
+This can require an excessive search time. If the expression with <TT>&gt;</TT> 
+is used, then <tt>A</tt> is matched, scanning over possible lengths of <tt>A</tt>. 
+If successful then <tt>B</tt> is matched and so on. If the expression with <tt>&lt;</tt> is 
+used then the search starts with <tt>D</tt>. These will tend to be faster but 
+with the possibility of missing a match. You need to have a string that 
+is matched explicitly (as opposed to <i>DOTS</i>, for example) immediately to the left 
+of each <tt>&gt;</tt> or to the right of each <tt>&lt;</tt>. For example,</p>
+<pre>   GS + &quot;The&quot;  &gt;  DOTS + &quot;dog&quot;  &gt;  DOTS + &quot;.&quot;</pre>
+<p>should be used in preference to</p>
+<pre>   GS + &quot;The&quot; + DOTS  &gt;  GS + &quot;dog&quot; + DOTS  &gt;  &quot;.&quot;</pre>
+<p>The second version will not match <i>DOTS</i> correctly and the match will 
+almost certainly fail.</p>
+<h4>Longest and shortest strings:</h4>
+
+<p>The&nbsp;direction of the search (from left to right or right to left) which 
+matching an expression with +, &lt; or &gt; is determined by the use <i>ShortestString</i>,
+<i>LongestString</i>, <i>SDOTS</i> or <i>LDOTS</i> objects. It is easy to set up 
+situations where the results are unpredictable and this needs further work.</p>
+
+<h4>White Space:</h4>
+
+<p>The WhiteSpace and OptionalWhiteSpace objects, <i>WS</i> and <i>OWS</i> match 
+sequences of&nbsp; the spaces, tabs, line feeds and carriage returns. The 
+surrounding characters must not be white space characters.</p>
+
+<H2><EM><A NAME="TaggedStringList"></A>TaggedStringList</EM> classes</H2>
+<P>The <EM>TaggedStringList</EM> family is used to select a subset of the 
+StringList for editing. It includes the <EM>TaggedStringList</EM>
+class and three classes, <EM>StringList_String</EM>,&nbsp;
+<EM>StringList_Range</EM> and <EM>StringList_GString</EM> derived from it.
+Objects from these classes are generated from one of the following expressions 
+</P>
+<PRE>   SL.All()
+   SL(string)
+   SL(string, string, ends)
+   SL(gstring)</PRE>
+
+<P>where <EM>SL</EM> is a StringList,&nbsp; <EM>string</EM> is a String,
+<EM>gstring</EM> is a GString, and <EM>ends</EM> is an int. These classes
+enable one to edit a subset of the strings in a StringList.</P>
+<P><EM>SL.All()</EM> includes <EM>all</EM> the strings in <EM>SL</EM>.</P>
+<P><EM>SL(s)</EM>, where <EM>s</EM> is either a character string or an object
+of class <EM>String</EM>, includes those strings in <EM>SL</EM> which include
+the string <EM>s</EM>.</P>
+<P><EM>SL(s1,s2, ends)</EM>, where <EM>s1</EM> and <EM>s2</EM> are either
+character strings or objects of class <EM>String</EM>, include those strings in
+<EM>SL</EM> selected in the range <EM>s1</EM> to <EM>s2</EM>. The <EM>ends</EM>
+parameter, if included, determines which ends of the ranges are included. See
+the description in the notes on the <A HREF="#StringList">StringList class</A>.
+The default is to include both ends.</P>
+<P><EM>SL(gs)</EM>, where <EM>gs</EM> is a <EM>GString</EM> expression,
+includes those strings in <EM>SL</EM> which match the pattern <EM>gs</EM>. Note
+that here, as elsewhere, the pattern must match the complete string and not
+just a subset of it.</P>
+<P>Objects of these classes should not be constructed as stand-alone objects
+but should be used as part of an editing function such as</P>
+<PRE>   SL.All().sa(&quot;target&quot;,&quot;replace with&quot;);</PRE>
+
+<P>They can also the passed to a function as a <EM>TaggedStringList&amp;</EM>
+parameter. This provides a way of carrying out more complicated editing
+functions that cannot be carried out directly with the functions provided in
+TaggedStringList family. These classes can access
+<EM>TaggedStringList::iterator</EM> and
+<EM>TaggedStringList::reverse_iterator</EM> classes which have the same
+properties with corresponding classes associated with the <EM>StringList</EM>
+class.</P>
+<P><STRONG>Note:</STRONG> do not use the <EM>reverse_iterator</EM> class with a
+<EM>StringList_Range</EM> object.</P>
+
+<P><b>Note:</b> if possible, use
+a simple string as an argument to <EM>SL</EM> to reduce the number of strings
+that have to be searched with a GString.</P>
+<H3>The member functions and friends</H3>
+<DIV ALIGN="left">
+<TABLE BORDER="1" WIDTH="100%" style="border-collapse: collapse" bordercolor="#111111" cellpadding="0" cellspacing="1">
+<TR>
+<TD WIDTH="50%"><TT>friend ostream&amp; operator&lt;&lt;(ostream&amp; os,
+TaggedStringList&amp; tsl);</TT></TD>
+<TD WIDTH="50%">Output the entire TaggedStringList to a file.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>iterator begin();</TT></TD>
+<TD WIDTH="50%">Return an iterator pointing to the beginning of the
+StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>iterator end();</TT></TD>
+<TD WIDTH="50%">Return an iterator pointing to one past the end of the
+StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>reverse_iterator rbegin();</TT></TD>
+<TD WIDTH="50%">Return a reverse iterator pointing to the end of the
+StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>reverse_iterator rend();</TT></TD>
+<TD WIDTH="50%">Return a reverse iterator pointing one before the beginning of
+the StringList.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>void erase(iterator i);</TT></TD>
+<TD WIDTH="50%">Erase the string corresponding to <EM>i.</EM> See note about
+the corresponding entry in the StringList class.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>void erase(reverse_iterator i);</TT></TD>
+<TD WIDTH="50%">Erase the string corresponding to <EM>i.</EM> See note about
+the corresponding entry in the StringList class.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>void insert_before(const String&amp; s, iterator
+i)</TT></TD>
+<TD WIDTH="50%">Insert <EM>s</EM> before the string corresponding to
+<EM>i</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>void insert_after(const String&amp; s, iterator
+i)</TT></TD>
+<TD WIDTH="50%">Insert <EM>s</EM> after the string corresponding to
+<EM>i</EM>.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int sf(const String&amp; s1, const String&amp; s2,
+iterator i);</TT></TD>
+<TD WIDTH="50%">Substitute the first occurrence of <EM>s1</EM> by <EM>s2</EM>
+in the string corresponding to <EM>i</EM>. Return number of changes (0 or 1).</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int sl(const String&amp; s1, const String&amp; s2,
+iterator i);</TT></TD>
+<TD WIDTH="50%">Substitute the last occurrence of <EM>s1</EM> by <EM>s2</EM> in
+the string corresponding to <EM>i</EM>. Return number of changes (0 or 1).</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int sa(const String&amp; s1, const String&amp; s2,
+iterator i);</TT></TD>
+<TD WIDTH="50%">Substitute all occurrences of <EM>s1</EM> by <EM>s2</EM> in the
+string corresponding to <EM>i</EM>. Return number of changes.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int s(GString&amp; g1, GString&amp; g2, iterator
+i);</TT></TD>
+<TD WIDTH="50%">Substitute the pattern of <EM>g1</EM> by <EM>g2</EM> in the
+string corresponding to <EM>i</EM>. Return number of changes (0 or 1).</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>void UpperCase(iterator i);</TT></TD>
+<TD WIDTH="50%">Convert the string corresponding to <EM>i</EM> to upper
+case.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>void LowerCase(iterator i);</TT></TD>
+<TD WIDTH="50%">Convert the string corresponding to <EM>i</EM> to lower
+case.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int erase();</TT></TD>
+<TD WIDTH="50%">Erase all strings selected by the TaggedStringList class. Return 
+number of erases.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int insert_before(const String&amp; s)</TT></TD>
+<TD WIDTH="50%">Insert <EM>s</EM> before each of the selected strings. Return 
+number of inserts.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int insert_after(const String&amp; s)</TT></TD>
+<TD WIDTH="50%">Insert <EM>s</EM> after each of the selected strings. Return 
+number of inserts.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int sf(const String&amp; s1, const String&amp;
+s2);</TT></TD>
+<TD WIDTH="50%">Substitute the first occurrence of <EM>s1</EM> by <EM>s2</EM>
+in each of the selected strings. Return number of changes.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int sl(const String&amp; s1, const String&amp;
+s2);</TT></TD>
+<TD WIDTH="50%">Substitute the last occurrence of <EM>s1</EM> by <EM>s2</EM> in
+each of the selected strings. Return number of changes.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int sa(const String&amp; s1, const String&amp;
+s2);</TT></TD>
+<TD WIDTH="50%">Substitute all occurrences of <EM>s1</EM> by <EM>s2</EM> in
+each of the selected strings. Return number of changes.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>int s(GString&amp; g1, GString&amp; g2);</TT></TD>
+<TD WIDTH="50%">Substitute the pattern of <EM>g1</EM> by <EM>g2</EM> in each of
+the selected strings. Return number of changes.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>void UpperCase();</TT></TD>
+<TD WIDTH="50%">Convert the selected strings to upper case.</TD>
+</TR>
+<TR>
+<TD WIDTH="50%"><TT>void LowerCase();</TT></TD>
+<TD WIDTH="50%">Convert the selected strings to lower case.</TD>
+</TR>
+</TABLE>
+</DIV>
+<P>The iterator versions of the editing functions are intended to be used
+within loops involving an iterator. Use a (forward) iterator rather than a
+reverse iterator. The editing functions without iterators refer to the whole
+TaggedStringList family object.</P>
+
+<h2><A NAME="Functions"></A>Functions</h2>
+<DIV ALIGN="left">
+<TABLE BORDER="1" WIDTH="100%" style="border-collapse: collapse" bordercolor="#111111" cellpadding="0" cellspacing="1">
+<TR>
+<TD WIDTH="50%"><tt>int s(String&amp; S, const GString&amp; g1, const GString&amp; g2);</tt></TD>
+<TD WIDTH="50%">Substitute the pattern of <EM>g1</EM> by <EM>g2</EM> in string 
+S. Return number of changes (0 or 1).</TD>
+</TR>
+</TABLE>
+</DIV>
+
+<P>&nbsp;</P>
+
+<H2><A NAME="Examples"></A>Examples</H2>
+<P>I have a file, fox.txt, containing the single line:</P>
+<PRE>   The quick brown fox jumps over the lazy dog.</PRE>
+
+<P>I demonstrate a variety of statements for editing this line.</P>
+<P>Change <EM>quick</EM> to <EM>fast</EM> and print out the resulting line.</P>
+<PRE>   ifstream is(&quot;fox.txt&quot;);
+   StringList Fox; is &gt;&gt; Fox;
+   Fox.All().sa(&quot;quick&quot;, &quot;fast&quot;);
+   cout &lt;&lt; Fox;</PRE>
+
+<P>or using GStrings</P>
+<PRE>   ifstream is(&quot;fox.txt&quot;);
+   StringList Fox; is &gt;&gt; Fox;
+   Fox.All().s(DOTS + &quot;quick&quot; + DOTS,
+               DOTS + &quot;fast&quot;  + DOTS);
+   cout &lt;&lt; Fox;</PRE>
+
+<P>Suppose the fox line is one line in a long file. I want the editing to apply
+only to lines that include the word <EM>fox</EM> (where we are ignoring the
+possibility that <EM>fox</EM> is included in some other word).</P>
+<PRE>   ifstream is(&quot;fox.txt&quot;);
+   StringList Fox; is &gt;&gt; Fox;
+   Fox(&quot;fox&quot;).s(DOTS + &quot;quick&quot; + DOTS,
+                DOTS + &quot;fast&quot;  + DOTS);
+   cout &lt;&lt; Fox;</PRE>
+
+<P>I don't know what the adjectives between <EM>The</EM> and <EM>fox</EM> are
+but I want to change them to <EM>slow grey</EM>. I show just the editing line. 
+</P>
+<PRE>   Fox.All().s(GS + &quot;The&quot; + DOTS          + &quot;fox&quot; + DOTS,
+                    DOTS  + &quot; slow grey &quot; + DOTS  + DOTS);</PRE>
+
+<P>I am not sure whether the verb is <EM>jump</EM> or <EM>jumps</EM> but I want
+to change it to <EM>leap</EM> or <EM>leaps</EM> respectively.</P>
+<PRE>   Fox.All().s(DOTS + (GS | &quot;jump&quot; | &quot;jumps&quot;) + DOTS,
+               DOTS + (GS | &quot;leap&quot; | &quot;leaps&quot;) + DOTS);</PRE>
+
+<P>I don't what the animals involved are but I want to swap them.</P>
+<PRE>   ShortestString SS1, SS2;
+   Fox.All().s(GS + &quot;The quick brown &quot; + SS1 + &quot; jumps over the lazy &quot; + SS2 + &quot;.&quot;,
+                    DOTS               + SS2 + DOTS                    + SS1 + DOTS);</PRE>
+
+<P>&nbsp;</P>
+
+<h2><a name="History"></a>History</h2>
+<ul>
+  <li>June, 2004: s, sa, sf, sl return number of changes</li>
+  <li>April, 2004: <i>s</i> function for string</li>
+  <li>October, 2002: Fix test program for new compilers</li>
+  <li>January, 2002: Fix white space; improve efficiency</li>
+  <li>July, 2001: Initial release</li>
+</ul>
+<H2><A NAME="ToDo"></A>To do</H2>
+<P>More testing.</P>
+<P>Operator * to allow multiple copies of a target. I will need three types of
+counters <EM>N0</EM> (may be 0 or 1 repetitions), <EM>NN</EM> (may be any
+number of repetitions including 0, <EM>N1</EM> (may be any number of
+repetitions &gt; 0). Can also have a positive integer. Assume <tt>&gt;</tt> combination
+rather than <tt>+</tt>. Assume longest when saying type of <tt>*</tt> expression.&nbsp; This is
+going to be a bit of problem as Collect won't work correctly; may need a IntList class to hold switching data.</P>
+<P>Review rules regarding shortest and longest.</P>
+<P>Letter by letter translations (SED <EM>y</EM> operator) - need function
+R('a', 'z');</P>
+<P>Fix problem with <TT>i.erase(); ++i;</TT>. Decide how to handle
+<TT>i.insert_next(S); ++i;</TT>.</P>
+<P>In TaggedStringList make iterators forward only; make reverse iterator fully
+functional (?)</P>
+<P>Introduce new editing phase, <EM>Load</EM>, between <EM>Matches</EM> and
+<EM>Collect</EM> to load values into ShortestString etc. This will ensure the value
+is not set if not involved in a match. Introduce boolean indicator into
+ShortestString etc to show if value has been set; reset when assigned a value
+with =. Run <EM>Load</EM> at search stage as well as edit phase.(??)</P>
+<P>More internal checking - iterators correctly matched with object they are
+accessing, comparisons valid.</P>
+<P>Check that operators in collect and translate phases agree.</P>
+<P>Notes on implementing new facilities. What is needed for a new
+TaggedStringList class and what is needed for a new operator (operator - need
+to define action in both GString and InitialGstring; list functions required)
+or a new target object. Requirements on Match Load Collect and Translate.
+Interchangeable target object <tt>-&gt;</tt> must push one string to list at collect
+time and pop one at translate time - note defaults.</P>
+<P>Check all target objects are interchangeable between Collect and Translate
+phases. Collect must push a value; Translate must Pop a value.</P>
+<P>Directory read into StringList - how to handle attributes? </P>
+<P>Column oriented input and output</P>
+<P>Regular expression input</P>
+<P>Number input (eg recognise E format)</P>
+<P>Extend and document substitution list facilities </P>
+<UL>
+<LI><a href="string.htm">return to string library</a></LI>
+  <li><a HREF="ol_doc.htm">To online documentation page</a></li>
+  <li><A HREF="#Top">Back to top</A></li>
+</UL>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

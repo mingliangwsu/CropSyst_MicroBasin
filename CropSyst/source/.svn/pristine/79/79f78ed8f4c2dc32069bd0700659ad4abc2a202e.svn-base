@@ -1,0 +1,22 @@
+#include "desired_vars.h"
+namespace CropSyst {
+//______________________________________________________________________________
+bool Desired_variables::is_desired(UED_variable_code var_code)             const
+{  nat32 at_index = 0;
+
+#if (CROPSYST_PROPER==5)
+bool desired = true; // temporarily output everything for debugging
+#else
+
+   bool desired =
+      desire_everything ||                                                       //111221
+      is_in_array((uint32) var_code,at_index);
+
+#endif
+
+   return desired;
+}
+//______________________________________________________________________________
+}
+
+

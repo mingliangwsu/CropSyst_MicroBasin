@@ -1,0 +1,541 @@
+
+<DL>
+<H3>[crop]</H3>                  //original
+<BR><B>details_URL=</B>
+<BR><B>description=</B>Maize
+<BR><B>feed_name_immature=</B>
+<BR><B>feed_name_midmature=</B>
+<BR><B>feed_name_mature=</B>
+# (model_options '(primary CropSyst_crop)
+<BR><B>model=</B>crop
+<BR><B>harvested_part=</B>grain    //original (moved to [harvest])
+<BR><B>photosynthetic_pathway=</B>C4
+<BR><B>life_cycle=</B>annual
+<BR><B>stem_type=</B>herbaceous
+<BR><B>tea=</B>false
+<BR><B>land_use=</B>ROW_CROPS
+<BR><B>season_dormancy_mode=</B>single
+<BR><B>canopy_growth=</B>leaf_area_index
+<BR><B>c_species=</B>C4
+<BR><B>senesced_biomass_fate=</B>shed
+<BR><B>linger=</B>90 Time that senesced leaves linger with (remain standing/attached to) the plant
+<BR><B>row_type=</B>no_rows
+<BR><B>perennial=</B>false
+<BR><B>stages=</B>NOCROP PREPLANTING PREEMERGENCE ACTIVE_GROWTH FLOWERING GRAIN_FILLING MATURITY DORMANT HARVESTABLE HARVESTED 
+<BR><B>phenology_observed:count=</B>3
+<BR><B>observation:count=</B>42
+<BR><B>production:count=</B>3
+
+______________________________________________________________________________
+
+<H3>[leaf]</H3>
+<BR><B>senesces=</B>true
+<BR><B>clip_newest=</B>true
+<BR><B>max_LAI=</B>5.00 m²/m² required for fruit trees        // mabe redo
+<BR><B>max_LAI_units=</B>m²/m²
+<BR><B>fract_LAI_mature=</B>0.80 0-1 (green and senesced)     // redo
+<BR><B>fract_LAI_mature_units=</B>0-1                         // redo
+<BR><B>initial_GAI=</B>0.011 m²/m² hint                       // redo
+<BR><B>initial_GAI_units=</B>m²/m²
+<BR><B>regrowth_GAI=</B>0.011 m²/m² (for perennial and/or clipped annuals)
+<BR><B>regrowth_GAI_units=</B>m²/m²
+<BR><B>specific_leaf_area=</B>22.00 m²/kg hint
+<BR><B>specific_leaf_area_units=</B>m²/kg
+<BR><B>stem_leaf_partition=</B>3.00 0-4 hint
+<BR><B>stem_leaf_partition_units=</B>0-4
+<BR><B>duration=</B>800 Degree days hint
+<BR><B>duration_units=</B>Degree days
+<BR><B>duration_stress_sensitivity=</B>1.00 0-3 hint
+<BR><B>duration_stress_sensitivity_units=</B>0-3
+
+_______________________________________________________________________________
+
+<H3>[transpiration]</H3>
+<BR><B>ET_crop_coef=</B>1.20 0.8-1.4 hint
+<BR><B>ET_crop_coef_units=</B>0.8-1.4
+<BR><B>max_water_uptake=</B>10.00 mm/day hint
+<BR><B>max_water_uptake_units=</B>mm/day
+<BR><B>stomatal_closure_leaf_water_pot=</B>-1000.00 -J/kg leaf water potential at the onset of water stress
+<BR><B>stomatal_closure_leaf_water_pot_units=</B>-J/kg
+<BR><B>wilt_leaf_water_pot=</B>-1600.00 -J/kg hint
+<BR><B>wilt_leaf_water_pot_units=</B>-J/kg
+<BR><B>kc=</B>0.50 0-1 hint
+<BR><B>kc_units=</B>0-1
+______________________________________________________________________________
+<H3>[water_use_efficiency]</H3> original    this is replaced with new TUE curve 
+<BR><B>season2_adj=</B>1.0000000000
+<BR><B>season3_adj=</B>1.0000000000
+<BR><B>season4_adj=</B>1.0000000000
+<BR><B>season5_adj=</B>10.0000000000
+______________________________________________________________________________
+
+<H3>[growth]</H3> original
+<BR><B>WUE_changes=</B>false
+<BR><B>TUE_equation=</B>Tanner_Sinclair
+<BR><B>RUE_basis=</B>photosynthetically_active_radiation
+<BR><B>TUE_scaling_coef=</B>0.45 - power function
+<BR><B>TUE_scaling_coef_units=</B>-
+filling<BR><B>TUE_scaling_coef_veg=</B>0.45 - power function
+<BR><B>TUE_scaling_coef_veg_units=</B>-
+<BR><B>TUE_at_1pKa_VPD=</B>5.00 g BM/kg H2O Throughout growth (or after vegetative growth if applicable)
+<BR><B>TUE_at_1pKa_VPD_units=</B>g BM/kg H2O
+<BR><B>TUE_at_1pKa_VPD_veg=</B>5.00 g BM/kg H2O Only during vegetative growth
+<BR><B>TUE_at_1pKa_VPD_veg_units=</B>g BM/kg H2O
+<BR><B>water_productivity=</B>5.00 g BM/kg H2O FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode)
+<BR><B>water_productivity_units=</B>g BM/kg H2O
+<BR><B>water_productivity_veg=</B>5.00 g BM/kg H2O (as in AquaCrop) Only during vegetative growth
+<BR><B>water_productivity_veg_units=</B>g BM/kg H2O
+<BR><B>RUE_PAR=</B>2.000000 g/MJ hint
+<BR><B>RUE_PAR_units=</B>g/MJ
+<BR><B>biomass_transpiration_coef=</B>5.00 Pa Throughout growth (or after vegetative growth if applicable)
+<BR><B>biomass_transpiration_coef_units=</B>Pa
+<BR><B>biomass_transpiration_coef_veg=</B>5.00 Pa Only during vegetative growth
+<BR><B>biomass_transpiration_coef_veg_units=</B>Pa
+<BR><B>early_growth_limit_temp=</B>1.00 °C hint
+<BR><B>early_growth_limit_temp_units=</B>°C
+<BR><B>LWP_reduces_canopy_expansion=</B>-800.00 J/kg (must be more negative than value above that begins reduction)
+<BR><B>LWP_reduces_canopy_expansion_units=</B>J/kg
+<BR><B>LWP_stops_canopy_expansion=</B>-1200.00 J/kg hint
+<BR><B>LWP_stops_canopy_expansion_units=</B>J/kg
+
+
+______________________________________________________________________________
+<BR><B><H2><FONT COLOR=RED>continue here</FONT></H2> 
+
+<H3>[morphology]</H3>
+<BR><B>max_canopy_height=</B>1.50 m hint
+<BR><B>max_canopy_height_units=</B>m
+<BR><B>max_root_depth=</B>1.5000000000 Maximum rooting depth
+<BR><B>surface_root_density=</B>6.0000000000 Surface root density
+<BR><B>root_density_distribution_curvature=</B>4.0000000000 Curvature of root density distribution
+<BR><B>root_length_per_unit_mass=</B>90.0000000000 Root length per unit root mas
+
+______________________________________________________________________________
+
+<H3>[harvest] </H3> //original
+<BR><B>unstressed=</B>0.43 0-1 hint
+<BR><B>flowering_sensitivity=</B>0.00 0.5-1.5 hint
+<BR><B>filling_sensitivity=</B>0.00 0.5-1.5 grain, tuber or fruit filling/bulking
+<BR><B>filling_duration=</B>30 Days hint
+<BR><B>temperature_stress_sensitivity=</B>0.00 0.5-1.5 hint
+<BR><B>translocation_max=</B>0.0000000000
+
+
+______________________________________________________________________________
+
+<H3>[emergence]</H3> (no change)
+<BR><B>model=</B>thermal_time
+<BR><B>a=</B>22.35 - Emperical constant
+<BR><B>a_units=</B>-
+<BR><B>b=</B>129.66 - Emperical constant
+<BR><B>b_units=</B>-
+<BR><B>seedling_leaf_area=</B>2.00 cm² on first day of emergence
+<BR><B>seedling_leaf_area_units=</B>cm²
+<BR><B>germination_base_temperature=</B>-1.0 °C 
+<BR><B>germination_base_temperature_units=</B>°C
+<BR><B>mean_base_soil_water_pot=</B>-1000.0 J/kg 
+<BR><B>mean_base_soil_water_pot_units=</B>J/kg
+<BR><B>stdev_base_soil_water_pot=</B>100.0 J/kg ?for 50% emergence?
+<BR><B>stdev_base_soil_water_pot_units=</B>J/kg
+
+______________________________________________________________________________
+[hardiness]   (no change)
+<BR><B>enabled=</B>false
+<BR><B>salvageable_days_before_maturity=</B>0  hint
+<BR><B>salvageable_days_before_maturity_units=</B>
+<BR><B>damage_cold_temp=</B>-5.00 °C hint
+<BR><B>damage_cold_temp_units=</B>°C
+<BR><B>lethal_cold_temp=</B>-10.00  hint
+<BR><B>lethal_cold_temp_units=</B>
+<BR><B>tuber_crit_temperature=</B>17.0000000000
+______________________________________________________________________________
+
+<H3>[nitrogen]</H3>
+<BR><B>fixation=</B>false
+<BR><B>legume_fraction=</B>1.0000000000
+<BR><B>nitrogen_leaf_stress_mode=</B>none
+
+<BR><B><H2><FONT COLOR=RED>continue here</FONT></H2>...
+
+<BR><B>max_uptake_daily_rate=</B>8.00 kg/ha/day hint
+<BR><B>max_uptake_daily_rate_units=</B>kg/ha/day
+<BR><B>demand_adjust=</B>1.00 adjustment hint
+<BR><B>demand_adjust_units=</B>adjustment
+<BR><B>stubble_max_conc=</B>0.007 kgN/kgDM hint
+<BR><B>stubble_max_conc_units=</B>kgN/kgDM
+<BR><B>root_conc=</B>0.007 kgN/kgDM hint
+<BR><B>root_conc_units=</B>kgN/kgDM
+<BR><B>residual_N_not_available_for_uptake=</B>1.000 ppm hint
+<BR><B>residual_N_not_available_for_uptake_units=</B>ppm
+<BR><B>soil_N_conc_where_N_uptake_decreases=</B>5.000 ppm hint
+<BR><B>soil_N_conc_where_N_uptake_decreases_units=</B>ppm
+<BR><B>PAW_where_N_uptake_rate_decreases=</B>0.500 0-1 hint
+<BR><B>PAW_where_N_uptake_rate_decreases_units=</B>0-1
+<BR><B>uptake_adj=</B>1.0000000000 Nitrogen uptake adjustment
+<BR><B>availability_adj=</B>1.0000000000 Nitrogen availability adjustment
+<BR><B>residual=</B>0.0000000000 Amount of residual nitrogen per soil layer
+<BR><B>max_conc_emerge=</B>0.0500000007 Maximum N concentration during early growth
+<BR><B>min_conc_mature=</B>0.0070000002 Minimum N concentration at maturity
+<BR><B>max_conc_mature=</B>0.0199999996 Maximum N concentration at maturity
+<BR><B>max_stubble=</B>0.0070000002 Maximum N content of standing stubble
+
+______________________________________________________________________________
+
+<H2><FONT COLOR=RED>continue here</FONT></H2>
+
+<H3>[fruit]</H3>
+<BR><B>fract_total_solids=</B>0.35 0-1 hint
+<BR><B>fract_total_solids_units=</B>0-1
+<BR><B>max_fruit_load=</B>20000.00 kg/ha hint
+<BR><B>max_fruit_load_units=</B>kg/ha
+<BR><B>initial_growth_fraction_to_fruit=</B>0.90 0-1 hint
+<BR><B>initial_growth_fraction_to_fruit_units=</B>0-1
+<BR><B>rapid_growth_fraction_to_fruit=</B>0.65 0-1 hint
+<BR><B>rapid_growth_fraction_to_fruit_units=</B>0-1
+<BR><B>harvest_temperature=</B>15.0 °C hint
+<BR><B>harvest_temperature_units=</B>°C
+<BR><B>harvest_temperature_days=</B>5 Days hint
+<BR><B>harvest_temperature_days_units=</B>Days
+<BR><B>earliest_harvest=</B>258 DOY hint
+<BR><B>earliest_harvest_units=</B>DOY
+<BR><B>latest_harvest=</B>275 DOY hint
+<BR><B>latest_harvest_units=</B>DOY
+<BR><B>max_water_uptake_before_fruiting=</B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_before_fruiting_units=</B>mm/day
+<BR><B>max_water_uptake_during_initial_fruit=</B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_during_initial_fruit_units=</B>mm/day
+<BR><B>max_water_uptake_during_radid_fruit=</B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_during_radid_fruit_units=</B>mm/day
+<BR><B>max_water_uptake_during_veraison=</B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_during_veraison_units=</B>mm/day
+<BR><B>max_water_uptake_after_maturity=</B>10.00 mm/day Maximum water uptake
+<BR><B>max_water_uptake_after_maturity_units=</B>mm/day
+
+______________________________________________________________________________
+
+<H3>[CO2]</H3>  (no change)
+<BR><B>growth_ratio_elevated_to_baseline_ppm=</B>1.25 ratio hint
+<BR><B>growth_ratio_elevated_to_baseline_ppm_units=</B>ratio
+<BR><B>elevated_reference_conc=</B>660.0 ppm hint
+<BR><B>elevated_reference_conc_units=</B>ppm
+<BR><B>baseline_reference_conc=</B>350.0 ppm hint
+<BR><B>baseline_reference_conc_units=</B>ppm
+<BR><B>linger=</B>90 days remain standing/attached to
+<BR><B>linger_units=</B>days
+
+______________________________________________________________________________
+
+<H3>[salinity]</H3> (no change)
+<BR><B>osmotic_pot_50=</B>-0.0 kPa hint
+<BR><B>osmotic_pot_50_units=</B>kPa
+<BR><B>tolerance_P=</B>0.000 1-5 hint
+<BR><B>tolerance_P_units=</B>1-5
+
+
+______________________________________________________________________________
+
+<BR><B><H2><FONT COLOR=RED>continue here</FONT></H2>
+
+<H3>[canopy_characteristics]</H3>
+<BR><B>initial_width=</B>1.00 m hint
+<BR><B>initial_width_units=</B>m
+<BR><B>final_width=</B>1.00 m hint
+<BR><B>final_width_units=</B>m
+<BR><B>initial_breadth=</B>2.00 m hint
+<BR><B>initial_breadth_units=</B>m
+<BR><B>final_breadth=</B>2.00 m hint
+<BR><B>final_breadth_units=</B>m
+<BR><B>initial_height=</B>1.20 m hint
+<BR><B>initial_height_units=</B>m
+<BR><B>final_height=</B>1.20 m hint
+<BR><B>final_height_units=</B>m
+<BR><B>branch_insertion_height=</B>0.60 m hint
+<BR><B>branch_insertion_height_units=</B>m
+<BR><B>initial_canopy_diameter=</B>3.0000000000 Initial canopy diameter
+<BR><B>final_canopy_diameter=</B>4.0000000000 Final canopy diameter
+<BR><B>max_LAI_of_canopy_projection=</B>3.0000000000 Maximum LAI of canopy crown diameter projected to soil surface
+
+______________________________________________________________________________
+
+<H3>[layout]</H3> (no change)
+<BR><B>row_spacing=</B>2.70 m hint
+<BR><B>row_spacing_units=</B>m
+<BR><B>row_azimuth=</B>0.00 0 =</B> North, 90 =</B> East, 180 =</B> South,  270 =</B> West hint
+<BR><B>row_azimuth_units=</B>0 =</B> North, 90 =</B> East, 180 =</B> South,  270 =</B> West
+<BR><B>col_spacing=</B>2.70 m hint
+<BR><B>col_spacing_units=</B>m
+
+______________________________________________________________________________
+<H3>[canopy_cover]</H3>
+<BR><B>initial_cover=</B>0.01 fraction hint
+<BR><B>initial_cover_units=</B>fraction
+<BR><B>maximum_cover=</B>0.90 fraction hint
+<BR><B>maximum_cover_units=</B>fraction
+<BR><B>mature_green_cover=</B>0.10 fraction hint
+<BR><B>mature_green_cover_units=</B>fraction
+<BR><B>mature_total_cover=</B>0.10 fraction hint
+<BR><B>mature_total_cover_units=</B>fraction
+<BR><B>rel_TT_at_half_CC_max=</B>0.45 fraction hint
+<BR><B>rel_TT_at_half_CC_max_units=</B>fraction
+<BR><B>cC_initial=</B>0.0099999998 Initial canopy cover
+<BR><B>cC_maximum=</B>0.8999999762 Maximum canopy cover
+<BR><B>cC_mature_green=</B>0.1000000015 Green canopy cover at maturity
+<BR><B>cC_mature_total=</B>0.1000000015 Total canopy cover at maturity (green and senesced)
+
+______________________________________________________________________________
+
+<H3>[phenology]</H3>
+<BR><B>maturity_significant=</B>true
+<BR><B>clipping_resets=</B>false
+<BR><B>emergence=</B>350 °C-days hint
+<BR><B>emergence_units=</B>°C-days
+<BR><B>flowering=</B>1580 °C-days hint
+<BR><B>flowering_units=</B>°C-days
+<BR><B>peak_LAI=</B>1550 °C-days hint
+<BR><B>peak_LAI_units=</B>°C-days
+<BR><B>max_root_depth=</B>1040 °C-days Established root depth for established fruit trees
+<BR><B>max_root_depth_units=</B>°C-days
+<BR><B>tuber_init=</B>1000 °C-days hint
+<BR><B>tuber_init_units=</B>°C-days
+<BR><B>filling=</B>1680 °C-days hint
+<BR><B>filling_units=</B>°C-days
+<BR><B>rapid_fruit_growth=</B>1300 °C-days hint
+<BR><B>rapid_fruit_growth_units=</B>°C-days
+<BR><B>maturity=</B>2382 °C-days hint
+<BR><B>maturity_units=</B>°C-days
+<BR><B>water_stress_sensitivity=</B>1.00 0-1 hint
+<BR><B>water_stress_sensitivity_units=</B>0-1
+<BR><B>WUE_change=</B>1000 °C-days hint
+<BR><B>WUE_change_units=</B>°C-days
+<BR><B>senescence=</B>1080 °C-days hint
+<BR><B>senescence_units=</B>°C-days
+<BR><B>resolution=</B>hr
+<BR><B>base_temp=</B>3.00 °C hint
+<BR><B>base_temp_units=</B>°C
+<BR><B>cutoff_temp=</B>22.00 °C hint
+<BR><B>cutoff_temp_units=</B>°C
+<BR><B>optimal_temp=</B>22.00 °C hint
+<BR><B>optimal_temp_units=</B>°C
+<BR><B>maximum_temp=</B>35.00 °C hint
+<BR><B>maximum_temp_units=</B>°C
+
+______________________________________________________________________________
+
+
+<H3>[root]</H3>
+<BR><B>root_sensitivity_water_stress=</B>0.00 index 
+<BR><B>root_sensitivity_water_stress_units=</B>index
+<BR><B>max_root_depth=</B>1.50 m Established root depth for established fruit trees
+<BR><B>max_root_depth_units=</B>m
+<BR><B>surface_root_density=</B>6.00 cm/cm³ at full rooting depth
+<BR><B>surface_root_density_units=</B>cm/cm³
+<BR><B>root_density_distribution_curvature=</B>4.000 0.0001-6.0 
+<BR><B>root_density_distribution_curvature_units=</B>0.0001-6.0
+<BR><B>root_length_per_unit_mass=</B>90.00 km/kg 
+<BR><B>root_length_per_unit_mass_units=</B>km/kg
+<BR><B>root_length_at_emergence=</B>1.20 cm 
+<BR><B>root_length_at_emergence_units=</B>cm
+
+______________________________________________________________________________
+
+<H3>[inactive_period]</H3>  (no change)
+<BR><B>consider_inactive_days=</B>7 days hint
+<BR><B>consider_inactive_days_units=</B>days
+<BR><B>inducement_temperature=</B>10.00 °C hint
+<BR><B>inducement_temperature_units=</B>°C
+<BR><B>start_DOY=</B>365  The latest day where dormancy or inactive period will has certainly occured (historically
+<BR><B>start_DOY_units=</B>
+<BR><B>end_DOY=</B>365  The earliest day where dormancy or inactive period  has occured (historically
+<BR><B>end_DOY_units=</B>
+<BR><B>minimum_duration=</B>19 days hint
+<BR><B>minimum_duration_units=</B>days
+<BR><B>start_valid_date=</B>365 (12/30)
+<BR><B>end_valid_date=</B>365 (12/30)
+
+______________________________________________________________________________
+
+<H3>[residue] </H3>(no change)
+<BR><B>RUSLE2_type=</B>unknown
+<BR><B>decomposition_time_50=</B>40  Hint
+<BR><B>decomposition_time_50_units=</B>
+<BR><B>fast_cycling_top_fraction=</B>0.50  Hint
+<BR><B>fast_cycling_top_fraction_units=</B>
+<BR><B>slow_cycling_top_fraction=</B>0.40  Hint
+<BR><B>slow_cycling_top_fraction_units=</B>
+<BR><B>lignified_top_fraction=</B>0.10  Hint
+<BR><B>lignified_top_fraction_units=</B>
+<BR><B>fast_cycling_root_fraction=</B>0.50  Hint
+<BR><B>fast_cycling_root_fraction_units=</B>
+<BR><B>slow_cycling_root_fraction=</B>0.30  Hint
+<BR><B>slow_cycling_root_fraction_units=</B>
+<BR><B>lignified_root_fraction=</B>0.20  Hint
+<BR><B>lignified_root_fraction_units=</B>
+<BR><B>fast_cycling_decomposition_time_50=</B>3.50  Hint
+<BR><B>fast_cycling_decomposition_time_50_units=</B>
+<BR><B>slow_cycling_decomposition_time_50=</B>9.99  Hint
+<BR><B>slow_cycling_decomposition_time_50_units=</B>
+<BR><B>lignified_decomposition_time_50=</B>115.07  Hint
+<BR><B>lignified_decomposition_time_50_units=</B>
+<BR><B>detrition_time_50=</B>720.0  Accounts for decomposition due to exposure to the elements.
+<BR><B>detrition_time_50_units=</B>
+<BR><B>carbon_fraction=</B>0.46  Hint
+<BR><B>carbon_fraction_units=</B>
+<BR><B>stubble_area_covered_to_mass_ratio=</B>2.00  Hint
+<BR><B>stubble_area_covered_to_mass_ratio_units=</B>
+<BR><B>area_covered_to_mass_ratio=</B>4.00  Hint
+<BR><B>area_covered_to_mass_ratio_units=</B>
+<BR><B>decomposition_time=</B>30 Time to reach 63% decomposition
+
+______________________________________________________________________________
+
+<H3>[vernalization]</H3> (no change)
+<BR><B>enabled=</B>false
+<BR><B>low_temp=</B>3.00 °C hint
+<BR><B>low_temp_units=</B>°C
+<BR><B>high_temp=</B>10.00 °C hint
+<BR><B>high_temp_units=</B>°C
+<BR><B>start=</B>10.00000000000000000000000000000000000000 °C-days hint
+<BR><B>start_units=</B>°C-days
+<BR><B>end=</B>50.00000000000000000000000000000000000000 °C-days hint
+<BR><B>end_units=</B>°C-days
+<BR><B>min_factor=</B>0.00 0-1 hint
+<BR><B>min_factor_units=</B>0-1
+
+______________________________________________________________________________
+
+<H3>[photoperiod] </H3> (no change)
+<BR><B>consideration=</B>none
+<BR><B>stop=</B>0.00 hours For short day crops this must be greater than the unconstrained value, for long day crops it must be less.
+<BR><B>stop_units=</B>hours
+<BR><B>unconstrain=</B>0.00 hours For short day crops this must be less than the stopped value, for long day crops it must be greater.
+<BR><B>unconstrain_units=</B>hours
+<BR><B>enabled=</B>false
+<BR><B>start=</B>0.0000000000 to inhibit flowering Day length (photo-period)
+<BR><B>end=</B>0.0000000000 for insensitivity Day length (photo-period)
+
+______________________________________________________________________________
+
+<H3>[harvest_index] </H3>
+<BR><B>unstressed=</B>0.4300010800 Unstressed harvest index
+<BR><B>flowering_sensitivity=</B>0.0000000000 flowering Sensitivity to water and nitrogen stress
+<BR><B>filling_sensitivity=</B>0.0000000000 filling/bulking Sensitivity to water and nitrogen stress
+<BR><B>filling_duration=</B>30 Duration of grain filling period (unstressed)
+<BR><B>temperature_stress_sensitivity=</B>0.0000000000 Sensitivity to temperature stress during flowering
+<BR><B>fract_total_solids=</B>0.3499999940 Fraction of total solids
+<BR><B>max_fruit_load=</B>20000.0000000000 Max. fruit load (fresh mass)
+<BR><B>initial_growth_fraction_to_fruit=</B>0.8999999762 Fraction of above biomass apportioned to fruit after flowering
+<BR><B>rapid_growth_fraction_to_fruit=</B>0.6499999762 Fraction of above biomass apportioned to fruit during accelerated fruit growth
+<BR><B>harvest_temperature=</B>15.0000000000 Low temperature for harvest
+<BR><B>harvest_temperature_days=</B>5 Consecutive days below the low temperature for to consider harvest
+<BR><B>earliest_harvest=</B>258 Day to start looking for harvest conditions
+<BR><B>latest_harvest=</B>275 Day to force harvest (or fixed date)
+<BR><B>max_water_uptake_before_fruiting=</B>10.0000000000 before fruiting
+<BR><B>max_water_uptake_during_initial_fruit=</B>10.0000000000 during intial fruit
+<BR><B>max_water_uptake_during_radid_fruit=</B>10.0000000000 during rapid fruit
+<BR><B>max_water_uptake_during_veraison=</B>10.0000000000 during veraison
+<BR><B>max_water_uptake_after_maturity=</B>10.0000000000 after maturity
+<BR><B>translocation_factor=</B>0.3000000119 Translocation to yield factor
+
+______________________________________________________________________________
+
+<H3>[options]</H3>  (no change)
+<BR><B>advanced=</B>false
+______________________________________________________________________________
+
+<H3>[dormancy]</H3>  (no change)
+<BR><B>senesce=</B>100.0000000000 Biomass that senesces at the on sent of dormancy
+<BR><B>enabled=</B>false
+<BR><B>inducement_temperature=</B>10.0000000000 Average temperature for 7 consecutive days to induce dormancy
+<BR><B>start_valid_date=</B>365 (12/30)
+<BR><B>leave_valid_date=</B>365 (12/30)
+<BR><B>scenesce=</B>100.0000000000 Biomass that senesces at the on sent of dormancy
+
+______________________________________________________________________________
+
+<H3>[information]</H3> (no change)
+<BR><B>UED_filename=</B>C:\Simulation\Projects\info    or_sample\Database\Weather\prosNM.ued
+[phenology_info    ion]
+<BR><B>observed_data_mode=</B>experimental_measurment_mode
+
+______________________________________________________________________________
+
+<H3>[phenology_typical_season]</H3> (no change)
+<BR><B>enabled=</B>true
+<BR><B>planting_date=</B>2006172 (2006/June/21(172))
+<BR><B>emergence_date=</B>2006172 (2006/June/21(172))
+<BR><B>tuber_initiation_date=</B>2006172 (2006/June/21(172))
+<BR><B>peak_LAI_date=</B>2006172 (2006/June/21(172))
+<BR><B>begin_flowering_date=</B>2006172 (2006/June/21(172))
+<BR><B>begin_grain_filling_date=</B>2006172 (2006/June/21(172))
+<BR><B>rapid_fruit_growth_date=</B>2006172 (2006/June/21(172))
+<BR><B>maturity_date=</B>2006172 (2006/June/21(172))
+
+______________________________________________________________________________
+
+<H3>[???_biomass_LAI]</H3> (no change)
+<BR><B>biomass_LAI_info    ion_mode=</B>both_SLA_SLP
+
+______________________________________________________________________________
+
+<H3>[phenology_observed:0]</H3>
+<BR><B>enabled=</B>true
+<BR><B>planting_date=</B>1996104 (1996/April/13(104))
+<BR><B>emergence_date=</B>1996146 (1996/May/25(146))
+<BR><B>tuber_initiation_date=</B>1996104 (1996/April/13(104))
+<BR><B>peak_LAI_date=</B>1996221 (1996/August/8(221))
+<BR><B>begin_flowering_date=</B>1996223 (1996/August/10(223))
+<BR><B>begin_grain_filling_date=</B>1996228 (1996/August/15(228))
+<BR><B>begin_rapid_fruit_growth_date=</B>1996104 (1996/April/13(104))
+<BR><B>maturity_date=</B>1996284 (1996/October/10(284))
+<BR><B>complete_senescence_date=</B>0 (Date omitted)
+
+:
+:
+<H3>[phenology_observed:n]</H3>
+:
+:
+
+______________________________________________________________________________
+
+<BR><B><H2><FONT COLOR=RED>continue here</FONT></H2>...
+
+<H3>[observation:0]</H3>
+<BR><B>date=</B>1996150 (1996/5/29)
+<BR><B>biomass=</B>10.3400001526
+<BR><B>gAI=</B>0.0199999996
+:
+:
+<H3>[observation:n]</H3>
+<BR><B>date=</B>1996160 (1996/6/8)
+<BR><B>biomass=</B>72.0000000000
+<BR><B>gAI=</B>0.1500000060
+
+______________________________________________________________________________
+
+<BR><B><H2><FONT COLOR=RED>continue here</FONT></H2>
+<H3>[production:0]</H3>
+<BR><B>year=</B>1996
+<BR><B>biomass_at_maturity=</B>20819.5000000000
+<BR><B>yield=</B>8952.4003906250
+:
+:
+<H3>[production:n]</H3>
+<BR><B>year=</B>1997
+<BR><B>biomass_at_maturity=</B>24469.9003906250
+<BR><B>yield=</B>10522.0996093750
+
+______________________________________________________________________________
+
+<H3>[GUI]</H3>
+<BR><B>show=</B>ffff
+<BR><B>top=</B>291
+<BR><B>left=</B>320
+<BR><B>width=</B>640
+<BR><B>height=</B>441
+<BR><B>activepageindex=</B>18
+<H3>[version]</H3>
+<BR><B>major=</B>4
+<BR><B>release=</B>14
+<BR><B>minor=</B>4
+
+</DL>

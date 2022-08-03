@@ -1,0 +1,93 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "form_management_editor.h"
+#pragma link "RNAutoCheckBox"
+#pragma link "RNAutoContainerListBox"
+#pragma link "RNAutoIntegerEdit"
+#pragma link "RNAutoParameterEditBar"
+#pragma link "AdvListV"
+#pragma link "RNAutoRadioGroup"
+//---------------------------------------------------------------------------
+/*
+#pragma package(smart_init)
+#pragma link "AdvPanel"
+#pragma link "RNAutoCheckBox"
+#pragma link "RNAutoRadioGroup"
+#pragma link "RNAutoParameterEditBar"
+#pragma link "RNAutoParameterEditBar"
+#pragma link "EasyListview"
+#pragma link "MPCommonObjects"
+#pragma link "RNAutoContainerListBox"
+#pragma link "RNAutoIntegerEdit"
+#pragma link "RNAutoContainerListBox"
+#pragma resource "*.dfm"
+TManagement_editor_form *Management_editor_form;
+*/
+//---------------------------------------------------------------------------
+__fastcall TManagement_editor_form::TManagement_editor_form(TComponent* Owner)
+   : TForm(Owner)
+   TManagement_editor_form_CONSTRUCTOR_INITIALIZATION
+{
+}
+//---------------------------------------------------------------------------
+//______________________________________________________________________________
+void __fastcall TManagement_editor_form::bind_to(Management_parameters *_management,Tparameter_file_form      *_parameter_file_form)
+{
+   bind_to_V4_and_V5(_management,_parameter_file_form);
+/* NYI
+   101216 I need to make parameters for these
+   edit_soil_conserve_factor->bind_to(&(_management.p_soil_conserve_factor));
+
+   edit_target_yield_N_uptake_kg_ha ->bind_to(&(management->N_application_soil_observation_event->p_target_yield_N_uptake_kg_ha)             ,parameter_file_form->compose_manual_subdirectory_filename(HELP_P_mgmt_N_uptake_target_yield).c_str());
+   edit_critical_soil_NO3           ->bind_to(&(management->N_application_soil_observation_event->p_critical_soil_NO3_for_no_response_kg_ha) ,parameter_file_form->compose_manual_subdirectory_filename(HELP_P_mgmt_N_critical_NO3).c_str());
+   edit_sampling_depth                  ->bind_to(&(management->N_application_soil_observation_event->p_soil_N_sampling_depth)                   ,parameter_file_form->compose_manual_subdirectory_filename(HELP_P_mgmt_N_sampling_depth).c_str());
+   edit_fert_use_eff                    ->bind_to(&(management->N_application_soil_observation_event->p_fertilizer_use_efficiency)               ,parameter_file_form->compose_manual_subdirectory_filename(HELP_P_mgmt_N_fert_use_eff).c_str());
+*/
+   show_hide_controls(0);
+};
+//______________________________________________________________________________
+void __fastcall TManagement_editor_form::Update()
+{  Update_VCL_common();
+   /*
+   listview_operations
+   */
+};
+//______________________________________________________________________________
+void __fastcall TManagement_editor_form::radiogroup_auto_NO3Click(TObject *Sender)
+{  show_hide_auto_NO3_parameters(); }
+//______________________________________________________________________________
+void __fastcall TManagement_editor_form::show_hide_controls(TObject *Sender)
+{
+/*NYI
+
+   In V5 we don't have the tabsheets, instead, remove clipping and residue
+   from the add operations combobox
+
+   clipping_tabsheet->TabVisible = management->crop_management;
+   residue_tabsheet->TabVisible = management->crop_management;
+*/
+}
+//______________________________________________________________________________
+void __fastcall TManagement_editor_form::button_auto_NO3_appl_addClick(TObject *Sender)
+{  handle_add_auto_NO3_appl(); }
+//---------------------------------------------------------------------------
+void __fastcall TManagement_editor_form::button_auto_NO3_appl_deleteClick(TObject *Sender)
+{  listbox_auto_NO3_split->delete_selected(); }
+//---------------------------------------------------------------------------
+void __fastcall TManagement_editor_form::listbox_auto_NO3_splitDblClick(TObject *Sender)
+{  handle_listbox_auto_NO3_splitDblClick(); };
+//---------------------------------------------------------------------------
+void __fastcall TManagement_editor_form::combobox_add_operationsChange(TObject *Sender)
+{
+//NYI   add operation event according to the selected operation
+}
+//---------------------------------------------------------------------------
+void __fastcall TManagement_editor_form::button_operation_deleteClick(TObject *Sender)
+{
+//NYI   Delete the selected operation event
+}
+//---------------------------------------------------------------------------
+

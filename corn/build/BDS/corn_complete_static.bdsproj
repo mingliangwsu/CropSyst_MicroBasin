@@ -1,0 +1,651 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">CPlusPlusBuilder.Personality</Option>
+			<Option Name="ProjectType">CppStaticLibrary</Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{3F8B5355-8CD1-4B17-B533-F0C583F4A343}</Option>
+		</Option>
+	</PersonalityInfo>
+	<CPlusPlusBuilder.Personality>
+		<Source>
+			<Source Name="MainSource">corn_complete_static.cpp</Source>
+		</Source>
+		<BCBPROJECT>
+      <project version="10.0">
+        <property category="build.config" name="active" value="1"/>
+        <property category="build.config" name="count" value="1"/>
+        <property category="build.config" name="excludedefaultforzero" value="0"/>
+        <property category="build.config.0" name="builddir" value="Debug"/>
+        <property category="build.config.0" name="key" value="Debug_Build"/>
+        <property category="build.config.0" name="name" value="Debug Build"/>
+        <property category="build.config.0" name="settings.win32b" value="default"/>
+        <property category="build.config.0" name="type" value="Toolset"/>
+        <property category="build.config.0" name="win32.win32b.builddir" value="Debug_Build"/>
+        <property category="build.config.1" name="key" value="Release_Build"/>
+        <property category="build.config.1" name="name" value="Release Build"/>
+        <property category="build.config.1" name="settings.win32b" value="default"/>
+        <property category="build.config.1" name="type" value="Toolset"/>
+        <property category="build.config.1" name="win32.win32b.builddir" value="Release_Build"/>
+        <property category="build.node" name="lastconfig" value="Release_Build"/>
+        <property category="build.node" name="libraries" value="rtl.lib"/>
+        <property category="build.node" name="name" value="corn_complete_static.lib"/>
+        <property category="build.node" name="packages" value="vcl;rtl;vclx;dbrtl;vcldb;adortl;dbxcds;dbexpress;vclib;ibxpress;xmlrtl;vclactnband;inet;IntrawebDB_80_100;Intraweb_80_100;indy;bcbofficexp;bcbsmp;bcbie;dsnap;bdertl;teeui;teedb;tee;vcldbx;TMSD2006"/>
+        <property category="build.node" name="sparelibs" value="rtl.lib"/>
+        <property category="build.node" name="use_packages" value="0"/>
+        <property category="build.platform" name="active" value="win32"/>
+        <property category="build.platform" name="win32.Debug_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.Release_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.default" value="win32b"/>
+        <property category="build.platform" name="win32.enabled" value="1"/>
+        <property category="build.platform" name="win32.win32b.enabled" value="1"/>
+        <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.1" value="_DEBUG"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.Od.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.k.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.n.arg.1" value="debug"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.n.arg.merge" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.n.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.r.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.v.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.vi.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.y.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$O.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.1" value="DEBUG"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\debug"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.z.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zi.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.arg" value="64"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.arg.1" value="c:\temp\lib\BDS\debug"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.arg.merge" value="0"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="container.SelectedOptimizations.containerenabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="container.SelectedWarnings.containerenabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.4.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.5.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.6.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.A.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.AK.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.AU.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.1" value="NDEBUG"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.2" value="CS_VERSION=4"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.H=.arg.1" value="..\..\..\..\temp\obj\corn\bds\corn_complete_static.csm"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.H=.arg.merge" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.H=.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Hc.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.He.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Hs.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.1" value="$(BDS)\include\vcl"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.I.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Jgi.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Jgx.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.O2.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.V0.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.V1.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Vmd.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Vmm.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Vms.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.align-1.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.align-2.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.align-3.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.align-5.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.disablewarns.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.k.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.n.arg.1" value="C:\temp\obj\corn\datetime\BDS\release"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.n.arg.merge" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.n.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.noregistervars.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.p.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.pm.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.pr.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.ps.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.r.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.rd.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.vi.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.w.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.brcc32" name="option.16.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.brcc32" name="option.31.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.$D.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.V.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\release"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.z.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zi.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zn.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.P.arg" value="64"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.P.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.P.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.dynamicrtl.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.arg.1" value="c:\temp\lib\BDS\release"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.arg.merge" value="0"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.enabled" value="1"/>
+        <optionset name="all_configurations">
+          <property category="node" name="displayname" value="All Configurations"/>
+          <property category="win32.*.win32b.bcc32" name="container.SelectedOptimizations.containerenabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.1" value="..\..\..\..\temp\obj\corn\datetime\bds\datetime_static_bds.csm"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.merge" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.Hc.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.1" value="..\..\format\binary\oldbinrec"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.10" value="..\math"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.11" value="..\math\numerical"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.12" value="..\math\statistical"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.13" value="..\measure"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.14" value="..\metrology"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.15" value="..\parameters"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.16" value="..\string"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.17" value="..\container"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.18" value="..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.19" value="..\format\spreadsheet"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.2" value="..\..\application\explaination"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.20" value="..\validate"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.21" value="..\format\excel"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.22" value="..\tabular"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.23" value="..\application"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.24" value="..\application\user"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.25" value="..\format\html\form_IO"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.26" value="..\..\format\html\form_IO"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.27" value="..\..\application\user"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.28" value="..\..\application"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.29" value="..\..\tabular"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.3" value="..\..\OS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.30" value="..\..\..\CANMS\src\facility"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.31" value="..\..\format\excel"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.32" value="..\..\validate"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.33" value="..\..\format\spreadsheet"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.34" value="..\..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.35" value="..\..\container"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.36" value="..\..\string"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.37" value="..\..\parameters"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.38" value="..\..\metrology"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.39" value="..\..\measure"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.4" value="..\build\BDS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.40" value="..\..\math\statistical"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.41" value="..\..\math\numerical"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.42" value="..\..\math"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.43" value="..\..\format\binary"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.44" value="..\..\file_sys"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.45" value="..\..\data_source"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.46" value="..\..\..\BDS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.47" value="..\.."/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.48" value="$(BDS)\include\dinkumware"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.49" value="$(BDS)\include"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.5" value="..\datetime"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.50" value="c:\dev"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.51" value="..\..\datetime"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.6" value="..\"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.7" value="..\data_source"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.8" value="..\file_sys"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.9" value="..\format\binary"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.O1.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.O2.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.Od.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.b.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.n.arg.1" value="..\..\..\..\temp\obj\corn\datetime\bds"/>
+          <property category="win32.*.win32b.bcc32" name="option.n.arg.merge" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.n.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.1" value="NO_STRICT"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tW.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWC.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWD.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWM.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.1" value="..\..\format\binary\oldbinrec"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.10" value="..\math"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.11" value="..\math\numerical"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.12" value="..\math\statistical"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.13" value="..\measure"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.14" value="..\metrology"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.15" value="..\parameters"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.16" value="..\string"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.17" value="..\container"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.18" value="..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.19" value="..\format\spreadsheet"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.2" value="..\..\application\explaination"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.20" value="..\validate"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.21" value="..\format\excel"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.22" value="..\tabular"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.23" value="..\application"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.24" value="..\application\user"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.25" value="..\format\html\form_IO"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.26" value="..\..\format\html\form_IO"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.27" value="..\..\application\user"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.28" value="..\..\application"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.29" value="..\..\tabular"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.3" value="..\..\OS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.30" value="..\..\..\CANMS\src\facility"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.31" value="..\..\format\excel"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.32" value="..\..\validate"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.33" value="..\..\format\spreadsheet"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.34" value="..\..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.35" value="..\..\container"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.36" value="..\..\string"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.37" value="..\..\parameters"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.38" value="..\..\metrology"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.39" value="..\..\measure"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.4" value="..\build\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.40" value="..\..\math\statistical"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.41" value="..\..\math\numerical"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.42" value="..\..\math"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.43" value="..\..\format\binary"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.44" value="..\..\file_sys"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.45" value="..\..\data_source"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.46" value="..\..\..\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.47" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.48" value="..\..\datetime"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.49" value="C:\dev\corn\datetime\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.5" value="..\datetime"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.6" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.7" value="..\data_source"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.8" value="..\file_sys"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.9" value="..\format\binary"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.1" value="..\..\format\binary\oldbinrec"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.10" value="..\math"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.11" value="..\math\numerical"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.12" value="..\math\statistical"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.13" value="..\measure"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.14" value="..\metrology"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.15" value="..\parameters"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.16" value="..\string"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.17" value="..\container"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.18" value="..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.19" value="..\format\spreadsheet"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.2" value="..\..\application\explaination"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.20" value="..\validate"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.21" value="..\format\excel"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.22" value="..\tabular"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.23" value="..\application"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.24" value="..\application\user"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.25" value="..\format\html\form_IO"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.26" value="..\..\format\html\form_IO"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.27" value="..\..\application\user"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.28" value="..\..\application"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.29" value="..\..\tabular"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.3" value="..\..\OS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.30" value="..\..\..\CANMS\src\facility"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.31" value="..\..\format\excel"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.32" value="..\..\validate"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.33" value="..\..\format\spreadsheet"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.34" value="..\..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.35" value="..\..\container"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.36" value="..\..\string"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.37" value="..\..\parameters"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.38" value="..\..\metrology"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.39" value="..\..\measure"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.4" value="..\build\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.40" value="..\..\math\statistical"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.41" value="..\..\math\numerical"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.42" value="..\..\math"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.43" value="..\..\format\binary"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.44" value="..\..\file_sys"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.45" value="..\..\data_source"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.46" value="..\..\..\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.47" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.48" value="..\..\datetime"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.49" value="C:\dev\corn\datetime\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.5" value="..\datetime"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.6" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.7" value="..\data_source"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.8" value="..\file_sys"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.9" value="..\format\binary"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.1" value="..\..\format\binary\oldbinrec"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.10" value="..\math"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.11" value="..\math\numerical"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.12" value="..\math\statistical"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.13" value="..\measure"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.14" value="..\metrology"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.15" value="..\parameters"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.16" value="..\string"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.17" value="..\container"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.18" value="..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.19" value="..\format\spreadsheet"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.2" value="..\..\application\explaination"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.20" value="..\validate"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.21" value="..\format\excel"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.22" value="..\tabular"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.23" value="..\application"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.24" value="..\application\user"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.25" value="..\format\html\form_IO"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.26" value="..\..\format\html\form_IO"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.27" value="..\..\application\user"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.28" value="..\..\application"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.29" value="..\..\tabular"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.3" value="..\..\OS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.30" value="..\..\..\CANMS\src\facility"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.31" value="..\..\format\excel"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.32" value="..\..\validate"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.33" value="..\..\format\spreadsheet"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.34" value="..\..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.35" value="..\..\container"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.36" value="..\..\string"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.37" value="..\..\parameters"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.38" value="..\..\metrology"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.39" value="..\..\measure"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.4" value="..\build\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.40" value="..\..\math\statistical"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.41" value="..\..\math\numerical"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.42" value="..\..\math"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.43" value="..\..\format\binary"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.44" value="..\..\file_sys"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.45" value="..\..\data_source"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.46" value="..\..\..\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.47" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.48" value="..\..\datetime"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.49" value="C:\dev\corn\datetime\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.5" value="..\datetime"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.6" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.7" value="..\data_source"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.8" value="..\file_sys"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.9" value="..\format\binary"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.1" value="..\..\format\binary\oldbinrec"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.10" value="..\math"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.11" value="..\math\numerical"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.12" value="..\math\statistical"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.13" value="..\measure"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.14" value="..\metrology"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.15" value="..\parameters"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.16" value="..\string"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.17" value="..\container"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.18" value="..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.19" value="..\format\spreadsheet"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.2" value="..\..\application\explaination"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.20" value="..\validate"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.21" value="..\format\excel"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.22" value="..\tabular"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.23" value="..\application"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.24" value="..\application\user"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.25" value="..\format\html\form_IO"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.26" value="..\..\format\html\form_IO"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.27" value="..\..\application\user"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.28" value="..\..\application"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.29" value="..\..\tabular"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.3" value="..\..\OS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.30" value="..\..\..\CANMS\src\facility"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.31" value="..\..\format\excel"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.32" value="..\..\validate"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.33" value="..\..\format\spreadsheet"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.34" value="..\..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.35" value="..\..\container"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.36" value="..\..\string"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.37" value="..\..\parameters"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.38" value="..\..\metrology"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.39" value="..\..\measure"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.4" value="..\build\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.40" value="..\..\math\statistical"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.41" value="..\..\math\numerical"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.42" value="..\..\math"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.43" value="..\..\format\binary"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.44" value="..\..\file_sys"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.45" value="..\..\data_source"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.46" value="..\..\..\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.47" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.48" value="..\..\datetime"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.49" value="C:\dev\corn\datetime\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.5" value="..\datetime"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.50" value="C:\Documents and Settings\rnelson\My Documents\Borland Studio Projects"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.51" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.52" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.6" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.7" value="..\data_source"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.8" value="..\file_sys"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.9" value="..\format\binary"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.1" value="..\..\format\binary\oldbinrec"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.10" value="..\..\math\numerical"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.11" value="..\..\math\statistical"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.12" value="..\..\measure"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.13" value="..\..\metrology"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.14" value="..\..\parameters"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.15" value="..\..\string"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.16" value="..\..\container"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.17" value="..\..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.18" value="..\..\format\spreadsheet"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.19" value="..\..\validate"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.2" value="..\..\application\explaination"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.20" value="..\..\format\excel"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.21" value="..\..\tabular"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.22" value="..\..\application"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.23" value="..\..\application\user"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.24" value="..\..\format\html\form_IO"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.25" value="..\build\BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.26" value="..\format\html\form_IO"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.27" value="..\application\user"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.28" value="..\application"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.29" value="..\tabular"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.3" value="..\..\OS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.30" value="..\..\CANMS\src\facility"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.31" value="..\format\excel"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.32" value="..\validate"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.33" value="..\format\spreadsheet"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.34" value="..\spreadsheet\cell_pump"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.35" value="..\container"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.36" value="..\string"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.37" value="..\parameters"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.38" value="..\metrology"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.39" value="..\measure"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.4" value="..\..\datetime"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.40" value="..\math\statistical"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.41" value="..\math\numerical"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.42" value="..\math"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.43" value="..\format\binary"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.44" value="..\file_sys"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.45" value="..\data_source"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.46" value="..\datetime"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.47" value="..\..\BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.48" value="..\"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.49" value="..\BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.5" value="..\.."/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.50" value="\"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.51" value="C:\dev\corn\datetime\BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.6" value="..\..\data_source"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.7" value="..\..\file_sys"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.8" value="..\..\format\binary"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.9" value="..\..\math"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Gi.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.2" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.3" value="$(BDS)\lib\psdk"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpd.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpe.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpp.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.aa.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.ap.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.dynamicrtl.enabled" value="0"/>
+          <property category="win32.*.win32b.tlib" name="option.dynamicrtl.enabled" value="0"/>
+        </optionset>
+      </project>
+      <FILELIST>
+        <FILE FILENAME="corn_complete_static.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="corn_complete_static" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\datetime\time_format.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="time_format" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\datetime\date.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="date" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\datetime\date_format.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="date_format" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\datetime\date_time_format.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="date_time_format" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\datetime\date_translator.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="date_translator" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\datetime\datetime64.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="datetime64" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\datetime\temporal_base.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="temporal_base" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\datetime\time.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="time" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\data_type_enum.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="data_type_enum" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\labeled_enum.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="labeled_enum" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\quality.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="quality" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\data_source\datarec.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="datarec" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\data_source\datasrc.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="datasrc" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\data_source\datasrc_index.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="datasrc_index" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\data_source\dbase_datasrc.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="dbase_datasrc" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\data_source\generic_datarec.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="generic_datarec" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\data_source\vv_file.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="vv_file" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\binary\binary_file_abstract.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="binary_file_abstract" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\binary\binary_file_FILE.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="binary_file_FILE" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\binary\binary_file_fstream.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="binary_file_fstream" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\binary\binary_file_interface.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="binary_file_interface" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\binary\binary_record.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="binary_record" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\binary\binfstrm.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="binfstrm" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\binary\binary_record_file.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="binary_record_file" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\moremath.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="moremath" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\numerical\interpolate.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="interpolate" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\numerical\interpolate_2D_3D.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="interpolate_2D_3D" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\numerical\nonlinearfit.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="nonlinearfit" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\numerical\numeric.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="numeric" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\numerical\solver.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="solver" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\statistical\stats_best.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="stats_best" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\statistical\stats.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="stats" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\measure\common_units.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="common_units" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\measure\measures.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="measures" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\measure\unitconv.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="unitconv" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\measure\units.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="units" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\measure\units_enum.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="units_enum" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\metrology\units_symbology.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="units_symbology" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\metrology\units_clad.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="units_clad" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\metrology\timestep.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="timestep" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameters\parameter.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="parameter" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameters\parameters.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="parameters" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameters\parameters_datarec.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="parameters_datarec" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameters\parameters_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="parameters_directory" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\string\strconv.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="strconv" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\text_list.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="text_list" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\search_tree.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="search_tree" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\SDF_list.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="SDF_list" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\item.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="item" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\indexer.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="indexer" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\enumlist.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="enumlist" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\container.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="container" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\binary_tree.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="binary_tree" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\bilist.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="bilist" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\association.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="association" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\container\array.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="array" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\spreadsheet\cell_pump\cell_reader_BIFF.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cell_reader_BIFF" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\spreadsheet\cell_pump\cell_receiver.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cell_receiver" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\spreadsheet\biff.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="biff" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\validate\validtyp.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="validtyp" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\format\excel\BIFF_record.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="BIFF_record" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\data_source\vv_entry.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="vv_entry" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\data_source\vv_entry.h"/>
+        <FILE FILENAME="..\..\tabular\tabular_text.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="tabular_text" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\tabular\tabular_text.h"/>
+        <FILE FILENAME="..\..\tabular\delineated_datarec.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="delineated_datarec" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\tabular\delineated_datarec.h"/>
+        <FILE FILENAME="..\..\tabular\delineation.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="delineation" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\tabular\delineation.h"/>
+        <FILE FILENAME="..\..\tabular\tabular.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="tabular" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\tabular\tabular.h"/>
+        <FILE FILENAME="..\..\tabular\tabular_format.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="tabular_format" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\tabular\tabular_format.h"/>
+        <FILE FILENAME="..\..\application\suite_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="suite_directory" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\suite_directory.h"/>
+        <FILE FILENAME="..\..\application\adjunct_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="adjunct_directory" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\adjunct_directory.h"/>
+        <FILE FILENAME="..\..\application\application_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="application_directory" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\application_directory.h"/>
+        <FILE FILENAME="..\..\application\documentation_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="documentation_directory" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\documentation_directory.h"/>
+        <FILE FILENAME="..\..\application\program_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="program_directory" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\program_directory.h"/>
+        <FILE FILENAME="..\..\application\project.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="project" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\project.h"/>
+        <FILE FILENAME="..\..\application\project_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="project_directory" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\project_directory.h"/>
+        <FILE FILENAME="..\..\application\user\appdata_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="appdata_directory" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\user\appdata_directory.h"/>
+        <FILE FILENAME="..\..\application\user\settings.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="settings" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\user\settings.h"/>
+        <FILE FILENAME="..\..\format\html\form_IO\content.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="content" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\random.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="random" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\math\random.h"/>
+        <FILE FILENAME="..\..\container\unilist.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="unilist" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\container\unilist.h"/>
+        <FILE FILENAME="..\..\application\explaination\explaination_location.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="explaination_location" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\application\explaination\explaination_location.h"/>
+        <FILE FILENAME="..\..\format\binary\oldbinrec\oldbinrec_s.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="oldbinrec_s" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\format\binary\oldbinrec\oldbinrec_s.h"/>
+        <FILE FILENAME="..\..\data_source\vv_datasrc.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="vv_datasrc" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\data_source\vv_datasrc.h"/>
+        <FILE FILENAME="..\..\datetime\date_unconventional.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="date_unconventional" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\datetime\date_unconventional.h"/>
+        <FILE FILENAME="..\..\math\statistical\statistics_types.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="statistics_types" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\math\statistical\statistics_types.h"/>
+        <FILE FILENAME="..\..\math\statistical\sample_cumulative_T.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sample_cumulative_T" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\statistical\sample_T.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sample_T" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\math\statistical\sample_T.h"/>
+        <FILE FILENAME="..\..\math\statistical\sample_dataset_T.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sample_dataset_T" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\statistical\distribution_Weibull.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="distribution_Weibull" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\math\statistical\distribution_Weibull.h"/>
+        <FILE FILENAME="..\..\math\statistical\distribution_normal.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="distribution_normal" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\math\statistical\statistics_descriptive.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="statistics_descriptive" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\math\statistical\statistics_descriptive.h"/>
+      </FILELIST>
+      <IDEOPTIONS>
+        <VersionInfo>
+          <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+          <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+          <VersionInfo Name="MajorVer">1</VersionInfo>
+          <VersionInfo Name="MinorVer">0</VersionInfo>
+          <VersionInfo Name="Release">0</VersionInfo>
+          <VersionInfo Name="Build">0</VersionInfo>
+          <VersionInfo Name="Debug">False</VersionInfo>
+          <VersionInfo Name="PreRelease">False</VersionInfo>
+          <VersionInfo Name="Special">False</VersionInfo>
+          <VersionInfo Name="Private">False</VersionInfo>
+          <VersionInfo Name="DLL">False</VersionInfo>
+          <VersionInfo Name="Locale">1033</VersionInfo>
+          <VersionInfo Name="CodePage">1252</VersionInfo>
+        </VersionInfo>
+        <VersionInfoKeys>
+          <VersionInfoKeys Name="CompanyName"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileDescription"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="InternalName"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
+          <VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductName"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="Comments"></VersionInfoKeys>
+        </VersionInfoKeys>
+        <Debugging>
+          <Debugging Name="DebugSourceDirs"></Debugging>
+        </Debugging>
+        <Parameters>
+          <Parameters Name="RunParams"> "C:\dev\CropSyst\original_submodels\soil\infiltration\compare\Scenarios\hourly_cascade.csn"  "C:\Simulation\Database\Format\all daily season annual all profiles.FMT"</Parameters>
+          <Parameters Name="Launcher"></Parameters>
+          <Parameters Name="UseLauncher">False</Parameters>
+          <Parameters Name="DebugCWD"></Parameters>
+          <Parameters Name="HostApplication"></Parameters>
+          <Parameters Name="RemoteHost"></Parameters>
+          <Parameters Name="RemotePath"></Parameters>
+          <Parameters Name="RemoteParams"></Parameters>
+          <Parameters Name="RemoteLauncher"></Parameters>
+          <Parameters Name="UseRemoteLauncher">False</Parameters>
+          <Parameters Name="RemoteCWD"></Parameters>
+          <Parameters Name="RemoteDebug">False</Parameters>
+          <Parameters Name="Debug Symbols Search Path"></Parameters>
+          <Parameters Name="LoadAllSymbols">True</Parameters>
+          <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+        </Parameters>
+        <Linker>
+          <Linker Name="LibPrefix"></Linker>
+          <Linker Name="LibSuffix"></Linker>
+          <Linker Name="LibVersion"></Linker>
+        </Linker>
+      </IDEOPTIONS>
+    </BCBPROJECT>
+		<buildevents/>
+	</CPlusPlusBuilder.Personality>
+	<StarTeamAssociation></StarTeamAssociation>
+	<StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>

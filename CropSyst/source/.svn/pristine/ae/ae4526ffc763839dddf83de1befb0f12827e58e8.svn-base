@@ -1,0 +1,181 @@
+#include "crop/crop_interfaced.h"
+
+#include "corn/math/compare.h"
+
+#include "options.h"
+#include "common/simulation/log.h"
+#include "cs_operation_codes.h"
+#include "corn/measure/measures.h"
+#include "mgmt_param.h"
+#include "common/weather/parameter/WP_air_temperature.h"
+namespace CropSyst {
+//______________________________________________________________________________
+Crop_interfaced::Crop_interfaced
+(const Air_temperature_average *_air_temperature_avg)                            //141208
+: structure_defined(false)
+,air_temperature_avg(_air_temperature_avg)                                       //141208
+{}
+//______________________________________________________________________________
+bool Crop_interfaced::check_for_automatic_clipping
+(const CropSyst::Auto_clip_biomass_mode &clip_biomass_op                         //051105
+,float64 remove_amount_kg_m2              // if harvest_amount_mode=HARVEST_REMOVE_FIXED_AMOUNT_BIOMASS  else 0.0 //050822
+,bool clip_now_or_never                                                          //980724
+#if (CS_VERSION==4)
+,Common_simulation_log *log
+#else
+// eventually all versions will use explainations
+#endif
+)                                                     //050929
+{
+   #define clipping_low_GAI_rate  0.05
+   bool clipping_performed = false;                                              //990913
+   days_since_last_clipping++;
+   if ((clip_biomass_op.biomass_fate_percents.remove_for_use                     //980723
+       +clip_biomass_op.biomass_fate_percents.remove_for_disposal
+       +clip_biomass_op.biomass_fate_percents.remain_as_residue) > 0)
+   {  float64 quick_canopy_biomass = get_canopy_biomass_kg_m2();
+      float64 GAI_today = get_GAI_today();
+      float64 LAI = get_LAI(false);
+
+
+      // RLN this is returning LAI for self shading response
+      // I think we what the actual LAI  so simply call get_LAI();
+
+
+      max_daily_GAI_rate = std::max<float64>(max_daily_GAI_rate,GAI_today);
+      consecutive_low_growth_days_for_clipping +=
+       ((GAI_today <= clipping_low_GAI_rate *clip_biomass_op.adj_relative_growth_rate)  //970521
+          && (GAI_today < max_daily_GAI_rate)
+          &&
+             (!air_temperature_avg || //normally there will always be air_temperature_avg
+              (air_temperature_avg->Celcius() > param_base_temp())))
+         ? (nat16)1
+         : (nat16)0;
+      Biomass_fated_cause fated_cause =BIOMASS_FATE_COUNT;                       //050822
+      float64   minimum_biomass_required_for_clipping_kg_m2 = per_ha_to_per_m2(clip_biomass_op.min_biomass_required_kg_ha); //051105
+      float64   biomass_forces_clipping_kg_m2               = per_ha_to_per_m2(clip_biomass_op.biomass_forces_clipping); //051105
+      bool sufficient_biomass_for_clipping = (quick_canopy_biomass >= minimum_biomass_required_for_clipping_kg_m2);   // I think minimum biomass is already handled by clip biomass 110428
+      bool sufficient_LAI =  (LAI >= clip_biomass_op.min_LAI_required);          //110428
+      bool try_to_get_in_one_more_harvest =                                      //980724
+         (clip_now_or_never
+           && (quick_canopy_biomass >= minimum_biomass_required_for_clipping_kg_m2)); //980724
+      if (try_to_get_in_one_more_harvest)    fated_cause = CLIP_NOW_OR_NEVER;
+      if (consecutive_low_growth_days_for_clipping > 14)
+      {  if (sufficient_biomass_for_clipping && sufficient_LAI)                  //110428
+         {  fated_cause = CLIPPING_DUE_TO_LOW_GROWTH;
+            clipping_performed = sufficient_biomass_for_clipping;                //990913
+         } else  //dry and dead:
+            fated_cause = INSUFFICIENT_BIOMASS_FOR_FINAL_CLIPPING;
+      }
+      if (!(sufficient_biomass_for_clipping && sufficient_LAI)) return false;    //110502
+      // for the next two options 0.0 essentially disabled the mode
+      if ((clip_biomass_op.LAI_forces_clipping     > 0.0000001) && (LAI > clip_biomass_op.LAI_forces_clipping))
+         fated_cause = CLIPPING_DUE_TO_MAX_LAI;
+      if ((biomass_forces_clipping_kg_m2 > 0.0000001) && (quick_canopy_biomass > biomass_forces_clipping_kg_m2))
+         fated_cause = CLIPPING_DUE_TO_MAX_BIOMASS;
+      int16 days_after_flowering = get_days_after_flowering();                   //040907
+      int16 days_after_flowering_forces_clipping =  clip_biomass_op.flowering_forces_clipping;  //051105
+      if ((days_after_flowering_forces_clipping ) && (days_after_flowering >= days_after_flowering_forces_clipping)) //110502_040830
+         fated_cause = CLIPPING_DUE_TO_DAYS_AFTER_FLOWERING;                     //040830
+      const Biomass_fate_parameters *fate_parameters_to_use =  0;
+      const Biomass_fate_parameters &biomass_fate_percents = clip_biomass_op.biomass_fate_percents; //051105
+      Biomass_fate_parameters dry_and_dead_fate_parameters =                     //040610
+            {  // All that would have been taken as harvest (any other loss from the harvest processing is sent to residue.
+               0 // remove for consumption
+               ,0.0 // remove as grazing
+               ,biomass_fate_percents.remain_as_residue + biomass_fate_percents.remove_for_disposal+  biomass_fate_percents.remove_for_use
+               ,0.0 // remove_as_loss
+               ,biomass_fate_percents.remain_as_dead
+               ,biomass_fate_percents.remain_as_live
+               ,biomass_fate_percents.remove_roots_to_dead_residue
+               ,biomass_fate_percents.remove_roots_as_loss
+               ,biomass_fate_percents.remain_roots_live
+            };
+      switch (fated_cause)
+      {  case CLIPPING_DUE_TO_MAX_BIOMASS  :
+         case CLIPPING_DUE_TO_MAX_LAI :
+         case CLIPPING_DUE_TO_DAYS_AFTER_FLOWERING :                             //040830
+         case CLIP_NOW_OR_NEVER           :
+         {  clipping_performed = true;
+            fate_parameters_to_use = &biomass_fate_percents;
+         } break;
+         case  CLIPPING_DUE_TO_LOW_GROWTH :
+         {  fate_parameters_to_use = &biomass_fate_percents;
+         } break;
+         case INSUFFICIENT_BIOMASS_FOR_FINAL_CLIPPING :
+         {  fate_parameters_to_use = &dry_and_dead_fate_parameters;
+         } break;
+         // By default fate_parameters_to_use = &biomass_fate_percents (set above) //050825
+      }
+      if (fate_parameters_to_use)
+      {  float64 biomass_removed = 0.0;                                          //060323
+         Crop_mass_fate_biomass_and_nitrogen *fate_now                           //070625
+            = clip_biomass
+            (clip_biomass_op.harvest_amount_mode_cowl.get()                      //120419
+            ,remove_amount_kg_m2
+            ,clip_biomass_op.min_retain_GAI
+            ,per_ha_to_per_m2(clip_biomass_op.reserve_biomass_kg_ha)
+            ,*fate_parameters_to_use
+            ,fated_cause);
+         if (fate_now)                                                           //060323
+         {  biomass_removed =  fate_now->biomass->get_total_removed_from_plant();
+            delete fate_now;
+         }
+         #if (CS_VERSION==4)
+         if (log)                                                                //050929
+         {  std::string cause_description(harvest_mode_and_biomass_fated_cause_label_table[fated_cause]); //050929
+            CORN::replace_character(cause_description,'_',' ');                  //050929
+            log->record(
+               #if (__LP64__ || _M_X64)
+                  (uint64_t)
+               #else
+                  (nat32 )
+               #endif
+			this
+			,"event",CropSyst_operation_codes[CS_OP_MGMT_AUTO_CLIP_BIOMASS],cause_description.c_str());  //050929
+            (*log) << "biomass_removed=" << per_m2_to_per_ha(biomass_removed) << " kg/ha" << std::endl;  //050929
+            (*log) << "note=See harvest report for biomass fate in this date." << std::endl; //050929
+         }
+         #else
+         // eventually all versions will use explainations
+         #endif
+      }
+      if (try_to_get_in_one_more_harvest)                                        //980724
+            automatic_clipping_enabled = false;                                  //980724
+   }
+   return clipping_performed;
+}
+//_1999-09-13____________________________________check_for_automatic_clipping__/
+Crop_mass_fate_biomass_and_nitrogen *                                            //070625
+ Crop_interfaced::clip_biomass
+(Harvest_amount_mode harvest_amount_mode                                         //050822
+,float64 remove_amount_kg_m2                                                     //050822
+,float64 min_retain_GAI                                                          //051103
+,float64 min_retain_biomass_kg_m2                                                //110603
+,const Biomass_fate_parameters &biomass_fate_percents
+,Biomass_fated_cause fated_cause)                                                //050822
+{  Crop_mass_fate_biomass_and_nitrogen *result                                   //070625
+      = process_biomass_fate(fated_cause,harvest_amount_mode,remove_amount_kg_m2
+      ,min_retain_GAI // retain_GAI
+      ,min_retain_biomass_kg_m2                                                  //110603
+      ,biomass_fate_percents,false,0.0);
+   consecutive_low_growth_days_for_clipping = 0;
+   max_daily_GAI_rate = 0.0;
+   days_since_last_clipping = 0;
+   respond_to_clipping();                                                        //040831
+   return result;
+}
+//_1997-06-22____________________________________________________clip_biomass__/
+bool Crop_interfaced::initialize()
+{  consecutive_low_growth_days_for_clipping = 0;                                 //970219
+   days_since_last_clipping = 0;
+   max_daily_GAI_rate = 0.0;    //  for clipping                                 //970219
+   automatic_clipping_enabled = true;                                            //980724
+   return true;                                                                  //140818
+}
+//_1997?___________________________________________________________initialize__/
+} // namespace CropSyst
+
+
+
+

@@ -1,0 +1,33 @@
+#include "scenarios_generator_engine.h"
+#include "corn/OS/file_system_logical.h"
+#include "corn/data_source/command_options_datasrc.h"
+//______________________________________________________________________________
+namespace CORN { namespace OS {
+File_system &file_system() { return CORN::OS::file_system_logical; }
+}}
+//______________________________________________________________________________
+int main(int argc, const char *argv[])
+{
+   CORN::Command_options_data_source command_line_options(argc,argv);
+   CS::Scenarios_generator_engine::Arguments arguments;
+   command_line_options.get(arguments);
+
+
+   // After reading the initial arguments we will now have
+   // the generate_directory and templates will have been copied into it.
+   // (where the template may provide additonal response and/or seclusion files.
+
+   CS::Scenarios_generator_engine *engine
+      = new CS::Scenarios_generator_engine(arguments);
+   command_line_options.get(engine->arguments.seclusion.arguments);
+   if (!engine->arguments.seclusion.count())
+      engine->arguments.seclusion.arguments.find_and_read_seclusion_files();
+
+   bool processed
+      = engine->initialize()
+      &&engine->generate();
+   delete engine;
+   return processed ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+//_2016-10-01___________________________________________________________________
+

@@ -1,0 +1,133 @@
+#pragma hdrstop
+#include "CropSyst/source/mgmt_param.h"
+#include "CropSyst/source/mgmtevnt.h"
+#if (CS_VERSION==4)
+#include <../../help/management.h>
+#  include "form_management_editor.h"
+#  include "form_auto_NO3_appl.h"
+#  include "CropSyst/gui/builder/operation_event/operation_event_frm.h"
+#else
+#  include "form_management_editor.h"
+#  include "form_auto_NO3_appl.h"
+#endif
+
+#include "form_param_file.h"
+
+#define V4_HELP_URL(x) ,0
+//130313 help disabled
+
+#pragma package(smart_init)
+//______________________________________________________________________________
+void __fastcall TManagement_editor_form::bind_to_V4_and_V5(CropSyst_Management_parameters *_management,Tparameter_file_form      *_parameter_file_form)
+{  management = _management;
+   parameter_file_form = _parameter_file_form;
+   radiogroup_land_treatment  ->bind_to(&(management->land_treatment_labeled) V4_HELP_URL(HELP_P_mgmt_conserv_land_treatment));
+   radiogroup_auto_NO3        ->bind_to(&(management->N_application_soil_observation_event->automatic_N_mode_cowl_or_labeled) V4_HELP_URL(HELP_P_mgmt_N_automatic));
+   checkbox_auto_N            ->bind_to(&(management->automatic_nitrogen)  V4_HELP_URL(HELP_P_mgmt_N_automatic));
+   checkbox_crop_management   ->bind_to(&(management->crop_management)     V4_HELP_URL(HELP_P_mgmt_crop_mode));
+   checkbox_CANMS->bind_to(&(management->CANMS_support));
+};
+//______________________________________________________________________________
+void TManagement_editor_form::Update_VCL_common()
+{
+   TForm::Update();
+   radiogroup_land_treatment     ->Update();
+   edit_soil_conserve_factor     ->Update();
+   edit_target_yield_N_uptake_kg_ha->Update();
+   edit_estimated_mineralization->Update();                                      //120711
+
+   edit_critical_soil_NO3        ->Update();
+   edit_sampling_depth           ->Update();
+   edit_fert_use_eff             ->Update();
+   checkbox_auto_N               ->Update();
+   checkbox_crop_management      ->Update();
+   checkbox_CANMS                ->Update();
+   listbox_auto_NO3_split        ->Update();
+   radiogroup_auto_NO3           ->Update();
+   auto_NO3_split_total = management->total_automatic_N_applications();
+   edit_auto_NO3_split->Update();
+   edit_auto_NO3_split->Color = (auto_NO3_split_total == 100) ? clLime : clRed;
+   show_hide_auto_NO3_parameters();                                              //120720
+};
+//______________________________________________________________________________
+void __fastcall TManagement_editor_form::calc_soil_conserve_factor(TObject *Sender)
+{
+   if (!management) return;
+   float32 contour_factor = 1.0;
+   float32 strip_factor = 1.0;
+   float32 terrace_factor = 1.0;
+   switch (radiogroup_contouring_factor->ItemIndex)
+   {
+      case 0 : contour_factor = 0.6; break;
+      case 1 : contour_factor = 0.5; break;
+      case 2 : contour_factor = 0.5; break;
+      case 3 : contour_factor = 0.6; break;
+      case 4 : contour_factor = 0.7; break;
+      case 5 : contour_factor = 0.8; break;
+      case 6 : contour_factor = 0.9; break;
+   };
+   switch (radiogroup_strip_cropping_factor->ItemIndex)
+   {
+      case 0 : strip_factor = 1.0;  break;
+      case 1 : strip_factor = 0.75; break;
+      case 2 : strip_factor = 0.5;  break;
+   };
+   switch (radiogroup_terrace_sedimentation_factor->ItemIndex)
+   {
+      case 0 : terrace_factor = 1.0; break;
+      case 1 : terrace_factor = 0.2; break;
+      case 2 : terrace_factor = 0.1; break;
+   };
+   management->soil_conservation_factor = contour_factor * strip_factor * terrace_factor;
+   edit_soil_conserve_factor->Update();
+}
+//______________________________________________________________________________
+void TManagement_editor_form::show_hide_auto_NO3_parameters()
+{
+   if (management)
+   {
+      bool show_AUTO_NO3 = management ->N_application_soil_observation_event->automatic_N_mode_cowl_or_labeled.get() == AUTO_NITRO_BALANCE_BASED
+                        || management ->N_application_soil_observation_event->automatic_N_mode_cowl_or_labeled.get() == AUTO_NITRO_LOCAL_CALIBRATION;
+
+      pagecontrol_seasonal_N_appl->Visible = show_AUTO_NO3;
+      edit_target_yield_N_uptake_kg_ha->Visible = management ->N_application_soil_observation_event->automatic_N_mode_cowl_or_labeled.get() == AUTO_NITRO_BALANCE_BASED;
+      edit_estimated_mineralization->Visible =  management ->N_application_soil_observation_event->automatic_N_mode_cowl_or_labeled.get() == AUTO_NITRO_BALANCE_BASED;
+
+      edit_critical_soil_NO3->Visible = management ->N_application_soil_observation_event->automatic_N_mode_cowl_or_labeled.get() == AUTO_NITRO_LOCAL_CALIBRATION;
+   };
+};
+//______________________________________________________________________________
+void TManagement_editor_form::handle_add_auto_NO3_appl()
+{
+   if (management)
+   {  CropSyst::N_application_soil_observation_mode::Split_application   *auto_N_split_op  = new CropSyst::N_application_soil_observation_mode::Split_application;
+      Tform_auto_NO3_application *auto_N_split_form = new Tform_auto_NO3_application(this);
+      auto_N_split_form->bind_to(auto_N_split_op,parameter_file_form);
+      prompt_and_append_event(auto_N_split_op,auto_N_split_form,management->auto_N_applications,
+         0 //NYI V4_HELP_URL(HELP_P_mgmt_N_automatic)
+         //110113         parameter_file_form->compose_manual_subdirectory_filename(HELP_P_mgmt_N_automatic).c_str()
+         );
+      Update(); // Just update everything this will recalc total
+   };
+};
+//______________________________________________________________________________
+void TManagement_editor_form::handle_listbox_auto_NO3_splitDblClick()
+{
+   if (management)
+   {  int focused = listbox_auto_NO3_split->ItemIndex;
+      Common_event *auto_N_split_appl_event = dynamic_cast<Common_event *>(management->auto_N_applications.get_at(focused));
+      if (auto_N_split_appl_event)
+      {  CropSyst::N_application_soil_observation_mode::Split_application *auto_N_split_appl_op
+            = ( CropSyst::N_application_soil_observation_mode::Split_application *)auto_N_split_appl_event->get_operation();
+         Tform_auto_NO3_application *auto_N_appl_form = new Tform_auto_NO3_application(this);
+         auto_N_appl_form->bind_to(auto_N_split_appl_op,parameter_file_form);
+         edit_event(auto_N_split_appl_event,auto_N_appl_form,
+                     0 //NYI V4_HELP_URL(HELP_P_mgmt_N_automatic)
+            //110113 parameter_file_form->compose_manual_subdirectory_filename(HELP_P_mgmt_N_automatic).c_str()
+            );
+         Update();
+      };
+   };
+};
+//______________________________________________________________________________
+

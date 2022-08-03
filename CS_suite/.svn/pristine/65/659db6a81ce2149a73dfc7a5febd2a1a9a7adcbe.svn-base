@@ -1,0 +1,1394 @@
+#include <vcl.h>
+#pragma hdrstop
+
+#if (__BCPLUSPLUS__>0x600)
+#define _UNICODE
+#endif
+//#define LANGUAGE_COMBOBOXES
+#include "frame_CS_context_functions.h"
+#include "CS_suite/CS_suite_directory.h"
+#include "CS_suite/CS_explorer/CS_explorer_engine.h"
+#include "GUI/explorer/form_explorer_common.h"
+#include frame_navigation_XXXX_h
+#include "CS_suite/CropSyst/file_system/project_directory_CropSyst.h"
+#include "CS_suite/CS_suite_directory.h"
+#include "corn/string/strconv.hpp"
+#include "CropSyst/source/cs_filenames.h"
+using namespace CS;
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma link "AdvCombo"
+#pragma link "AdvEdBtn"
+#pragma link "AdvEdit"
+#pragma link "AdvFileNameEdit"
+#pragma link "FlCtrlEx"
+#pragma link "AdvDirectoryEdit"
+#pragma link "htmlbtns"
+#pragma link "RNAutoFloatEdit"
+#pragma link "RNAutoBitCheckListBox"
+#pragma resource "*.dfm"
+Tframe_CS_context *frame_CS_context;
+//---------------------------------------------------------------------------
+#define FORM_SCENRIO_OUTPUT_CONTEXT Tframe_CS_context
+#define output_options explorer_engine->provide_output_options()
+#define scenario_output_directory explorer_engine->get_directory_name_qualified()
+#include "CS_suite/CS_explorer/form_common_output_management.cpp"
+#undef scenario_output_directory
+#undef output_options
+//---------------------------------------------------------------------------
+__fastcall Tframe_CS_context::Tframe_CS_context(TComponent* Owner)
+   : TFrame(Owner)
+   , explorer_form(0)
+   , CS_suite_directory(0)
+   , navigation_responder(*this)
+   , navigation_frame(0)
+   , explorer_engine(0)
+   , template_dir_is_scenario(false)                                             //111104
+   , CPF_percents_water(0)                                                       //150418
+   , abort_run(false)                                                            //150419
+{
+   button_lauch_CS_suite->Visible = false;                                       //131007
+}
+//---------------------------------------------------------------------------
+void Tframe_CS_context::bind_to
+(Tcommon_explorer_form  *_explorer_form
+,Tnavigation_frame      *_navigation_frame
+,CS_Explorer_engine     *_explorer_engine)
+{
+   explorer_form     = _explorer_form;
+   navigation_frame  = _navigation_frame;
+   explorer_engine   = _explorer_engine;
+   //141116 obsolete checkbox_UED_tools_mode->Checked = explorer_engine->UED_tools_mode;
+   if (ParamCount() == 1)
+   {  if (ParamStr(1) == "UED_tools")
+      {
+         explorer_engine->UED_tools_mode = true;
+         explorer_engine->user_settings.advanced_mode = true;
+      }
+   }
+   edit_simulation_model->Text =
+      CS::Suite_directory->CropSyst().cropsyst_model_executable().c_str();
+   weather_REACCH_latitude->bind_to(&import_latitude,6);
+   weather_REACCH_longitude->bind_to(&import_longitude,6);
+   checklistbox_CPF_percent_water->bind_to(&CPF_percents_water,0);
+}
+//---------------------------------------------------------------------------
+void Tframe_CS_context::show_hide_controls()
+{  if (!CS::Suite_directory) return; /* closing the program */                    //111009
+   groupbox_scenarios_crop_production_function->Visible = false;
+   switch (explorer_engine->get_identified_context()) // was identify_context()
+   {
+      case arbitrary_context           : break;
+      case project_context             : break; //  1
+      case database_context            :
+      {
+         panel_database_add_weather    ->Caption = explorer_engine->database_has_directory("Weather")    ? "Goto Weather"     : "Add Weather folder";
+         panel_database_add_soil       ->Caption = explorer_engine->database_has_directory("Soil")       ? "Goto Soil"        : "Add Soil folder";
+         panel_database_add_rotation   ->Caption = explorer_engine->database_has_directory("Rotation")   ? "Goto Rotation"    : "Add Rotation folder";
+         panel_database_add_crop       ->Caption = explorer_engine->database_has_directory("Crop")       ? "Goto Crop"        : "Add Crop folder";
+         panel_database_add_management ->Caption = explorer_engine->database_has_directory("Management") ? "Goto Management"  : "Add Management folder";
+         panel_database_add_biomatter  ->Caption = explorer_engine->database_has_directory("Biomatter")  ? "Goto Biomatter"   : "Add Biomatter folder";
+         panel_database_add_format     ->Caption = explorer_engine->database_has_directory("Format")     ? "Goto Format"      : "Add Format folder";
+      } break; //  2
+      case scenarios_context           : groupbox_scenarios_crop_production_function->Visible = true;  break; //  3
+      case enterprises_context         : break; //  3
+      case scenario_context            : groupbox_scenarios_crop_production_function->Visible = true; break; //  4
+      case generated_scenarios_context : break; //  5
+      case scenario_output_context     :
+      {
+         fast_graph_button       ->Enabled = explorer_engine->scenario_output_has_file(   "daily.UED");
+         formated_schedule_button->Enabled = explorer_engine->scenario_output_has_file("schedule.txt");
+         text_schedule_button    ->Enabled = explorer_engine->scenario_output_has_file("schedule.txt");
+         harvest_report_button   ->Enabled = explorer_engine->scenario_output_has_file( "harvest.htm");
+         groupbox_reports_to_be_generated->Visible = false;
+         const CropSyst::Scenario_output_options *scenario_output_option
+            = explorer_engine->provide_output_options();
+         groupbox_reports_to_be_generated->Visible = scenario_output_option != NULL;
+      } break; //  6
+      case weather_context             : break; //  7
+      case soil_context                : break; //  8
+      case rotation_context            : break; //  9
+      case crop_context                : break; // 10
+      case management_context          : break; // 11
+      case biomatter_context           : break; // 12
+#if (CS_VERSION==4)
+      case format_context              : break; // 13
+      case STATSGO_context             : break; // 14
+#endif
+   }
+
+   { // CANMS support
+      bool CANMS_installed =
+         CORN::OS::file_system_engine.exists(CS::Suite_directory->CANMS());      //140313
+      CORN::OS::File_name_concrete CANMS_scenario_file(explorer_engine->get_directory_name_qualified(),".CANMS_scenario");
+      bool CANMS_files_found = CORN::OS::file_system_engine.exists(CANMS_scenario_file);
+      button_scenario_run_CANMS->Visible = CANMS_installed || CANMS_files_found;
+      button_project_CANMS_enterprises->Visible =CANMS_installed;
+      button_scenario_edit_CANMS->Visible =CANMS_installed || CANMS_files_found;
+      button_CANMS->Visible = CANMS_installed;
+//    tabsheet_enterprises->TabVisible = CANMS_installed;
+      button_scenario_run_CANMS->Visible = CANMS_files_found;
+      button_scenarios_create_CANMS_scenario->Visible = CANMS_installed;
+   }
+   { // CAFE dairy support
+      bool CAFE_installed = CORN::OS::file_system_engine.exists(CS::Suite_directory->CAFE()); //140111
+      CORN::OS::File_name_concrete  CAFE_dairy_scenario_file(explorer_engine->get_directory_name_qualified(),".CAFE_dairy_scenario");
+      bool CAFE_dairy_files_found = CORN::OS::file_system_engine.exists(CAFE_dairy_scenario_file);
+      //obs?button_scenario_run_CAFE_dairy->Visible = CAFE_installed || CAFE_dairy_files_found;
+      //NA button_project_CANMS_enterprises->Visible =CANMS_installed;
+      //obs?button_scenario_edit_CAFE_dairy->Visible =CAFE_installed || CAFE_dairy_files_found;
+      //NYI button_CAFE_dairy->Visible = CAFE_installed;
+//    tabsheet_enterprises->TabVisible = CANMS_installed;
+
+      button_scenarios_create_CAFE_dairy_scenario->Visible = CAFE_installed;
+      button_scenarios_create_CAFE_dairy_scenario->Visible = CAFE_installed;
+   }
+   panel_template_project->Visible = checkbox_project_copy_template->Checked;    //141110
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenario_editClick(TObject *Sender)
+{  explorer_engine->scenario_edit();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenario_runClick(TObject *Sender)
+{
+   button_abort_run->Visible = true;
+   if (checkbox_run_GIS_scenario->Checked)                                       //140214
+      explorer_engine->scenario_run_GIS();                                       //140214
+   else
+   {  CORN::OS::File_name_concrete report_format_filename(edit_scenario_report_filename->Text.c_str());
+      explorer_engine->scenario_run
+         (checkbox_scenario_display_runtime_graph->Checked
+         ,&report_format_filename
+         ,CPF_percents_water);                                                   //120518
+   }
+   button_abort_run->Visible = false;
+/*NYI
+   button_energy_estimation->Visible
+      = CS::Suite_directory->CAFE().cropland_energy_estimation_workbook_xls().exists()                                     //110920
+      ||CS::Suite_directory->CAFE().cropland_energy_estimation_workbook_xlsm().exists();                                     //110920
+*/
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenario_databaseClick(TObject *Sender)
+{  CORN_Directory_name *database_dir = explorer_engine->goto_subdirectory
+#ifdef LANGUAGE_COMBOBOXES
+      (combobox_scenario_database->Text.c_str());
+#else
+      ("Database");
+#endif
+   navigation_frame->select_folder(database_dir ? database_dir->c_str() : 0);
+   delete database_dir;                                                          //131006
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenarios_create_CropSyst_scenarioClick(TObject *Sender)
+{  explorer_engine->project_scenarios_create_scenario
+      (edit_scenarios_scenario_name->Text.c_str()
+      ,CS_SCENARIO_FILENAME
+      ,CS::Suite_directory->CropSyst().scenario_editor_executable());
+   if (explorer_engine && explorer_engine->user_settings.auto_explore_created_context) //101126
+      navigation_frame->select_folder(explorer_engine->get_directory_name_qualified().c_str());
+   else navigation_frame->refresh();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenarios_create_CANMS_scenarioClick(TObject *Sender)
+{  STRING_WITH_FILENAME new_scenario_name(edit_scenarios_scenario_name->Text.c_str());
+   STRING_WITH_FILENAME scenario_file_name_or_extension
+   #if (__BCPLUSPLUS__>0x0600)
+      (L".CANMS_scenario");
+   #else
+      (".CANMS_scenario");
+   #endif
+   explorer_engine->project_scenarios_create_scenario
+      (new_scenario_name
+      ,scenario_file_name_or_extension // L".CANMS_scenario"
+      ,CS::Suite_directory->CANMS().scenario_editor_exe);
+   const
+      CORN::OS::Directory_name
+      &created_scenario_dir = explorer_engine->get_directory_name_qualified();
+   if (explorer_engine && explorer_engine->user_settings.auto_explore_created_context) //101126
+      navigation_frame->select_folder(created_scenario_dir.c_str());
+   else navigation_frame->refresh();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenarios_create_CAFE_dairy_scenarioClick(TObject *Sender)
+{  STRING_WITH_FILENAME  new_scenario_name(edit_scenarios_scenario_name->Text.c_str());
+   STRING_WITH_FILENAME  scenario_file_name_or_extension
+   #if (__BCPLUSPLUS__>0x0600)
+      (L".CAFE_dairy_scenario");
+   #else
+      (".CAFE_dairy_scenario");
+   #endif
+
+   explorer_engine->project_scenarios_create_scenario
+      (new_scenario_name
+      ,scenario_file_name_or_extension
+      ,CS::Suite_directory->CAFE().Dairy().scenario_editor_executable());
+   const CORN::OS::Directory_name                                                //131006
+      &created_scenario_dir = explorer_engine->get_directory_name_qualified();
+   if (explorer_engine && explorer_engine->user_settings.auto_explore_created_context)
+      navigation_frame->select_folder(created_scenario_dir.c_str());
+   else navigation_frame->refresh();
+}
+//_2011-01-06___________________________________________________________________
+void __fastcall Tframe_CS_context::button_scenarios_create_NIFA_dairy_scenarioClick(TObject *Sender)
+{
+  STRING_WITH_FILENAME  new_scenario_name(edit_scenarios_scenario_name->Text.c_str());
+   STRING_WITH_FILENAME  scenario_file_name_or_extension
+   #if (__BCPLUSPLUS__>0x0600)
+      (L".NIFA_dairy_scenario");
+   #else
+      (".NIFA_dairy_scenario");
+   #endif
+   explorer_engine->project_scenarios_create_scenario
+      (new_scenario_name
+      ,scenario_file_name_or_extension
+      ,CS::Suite_directory->NIFA().Dairy().scenario_editor_executable());
+   const CORN::OS::Directory_name                                                //131006
+      &created_scenario_dir = explorer_engine->get_directory_name_qualified();
+   if (explorer_engine && explorer_engine->user_settings.auto_explore_created_context)
+      navigation_frame->select_folder(created_scenario_dir.c_str());
+   else navigation_frame->refresh();
+}
+//_2014-11-10___________________________________________________________________
+void __fastcall Tframe_CS_context::button_senerios_runClick(TObject *Sender)
+{  CORN::Text_list selected_scenario_filenames;
+   //Currently get_list_of_selected_files returns fully qualified filename
+   if (navigation_frame->get_list_of_selected_items_unqual(selected_scenario_filenames))
+   {
+      CORN::OS::File_name_concrete report_filename(edit_scenarios_report_filename->Text.c_str()); //120518
+      if (!(explorer_engine->project_scenarios_run_scenarios
+         (selected_scenario_filenames
+         ,&report_filename
+         ,abort_run
+         ,true // Currently we disable runtime graph for multiple run mode.
+         ,checkbox_scenarios_run_simultaneously->Checked
+         //150418,checkbox_scenarios_crop_production_function_water->Checked             //140414
+         ,CPF_percents_water
+         )))
+      Application->MessageBox(
+       _TEXT("None of the selected items appear to be scenarios")
+      ,_TEXT("No scenarios selected or run")
+      ,IDOK);
+   }else
+      Application->MessageBox(
+       _TEXT("To select multiple scenarios hold down the [Ctrl] key and click the scenario folder")
+      ,_TEXT("No scenarios selected or run")
+      ,IDOK);
+
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenarios_resetClick(TObject *Sender)
+{  Application->MessageBox(
+      _TEXT("This function is not yet implemented: Scenarios reset"),_TEXT("Not yet implemented")
+      ,IDOK);
+
+//NYI copy parameters from    recently_selected_filename[
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_compare_project_scenariosClick(TObject *Sender)
+{  Application->MessageBox(
+      _TEXT("This function is not yet implemented: Analysis compare scenarios"),_TEXT("Not yet implemented")
+      ,IDOK);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_enterprise_createClick(TObject *Sender)
+{  explorer_engine->project_enterprises_create_enterprise(edit_enterprise_name->Text.c_str());
+   const CORN_Directory_name &created_enterprise_dir = explorer_engine->get_directory_name_qualified();
+   if (explorer_engine && explorer_engine->user_settings.auto_explore_created_context) //101126
+      navigation_frame->select_folder(created_enterprise_dir.c_str());
+   else navigation_frame->refresh();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_biomatter_createClick(TObject *Sender)
+{   explorer_engine->edit_context_file(edit_biomatter_name->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_format_createClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_format_name->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_rotation_createClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_rotation_name->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_crop_createClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_crop_name->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::create_generic_crop_buttonClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_crop_name->Text.c_str(),L"crop");
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::create_fruit_crop_buttonClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_crop_name->Text.c_str(),L"fruit");
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::create_CROPGRO_crop_buttonClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_crop_name->Text.c_str(),L"cropgro");
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_management_createClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_management_name->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::fast_graph_buttonClick(TObject *Sender)
+{
+   explorer_engine->launch_output_fast_graph();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::formated_schedule_buttonClick(TObject *Sender)
+{  explorer_engine->launch_output_schedule_viewer();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::text_schedule_buttonClick(TObject *Sender)
+{  explorer_engine->launch_output_schedule_text_viewer();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::harvest_report_buttonClick(TObject *Sender)
+{  explorer_engine->launch_output_harvest_report_viewer();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_output_edit_report_generationClick(TObject *Sender)
+{
+/*
+   NYI  The output_manager_advanced provided the editor
+   for the list of conversions available for report generation.
+   I need to provide a stand alone editor to replace this
+
+   For version 4, as a temporary hack I can simply launch the output manager advanced
+   in a special mode that perhaps hides the /Scenario results\ page,
+   or at least set the /Report generation\ the active page.
+
+*/   
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::output_reexport_buttonClick(TObject *Sender)
+{  const CropSyst::Scenario_output_options *output_options = explorer_engine->provide_output_options();
+   if (!output_options) return;
+   progress_bar->Visible=true;
+   progress_bar->StepBy(1);
+   progress_bar->Min = 0;
+   progress_bar->Max = (output_options->conversions.count());
+   progress_bar->Position = 0;
+   FOR_EACH_IN(conversion,CropSyst::Scenario_output_options::Conversion,output_options->conversions,each_conversion)
+   {  bool export_needed = report_out_of_sync(conversion);
+      if (export_needed)
+          explorer_engine->output_export_UED_to_XLS_file_command_line(conversion->ued_filename,conversion->xxx_filename,conversion->tdf_filename,false);
+      progress_bar->StepIt();
+      Application->ProcessMessages();
+   } FOR_EACH_END(each_conversion);
+   progress_bar->Visible=false;
+   update_list_of_pending_reports();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_create_weatherClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_weather_name->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_weather_import_UEDClick(TObject *Sender)
+{  explorer_engine->launch_UED_import();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_weather_export_UEDClick(TObject *Sender)
+{  explorer_engine->launch_UED_export();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_weather_climgenClick(TObject *Sender)
+{  explorer_engine->launch_ClimGen();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_weather_UED_spatialClick(TObject *Sender)
+{  explorer_engine->launch_UED_spatial_interpolator();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_weather_map_UED_locationsClick(TObject *Sender)
+{  explorer_engine->map_UED_locations();
+   Application->MessageBox(
+       _TEXT("The file locations_map.htm will appear in\nthe file list above when the mapping is complete\ndouble-click the file name to view the map in a web browser.\nRequires the Internet to connect with Google Maps.")
+      ,_TEXT("locations_map.htm will be created")
+      ,MB_OK);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_UED_condenseClick(TObject *Sender)
+{  explorer_engine->launch_UED_condense();
+}
+//---------------------------------------------------------------------------
+#include "corn/OS/Windows/VCL/registry.h"
+void __fastcall Tframe_CS_context::UED_association_buttonClick(TObject *Sender)
+{
+   // This should be moved to CS_explorer_engine
+   CORN::Registry *reginifile = new CORN::Registry("CropSyst_Suite_4");
+   try
+   {  // Note, should find the correct CS_Suite_4 directory location
+      // Eventually may have a more generic editor
+      CORN::OS::File_name_concrete UED_ico_fname(CS::Suite_directory->icons(),"UED.ico");
+      reginifile->register_extension("UED","Universal Environment Database"
+         ,CS::Suite_directory->weather_editor_executable().c_str()
+         ,UED_ico_fname.c_str() /*"C:\\CS_suite_4\\icons\\UED.ico"*/);
+      Application->MessageBox(
+         _TEXT("UED file type registration complete"),_TEXT("File type registration")
+         , MB_OK	);
+   }
+   __finally
+   {   delete reginifile; }
+
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_arbitrary_project_newClick(TObject *Sender)
+{
+   if (edit_arbitrary_project_name->Text.Length() == 0)
+      // NYI should also validate that the project name is a valid directory
+      Application->MessageBox(
+         _TEXT("You must enter a valid directory name to create a new project"),_TEXT("Project directory name invalid")
+         ,IDOK);
+   else
+   {
+      if (checkbox_project_copy_template->Checked)                               //141009
+      {  CORN::OS::Directory_name_concrete new_dir(explorer_engine->get_directory_name_qualified(),edit_arbitrary_project_name->Text.c_str());
+         CORN::OS::Directory_name_concrete from_dir(diredit_project_template->Text.c_str());
+         if (CORN::OS::file_system_engine.copy_directory(from_dir,new_dir,true))
+            navigation_frame->select_folder(new_dir.c_str());
+      }
+      else
+      {  CORN::OS::Directory_name *new_project_dir = explorer_engine->create_project(edit_arbitrary_project_name->Text.c_str());
+         if (explorer_engine && explorer_engine->user_settings.auto_explore_created_context) //101126
+            navigation_frame->select_folder(new_project_dir? new_project_dir->c_str() : 0);
+         else navigation_frame->refresh();
+      }
+   }
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_arbitrary_goto_templateClick(TObject *Sender)
+{  navigation_frame->select_folder(diredit_project_template->Text.c_str());
+}
+//---------------------------------------------------------------------------
+
+void __fastcall Tframe_CS_context::button_arbitrary_create_simulation_folderClick(TObject *Sender)
+{
+   #if (__BCPLUSPLUS__ >= 0x600)
+   CORN_Directory_name *sim_projects_dir = explorer_engine->create_simulation_directory
+      (combobox_abritrary_simulation_folder_name ->Text.c_str()
+      ,combobox_arbitrary_projects->Text.c_str()
+      );
+   #else
+   AnsiString simulation_folder_name(combobox_abritrary_simulation_folder_name ->Text);
+   AnsiString projects_folder_name  (combobox_arbitrary_projects->Text);
+   CORN::Smart_directory_name *sim_projects_dir = explorer_engine->create_simulation_directory
+      (simulation_folder_name.c_str()
+      ,projects_folder_name.c_str()
+      );
+   #endif
+   if (explorer_engine && explorer_engine->user_settings.auto_explore_created_context) //101126
+      navigation_frame->select_folder(sim_projects_dir ? sim_projects_dir->c_str() : 0);
+   else navigation_frame->refresh();
+   groupbox_arbitrary_simulation_folder->Visible = false;
+   // Once we've created a Simulation\Projects folder,
+   // we don't necessarily want do do this again in this editing session.
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_climgenClick(TObject *Sender)
+{  explorer_engine->launch_ClimGen();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::checkbox_UED_tools_modeClick(TObject *Sender)
+{
+/*141116 tools mode checkbox has been removed
+   explorer_engine->UED_tools_mode = checkbox_UED_tools_mode->Checked;
+   if (explorer_engine->UED_tools_mode)
+   {  explorer_engine->assume_context(weather_context);
+      show_context(weather_context);
+   } else
+   {
+      Update();
+   }
+   */
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::combobox_arbitrary_assume_context_oldChange(TObject *Sender)
+{  Directory_context assumed_context = combobox_arbitrary_assume_context->ItemIndex;
+   explorer_engine->assume_context(assumed_context);
+   if (checkbox_assume_permanent->Checked)
+   {  switch (assumed_context)
+      {  case scenario_context :
+         {
+            CORN::OS::File_name_concrete scenario_filename(explorer_engine->get_directory_name_qualified(),".CropSyst_scenario");
+            WritePrivateProfileString("scenario","x"," ",scenario_filename.c_str());
+         } break;
+         /* currently an enterprise is added module in and Enterprises folder, not a director
+         case  :
+         {
+            WritePrivateProfileString("enterprise","","",".CANMS_enterprise");
+         } break;
+         */
+         case project_context :
+         {  CORN::OS::File_name_concrete project_filename(explorer_engine->get_directory_name_qualified(),".CS_project");
+            WritePrivateProfileString("Project","x"," ",project_filename.c_str());
+         } break;
+         // NYI STATSGO_MDB
+         default :
+         {
+            Application->MessageBox(_TEXT("Context can not be permanently assigned to this folder"),_TEXT("Cannot be permanent"),MB_OK);
+         } break;
+/* These contexts cannot currently be permanent
+      {arbitrary_context            //  0
+      ,project_context              //  1
+      ,database_context             //  2
+      ,scenarios_context            //  3
+      ,enterprise_context          //  4
+      ,             //  5
+      ,generated_scenarios_context  //  6
+      ,scenario_output_context      //  7
+      ,weather_context              //  8
+      ,soil_context                 //  9
+      ,rotation_context             // 10
+      ,crop_context                 // 11
+      ,management_context           // 12
+      ,biomatter_context            // 13
+#if (CS_VERSION==4)
+      ,format_context               // 14
+      ,STATSGO_context              // 15    This is the older STATSGO ArcInfo format I may or may not support it in V5
+#endif
+#if (CS_VERSION==5)
+// NYI  TDF output format           // 14
+// NYI  STATSGO_MDB                 // 15    This is the new ArcGIS format
+#endif
+      ,CONTEXT_COUNT
+*/
+      }
+      explorer_engine->setup_context();
+   }
+   show_context(assumed_context);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_project_scenariosClick(TObject *Sender)
+{  CORN_Directory_name *scenarios_dir = explorer_engine->goto_subdirectory
+#ifdef LANGUAGE_COMBOBOXES
+      (combobox_project_scenarios->Text.c_str());
+#else
+       ("Scenarios");
+#endif
+   navigation_frame->select_folder(scenarios_dir ? scenarios_dir->c_str() : 0);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_project_databaseClick(TObject *Sender)
+{  CORN_Directory_name *database_dir = explorer_engine->goto_subdirectory
+#ifdef LANGUAGE_COMBOBOXES
+      (combobox_project_database->Text.c_str());
+#else
+      ("Database");
+#endif
+   navigation_frame->select_folder(database_dir ? database_dir->c_str() : 0);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_project_CANMS_enterprisesClick(TObject *Sender)
+{  CORN_Directory_name *enterprises_dir = explorer_engine->goto_subdirectory
+#ifdef LANGUAGE_COMBOBOXES
+      (combobox_project_enterprises->Text.c_str());
+#else
+      ("Enterprises");
+#endif
+   navigation_frame->select_folder(enterprises_dir ? enterprises_dir->c_str() : 0);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_project_GIS_simulationClick(TObject *Sender)
+{  explorer_engine->project_GIS_simulation();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_project_watershed_simulationClick(TObject *Sender)
+{  explorer_engine->project_watershed_simulation();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_project_cabon_sequestrationClick(TObject *Sender)
+{  explorer_engine->project_carbon_sequestration_for_grazing_regimen();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::combinatorial_project_scenario_generation_buttonClick(TObject *Sender)
+{
+   if (!template_dir_is_scenario)
+   {  Application->MessageBox(_TEXT(
+         "A scenario to serve as a template to generate\n"
+         "the new scenarios must first be selected"), _TEXT("Scenario (folder) not selected."),MB_OK);
+      return;
+   }
+   if (Application->MessageBox(
+      _TEXT(
+      //"NOTE: This function is implemented but has not yet been fully tested.\n\n"
+      "This operation generates all possible combinations of scenarios\n"
+      "given parameter files in this project's Database.\n"
+      "This may or may not replace all files in the Generated scenarios folder.\n\n"
+      "You may first want to copy or move the Generated scenarios folder\n"
+      "to another directory as a backup measure.\n\n"
+      "Continue with combinatorial scenario generation?")
+      ,_TEXT("Conform combinatorial scenario generation")
+      ,MB_YESNO)
+      == ID_YES)
+   {  CORN_Directory_name_instance                                               //131006
+      template_scenario_directory_name(edit_project_combinatorial_scenario_template->Text.c_str());
+      // Note that the current directory context here will be the project directory.
+      CropSyst_Project_directory *project_dir = explorer_engine->provide_project_directory();
+      if (!project_dir)
+      {  Application->MessageBox(
+            _TEXT("Could not get the project directory or its 'Scenarios' directory for scenario generation"),_TEXT("Combinatorial scenario generation aborted")
+            ,MB_OK);
+         return;
+      }
+      if (!CORN::OS::file_system_engine.exists(template_scenario_directory_name))
+      {
+         if (Application->MessageBox(
+               _TEXT("A template scenario has not yet been selected.\n\n"
+               "The most recently selected or edited scenario is automatically selected as the template,\n"
+               "so a scenario can be selected by entering the Scenarios folder and selecting a scenario file.\n\n"
+               "To create a scenario template goto the Scenarios folder and add a new scenario there.\n")
+               ,_TEXT("Template scenario not selected")
+               ,MB_OK))
+//               "Would you like to create a new scenario with the default name to be used as the template scenario now.\n","Template scenario not selected",MB_YESNO) == ID_YES)
+         {
+            // NYI I should
+
+//OBSOLETE            edit_project_scenario_name->Text = filenameedit_project_combinatorial_scenario_template->Text;
+//OBSOLETE            button_project_scenario_createClick(Sender);
+         }
+         return;
+      }
+      // First do a pseudo run to precount the number of of scenarios.
+      #ifdef _UNICODE
+      std::wstring prefix_wstr(edit_combsim_prefix->Text.c_str());
+      std::string prefix_str;
+      CORN::wstring_to_string(prefix_wstr,prefix_str);
+      #else
+      std::string prefix_str(edit_combsim_prefix->Text.c_str());
+      #endif
+      CORN::OS::Directory_name_concrete                                           //131006
+            generated_scenarios_dir(project_dir->generated_scenarios());
+      CORN::OS::file_system_engine.create_directory(generated_scenarios_dir);    //131006
+      int potential_scenario_generation_count = explorer_engine->project_combinatorial_scenario_generation_generate_all
+         (template_scenario_directory_name
+         ,generated_scenarios_dir                                                //111104
+         ,prefix_str
+         ,true);
+      if (potential_scenario_generation_count)
+      {
+         // Before running, goto into the generated scenarios so we can see the
+         // scenarios as they are generated in the file list
+         // Note that project_combinatorial_scenario_generation_generate_all
+         // in precount mode will create this folder above.
+         navigation_frame->select_folder
+            (generated_scenarios_dir.c_str());
+         int actual_scenario_generation_count = explorer_engine->project_combinatorial_scenario_generation_generate_all
+            (template_scenario_directory_name
+            ,generated_scenarios_dir
+            ,prefix_str
+            ,false);
+         Application->MessageBox
+            (_TEXT("The scenarios have been generated."),_TEXT("Complete")
+            ,MB_OK);
+      } else
+         Application->MessageBox(
+            _TEXT("Either this project does not (yet) have a parameter database directory,"
+             " or there are no parameter files in the database to perform combination")
+            ,_TEXT("No database parameter files for combination")
+            ,MB_OK);
+   }
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_CANMSClick(TObject *Sender)
+{  // NYI
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::panel_database_add_weatherClick(TObject *Sender)
+{
+   bool goto_directory =    explorer_engine && explorer_engine->user_settings.auto_explore_created_context;
+   if (explorer_engine->database_has_directory("Weather"))
+      goto_directory = true;
+   CORN_Directory_name *weather_dir =explorer_engine->add_database_context("Weather",goto_directory);
+   if (goto_directory)
+        navigation_frame->select_folder(weather_dir ? weather_dir->c_str() : 0);
+   else panel_database_add_weather    ->Caption = "Goto Weather";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::panel_database_add_soilClick(TObject *Sender)
+{
+   bool goto_directory =    explorer_engine && explorer_engine->user_settings.auto_explore_created_context;
+   if (explorer_engine->database_has_directory("Soil"))
+      goto_directory = true;
+  CORN_Directory_name *soil_dir =explorer_engine->add_database_context("Soil",goto_directory);
+   if (goto_directory)
+        navigation_frame->select_folder(soil_dir ? soil_dir->c_str() : 0);
+   else panel_database_add_soil       ->Caption = "Goto Soil";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::panel_database_add_cropClick(TObject *Sender)
+{  bool goto_directory =    explorer_engine && explorer_engine->user_settings.auto_explore_created_context;
+   if (explorer_engine->database_has_directory("Crop"))
+      goto_directory = true;
+   CORN_Directory_name *crop_dir =explorer_engine->add_database_context("Crop",goto_directory);
+   if (goto_directory)
+      navigation_frame->select_folder(crop_dir ? crop_dir->c_str() : 0);
+   else panel_database_add_crop       ->Caption = "Goto Crop";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::panel_database_add_rotationClick(TObject *Sender)
+{  bool goto_directory =    explorer_engine && explorer_engine->user_settings.auto_explore_created_context;
+   if (explorer_engine->database_has_directory("Rotation"))
+      goto_directory = true;
+  CORN_Directory_name *rotation_dir =explorer_engine->add_database_context("Rotation",goto_directory);
+   if (goto_directory)
+        navigation_frame->select_folder(rotation_dir ? rotation_dir->c_str() : 0);
+   else panel_database_add_rotation   ->Caption = "Goto Rotation";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::panel_database_add_biomatterClick(TObject *Sender)
+{  bool goto_directory =    explorer_engine && explorer_engine->user_settings.auto_explore_created_context;
+   if (explorer_engine->database_has_directory("Biomatter"))
+      goto_directory = true;
+  CORN_Directory_name *biomatter_dir =explorer_engine->add_database_context("Biomatter",goto_directory);
+   if (goto_directory)
+      navigation_frame->select_folder(biomatter_dir ? biomatter_dir->c_str() : 0);
+   else panel_database_add_biomatter  ->Caption = "Goto Biomatterfolder";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::panel_database_add_formatClick(TObject *Sender)
+{  bool goto_directory =    explorer_engine && explorer_engine->user_settings.auto_explore_created_context;
+   if (explorer_engine->database_has_directory("Format"))
+      goto_directory = true;
+   CORN_Directory_name *format_dir =explorer_engine->add_database_context("Format",goto_directory);
+   if (goto_directory)
+      navigation_frame->select_folder(format_dir ? format_dir->c_str() : 0);
+   else panel_database_add_format->Caption = "Goto Format";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::panel_database_add_managementClick(TObject *Sender)
+{  bool goto_directory =    explorer_engine && explorer_engine->user_settings.auto_explore_created_context;
+   if (explorer_engine->database_has_directory("Management"))
+      goto_directory = true;
+  CORN_Directory_name  *management_dir =explorer_engine->add_database_context("Management",goto_directory);
+   if (goto_directory)
+      navigation_frame->select_folder(management_dir ? management_dir->c_str() : 0);
+   else panel_database_add_management ->Caption = "Goto Management";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_soil_newClick(TObject *Sender)
+{  explorer_engine->edit_context_file(edit_soil_name->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_soil_importClick(TObject *Sender)
+{  explorer_engine->launch_soil_convertor();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_soil_SOILPAR2Click(TObject *Sender)
+{  Application->MessageBox(
+//      #if (__BCPLUSPLUS__>0x0600)
+      _TEXT("This function is not yet implemented: soil SOILPAR"),_TEXT("Not yet implemented")
+//      #else
+//      "This function is not yet implemented: soil SOILPAR","Not yet implemented"
+//      #endif
+      ,IDOK);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenario_run_CANMSxClick(TObject *Sender)
+{  // NYI
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenario_edit_CANMS_Click(TObject *Sender)
+{  explorer_engine->CANMS_scenario_edit();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::groupbox_scenario_formatClick(TObject *Sender)
+{  show_hide_controls();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::groupbox_scenarios_formatClick(TObject *Sender)
+{  show_hide_controls();
+}
+//---------------------------------------------------------------------------
+void __fastcall  Tframe_CS_context::Update()
+{  // add 100201
+   Directory_context context = explorer_engine->identify_context();
+   show_context((int)context);
+//141116   checkbox_UED_tools_mode->Update();
+}
+//---------------------------------------------------------------------------
+void Tframe_CS_context::show_context(int context_index)
+{  Directory_context context = (Directory_context)context_index;
+   tabsheet_arbitrary ->Enabled = true; // enable one of the tabsheets to ensure that something is enabled as we enable and disable the sheets.
+   for (int page_index = 1; page_index < pagecontrol_context->PageCount; page_index++)
+      pagecontrol_context->Pages[context_index]->TabVisible = true;
+   pagecontrol_context->ActivePageIndex = context_index;
+   for (int page_index = 1; page_index < pagecontrol_context->PageCount; page_index++)
+      pagecontrol_context->Pages[page_index]->TabVisible = page_index == context_index;
+   pagecontrol_context->Pages[0]->TabVisible = 0 == context_index; // Now we enable/disable the arbitrary context as needed
+   pagecontrol_context->ActivePageIndex = context_index;
+   switch (context)
+   {
+      case scenario_output_context :
+      {  // In the case of the scenario output directory
+         // If a report is deleted, we will want to relist the generated report options.
+         update_list_of_pending_reports();
+      } break;
+      case arbitrary_context :
+         groupbox_arbitrary_simulation_folder->Visible = true;
+      break;
+      case scenarios_context: case generated_scenarios_context :
+//101124 Now if no scenarios are selected we give a message
+//101124            // When we first enter a scenarios context we disabled the run button
+//101124            // until one or more scenarios are selected.
+//101124           button_senerios_run->Enabled = false;
+      break;
+      case project_context :
+      {
+         CORN::OS::Directory_name_concrete CS_project_filename(explorer_engine->get_directory_name_qualified(),".CS_project");
+         char value_buffer[1000];
+         GetPrivateProfileString("combinatorial_scenario_generation","template",explorer_engine->get_directory_name_qualified().c_str(),value_buffer,1000,CS_project_filename.c_str());
+         edit_project_combinatorial_scenario_template->Text = value_buffer;
+         GetPrivateProfileString("combinatorial_scenario_generation","prefix","",value_buffer,1000,CS_project_filename.c_str());
+         edit_combsim_prefix->Text = value_buffer;
+      } break;
+   }
+   // 141110 Added advanced mode
+   bool advanced = explorer_engine->user_settings.advanced_mode;                 //141110
+
+   // Arbitrary
+   groupbox_arbitrary_simulation_folder                  ->Visible = advanced;
+   panel_arbitrary_assume_context                        ->Visible = advanced;
+   // Project
+   button_project_cabon_sequestration                    ->Visible = advanced;
+   panel_watershed_module                                ->Visible = advanced;
+   groupbox_combinatorial_scenario_gen                   ->Visible = advanced;
+   // Database
+   groupbox_REACCH_import                                ->Visible = advanced;
+   // Scenarios
+   panel_simulation_model                                ->Visible = advanced;
+   checkbox_scenarios_run_statistical_analysis           ->Visible = advanced;
+   tabsheet_scenarios_reset                           ->TabVisible = advanced;
+   tabsheet_scenarios_analysis                        ->TabVisible = advanced;
+   tabsheet_scenarios_export                          ->TabVisible = advanced;
+   // Scenario
+   panel_scenario_right                                  ->Visible = advanced;
+   groupbox_scenario_analysis                            ->Visible = advanced;
+   // Weather
+   panel_weather_tools_advanced                          ->Visible = advanced;
+   /*
+   button_weather_UED_spatial                            ->Visible = advanced;
+   groupbox_quality                                      ->Visible = advanced;
+   button_UED_condense                                   ->Visible = advanced;
+   UED_association_button                                ->Visible = advanced;
+   */
+   // Management
+   button_management_combinatorial_generation            ->Visible = advanced;
+   panel_crop_advanced                                   ->Visible = advanced;
+
+
+   show_hide_controls();
+}
+//---------------------------------------------------------------------------
+/* scenariou output manager functions to be implemented in CS_explorer scenario output context
+//______________________________________________________________________________
+__fastcall Toutput_manager_advanced_form::Toutput_manager_advanced_form(TComponent* Owner)
+: TForm(Owner)
+, fastgrph_exe(new Smart_file_name(cs_suite_paths->get_fastgraph_exe().c_str()))
+, schedule_viewer_exe(new Smart_file_name(cs_suite_paths->get_schedule_viewer_exe().c_str()))
+,scenario_directory(0)
+,build_reports(0)
+#ifdef GENERATE_ON_START
+,initial_reports_generated(false)
+#endif
+,export_options(new CropSyst_scenario_output_options::Conversion())
+,sim_starting_date((Year)0,(DOY)0)   // Default 0 indicates all dates in the
+,sim_ending_date  ((Year)0,(DOY)0)   // UED will be exported.
+{}
+//______________________________________________________________________________
+__fastcall Toutput_manager_advanced_form::~Toutput_manager_advanced_form()
+{
+   if (export_options) delete export_options; export_options = 0;
+   if (scenario_directory) delete scenario_directory; scenario_directory = 0;
+}
+//______________________________________________________________________________
+class Scenario_options_data_record
+:public Common_parameters_data_record //Simulation_parameters
+,public CropSyst_model_options
+{  // THis is a local class because we only need to get the start and end date
+public:
+   Scenario_options_data_record()
+   : Common_parameters_data_record(NO_ASSOCIATED_DIRECTORY,CS_VERSION_NUMBERS,"model_options")
+   , CropSyst_model_options()
+   {}
+   virtual const char *get_primary_section_name() const { return "model_options" ; }
+   virtual void expect_structure(bool for_write)
+   {  Common_parameters_data_record::expect_structure( for_write);
+      setup_structure(*this,for_write);
+   }
+}
+//______________________________________________________________________________
+void Toutput_manager_advanced_form::bind_to
+(CropSyst_scenario_output_options *i_output_options
+,const char                       *i_scenario_options_filename           // I think simply the scenario filename
+,Tparameter_file_form             *_param_file_form
+)
+{
+   param_file_form = _param_file_form;
+   if (scenario_directory) delete scenario_directory; scenario_directory = 0;
+   scenario_directory = new CropSyst::Scenario_directory(i_scenario_options_filename);
+   output_options = i_output_options;
+   scenario_directory->output_dir.set_as_current_working_directory();
+   CORN::Ustring new_caption(Caption.c_str());
+   new_caption.append(scenario_directory->output_dir);  // Warning may have problems with this is bind_to is called multiple times.
+   Caption =  new_caption.c_str();
+   Application->Title = new_caption.c_str();
+   CORN::Smart_file_name scenario_options_filename (i_scenario_options_filename);
+   if (scenario_options_filename.exists())
+   {
+      Simulation_run_period_data_record sim_ops;       //060418 was Scenario_options_data_record
+      VV_File scenario_file(i_scenario_options_filename);
+      scenario_file.get(sim_ops);
+      sim_starting_date.set(sim_ops.starting_date);
+      sim_ending_date.set(sim_ops.ending_date);
+   } // else the sim_starting and ending dates default to 0, the export utility will need to query the UED file to determine date extent.
+   scenario_directory->output_dir.qualify();   // 050328 This line might not be needed, probably already qualified
+   if (scenario_directory->output_dir.exists())
+      xls_reports_shelllistview        ->RootFolder = scenario_directory->output_dir.c_str();
+   if (scenario_directory->output_soil_dir.exists())
+      xls_profile_reports_shelllistview->RootFolder = scenario_directory->output_soil_dir.c_str();
+
+   fast_graph_button       ->Enabled = scenario_directory->daily_ued.exists();
+   text_schedule_button    ->Enabled = scenario_directory->schedule_txt.exists();
+   formated_schedule_button->Enabled = scenario_directory->schedule_txt.exists();
+   harvest_report_button   ->Enabled = scenario_directory->harvest_htm.exists();
+
+//081001   fast_graph_button       ->bind_to((scenario_directory->daily_ued.c_str()) ,0,fast_graph_gem,fastgrph_exe->c_str());
+   text_schedule_button    ->bind_to((scenario_directory->schedule_txt.c_str()) ,0,schedule_gem,0);
+   formated_schedule_button->bind_to((scenario_directory->schedule_txt.c_str()) ,0,schedule_gem,schedule_viewer_exe->c_str());
+
+   scenario_directory->CPF_dir.qualify();  // 050328 might not be needed, may already be qualified
+   if (scenario_directory->CPF_dir.exists())
+         CPF_dirlistbox->Directory = scenario_directory->CPF_dir.c_str();
+   else  CPF_tabsheet->TabVisible=false;
+
+   auto_export_listbox->bind_to(&(output_options->conversions),0);
+   bind_export_options();
+
+   build_button->bind_to(&build_reports,0);
+   Show();
+}
+//______________________________________________________________________________
+void Toutput_manager_advanced_form::bind_export_options()
+{
+   auto_export_enable_checkbox->bind_to(&(export_options->always_convert),0);
+   export_UED_filename_edit->bind_to(&(export_options->ued_filename),0);
+   DragAcceptFiles(export_UED_filename_edit->Handle,true);
+   export_TDS_filename_edit->bind_to(&(export_options->tdf_filename),0);
+   DragAcceptFiles(export_TDS_filename_edit->Handle,true);
+   export_XXX_filename_edit->bind_to(&(export_options->xxx_filename),0);
+   DragAcceptFiles(export_XXX_filename_edit->Handle,true);
+}
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::Update(void)
+{
+#ifdef GENERATE_ON_START
+   if (!initial_reports_generated)
+      regenerate_reports();
+#endif
+   auto_export_listbox->Update();
+   export_UED_filename_edit->Update();
+   export_TDS_filename_edit->Update();
+   export_XXX_filename_edit->Update();
+   update_list_of_pending_reports();
+}
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::explore_button_onclick(TObject *Sender)
+{  Variant  ShellOLE;
+   ShellOLE=Variant::CreateObject("Shell.Application");
+   Function Explore("Explore");
+   AnsiString directory(scenario_directory->output_dir.c_str());
+   ShellOLE.Exec(Explore << Variant(directory));
+}
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::open_selected_CPF_report(TObject *Sender)
+{  CORN::Smart_file_name selected_filename(CPF_filelistbox->Items->Strings[CPF_filelistbox->ItemIndex].c_str());
+   selected_filename.set_path(CPF_dirlistbox->Directory.c_str());
+   selected_filename.invoke_viewer();
+}
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::append_export_buttonClick(TObject *Sender)
+{  if (output_options)
+   {  output_options->conversions.append(export_options);
+      export_options = new CropSyst_scenario_output_options::Conversion();
+      Update();
+   }
+}
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::reexport_buttonClick(TObject *Sender)
+{  regenerate_reports();
+}
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::delete_export_buttonClick(TObject *Sender)
+{  auto_export_listbox->delete_selected();
+   update_list_of_pending_reports();
+}
+//______________________________________________________________________________
+#ifdef NYI
+This isn't working for some reason memory is messed up some where
+void Toutput_manager_advanced_form::export_UED_to_XLS_file
+(const CORN::Smart_file_name &XXXXX_ued
+,const CORN::Smart_file_name &XXXXX_xxx
+,const CORN::Smart_file_name &XXXXX_tdf
+,bool include_full_year
+)
+{
+   CORN::Date include_starting_date(sim_starting_date);
+   if (include_full_year) include_starting_date.set_DOY(1);
+   CORN::Date include_endinging_date(sim_ending_date);
+   if (include_full_year) include_endinging_date.set_DOY(sim_ending_date.days_in_year());
+   CORN::Smart_file_name ued_filename(XXXXX_ued); ued_filename.qualify();
+   CORN::Smart_file_name xxx_filename(XXXXX_xxx); xxx_filename.qualify();
+   CORN::Smart_file_name tdf_filename(XXXXX_tdf);
+   if (xxx_filename.find_substring("\\soil\\") != SUBSTRING_NOT_FOUND)
+      output_soil_dir.create();
+   if(!tdf_filename.is_qualified(false))
+      tdf_filename.set_path(simulation_paths->get_database_output_default_dir());
+   if (ued_filename.exists()      && tdf_filename.exists())
+   {  UED_export_database *export_DB = new UED_export_database(ued_filename.c_str(), tdf_filename.c_str());
+      export_DB->initialize();
+      {  UED_period_record *simulation_period_rec = export_DB->get_period(UED_period_application_code_option|UED_period_variable_code_option,0,0,0,0,0);
+         if (simulation_period_rec)
+            export_DB->set_date_ranges(simulation_period_rec->start_date_time,simulation_period_rec->end_date_time);
+      }
+      export_DB->export_to(xxx_filename.c_str());
+//      delete export_DB;  not deleting, because something is out of alignment when compiled under builder
+   }
+}
+#endif
+
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::Xupdate_list_of_pending_reports(
+      TObject *Sender, TListItem *Item, TItemChange Change)
+{  update_list_of_pending_reports();
+}
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::label_excel_problem_detailsClick(TObject *Sender)
+{  param_file_form->view_FAQ("excel_display_problem.htm");
+}
+//______________________________________________________________________________
+void __fastcall Toutput_manager_advanced_form::fast_graph_button_Click(TObject *Sender)
+{  // The current working directory
+   param_file_form->run_program_with_file
+      ( fastgrph_exe//100616 ->c_str()
+      , scenario_directory->daily_ued//100616 .c_str()
+      , ""
+      , ""
+      , false // don't wait_for_termination
+      , SW_SHOWNORMAL);
+}
+//______________________________________________________________________________
+*/
+//______________________________________________________________________________
+//______________________________________________________________________________
+void Navigation_responder_CS::navigation_directory_selected
+(const CORN_Directory_name &selected_dirname)
+{
+// set the recently selected filename
+   bool selected_is_scenario = false;
+   Directory_context context = context_frame.explorer_engine->identify_context_of(selected_dirname);
+   selected_is_scenario = (context == scenario_context);
+   if (selected_is_scenario)
+   {  std::wstring name_ext;                                                     //120614
+      context_frame.edit_project_combinatorial_scenario_template->Text
+         = selected_dirname.append_name_with_extension_to(name_ext).c_str();     //120723_120614_090802
+   } else
+   {  // currently doing nothing, but might want to set an output indicating the
+      // file selection for the current context.
+      // I don't currently do this because the file will already be shown in the file list view
+   // Note that the navigation frame already set the most recently selected file for the current context
+   }
+   context_frame.panel_AgMIP->Visible = false;
+}
+//______________________________________________________________________________
+void Navigation_responder_CS::navigation_file_selected(const CORN_File_name &selected_filename)
+{  // set the recently selected filename
+   bool selected_is_scenario = false;
+#if (CS_VERSION==4)
+//090826 In version 4 we work with .csn files which are listed in Scenarios folder
+// In version 5 there will be no .csn files.
+    selected_is_scenario  = selected_filename.has_extension_ASCII("csn");
+   // NYI set recent file for the current context
+#endif
+   if (selected_is_scenario)
+   {
+      std::wstring name_ext;                                                       //120614
+      context_frame.edit_project_combinatorial_scenario_template->Text
+         = selected_filename.append_name_with_extension_to(name_ext).c_str(); //120723_090802 Item->DisplayName;
+   } else
+   {  // currently doing nothing, but might want to set an output indicating the
+      // file selection for the current context.
+      // I don't currently do this because the file will already be shown in the file list view
+   // Note that the navigation frame already set the most recently selected file for the current context
+   }
+   bool enable_AgMIP_tools = selected_filename.has_extension_ASCII("json"); //130418
+   //141116 context_frame.memo_developers->Visible = !enable_AgMIP_tools;
+   context_frame.panel_AgMIP->Visible = enable_AgMIP_tools; //130418
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::listbox_pending_reportsClick(TObject *Sender)
+{  const CropSyst::Scenario_output_options  *output_options = explorer_engine->provide_output_options();
+   if (!output_options) return;
+   std::wstring selected_pending_report(listbox_pending_reports->Items->Strings[listbox_pending_reports->ItemIndex].c_str());
+   CropSyst::Scenario_output_options::Conversion *conversion = (CropSyst::Scenario_output_options::Conversion  *)output_options->conversions.find_wstring(selected_pending_report);
+   if (conversion)
+   {  explorer_engine->output_export_UED_to_XLS_file_command_line(conversion->ued_filename,conversion->xxx_filename,conversion->tdf_filename,false);
+   }
+   update_list_of_pending_reports();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::BitBtn11Click(TObject *Sender)
+{  Application->MessageBox(_TEXT("The calibrator is not yet available from CS_explorer.\n")
+      _TEXT("It is accessable from the Crop editor"),MB_OK);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_energy_estimationClick(TObject *Sender)
+{
+   // NYI button_energy_estimation
+   //  CS_explorer engine needs function
+   // to copy cropland_energy_estimation to to the scenario directory
+   // (if not already exists) and launch the aggregator.
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::edit_project_combinatorial_scenario_templateChange(TObject *Sender)
+{  CORN::OS::Directory_name_concrete template_dir (edit_project_combinatorial_scenario_template->Text.c_str());
+   template_dir_is_scenario =explorer_engine->identify_context_of(template_dir) == scenario_context;
+   edit_project_combinatorial_scenario_template->Color
+      = template_dir_is_scenario ? clLime : clRed;
+   edit_project_combinatorial_scenario_template->Hint
+      = template_dir_is_scenario ? L"Template scenario selected"
+            : L"The selected folder is not a scenario";
+   if (template_dir_is_scenario)
+   {  // Record the selection in the Project file (persistence)
+      CORN_File_name_instance CS_project_filename;    //120518
+      bool scenario_is_in_project = true;
+
+      /*
+      continue here
+      search the ancestor directories of the CWD (explorer_engine->get_directory_name_qualified())
+      for the file ".CS_project"
+      (I don't yet have a function to do this for any arbitrary directory
+       I would probably need to implement this in file_system_engine.
+       */
+
+      if (scenario_is_in_project)                                                //120518
+      WritePrivateProfileString("combinatorial_scenario_generation","template",template_dir.c_str(),CS_project_filename.c_str());
+   }
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::edit_combsim_prefixChange(TObject *Sender)
+{  CORN::OS::Directory_name_concrete CS_project_filename(explorer_engine->get_directory_name_qualified(),".CS_project");
+   #ifdef _UNICODE
+   std::wstring prefix_wstr(edit_combsim_prefix->Text.c_str());
+   std::string prefix_str;CORN::wstring_to_string(prefix_wstr,prefix_str);
+   #else
+   std::string prefix_str(edit_combsim_prefix->Text.c_str());
+   #endif
+   WritePrivateProfileString("combinatorial_scenario_generation","prefix",prefix_str.c_str(),CS_project_filename.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::tabsheet_generated_scenarios_runShow(TObject *Sender)
+{  panel_scenarios_run_options->Parent = tabsheet_generated_scenarios_run;
+   panel_scenarios_report_format->Parent = tabsheet_generated_scenarios_run;
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::tabsheet_scenarios_runShow(TObject *Sender)
+{  panel_scenarios_run_options->Parent = tabsheet_scenarios_run;
+   panel_scenarios_report_format->Parent = tabsheet_scenarios_run;
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::tabsheet_generated_scenarios_analysisShow(TObject *Sender)
+{  panel_analysis_function->Parent = tabsheet_generated_scenarios_analysis;
+   groupbox_instructions->Parent = tabsheet_generated_scenarios_analysis;
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::tabsheet_scenarios_analysisShow(TObject *Sender)
+{  panel_analysis_function->Parent = tabsheet_scenarios_analysis;
+   groupbox_instructions->Parent = tabsheet_scenarios_analysis;
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_generate_annual_reportClick(TObject *Sender)
+{  std::string gen_command("\"");
+   gen_command.append
+      (CS::Suite_directory->UED().convert_text_dBase_Excel_with_TDF_executable().c_str()); //131106
+      //130610 (text_dbase_excel_with_TDF_convertor);
+   gen_command.append("\" \"command=export\" \"format_filename=");
+   gen_command.append("C:\\Simulation\\Database\\Format\\all\\annual.tdf");
+   // Eventually search for the .TDF file
+   gen_command.append("\" \"UED_filename=");
+   CORN::OS::File_name_concrete annual_ued(explorer_engine->get_directory_name_qualified(),"annual.ued");
+   gen_command.append(annual_ued.c_str());
+   gen_command.append("\" \"target_filename=");
+   CORN::OS::File_name_concrete annual_xls(explorer_engine->get_directory_name_qualified(),"annual.xls");
+   gen_command.append(annual_xls.c_str());
+   gen_command.append("\"");
+   explorer_engine->command_history.add_string(gen_command);                     //140519
+   WinExec(gen_command.c_str(),SW_NORMAL);
+
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_generate_season_reportClick(TObject *Sender)
+{  std::string gen_command("\"");
+   gen_command.append
+      (CS::Suite_directory->UED().convert_text_dBase_Excel_with_TDF_executable().c_str()); //131106
+   gen_command.append("\" \"command=export\" \"format_filename=");
+   gen_command.append("C:\\Simulation\\Database\\Format\\all\\season.tdf");
+   // Eventually search for the .TDF file
+   gen_command.append("\" \"UED_filename=");
+   CORN::OS::File_name_concrete season_ued(explorer_engine->get_directory_name_qualified(),"season.ued");
+   CORN::OS::File_name_concrete season_xls(explorer_engine->get_directory_name_qualified(),"season.xls");
+   gen_command.append(season_ued.c_str());
+   gen_command.append("\" \"target_filename=");
+   gen_command.append(season_xls.c_str());
+   gen_command.append("\"");
+   explorer_engine->command_history.add_string(gen_command);                     //140519
+   WinExec(gen_command.c_str(),SW_NORMAL);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_generate_daily_reportClick(TObject *Sender)
+{  std::string gen_command("\"");
+   gen_command.append
+      (CS::Suite_directory->UED().convert_text_dBase_Excel_with_TDF_executable().c_str()); //131006
+   gen_command.append("\" \"command=export\" \"format_filename=");
+   gen_command.append("C:\\Simulation\\Database\\Format\\all\\daily.tdf");
+   // Eventually search for the .TDF file
+   gen_command.append("\" \"UED_filename=");
+   CORN::OS::File_name_concrete daily_ued(explorer_engine->get_directory_name_qualified(),"daily.ued");
+   CORN::OS::File_name_concrete daily_xls(explorer_engine->get_directory_name_qualified(),"daily.xls");
+   gen_command.append(daily_ued.c_str());
+   gen_command.append("\" \"target_filename=");
+   gen_command.append(daily_xls.c_str());
+   gen_command.append("\"");
+   explorer_engine->command_history.add_string(gen_command);                     //140519
+   WinExec(gen_command.c_str(),SW_NORMAL);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_AgMIP_import_ACEClick(TObject *Sender)
+{  if (!explorer_engine) return;
+   CORN::Text_list selected_JSON_filenames_presumed;
+   //Currently get_list_of_selected_files returns fully qualified filename
+   if (  navigation_frame->get_list_of_selected_items_unqual(selected_JSON_filenames_presumed))
+      explorer_engine->translate_AgMIP_ACE_JSON_files(selected_JSON_filenames_presumed);
+}
+//_2013-04-18___________________________________________________________________
+void __fastcall Tframe_CS_context::button_scenarios_exportClick(TObject *Sender)
+{
+   const wchar_t *target_extension
+      = radiogroup_scenarios_export_formats->ItemIndex
+        ? L"csv"
+        : L"json";
+   CropSyst::Scenario_export_engine::Arguments export_args
+      (explorer_engine->get_directory_name_qualified()
+      ,CORN::OS::File_name_concrete// target_filename
+         (explorer_engine->get_directory_name_qualified()
+         ,edit_scenarios_export_target_filename->Text.c_str())
+      ,target_extension);
+   // May be empty
+
+   CORN::Text_list selected_items_unqual;                                        //150503
+   navigation_frame->get_list_of_selected_items_unqual(selected_items_unqual);   //150503
+   export_args.know_selected_scenarios_unqual(selected_items_unqual);            //150503
+
+   // Note that the selection list may include Non-scenario directories
+   // or filenames. These will be ignored.
+   edit_scenarios_export_target_filename->Color =
+      explorer_engine->export_scenarios
+         (export_args,radiogroup_scenarios_export_formats->ItemIndex)
+      ?clLime
+      :clRed;
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::radiogroup_scenarios_export_formatsClick(TObject *Sender)
+{  CORN::Date_time_64 now;
+   std::string datestr; //140629   char datestr[20];
+   now.date_format.set_ordering_styles_separator/*150310 set_format*/(D_YMD,D_YYYY|D_M|D_lead_zero,'-');                 //150310
+   now.append_to_string(datestr);                                                //140629
+   //140629   strcpy(datestr,now.c_str());
+   now.time_format.set_cstr(TF_HHMM);                                            //150310
+   std::string now_suffix(datestr);
+   CORN::replace_character(now_suffix,':','-');
+   CORN::replace_character(now_suffix,' ','T');
+   std::string target_filename;
+   switch (radiogroup_scenarios_export_formats->ItemIndex)
+   {  case 0 : target_filename = "ACE_input_" + now_suffix +".json";    break;
+      case 1 : target_filename = "ACMO_output_" + now_suffix +".csv";   break;
+   }
+   edit_scenarios_export_target_filename->Text = target_filename.c_str();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenarios_format_clear_Click(TObject *Sender)
+{  edit_scenarios_report_filename->Text = L"";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_scenario_format_clear_click(TObject *Sender)
+{  edit_scenario_report_filename->Text = L"";
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_UED_export_qualityClick(TObject *Sender)
+{  CORN::Text_list selected_UED_filenames;
+   //Currently get_list_of_selected_files returns fully qualified filename
+   if (navigation_frame->get_list_of_selected_items_unqual(selected_UED_filenames))
+      explorer_engine->UED_file_quality_import_or_export
+         ("export"
+         ,selected_UED_filenames);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_UED_import_qualityClick(TObject *Sender)
+{  CORN::Text_list selected_UED_filenames;
+   //Currently get_list_of_selected_files returns fully qualified filename
+   if (navigation_frame->get_list_of_selected_items_unqual(selected_UED_filenames))
+      explorer_engine->UED_file_quality_import_or_export
+         ("import"
+         ,selected_UED_filenames);
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_REACCH_importClick(TObject *Sender)
+{
+   bool from_local_server = radiogroup_from->ItemIndex == 1;                     //140804
+   std::string climate_scenario;
+   CORN::wstring_to_string(radiogroup_REACCH_weather_scenario->Items->Strings[radiogroup_REACCH_weather_scenario->ItemIndex].c_str(),climate_scenario);
+   std::string RCP_scenario;
+   CORN::wstring_to_string(radiogroup_REACCH_weather_RCP->Items->Strings[radiogroup_REACCH_weather_RCP->ItemIndex].c_str(),RCP_scenario);
+   std::string master_scenario_directory;
+   CORN::wstring_to_string(directoryedit_master_simulation_database->Text.c_str(),master_scenario_directory);
+   if (from_local_server)                                                        //140804
+   {  groupbox_database_REACCH_ready->Visible = true;
+/*
+continue here
+
+      display next download time
+      start timer
+*/
+   }
+   explorer_engine->database_REACCH_import
+      (import_latitude,import_longitude
+      ,climate_scenario
+      ,RCP_scenario
+      ,from_local_server                                                         //140804
+      ,master_scenario_directory);
+}
+//_2014-06-30___________________________________________________________________
+void __fastcall Tframe_CS_context::timer_database_REACCH_availableTimer(TObject *Sender)
+{  if (!explorer_engine->download_pending_URLs())
+   {
+/* NYI
+      reset timer for 10 more minutes
+*/
+   } else groupbox_database_REACCH_ready->Visible = false;
+}
+//_2014-08-04___________________________________________________________________
+void __fastcall Tframe_CS_context::start_CropSyst_wizardClick(TObject *Sender)
+{  explorer_engine->launch_CropSyst_wizard();
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::checkbox_project_copy_templateClick(TObject *Sender)
+{  panel_template_project->Visible = checkbox_project_copy_template->Checked;
+}
+//---------------------------------------------------------------------------
+void __fastcall Tframe_CS_context::button_abort_runClick(TObject *Sender)
+{  abort_run = true;
+}
+//_2015-04-19___________________________________________________________________
+

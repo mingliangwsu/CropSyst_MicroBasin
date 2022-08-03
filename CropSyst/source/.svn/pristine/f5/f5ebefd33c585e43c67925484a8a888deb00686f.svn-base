@@ -1,0 +1,269 @@
+#define VERBOSE
+#include "arguments_CropSyst.h"
+#include "CropSyst/source/CropSyst_engine_V5.h"
+//______________________________________________________________________________
+bool quick_and_dirty_disable_chem_balance_when_watertable = false;               //150424
+namespace CORN { namespace OS {
+File_system &file_system() { return CORN::OS::file_system_logical; }
+}}
+//______________________________________________________________________________
+int main(int argc, const char *argv[])
+{
+   CORN::Command_options_data_source command_line_options(argc,argv);            //160908
+   CS::Simulation_run_result run_result = RUN_SUCCESS;
+
+/* need to reimplement as needed
+#ifdef _Windows
+   set_terminate(pause_for_error);
+#endif
+
+   date_setup_phrases();                                                         //000807
+   // User can override simulation and/or report format
+   // from the ini file by specifying them on the command line
+//             Command line parameters
+//             filename.SIM   may occur in any position in the command line but is usually first
+//             filename.FMT   may occur in any position in the command line but usually follows filename.sim
+//                            it is optional
+//             TABLE tablename  This is used in GIS modes tablename may be the name of the table
+//                               (For LADSS there is no extension for ARCCS this will be a .DBF file
+//             LBF   number     This is the land block fragment (polygon ID number).
+
+   CropSyst_project *project = 0;                                                //050325
+   #ifdef LADSS_MODE
+   bool LADSS_database_daily_output = false;                                     //030415
+   if (LADSS_mode)                                                               //021206
+   {                                                                             //021206
+      LADSS_database = new LADSS_database_parameters;                            //030110
+      {  // Load LADSS response parameters. We need to have the  parameters for
+         // opening the Oracle database. These are stored in a response file
+         // specified as the first command line argument.
+         VV_File LADSS_file(argv[1]);                                            //020611
+         LADSS_file.get(*LADSS_database);                                        //020611
+      }
+      LADSS_database->scenarios_dir.create();                                    //021214
+      LADSS_database->scenarios_dir.set_as_current_working_directory();          //040617
+      LADSS_database_daily_output = LADSS_database->daily_output;                //040617
+      #  ifdef LADSS_ORACLE
+      // In LADSS, parameters are stored in a fixed Oracle database structure.
+      // To use Oracle we first need to open a server session.
+      oracle_session = new Oracle_server_session(LADSS_database->user_ID.c_str(),LADSS_database->password.c_str()); //020611
+      #  endif
+      {     // Load Project options
+         // We can now load the project options from the project table           //020611
+         #  ifdef Database_data_source
+         Database_data_source project_datasrc(LADSS_database_schema table("PROJECT"),"PROJ_ID",std::ios_base::in database_session);  //020611
+         // Goto the project record specified in the response file and load the project parameters.               //020611
+         project_datasrc.where_long("PROJ_ID",LADSS_database->proj_ID);                                           //020611
+         project = new CropSyst_project();                                                                        //050325
+         project_datasrc.get(*project);                                                                           //020611
+         #  endif
+      }
+      arguments.GIS_override_table.assign("ALLOCATION");                         //150416_020613
+      scenario_ID = LADSS_database->alloc_ID;                                    //020611
+   } else // not LADSS mode.                                                     //050325
+   #endif
+   {
+      #if (CS_VERSION==4)
+      project = new CropSyst_project();                                          //050325
+           // Initially this will simply be the default settings.
+      #endif
+      arguments.provide_scenario_directory().purge_output();                     //150415 050326
+   }
+   #if (CROPSYST_VERSION >4)
+   if (!arguments.is_scenario_file_named_or_found()                              //1450415
+       //150907 appears to be obsolete && !scenario_ID
+       )  //130807_021214
+   {
+      std::cerr << TL_Unable_to_open_file << ':' << TL_Simulation << " (" <<
+        scenario_filename                                                       //020504
+          << ')' << std::endl;
+         #ifdef _Windows
+            click_close_message(true);
+         #endif
+   }
+   #endif
+   CropSyst::Desired_variables desired_variables;                                //041030
+   #if (defined(XLS_OUTPUT) || defined(UED_OUTPUT))
+   if (
+       arguments.provide_scenario_file_name()
+       .has_in_path_cstr("AgMIP"))                                               //110916
+   {  // This is special for AgMIP
+      // seasonal
+
+      desired_variables.append(CSVC_crop_biomass_yield_period_sum);
+      desired_variables.append(CSVC_crop_biomass_produced_above_ground_period_sum);
+      desired_variables.append(CSVC_crop_base_peak_LAI_time_step_max);
+      desired_variables.append(CSVC_crop_base_flowering_date_YD);
+      desired_variables.append(CSVC_crop_base_maturity_date_YD);
+      desired_variables.append(CSVC_soil_N_leached_period_sum);
+      desired_variables.append(CSVC_soil_base_water_drainage_period_sum);
+      desired_variables.append(CSVC_crop_N_mass_yield_period_sum);               //120117
+      desired_variables.append(CSVC_weather_ET_act_period_sum);
+      desired_variables.append(CSVC_weather_ET_ref_period_sum);                  //130724
+      desired_variables.append(CSVC_soil_N_mineralization_period_sum);
+      //desired_variables.append(CSVC_mgmt_N_organic_gaseous_loss_period_sum);
+      desired_variables.append(CSVC_mgmt_N_inorganic_gaseous_loss_period_sum);
+      desired_variables.append(CSVC_soil_N_immobilization_period_sum);
+      desired_variables.append(CSVC_organic_matter_mineralized_period_sum);
+      desired_variables.append(CSVC_soil_N_denitrification_period_sum);
+
+      // daily
+      desired_variables.append(CSVC_crop_biomass_yield);
+      desired_variables.append(CSVC_crop_biomass_canopy);
+      desired_variables.append(CSVC_crop_base_leaf_area_index);
+      desired_variables.append(CSVC_soil_N_leached_accum_to_date_time);
+      desired_variables.append(CSVC_crop_N_mass_canopy_production_accum_to_date_time);      //131007
+      desired_variables.append(CSVC_crop_N_mass_canopy_current);                 //131007
+      desired_variables.append(CSVC_soil_base_water_drainage_accum_to_date_time);
+      desired_variables.append(CSVC_weather_ET_act_accum_to_date_time);
+      desired_variables.append(CSVC_weather_ET_ref_accum_to_date_time);          //130724
+
+      desired_variables.append(CSVC_organic_matter_mineralized_accum_to_date_time);
+      desired_variables.append(CSVC_mgmt_N_inorganic_gaseous_loss_accum_to_date_time);
+      desired_variables.append(CSVC_soil_N_immobilization_accum_to_date_time);
+      desired_variables.append(CSVC_soil_N_denitrification_time_step_sum);
+      desired_variables.append(CSVC_soil_base_plant_avail_water);
+      desired_variables.append(CSVC_organic_matter_N_mineralization_profile_time_step_sum);
+      desired_variables.append(CSVC_organic_matter_mineralized_time_step_sum);
+   }
+   project->list_required_variables(desired_variables); // These are variables used for GIS or other statistical analysis. //091007
+   #endif
+   #ifdef STATSGO_DATABASE
+   #ifndef linux
+      STATSGO::Database  *STATSGO_database = 0; // Optional                         //060213
+      #ifndef LADSS_UNIX
+      if (project->STATSGO_path.exists())                                           //060213
+      {   STATSGO_database = new STATSGO::Database(project->STATSGO_path.c_str());  //060213
+         if (!STATSGO_database->good()) { delete STATSGO_database; STATSGO_database = 0; }  //060213
+      }                                                                            //060213
+      #endif
+   #endif
+   #endif
+   #ifdef LADSS_MODE
+   char scenario_ID_cstr[10]; CORN_uint32_to_str(scenario_ID,scenario_ID_cstr,10);//030215
+   #endif
+   CropSyst::Scenario scenario_control_and_model_ops(&arguments.provide_scenario_directory());        //150315_130827
+   arguments.override_parameters(scenario_control_and_model_ops);          //150415
+   CORN::Date today;                                                             //131004
+      // Currently this today IS the today of the loop.                          //140724
+      // This is because the land unit is instanciated
+      // before CS_mod then given to CS mod
+      // Eventually land_unit_sim will be instanciated by CS_mod
+      // which will provide the simulation today.
+   #ifdef LADSS_MODE
+   CropSyst_Model_options LADSS_model_options;                                   //051231
+   if (!LADSS_mode)                                                              //060908
+   #endif
+   {
+      scenario_control_and_model_ops.qualify_parameter_filenames
+         (arguments.provide_scenario_directory().Scenarios());
+      // needs to be the current working directory (the directory the scenario file is in, not the scenario's folder
+   }
+   CropSyst::Land_unit_with_output_V4                                            //141206
+      *                                                                          //140421
+      land_unit_with_output                                                      //040921
+      = new CropSyst::Land_unit_with_output_V4                                   //141206_140421
+      (arguments.scenario_ID                                                     //150416
+      ,scenario_control_and_model_ops                                            //130827
+      ,today                                                                     //131004
+      ,desired_variables,CS_event_log
+      ,&(arguments.provide_scenario_directory())                                 //150415
+      ,arguments.get_override_format_file_name()                                 //120505
+      ,CropSyst::batch_mode,true);
+
+   CropSyst_Model *simulation =                                                  //020504
+#ifdef LADSS_UNIX
+   LADSS_mode
+      ? new LADSS_Cropsyst_model(LADSS_database->weather_dir
+         ,*land_unit_with_output                                                 //140421
+         ,&LADSS_model_options,desired_variables,reports,batch_mode)
+      :
+#endif
+      new CropSyst_Model
+      (*land_unit_with_output                                                    //140421
+      ,scenario_control_and_model_ops                                            //130827
+      ,desired_variables                                                         //041030
+      ,land_unit_with_output->reports
+      ,CropSyst::batch_mode);
+
+   land_unit_with_output->know_simulation(simulation);                           //141220
+   today = scenario_control_and_model_ops.start_date;                            //140724
+      // This is just a temporary hack until I move land_unit
+      // instanciation inside CS_mod
+
+//#define TEST_MANY_LBFS
+#ifdef TEST_MANY_LBFS
+   for (int32 i = 0; i < 10 ; i++)
+   {
+      Land_unit_simulation *LBF = new Land_unit_simulation
+         (i,CS_event_log, 0);  //050619 //
+      VV_File scenario_file(scenario_filename.c_str());
+      scenario_file.get(*LBF);
+      simulation->add_land_block_fragment(LBF);
+   }
+#endif
+
+#ifdef LADSS_MODE
+   // We must set LADSS_CropSyst_Model for LADSS mode so, operations can be loaded from data sources
+   if (LADSS_mode) LADSS_CropSyst_model = (LADSS_CropSyst_Model *)simulation;    //031123
+#endif
+
+    cout << arguments.provide_scenario_file_name().c_str() << endl;              //150415010110
+
+   // Open the detail.txt file which can be used to output temporary information.//040607
+   #ifdef _Windows
+      detail_txt_file.open(land_unit_with_output->scenario_directory->Output().detail_txt().c_str());
+      #ifdef DEBUG_CROP_N_FATE
+         crop_N_fate_txt_file.open(land_unit_with_output->scenario_directory->crop_N_fate_txt.c_str());
+      #endif
+
+      CORN::OS::File_name_concrete daily_grazing_txt_filename(land_unit_with_output->scenario_directory,"daily_grazing","dat");
+      daily_grazing_txt_file.open( daily_grazing_txt_filename.c_str());
+      // output header line
+      daily_grazing_txt_file << "date\tcrop_biomass(kg/m2)\tgrazing_BM_demand(kg/m2)\tgrazing_BM_actual(kg/m2)\ttotal_BM_production_todate(kg/ha)" << endl;
+   #endif
+
+   CORN::OS::file_system_engine.set_current_working_directory
+      (arguments.provide_scenario_directory_name());                             //150415
+      // Not sure why I had previously set CWD to Scenarios.
+      // I shouldn't need to do that because the parent directory might
+      // not necessarily be "Scenarios".
+      // Previous versions using .CSN file, the .CSN files were
+      // expected to be in Scenarios, this is nolonger the case.
+      // Also the newer models such as REACCH and OFoot versions,
+      // the scenario directory now the CWD.
+*/
+
+   CropSyst::version5::Simulation_engine simulation(command_line_options);       //160513
+   run_result =  simulation.run();
+
+/* Need to reimplement as necessary
+
+   #ifdef _Windows
+      detail_txt_file.close();                                                   //040604
+      #ifdef DEBUG_CROP_N_FATE
+         crop_N_fate_txt_file.close();                                           //070131
+      #endif
+      daily_grazing_txt_file.close();
+   #endif
+   #  ifdef LADSS_ORACLE
+   // In LADSS, parameters are stored in a fixed Oracle database structure.
+   // To use Oracle we first need to open a server session.
+      if (oracle_session) delete oracle_session;                                 //020611
+   #  endif
+   #ifdef unix
+   // Under UNIX version something is not deleting correctly
+   // when simulation is deleted, so we simply abort the program
+   exit(run_result);                                                             //030415
+   #endif
+   #ifdef _Windows
+           if ((run_result != RUN_SUCCESS) && !CropSyst::batch_mode)
+                 click_close_message(false);
+   #endif
+   delete simulation;       // also deletes LADSS_CropSyst_Model                 //021214
+   delete land_unit_with_output;                                                 //140421
+*/
+   return run_result;                                                            //040806
+}
+//______________________________________________________________________________
+

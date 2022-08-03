@@ -1,0 +1,71 @@
+Management: #1
+Specific applications and irrigation modes may be used together.  Specific events will always be applied, irrespective of moisture conditions #3
+Specified dates #4
+Irrigation applications apply a specified amount of water on the specified date. The irrigation application may be repeated periodically. #5
+Add an irrigation application #6
+Automatic #8
+Irrigation mode applies water according to specified conditions.  Applications may occur througout the specified period. Now in version 4, multiple periods with different conditions may be added to the management schedule. #9
+Add an automatic irrigation period #10
+Specific applications and automatic N application modes may be used together.  Specific events will always be applied, irrespective of soil profile nitrogen. #13
+Specific dates #14
+
+Any number of inorganic application events may be specified. #16
+Inorganic nitrogen application #17
+
+Any number of organic application events may be specified. #20
+Organic nitrogen event #21
+Any number of organic application events may be specified. #24
+Manure application event #25
+Seasonal N application contingent on soil observation #27
+Soil sampling date #28
+Soil sampling and nitrogen use parameters #29
+This is slightly different from version 3 where a single sampling date was specified for the entire growing season. #30
+Note that the soil sampling date is taken as the scheduled starting date of this auto N application mode. #31
+The soil sampling date must be prior to sowing if no application date is added. #32
+The soil sampling date must be prior to any application dates. #33
+If no application dates are specified, all nitrate will be applied at the time of sowing. Or on the sampling date if this event is already in the growing season. #34
+To stop automatic N application at some point during the growing season, add an event with "None" selected. #35
+Crop N uptake for target yield #36
+Critical soil NO3 - N a planting for no response #38
+Soil sampling depth #40
+Fertilizer use efficiency #42
+Application events (optional) #44
+<- These applications should sum to 100% #45
+You may distribute the application events throughout the season.  If you don''t split the application all auto N application will be made on the sampling date. #46
+Add a N application event #47
+Nitrogen application mode #50
+Based on nitrogen balance #52
+Based on local calibration #53
+Automatic nitrogen applied directly to plant tissues #55
+Harvest/Clipping #56
+Note that prior to version 4 there was an automatic  periodic clipping mode.  In version 4 you can now repeat specific events so automatic periodic clipping was rendered obsolete. #57
+Specified dates #58
+Harvest/Clipping events remove the specified amount of biomass from the crop.  Harvest/Clipping may be forced to occur at the specified date or may be delayed until LAI reaches a prescribe level.  Clippings may be repeated periodically. #59
+Add a harvest or clipping event #60
+The automatic clipping mode will perform clippings when plant biomass reaches prescribed levels. #63
+Add an automatic clipping mode #64
+Tillage operations disturb the soil and redistribute residues.  Surface water storage it also created. #67
+Add a tillage operation #68
+Residue operations can either remove surface residue or lay down standing stubble as surface residue. #71
+Add a residue operation #72
+Parameters for runoff (curve number approach): #75
+Note that all conservation parameters remain in effect from the sowing date of the current crop until the sowing date of any following crop. #76
+The following selections calculate the soil conservation practice factor above. #77
+RUSLE soil conservation practice factor. #78
+Land treatment #80
+Straight row #82
+Contoured #83
+Terraced #84
+Contouring factor based on land slope #85
+Strip cropping factor for crop widths #93
+1.00 <- For contouring only or for alternating strips #94
+0.75 <- For 4-yer rotation with 2 years of row crop #95
+0.50 <- For 1 year of row crop #96
+Terrace sedimentation factor #97
+1.0 <- For no terraces #98
+0.2 <- For terraces with graded channel sod outlets #99
+0.1 <- For terraces with underground outlets #100
+This option is usually selected indicating the management is intended to be associated with a crop in a rotation. #101
+This management schedule is intended for use with crop rotations (avoid using actual specific fixed dates) #102
+This option enables additional operation and scheduling options for use with the CANMS model. #103
+CANMS (Comprehensive Animal Nutrient Modeling System) compatibility options (not needed for CropSyst). #104

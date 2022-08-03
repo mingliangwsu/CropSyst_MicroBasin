@@ -1,0 +1,200 @@
+[crop]
+details_URL=
+description=-
+feed_name_immature=
+feed_name_midmature=
+feed_name_mature=
+model=crop
+harvested_part=unknown
+RUSLE2_name=
+RUSLE2_description=
+abscission=none
+C_species=C3
+photosynthetic_pathway=C3
+life_cycle=annual
+stem_type=herbaceous
+land_use=ROW_CROPS
+season_dormancy_mode=single
+canopy_growth=leaf_area_index_V5
+linger=90 Time that senesced leaves linger with the plant
+adjustment:count=0
+grain_stress_period:count=0
+[version]
+major=4
+release=19
+minor=0
+[water_use_efficiency]
+season2_adj=1.00000000
+season3_adj=1.00000000
+season4_adj=1.00000000
+season5_adj=1.00000000
+[leaf]
+senesces=true
+clip_newest=true
+max_LAI=5.00000000 Maximum expected leaf area index (required for fruit trees)
+fract_LAI_mature=0.80000001 Fraction of max. LAI at physiological maturity (green and senesced)
+initial_GAI=0.01100000 Initial Initial green leaf area index
+regrowth_GAI=0.01100000 Min. green leaf area index for regrowth (perennial and/or clipped annuals) When there are clipping events or the crop comes out stress or dormancy conditions.this is the minimal green leaf area index available to restart growth. Applies to perennial and/or clipped annuals
+specific_leaf_area=22.00000000 Specific leaf area at optimum temperature
+stem_leaf_partition=3.00000000 Stem/leaf partition coefficient
+duration=800.00000000 Leaf area duration
+duration_stress_sensitivity=1.00000000 Leaf area duration sensitivity to water stress
+[Jordi]
+a1=0.00000000
+a2=0.00000000
+[transpiration]
+ET_crop_coef=1.00000000 Evapotranspiration crop coefficient at full canopy
+max_water_uptake=10.00000000 Maximum water uptake
+stomatal_closure_leaf_water_pot=-700.00000000 Leaf water potential at the onset of stomatal closure
+wilt_leaf_water_pot=-1600.00000000 Wilting leaf water potential
+kc=0.50000000 Canopy extinction coefficient for total (global) solar radiation
+[growth]
+WUE_changes=false
+TUE_equation=Tanner_Sinclair
+RUE_basis=photosynthetically_active_radiation
+TUE_scaling_coef=0.44999999 Scaling coefficient of TUE regression (power function)
+TUE_scaling_coef_veg=0.44999999 Scaling coefficient of TUE regression (power function)
+TUE_at_1pKa_VPD=5.00000000 Transpiration Use Efficiency when VPD is at 1kPa when VPD is at 1kPa
+TUE_at_1pKa_VPD_veg=5.00000000 Transpiration Use Efficiency when VPD is at 1kPa when VPD is at 1kPa
+water_productivity=20.00000000 Water productivity FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode)
+water_productivity_veg=20.00000000 Water productivity as in AquaCrop
+RUE_global=4.00000000 Total radiation basis RUE
+RUE_PAR=3.00000000 Photosynthetically Active Radiation (PAR) basis
+biomass_transpiration_coef=5.00000000 Above ground biomass transpiration coefficient (K) for annuals annual
+biomass_transpiration_coef_veg=5.00000000 Above ground biomass transpiration coefficient (K) for annuals annual
+early_growth_limit_temp=0.00000000 Mean daily temperature that limits early growth
+min_tolerable_temp=0.00000000 Minimum tolerable temperature
+max_tolerable_temp=45.00000000 Maximum tolerable temperature
+low_threshold_limit_temp=10.00000000 Low threshold limitation temperature
+high_threshold_limit_temp=25.00000000 High threshold limitation temperature
+LWP_reduces_canopy_expansion=-800.00000000 Leaf water potential that begins reduction of canopy expansion
+LWP_stops_canopy_expansion=-1200.00000000 Leaf water potential that stops canopy expansion
+[morphology]
+max_canopy_height=1.50000000 Maximum plant height
+[harvest_index]
+unstressed=0.50000000 Unstressed harvest index
+temperature_stress_sensitivity=0.00000000 Sensitivity to temperature stress during flowering
+adjust_HI=true
+[emergence]
+model=thermal_time
+a=22.35000038 a slope? for hydrothermal time constant curve Emperical constant
+b=129.66000366 b intercept? for hydrothermal time constant curve Emperical constant
+seedling_leaf_area=2.00000000 Leaf area of seedling on first day of emergence
+mean_base_soil_water_pot=-1000.00000000 Mean base soil water potential for 50% emergence
+stdev_base_soil_water_pot=100.00000000 Std deviation base soil water potential ?for 50% emergence?
+[hardiness]
+enabled=false
+damage_cold_temp=-5.00000000 Cold temperature which begins to damage the plant (leaves)
+lethal_cold_temp=-10.00000000 Cold temperature which is lethal to the plant (leaves)
+salvageable_deg_day=1200 Thermal time at which grain filling may continue after lethal frost
+[nitrogen]
+fixation=false
+legume_fraction=1.00000000
+nitrogen_leaf_stress_mode=none
+max_uptake_daily_rate=5.00000000 Maximum uptake during rapid linear growth
+stubble_max_conc=0.00700000 Maximum N concentration of chaff and stubble
+root_conc=0.00700000 Standard root N concentration
+demand_adjust=0.00000000 Nitrogen demand adjustment
+biomass_to_start_dilution_max_N_conc=0.00000000 Biomass to start dilution of maximum N concentration
+emergence_max_conc=0.00700000 Maximum N concentration of canopy at emergence
+emergence_crit_conc=0.00700000 Critical N concentration of canopy at emergence
+biomass_to_start_dilution_crit_N_conc=1.50000000 Biomass to start dilution of critical N concentration
+PAW_where_N_uptake_rate_decreases=0.50000000 Plant available water at which N uptake starts decreasing
+residual_N_not_available_for_uptake=1.00000000 Residual N not available for uptake
+soil_N_conc_where_N_uptake_decreases=5.00000000 Soil N concentration at which N uptake starts decreasing
+N_mature_max_conc=0.02350000 Maximum above ground concentration at maturity
+dilution_curve_slope=0.44999999 Concentration curve slope
+dilution_curve_based_on_max_conc=false
+end_dilution_curve=0 End dilution curve
+[fruit]
+fract_total_solids=0.34999999 Fraction of total solids
+max_fruit_load=20000.00000000 Max. fruit load (fresh mass)
+initial_growth_fraction_to_fruit=0.89999998 Fraction of above biomass apportioned to fruit after flowering
+rapid_growth_fraction_to_fruit=0.64999998 Fraction of above biomass apportioned to fruit during accelerated fruit growth
+harvest_temperature=15.00000000 Low temperature for harvest
+harvest_temperature_days=5 Consecutive days below the low temperature for to consider harvest
+earliest_harvest=258 Day to start looking for harvest conditions
+latest_harvest=275 Day to force harvest (or fixed date)
+max_water_uptake_before_fruiting=10.00000000 before fruiting
+max_water_uptake_during_initial_fruit=10.00000000 during intial fruit
+max_water_uptake_during_radid_fruit=10.00000000 during rapid fruit
+max_water_uptake_during_veraison=10.00000000 during veraison
+max_water_uptake_after_maturity=10.00000000 after maturity
+[CO2]
+TUE_reference_conc=350.00000000 transpiration use efficiency CO2 concentration when measured
+RUE_reference_conc=350.00000000 radiation use efficiency CO2 concentration when measured
+alpha=0.00500000 alpha Non-rectangular hyperbola solution for estimated relative growth
+theta=0.80000001 theta Non-rectangular hyperbola solution for estimated relative growth
+growth_ratio_asymptotic=1.70000005 asymptotic growth ratio
+[salinity]
+osmotic_pot_50=-0.00000010 Soil solution osmotic potential for 50% yield reduction
+tolerance_P=0.00000010 Salinity tolerance exponent (Van-Genuchten p) 
+[canopy_cover]
+CC_initial=0.01000000 Initial canopy cover
+CC_maximum=0.89999998 Maximum canopy cover
+CC_full_senescence_green=0.10000000 Green canopy cover at full senescence
+CC_mature_total=0.10000000 Total canopy cover at maturity (green and senesced)
+rel_TT_at_half_CC_max=0.50000000 Relative thermal time at half maximum canopy cover
+[phenology]
+maturity_significant=true
+clipping_resets=false
+emergence=100 Emergence
+flowering=1000 Begin flowering
+peak_LAI=1040 End canopy growth
+filling=1020 Begin filling (seed filling, or orchard fruit filling, or tuber bulking)
+maturity=1500.00000000 Physiological maturity
+water_stress_sensitivity=1.00000000 Adjustment factor for phenologic response to stress
+WUE_change=1000.00000000 Thermal time for change of water use efficiency
+senescence=1080.00000000 Begin senescence (thermal time)
+full_senescence=1501.00000000 Full senescence (thermal time)
+tuber_init=1000 Tuber initiation
+max_root_depth=1040 Maximum root depth
+rapid_fruit_growth=1300.00000000 Begin rapid fruit growth
+resolution=daily
+base_temp=3.00000000 Base temperature
+cutoff_temp=22.00000000 Cutoff temperature
+optimal_temp=22.00000000 Optimal temperature
+maximum_temp=35.00000000 Maximum temperature
+[root]
+initial_depth=0.20000000
+root_sensitivity_water_stress=0.00000000 Root sensitivity to water stress
+max_root_depth=1.50000000 Maximum root depth
+surface_root_density=3.00000000 Maximum surface root density at full rooting depth
+root_density_distribution_curvature=0.10000000 Curvature of root density distribution
+root_length_per_unit_mass=90.00000000 Root length per unit root mass
+root_length_at_emergence=2.00000000 Root length at emergence
+root_shoot_emergence_ratio=2.00000000 root/shoot (mass) ratio at emergence
+root_shoot_full_ratio=0.10000000 root/shoot (mass) ratio at full extent
+[inactive_period]
+consider_inactive_days=7 at end or restart of growth activity
+inducement_temperature=10.00000000 Average temperature over these consecutive days below which inactivity is induced
+start_valid_date=365 (12/30)
+end_valid_date=365 (12/30)
+[residue]
+RUSLE2_type=unknown
+decomposition_time=30 Time to reach 63% decomposition
+decomposition_time_50=40 Time to reach 50% decomposition
+fast_cycling_top_fraction=0.50000000 Fast cycling top fraction
+slow_cycling_top_fraction=0.40000001 Slow cycling top fraction
+lignified_top_fraction=0.10000000 Lignified top fraction
+fast_cycling_root_fraction=0.50000000 Fast cycling root_fraction
+slow_cycling_root_fraction=0.30000001 Slow cycling root_fraction
+lignified_root_fraction=0.20000000 Lignified root_fraction
+fast_cycling_decomposition_time_50=3.00000000 Fast cycling time to 50%
+slow_cycling_decomposition_time_50=6.00000000 Slow cycling time to 50%
+lignified_decomposition_time_50=30.00000000 Lignified biomass time to 50%
+detrition_time_50=720.00000000 Time to 50% detrition
+carbon_fraction=0.46000001 Top and root carbon fraction
+stubble_area_covered_to_mass_ratio=2.00000000 Stubble area covered to mass ratio
+area_covered_to_mass_ratio=4.00000000 Flattened surface residue area covered to mass ratio
+[vernalization]
+enabled=false
+low_temp=3.00000000 Low temperature for optimal vernalization
+high_temp=10.00000000 High temperature for optimal vernalization
+start=10.00000000 Day requirement to start
+end=50.00000000 Vernalization days required to complete vernalization
+min_factor=0.00000000 Minimum vernalization factor
+[photoperiod]
+consideration=none
+unconstrain=0.00000000 development is not constrained Day length (photo-period)
+stop=0.00000000 development is stopped Day length (photo-period)

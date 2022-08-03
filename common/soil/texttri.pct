@@ -1,0 +1,4 @@
+char *TL_Soil_texture_triangle =" translate(L_Soil_texture_triangle );
+char *TL_sand =" translate(L_sand );
+char *TL_clay =" translate(L_clay );
+char *TL_silt =" translate(L_silt );

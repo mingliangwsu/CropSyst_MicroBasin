@@ -1,0 +1,502 @@
+#include <fstream>
+#include "corn/math/compare.hpp"
+#include "common/residue/residue_decomposition_param.h"
+#include "common/residue/residues_interface.h"
+#include "crop/crop_N_interface.h"
+#include "crop/canopy_portion.h"
+#include "crop/crop_canopy_biomass_GAI.h"
+#include "crop/crop_biomass.h"
+#include "crop/crop_types.hpp"
+//___________________________________________________________________constructor
+Canopy_biomass_GAI::Canopy_biomass_GAI
+(
+ #if (CS_VERSION==4)
+ Senesced_biomass_fate              _senesced_biomass_fate_param
+ #else
+ Abscission                         _abscission                                  //110911
+ #endif
+,float64                             _regrowth_GAI                               //080222
+,Residue_decomposition_parameters   &_residue_decomposition_params
+,Residues_interface                 *_residues
+,Crop_nitrogen_interface            *_nitrogen
+,bool                                _is_continuous_grass)                       //080515
+#if (CS_VERSION==4)
+: canopy_vital                      (_senesced_biomass_fate_param,false)         //060911
+, canopy_effete                     (_senesced_biomass_fate_param,true)          //060911
+, senesced_biomass_fate_param       (_senesced_biomass_fate_param)               //060817
+#else
+: canopy_vital                      (_abscission,false)         //060911
+, canopy_effete                     (_abscission,true)          //060911
+, abscission                        (_abscission)                                //110911
+#endif
+, residue_decomposition_params      (_residue_decomposition_params)
+, residues                          (_residues)
+, nitrogen                          (_nitrogen)
+, untouchable_portion               (0)                                          //071126
+, regrowth_GAI                      (_regrowth_GAI)                              //080222
+, is_continuous_grass               (_is_continuous_grass)                       //080515
+, GAI_has_died_off (false) ,  resets(0)                                          //080415
+{};
+//___________________________________________________________________constructor
+Canopy_biomass_GAI::~Canopy_biomass_GAI()
+{  if (untouchable_portion) delete untouchable_portion; untouchable_portion = 0;
+};
+//___________________________________________________________________constructor
+bool Canopy_biomass_GAI::is_valid()                            const
+{  return(canopy_vital.accum_today!= 0)                                          //060911
+      && (canopy_effete.accum_today!= 0)                                         //080314
+      && (untouchable_portion != 0);                                             //071126
+};
+//___________________________________________________________________constructor
+/*_______*/ bool Canopy_biomass_GAI::take_portion                      modification_
+/*_______*/ (Canopy_portion  *todays_portion
+/*071126_*/ ,bool initial_restart_vital
+/*_______*/ ,bool protect_it)
+/*_______*/ {  bool portion_valid = todays_portion &&  todays_portion->is_valid();
+//081101_/*_______*/    if (!todays_portion) return;
+//081101_/*_______*/    if (todays_portion->is_valid())
+/*081101_*/    if (portion_valid)
+/*060317_*/    {
+/*071126_*/       if (initial_restart_vital)
+/*071126_*/             untouchable_portion = todays_portion;
+/*071126_*/       else
+/*060317_*/       {  if (protect_it)
+/*_______*/             canopy_vital.prepend(todays_portion);
+/*_______*/          else
+/*080222_*/          {  if (untouchable_portion)
+/*080222_*/             {  // skim off some GAI for regrowth
+/*080222_*/                float64 more_GAI_needed_for_regrowth = regrowth_GAI - untouchable_portion->get_GAI();
+/*080222_*/                float64 portion_GAI = todays_portion->get_GAI();
+/*080222_*/                if ((more_GAI_needed_for_regrowth > 0.0) && (portion_GAI < more_GAI_needed_for_regrowth))
+/*080222_*/                {  untouchable_portion->increment_by(*todays_portion);
+/*080222_*/                   delete todays_portion; todays_portion = 0;
+/*080222_*/                }
+/*080515_*/                else
+/*080515_*/                {  // if started to senesce any GAI (Any GAI has died off)
+/*080515_*/                   // This is for the case when we have continuous
+/*080515_*/                   // annual grasses (Mike Rivington),
+/*080515_*/                   // the GAI curve was dipping down after peak LAI
+/*080515_*/                   // but then recovering
+                  //080515 disabled
+                  //080515    if (GAI_has_died_off && is_continuous_grass)
+                  //080515    todays_portion->clear_GAI_related_biomass();
+/*080515_*/                };
+/*080222_*/             }
+/*080222_*/             if (todays_portion) // may be NULL if we added it to the untouchable portion
+/*_______*/                canopy_vital.append(todays_portion);
+/*080222_*/          }
+/*071126_*/       }
+/*_______*/    }
+/*_______*/    else  delete todays_portion;
+/*_______*/    invalidate();
+/*081030_*/    return portion_valid;
+/*_______*/ };
+//__________________________________________________________________take_portion
+void Canopy_biomass_GAI::respond_to_clipping()               modification_/*111011 mutation_*/
+{
+   GAI_has_died_off = false;
+   // This allow continued accumulation of GAI related biomass
+};
+//_2008-05-15______________________________________________respond_to_clipping_/
+void Canopy_biomass_GAI::restart()                           mutates_
+{
+   GAI_has_died_off = false;
+   // This allow continued accumulation of GAI related biomass
+};
+//_2008-05-15______________________________________________respond_to_clipping_/
+/*080222_*/ void Canopy_biomass_GAI::terminate()
+/*_______*/ {  // Makes the untouchable portion available for removal with biomass fate.
+/*_______*/    if (untouchable_portion)
+/*_______*/    {  canopy_vital.append(untouchable_portion);
+/*_______*/       untouchable_portion = 0;
+/*_______*/    };
+/*_______*/ };
+//__________________________________________________________________take_portion
+/*060911_*/ Canopy_biomass_GAI::Canopy::~Canopy()
+/*_______*/ {
+/*_______*/    if (accum_today) delete accum_today; accum_today= 0;
+/*_______*/ };
+//_______________________________________________________________________~Canopy
+/*060911_*/ void Canopy_biomass_GAI::Canopy::invalidate()                mutates_
+/*_______*/ {
+/*_______*/    if (accum_today)  delete accum_today;  accum_today= 0;
+/*_______*/ };
+//____________________________________________________________Canopy::invalidate
+/*_______*/ void Canopy_biomass_GAI::invalidate()                        mutates_
+/*_______*/ {
+/*060911_*/    canopy_vital.invalidate();
+/*060911_*/    canopy_effete.invalidate();
+/*_______*/ };
+//__________________________________________________________________ invalidate
+/*_______*/ void Canopy_biomass_GAI::age_by
+/*_______*/ (float64 daily_age_deg_day
+/*_______*/ ,float64 leaf_duration_deg_day_f32)                        modification_
+/*_______*/ {  FOR_EACH_IN(vital_portion,Canopy_portion,canopy_vital,each_vital_portion)
+/*_______*/    {  bool just_died = vital_portion->age_by(daily_age_deg_day,leaf_duration_deg_day_f32);
+/*080515_*/       if (just_died)
+/*080515_*/          GAI_has_died_off = true;
+/*_______*/    } FOR_EACH_END(each_vital_portion);
+/*_______*/    FOR_EACH_IN(effet_portion,Canopy_portion,canopy_effete,each_effete_portion)
+/*_______*/    {  bool just_died = effet_portion->age_by(daily_age_deg_day,leaf_duration_deg_day_f32);
+/*_______*/    } FOR_EACH_END(each_effete_portion);
+/*071126_*/    // Do not age untouchable portion.
+/*_______*/    invalidate();
+/*080515_*/    if ((GAI_has_died_off && resets == 0) && is_continuous_grass)
+/*080515_*/    {  //go through and clear the GAI_related canopy biomasses for all vital portions
+
+                  // This is intended quickly replaced short lived leaves.
+                  // May need a parameter to enable this mode (I.e. any short lived grass)
+
+
+                  // 081108 We need to revisit if this is still necessary,
+                  // may be able to simply set stem leaf partion to 0.0???
+
+/*080515_*/       FOR_EACH_IN(vital_portion,Canopy_portion,canopy_vital,each_vital_portion)
+/*080515_*/          {  vital_portion->clear_GAI_related_biomass();
+/*080515_*/       } FOR_EACH_END(each_vital_portion);
+/*080515_*/       resets ++;
+/*080515_*/       GAI_has_died_off = false;
+/*080515_*/    }
+/*_______*/ };
+//________________________________________________________________________age_by
+void Canopy_biomass_GAI::die_back(float64 fraction_to_die) modification_
+{  // This sets the specified fraction of live biomass to effete
+   // The biomass remains associated with the plant (it is not sent to residue)
+   float64 GAI_remaining_to_die = get_GAI(include_vital|include_effete) * fraction_to_die;
+   // Killing of effete first
+   FOR_EACH_IN(effete_portion,Canopy_portion,canopy_effete,each_effete_portion)
+   {  float64 GAI_this_portion = effete_portion->get_GAI();
+      if (GAI_remaining_to_die > 0.0)
+         effete_portion->die();
+       GAI_remaining_to_die -= GAI_this_portion;
+   } FOR_EACH_END(each_effete_portion);
+   FOR_EACH_IN(vital_portion,Canopy_portion,canopy_vital,each_vital_portion)
+   {  float64 GAI_this_portion = vital_portion->get_GAI();
+      if (GAI_remaining_to_die > 0.0)
+         vital_portion->die();
+       GAI_remaining_to_die -= GAI_this_portion;
+   } FOR_EACH_END(each_vital_portion);
+   // do not die back untouchable_portion 071126_
+   invalidate();
+};
+//____________________________________________________________________  die_back
+float64 Canopy_biomass_GAI::Canopy::update()                 mutates_
+{
+   float64 sloughed_biomass = 0;                                                 //060816
+   accum_today = new Canopy_portion;
+   FOR_EACH(portion,Canopy_portion,each_portion)
+   {
+      if (portion && portion->is_dead())                                         //060824
+      {  Days days_dead = portion->inc_days_dead();                              //060824
+         #if (CS_VERSION==4)
+         switch (senesced_biomass_fate_param)                                    //060824
+         {  case senesced_biomass_linger :                                       //060824
+         #else
+         switch (abscission)                                                     //110911
+         {  case semi_deciduous :                                                //110911
+         #endif
+            { if (days_dead > 90)                                                //060824
+              {    sloughed_biomass += portion->slough();                        //060824
+                  each_portion->detach_current();                                //070418
+                  delete portion; portion = 0;                                   //070328
+              };                                                                 //070328
+            } break;                                                             //060824
+            #if (CS_VERSION==4)
+            case senesced_biomass_shed :                                         //060825
+            #else
+            case deciduous :                                                     //110911
+            #endif
+            {  if (from_previous_season)                                         //060824
+               {  sloughed_biomass += portion->slough();                         //060824
+                  each_portion->detach_current();                                //070418
+                  delete portion; portion = 0;                                   //070328
+               };                                                                //070328
+            } break;                                                             //060824
+        }; // end switch                                                         //060824
+      }; // if is_dead                                                           //060824
+      if (portion) // may be deleted if depleted above                           //060824
+      {                                                                          //070328
+         accum_today->increment_by(*portion);
+      };                                                                         //070328
+   } FOR_EACH_END(each_portion);
+   return sloughed_biomass;
+};
+//________________________________________________________________Canopy::update
+bool Canopy_biomass_GAI::update()                            mutates_
+{
+   invalidate();
+   float64 vital_sloughed_biomass = canopy_vital.update();                       //060816
+   if (vital_sloughed_biomass > 0.0 && residues)                                 //060824
+      residues->add_surface_plant_pool                                           //060824
+      (
+       #if (CS_VERSION==4)
+       (senesced_biomass_fate_param == senesced_biomass_linger)                  //040517
+       #else
+       (abscission == semi_deciduous)
+       #endif
+         ?  OM_flat_surface_position : OM_stubble_surface_position
+      ,OM_ORIGINAL_CYCLING                                                       //060219
+      ,vital_sloughed_biomass                                                    //______
+NITRO ,nitrogen ? nitrogen->get_canopy_concentration(include_vital) : 0.0
+      ,residue_decomposition_params                                              //060219
+      ,0);                                                                       //060816
+   float64 sloughed_biomass_effete =  canopy_effete.update();                    //060816
+   if (sloughed_biomass_effete > 0.0 && residues)                                //060824
+      residues->add_surface_plant_pool                                           //060824
+      ((senesced_biomass_fate_param == senesced_biomass_linger)                  //040517
+         ?  OM_flat_surface_position : OM_stubble_surface_position
+      ,OM_ORIGINAL_CYCLING                                                       //060219
+      ,sloughed_biomass_effete                                                   //______
+NITRO ,nitrogen ? nitrogen->get_canopy_concentration(include_effete) : 0.0
+      ,residue_decomposition_params                                              //060219
+      ,0);                                                                       //060816
+   // Do nothing to untouchable portion                                          //071126
+   return true;                                                                  //080728
+};
+//________________________________________________________________________update
+/*040623_*/ float64 Canopy_biomass_GAI::Canopy::remove_biomass
+/*_______*/ (float64 GAI_remaining_available
+/*_______*/ ,float64 biomass_to_remove
+/*060323_*/ ,float64 retain_vital_GAI        // biomass won't be removed if it takes the GAI below this level
+/*_______*/ ,bool remove_newest_first
+/*_______*/ ,bool reserve_todays_history
+/*_______*/ ) modification_
+/*_______*/ {
+/*_______*/    if (CORN::is_approximately<float64>(biomass_to_remove,0.0,0.0000001)) return 0.0;
+/*_______*/    float64 more_biomass_to_remove = biomass_to_remove;
+/*_______*/    // Now loop through the GAI_ages from the tail and remove the newest leaves
+/*_______*/    float64 act_removed_biomass = 0.0;
+//070806 /*_______*/    CORN::Container::Iterator *history_iterator = iterator();
+/*_______*/    //We can now either remove the newest biomass first or the oldest biomass first
+/*070806_*/    Canopy_portion  *curr_daily = 0;
+/*_______*/    for (curr_daily = remove_newest_first ?(Canopy_portion *)pop_at_tail(): (Canopy_portion *)pop_at_head()
+/*_______*/       ;(curr_daily && (more_biomass_to_remove > 0.0))
+/*_______*/       ;curr_daily = remove_newest_first ?(Canopy_portion *)pop_at_tail(): (Canopy_portion *)pop_at_head())
+/*071126_*/    {
+/*060601_*/       float64 daily_canopy_biomass = curr_daily->get_biomass_current();
+/*060323_*/       float64 daily_GAI                     = curr_daily->get_GAI();
+/*060911_*/       bool need_to_retain_GAI = from_previous_season ? false :
+/*060911_*/            ((GAI_remaining_available - daily_GAI) < retain_vital_GAI);   // Don't allow the GAI to go below the limit
+/*060323_*/       if (!need_to_retain_GAI)
+/*060323_*/       {  if  (more_biomass_to_remove > daily_canopy_biomass)
+/*_______*/          { //  Remove the whole daily bit
+/*_______*/             more_biomass_to_remove -= daily_canopy_biomass;
+/*_______*/             act_removed_biomass += daily_canopy_biomass;
+/*070806_*/             delete curr_daily; curr_daily = 0;
+/*060323_*/             GAI_remaining_available -= daily_GAI;
+/*_______*/          } else // We just have a little bit left to remove, we just won't bother to do it
+/*060601_*/          {  float32 GAI_to_remove = curr_daily->get_GAI() * more_biomass_to_remove / curr_daily->get_biomass_current();
+/*050117_*/             curr_daily->dec_green_area_index(GAI_to_remove);
+/*060323_*/             GAI_remaining_available -= GAI_to_remove;
+/*060601_*/             curr_daily->dec_biomass_current(more_biomass_to_remove);
+/*040807_*/             act_removed_biomass += more_biomass_to_remove;
+/*_______*/             more_biomass_to_remove = 0.0;
+/*_______*/          };
+/*060323_*/       };
+/*_______*/    };
+/*070806_*/    if (curr_daily )
+/*070806_*/    {  // We had a tad left so we need to push it back onto the list
+/*070806_*/       if  (remove_newest_first)
+/*070806_*/             append(curr_daily);
+/*070806_*/       else  prepend(curr_daily);
+/*070806_*/    };
+/*_______*/    invalidate();
+/*050822_*/    // remove biomass N is now processed with biomatter fate
+/*_______*/  return act_removed_biomass;
+/*_______*/ };
+//________________________________________________________________remove_biomass
+/*040623_*/ float64 Canopy_biomass_GAI::remove_biomass
+/*_______*/ (float64 biomass_to_remove       // don't pass by reference even though it is decremented locally
+/*060323_*/ ,float64 retain_vital_GAI        // biomass won't be removed if it takes the GAI below this level
+/*_______*/ ,bool remove_newest_first
+/*_______*/ ,bool reserve_todays_history
+/*070412_*/ ,Crop_biomass &accumulated_removed_biomass // Return about of biomass removed
+/*_______*/ )   modification_
+/*_______*/ {
+/*060911_*/    float64 vital_GAI_remaining_available = get_GAI(include_vital);
+/*060911_*/    float64 effete_GAI_remaining_available = get_GAI(include_effete);
+/*060911_*/    float64 act_effete_removed_biomass = canopy_effete.remove_biomass(effete_GAI_remaining_available,biomass_to_remove,retain_vital_GAI,remove_newest_first,  reserve_todays_history);
+/*060911_*/    biomass_to_remove -= act_effete_removed_biomass;
+/*060911_*/    float64 act_vital_removed_biomass = canopy_vital.remove_biomass(vital_GAI_remaining_available,biomass_to_remove,retain_vital_GAI,remove_newest_first,  reserve_todays_history);
+/*060911_*/    biomass_to_remove -= act_vital_removed_biomass;
+/*_______*/    // At this point biomass_to_remove should be 0.0 if the specified biomass exists
+/*_______*/    // otherwise the requested amount was not available.
+/*_______*/    float64 act_removed_biomass = act_effete_removed_biomass + act_vital_removed_biomass;
+/*070414_*/       float64 act_removed_N_mass = 0;
+/*070412_*/    if (nitrogen)
+/*070412_*/    {
+/*070414_*/       float64 act_vital_removed_N_mass    = nitrogen->remove_canopy_nitrogen_for(act_vital_removed_biomass ,include_vital);
+/*070412_*/       float64 act_effete_removed_N_mass   = nitrogen->remove_canopy_nitrogen_for(act_effete_removed_biomass,include_effete);
+/*070414_*/       act_removed_N_mass = act_vital_removed_N_mass + act_effete_removed_N_mass;
+/*070412_*/    };
+/*070802_*/    Crop_biomass removed_now(act_removed_biomass,act_removed_N_mass);
+/*070802_*/    accumulated_removed_biomass.add_crop_biomass(removed_now);
+/*050822_*/    // remove biomass N is now processed with biomatter fate
+/*071126_*/    // The untouchable_portion is not removable
+/*_______*/  return act_removed_biomass;
+/*_______*/ };
+//________________________________________________________________remove_biomass
+/*070627_*/ float64 Canopy_biomass_GAI::remove_all_biomass
+/*070627_*/ (Crop_biomass &accumulated_removed_biomass)                        modification_
+/*_______*/ {
+/*070627_*/    // This removes all canopy biomass from the plant (I.e. in the case of termination)
+/*070627_*/    // Returnsabout of biomass removed
+/*060911_*/    float64 act_effete_removed_biomass = canopy_effete.remove_biomass(999999.0,999999.0,0,true,  false);
+/*060911_*/    float64 act_vital_removed_biomass = canopy_vital.remove_biomass(999999.0,999999.0,0,true,  false);
+/*071126_*/    // the untouchable portion is not removable
+/*_______*/    float64 act_removed_biomass = act_effete_removed_biomass + act_vital_removed_biomass;
+/*070414_*/    float64 act_removed_N_mass    = 0;
+/*070412_*/    if (nitrogen)
+/*070412_*/    {  float64 act_removed_N_mass    = nitrogen->remove_canopy_nitrogen_for(999999.0 ,include_vital|include_effete);
+/*070412_*/    };
+/*070802_*/    Crop_biomass removed_now(act_removed_biomass,act_removed_N_mass);
+/*070802_*/    accumulated_removed_biomass.add_crop_biomass(removed_now);
+/*_______*/    invalidate();
+/*_______*/  return act_removed_biomass;
+/*_______*/ };
+//____________________________________________________________remove_all_biomass
+/*_______*/ float64 Canopy_biomass_GAI::get_GAI(uint8 include_GAI)         const
+/*_______*/ {  if (!is_valid()) update();
+/*060921_*/    float64 GAI_vital  = (include_GAI & include_vital)  ? canopy_vital.accum_today->get_GAI() : 0.0;
+/*060921_*/    float64 GAI_effete = (include_GAI & include_effete) ? canopy_effete.accum_today->get_GAI() : 0.0;
+/*071126_*/    float64 GAI_untouchable = (include_GAI & include_vital)  && untouchable_portion ? untouchable_portion->get_LAI() : 0.0;
+/*071126_*/    return GAI_vital + GAI_effete + GAI_untouchable;
+/*_______*/ };
+//_________________________________________________________________get_GAI_vital
+/*060824_*/ float64 Canopy_biomass_GAI::get_LAI() const
+/*_______*/ {  if (!is_valid()) update();
+/*_______*/    float64 sum_LAI
+/*_______*/       = canopy_vital.accum_today->get_LAI()
+/*_______*/       + canopy_effete.accum_today->get_LAI()
+/*071126_*/       + (untouchable_portion ? untouchable_portion->get_LAI() : 0.0);
+/*_______*/    return sum_LAI;
+/*_______*/ };
+//_______________________________________________________________________get_LAI
+/*_______*/ float64 Canopy_biomass_GAI::get_biomass_current(uint8 include_biomass) const
+/*_______*/ {  if (!is_valid()) update();
+/*_______*/    bool include_dead = include_biomass & include_canopy_dead;
+/*070321_*/    float64 biomass_current_vital = (include_biomass & include_vital) ? canopy_vital.accum_today->get_biomass_current() : 0.0;
+/*070321_*/    float64 biomass_current_effete =(include_biomass & include_effete) ?  canopy_effete.accum_today->get_biomass_current() : 0.0;
+/*071126_*/    float64 biomass_untouchable = (include_biomass & include_vital) && untouchable_portion ? untouchable_portion->get_biomass_current() : 0.0;
+/*071126_*/    return biomass_current_vital + biomass_current_effete + biomass_untouchable;
+/*_______*/ };
+//___________________________________________________________________get_biomass
+/*_______*/ float64 Canopy_biomass_GAI::get_biomass_produced(uint8 include_biomass) const
+/*_______*/ {  if (!is_valid()) update();
+/*070321_*/    float64 biomass_produced_vital = (include_biomass & include_vital) ? canopy_vital.accum_today->get_biomass_produced() : 0.0;
+/*070321_*/    float64 biomass_produced_effete =(include_biomass & include_effete) ?  canopy_effete.accum_today->get_biomass_produced() : 0.0;
+/*071126_*/    float64 biomass_untouchable = (include_biomass & include_vital) && untouchable_portion ? untouchable_portion->get_biomass_produced() : 0.0;
+/*071126_*/    return biomass_produced_vital + biomass_produced_effete + biomass_untouchable;
+/*_______*/ };
+//___________________________________________________________________get_biomass
+float64 Canopy_biomass_GAI::get_GAI_related_biomass() const
+{  if (!is_valid()) update();
+   float64 GAI_related_biomass_vitale     = canopy_vital.accum_today->get_GAI_related_biomass() ;
+   float64 GAI_related_biomass_effete     = canopy_effete.accum_today->get_GAI_related_biomass();
+   float64 GAI_related_biomass_untouchable= untouchable_portion ? untouchable_portion->get_GAI_related_biomass() : 0.0;
+   return
+   //080515 disabled  (GAI_has_died_off && is_continuous_grass) ? 0.0 :
+      GAI_related_biomass_vitale + GAI_related_biomass_effete + GAI_related_biomass_untouchable; // Note the effete may already be 0
+};
+//_______________________________________________________get_GAI_related_biomass
+#ifdef CO2_CHANGE
+float64 Canopy_biomass_GAI::get_GAI_at_baseline_ppm() const
+{  if (!is_valid()) update();
+   float64 GAI_at_baseline_ppm = 0.0;
+   GAI_at_baseline_ppm += canopy_vital.accum_today->get_GAI_at_baseline_ppm();
+   GAI_at_baseline_ppm += canopy_effete.accum_today->get_GAI_at_baseline_ppm();
+   GAI_at_baseline_ppm +=  untouchable_portion ? untouchable_portion->get_GAI_at_baseline_ppm() : 0.0;
+   return GAI_at_baseline_ppm;
+};
+//_2007-11-26__________________________________________get_GAI_at_baseline_ppm_/
+float64 Canopy_biomass_GAI::get_GAI_related_biomass_at_baseline_ppm() const
+{  if (!is_valid()) update();
+   float64 GAI_related_biomass_at_baseline_ppm = 0;
+   GAI_related_biomass_at_baseline_ppm += canopy_vital.accum_today->get_GAI_related_biomass_at_baseline_ppm();
+   GAI_related_biomass_at_baseline_ppm += canopy_effete.accum_today->get_GAI_related_biomass_at_baseline_ppm();
+   GAI_related_biomass_at_baseline_ppm += untouchable_portion ? untouchable_portion->get_GAI_related_biomass_at_baseline_ppm() : 0.0;
+   return  GAI_related_biomass_at_baseline_ppm ;
+};
+//_2007-11-26___________________get_GAI_related_canopy_biomass_at_baseline_ppm_/
+#endif
+float64 Canopy_biomass_GAI::get_live_green_biomass(bool include_vital,bool include_effete) const
+{  // Note, could make the live_biomass a property of portion
+ // and simply add this with the reset or update()
+   if (!is_valid()) update();                                                    //060316
+   float64 live_biomass = 0.0;  // kg_m2
+   if (include_vital)                                                            //060911
+   {
+      FOR_EACH_IN(portion,Canopy_portion ,canopy_vital,each_portion)
+      {  if (!portion->is_dead()) // obs caller should make sure senescence does not apply duration already checked to determine if dead(then don't call this function) (parameters->has_leaf_senescence()  && (curr_daily->age > parameters->leaf_duration_deg_day_f32))
+         live_biomass += portion->get_biomass_current();  // produced and current should be the same for live  //060601
+      } FOR_EACH_END(each_portion);
+      live_biomass += untouchable_portion ? untouchable_portion->get_biomass_current() : 0.0;   //071126
+   };
+   if (include_effete)                                                           //060911
+   FOR_EACH_IN(portion,Canopy_portion ,canopy_effete,each_portion)
+   {  if (!portion->is_dead()) // obs caller should make sure senescence does not apply duration already checked to determine if dead(then don't call this function) (parameters->has_leaf_senescence()  && (curr_daily->age > parameters->leaf_duration_deg_day_f32))
+      live_biomass += portion->get_biomass_current();  // produced and current should be the same for live  //060601
+   } FOR_EACH_END(each_portion);
+ return live_biomass;
+};
+//_2006-03-13___________________________________________get_live_green_biomass_/
+float64 Canopy_biomass_GAI::get_live_and_or_dead_biomass(bool include_vital,bool include_effete,bool include_dead) const
+{  // Note, could make the live_biomass a property of portion
+ // an simply add this with the reset or update()
+   if (!is_valid()) update();
+   float64 biomass = 0.0;  // kg_m2
+   FOR_EACH_IN(portion,Canopy_portion ,canopy_vital,each_vital_portion)
+   {
+      if (include_dead && portion->is_dead())
+         biomass += portion->get_biomass_current();  // produced and current should be the same for live
+      if (include_vital && (portion->get_GAI() > 0.0000001))
+         biomass += portion->get_biomass_current();  // produced and current should be the same for live
+   } FOR_EACH_END(each_vital_portion);
+   FOR_EACH_IN(portion,Canopy_portion ,canopy_effete,each_effete_portion)
+   {
+      if (include_dead && portion->is_dead())
+         biomass += portion->get_biomass_current();  // produced and current should be the same for live
+      if (include_effete && (portion->get_GAI() > 0.0000001))
+         biomass += portion->get_biomass_current();  // produced and current should be the same for live
+   } FOR_EACH_END(each_effete_portion);
+   biomass += untouchable_portion ? untouchable_portion->get_biomass_current() : 0.0; //071126
+   return biomass;
+};
+//_2006-09-07___________________________________________get_live_green_biomass_/
+/*060825_*/ bool Canopy_biomass_GAI
+/*080401_*/    ::end_season(bool apply_dormancy)                    modification_
+/*_______*/ {  // At this point there may be some effete portions from previous years that have been exhausted they can be cleaned now
+/*060911_*/    while (Canopy_portion *portion = (Canopy_portion *)canopy_vital.pop_at_head())
+/*080401_*/    {  if (apply_dormancy)
+/*060911_*/          portion->dormancy();
+/*060911_*/       canopy_effete.append(portion);
+/*060911_*/    };
+/*_______*/  return true;
+/*_______*/ };
+//______________________________________________________________________dormancy
+void Canopy_biomass_GAI::dump_ages(std::ofstream &tostream)
+{  static nat32 day=0;
+   day++;
+   if (canopy_effete.count())
+   {
+      tostream << "day" <<'\\t'<< (int)day << " effete:\n";
+      FOR_EACH_IN(effete_portion,Canopy_portion ,canopy_effete,each_effete_portion)
+         effete_portion->write(tostream);
+      FOR_EACH_END(each_effete_portion);
+   }
+   tostream << "day" << '\\t' << (int)day << "vital:\n";
+   FOR_EACH_IN(vital_portion,Canopy_portion ,canopy_vital,each_vital_portion)
+         vital_portion->write(tostream);
+   FOR_EACH_END(each_vital_portion);
+   if (untouchable_portion)                                                      //071126
+      tostream << "untouchable portion:\nUa=" << (int)untouchable_portion << "\t"<< untouchable_portion->get_age() << " GAI=" << untouchable_portion->get_GAI()<< " BM=" << untouchable_portion->get_biomass_current();
+   tostream << std::endl;
+};
+//_2007-07-05________________________________________________________dump_ages_/
+
+
+
+
+// 060911 350 lines
+// 070806 488 lines
+// 080727 537 lines

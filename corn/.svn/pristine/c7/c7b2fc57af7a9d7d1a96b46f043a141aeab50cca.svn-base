@@ -1,0 +1,129 @@
+#include "corn/data_source/datarec.h"
+#include "corn/tabular/delineation.h"
+
+namespace CORN {
+//______________________________________________________________________________
+const char *delimit_mode_label_table[] =
+{"intrinsic"
+,"fixed"
+,"character"
+,0 };
+//______________________________________________________________________________
+const char *text_quote_mode_label_table[] =
+{"unquoted"
+,"single"
+,"double"
+,"alternating"
+,0 };
+//______________________________________________________________________________
+const char *relative_to_label_table[] =
+{  "file"
+,  "data"
+,  "page"
+,  "block"
+,0};
+//______________________________________________________________________________
+#define LABEL_start_row        "start_row"
+#define LABEL_text_quote_mode       "text_quote_mode"
+#define LABEL_continuous_delimiter  "continuous_delimiter"
+#define LABEL_delimiter_space       "delimiter_space"
+#define LABEL_delimiter_comma       "delimiter_comma"
+#define LABEL_delimiter_tab         "delimiter_tab"
+#define LABEL_delimiter_semicolon   "delimiter_semicolon"
+#define LABEL_delimiter_other       "delimiter_other"
+#define LABEL_other_delimiter       "other_delimiter"
+#define LABEL_decimal_mark          "decimal_mark"
+//______________________________________________________________________________
+void Extent_layout::setup_structure(CORN::Data_record &data_rec,bool /*for_write*/) modification_
+{  data_rec.expect_enum("start_row_relative_to",relative_to_labeled);            //060823
+	data_rec.expect_int16(LABEL_start_row,start_row_1_based);
+   data_rec.expect_string("begin_marker",begin_marker,100);                      //050321
+   data_rec.expect_string("end_marker",end_marker,100);                          //050321
+}
+//______________________________________________________________________________
+void Delineation_layout::setup_structure(CORN::Data_record &data_rec,bool for_write) modification_
+{  Extent_layout::setup_structure(data_rec,for_write);
+   data_rec.expect_enum("delimit_mode",delimit_mode_labeled);                    //040925
+	data_rec.expect_enum(LABEL_text_quote_mode,text_quote_mode_labeled);          //02050
+   if (!for_write || delimit_mode_labeled.get() == DELIMIT_character)            //040925
+   {  data_rec.expect_bool(LABEL_continuous_delimiter,continuous_delimiter,VV_bool_entry::form_true);
+	   data_rec.expect_bool(LABEL_delimiter_space,delimiter_space,VV_bool_entry::form_true);
+	   data_rec.expect_bool(LABEL_delimiter_comma,delimiter_comma,VV_bool_entry::form_true);
+	   data_rec.expect_bool(LABEL_delimiter_tab,delimiter_tab,VV_bool_entry::form_true);
+	   data_rec.expect_bool(LABEL_delimiter_semicolon,delimiter_semicolon,VV_bool_entry::form_true);
+	   data_rec.expect_bool(LABEL_delimiter_other,delimiter_other,VV_bool_entry::form_true);
+	   data_rec.expect_int16(LABEL_other_delimiter,other_delimiter_16);
+   }
+   data_rec.expect_string(LABEL_decimal_mark,decimal_mark,10);                   //050402
+   data_rec.expect_string("notes",notes,512);                                    //050517
+}
+//______________________________________________________________________________
+bool Delineation_layout::is_delimiter(char potential_delimiter)     affirmation_
+{  return
+      (delimiter_space     && (potential_delimiter == ' '))
+   || (delimiter_comma     && (potential_delimiter == ','))
+   || (delimiter_tab       && (potential_delimiter == '\t'))
+   || (delimiter_semicolon && (potential_delimiter == ';'))
+   || (delimiter_other     && (potential_delimiter == other_delimiter_16));
+}
+//______________________________________________________________________________
+const char *Delineation_layout::get_delimitor()                            const
+{
+//             When reading files, multiple potential delimitors could be optionally specified as delimitors
+//             When writing files, only a single delimitor is available.
+   return_buffer.assign("");
+   if (delimiter_string)   return_buffer.assign(other_delimiter_string);
+   if (delimiter_other)
+   {  char buffer_cstr[3];
+      buffer_cstr[0] = (char)other_delimiter_16; buffer_cstr[1] = 0;
+      return_buffer.assign(std::string (buffer_cstr));
+   }
+   if (delimiter_semicolon)return_buffer.assign(";");
+   if (delimiter_comma)    return_buffer.assign(",");
+   if (delimiter_tab)      return_buffer.assign("\t");
+   if (delimiter_space)    return_buffer.assign(" ");
+   return return_buffer.c_str();
+}
+//_2005-08-30___________________________________________________________________
+bool Delineation_layout::default_R_text()                          modification_
+{
+   delimit_mode_labeled.set(DELIMIT_character);
+
+   continuous_delimiter = false;
+   delimiter_tab        = true;
+   delimiter_space      = false;
+   delimiter_comma      = false;
+   delimiter_semicolon  = false;
+   delimiter_other      = false;
+   delimiter_string     = false;
+   // NA other_delimiter_string;    // Other extended delimiter (I.e. HTML table <TH><TD>) //050830
+   text_quote_mode_labeled.set(NO_QUOTE); //RLN warning, need to verify
+      // NO_QUOTE, SINGLE_QUOTE, DOUBLE_QUOTE, ALTERNATING_QUOTE
+   decimal_mark = ".";  // . for US  , for other countries   This probably should be moved to Tabular file since it is a property of the file format, not delineation //050402
+   return true;
+}
+//_2014-10-08___________________________________________________________________
+bool Delineation_layout::copy_from(const Delineation_layout &from) modification_
+{
+   delimit_mode_labeled.set(from.delimit_mode_labeled.get());
+   continuous_delimiter    = from.continuous_delimiter;
+   delimiter_tab           = from.delimiter_tab;
+   delimiter_space         = from.delimiter_space;
+   delimiter_comma         = from.delimiter_comma;
+   delimiter_semicolon     = from.delimiter_semicolon;
+   delimiter_other         = from.delimiter_other;
+   other_delimiter_16      = from.other_delimiter_16;
+   delimiter_string        = from.delimiter_string;
+   other_delimiter_string  = from.other_delimiter_string;
+   text_quote_mode_labeled.set(from.text_quote_mode_labeled.get());                            //020505
+   decimal_mark            = from.decimal_mark;
+   notes                   = from.notes;
+   // NYI should eventually copy all the extent, at this time I only needed the start row
+   start_row_1_based       = from.start_row_1_based;
+   return true;
+};
+
+//_2014-10-08___________________________________________________________________
+
+} // namespace CORN
+

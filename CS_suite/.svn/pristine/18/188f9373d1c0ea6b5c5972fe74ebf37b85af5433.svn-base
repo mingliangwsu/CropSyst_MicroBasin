@@ -1,0 +1,122 @@
+L_Actual_date,
+/* phensync  CSW  PARAMS  CSW it-gb
+en Actual date
+fr Date réelle
+it Data effettiva
+es Fecha real
+es Data real
+*/
+L_After_emergence,
+/* phensync  CSW ( PARAMS )
+en After emergence
+fr Aprés levée
+it Dopo emergenza
+es Después emergencia
+ca Després emergència
+*/
+L_After_flowering,
+/* phensync  CSW ( PARAMS )
+en After flowering
+fr Aprés la floraison
+it Dopo la fioritura
+es Después la floración
+ca Després la floració
+*/
+L_After_harvest,
+/* phensync  CSW ( PARAMS )
+en After harvest
+fr Aprés la récolte
+it Dopo la raccolata
+es Después la cosecha
+ca Després la collita
+*/
+
+L_After_planting,
+/* phensync  CSW ( PARAMS )
+en After planting
+fr Aprés le semis
+it Dopo la semina
+es Después la semina
+ca Després la sembra
+*/
+L_After_senescence,
+/* phensync  CSW ( PARAMS )
+en After senescence
+fr Aprés le sénescence
+it Dopo la senescenza
+es Después la senescencia
+ca Després la senescència
+*/
+L_After_grain_filling,
+/* phensync  CSW ( PARAMS )
+en After Grain filling
+fr Aprés début remplissage
+it Dopo il inizio formazione della cariosside
+es Después el comienzo de llenado de grano
+ca Després inici ompliment del gra
+*/
+L_after_physiological_maturity,
+/* phensync  REPORT  ARCCS CROPSYST RPRTVIEW  VALIDATE PARAMS CS    RPRTGRPH
+en after physiological maturity
+fr depuis la maturité physiologique
+it dopo la maturazione fisiologica
+es después de madurez fisiológica
+ca després de maduresa fisiològica
+*/
+
+L_Relative_date,
+/* phensync  CSW  PARAMS  it-gb
+en Relative date
+fr Date relative
+it Data relativa
+es Fecha relativo
+ca Data relativo
+*/
+L_Relative_to_sow_date,
+/* phensync  CSW  PARAMS  it-gb
+en Relative date
+fr Date relative
+it Data relativa
+es Fecha relativo
+ca Data relativo
+*/
+L_Relative_to_start_date,
+/* phensync  CSW  PARAMS  en-rn CHECK TRANSLATIONS fr-rn it-rn es-rn ca-rn
+en Relative to start date
+fr Date relative a la date début
+it Data relativa alla data di inizio
+es Fecha relativo a la fecha de inicio
+ca Data relativo a la data d'inici
+*/
+L_Relative_to_end_date,
+/* phensync  CSW  PARAMS  en-rn CHECK TRANSLATIONS fr-rn it-rn es-rn ca-rn
+en Relative to end date
+fr Date relative a la date fin
+it Data relativa alla data di conclusione
+es Fecha relativo a la fecha de término
+ca Data relativo a la data de finalització
+*/
+L_Relative_year_offset_check_obsolete,
+/* phensync  CSW  PARAMS
+en Relative year offset
+fr Année relative
+it Anno relativo
+es Año relativo
+ca Any relativo
+*/
+L_or,
+/* phensync  CSW  PARAMS
+en or
+fr ou
+it o
+es o
+ca o
+*/
+L_Syncronization,
+/* phensync  PARAMS CS
+en Syncronization
+fr Syncronisation
+it Sincronizzazione
+es Sincronización
+ca Sincronització
+*/

@@ -1,0 +1,47 @@
+#ifndef chemfileH
+#define chemfileH
+#  include "corn/OS/directory_entry_name_concrete.h"
+#include "corn/container/bilist.h"
+#include "corn/container/association.h"
+//______________________________________________________________________________
+class chemical_properties
+: public CORN::Association
+{public:
+    float32 half_life;
+    float32 linear_sorption_coef;
+    float32 Freundlich_N;
+    float32 activation_energy;
+    float32 soil_moisture_influence; // B_param;                                 //030103
+    std::string name;
+ public: // constructors
+    // Constructor for loading data from chemical pesticide database
+    chemical_properties();
+    // Constructor for adding new chemicals
+    chemical_properties(const char *i_name);
+    // Copy constructor
+    inline chemical_properties(const chemical_properties &to_copy)
+       :CORN::Association()
+       ,half_life(to_copy.half_life)
+       ,linear_sorption_coef(to_copy.linear_sorption_coef)
+       ,Freundlich_N(to_copy.Freundlich_N)
+       ,activation_energy(to_copy.activation_energy)
+       ,soil_moisture_influence(to_copy.soil_moisture_influence)
+       ,name(to_copy.name)
+       {}
+ public: // virtual methods
+    inline virtual const char *get_key()                                   const {  return name.c_str(); } //030117
+    inline virtual bool write(std::ostream &strm)                  modification_{ return false; } // Not currently needed
+    virtual bool read(std::istream &instrm)                         modification_;//990225
+};
+//_1999-02-25___________________________________________________________________
+class chemical_file
+: public CORN::Association_list                                                         //1999-12-05
+{private:
+    CORN::OS::File_name_concrete file_name;
+ public:
+    chemical_file(bool add_none_salt);
+};
+//______________________________________________________________________________
+#endif
+//chemfile.h
+

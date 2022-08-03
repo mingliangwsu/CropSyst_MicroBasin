@@ -1,0 +1,305 @@
+#include <math.h>
+#if (CS_VERSION==4)
+#  include "geolocation/GUI/geolocation_frm.h"
+#  define V4_HELP_URL(help)                                                      \
+      ,help
+#  include "CropSyst/GUI/help/location.h"
+#else
+#  include "common/geodesy/GUI/form_geolocation_VCL_RS.h"
+#  define V4_HELP_URL(help)
+#endif
+#ifndef geolocationH
+#  include "common/geodesy/geolocation.h"
+#endif
+#ifndef GEOLOCATION_UTM_H
+#  include "common/geodesy/UTM.h"
+#endif
+#include "corn/string/strconv.hpp"
+//______________________________________________________________________________
+void Tgeolocation_form::bind_to
+(Geolocation *_geolocation_params
+,std::string  *description          // may be 0
+)
+{
+   geolocation_parameters =_geolocation_params;
+   if (description)
+   {  description_edit->bind_to(description V4_HELP_URL(HELP_P_loc_description)); }
+   else
+   {  groupbox_description->Visible = false;
+      geolocation_pagecontrol->Align = alClient;
+   };
+   latitude_decdeg_edit ->bind_to(&geolocation_parameters->latitude_dec_deg,8 V4_HELP_URL(HELP_P_loc_latitude));
+   longitude_decdeg_edit->bind_to(&geolocation_parameters->longitude_dec_deg,8 V4_HELP_URL(HELP_P_loc_latitude));
+
+   elevation_edit->bind_to(&geolocation_parameters->elevation,2 V4_HELP_URL(0));
+   screening_height_edit->bind_to(&geolocation_parameters->screening_height_32,2 V4_HELP_URL(HELP_P_loc_windmeasure));
+
+   lat_deg_edit->bind_to(&lat_deg V4_HELP_URL(HELP_P_loc_latitude));
+   long_deg_edit->bind_to(&long_deg V4_HELP_URL(HELP_P_loc_latitude));
+
+   lat_min_edit->bind_to(&lat_min V4_HELP_URL(HELP_P_loc_latitude));
+   long_min_edit->bind_to(&long_min V4_HELP_URL(HELP_P_loc_latitude));
+
+   lat_sec_edit->bind_to(&lat_sec,4 V4_HELP_URL(HELP_P_loc_latitude));
+   long_sec_edit->bind_to(&long_sec,4 V4_HELP_URL(HELP_P_loc_latitude));
+
+   utm_northing_edit ->bind_to(&utm_northing,8 V4_HELP_URL(HELP_P_loc_latitude /*NYI HELP_P_loc_UTM*/));
+   utm_easting_edit  ->bind_to(&utm_easting, 8 V4_HELP_URL(HELP_P_loc_latitude /*NYI HELP_P_loc_UTM*/));
+   utm_zone_edit     ->bind_to(&utm_zone       V4_HELP_URL(HELP_P_loc_latitude /*NYI HELP_P_loc_UTM*/));
+
+   latitude_decdeg_onexit(0);
+   longitude_decdeg_onexit(0);
+
+   update_UTM();
+
+   country_name_edit ->bind_to(&(geolocation_parameters->country_name) V4_HELP_URL(0));
+   state_code_edit   ->bind_to(&(geolocation_parameters->state_name) V4_HELP_URL(0));
+   county_code_edit  ->bind_to(&(geolocation_parameters->county_name) V4_HELP_URL(0));
+
+   char buffer[20];
+   station_number_edit  ->Text = ltoa(geolocation_parameters->ID/*120723station_number*/,buffer,10);
+   station_ID_code_edit ->bind_to(&(geolocation_parameters->station_ID_code) V4_HELP_URL(0));
+   station_name_edit    ->bind_to(&(geolocation_parameters->station_name) V4_HELP_URL(0));
+
+   if (geolocation_parameters->country_code_ISO3166)
+   {  itoa(geolocation_parameters->country_code_ISO3166,buffer,10);
+      country_ISO3166_code_combobox->Text = buffer;
+   }
+   show_hide_controls();
+}
+//______________________________________________________________________________
+void Tgeolocation_form::dec_deg_to_deg_minute_second(float32 dec_deg, int16 &deg,int16 &min, float32 &sec,bool &east_or_north) const
+{
+/*
+ D.d --> DM.m  (45.3772 --> 45o22.6333):
+     - Multiply .d by 60 to get M.m (.3772*60=22.6333)
+ DM.m --> DMS  (45o22.6333 --> 45o22'38"):
+     - Multiply .m by 60 to get S(.6333*60=38)
+*/
+   east_or_north = (dec_deg > 0);
+   dec_deg = fabs(dec_deg);
+   deg = (int16)dec_deg;
+   float32  d = dec_deg - deg;
+   float32  dec_min = d * 60.0;
+   min = abs((int16)dec_min);
+   float32 m = dec_min - min;
+   sec = m * 60.0;
+}
+//______________________________________________________________________________
+float32 Tgeolocation_form::deg_minute_second_to_dec_deg(int16 deg,int16 min, int16 sec,bool east_or_north) const
+{
+/*
+ DMS --> DM.m  (45o22'38" --> 45o22.6333):
+     - Divide S by 60 to get .m (38/60=.6333)
+     - Add .m to M to get M.m (22+.6333=22.6333)
+ DM.m --> D.d  (45o 22.6333 --> 45.3772):
+     - Divide M.m by 60 to get .d (22.6333/60=.3772)
+     - Add .d to D to get D.d (45+.3772=45.3772)
+*/
+   float32 min_decimal = (float)sec/60.0;
+    min_decimal += min;
+   float32 deg_decimal = deg + (min_decimal/60);
+   if (!east_or_north) deg_decimal = -deg_decimal;  // west and south are negative
+   return deg_decimal;
+}
+//______________________________________________________________________________
+void Tgeolocation_form::handle_country_ISO3166_code_combobox_onchange()
+{
+   if (geolocation_parameters)
+   {  geolocation_parameters->country_code_ISO3166 =
+      //#ifdef UNICODE
+         _wtoi
+      //#else
+      //   atoi
+      //#endif
+         (country_ISO3166_code_combobox->Text.c_str());
+      show_hide_controls();
+   }
+}
+//______________________________________________________________________________
+void Tgeolocation_form::handle_US_state_FIPS_combobox_onchange()
+{
+   if (geolocation_parameters)
+   {  geolocation_parameters->state_code =
+      //#ifdef UNICODE
+         _wtoi
+      //#else
+      //   atoi
+      //#endif
+         (US_state_FIPS_combobox->Text.c_str());
+      show_hide_controls();
+   }
+}
+//______________________________________________________________________________
+void Tgeolocation_form::show_hide_controls()
+{  // For United states
+   if (geolocation_parameters)
+   {
+      bool united_states = ((geolocation_parameters->country_code_ISO3166 == 840) || (geolocation_parameters->country_code_ISO3166 == 581));
+      US_state_FIPS_combobox->Visible = united_states;
+      bool show_country_name = (!geolocation_parameters->country_code_ISO3166 ||
+         (!geolocation_parameters->country_code_ISO3166
+        && (geolocation_parameters->county_name.length() !=0)));
+      country_name_edit->Visible = show_country_name;
+      state_code_edit->Visible = !united_states || (geolocation_parameters->state_code == 0);
+      county_code_combobox->Visible = false; // Not yet implememented
+   }
+}
+//______________________________________________________________________________
+void __fastcall Tgeolocation_form::station_number_edit_onchange(TObject *Sender)
+{  if (geolocation_parameters)
+   {
+      geolocation_parameters->ID/*120723station_number*/ =
+      //#ifdef UNICODE
+         _wtol
+      //#else
+      //   atol
+      //#endif
+         (station_number_edit->Text.c_str());
+/*110503
+      char ID_code[20];
+      strcpy(ID_code,station_number_edit->Text.c_str());
+      geolocation_parameters->station_number = atol(ID_code);
+*/
+   }
+}
+//______________________________________________________________________________
+void __fastcall Tgeolocation_form::Update()
+{
+   description_edit->Update();
+   latitude_decdeg_edit->Update();
+   longitude_decdeg_edit->Update();
+//   longitude_edit_bar->Update();
+//   elevation_edit_bar->Update();
+//   screening_height_edit_bar->Update();
+   elevation_edit->Update();
+   screening_height_edit->Update();
+   lat_deg_edit->Update();
+   long_deg_edit->Update();
+   lat_min_edit->Update();
+   long_min_edit->Update();
+   lat_sec_edit->Update();
+   long_sec_edit->Update();
+//   update_latitude_dec_min_sec(0);
+//   update_longitude_dec_min_sec(0);
+
+   latitude_decdeg_onexit(0);
+   longitude_decdeg_onexit(0);
+
+   country_name_edit ->Update();
+   state_code_edit   ->Update();
+   county_code_edit  ->Update();
+   char buffer[20];
+   station_ID_code_edit ->Text = ltoa(geolocation_parameters->ID,buffer,10);
+   station_ID_code_edit ->Update();
+   station_name_edit    ->Update();
+   update_UTM();
+}
+//______________________________________________________________________________
+void Tgeolocation_form::handle_button_google_mapsClick()
+{  // Google maps URL with latitude longitude coordinate
+   // http://maps.google.com/?ll=45.9300041,-119.480003&spn=1,1
+   // the spn is the size of the view port in units of latitude and longitude
+   std::string google_maps_URL("explorer \"http://maps.google.com/?ll=");
+   //160208 google_maps_URL.append(CORN_float32_to_str(geolocation_parameters->latitude_dec_deg,6));
+   google_maps_URL.append(CORN::float32_to_cstr(geolocation_parameters->latitude_dec_deg,6));
+   google_maps_URL.append(",");
+   //160208 google_maps_URL.append(CORN_float32_to_str(geolocation_parameters->longitude_dec_deg,6));
+   google_maps_URL.append(CORN::float32_to_cstr(geolocation_parameters->longitude_dec_deg,6));
+   google_maps_URL.append("&spn=1,1\"");
+   WinExec(google_maps_URL.c_str(),SW_SHOWNORMAL	);
+}
+//______________________________________________________________________________
+void Tgeolocation_form::update_UTM()
+{
+   UTM_Coordinate utm_geo;
+   utm_geo.set_degrees(geolocation_parameters->latitude_dec_deg,geolocation_parameters->longitude_dec_deg);
+   utm_northing   = utm_geo.get_northing();
+   utm_easting    = utm_geo.get_easting();
+   utm_zone       = utm_geo.get_zone();
+   char utm_zone_desg[10];
+   utm_zone_desg[0] = utm_geo.get_zone_designator();
+   utm_zone_desg[1] = 0;
+//   utm_zone_designator.assign(utm_zone_desg);
+
+   utm_northing_edit->Update();
+   utm_easting_edit->Update();
+   utm_zone_edit->Update();
+//   utm_zone_designator_edit->Update();
+   utm_zone_desg_edit->Text = utm_zone_desg;
+}
+//______________________________________________________________________________
+void __fastcall Tgeolocation_form::longitude_decdeg_onexit(TObject */*Sender unused*/)
+{
+   bool east;
+   dec_deg_to_deg_minute_second
+   (geolocation_parameters->longitude_dec_deg
+   ,long_deg
+   ,long_min
+   ,long_sec
+   ,east);
+   long_dir_combobox->Text = east ? "East" : "West";
+   long_deg_edit->Update();
+   long_min_edit->Update();
+   long_sec_edit->Update();
+   update_UTM();
+}
+//______________________________________________________________________________
+void Tgeolocation_form::handle_utm_onexit()
+{
+   UTM_Coordinate utm_geo;
+   char utm_zone_desg = utm_zone_desg_edit->Text.c_str()[0];
+   utm_geo.set_UTM(utm_easting, utm_northing, utm_zone,utm_zone_desg);
+   float32 latitude_dec_deg_32;
+   float32 longitude_dec_deg_32;
+   if (utm_geo.get_degrees(latitude_dec_deg_32,longitude_dec_deg_32))
+   {  geolocation_parameters->latitude_dec_deg = latitude_dec_deg_32;
+      geolocation_parameters->longitude_dec_deg = longitude_dec_deg_32;
+   }
+   latitude_decdeg_edit->Update();
+   bool north;
+   dec_deg_to_deg_minute_second
+      (geolocation_parameters->latitude_dec_deg
+      ,lat_deg,lat_min,lat_sec,north);
+   lat_deg_edit->Update();
+   lat_min_edit->Update();
+   lat_sec_edit->Update();
+   lat_dir_combobox->Text = north ? "North" : "South";
+   longitude_decdeg_edit->Update();
+   bool east;
+   dec_deg_to_deg_minute_second
+      (geolocation_parameters->longitude_dec_deg
+      ,long_deg,long_min,long_sec,east);
+   long_deg_edit->Update();
+   long_min_edit->Update();
+   long_sec_edit->Update();
+
+   long_dir_combobox->Text = east ? "East" : "West";
+}
+//______________________________________________________________________________
+void Tgeolocation_form::handle_latitude_degminsec_onexit()
+{  geolocation_parameters->latitude_dec_deg = deg_minute_second_to_dec_deg
+   (lat_deg,lat_min,lat_sec,lat_dir_combobox ->Text == "North");
+   latitude_decdeg_edit->Update();
+   update_UTM();
+}
+//______________________________________________________________________________
+void Tgeolocation_form::handle_longitude_degmin_sec_onexit()
+{   geolocation_parameters->longitude_dec_deg= deg_minute_second_to_dec_deg
+   (long_deg,long_min,long_sec,long_dir_combobox->Text == "East");
+   longitude_decdeg_edit->Update();
+   update_UTM();
+}
+//______________________________________________________________________________
+void Tgeolocation_form::handle_latitude_decdeg_onexit()
+{  bool north;
+   dec_deg_to_deg_minute_second
+      (geolocation_parameters->latitude_dec_deg
+      ,lat_deg,lat_min,lat_sec,north);
+   lat_dir_combobox->Text = north ? "North" : "South";
+   lat_deg_edit->Update();
+   lat_min_edit->Update();
+   lat_sec_edit->Update();
+   update_UTM();
+}
+//______________________________________________________________________________

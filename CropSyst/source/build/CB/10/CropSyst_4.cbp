@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="CropSyst_4" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option platforms="Unix;" />
+				<Option output="../../../../../../CS_suite_4/CropSyst/CropSyst_4" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="~/simulation/Projects/linux_test/Scenarios/test_scenario.csn ~/simulation/Projects/linux_test/Database/Format/comprehensive.FMT" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-I ~/dev" />
+					<Add option="-Wno-unknown-pragmas" />
+					<Add option="-Wno-reorder" />
+					<Add option="-DCROPSYST" />
+					<Add option="-DCS_VERSION=4" />
+					<Add option="-DCROPSYST_VERSION=4" />
+					<Add option="-DCO2_V4" />
+					<Add option="-DxXLS_OUTPUT" />
+					<Add option="-DAPPTYPE_CONSOLE" />
+					<Add option="-DxLADSS_MODE" />
+					<Add option="-DNEW_RESIDUE_BALANCE" />
+					<Add option="-DOLD_ORCHARD" />
+					<Add directory="~/dev/cropsyst/source" />
+				</Compiler>
+				<Linker>
+					<Add library="../../../../../corn/application/CB8/application_static/libapplication_static.a" />
+					<Add library="../../../../../corn/CB8/corn_static/libCORN_static.a" />
+					<Add library="../../../../../corn/datetime/CB8/datetime_static/libdatetime_static.a" />
+					<Add library="../../../../../corn/file_sys/CB8/file_sys_static/libfile_sys_static.a" />
+					<Add library="../../../../../corn/format/CB8/format_static/libformat_static.a" />
+					<Add library="../../../../../corn/parameters/CB8/parameters_static/libparameters_static.a" />
+					<Add library="../../../../../ued/library/CB8/ued_static/libued_static.a" />
+					<Add library="../../../../../common/weather/CB8/weather_static/libweather_static.a" />
+					<Add library="../../../../../common/simulation/CB8/common_sim_static/libcommon_sim_static.a" />
+					<Add library="../../../../../corn/CB8/corn_static/obj/Debug/dynamic_array/da_uint8.o" />
+					<Add library="../../../../../corn/container/CB8/container_static/libcontainer_static.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="../../../../../../temp/CropSyst_4" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<VirtualTargets>
+			<Add alias="CropSyst_virtual_targets" targets="Debug;Release;" />
+		</VirtualTargets>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add option="-I ~/dev" />
+			<Add option="-I ~/dev/cropsyst/cpp" />
+			<Add option="-Wno-unknown-pragmas" />
+			<Add option="-Wno-reorder" />
+			<Add option="-DCROPSYST" />
+			<Add option="-DXLS_OUTPUT" />
+			<Add option="-DAPPTYPE_CONSOLE" />
+			<Add option="-DNEW_RESIDUE_BALANCE" />
+			<Add option="-DOLD_ORCHARD" />
+			<Add option="-DNEW_CO2_CONC" />
+			<Add directory="../../.." />
+			<Add directory="../../../../../common" />
+			<Add directory="../../../../../USDA/NRCS" />
+		</Compiler>
+		<Linker>
+			<Add library="../../../../../corn/container/CB8/container_static/libcontainer_static.a" />
+		</Linker>
+		<Unit filename="../../../CS_UED_datasrc.cpp" />
+		<Unit filename="../../../N_sources.cpp" />
+		<Unit filename="../../../chemfile.cpp" />
+		<Unit filename="../../../crop/canopy_growth.cpp" />
+		<Unit filename="../../../crop/canopy_growth_LAI_based.cpp" />
+		<Unit filename="../../../crop/canopy_growth_cover_based.cpp" />
+		<Unit filename="../../../crop/crop_CO2.cpp" />
+		<Unit filename="../../../crop/crop_N_balancer.cpp" />
+		<Unit filename="../../../crop/crop_biomass.cpp" />
+		<Unit filename="../../../crop/crop_common.cpp" />
+		<Unit filename="../../../crop/crop_cropsyst.cpp" />
+		<Unit filename="../../../crop/crop_emergence.cpp" />
+		<Unit filename="../../../crop/crop_fruit.cpp" />
+		<Unit filename="../../../crop/crop_inactive_period.cpp" />
+		<Unit filename="../../../crop/crop_interfaced.cpp" />
+		<Unit filename="../../../crop/crop_interfaced_cropsyst.cpp" />
+		<Unit filename="../../../crop/crop_n.cpp" />
+		<Unit filename="../../../crop/crop_orchard_Kemanian_Stockle.cpp" />
+		<Unit filename="../../../crop/crop_orchard_Oyarzun_Stockle.cpp" />
+		<Unit filename="../../../crop/crop_orchard_common.cpp" />
+		<Unit filename="../../../crop/crop_root.cpp" />
+		<Unit filename="../../../crop/crop_thermal_time.cpp" />
+		<Unit filename="../../../crop/crop_transpiration_2.cpp" />
+		<Unit filename="../../../crop/crop_types.cpp" />
+		<Unit filename="../../../crop/greenhouse/crop_greenhouse.cpp" />
+		<Unit filename="../../../crop/transpiration_dependent_growth.cpp" />
+		<Unit filename="../../../cropsyst_main.cpp" />
+		<Unit filename="../../../cs_ET.cpp" />
+		<Unit filename="../../../cs_UED_annual.cpp" />
+		<Unit filename="../../../cs_UED_daily.cpp" />
+		<Unit filename="../../../cs_UED_db.cpp" />
+		<Unit filename="../../../cs_UED_harvest.cpp" />
+		<Unit filename="../../../cs_UED_season.cpp" />
+		<Unit filename="../../../cs_accum.cpp" />
+		<Unit filename="../../../cs_chem_pot_mineral_N.cpp" />
+		<Unit filename="../../../cs_datarec.cpp" />
+		<Unit filename="../../../cs_event.cpp" />
+		<Unit filename="../../../cs_events.cpp" />
+		<Unit filename="../../../cs_glob.cpp" />
+		<Unit filename="../../../cs_irrdy.cpp" />
+		<Unit filename="../../../cs_mgmt.cpp" />
+		<Unit filename="../../../cs_mod.cpp" />
+		<Unit filename="../../../cs_operation.cpp" />
+		<Unit filename="../../../cs_operation_codes.cpp" />
+		<Unit filename="../../../cs_paths.cpp" />
+		<Unit filename="../../../cs_project.cpp" />
+		<Unit filename="../../../cs_report.cpp" />
+		<Unit filename="../../../cs_results.cpp" />
+		<Unit filename="../../../cs_scenario.cpp" />
+		<Unit filename="../../../cs_scenario_directory.cpp" />
+		<Unit filename="../../../cs_simulation.cpp" />
+		<Unit filename="../../../cs_till.cpp" />
+		<Unit filename="../../../cs_variables.cpp" />
+		<Unit filename="../../../cs_vars.cpp" />
+		<Unit filename="../../../cs_vars_abbrv.cpp" />
+		<Unit filename="../../../csprofss.cpp" />
+		<Unit filename="../../../database_dir.cpp" />
+		<Unit filename="../../../desired_vars.cpp" />
+		<Unit filename="../../../fmt_param.cpp" />
+		<Unit filename="../../../friction_velocity.cpp" />
+		<Unit filename="../../../growth_stages.cpp" />
+		<Unit filename="../../../inorganic_NH4.cpp" />
+		<Unit filename="../../../land_unit_output.cpp" />
+		<Unit filename="../../../land_unit_sim.cpp" />
+		<Unit filename="../../../mgmt_param.cpp" />
+		<Unit filename="../../../mgmt_types.cpp" />
+		<Unit filename="../../../mgmtevnt.cpp" />
+		<Unit filename="../../../model_options.cpp" />
+		<Unit filename="../../../organic_matter/OM_common.cpp" />
+		<Unit filename="../../../organic_matter/OM_common.h" />
+		<Unit filename="../../../organic_matter/OM_params.cpp" />
+		<Unit filename="../../../organic_matter/OM_pools_common.cpp" />
+		<Unit filename="../../../organic_matter/OM_pools_common.h" />
+		<Unit filename="../../../organic_matter/OM_residues_profile_abstract.cpp" />
+		<Unit filename="../../../organic_matter/OM_residues_profile_abstract.h" />
+		<Unit filename="../../../organic_matter/OM_residues_profile_common.cpp" />
+		<Unit filename="../../../organic_matter/OM_residues_profile_common.h" />
+		<Unit filename="../../../organic_matter/OM_types.cpp" />
+		<Unit filename="../../../organic_matter/OM_types.h" />
+		<Unit filename="../../../organic_matter/multiple_pool/OM_multiple_pool.cpp" />
+		<Unit filename="../../../organic_matter/multiple_pool/OM_multiple_pool.h" />
+		<Unit filename="../../../organic_matter/multiple_pool/OM_pools_multiple.cpp" />
+		<Unit filename="../../../organic_matter/multiple_pool/OM_pools_multiple.h" />
+		<Unit filename="../../../organic_matter/multiple_pool/OM_residues_profile_multiple_cycling.cpp" />
+		<Unit filename="../../../organic_matter/multiple_pool/OM_residues_profile_multiple_cycling.h" />
+		<Unit filename="../../../organic_matter/simple/OM_residues_profile_simple.cpp" />
+		<Unit filename="../../../organic_matter/simple/OM_residues_profile_simple.h" />
+		<Unit filename="../../../organic_matter/simple/OM_simple.cpp" />
+		<Unit filename="../../../organic_matter/simple/OM_simple.h" />
+		<Unit filename="../../../organic_matter/single_pool/OM_pools_single_pool.cpp" />
+		<Unit filename="../../../organic_matter/single_pool/OM_pools_single_pool.h" />
+		<Unit filename="../../../organic_matter/single_pool/OM_residues_profile_single_pool.cpp" />
+		<Unit filename="../../../organic_matter/single_pool/OM_residues_profile_single_pool.h" />
+		<Unit filename="../../../organic_matter/single_pool/OM_residues_single_pool.cpp" />
+		<Unit filename="../../../organic_matter/single_pool/OM_residues_single_pool.h" />
+		<Unit filename="../../../organic_matter/single_pool/OM_single_pool.cpp" />
+		<Unit filename="../../../organic_matter/single_pool/OM_single_pool.h" />
+		<Unit filename="../../../organicn.cpp" />
+		<Unit filename="../../../output.cpp" />
+		<Unit filename="../../../perform_op.cpp" />
+		<Unit filename="../../../pond.cpp" />
+		<Unit filename="../../../project/GIS/GIS_params.cpp" />
+		<Unit filename="../../../project/GIS/GIS_table.cpp" />
+		<Unit filename="../../../project/GIS/pat.cpp" />
+		<Unit filename="../../../project/optimization/carbon_sequestration/carbon_sequestration_param.cpp" />
+		<Unit filename="../../../project_types.cpp" />
+		<Unit filename="../../../rot_param.cpp" />
+		<Unit filename="../../../rprtclss.cpp" />
+		<Unit filename="../../../rptoptns.cpp" />
+		<Unit filename="../../../seeding_param.cpp" />
+		<Unit filename="../../../sim_param.cpp" />
+		<Unit filename="../../../soil.cpp" />
+		<Unit filename="../../../soil/abiotic_environment.cpp" />
+		<Unit filename="../../../soil/chemical_balance.cpp" />
+		<Unit filename="../../../soil/chemical_mass_profile.cpp" />
+		<Unit filename="../../../soil/chemical_profile.cpp" />
+		<Unit filename="../../../soil/chemicals_profile.cpp" />
+		<Unit filename="../../../soil/disturbance.cpp" />
+		<Unit filename="../../../soil/dynamic_water_entering.cpp" />
+		<Unit filename="../../../soil/erosion_RUSLE.cpp" />
+		<Unit filename="../../../soil/evaporation_abstract.cpp" />
+		<Unit filename="../../../soil/evaporation_interface.cpp" />
+		<Unit filename="../../../soil/evaporation_without_vapor_path.cpp" />
+		<Unit filename="../../../soil/freezing_abstract.cpp" />
+		<Unit filename="../../../soil/freezing_jumakis.cpp" />
+		<Unit filename="../../../soil/freezing_numerical.cpp" />
+		<Unit filename="../../../soil/hydraulic_properties.cpp" />
+		<Unit filename="../../../soil/hydrology.cpp" />
+		<Unit filename="../../../soil/hydrology_cascade.cpp" />
+		<Unit filename="../../../soil/hydrology_finite_diff.cpp" />
+		<Unit filename="../../../soil/infiltration.cpp" />
+		<Unit filename="../../../soil/infiltration_cascade_common.cpp" />
+		<Unit filename="../../../soil/infiltration_cascade_daily.cpp" />
+		<Unit filename="../../../soil/infiltration_cascade_hourly.cpp" />
+		<Unit filename="../../../soil/infiltration_finite_diff.cpp" />
+		<Unit filename="../../../soil/nitrogen_common.cpp" />
+		<Unit filename="../../../soil/nitrogen_profile.cpp" />
+		<Unit filename="../../../soil/runoff.cpp" />
+		<Unit filename="../../../soil/salinity_profile.cpp" />
+		<Unit filename="../../../soil/soil_base.cpp" />
+		<Unit filename="../../../soil/soil_interface.cpp" />
+		<Unit filename="../../../soil/soil_param.cpp" />
+		<Unit filename="../../../soil/soil_param_with_STATSGO.cpp" />
+		<Unit filename="../../../soil/structure_common.cpp" />
+		<Unit filename="../../../soil/structure_interface.cpp" />
+		<Unit filename="../../../soil/sublayers.cpp" />
+		<Unit filename="../../../soil/surface_temperature.cpp" />
+		<Unit filename="../../../soil/temperature_functions.cpp" />
+		<Unit filename="../../../soil/temperature_hourly.cpp" />
+		<Unit filename="../../../soil/temperature_interface.cpp" />
+		<Unit filename="../../../soil/temperature_profile.cpp" />
+		<Unit filename="../../../soil/texture_interface.cpp" />
+		<Unit filename="../../../soil/tillage_effect.cpp" />
+		<Unit filename="../../../static_phrases.cpp" />
+		<Unit filename="../../../storm.cpp" />
+		<Unit filename="../../../unstressed_growth.cpp" />
+		<Unit filename="../../../watertab.cpp" />
+		<Unit filename="../../../../../common/biomatter/manure_form.cpp" />
+		<Unit filename="../../../../../common/biomatter/organic_biomatter_balance.cpp" />
+		<Unit filename="../../../../../common/environment/environment_base.cpp" />
+		<Unit filename="../../../../../common/geolocation/USA_state_FIPS_code.cpp" />
+		<Unit filename="../../../../../common/geolocation/geolocation.cpp" />
+		<Unit filename="../../../../../common/residue/residue_V4_common.cpp" />
+		<Unit filename="../../../../../common/residue/residue_balancer.cpp" />
+		<Unit filename="../../../../../common/residue/residue_biomatter_profile_simple.cpp" />
+		<Unit filename="../../../../../common/residue/residue_const.cpp" />
+		<Unit filename="../../../../../common/residue/residue_decomposition_limitations.cpp" />
+		<Unit filename="../../../../../common/residue/residue_decomposition_param.cpp" />
+		<Unit filename="../../../../../common/residue/residue_pool_simple.cpp" />
+		<Unit filename="../../../../../common/residue/residue_pools_simple.cpp" />
+		<Unit filename="../../../../../common/residue/residue_single_pool.cpp" />
+		<Unit filename="../../../../../common/residue/residues_common.cpp" />
+		<Unit filename="../../../../../common/residue/residues_cycling.cpp" />
+		<Unit filename="../../../../../common/soil/NRCS/NRCS_SDR_field_ops.cpp" />
+		<Unit filename="../../../../../common/soil/SCS/SCS.cpp" />
+		<Unit filename="../../../../../common/soil/USDA_texture.cpp" />
+		<Unit filename="../../../../../common/soil/layering.cpp" />
+		<Unit filename="../../../../../common/soil/texttri.cpp" />
+		<Unit filename="../../../../../common/soil/texture.cpp" />
+		<Unit filename="../../../../../common/soil/txtrhydr.cpp" />
+		<Unit filename="../../../../../corn/math/random.cpp" />
+		<Unit filename="../../../../../ued/convert/ED_tabular_format.cpp" />
+		<Unit filename="../../../../../ued/library/UED_tuple_datasrc.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<envvars />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

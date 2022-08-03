@@ -1,0 +1,111 @@
+#ifndef OUTPUTDAILYSOILCLASS_H
+#define OUTPUTDAILYSOILCLASS_H
+#include "soil/soilprofileclass2.h"
+
+class SoilProfileClass;
+class OutputDailySoilClass
+{
+    int NuL;
+public:
+    //160415LML int Current_Year;
+    //160415LML int Current_Month;
+    //160415LML int Current_DOM;
+    //160415LML int Current_DOY;
+    CORN::Date_32_clad Current_Date;                                                     //160415LML
+    std::string Crop_Name;                                                       //LML 140829
+    std::string Management_Name;                                                 //LML 140829
+    std::string Development_Stage;                                               //151016LML
+    double Leaf_Area_Index;                                                      //total LAI 151016LML
+    double Layer_Water_Content[MAX_soil_layers_alloc];
+    double Layer_Ice_Content[MAX_soil_layers_alloc];
+    double Layer_Nitrate_N_Mass[MAX_soil_layers_alloc];                          //(kg/ha)
+    double Layer_Ammonium_N_Mass[MAX_soil_layers_alloc];                         //(kg/ha)
+    double Layer_Avg_Daily_Soil_T[MAX_soil_layers_alloc];
+    double Soil_Water_Actual_Evaporation;                                        //(m) Soil and pond evaporation
+    double Snow_Evaporation;                                                     //(m h2o)
+    double soil_evaporation;                                                     //(m h2o) 160616LML
+    double pond_evaporation;                                                     //(m h2o) 160616LML
+    double residue_evaporation;                                                  //(m h2o) 160616LML
+    double Plant_Transpiration;                                                  //(m h2o) LML 140902
+    double Canopy_Interception;                                                  //(m h2o) 161028
+    double Daily_PET_MB;                                                         //(m) 160407LML
+    double Daily_Runoff_Excess_Infiltration;                                     //LML 141028
+    double Daily_Surface_Runoff;                                                 //(m)
+    double Daily_Surface_Runon;                                                  //(m) LML 140923
+    double Daily_Lateral_Runoff;                                                 //(m) 151006LML
+    double Daily_Lateral_Runon;                                                  //(m) 151006LML
+    double Daily_Lateral_Up;                                                     //(m) 151006LML
+    double NO3_N_Fertilization;                                                  //(kgN/ha)
+    double NH4_N_Fertilization;                                                  //(kgN/ha)
+    double org_N_Fertilization;                                                  //(kgN/ha) 160323LML
+    double Nitrate_Leaching;                                                     //(kgN/ha)
+    double Ammonium_Leaching;                                                    //(kgN/ha)
+    double Drainage;                                                             //(m)
+    double Fraction_Cover_Snow;
+    double Daily_Snow_Depth;                                                     //(m snow) peak snow depth
+    double Snow_Melt_Amount;                                                     //(m water)
+    //double Total_Snow_Amount;               //(m water)
+    double Avg_Snow_Surface_T;
+    //double Avg_Snow_Below_Surface_T;
+    double Precipitation_m;
+    double Mean_Temperature;
+    //LML 140829 soil & residue C,N,&water
+    double Pond_m;                                                               //(m water)
+    double Total_SWE;                                                            //(m water) End of day SWE
+    double Peak_SWE;                                                             //(m water) Peak day SWE
+    double Total_LiqW_m;                                                         //(m water)
+    double Total_Ice_m;                                                          //(m water)
+    double AG_Residue_C_Mass;                                                    //(kgC/ha) aboveground
+    double BG_Residue_C_Mass;                                                    //(kgC/ha) bellowground
+    double SOM_C_Mass;                                                           //(kgC/ha) soil
+    double AG_Residue_N_Mass;                                                    //(kgN/ha) aboveground
+    double BG_Residue_N_Mass;                                                    //(kgN/ha) bellowground
+    double SOM_N_Mass;                                                           //(kgN/ha) soil
+    double NO3_N_Mass;                                                           //(kgN/ha) soil
+    double NH4_N_Mass;                                                           //(kgN/ha) soil
+    double Profile_Mineral_N_Mass;                                               //(kgN/ha) NO3+NH4 170124LML
+    double Top_One_Meter_Mineral_N_Mass;                                         //(kgN/ha) 170124LML
+    double Profile_SOM_Carbon_Lost_As_CO2;                                       //(gC/m2/day) LML 140730
+    double Profile_Residue_Carbon_Lost_As_CO2;                                   //(gC/m2/day) LML 140730
+    double Maintenance_Respiration;                                              //(g glucose/m2/day) FMS Jun 27, 2014
+    double Biosynthesis_Efficiency;                                              //(g dry weight biomass / g glucose) FMS Jun 27, 2014
+    double Gross_Canopy_Photosynthesis;                                          //(gC/m2/day) FMS Jul 2, 2014
+    double CO2_by_Plant_Respiration;                                             //(gC/m2/day) FMS Jul 2, 2014
+    double Biomass_Root_Today;                                                   //(kg DM/m2) root
+    double Biomass_Top_Today;                                                    //(kg DM/m2) canopy
+    std::vector<double> dailyLateralInFlowSolute_kg;
+    std::vector<double> dailyLateralOutFlowSolute_kg;
+    std::vector<double> dailySurfaceInFlowSolute_kg;
+    std::vector<double> dailySurfaceOutFlowSolute_kg;
+    //151028LML added from outputgrowthclass for comparing with VB version
+    //outputgrowthclass is obsolete.
+    double Cumulative_Thermal_Time;
+    //double Potential_Cumulative_Biomass;                                         //(t/ha)
+    //double Actual_Cumulative_Biomass;                                            //(t/ha)
+    //double Actual_Cumulative_Root_Biomass;                                       //(t/ha)
+    double Fraction_Solar_Rad_Intercepted_Green_Canopy;                          //LML 140826 Potential_Green_Area_Index;
+    double Intercepted_Solar_Rad_MJ_m2;                                          //160405LML
+    double Green_Area_Index;
+    double Crop_Potential_Transpiration;                                         //(mm)
+    double Actual_Nitrogen_Uptake;                                               //(kgN/ha)
+    double Water_Stress_Index;
+    double Nitrogen_Stress_Index;
+    double Temperature_Stress_Index;                                             //160404LML
+    double Temperature_Stress_Index_Mean;                                        //160404LML
+    double Temperature_Stress_Current;                                     //160404LML
+    double Root_Depth;                                                           //(m)
+    double yield;                                                                //(t/ha)
+    double nitrification;                                                        //(kgN/ha)
+    double denitrification;                                                      //(kgN/ha)
+    double mineralization;                                                       //(kgN/ha)
+    double volatilization;                                                       //(kgNH4-N/ha)
+    double N_N2O_loss;                                                           //(kgN/ha) 170207LML
+    //bool Convert_Biomass_To_Residue;          //FMS Jul 11, 2014
+public:
+    //SoilProfileClass &SoilProfileRef;
+    double ProfileSoilWater(SoilProfileClass *pSoilProfile);
+    OutputDailySoilClass();//SoilProfileClass &_SoilProfileRef);
+    ~OutputDailySoilClass();
+};
+
+#endif // OUTPUTDAILYSOILCLASS_H

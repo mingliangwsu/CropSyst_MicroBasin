@@ -1,0 +1,560 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{4D907D0F-FBC0-485D-BF57-445C18FB9247}</ProjectGuid>
+			<ProjectVersion>12.0</ProjectVersion>
+			<Config Condition="'$(Config)'==''">Release</Config>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<TLIB_PageSize>128</TLIB_PageSize>
+			<OutputExt>lib</OutputExt>
+			<PackageImports>vcl.bpi;rtl.bpi;bcbie.bpi;vclx.bpi;vclactnband.bpi;xmlrtl.bpi;bcbsmp.bpi;vclimg.bpi;dbrtl.bpi;vcldb.bpi;vcldbx.bpi;bdertl.bpi;vcltouch.bpi;dsnap.bpi;dsnapcon.bpi;TeeUI.bpi;TeeDB.bpi;Tee.bpi;adortl.bpi;IndyCore.bpi;IndySystem.bpi;IndyProtocols.bpi;inet.bpi;intrawebdb_100_140.bpi;Intraweb_100_140.bpi;VclSmp.bpi;vclie.bpi;inetdb.bpi;webdsnap.bpi;websnap.bpi;inetdbbde.bpi;inetdbxpress.bpi;soaprtl.bpi;vclribbon.bpi;DbxCommonDriver.bpi;DbxClientDriver.bpi;DBXInterBaseDriver.bpi;DBXMySQLDriver.bpi;dbexpress.bpi;dbxcds.bpi;RNAutoControls_basic_package.bpi;tmsd2010.bpi;tmsexd2010.bpi;tmsxlsd2010.bpi;tmswizd2010.bpi</PackageImports>
+			<ProjectType>CppStaticLibrary</ProjectType>
+			<AllPackageLibs>rtl.lib;vcl.lib;RNAutoControls_CORN_package.lib;vclx.lib;RNAutoControls_basic_package.lib;bcbsmp.lib</AllPackageLibs>
+			<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
+			<UsePackages>true</UsePackages>
+			<IncludePath>..\..\..\chronometry\;..\..\..\format\;..\..\..\Internet\HTTP\;..\..\..\format\spreadsheet\;..\..\..\format\excel\;..\..\..\format\binary\oldbinrec\;..\..\..\math\;$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;..\..\..\format\binary\;..\..\..\format\MicroSoft\Access\;..\..\..\math\numerical\;..\..\..\parameters\;..\..\..\file_sys\;..\..\..\datetime\;..\..\..\validate\;..\..\..\string\;..\..\..\OS\;..\..\..\application\user\;..\..\..\application\explaination\;..\..\..\math\statistical\;..\..\..\measure\;..\..\..\tabular\;..\..\..\format\html\form_IO\;..\..\..\;..\..\..\application\;..\..\..\data_source\;..\..\..\container\;..\..\..\metrology\;..\..\;..\;..\..\..\..;c:\dev;$(IncludePath)</IncludePath>
+			<ILINK_LibraryPath>$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<BCC_wpar>false</BCC_wpar>
+			<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
+			<BCC_ExtendedErrorInfo>true</BCC_ExtendedErrorInfo>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
+			<BCC_DisableOptimizations>true</BCC_DisableOptimizations>
+			<DCC_Optimize>false</DCC_Optimize>
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+			<Defines>_DEBUG;$(Defines)</Defines>
+			<BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
+			<IntermediateOutputDir>Debug</IntermediateOutputDir>
+			<BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>
+			<DCC_Define>DEBUG</DCC_Define>
+			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+			<TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>
+			<BCC_StackFrames>true</BCC_StackFrames>
+			<ILINK_LibraryPath>$(BDS)\lib\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
+			<TASM_Debugging>Full</TASM_Debugging>
+			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<IntermediateOutputDir>Release</IntermediateOutputDir>
+			<ILINK_LibraryPath>$(BDS)\lib\release;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<TASM_Debugging>None</TASM_Debugging>
+		</PropertyGroup>
+		<ItemGroup>
+			<CppCompile Include="..\..\..\data_source\vv_datasrc.cpp">
+				<DependentOn>..\..\..\data_source\vv_datasrc.h</DependentOn>
+				<BuildOrder>89</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\metrology\units_clad.cpp">
+				<DependentOn>..\..\..\metrology\units_clad.h</DependentOn>
+				<BuildOrder>27</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\measure\units_enum.cpp">
+				<DependentOn>..\..\..\measure\units_enum.h</DependentOn>
+				<BuildOrder>69</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\application_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\application\application_directory_OS_FS.h</DependentOn>
+				<BuildOrder>53</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\numerical\interpolate_2D_3D.cpp">
+				<DependentOn>..\..\..\math\numerical\interpolate_2D_3D.h</DependentOn>
+				<BuildOrder>59</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\datetime\time.cpp">
+				<DependentOn>..\..\..\datetime\time.h</DependentOn>
+				<BuildOrder>12</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\measure\unitconv.cpp">
+				<DependentOn>..\..\..\measure\unitconv.h</DependentOn>
+				<BuildOrder>31</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\OS.cpp">
+				<BuildOrder>61</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\spreadsheet\biff.cpp">
+				<DependentOn>..\..\..\format\spreadsheet\biff.h</DependentOn>
+				<BuildOrder>93</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\float16.cpp">
+				<DependentOn>..\..\..\float16.h</DependentOn>
+				<BuildOrder>82</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\user\settings.cpp">
+				<DependentOn>..\..\..\application\user\settings.h</DependentOn>
+				<BuildOrder>51</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\statistical\statistics_descriptive.cpp">
+				<DependentOn>..\..\..\math\statistical\statistics_descriptive.h</DependentOn>
+				<BuildOrder>88</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\statistical\statistics_types.cpp">
+				<DependentOn>..\..\..\math\statistical\statistics_types.h</DependentOn>
+				<BuildOrder>90</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\parameters\parameters_datarec.cpp">
+				<DependentOn>..\..\..\parameters\parameters_datarec.h</DependentOn>
+				<BuildOrder>33</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\SDF_list.cpp">
+				<DependentOn>..\..\..\container\SDF_list.h</DependentOn>
+				<BuildOrder>8</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\file_system_engine_Windows.cpp">
+				<DependentOn>..\..\..\OS\file_system_engine_Windows.h</DependentOn>
+				<BuildOrder>78</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\datetime\date.cpp">
+				<DependentOn>..\..\..\datetime\date.h</DependentOn>
+				<BuildOrder>20</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\datetime\date_format.cpp">
+				<DependentOn>..\..\..\datetime\date_format.h</DependentOn>
+				<BuildOrder>19</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\data_source\datasrc.cpp">
+				<DependentOn>..\..\..\data_source\datasrc.h</DependentOn>
+				<BuildOrder>22</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\file_system_logical.cpp">
+				<DependentOn>..\..\..\OS\file_system_logical.h</DependentOn>
+				<BuildOrder>79</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\filtered_filename.cpp">
+				<DependentOn>..\..\..\OS\filtered_filename.h</DependentOn>
+				<BuildOrder>77</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\data_type_enum.cpp">
+				<BuildOrder>71</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\html\form_IO\content.cpp">
+				<BuildOrder>70</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\quality.cpp">
+				<DependentOn>..\..\..\quality.h</DependentOn>
+				<BuildOrder>42</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\project_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\application\project_directory_OS_FS.h</DependentOn>
+				<BuildOrder>60</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\measure\measures.cpp">
+				<DependentOn>..\..\..\measure\measures.h</DependentOn>
+				<BuildOrder>80</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\enumlist.cpp">
+				<DependentOn>..\..\..\container\enumlist.h</DependentOn>
+				<BuildOrder>6</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\statistical\statistics_recorder.cpp">
+				<DependentOn>..\..\..\math\statistical\statistics_recorder.h</DependentOn>
+				<BuildOrder>89</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\project.cpp">
+				<DependentOn>..\..\..\application\project.h</DependentOn>
+				<BuildOrder>93</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\binary\oldbinrec\oldbinrec_s.cpp">
+				<DependentOn>..\..\..\format\binary\oldbinrec\oldbinrec_s.h</DependentOn>
+				<BuildOrder>91</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\Internet\HTTP\request.cpp">
+				<DependentOn>..\..\..\Internet\HTTP\request.h</DependentOn>
+				<BuildOrder>98</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\tabular\tabular_text.cpp">
+				<DependentOn>..\..\..\tabular\tabular_text.h</DependentOn>
+				<BuildOrder>89</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\file_type_description.cpp">
+				<DependentOn>..\..\..\OS\file_type_description.h</DependentOn>
+				<BuildOrder>79</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\spreadsheet\css_file.cpp">
+				<DependentOn>..\..\..\format\spreadsheet\css_file.h</DependentOn>
+				<BuildOrder>94</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\random.cpp">
+				<DependentOn>..\..\..\math\random.h</DependentOn>
+				<BuildOrder>81</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\chronometry\time_abstract.cpp">
+				<BuildOrder>106</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\chronometry\time_second.cpp">
+				<DependentOn>..\..\..\chronometry\time_second.h</DependentOn>
+				<BuildOrder>107</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\numerical\interpolate.cpp">
+				<DependentOn>..\..\..\math\numerical\interpolate.h</DependentOn>
+				<BuildOrder>78</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\text_list_A.cpp">
+				<DependentOn>..\..\..\container\text_list_A.h</DependentOn>
+				<BuildOrder>102</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\moremath.cpp">
+				<DependentOn>..\..\..\math\moremath.h</DependentOn>
+				<BuildOrder>95</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\tabular\tabular_format.cpp">
+				<DependentOn>..\..\..\tabular\tabular_format.h</DependentOn>
+				<BuildOrder>86</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\tabular\delineation.cpp">
+				<DependentOn>..\..\..\tabular\delineation.h</DependentOn>
+				<BuildOrder>83</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\tabular\tabular.cpp">
+				<DependentOn>..\..\..\tabular\tabular.h</DependentOn>
+				<BuildOrder>84</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\explaination\explainations.cpp">
+				<DependentOn>..\..\..\application\explaination\explainations.h</DependentOn>
+				<BuildOrder>67</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\statistical\distribution_normal.cpp">
+				<DependentOn>..\..\..\math\statistical\distribution_normal.h</DependentOn>
+				<BuildOrder>83</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\statistical\distribution_Weibull.cpp">
+				<DependentOn>..\..\..\math\statistical\distribution_Weibull.h</DependentOn>
+				<BuildOrder>84</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\tabular\delineated_datarec.cpp">
+				<DependentOn>..\..\..\tabular\delineated_datarec.h</DependentOn>
+				<BuildOrder>82</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\tabular\tabular_parser.cpp">
+				<DependentOn>..\..\..\tabular\tabular_parser.h</DependentOn>
+				<BuildOrder>88</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\datetime\date_translator.cpp">
+				<BuildOrder>17</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\text_list.cpp">
+				<DependentOn>..\..\..\container\text_list.h</DependentOn>
+				<BuildOrder>10</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\arguments.cpp">
+				<DependentOn>..\..\..\application\arguments.h</DependentOn>
+				<BuildOrder>96</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\datetime\datetime64.cpp">
+				<DependentOn>..\..\..\datetime\datetime64.h</DependentOn>
+				<BuildOrder>16</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\parameters\parameters.cpp">
+				<DependentOn>..\..\..\parameters\parameters.h</DependentOn>
+				<BuildOrder>44</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\file_system_engine_common.cpp">
+				<DependentOn>..\..\..\OS\file_system_engine_common.h</DependentOn>
+				<BuildOrder>79</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\labeled_enum.cpp">
+				<BuildOrder>35</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\data_source\generic_datarec.cpp">
+				<BuildOrder>58</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\string\strconv.cpp">
+				<DependentOn>..\..\..\string\strconv.h</DependentOn>
+				<BuildOrder>29</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\directory_entry_name_abstract.cpp">
+				<DependentOn>..\..\..\OS\directory_entry_name_abstract.h</DependentOn>
+				<BuildOrder>72</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\search_tree.cpp">
+				<DependentOn>..\..\..\container\search_tree.h</DependentOn>
+				<BuildOrder>9</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\binary\binary_file_fstream.cpp">
+				<DependentOn>..\..\..\format\binary\binary_file_fstream.h</DependentOn>
+				<BuildOrder>46</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\explaination\explaination_location.cpp">
+				<BuildOrder>66</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\suite_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\application\suite_directory_OS_FS.h</DependentOn>
+				<BuildOrder>56</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\program_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\application\program_directory_OS_FS.h</DependentOn>
+				<BuildOrder>55</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\datetime\time_format.cpp">
+				<DependentOn>..\..\..\datetime\time_format.h</DependentOn>
+				<BuildOrder>13</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\association.cpp">
+				<DependentOn>..\..\..\container\association.h</DependentOn>
+				<BuildOrder>2</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\item.cpp">
+				<DependentOn>..\..\..\container\item.h</DependentOn>
+				<BuildOrder>7</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\user\appdata_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\application\user\appdata_directory_OS_FS.h</DependentOn>
+				<BuildOrder>50</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\adjunct_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\application\adjunct_directory_OS_FS.h</DependentOn>
+				<BuildOrder>52</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\binary\binary_file_abstract.cpp">
+				<DependentOn>..\..\..\format\binary\binary_file_abstract.h</DependentOn>
+				<BuildOrder>47</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\documentation_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\application\documentation_directory_OS_FS.h</DependentOn>
+				<BuildOrder>54</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\data_source\vv_file.cpp">
+				<DependentOn>..\..\..\data_source\vv_file.h</DependentOn>
+				<BuildOrder>20</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\metrology\units_symbology.cpp">
+				<BuildOrder>26</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\translations.cpp">
+				<DependentOn>..\..\..\application\translations.h</DependentOn>
+				<BuildOrder>62</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\measure\common_units.cpp">
+				<BuildOrder>79</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\data_source\dbase_datasrc.cpp">
+				<DependentOn>..\..\..\data_source\dbase_datasrc.h</DependentOn>
+				<BuildOrder>57</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\unilist.cpp">
+				<DependentOn>..\..\..\container\unilist.h</DependentOn>
+				<BuildOrder>11</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\indexer.cpp">
+				<BuildOrder>7</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\validate\validtyp.cpp">
+				<DependentOn>..\..\..\validate\validtyp.h</DependentOn>
+				<BuildOrder>30</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\data_source\command_options_datasrc.cpp">
+				<DependentOn>..\..\..\data_source\command_options_datasrc.h</DependentOn>
+				<BuildOrder>88</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\parameters\parameters_directory_OS_FS.cpp">
+				<DependentOn>..\..\..\parameters\parameters_directory_OS_FS.h</DependentOn>
+				<BuildOrder>43</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\data_source\datarec.cpp">
+				<DependentOn>..\..\..\data_source\datarec.h</DependentOn>
+				<BuildOrder>23</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\data_source\vv_entry.cpp">
+				<DependentOn>..\..\..\data_source\vv_entry.h</DependentOn>
+				<BuildOrder>21</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\MicroSoft\Access\import_export_table.cpp">
+				<DependentOn>..\..\..\format\MicroSoft\Access\import_export_table.h</DependentOn>
+				<BuildOrder>72</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\directory_entry_name_concrete.cpp">
+				<DependentOn>..\..\..\OS\directory_entry_name_concrete.h</DependentOn>
+				<BuildOrder>73</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\uniform_resource_identifier.cpp">
+				<DependentOn>..\..\..\OS\uniform_resource_identifier.h</DependentOn>
+				<BuildOrder>74</BuildOrder>
+			</CppCompile>
+			<None Include="corn_complete_static.todo"/>
+			<CppCompile Include="..\..\..\format\binary\binary_record_file.cpp">
+				<DependentOn>..\..\..\format\binary\binary_record_file.h</DependentOn>
+				<BuildOrder>45</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\parameters\number_keyed.cpp">
+				<DependentOn>..\..\..\parameters\number_keyed.h</DependentOn>
+				<BuildOrder>76</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\directory_entry_name.cpp">
+				<DependentOn>..\..\..\OS\directory_entry_name.h</DependentOn>
+				<BuildOrder>79</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\metrology\timestep.cpp">
+				<DependentOn>..\..\..\metrology\timestep.h</DependentOn>
+				<BuildOrder>28</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\parameters\parameter.cpp">
+				<DependentOn>..\..\..\parameters\parameter.h</DependentOn>
+				<BuildOrder>45</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\math\statistical\stats.cpp">
+				<DependentOn>..\..\..\math\statistical\stats.h</DependentOn>
+				<BuildOrder>49</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\uniform_resource_locator.cpp">
+				<DependentOn>..\..\..\OS\uniform_resource_locator.h</DependentOn>
+				<BuildOrder>75</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\bilist.cpp">
+				<BuildOrder>3</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\datetime\date_unconventional.cpp">
+				<DependentOn>..\..\..\datetime\date_unconventional.h</DependentOn>
+				<BuildOrder>90</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\binary_tree.cpp">
+				<DependentOn>..\..\..\container\binary_tree.h</DependentOn>
+				<BuildOrder>4</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\container.cpp">
+				<DependentOn>..\..\..\container\container.h</DependentOn>
+				<BuildOrder>5</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\datetime\date_time_format.cpp">
+				<BuildOrder>18</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\OS\file_system.cpp">
+				<DependentOn>..\..\..\OS\file_system.h</DependentOn>
+				<BuildOrder>96</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\seclusion.cpp">
+				<DependentOn>..\..\..\seclusion.h</DependentOn>
+				<BuildOrder>97</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\field.cpp">
+				<DependentOn>..\..\..\format\field.h</DependentOn>
+				<BuildOrder>99</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\container\text_list_C.cpp">
+				<DependentOn>..\..\..\container\text_list_C.h</DependentOn>
+				<BuildOrder>101</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\chronometry\date_time_64.cpp">
+				<DependentOn>..\..\..\chronometry\date_time_64.h</DependentOn>
+				<BuildOrder>103</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\format\binary\binary_record.cpp">
+				<DependentOn>..\..\..\format\binary\binary_record.h</DependentOn>
+				<BuildOrder>25</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\chronometry\date_abstract.cpp">
+				<DependentOn>..\..\..\chronometry\date_abstract.h</DependentOn>
+				<BuildOrder>104</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\chronometry\date_32.cpp">
+				<DependentOn>..\..\..\chronometry\date_32.h</DependentOn>
+				<BuildOrder>106</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\application\progress.cpp">
+				<DependentOn>..\..\..\application\progress.h</DependentOn>
+				<BuildOrder>100</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\chronometry\date_time_abstract.cpp">
+				<BuildOrder>108</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\chronometry\temporal.cpp">
+				<DependentOn>..\..\..\chronometry\temporal.h</DependentOn>
+				<BuildOrder>109</BuildOrder>
+			</CppCompile>
+			<BuildConfiguration Include="Base">
+				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<Import Project="$(BDS)\Bin\CodeGear.Cpp.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Cpp.Targets')"/>
+		<ProjectExtensions>
+			<Borland.Personality>CPlusPlusBuilder.Personality.12</Borland.Personality>
+			<Borland.ProjectType>CppStaticLibrary</Borland.ProjectType>
+			<BorlandProject>
+				<CPlusPlusBuilder.Personality>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">1033</VersionInfo>
+						<VersionInfo Name="CodePage">1252</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Debugging>
+						<Debugging Name="DebugSourceDirs"/>
+					</Debugging>
+					<Parameters>
+						<Parameters Name="RunParams">C:\dev\CropSyst\original_submodels\soil\infiltration\compare\Scenarios\hourly_cascade.csn</Parameters>
+						<Parameters Name="Launcher"/>
+						<Parameters Name="UseLauncher">False</Parameters>
+						<Parameters Name="DebugCWD">C:\dev\CropSyst\original_submodels\soil\infiltration\compare\Scenarios\hourly_cascade</Parameters>
+						<Parameters Name="HostApplication"/>
+						<Parameters Name="RemoteHost"/>
+						<Parameters Name="RemotePath"/>
+						<Parameters Name="RemoteParams"/>
+						<Parameters Name="RemoteLauncher"/>
+						<Parameters Name="UseRemoteLauncher">False</Parameters>
+						<Parameters Name="RemoteCWD"/>
+						<Parameters Name="RemoteDebug">False</Parameters>
+						<Parameters Name="Debug Symbols Search Path"/>
+						<Parameters Name="LoadAllSymbols">True</Parameters>
+						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+					</Parameters>
+					<Excluded_Packages>
+						<Excluded_Packages Name="C:\Documents and Settings\All Users\Documents\RAD Studio\7.0\Bpl\EasyListviewD13D.bpl">MustangPeak EasyListview Designtime Package</Excluded_Packages>
+						<Excluded_Packages Name="C:\Documents and Settings\All Users\Documents\RAD Studio\7.0\Bpl\MPCommonLibD13D.bpl">Mustangpeak Common Library DesignTime Package</Excluded_Packages>
+						<Excluded_Packages Name="C:\Documents and Settings\All Users\Documents\RAD Studio\7.0\Bpl\VirtualTreesD13D.bpl">Virtual Treeview design time package</Excluded_Packages>
+						<Excluded_Packages Name="C:\Documents and Settings\All Users\Documents\RAD Studio\7.0\Bpl\VirtualShellToolsD13D.bpl">Virtual Shell Tools Designtime Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\bcboffice2k140.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\bcbofficexp140.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dcloffice2k140.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+					</Excluded_Packages>
+					<ProjectProperties>
+						<ProjectProperties Name="AutoShowDeps">False</ProjectProperties>
+						<ProjectProperties Name="ManagePaths">True</ProjectProperties>
+						<ProjectProperties Name="VerifyPackages">True</ProjectProperties>
+					</ProjectProperties>
+				</CPlusPlusBuilder.Personality>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+	</Project>

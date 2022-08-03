@@ -1,0 +1,173 @@
+#include "scenario_export_engine.h"
+//#include "corn/datetime/datetime64.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/seclusion.h"
+namespace CropSyst
+{
+//______________________________________________________________________________
+Scenario_export_engine::Arguments::Arguments
+(int argc, const char *argv[]
+,const wchar_t *_target_file_extension)
+:source_directory_name           (0)
+,target_filename                 (0)
+,identified_scenario_filenames   ()
+,target_file_extension           (_target_file_extension)
+{
+   // Arguments are optional.
+   // If arguments are provided the first (optional) is usually the name of the
+   // project directory (may be qualified)
+   // No argument specified the project, the current working directory
+   // is assumed to be the project directory
+   for (int a = 1; a < argc; a++)
+   {  CORN::OS::Directory_entry_name_concrete *DE_a
+         = new CORN::OS::Directory_entry_name_concrete(argv[a]);
+      take_arg_DEN(DE_a);
+   }
+   complete_construction();
+}
+//______________________________________________________________________________
+Scenario_export_engine::Arguments::Arguments
+(const CORN::OS::Directory_entry_name &_source_directory_name
+,const CORN::OS::File_name            &_target_filename_qual
+,const wchar_t *_target_file_extension)
+:source_directory_name           (0)
+,target_filename                 (0)
+,target_file_extension           (_target_file_extension)
+{
+   CORN::OS::Directory_entry_name_concrete *DE_a
+      = new CORN::OS::Directory_entry_name_concrete(_source_directory_name);
+   take_arg_DEN(DE_a);
+   target_filename = new CORN::OS::File_name_concrete(_target_filename_qual);
+   complete_construction();
+}
+//_2015-04-27___________________________________________________________________
+bool Scenario_export_engine::Arguments::take_arg_DEN
+(CORN::OS::Directory_entry_name_concrete *DE_a)                    construction_
+{  if (DE_a->has_extension(target_file_extension))
+   {  delete target_filename; // May be a user error should only name one target filename
+      target_filename = DE_a;
+   } else
+   {  CORN::OS::File_system::Directory::Type DE_type = CORN::OS::file_system_engine.identify_type(*DE_a);
+      switch (DE_type)
+      {  case CORN::OS::directory_entry :
+         {  CORN::OS::File_name_concrete *potential_scenario_filename
+               = new CORN::OS::File_name_concrete(*DE_a,L".CropSyst_scenario");
+            if (CORN::OS::file_system_engine.exists(*potential_scenario_filename))
+            {  identified_scenario_filenames.append(potential_scenario_filename);
+               delete DE_a;
+            } else
+            {  delete potential_scenario_filename; potential_scenario_filename = 0;
+               delete source_directory_name; // May be a user error, should ether have one source directory or scenario directories
+               source_directory_name = DE_a;
+            }
+         } break;
+         case CORN::OS::file_entry :
+         case CORN::OS::FIFO_special_entry :
+         {
+            delete target_filename; // May be a user error should only name one target filename
+            target_filename = DE_a;
+         }
+         break;
+      } // switch
+   }
+   return true;
+}
+//_2015-04-28___________________________________________________________________
+bool Scenario_export_engine::Arguments::complete_construction()    construction_
+{  if (!source_directory_name || !CORN::OS::file_system_engine.exists(*source_directory_name))
+   {  source_directory_name = new CORN::OS::Directory_name_concrete(); // CWD
+      std::clog << "source directory defaults to CWD:" << source_directory_name->c_str() << std::endl;
+   }
+   return true;
+}
+//_2015-04-28___________________________________________________________________
+bool Scenario_export_engine::Arguments::know_selected_scenarios_unqual
+(const CORN::Text_list &selected_scenario_names)
+{  FOR_EACH_IN( scenario_name,CORN::Item_string/*180115 Text_list::Item*/,selected_scenario_names,each_scenario)
+   {  CORN::OS::Directory_entry_name_concrete *DE_a
+         = new CORN::OS::Directory_entry_name_concrete(*source_directory_name,*scenario_name);
+      take_arg_DEN(DE_a);
+   }  FOR_EACH_END(each_scenario)
+   return true;
+}
+//_2015-05-02___________________________________________________________________
+const std::wstring Scenario_export_engine::Arguments::compose()            const
+{  // used by CS_Explorer_engine::export_scenarios
+   std::wstring composed;
+   if (target_filename)
+   {  composed.append(L"\"");
+      composed.append(target_filename->w_str());
+      composed.append(L"\" ");
+   }
+   // Currently ACMO can take specific scenario filenames provided by CS explorer
+   if (identified_scenario_filenames.count())
+   FOR_EACH_IN(scenario_filename_qual,CORN::OS::File_name,identified_scenario_filenames, each_scenario)
+   {  composed.append(L" \"");
+      scenario_filename_qual->append_to_wstring(composed);                       //150503
+      composed.append(L"\"" );
+   } FOR_EACH_END(each_scenario)
+   else if (source_directory_name)
+   {  composed.append(L" \"");
+      source_directory_name->append_to_wstring(composed);
+      composed.append(L"\"" );
+   }
+   return composed;
+}
+//______________________________________________________________________________
+Scenario_export_engine::Scenario_export_engine
+(modifiable_  Arguments &_arguments)
+: selected_scenario_filenames_fully_qualified()
+, arguments(_arguments)
+, scenario_count(0)
+{  selected_scenario_filenames_fully_qualified.transfer_all_from(arguments.identified_scenario_filenames); //150428
+   if (!selected_scenario_filenames_fully_qualified.count() && arguments.source_directory_name)
+   {  CORN::Inclusion CropSyst_scenario_inclusion(".CropSyst_scenario",false);
+      CORN::OS::file_system_engine.list_DENs                                     //100101
+         ((*arguments.source_directory_name)
+         ,&selected_scenario_filenames_fully_qualified,0
+         ,CropSyst_scenario_inclusion
+         ,CORN::OS::File_system::subdirectory_recursion_inclusive);              //150909
+   }
+}
+//______________________________________________________________________________
+CORN::OS::File_name *Scenario_export_engine::render_target_filename() rendition_
+{  CORN::OS::File_name_concrete *rendered_target_filename = 0;                   //150402
+   if (arguments.target_filename) // user is specifying the target filename      //150402
+      rendered_target_filename = new CORN::OS::File_name_concrete
+         (*arguments.target_filename);
+   else
+   {  // Composing target filename
+      CORN::Date_time_clad_64 now;
+      std::string datestr;
+      //170901 this is the default format now.date_format.set_ordering_styles_separator(D_YMD,D_YYYY|D_M|D_lead_zero,'-');
+      now.append_to_string(datestr _ISO_FORMAT_DATE_TIME);                                             //140629
+      //170901 now.time_format.set_cstr(TF_HHMM);
+      std::string no_colons(datestr);
+      CORN::replace_character(no_colons,':','-');
+      CORN::replace_character(no_colons,' ','T');
+      std:string name_unqual(get_target_filename_prefix());
+      name_unqual.append("_");
+      name_unqual.append(no_colons);
+      rendered_target_filename = new CORN::OS::File_name_concrete                //150402
+         (*arguments.source_directory_name,name_unqual,get_target_filename_extension());
+   }
+   return rendered_target_filename;                                              //150402
+}
+//______________________________________________________________________________
+bool Scenario_export_engine::initialize()                        initialization_
+{  CORN::OS::File_name *target_filename = render_target_filename();
+   target.open(target_filename->c_str());
+   return true;
+}
+//_2015-05-03___________________________________________________________________
+nat16 Scenario_export_engine::export_scenarios()                   modification_
+{  nat32 scenarios_exported; //successfully exported
+   FOR_EACH_IN(source_filename,CORN::OS::File_name, selected_scenario_filenames_fully_qualified,each_source)
+      scenario_count++;
+      scenarios_exported += export_scenario(*source_filename);
+   FOR_EACH_END(each_source)
+   return scenarios_exported;
+}
+//______________________________________________________________________________
+} // namespace CropSyst
+

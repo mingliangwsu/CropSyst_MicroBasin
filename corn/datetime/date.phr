@@ -1,0 +1,331 @@
+L_DATE_Jan_abrv,
+/* date  *
+en Jan
+fr Jan
+it Gen
+es Enr
+ca Gen
+de Jan
+*/
+L_DATE_Feb_abrv,
+/* date  *
+en Feb
+fr Fev
+it Feb
+es Feb
+ca Feb
+de Feb
+*/
+L_DATE_Mar_abrv,
+/* date  *
+en Mar
+fr Mar
+it Mar
+es Mar
+ca Mar
+de Mar
+*/
+L_DATE_Apr_abrv,
+/* date  *
+en Apr
+fr Avr
+it Apr
+es Abr
+ca Abr
+de Apr
+*/
+L_DATE_May_abrv,
+/* date  *
+en May
+fr Mai
+it Maggio
+es Mayo
+ca Maig
+de Mai
+*/
+L_DATE_Jun_abrv,
+/* date  *
+en Jun
+fr Jun
+it Giu
+es Jun
+ca Jun
+de Jun
+*/
+L_DATE_Jul_abrv,
+/* date  *
+en Jul
+fr Jul
+it Lug
+es Jul
+ca Jul
+de Jul
+*/
+L_DATE_Aug_abrv,
+/* date  *
+en Aug
+fr Aot
+it Ago
+es Ago
+ca Agt
+de Aug
+*/
+L_DATE_Sep_abrv,
+/* date  *
+en Sep
+fr Sep
+it Set
+es Set
+ca Set
+de Sep
+*/
+L_DATE_Oct_abrv,
+/* date  *
+en Oct
+fr Oct
+it Ott
+es Oct
+ca Oct
+de Okt
+*/
+L_DATE_Nov_abrv,
+/* date  *
+en Nov
+fr Nov
+it Nov
+es Nov
+ca Nov
+de Nov
+*/
+L_DATE_Dec_abrv,
+/* date  *
+en Dec
+fr Dec
+it Dic
+es Dec
+ca Des
+de Dez
+*/
+L_DATE_January,
+/* date  *
+en January
+fr Janvier
+it Gennaio
+es Enero
+ca Gener
+de Januar
+*/
+L_DATE_February,
+/* date  *
+en February
+fr Fevrier
+it Febbraio
+es Febrero
+ca Febrer
+de Februar
+*/
+L_DATE_March,
+/* date  *
+en March
+fr Mars
+it Marzo
+es Marzo
+ca Març
+de März
+*/
+L_DATE_April,
+/* date  *
+en April
+fr Avril
+it Aprile
+es Abril
+ca Abril
+de April
+*/
+L_DATE_May,
+/* date  *
+en May
+fr Mai
+it Maggio
+es Mayo
+ca Maig
+de Mai
+*/
+L_DATE_June,
+/* date  *
+en June
+fr Juin
+it Giugno
+es Junio
+ca Juny
+de Juni
+*/
+L_DATE_July,
+/* date  *
+en July
+fr Juillet
+it Luglio
+es Julio
+ca Julio
+de Juli
+*/
+L_DATE_August,
+/* date  *
+en August
+fr Août
+it Agosto
+es Agosto
+ca Agost
+de August
+*/
+L_DATE_September,
+/* date  *
+en September
+fr Septembre
+it Settembre
+es Septiembre
+ca Setembre
+de September
+*/
+L_DATE_October,
+/* date  *
+en October
+fr Octobre
+it Ottobre
+es Octubre
+ca Octubre
+de Oktober
+*/
+L_DATE_November,
+/* date  *
+en November
+fr Novembre
+it Novembre
+es Noviembre
+ca Novembre
+de November
+*/
+L_DATE_December,
+/* date  *
+en December
+fr Decembre
+it Dicembre
+es Diciembre
+ca Desembre
+de Dezember
+*/
+L_DATE_Sunday,
+/* date  *
+en Sunday
+it Domenica
+de Sonntag
+*/
+L_DATE_Monday,
+/* date  *
+en Monday
+it Lunedì
+de Montag
+*/
+L_DATE_Tuesday,
+/* date  *
+en Tuesday
+it Martedì
+de Dienstag
+*/
+L_DATE_Wednesday,
+/* date  *
+en Wednesday
+it Mercoledì
+de Mittwoch
+*/
+L_DATE_Thursday,
+/* date  *
+en Thursday
+it Giovedì
+de Donnerstag
+*/
+L_DATE_Friday,
+/* date  *
+en Friday
+it Venerdì
+de Freitag
+*/
+L_DATE_Saturday,
+/* date  *
+en Saturday
+it Sabato
+de Samstag
+*/
+L_DATE_Day,
+/* date  *
+en Day
+fr Jour
+it Giorno
+es Día
+ca Dia
+*/
+L_DATE_Days,
+/* date  *
+en Days
+fr Jours
+it Giorni
+es Días
+ca Dies
+*/
+L_DATE_Day_of_month,
+/* date  *
+en Day of the month
+fr Jour du mois
+it Giorno del mese
+es Día del mes
+ca Dia del mes
+*/
+L_DATE_Day_of_year,
+/* date  *
+en Day of the year
+fr Jour de l'année
+it Giorno dell'anno
+es Día del año
+ca Dia de l'any
+*/
+L_DATE_Month,
+/* date  *
+en Month
+fr Mois
+it Mese
+es Mes
+ca Mes
+*/
+L_DATE_Year,
+/* date  *
+en Year
+fr Année
+it Anno
+es Año
+ca Any
+*/
+L_DATE_Years,
+/* date  *
+en Years
+fr Années
+it Anni
+es Años
+ca Anys
+*/
+L_DATE_Date,
+/* date  *
+en Date
+fr Date
+it Data
+es Fecha
+ca Data
+*/
+L_Relative_year,
+/* date *
+en Relative year
+fr Année relative
+it Anno relativo
+es Año relativo
+ca Any relativo
+*/
+

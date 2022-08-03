@@ -1,0 +1,137 @@
+
+// For C++ projects dont include this file in your project/Makefile
+// (it is #included by request_WinINet.cpp).
+// For C projects, do include this file.
+
+// This code is compatible and used with C++ versions
+
+#if (!defined(_WIN32) && ! defined(_WIN64))
+#error Windows only
+// These functions are only available under the development environments for Windows
+// For Linux use request_cURL
+#endif
+
+#ifndef __cplusplus
+#include <Windows.h>
+#include <WinInet.h>
+// #include "corn/Internet/HTTP/request.h"
+#endif
+
+
+#define WinINet_REQUEST_START(hostname,port,username,password,path_query_fragment) \
+   char httpUseragent[512];                                                    \
+   DWORD szhttpUserAgent = sizeof(httpUseragent);                              \
+   ObtainUserAgentString( 0, httpUseragent, &szhttpUserAgent );                \
+   char m[5];                                                                  \
+   if(Method == GET) strcpy(m, "GET\0");                                       \
+   else              strcpy(m, "POST\0");                                      \
+   HINTERNET internet = InternetOpenA                                          \
+      (httpUseragent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);            \
+   if(internet != NULL)                                                        \
+   {  \
+      HINTERNET connect = InternetConnectA                                     \
+         (internet,hostname,port,username,password,INTERNET_SERVICE_HTTP,0,0 );\
+      if(connect != NULL)                                                      \
+      {  HINTERNET request = HttpOpenRequestA                                  \
+            (connect, m                                                        \
+            ,path_query_fragment                                               \
+            , "HTTP/1.1", NULL, NULL,                                          \
+            INTERNET_FLAG_HYPERLINK | INTERNET_FLAG_IGNORE_CERT_CN_INVALID |   \
+               INTERNET_FLAG_IGNORE_CERT_DATE_INVALID |                        \
+               INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP  |                        \
+               INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |                        \
+               INTERNET_FLAG_NO_AUTH |                                         \
+               INTERNET_FLAG_NO_CACHE_WRITE |                                  \
+               INTERNET_FLAG_NO_UI |                                           \
+               INTERNET_FLAG_PRAGMA_NOCACHE |                                  \
+               INTERNET_FLAG_RELOAD, NULL);                                    \
+         if(request != NULL)                                                   \
+         {  int datalen = 0;                                                   \
+            if(data != NULL) datalen = strlen(data);                           \
+            int headerlen = 0;                                                 \
+            if(header != NULL) headerlen = strlen(header);                     \
+            HttpSendRequestA(request, header, headerlen, data, datalen);       \
+             CHAR szBuffer[1025];                                              \
+             DWORD dwRead=0;                                                   \
+             while(::InternetReadFile(request, szBuffer                        \
+                   , sizeof(szBuffer)-1, &dwRead) && dwRead) {
+
+// Currently only using INTERNET_SERVICE_HTTP,
+// other services would be INTERNET_SERVICE_FTP INTERNET_SERVICE_GOPHER
+// FTP uses the dwFlags argument.
+// INTERNET_FLAG_PASSIVE uses passive FTP semantics
+// dwContext is not currently needed
+
+
+#define WinINet_REQUEST_FINISH                \
+               szBuffer[dwRead] = 0;          \
+               OutputDebugStringA(szBuffer);  \
+               dwRead=0;                      \
+             } InternetCloseHandle(request);  \
+      }  } InternetCloseHandle(connect);      \
+   } InternetCloseHandle(internet);
+
+
+// InternetOpenA
+// http://msdn.microsoft.com/en-us/library/windows/desktop/aa385096%28v=vs.85%29.aspx
+
+// InternetConnect
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa384363(v=vs.85).aspx
+
+// HttpOpenRequestA
+// http://msdn.microsoft.com/en-us/library/windows/desktop/aa384233%28v=vs.85%29.aspx
+
+// HttpSendRequestA
+// http://msdn.microsoft.com/en-us/library/windows/desktop/aa384247%28v=vs.85%29.aspx
+
+// InternetCloseHandle
+// http://msdn.microsoft.com/en-us/library/windows/desktop/aa384350%28v=vs.85%29.aspx
+//______________________________________________________________________________
+// for C++ the request_URI forms of this method may be preferable
+/*_________________________________________________________________________*/
+bool WinINet_request_to_cstr
+(int Method, LPCSTR Host, LPCSTR url, LPCSTR header, LPSTR data,char *result)
+{
+   WinINet_REQUEST_START(Host,INTERNET_DEFAULT_HTTP_PORT,NULL,NULL,url)
+   strcpy(result,szBuffer);
+   WinINet_REQUEST_FINISH
+}
+/*_________________________________________________________________________*/
+/* http://stackoverflow.com/questions/10106816/how-to-contruct-httpsendrequest-method-of-wininet
+
+#include <wininet.h>
+
+    /// ....
+
+    HINTERNET hIntSession =
+      ::InternetOpen(_T("MyApp"), INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+
+    HINTERNET hHttpSession =
+      InternetConnect(hIntSession, _T("api.twitter.com"), 80, 0, 0, INTERNET_SERVICE_HTTP, 0, NULL);
+
+    HINTERNET hHttpRequest = HttpOpenRequest(
+      hHttpSession,
+      _T("GET"),
+      _T("1/statuses/user_timeline.xml?screen_name=twitterapi"),
+      0, 0, 0, INTERNET_FLAG_RELOAD, 0);
+
+    TCHAR* szHeaders = _T("Content-Type: text/html\nMySpecialHeder: whatever");
+    CHAR szReq[1024] = "";
+    if( !HttpSendRequest(hHttpRequest, szHeaders, _tcslen(szHeaders), szReq, strlen(szReq))) {
+      DWORD dwErr = GetLastError();
+      /// handle error
+    }
+
+    CHAR szBuffer[1025];
+    DWORD dwRead=0;
+    while(::InternetReadFile(hHttpRequest, szBuffer, sizeof(szBuffer)-1, &dwRead) && dwRead) {
+      szBuffer[dwRead] = 0;
+      OutputDebugStringA(szBuffer);
+      dwRead=0;
+    }
+
+    ::InternetCloseHandle(hHttpRequest);
+    ::InternetCloseHandle(hHttpSession);
+    ::InternetCloseHandle(hIntSession);
+*/
+

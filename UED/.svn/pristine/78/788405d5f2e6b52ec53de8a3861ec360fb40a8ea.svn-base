@@ -1,0 +1,70 @@
+#include <UED/library/database_file.h>
+#include <corn/file_sys/smart_filename.h>
+#include <fstream>
+//#include <corn/format/binary/binary_record.h>
+/*
+   This command line mode program
+   makes a copy of the first named UED file
+   having the second filename.
+   All free records (marked as free or deleted)
+   are expunged from the copy.
+
+   If only one UED filename is specified on the command line
+   the new file will be given the same name prepended with "Copy of "
+
+
+*/
+//______________________________________________________________________________    
+uint32 pack_UED_file
+   (const CORN::Smart_file_name &original_file_name
+   ,const CORN::Smart_file_name &copy_file_name)
+{
+   UED::Database_file *original_file = new UED::Database_file(original_file_name.c_str(),true);           // open the original file readonly
+      // Note that I am using new for original file because
+      // I have giving the original records to the copy
+      // but then both objects are pointing to the original records.
+      // I should 'take' or copy the records from the original, but I don't
+      // currently have a mechanism for that in UED::Database_file.
+      // Hence this hack.
+   UED::Database_file copy_file(copy_file_name.c_str(),false);                  // open the copy
+   uint32 record_count = 0;
+   while (UED::Record_base *original_rec = original_file->goto_next())
+   {
+      Record_code original_rec_code = original_rec->get_code();
+      if (original_rec_code != original_file->get_free_code(original_rec_code))
+      {
+         copy_file.append_record(original_rec,true);
+
+         // Warning UED::Database_file expects appended records to be relinquished
+         // to it, so both databases will be pointing to the original record.
+         // This should not be a problem as long as I don't delete original_file
+         // (Using Database_file_indexed would likely be problemactic.
+         record_count++;
+      }
+      // else we don't copy the record
+   };
+   return record_count;
+};
+//______________________________________________________________________________
+
+int main(int argc, const char *argv[])
+{  int result = EXIT_FAILURE;
+
+   if (argc > 1)
+   {  CORN::Smart_file_name original_file_name(argv[1]);
+      CORN::Ustring copy_of_name("copy of ");
+      copy_of_name.append(original_file_name.get_name(false));
+      CORN::Smart_file_name copy_file_name(original_file_name);
+      copy_file_name.set_name(copy_of_name);
+      if (argc > 2)
+      {
+         copy_file_name.set(argv[2]);
+      };
+      std::cout << "Packing:" << original_file_name << " to " << copy_file_name << std::endl;
+      result = pack_UED_file(original_file_name,copy_file_name) > 0
+         ? EXIT_SUCCESS
+         : EXIT_FAILURE;
+   };
+   return result;
+};
+//______________________________________________________________________________

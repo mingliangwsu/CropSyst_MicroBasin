@@ -1,0 +1,33 @@
+
+Integer and float field
+
+variable/field name	
+	unlimited characters for VV_file
+	11 characters (for dBase)
+	32 characters (for Oracle)
+units
+
+default value
+warning min/max
+error min/max
+caption
+hint
+help URL
+
+I don't think I will have
+manual URL
+tutorial URL
+FAQ URL
+because VCL provides only a single help file does not provide 
+These should be cross referenced through the help
+
+
+
+
+
+float fields
+precision
+
+integer field
+
+

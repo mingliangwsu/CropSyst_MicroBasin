@@ -1,0 +1,607 @@
+#include "crop/crop_types.h"
+#include "crop/crop_fruit.h"
+#include "crop/crop_param.h"
+#include "crop/canopy_growth.h"
+#include "crop/crop_orchard_common.h"
+#include "common/weather/hour/weather_hours.h"
+#include "common/weather/weather.h"
+#include "crop/phenology_common.h"
+#include "crop/growth_stages.h"
+
+#  include "static_phrases.h"
+
+namespace CropSyst {
+//______________________________________________________________________________
+void Fruit_chill_requirement::add_hour_temperature(float64 temperature)
+{  // convert temperature to chill units
+   float64 chill_units
+   =  (temperature < 1.4) ? 0.0
+   :  (temperature < 2.4) ? 0.5
+   :  (temperature < 9.1) ? 1.0
+   :  (temperature <12.4) ? 0.5
+   :  (temperature <15.9) ? 0.0
+   :  (temperature <18.0) ?-0.5
+   :                       -1.0;
+   //deduct chill units from chill_hours remaining.
+   chill_hours_remaining -= chill_units;
+}
+//_2002-11-24___________________________________________________________________
+bool Fruit_bud_break_requirement::satisfied(bool chill_req_satisfied,float32 accum_deg_days) const
+{  bool sat = chill_req_satisfied
+   ?  accum_deg_days >= deg_day_bud_break_chill_req_sat
+   :  accum_deg_days >= deg_day_bud_break_chill_req_not_sat;
+   return sat;
+}
+//_2003-05-15___________________________________________________________________
+Fruit_harvest_requirements::Fruit_harvest_requirements(const CropSyst::Crop_parameters::Fruit &_parameters)
+: parameters(_parameters)
+, consecutive_days_below_threshold_temperature(0)
+{}
+//_2008-12-04___________________________________________________________________
+bool Fruit_harvest_requirements::satisfied(DOY doy,float64 min_temp,float64 avg_temp) mutates_
+{  bool result = false;
+   if (doy == parameters.harvest_DOY_latest)
+      result = true; // we have reached the lastest date for harvest so force harvest.
+   else
+   switch (parameters.harvest_condition_mode)
+   {  case management_scheduled_harvest      :  { result =  false; } break; // Harvest should be picked up by a management operation
+      case consider_fixed_date_harvest       :  { if (doy == parameters.harvest_DOY_fixed) result = true; }break;
+      case consider_min_temperature_harvest  :
+      {  if ((doy >= parameters.harvest_DOY_earliest) && (doy <= parameters.harvest_DOY_latest) && (min_temp <= parameters.harvest_temperature))
+         {  consecutive_days_below_threshold_temperature += 1;
+            if (consecutive_days_below_threshold_temperature >= (CORN::Days)parameters.harvest_temperature_days)
+               result = true;
+         } else  consecutive_days_below_threshold_temperature = 0;
+      } break;
+      case consider_avg_temperature_harvest  :
+      { if ((doy >= parameters.harvest_DOY_earliest) && (doy <= parameters.harvest_DOY_latest) && (avg_temp <= parameters.harvest_temperature))
+         {  consecutive_days_below_threshold_temperature += 1;
+            if (consecutive_days_below_threshold_temperature >= (CORN::Days)parameters.harvest_temperature_days)
+               result = true;
+         } else  consecutive_days_below_threshold_temperature = 0;
+      } break;
+   }
+   return result;
+}
+//_2008-12-04___________________________________________________________________
+Crop_CropSyst_orchard_fruit::Crop_CropSyst_orchard_fruit
+(CropSyst::Crop_parameters              *_parameters                             //020409
+,bool                          _owns_parameters                                  //040121
+,CORN::Date                   &_today                                            //110824
+,CORN::Unidirectional_list             &performable_operations_                  //151004
+,modifiable_ Crop_CO2_response         *Crop_CO2_response_given_optional         //151201
+,const Air_temperature_maximum         &air_temperature_max_                     //151201
+,const Air_temperature_minimum         &air_temperature_min_                     //151201
+,const Air_temperature_average         &air_temperature_avg_                     //151201
+,const Solar_radiation                 &solar_radiation_                         //151201
+,const Vapor_pressure_deficit_daytime  &vapor_pressure_deficitdaytime_           //151201
+,const Vapor_pressure_deficit_max      &vapor_pressure_deficit_max_              //151201
+,const Psychrometric_constant          &_psychrometric_constant                  //140508
+,const float64                         &_aerodynamic_resistance_ref_plants       //140508
+  //161111,const float64                         &_snow_pack_thickness_m                   //141205
+,const Sun                             &_sun                                     //151128
+,Weather_spanning_interface                                                      //151201_130901
+      &_weather
+//160706 #ifdef WEATHER_PROVIDER_VERSION
+,Weather_provider             &_weather_provider                                 //110826
+//160706 #endif
+,Weather_hours                &_hourly_weather                                   //080908
+,Soil_interface               *_soil                                             //050721
+,Soil_nitrogen_interface      *_soil_chem                                        //050721
+,modifiable_ Soil_salt_interface      *_soil_salinity                            //051118
+,Crop_nitrogen_model           _nitrogen_model                                   //050722
+#ifdef NITROGEN
+,const Slope_saturated_vapor_pressure_plus_psychrometric_resistance            //referenced
+      *slope_saturated_vapor_pressure_plus_psychrometric_resistance_reference
+,ET_reference_interface       *_ET
+#endif
+,Orchard_interface *_orchard                                                     //071121
+)
+:Crop_complete
+   (_parameters
+   #ifdef OLD_ORCHARD
+   ,_orchard
+   #endif
+   ,_owns_parameters
+   ,_today                                                                       //110824
+   ,performable_operations_                                                      //151005
+   ,Crop_CO2_response_given_optional                                             //151201
+   ,air_temperature_max_                                                         //151201
+   ,air_temperature_min_                                                         //151201
+   ,air_temperature_avg_                                                         //151201
+   ,solar_radiation_                                                             //151201
+   ,vapor_pressure_deficitdaytime_                                               //151201
+   ,vapor_pressure_deficit_max_                                                  //151201
+   ,_psychrometric_constant                                                      //140508
+  //161111   ,_snow_pack_thickness_m                                                       //141205
+   ,_weather
+   ,_sun.ref_sun_rise_time()                                                     //151128_150907
+   ,day_length_hours_unused                                                      //140812
+   ,0 // _seeding_parameters not applicable to fruit tree
+   ,_soil
+   ,_nitrogen_model
+   #ifdef NITROGEN
+   ,slope_saturated_vapor_pressure_plus_psychrometric_resistance_reference       //150602
+   #endif
+   )
+, fruit_dry_biomass             ( 0.0)
+, fruit_reserves_biomass        ( 0.0)                                                          //071117
+, fruit_root_turnover_biomass   ( 0.0)                                                          //071117
+,initial_fruit_growth_date    ((Year)0,CORN::DOY(0),D_YMD,D_YYYY|D_Mmm|D_lead_zero,'/')         //030521
+,veraison_date                ((Year)0,CORN::DOY(0),D_YMD,D_YYYY|D_Mmm|D_lead_zero,'/')         //030521
+,rapid_fruit_growth_date      ((Year)0,CORN::DOY(0),D_YMD,D_YYYY|D_Mmm|D_lead_zero,'/')         //030521
+
+,bud_break_date                     ((Year)0,CORN::DOY(0),D_YMD,D_YYYY|D_Mmm|D_lead_zero,'/')   //081013
+,chill_requirement_satisfied_date   ((Year)0,CORN::DOY(0),D_YMD,D_YYYY|D_Mmm|D_lead_zero,'/')   //081013
+,fruit_chill_requirement(0)    // will be set at end of dormancy                                //021125
+,fruit_bud_break_requirement(0)// will be set when chill requiment satisfied.                   //021125
+,orchard(_orchard)                                                                              //071121
+,limit_max_LAI(false)                                                                           //081103
+{}
+//______________________________________________________________________________
+Crop_CropSyst_orchard_fruit::~Crop_CropSyst_orchard_fruit()
+{
+OPTFRUIT       if (fruit_chill_requirement)     delete fruit_chill_requirement;     fruit_chill_requirement = 0;
+OPTFRUIT       if (fruit_bud_break_requirement) delete fruit_bud_break_requirement; fruit_bud_break_requirement = 0;
+   if (fruit_harvest_requirements)  delete fruit_harvest_requirements;  fruit_harvest_requirements = 0;  //081204
+}
+//______________________________________________________________________________
+bool Crop_CropSyst_orchard_fruit::initialize()
+{
+   fruit_dry_biomass             = 0;                                            //000616
+   fruit_reserves_biomass        = 0;                                            //071117
+   fruit_root_turnover_biomass   = 0;                                            //071117
+   initial_fruit_growth_date  .set_YD(Year(0),CORN::DOY(0));                     //030521
+   veraison_date              .set_YD(Year(0),CORN::DOY(0));                     //030521
+   rapid_fruit_growth_date    .set_YD(Year(0),CORN::DOY(0));                     //030521
+   bud_break_date               .set_YD(Year(0),CORN::DOY(0));                   //081013
+   chill_requirement_satisfied_date.set_YD(Year(0),CORN::DOY(0));                //081013
+   return true;
+}
+//_2007-11-20___________________________________________________________________
+bool Crop_CropSyst_orchard_fruit::start()
+{  phenology.growth_stage      = NGS_DORMANT_or_INACTIVE;                        //130925_030523
+   //assuming fruit simulations start jan 1
+   quiescence_end_requirement = new CropSyst::Quiescence_end_requirement         //160326
+      ((parameters->quiescence),1  );                                            //160326
+#ifdef FRUIT_CROP_MODEL
+   // fruit bud break requirements check must not start until dormancy ends      //080908
+      fruit_chill_requirement = new Fruit_chill_requirement(parameters->dormancy.chill_hours);  //030529
+#endif
+      roots_vital->root_length       = parameters->root.max_depth;               //061212
+      plant_height      = parameters->morphology.max_canopy_height;              //110218_990213
+      trigger_synchronization(NGS_DORMANT_or_INACTIVE);                          //030516
+   return Crop_complete::start();                                                //140619
+      // Not sure why I didn;t call super start() before.
+}
+//_2007-11-20___________________________________________________________________
+void Crop_CropSyst_orchard_fruit::setup_inactive_period_end_requirement(CORN::DOY doy)
+{  // doesn't actually have dormancy_end_requirement
+   // Instead uses fruit_chill_requirement
+   fruit_harvested = false;
+   if (fruit_chill_requirement)      // Should not happen
+      delete fruit_chill_requirement;// but just in case
+   fruit_chill_requirement = new Fruit_chill_requirement(parameters->dormancy.chill_hours);
+}
+//_2007-11-20_2003-05-14________________________________________________________
+bool
+#ifdef OLD_ORCHARD
+   Crop_complete
+#else
+   Crop_CropSyst_orchard_fruit
+#endif
+   ::initiate_fruit_growth()
+{
+   fruit_dry_biomass = 0.0;                                                      //000616
+   #ifdef OLD_PHENOLOGY_SEQUENCER
+   phenology.growth_stage = FGS_FRUCTESCENCE;
+   log_event("Begin initial fruit growth");
+   initial_fruit_growth_date.set(today);                                         //020809
+   trigger_synchronization(FGS_FRUCTESCENCE);
+   return true;                                                                  //140619
+   #else
+   trigger_synchronization(FGS_FRUCTESCENCE);
+   return CropSyst::Phenology_sequencer::initiate_fruit_growth();
+   #endif
+}
+//_2003-05-21___________________________________________________________________
+bool
+#ifdef OLD_ORCHARD
+   Crop_complete
+#else
+   Crop_CropSyst_orchard_fruit
+#endif
+::initiate_veraison()
+{  linger_veraison_label = 2;
+   trigger_synchronization(FGS_VERAISON);
+   #ifdef OLD_PHENOLOGY_SEQUENCER
+   phenology.growth_stage = FGS_VERAISON;
+   log_event(TL_Begin_veraison);
+   return true;                                                                  //140619
+   #else
+   return  CropSyst::Phenology_sequencer::initiate_veraison();
+   #endif
+}
+//______________________________________________________________________________
+bool
+#ifdef OLD_ORCHARD
+   Crop_complete
+#else
+   Crop_CropSyst_orchard_fruit
+#endif
+::initiate_rapid_fruit_growth()
+{
+   if (parameters->fruit.grape)                                                  //030521
+      initiate_veraison();                                                    //030521
+   #ifdef OLD_PHENOLOGY_SEQUENCER
+   phenology.growth_stage = FGS_RAPID_FRUIT_DEVELOPMENT;
+   log_event("Beging rapid fruit growth");
+   rapid_fruit_growth_date.set(today);                                           //020809
+   trigger_synchronization(FGS_RAPID_FRUIT_DEVELOPMENT);
+   return true;                                                                  //140619
+   #else
+   trigger_synchronization(FGS_RAPID_FRUIT_DEVELOPMENT);
+   return  CropSyst::Phenology_sequencer::initiate_rapid_fruit_growth();
+   #endif
+}
+//_2003-05-21___________________________________event_begin_rapid_fruit_growth_/
+float64 Crop_CropSyst_orchard_fruit::determine_yield()                 mutation_
+{  float64 yield_now   = fruit_dry_biomass;                                      //080912
+      // Now we stop partition when max fruit load is reached
+   fruit_dry_biomass = 0;  // clear for successive years                         //000616
+   return  yield_now;
+}
+//_2007-11-20___________________________________________________________________
+void Crop_CropSyst_orchard_fruit::restart(float64 restart_biomass,float64 restart_GAI,bool use_clump_factor, bool after_dormancy)
+{  Crop_complete::restart( restart_biomass, restart_GAI, use_clump_factor,  after_dormancy);
+   initial_fruit_growth_date.set_YD(Year(0),CORN::DOY(0));                       //030521
+   veraison_date.set_YD(Year(0),CORN::DOY(0));                                   //030521
+   rapid_fruit_growth_date.set_YD(Year(0),CORN::DOY(0));                         //030521
+   float64 deg_days_begin_canopy_development = thermal_time->get_accum_degree_days(false); //071121
+   orchard->set_deg_days_begin_canopy_development(deg_days_begin_canopy_development);     //071121
+   if (fruit_adjusted_parameters) delete fruit_adjusted_parameters;              //081113
+      fruit_adjusted_parameters = new CropSyst::Crop_parameters::Fruit(parameters->fruit); //081113
+   limit_max_LAI = false;                                                        //081101
+}
+//______________________________________________________________________________
+void Crop_CropSyst_orchard_fruit::thermal_time_event()
+{  if (phenology.growth_stage == NGS_DORMANT_or_INACTIVE) return;                //130925_071113
+   if (parameters->crop_model_labeled.get() == CROPSYST_ORCHARD_MODEL)           //130408
+   {   if (thermal_time_matchs(parameters->phenology.initiation.filling,true))             initiate_fruit_growth();        //030521
+       if (thermal_time_matchs(parameters->phenology.initiation.rapid_fruit_growth,false)) initiate_rapid_fruit_growth();  //030521
+   } else // Now all non fruit crops, not just those harvest for seed can have grain (seed) filling                        //040827
+       Crop_complete::thermal_time_event();
+}
+//_1997-05-14___________________________________________________________________
+void Crop_CropSyst_orchard_fruit::update_lingers()                 modification_ // actually aguments adjucts
+{  if (linger_budbreak_label) linger_budbreak_label--;                           //030521
+   if (linger_veraison_label) linger_veraison_label--;                           //030521
+   if (linger_chill_satisfied_label)  linger_chill_satisfied_label--;            //030529
+}
+//_2007-11-20___________________________________________________________________
+void Crop_CropSyst_orchard_fruit::consider_inactive_period                       //020626
+(float64 avg_temperature                                                         //021202
+,float64 temperature_with_est_night)   // daily temp with est. night time temps.
+{  if (fruit_bud_break_requirement)                                              //021125
+   { if (fruit_bud_break_requirement->satisfied
+         (!fruit_chill_requirement,thermal_time->get_accum_degree_days(false)))   //040830
+       { //081103 linger_budbreak_label = 4;
+         phenology.growth_stage = FGS_ACTIVE_GROWTH;                             //030523
+         trigger_synchronization(FGS_BUD_BREAK);                                 //030523
+         restart_after_inactive_period();                                        //021202
+         log_event("Bud break");
+         delete fruit_bud_break_requirement;                                     //021125
+         fruit_bud_break_requirement = 0;                                        //021125
+         bud_break_date.set(today);                                              //081013
+       }                                                                         //021125
+   }
+   Crop_complete::consider_inactive_period(avg_temperature);                     //071120
+      // was temperature_with_est_night
+   if (fruit_chill_requirement)                                                  //021125
+   {   if (fruit_chill_requirement->satisfied())                                 //021125
+       {  log_event("Chill requirement satisfied");
+          chill_requirement_satisfied_date.set(today);                           //081013
+          delete fruit_chill_requirement;                                        //021125
+          fruit_chill_requirement = 0;                                           //021125
+       }
+       else                                                                      //021125
+       {  //I still need to move est_temperature object to crop from thermal time class   //021125
+          for (Hour hr = 0; hr < 24; hr++)                                       //050816
+          {  float64 air_temperature_hour = ref_hourly_weather->get_air_temperature(hr); //080908
+             fruit_chill_requirement->add_hour_temperature(air_temperature_hour);//050816
+          }
+       }
+   }
+}
+//______________________________________________________________________________
+void Crop_CropSyst_orchard_fruit::senesce_at_dormancy()
+{  //  currently  do nothing, (we didnt do anything before we moved fruit submodel out of Crop_complete
+   fruit_harvested =false;                                                       //030529
+}
+//_2007-11-20___________________________________________________________________
+bool
+#ifdef OLD_ORCHARD
+Crop_complete
+#else
+Crop_CropSyst_orchard_fruit
+#endif
+:: is_at_max_fruit_load()                                                  const
+{
+   float64 max_fruit_dry_biomass // This really only needs to be computed once   //080912
+      = (per_ha_to_per_m2(fruit_adjusted_parameters->max_fruit_load_kg_ha)
+               * fruit_adjusted_parameters->fract_total_solids);
+   return fruit_dry_biomass >max_fruit_dry_biomass;
+}
+//_2008-11-03___________________________________________________________________
+float64
+#ifdef OLD_ORCHARD
+Crop_complete
+#else
+Crop_CropSyst_orchard_fruit
+#endif
+::distribute_todays_non_leaf_stem_growth(float64 todays_growth) modification_
+{  float64 todays_non_leaf_stem_growth = todays_growth;  // for normal crops everything goes to leaf stem(branch)
+#ifdef OLD_ORCHARD
+   if (parameters->crop_model_labeled.get() == CROPSYST_ORCHARD_MODEL)
+   {                                                                             //081103
+      if (!is_at_max_fruit_load())                                               //081103
+      {  // we need to do translation daily if not sufficient biomass (need potential growth rate).//000626
+            float64 fract_to_fruit = 0.0;                                        //000626
+            switch (phenology.growth_stage)                                      //000626
+            {  case FGS_FRUCTESCENCE : fract_to_fruit =                          //000626
+                     fruit_adjusted_parameters->                                 //081103
+                        initial_growth_fraction_to_fruit ; break;                //000626
+               case FGS_VERAISON :                                               //000626
+               case FGS_RAPID_FRUIT_DEVELOPMENT :                                //030521
+                  fract_to_fruit =                                               //080912
+                     fruit_adjusted_parameters->                                 //081103
+                        rapid_growth_fraction_to_fruit ;                         //000626
+               break;
+               default : fract_to_fruit = 0.0; break;                            //000626
+            }
+            float64 fruit_dry_biomass_today =  todays_growth * fract_to_fruit;   //011022
+            fruit_dry_biomass +=fruit_dry_biomass_today;                         //000626
+            float64 max_fruit_dry_biomass                                        //080912
+            // This really only needs to be computed once
+            //(BUT DOES NEED TO BE UPDATED WITH FREEZING DAMAGE)
+            = (per_ha_to_per_m2(fruit_adjusted_parameters->max_fruit_load_kg_ha) //081103
+                  *  fruit_adjusted_parameters->                                 //081103
+                        fract_total_solids);                                     //000626
+            if (fruit_dry_biomass > max_fruit_dry_biomass)                       //080912
+            {  fruit_dry_biomass_today = max_fruit_dry_biomass-fruit_dry_biomass;//080912
+               fruit_dry_biomass = max_fruit_dry_biomass;                        //080912
+            }                                                                    //080912
+            todays_non_leaf_stem_growth -= fruit_dry_biomass_today;              //011022
+      } // else when we reach the maximum fruit load, stop partitioning of biomass to fruit and   //080912
+      float64 LAI = get_LAI(true);                                               //081111
+         // This is just the normal LAI
+      if (LAI > parameters->canopy_growth_LAI_based.max_LAI)                     //081103
+         limit_max_LAI = true;                                                   //081103
+   } // if fruit harvest
+#else
+// NYI
+
+0.08	 Potential Fruit Relative Growth Rate (kg/kg/day)
+0.5	 Current Fruit Biomass (kg/m2)
+30	 Current Number of Fruits per square meter
+0.04	 Available Biomass for Fruit Growth (kg/m2/day)
+0.95	 Curvature
+
+//071120
+   switch (growth_stage)
+   {  case INITIAL_FRUIT_GROWTH     : need some thing here
+      case VERAISON                 :
+      case RAPID_FRUIT_GROWTH       :
+               {
+                   may need to check max fruit load
+                  float64 available_biomass_for_fruit_growth =  todays_growth +  fruit_reserves_biomass + fruit_root_turnover_biomass; // Warning check with Claudio if fruit_root_turnover_biomass included here
+                  float64 fruit_biomass_growth = calc_fruit_biomass_growth( available_biomass_for_fruit_growth);
+                  fruit_dry_biomass +=fruit_biomass_growth;
+                  todays_non_leaf_stem_growth -= fruit_biomass_growth; // actual canopy growth;
+
+               } break;
+   }
+   switch (growth_stage)
+   {  case xxxxx:
+      {
+      } break;
+      case xxxxx:
+      {
+      } break;
+      case xxxxx:
+      {
+      } break;
+
+   }
+
+ FGS_PLANTING           // when planted from seed or started in orchard
+,FGS_reserved_1        // This is a place holder for future use  (matches emergence) May be needed for seeded starts
+,FGS_BUD_BREAK
+,FGS_ACTIVE_GROWTH
+,FGS_FLOWERING
+,FGS_FRUIT_DEVELOPMENT
+,FGS_VERAISON
+,FGS_RAPID_FRUIT_DEVELOPMENT
+,FGS_MATURITY
+,FGS_DORMANT
+,FGS_HARVESTABLE
+,FGS_HARVEST
+,FGS_TERMINATED      // Due to premature death, removal etc..
+
+               fruit_reserves_biomass
+               fruit_root_turnover_biomass
+
+#endif
+   return todays_non_leaf_stem_growth;  // for normal crops everything goes to leaf stem(branch)
+}
+//_2007-11-20___________________________________________________________________
+bool
+#ifdef OLD_ORCHARD
+Crop_complete
+#else
+Crop_CropSyst_orchard_fruit
+#endif
+:: get_limit_max_LAI() const { return limit_max_LAI; }
+// only applies to fruit crops (which will override)
+//_2008-11-03___________________________________________________________________
+bool
+#ifdef OLD_ORCHARD
+Crop_complete
+#else
+Crop_CropSyst_orchard_fruit
+#endif
+::respond_to_freezing_damage(float64 fract_reduction_due_to_freezing) modification_
+{  if (   (phenology.growth_stage == NGS_ANTHESIS)
+       || (phenology.growth_stage == FGS_FRUCTESCENCE))
+   {  fruit_adjusted_parameters->max_fruit_load_kg_ha  *= (1.0 - fract_reduction_due_to_freezing); // 081103 need to check this with Claudio
+      //initial_growth_fraction_to_fruit          = 0.0; Currently not adjusting these
+      //rapid_growth_fraction_to_fruit            = 0.0; the crop may reach the maximum fruit load sooner and partition will then be stopped.
+   }  // else Currently normal crops simply die_back (done by caller) this is overridden by fruit crops
+   return true;
+}
+//_2008-11-03___________________________________________________________________
+float64 Crop_CropSyst_orchard_fruit
+::get_colimitation_curvature()                                             const
+{  return 0.0; // Not yet implemented
+}
+//______________________________________________________________________________
+float64 Crop_CropSyst_orchard_fruit
+::calc_fruit_biomass_growth
+   (float64 available_biomass_for_fruit_growth)                            const
+{  float64 fruit_biomass_growth = 0.0;
+#ifdef NYI
+/*
+Function DailyFruitBiomassGrowth(fruit_relative_growth_rate As Single, Current_Fruit_Biomass As Single, _
+, available_biomass_for_fruit_growth As Single, _
+Colimitation_Curvature As Single) As Single
+Dim pot_fruit_growth_rate As Single 'kg/m2/day
+Dim current_mean_mass_per_fruit As Single 'kg
+ 'Units
+ */
+      float64 fruit_relative_growth_rate // (kg/kg/day)
+         get_fruit_relative_growth_rate();  // This may be a crop parameter or derived from crop parameters with curves for specific crop types
+/*
+ 'Current_Fruit_Biomass (kg/m2)
+ 'current_fruit_count (Number/m2)
+ 'available_biomass_for_fruit_growth (kg/m2/day)
+ */
+      float64 colimitation_curvature = get_colimitation_curvature(); // Not sure what this is
+      float64 current_mean_mass_per_fruit // kg
+         = fruit_dry_biomass / current_fruit_count;
+      float64 pot_fruit_growth_rate = fruit_relative_growth_rate * current_mean_mass_per_fruit;
+      float64 fruit_growth_biomass_demand = pot_fruit_growth_rate * current_fruit_count;
+      fruit_biomass_growth =
+         (  pot_fruit_growth_rate * current_fruit_count + available_biomass_for_fruit_growth
+            - sqrt(CORN_sqr(fruit_growth_biomass_demand + available_biomass_for_fruit_growth)
+                       - 4.0 * colimitation_curvature * fruit_growth_biomass_demand * available_biomass_for_fruit_growth))
+         / (2.0 * colimitation_curvature);
+#endif
+   return fruit_biomass_growth;
+}
+//_2005-08-18___________________________________________________________________
+#ifdef CROP_ORCHARD
+bool
+#ifdef OLD_ORCHARD
+   Crop_complete
+#else
+   Crop_CropSyst_orchard_fruit::
+#endif
+   ::is_fruit_harvestable() const
+{
+   return
+#ifdef OLD_ORCHARD
+     (parameters->crop_model_labeled.get() == CROPSYST_ORCHARD_MODEL)            //130408
+     && (phenology.growth_stage == NGS_HARVESTABLE) ?  true : false;             //081204
+#else
+       phenology.growth_stage == NGS_HARVESTABLE;
+#endif
+}
+#endif
+//_2008-12-04___________________________________________________________________
+#ifdef OLD_ORCHARD
+#else
+NYN harvest needs to be processed by caller
+bool Crop_CropSyst_orchard_fruit::process(const CORN::Date &today )
+{
+   warning need to copy the OLD_ORCHARD
+      check for harvest from Crop_complete::process(today )
+
+   return  Crop_complete::process(today );
+}
+//_2008-12-04___________________________________________________________________
+#endif
+
+} // namespace CropSyst
+
+/*
+From: Marsal, Jordi [Jordi.Marsal@irta.cat]
+Sent: Thursday, November 29, 2007 1:41 AM
+To: Nelson, Roger Leroy; Stockle, Claudio Osvaldo
+
+Attachments: Potential RGR Grapevine_Tempranillo_Formula.xls; Potential
+RGR Apple_GoldenSomthee_Formula.xls
+
+
+Dear Roger and Claudio,
+
+Please find in attachement the potential RGR curves corresponding
+to apple and vinegrapes in two different spreadsheets.
+The functions can be found within the figures corresponding to the Curve fitting part.
+
+There are two different initial fruit mass to be considered
+and that should not be confused. First is the one that permits to initiate
+the Potential RGR calculation (obtained under very low fruit load conditions),
+second is the one that comes from commercial conditions and permits to
+calculate Actual fruit growth.
+Both should be determined at the same phenological time,
+but only the latter should be provided by the user.
+
+For Apple
+GDD after full budbreak to initiate fruit growth routine = 790
+Initial frut dry matter for potential RGR calculation = 3.4 g
+
+For Vinegrape
+GDD after full budbreak to initiate fruit growth routine = 700
+Initial frut dry matter for potential RGR calculation = 0.027 g
+
+Ohter details are provided in the files.
+
+I had trouble with the vinegrape RGR function because it failed to
+reproduce the original fruit growth curve it came from.
+This is probably due to small accumulated errors in every daily step
+for the calculation of the final dry matters.
+In order to avoid this underestimation for potential fruit growth,
+I have slightly modified the parameters of the original 3-functions.
+
+There's a lot of other information in the files.
+I have checked them with commercial field data to evaluate the
+information provided by the curves during two different periods.
+In apple a curvature of about 0.75 is suggested.
+Good news is that potential source calculated by WUE or Radiative method
+produces similar results (see second sheet of the file).
+However potential source seems to me overestimating the capacity
+for allocating biomass to fruit growth.
+In consequence we should consider another factor as relevant such as transport limitation.
+In vinegrapes, results are not that encouraging, though.
+It seems it is going to be a great deal of carbon for shoot growth after veraison.
+A good adjutsment of leaf water potential to realistic values observed in the field should help reduce this
+putative extra-vegetative growth during summer.
+
+Other stuff
+Target number of fruits per tree, grape clusters per vine
+and grape berries per cluster should be defined by the user,
+since they are a function of the commercial practices carried out in every specific case.
+In the second sheet of both attached files you can see the values
+I used in my example cases (see cell defined by cropping).
+
+Reserves is a difficult issue, we should also consider the role of stems and branches on the winter reserves though at less extent
+ than in roots.
+Let's see what claudio says about it. I think a simple approach would come from considering all
+growth occured until the start of fruit growth routine calculation as coming from reserves by 80%, for instance.
+
+There are a number of comments that I would like to point out after you have recieved the curves and started to work on it.
+
+My best regards
+Jordi
+*/
+

@@ -1,0 +1,104 @@
+#include "OM_params.h"
+#include "organic_matter/OM_const.h"
+#include "corn/data_source/datarec.h"
+//______________________________________________________________________________
+Organic_matter_initialization_parameters::Organic_matter_initialization_parameters()
+:organic_matter_partitioning_mode_labeled(OMPM_previously_crop_land)
+//    The following are essentially the percent of the initial organic matter carbon mass that is apportioned to the respective organic matter pools 040610
+,active_SOM_protected_percent (100)
+//040611  Warning I need to ask Claudio for default ranges for these parameters
+#if (CROPSYST_VERSION==4)
+,v_active_SOM_protected_percent(active_SOM_protected_percent,UC_percent,LABEL_active_SOM_protected,2,100,0,100,0,100,"%","Protected (metastable) portion of the active stable organic matter")  //040610_
+#endif
+{
+   for (uint8 h = 0; h <=3 ; h++)
+   {  microbial_biomass_percent[h]=  3.0;
+      labile_SOM_percent       [h]=  2.0;
+      metastable_SOM_percent   [h]= 45.0;
+      passive_SOM_percent      [h]= 50.0;
+   };
+   for (uint8 h = 4; h <= MAX_soil_horizons; h++)
+   {  microbial_biomass_percent[h]=  0.5;
+      labile_SOM_percent       [h]=  0.0;
+      metastable_SOM_percent   [h]=  1.0;
+      passive_SOM_percent      [h]= 98.5;
+   };
+};
+//_2006-02-15___________________________________________________________________
+void Organic_matter_initialization_parameters::setup_structure(Data_record &data_rec,bool for_write/* = false*/ ) modification_
+{
+/* Currently these are all in CS_scenario
+   data_rec.set_current_section(LABEL_POM);
+      data_rec.expect_date(LABEL_recalibrate_date,POM_recalibrate_date,false);
+      data_rec.expect_float32_array_with_units_code_fixed(LABEL_POM,UC_percent,horizon_percent_organic_matter,1,MAX_soil_horizons,false);
+      data_rec.expect_bool("get_OM_from_soil_DS",use_soil_parameter_organic_matter);
+*/
+   data_rec.set_current_section("organic_matter_initialization");                                                                                                                            //040812
+      data_rec.expect_float32_array_with_units_code_fixed(LABEL_microbial_biomass,UC_percent,microbial_biomass_percent,1,MAX_soil_horizons,false);  //070404// "Microbial biomass"           ,"portion of the total organic matter")
+      data_rec.expect_float32_array_with_units_code_fixed(LABEL_labile_SOM       ,UC_percent,labile_SOM_percent       ,1,MAX_soil_horizons,false);  //070404// "Labile stable organic matter","portion of the total organic matter")
+      data_rec.expect_float32_array_with_units_code_fixed(LABEL_metastable_SOM   ,UC_percent,metastable_SOM_percent   ,1,MAX_soil_horizons,false);  //070404// "Metastable organic matter"   ,"portion of the total organic matter")
+      data_rec.expect_float32_array_with_units_code_fixed(LABEL_passive_SOM      ,UC_percent,passive_SOM_percent      ,1,MAX_soil_horizons,false);  //070404// "Passive organic matter"      ,"portion of the total organic matter")
+   data_rec.set_current_section("organic_matter_history");
+      data_rec.expect_enum(LABEL_partitioning_mode,organic_matter_partitioning_mode_labeled);
+#if (CS_VERSION==4)
+#ifndef REACCH_VERSION
+      data_rec.expect_valid_float32(v_active_SOM_protected_percent);
+#endif
+#endif
+};
+//_2012-09-09___________________________________________________________________
+Organic_matter_decomposition_parameters::Organic_matter_decomposition_parameters()
+:unadj_microbial_decomposition_const      (default_microbial_decomposition_const)
+,labile_active_SOM_decomposition_const    (default_labile_active_SOM_decomposition_const)
+,metastable_active_SOM_decomposition_const(default_metastable_active_SOM_decomposition_const)
+,passive_SOM_decomposition_const          (default_passive_SOM_decomposition_const)
+,microbial_CN_ratio                       (default_microbial_CN_ratio)
+,labile_active_SOM_CN_ratio               (default_labile_active_SOM_CN_ratio)
+,metastable_active_SOM_CN_ratio           (default_metastable_active_SOM_CN_ratio)
+,passive_SOM_CN_ratio                     (default_passive_SOM_CN_ratio)
+,single_SOM_CN_ratio                      (default_single_SOM_CN_ratio)
+,C_fraction_from_labile_to_passive_SOM     (0.001) //090520 (0.004)//(0.000001/default_labile_active_SOM_decomposition_const)
+,C_fraction_from_metastable_to_passive_SOM (0.01)  //090520 (0.03) // (0.000001/default_metastable_active_SOM_decomposition_const)
+,max_apparent_soil_C_decomposition_const   (0.000164384)
+#if (CS_VERSION==4)
+//040611  Warning I need to ask Claudio for default ranges for these parameters
+,v_unadj_microbial_decomposition_const       (unadj_microbial_decomposition_const      ,UC_1_per_day  ,LABEL_microbial_biomass_decomposition_constant  , 10,default_microbial_decomposition_const            ,0.0    ,0.5 , 0.0,1.0,0,"Microbial biomass (unadjusted)"         ,"Decomposition constant")
+,v_labile_active_SOM_decomposition_const     (labile_active_SOM_decomposition_const    ,UC_1_per_day  ,LABEL_labile_SOM_decomposition_constant         , 10,default_labile_active_SOM_decomposition_const    ,0.0    ,0.5 , 0.0,1.0,0,"Labile active stable organic matter"    ,"Decomposition constant")
+,v_metastable_active_SOM_decomposition_const (metastable_active_SOM_decomposition_const,UC_1_per_day  ,LABEL_metastable_SOM_decomposition_constant     , 10,default_metastable_active_SOM_decomposition_const,0.0    ,0.5 , 0.0,1.0,0,"Metastable active stable organic matter","Decomposition constant")
+,v_passive_SOM_decomposition_const           (passive_SOM_decomposition_const          ,UC_1_per_day  ,LABEL_passive_SOM_decomposition_constant        , 10,default_passive_SOM_decomposition_const          ,0.0    ,0.5 , 0.0,1.0,0,"Passive stable organic matter"          ,"Decomposition constant")
+,v_microbial_CN_ratio                (microbial_CN_ratio             ,UC_ratio,"microbial_CN_ratio"            ,2,default_microbial_CN_ratio             ,1.0,100.0,0,100.0,"Ratio","Microbial carbon/nitrogen ratio")
+,v_labile_active_SOM_CN_ratio        (labile_active_SOM_CN_ratio     ,UC_ratio,"labile_active_SOM_CN_ratio"    ,2,default_labile_active_SOM_CN_ratio     ,1.0,100.0,0,100.0,"Ratio","Labile active SOM carbon/nitrogen ratio")
+,v_metastable_active_SOM_CN_ratio    (metastable_active_SOM_CN_ratio ,UC_ratio,"metastable_active_SOM_CN_ratio",2,default_metastable_active_SOM_CN_ratio ,1.0,100.0,0,100.0,"Ratio","Metastable active SOM carbon/nitrogen ratio")
+,v_passive_SOM_CN_ratio              (passive_SOM_CN_ratio           ,UC_ratio,"passive_SOM_CN_ratio"          ,2,default_passive_SOM_CN_ratio           ,1.0,100.0,0,100.0,"Ratio","Passive active SOM carbon/nitrogen ratio")
+,v_max_apparent_soil_C_decomposition_const (max_apparent_soil_C_decomposition_const,UC_1_per_day,"max_apparent_soil_C_decomposition_const"  ,9,0.000164384,0.0,1.0,0.0,1.0,0,"Maximum apparent soil carbon decomposition for undisturbed soil","rate constant")
+//111028 ,max_residue_decomposition_const_obs           (0.1)        ,  v_max_residue_decomposition_const_obs         (max_residue_decomposition_const_obs        ,UC_1_per_day,"max_residue_decomposition_const"          ,9,0.1        ,0.0,1.0,0.0,1.0,0,"Maximum residue decomposition","rate constant")
+,v_C_fraction_from_labile_to_passive_SOM      (C_fraction_from_labile_to_passive_SOM     ,UC_fraction,"C_fraction_from_labile_to_passive_SOM",7    ,0.001 /*050920 0.004*/,0,1,0,1,0,"Fraction of carbon transferred from labile to passive SOM")
+,v_C_fraction_from_metastable_to_passive_SOM  (C_fraction_from_metastable_to_passive_SOM ,UC_fraction,"C_fraction_from_metastable_to_passive_SOM",7,0.01 ,/*050920 0.03*/ 0,1,0,1,0,"Fraction of carbon transferred from metastable to passive SOM")
+,v_single_SOM_CN_ratio (single_SOM_CN_ratio             ,UC_ratio,"single_CN_ratio"            ,2,default_single_SOM_CN_ratio             ,1.0,100.0,0,100.0,"Ratio","SOM carbon/nitrogen ratio")   //110928
+#else
+
+#endif
+{};
+//______________________________________________________________________________
+void Organic_matter_decomposition_parameters::setup_structure(Data_record &data_rec,bool for_write/* = false*/ ) modification_
+{
+   data_rec.set_current_section("organic_matter_decomposition");
+      // Note, eventually I need to use Parameters
+      // but I dont have a V5 scenario editor yet, so I stick with these:
+
+      data_rec.expect_float32(LABEL_microbial_biomass_decomposition_constant  ,unadj_microbial_decomposition_const);              //120823
+      data_rec.expect_float32(LABEL_labile_SOM_decomposition_constant         ,labile_active_SOM_decomposition_const);                   //120823
+      data_rec.expect_float32(LABEL_metastable_SOM_decomposition_constant     ,metastable_active_SOM_decomposition_const);           //120823
+      data_rec.expect_float32(LABEL_passive_SOM_decomposition_constant        ,passive_SOM_decomposition_const);                        //120823
+      data_rec.expect_float32("microbial_CN_ratio"                      ,microbial_CN_ratio);                                            //120823
+      data_rec.expect_float32("labile_active_SOM_CN_ratio"              ,labile_active_SOM_CN_ratio);                                    //120823
+      data_rec.expect_float32("metastable_active_SOM_CN_ratio"          ,metastable_active_SOM_CN_ratio);                                //120823
+      data_rec.expect_float32("passive_SOM_CN_ratio"                    ,passive_SOM_CN_ratio);                                          //120823
+      data_rec.expect_float32("max_apparent_soil_C_decomposition_const",max_apparent_soil_C_decomposition_const);               //120823
+//111028      data_rec.expect_float32(organic_matter_decomposition_parameters.v_max_residue_decomposition_const_obs);
+      data_rec.expect_float32("single_CN_ratio"                            ,single_SOM_CN_ratio);                                           //120823
+      data_rec.expect_float32("C_fraction_from_labile_to_passive_SOM"      ,C_fraction_from_labile_to_passive_SOM );      //120823
+      data_rec.expect_float32("C_fraction_from_metastable_to_passive_SOM"  ,C_fraction_from_metastable_to_passive_SOM );  //120823
+};
+//_2012-09-09___________________________________________________________________
+

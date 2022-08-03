@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="weather_lib.lib"/>
+    <OBJFILES value="..\wthrfile.obj ..\et.obj ..\et_ref.obj ..\gen_dat_filename.obj 
+      ..\loc_param.obj ..\phrases.obj ..\sky.obj ..\snow.obj ..\solar_rad.obj 
+      ..\stormgen.obj ..\sun.obj ..\wind.obj ..\wthr.obj ..\wthrbase.obj 
+      ..\wthrdata.obj ..\daily.obj ..\wthr_vp.obj ..\temperature_est.obj"/>
+    <RESFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;.."/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
+    <MAINSOURCE value="weather_lib.bpf"/>
+    <INCLUDEPATH value="..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp"/>
+    <LIBPATH value="..\;..;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+    <LISTFILE value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -H=weather.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-$YD -$W -$O- -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="/P64"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=4
+Item0=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;c:\dev\cropsyst\cpp
+Item1=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item2=..\;..;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item3=..\;..;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=1
+Item0=..\;..;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=5
+Item0=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH
+Item1=_DEBUG;SUPPORT_STRING;VERSION_NUMBERS=4,0,0
+Item2=_DEBUG;SUPPORT_STRING;VERSION_NUMBER=4,0,0
+Item3=_DEBUG;SUPPORT_STRING
+Item4=_DEBUG
+
+[HistoryLists\hlTlibPageSize]
+Count=2
+Item0=0x0040
+Item1=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

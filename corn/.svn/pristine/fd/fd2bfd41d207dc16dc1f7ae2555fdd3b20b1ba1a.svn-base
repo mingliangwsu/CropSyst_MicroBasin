@@ -1,0 +1,13 @@
+#ifndef statistics_typesHPP
+#define statistics_typesHPP
+#include "corn/labeled_enum.h"
+namespace CORN {
+#include "corn/math/statistical/statistics_types.h"
+//______________________________________________________________________________
+DECLARE_LABELED_ENUM(Statistic_labeled,Statistic,statistic_label_table);
+//______________________________________________________________________________
+extern nat16 statistic_units_matches_observation_units;
+//______________________________________________________________________________
+} // namespace CORN
+#endif
+

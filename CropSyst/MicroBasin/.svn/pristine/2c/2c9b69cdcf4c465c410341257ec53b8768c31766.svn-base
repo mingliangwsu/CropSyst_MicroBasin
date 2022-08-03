@@ -1,0 +1,73 @@
+#include <iostream>
+
+
+#  include "corn/OS/file_system_logical.h"
+
+
+#include "basin/basinclass.h"
+
+#include "control/allcontrolclass.h"
+
+
+#include "corn/datetime/date.hpp"
+#ifdef CROPSYST_VERSION
+#  include "corn/OS/directory_entry_name_concrete.h"
+#  include "common/simulation/log.h"
+#  include "corn/OS/file_system_logical.h"
+#endif
+#ifdef CROPSYST_WEATHER
+#else
+#  include "weather/weatherlocationinputclass.h"
+#endif
+#include "util/pubtools.h"
+#include "soil/soilprofileclass2.h"
+
+//#define Destruct_Monitor
+
+#ifdef CROPSYST_VERSION
+namespace CORN { namespace OS {
+File_system &file_system() { std::clog << "reach file_system()\n"; return CORN::OS::file_system_logical; }             //150709RLN
+}}
+bool quick_and_dirty_disable_chem_balance_when_watertable = true;                //150709
+#endif
+
+//______________________________________________________________________________
+int main(int argc, const char *argv[])
+{
+   CORN::OS::Directory_name_concrete XXX;
+   bool run_success = true;                                                      //141221
+   #ifdef DEBUG_LIU_OUT_CSV
+   //151013LML disabled temporaly. extern std::ofstream fstm_daily_cell_out;
+   extern std::ofstream fstm_daily_basin_out;
+   char outfilename[200];
+   //151013LML disabled temporaly.sprintf(outfilename,"%s%s",project_directory.c_str(),"\\Scenarios\\test\\Output\\daily.csv");
+   //151013LML disabled temporaly.fstm_daily_cell_out.open(outfilename, std::ios::out);
+   sprintf(outfilename,"%s%s",project_directory.c_str(),"\\Scenarios\\test\\Output\\basinout_daily.csv");
+   fstm_daily_basin_out.open(outfilename, std::ios::out);
+   #endif
+
+      // Currently there is a single event log
+      // because we probably won't be able to have
+      // event log simultaneously file open for every single cell.
+      // Eventually the event log will be made a global
+      // because is actually an 'aspect' level object.
+
+    //END OF TEST ONLY
+    //Initialize the basin
+    BasinClass basin(argc,argv);                                                 //160406_160301RLN
+
+    #ifdef LIU_DEBUG
+    CORN::Time now;
+    std::clog<<"Start at "<< now.as_string()<<std::endl;
+    #endif
+
+    run_success &= basin.run();                                                  //150629RLN
+
+    #ifdef DEBUG_LIU_OUT_CSV
+    //151013LML disabled temporaly fstm_daily_cell_out.close();
+    fstm_daily_basin_out.close();
+    #endif
+    return run_success ? EXIT_SUCCESS : EXIT_FAILURE;                            //141221RLN
+    
+}
+//______________________________________________________________________________

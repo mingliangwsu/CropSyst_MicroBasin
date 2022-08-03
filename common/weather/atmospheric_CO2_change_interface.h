@@ -1,0 +1,27 @@
+#error this file is obsolete, use instead atmospheric_CO2_change.h
+
+#ifndef atmospheric_CO2_change_interfaceH
+#define atmospheric_CO2_change_interfaceH
+#include "corn/const.h"
+#include "corn/primitive.h"
+#include "corn/chronometry/date_types.hpp"
+#include "common/biometeorology/parameter/CO2_atmospheric_conc.h"
+//______________________________________________________________________________
+namespace CORN
+{  class Quality;
+};
+//______________________________________________________________________________
+class Atmospheric_CO2_change_interface  // interface
+{  // This is an interface for Atomspheric CO2 change models.
+   // Note that for CropSyst, the CO2 change in the ET model is optional.
+public:
+//NYN   virtual bool    update()                                         updates = 0;
+   virtual bool update()                                           rectification_= 0;
+   virtual bool end_year(CORN::Year year)                           modification_= 0;
+   virtual float64 get_current_CO2_conc()                                  const = 0;
+//   virtual const float32 &ref_current_CO2_conc()                           const = 0;
+   virtual const CS::CO2_atmospheric_concentration &ref_CO2_current_conc() const = 0; //150507
+};
+//_end_class___________________________________________Atmospheric_CO2_change__/
+#endif
+

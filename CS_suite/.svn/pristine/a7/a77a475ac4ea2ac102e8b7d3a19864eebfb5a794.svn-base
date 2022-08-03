@@ -1,0 +1,106 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "corn/application/program_directory_OS_FS.h"
+#include "CS_suite/CS_suite_directory.h"
+#include "CS_suite/CropSyst/CropSyst_directory.h"
+//150403  #include "common/simulation/paths.h"
+
+USERES("management_editor.res");
+USEFORM("..\form_management_editor.cpp", Management_editor_form);
+USEFORM("..\form_operation_event.cpp", operation_event_form);
+USERC("..\..\..\..\..\components\AutoControls\BlueSky\bluesky.rc");
+USEFORM("..\form_irrig_appl.cpp", Irrigation_application_form);
+USEFORM("..\form_tillage_residue.cpp", tillage_residue_form);
+USEFORM("..\form_inorganic_N_appl.cpp", inorganic_N_application_form);
+USERC("..\..\..\..\..\components\AutoControls\resources\buttons.rc");
+USEUNIT("..\..\..\..\..\GUI\recent\recent.cpp");
+USEFORM("..\form_event.cpp", event_editor_form);
+USEFORM("..\..\..\..\..\GUI\parameter\form_param_file.cpp", parameter_file_form);
+USEFORM("..\form_sync.cpp", sync_form);
+USEFORM("..\form_organic_N_appl.cpp", organic_N_application_form);
+USEFORM("..\form_manure_appl.cpp", manure_application_form);
+USELIB("..\..\..\..\..\components\TMS_4.7\source_BDS\TMS Component Pack\wininet.lib");
+USEUNIT("..\..\..\..\..\common\biomatter\manure_form.cpp");
+USEUNIT("..\..\..\..\..\common\residue\residue_const.cpp");
+USEUNIT("..\..\..\..\..\common\soil\SCS\SCS.cpp");
+USEUNIT("..\..\..\..\..\common\biomatter\biomass_decomposition_param.cpp");
+USEUNIT("..\..\..\..\..\components\AutoControls\AutoContainerCheckListBox.cpp");
+USELIB("C:\temp\lib\BCB5\release\common_sim_static.lib");
+USELIB("C:\temp\lib\BCB5\release\CS_directory.lib");
+USEUNIT("..\..\..\..\..\GUI\translator\translator_windows.cpp");
+USEUNIT("..\..\..\..\..\components\AutoControls\AutoDateButton.cpp");
+USEFORM("..\..\..\..\..\components\AutoControls\AutoCalendarForm.cpp", AutoCalendar_form);
+USEUNIT("..\..\..\..\..\GUI\parameter\form_param_file_common.cpp");
+USEUNIT("..\..\..\..\..\common\simulation\event.cpp");
+USELIB("C:\temp\lib\BCB5\release\corn_complete_static.lib");
+USEUNIT("..\..\form_management_editor_common_VCL.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\cs_till.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\cs_operation.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\cs_operation_codes.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\management\management_param_V4.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\management\management_param_class.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\management\management_param_struct.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\N_sources.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\mgmt_param.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\mgmt_types.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\organicn.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\static_phrases.cpp");
+USEUNIT("..\..\..\..\..\CropSyst\source\crop\growth_stages.cpp");
+USEUNIT("..\..\..\..\..\common\simulation\synchronization.cpp");
+USEFORM("..\form_auto_NO3_appl.cpp", form_auto_NO3_application);
+USEFORM("..\form_clipping.cpp", clipping_form);
+USEFORM("..\form_auto_clipping.cpp", auto_clipping_form);
+USEUNIT("..\..\..\..\..\corn\OS\file_system_engine.cpp");
+USEUNIT("..\..\..\..\..\corn\OS\file_system_engine_common.cpp");
+USEUNIT("..\..\..\..\..\corn\OS\file_system_engine_Windows.cpp");
+USEUNIT("..\..\..\..\..\corn\OS\file_system_logical.cpp");
+//---------------------------------------------------------------------------
+#include "CropSyst/source/management/management_param_V4.h"
+#include "../form_management_editor.h"
+#include "CropSyst/GUI/help/management.h"
+#include "CS_Suite/common_editor_main_inc.cpp"
+//1450403 DECLARE_EDITOR_DIRECTORY
+//______________________________________________________________________________
+WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+//130614   setup_simulation_paths(CS_VERSION_NUMBERS,LABEL_CS_suite);
+   try
+   {
+      INSTANCIATE_EDITOR_DIRECTORIES(ParamStr(0).c_str());                       //150412
+      //150403 setup_simulation_paths(CS_VERSION_NUMBERS,LABEL_CS_suite);                 //130614
+       Application->Initialize();
+       Application->CreateForm(__classid(Tparameter_file_form), &parameter_file_form);
+       Application->CreateForm(__classid(TManagement_editor_form), &Management_editor_form);
+       Application->CreateForm(__classid(Toperation_event_form), &operation_event_form);
+       Application->CreateForm(__classid(TIrrigation_application_form), &Irrigation_application_form);
+       Application->CreateForm(__classid(Ttillage_residue_form), &tillage_residue_form);
+       Application->CreateForm(__classid(Tinorganic_N_application_form), &inorganic_N_application_form);
+       Application->CreateForm(__classid(Tevent_editor_form), &event_editor_form);
+       Application->CreateForm(__classid(Tsync_form), &sync_form);
+       Application->CreateForm(__classid(Torganic_N_application_form), &organic_N_application_form);
+       Application->CreateForm(__classid(Tmanure_application_form), &manure_application_form);
+       Application->CreateForm(__classid(TAutoCalendar_form), &AutoCalendar_form);
+       Application->CreateForm(__classid(Tform_auto_NO3_application), &form_auto_NO3_application);
+       Application->CreateForm(__classid(Tclipping_form), &clipping_form);
+       Application->CreateForm(__classid(Tauto_clipping_form), &auto_clipping_form);
+       CropSyst::Management_parameters management_params;
+       MGT_filename  management_filename(ParamStr(1).c_str());
+      BIND_FORM_TO_PARAMETERS(management_params,Management_editor_form
+         ,management_filename
+         ,&management_filename.get_file_type_descriptions())                      //130313
+
+      if (ParamCount() == 2)  // operation event ID (used when openning from schedule view to see operation parameters
+          Management_editor_form->open_operation_event(ParamStr(2).c_str());
+       Application->Run();
+   }
+   catch (Exception &exception)
+   {
+       Application->ShowException(&exception);
+   }
+   return 0;
+}
+//---------------------------------------------------------------------------
+

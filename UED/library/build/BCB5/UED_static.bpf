@@ -1,0 +1,29 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+USEUNIT("..\..\index.cpp");
+USEUNIT("..\..\locrec.cpp");
+USEUNIT("..\..\rec_io.cpp");
+USEUNIT("..\..\record.cpp");
+USEUNIT("..\..\std_codes.cpp");
+USEUNIT("..\..\timeqry.cpp");
+USEUNIT("..\..\unitsrec.cpp");
+USEUNIT("..\..\varcodes.cpp");
+USEUNIT("..\..\varrec.cpp");
+USEUNIT("..\..\codes.cpp");
+USEUNIT("..\..\units_def.cpp");
+USEUNIT("..\..\datasetrec.cpp");
+USEUNIT("..\..\datasetrec_creation.cpp");
+USEUNIT("..\..\database_file.cpp");
+USEUNIT("..\..\UED_fname.cpp");
+USEUNIT("..\..\..\..\CS_suite\UED\UED_directory.cpp");
+USEUNIT("..\..\variable_format.cpp");
+USEUNIT("..\..\std_variables.cpp");
+USEUNIT("..\..\..\..\common\geodesy\geolocation.cpp");
+USEUNIT("..\..\..\..\common\geodesy\geocoordinate.cpp");
+//---------------------------------------------------------------------------
+#define Library
+
+// To add a file to the library use the Project menu 'Add to Project'.
+

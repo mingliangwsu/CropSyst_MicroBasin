@@ -1,0 +1,128 @@
+#ifndef CROPSYST_WEATHER
+#ifndef CLSSNOW_H
+#define CLSSNOW_H
+
+#include "datetime/date.hpp"
+#include <vector>
+
+class SoilStateClass;
+class WeatherStateDailyClass;
+class BasinCellClass;
+namespace CS
+{
+   class Solar_irradiance_extraterrestrial_hourly;
+}
+//______________________________________________________________________________
+class clsSnow
+{
+ private:
+    double SaturationVaporPressure(double T_Celsius);
+      //141221RLN SaturationVaporPressure is actually also available in Weather_provider
+      // I need to see how to connect this
+    double Arcsin(double X);
+    double CalcLongWaveHeat(const double StefBoltz, const double Unsworth_Montieth_LongWave_Atm_Emissivity, const double Air_Temp, const double Emissivity_of_Snow, const double Surface_Temperature); //FMS New Feb 13, 2016 By Brooks 2003
+    bool DistributeExcessEnergyFreezeOrThaw(double &Water_Equivalent_Used_in_Melt_or_Frezzing, double &Water_Equivalent_Remant_Energy, double &PoolSWE_1, double &PoolSWE_2, double &PoolSWE_3, const bool UpdatePools); //FMS Feb 13, 2016 Distribute excess Energy in pools
+
+    int Nenner;                                                                  //160211LML
+
+ public:
+    //M.Liu
+    //Hour: 0: last hour of yesterday
+    //Hour: 1-24 today
+    double Age_Of_Snow;                             // As Double '(days)
+    double Avg_Daily_Fraction_Cover_Snow;           //at the end of day
+    double Avg_Daily_Snow_Below_Surface_T;          //(366) As Double
+    double Avg_Daily_Snow_Surface_T;                //(366) As Double
+    double Daily_Snow_Peak_Depth_mm;                                             //(mm snow)
+    double Daily_Sublimation_Or_Desublimation_mm;                                //(mm water)
+    double Daily_Snow_Melt_Amount_mm;                                            //(mm water)
+    double Daily_Snow_Melt_Depth_mm;                                             //(mm water)
+    double Daily_Rain_mm;                                                        //(mm water)
+    double Daily_Intercepted_Pp_mm;                                              //160214LML
+    double Daily_W_freeze_thaw_mm;                                               //160214LML
+    double output_daily_snowfall_on_ground_SWE_mm;                               //150909LML
+    double Snow_Amount_Peak_Today_mm;                                            //(mm H2O) 160214LML peak snow in a day
+    std::vector<double> Energy_Below_Snow_Surface;              //(24) As Double
+    //double *Energy_in_Snow;                         //(24) As Double ' (J/m2) hourly values; = U in Erin Brooks work;
+    //double *Energy_In_Snow_Surface;                 //(24) As Double
+    std::vector<double> Fraction_Cover_Snow;                    //(24) As Double
+    std::vector<double> Hourly_Energy_Below_Snow_Surface;       //(24) As Double
+    std::vector<double> Hourly_Energy_in_Snow;                  //(24) As Double ' (J/m2) hourly values; = U in Erin Brooks work;
+    std::vector<double> Hourly_Energy_In_Snow_Surface;          //(24) As Double
+    std::vector<double> Hourly_Ice_In_Snow_Amount;              //(mm H2O)
+    std::vector<double> Hourly_Snow_Amount;                     //(mm H2O/hr) nonintercepted snowfall
+    std::vector<double> Hourly_Snow_Below_Surface_T;            //(24) As Double
+    std::vector<double> Hourly_Snow_Depth;                      //(24) As Double
+    std::vector<double> Hourly_Snow_Melt_Amount;                //(mm H2O/hr) always > 0 and it is used for infiltration process
+                                                    //It is estimated from mass balance and it include the nonintercepted rain if SWE > 0
+    std::vector<double> Hourly_Rain_mm;                         //(mm H2O/hr nonintercepted rain by canopy & snowpack
+                                                    //Assume all rain will be intercepted by snowpack if it exists.
+    std::vector<double> Hourly_Snow_Melt_Depth;                 //(24) As Double
+    std::vector<double> Hourly_Snow_Surface_T;                                  //(24)
+    std::vector<double> Hourly_Water_In_Snow_Amount;                            //(mm H2O)
+    std::vector<bool> Hourly_Precipitation_Is_Snow;                             //(24) As Boolean
+    std::vector<double> Hourly_Added_Snow_Depth;                                //(24) As Double ' FMS 10/07/2013
+    std::vector<double> Hourly_Sublimation_mm;                                  //(24) As Double 'FMS 10/11/2013
+    std::vector<double> Hourly_Snow_Pack_SWE;                                   //(mm) (366, 24) As Double 'FMS mm 10/08/2013
+    double Current_Snow_Pack_SWE_mm;                                             //(mm water) current SWE (ice & water in snow)
+    std::vector<double> Hourly_W_freeze_thaw_mm;                                //(24) As Double ' FMS 12/11/2013
+    std::vector<double> Hourly_QtotalkJm2;                                      //(24) As Double 'FMS 12/11/2013
+    std::vector<double> Hourly_Non_Intercepted_Precipitation_mm;                 //140926LML
+    std::vector<double> QtotalkJm2;        //24
+    std::vector<double> W_freeze_thaw_mm;  //(24) As Double                      //131211FMS
+
+    //'Dim Total_Snow_Amount(366);  //(mm water eq.)  Change matrix              //13????FMS
+    //double Total_SWE_m;    //(m water eq.) change matrix by variable             //131115FMS Current SWE (m H2O)
+    double Balance_Daily_Snow_Today;                                             //131007FMS
+    //'Dim Hourly_Snow_Melt_SWE(366, 24) As Double                               //131008FMS
+    int Last_Day_Simulated;                                                      //131009FMS
+    double U_internal_energy;                       //kJ/m2                      //131112FMS_150910LML need talk with Fidel.
+    double Long_Term_Liquid_Budget;                                              //131010FMS
+    double Last_Hour_Previous_Day_Snow_Pack_SWE;        // As Double             //??????COS
+    double PPerr;                                                                //131014FMS
+    double Actual_Hour_Snow_Pack_SWE;                                            //131014FMS
+    double Non_Intercepted_Precipitation;           //(mm H2O/day)
+    double Previous_Hour_Snow_Pack_SWE_m;                                        //131112FMS
+    double Main_Slope;                                                           //131115FMS
+    double Main_Aspect;                                                          //131115FMS
+    double Density_Snow;                            //(kg/m3)                    //140328FMS
+    double Cumulative_New_Snow_Fall;                                             //FMS Feb 12, 2016
+    double Cumulative_Rain_mm;                                                   //FMS Feb 12, 2016
+    double Cumulative_Sublimation_mm;                                            //FMS Feb 12, 2016
+    double Cumulative_Re_Sublimation_mm;                                         //FMS Feb 12, 2016
+    //int    Nenner;                                                             //150311FMS
+    const CORN::Date &today;
+    const int32 &RefGridID;                          //  for debug               //150221LML
+ public: // external object references
+    SoilStateClass               &SoilStateRef;                                  //131015FMS
+    const WeatherStateDailyClass &Weather;                                       //160224RLN
+    const double                 &site_latitude;                                 //160224RLN
+    const double                 &site_slope;                                    //160224RLN
+    const double                 &site_aspect;                                   //160224RLN
+       // This are currently only reference because currently the show
+       // is being instanciated before these have been set
+    #ifdef CROPSYST_VERSION
+    const CS::Solar_irradiance_extraterrestrial_hourly &extraterrestrial_solar_irradiance_basin; //151214RLN
+    #endif
+ public: // methods
+    clsSnow
+      (SoilStateClass                  &SoilStateRef_
+      #ifdef CROPSYST_VERSION
+      ,const CS::Solar_irradiance_extraterrestrial_hourly
+         &extraterrestrial_solar_irradiance_basin_                               //151214RLN
+      #endif
+      ,const WeatherStateDailyClass    &Weather_                                 //160224RLN
+      ,const double                    &site_latitude_                           //160224RLN
+      ,const double                    &site_slope_                              //160224RLN
+      ,const double                    &site_aspect_                             //160224RLN
+      ,const CORN::Date                &today_
+      ,const long                      &RefGridID_);
+    ~clsSnow();
+    double calHourlyNonInterceptedPrecipitation(double PrecipitationHourly,double PrecipitationDaily);
+    void HourlySnowRoutine(int HourOfDay);                                       //160224RLN
+      //160224RLN (WeatherStateDailyClass &Weather, BasinCellClass &BasinCell);
+    bool initialize();
+};
+//______________________________________________________________________________
+#endif // CLSSNOW_H
+#endif

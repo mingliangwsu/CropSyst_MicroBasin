@@ -1,0 +1,33 @@
+Organic N application #1
+Organic manure #2
+Organic N (manure) source #3
+Straw (do not use straw here) #4
+Poultry (layers) #5
+Poultry (fresh) broilers or turkeys #6
+Poulty (broilers) or turkeys (aged) #7
+Swine #8
+Dairy (fresh) #9
+Dairy (tank storage) #10
+Dairy (anaerobic lagoon storage) #11
+Beef (fresh) #12
+Beef (aged) 2.5% N (dry wt. basis) #13
+Beef (aged) 1.5% N (dry wt. basis) #14
+Beef (aged) 1.0% N (dry wt. basis) #15
+Enter either N mass or biomass, the other will be estimated. #18
+Organic dry matter biomass (estimated from N mass) #19
+Decomposition time to be calculated by CropSyst #25
+Time required to decompose 50% #26
+Time required to decompose 63%  (will be obsolete in version 4.2) #28
+Fraction of carbon in organic matter (carbon fraction) #30
+Volatilization #32
+        (including mineralized organic N) #33
+Volatilization loss to be calculated by CropSyst #36
+Application method #37
+Surface broadcast no incorporation #38
+Sprinkler #39
+Surface broadcast with incorporation #40
+Knifed #41
+Form #42
+NRCS field operation #50
+Used for surface residue disturbance and fate #51
+

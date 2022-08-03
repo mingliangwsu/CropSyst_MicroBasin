@@ -1,0 +1,19 @@
+Inorganic nitrogen application #1
+Amount of nitrogen in the form of nitrate (NO3) #2
+Amount of nitrogen in the form of ammonium (NH4) #4
+NH4_volatil_loss_check #6
+Ammonium source #7
+Urea #8
+Urea - ammonium nitrate #9
+Ammonium sulfate #10
+Ammonium nitrate #11
+Anhydrous ammonium #12
+Application method #13
+Surface broadcast #14
+Surface dribble #15
+Incorporated #16
+Injected #17
+NH4 Volatilization loss #18
+NRCS field operation #20
+Used for surface residue disturbance and fate #21
+

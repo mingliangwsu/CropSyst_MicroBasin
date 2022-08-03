@@ -1,0 +1,258 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\temp\lib\BCB5\release\CropSyst_scenario_static.lib"/>
+    <OBJFILES value="C:\temp\obj\CropSyst\cpp\BCB5\\cs_scenario.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\cs_operation.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\fmt_param.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\mgmt_param.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\model_options.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\rot_param.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\texture.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\USDA_texture.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\TEXTTRI.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\snow.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\cs_operation_codes.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\LADSS.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\mgmt_types.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\cs_till.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\SCS.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\manure_form.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\seeding_param.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\layering.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\project_types.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\weather_types.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\cs_scenario_directory.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\cs_vars_abbrv.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\cs_vars.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\residue_decomposition_param.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\N_sources.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\residue_const.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\txtrhydr.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\organicn.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\biomass_decomposition_param.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\CS_application_directory.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\soil_param.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\OM_types.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\OM_params.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\crop_types.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\ET_model.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\growth_stages.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\soil_param_V4.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\soil_param_class.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\crop_param_class.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\crop_param_struct.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\crop_param_V4.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\property.obj 
+      C:\temp\obj\CropSyst\cpp\BCB5\\context_directory_OS_FS.obj"/>
+    <RESFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..;..\..\..\..\Common\soil;..\..\..\..\Common\weather;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\biomatter;..\..\..\..\Common\residue;..\..\..\..\CS_suite;..\..\soil;..\..\organic_matter;..\..\crop;..\..\..\..\common\biometeorology;..\..\..\..\common\physics;..\..\..\..\corn\application"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;xSTATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;CS_VERSION=4;_DEBUG;CROPSYST_VERSION=4;USE_OS_FS"/>
+    <SYSDEFINES value="NO_STRICT;_RTLDLL"/>
+    <MAINSOURCE value="CropSyst_scenario_static.bpf"/>
+    <INCLUDEPATH value="..\..\..\..\CS_suite\CropSyst\file_system;..\..\..\..\corn\application;..\..\..\..\CS_suite\file_system;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\source\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\CropSyst\source"/>
+    <LIBPATH value="..\..\..\..\CS_suite\CropSyst\file_system;..\..\..\..\corn\application;..\..\..\..\CS_suite\file_system;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <WARNINGS value="-w-par"/>
+    <LISTFILE value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -Vmm -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\CropSyst\cpp\BCB5\&quot; -N0&quot;C:\temp\obj\CropSyst\cpp\BCB5\&quot; 
+      -$Y+ -$W -$O- -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="/P8192"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value="cg32.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=20
+Item0=..\..\..\..\CS_suite\CropSyst\file_system;..\..\..\..\corn\application;..\..\..\..\CS_suite\file_system;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\source\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\CropSyst\source
+Item1=..\..\..\..\corn\application;..\..\..\..\CS_suite\file_system;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\source\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\CropSyst\source
+Item2=..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\source\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\common;..\..\..\..\USDA\NRCS;..\..\..\CropSyst\source
+Item3=..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item4=..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\common;..\..\..\..\USDA\NRCS
+Item5=..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\common;C:\dev\USDA\NRCS
+Item6=..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\common
+Item7=..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;c:\dev\common
+Item8=..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item9=..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item10=..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item11=..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item12=..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item13=..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item14=..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..
+Item15=..\..\..\Common\soil\statsgo;..\..\..\Common\residue;..\..\..\Common\soil\SCS;..\..\..\Common\soil;..\;..\..\..\Common\weather;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item16=..\..\..\Common\weather;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item17=..\..\..\Common\weather;..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item18=..\;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+Item19=..\;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=15
+Item0=..\..\..\..\CS_suite\CropSyst\file_system;..\..\..\..\corn\application;..\..\..\..\CS_suite\file_system;C:\Program Files\Borland\CBuilder5\Projects\;..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\..\..\corn\application;..\..\..\..\CS_suite\file_system;C:\Program Files\Borland\CBuilder5\Projects;..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..\..\..\common\physics;..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\..\..\..\common\biometeorology;..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\..\organic_matter;..\..\soil;..\..\..\..\ued;..\..\..\..\CS_suite\CropSyst;..\..\..\..\CS_suite;..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item5=..\..\..\CropSyst\cpp\crop;..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\..\..\..\common\soil\NRCS;..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\..\crop;..\..\..\Project\GIS;..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item8=..\..\..\..\Common\biomatter;..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item9=..\..\..\..\corn\format;..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item10=..\..;..\..\..\..\Common\soil\statsgo;..\..\..\..\Common\residue;..\..\..\..\Common\soil\SCS;..\..\..\..\Common\soil;..\..\..\..\Common\weather;$(BCB)\lib\obj;$(BCB)\lib
+Item11=..\..\..\Common\soil\statsgo;..\..\..\Common\residue;..\..\..\Common\soil\SCS;..\..\..\Common\soil;..\;..\..\..\Common\weather;..;$(BCB)\lib\obj;$(BCB)\lib
+Item12=..\..\..\Common\weather;..;$(BCB)\lib\obj;$(BCB)\lib
+Item13=..\..\..\Common\weather;..\;..;$(BCB)\lib\obj;$(BCB)\lib
+Item14=..\;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=20
+Item0=CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;xSTATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;CS_VERSION=4;_DEBUG;CROPSYST_VERSION=4;USE_OS_FS
+Item1=CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;xSTATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;CS_VERSION=4;_DEBUG;CROPSYST_VERSION=4
+Item2=CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;CS_VERSION=4;_DEBUG;CROPSYST_VERSION=4
+Item3=CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;CS_VERSION=4;_DEBUG
+Item4=CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;CS_VERSION=4
+Item5=CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;xOLD_BINARY_FILE;CS_VERSION=4
+Item6=CROPSYST;xUSE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;xOLD_BINARY_FILE;_DEBUG;CS_VERSION=4
+Item7=CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;xOLD_BINARY_FILE;_DEBUG;CS_VERSION=4
+Item8=CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;xOLD_BINARY_FILE;_DEBUG
+Item9=CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;xOLD_BINARY_FILE
+Item10=_DEBUG;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;xOLD_BINARY_FILE
+Item11=_DEBUG;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2;OLD_BINARY_FILE
+Item12=_DEBUG;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT;DENITRIFICATION_WITH_CO2
+Item13=_DEBUG;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST;OM_ABSTRACT
+Item14=_DEBUG;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE;OLD_HARVEST
+Item15=_DEBUG;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;STATSGO_DATABASE
+Item16=_DEBUG;CROPSYST;USE_PCH;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;SUPPORT_STRING
+Item17=_DEBUG;CROPSYST;ONEHEADER;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API;SUPPORT_STRING
+Item18=_DEBUG;CROPSYST;ONEHEADER;TEXTTRI_MEM;ARCCS_TABLE;BUILDER_API
+Item19=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=5
+Item0=C:\temp\obj\CropSyst\cpp\BCB5\
+Item1=C:\temp\obj\CropSyst\cpp\BCB5\
+Item2=C:\temp\obj\CropSyst\cpp\BCB5
+Item3=C:\temp\obj\BCB5\
+Item4=C:\temp\obj\BCB5
+
+[HistoryLists\hlFinalOutputDir]
+Count=2
+Item0=C:\temp\lib\BCB5\release\
+Item1=C:\temp\lib\BCB5\release
+
+[HistoryLists\hIBPIOutputDir]
+Count=1
+Item0=C:\dev\components\AutoControls\
+
+[HistoryLists\hlTlibPageSize]
+Count=9
+Item0=0x2000
+Item1=0x1000
+Item2=0x0800
+Item3=0x0400
+Item4=0x0200
+Item5=0x0100
+Item6=0x0080
+Item7=0x0040
+Item8=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+
+  <FILES>
+    <FILE type="override" value="..\..\..\..\Common\soil\SCS\SCS.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\project_types.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\biomatter\manure_form.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\weather\snow.cpp" translator="Auto">
+      <CFLAG1 value=" -H=C:\dev\Common\weather\cbuilder\weather.csm"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\soil\TEXTTRI.CPP" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\seeding_param.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\N_sources.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\mgmt_types.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\soil\texture.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+    <FILE type="override" value="..\..\..\..\Common\soil\USDA_texture.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+  </FILES>
+</PROJECT>

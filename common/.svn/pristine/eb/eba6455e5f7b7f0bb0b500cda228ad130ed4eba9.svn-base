@@ -1,0 +1,40 @@
+#include "corn/datetime/date.hpp"
+#include "common/simulation/log.h"
+using namespace std;
+#if (CS_VERSION <= 5)
+extern CORN::Date simulation_today;
+#endif
+//______________________________________________________________________________
+Common_simulation_log::Common_simulation_log()
+: ofstream()
+,log_count(0)
+{}
+//______________________________________________________________________________
+Common_simulation_log::Common_simulation_log(const char *log_filename)
+: ofstream(log_filename)
+,log_count(0)
+{}
+//______________________________________________________________________________
+bool Common_simulation_log::reset()
+{  log_count = 0;
+   return true;                                                                  //120516
+}
+//_2011-07-12__________________________________________________________________/
+nat32 Common_simulation_log::record
+(nat32 object_ID
+,const char *prefix
+,const char *type
+,const char *description)
+{
+   log_count++;
+   *this << '[' << prefix << '_' << log_count << ']'        << endl;
+   *this << "object_ID=" << object_ID                       << endl
+         << "date=" << simulation_today.get_date32()        << /* " (" << simulation_today.c_str() << ")" <<*/ std::endl;
+   if (type)         *this << "type=" << type               << std::endl;
+   if (description)  *this << "description=" << description << std::endl;
+   return log_count;
+}
+//______________________________________________________________________________
+Common_simulation_log CS_event_log;
+nat8 CS_event_log_cycle = 0;
+//______________________________________________________________________________

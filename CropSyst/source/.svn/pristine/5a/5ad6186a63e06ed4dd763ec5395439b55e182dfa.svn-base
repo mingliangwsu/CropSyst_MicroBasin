@@ -1,0 +1,1395 @@
+
+#include <options.h>
+#include "corn/validate/validtyp.h"
+#define LABEL_enabled "enabled"
+#include "corn/math/compare.hpp"
+#include "crop/crop_param.h"
+#include "static_phrases.h"
+#include "common/biomatter/decomposition_const.h"
+#include "common/residue/residue_const.h"
+#include "corn/measure/measures.h"
+#include "crop/growth_stages.hpp"
+extern bool LADSS_mode;
+#define  LABEL_salinity          "salinity"
+//______________________________________________________________________________
+static Units_code alt_RUE_units[] = { UC_g_MJ,UC_kg_MJ,0};
+//#if (CROPSYST_VERSION >= 5)
+namespace CropSyst {
+//#endif
+//______________________________________________________________________________
+int16 Crop_parameters::param_end_veg_growth_or_rapid_fruit_growth_deg_day() const
+{  return (int16) ((crop_model_labeled.get() == CROPSYST_FRUIT_MODEL)
+   ?  phenology.begin_rapid_fruit_growth_deg_day
+   :  phenology.end_vegetative_growth_deg_day);
+}
+//_2003-05-29___________________________________________________________________
+float64 Crop_parameters::param_TUE_at_1kPa_VPD( bool before_WUE_change ) const
+{  int vegetative_growth_index =
+      WUE_changes && before_WUE_change
+      ? 1
+      : 0;
+   return TUE_at_1kPa_VPD[vegetative_growth_index];
+}
+//_2008-04-28__2008-05-06_______________________________________________________
+float64 Crop_parameters::param_TUE_scaling_coef( bool before_WUE_change ) const
+{  int vegetative_growth_index =
+      WUE_changes && before_WUE_change
+      ? 1
+      : 0;
+   return TUE_scaling_coef[vegetative_growth_index];
+}
+//_2009-12-01___________________________________________________________________
+float64 Crop_parameters::param_water_productivity(bool before_WUE_change )  const
+{  int vegetative_growth_index =
+      WUE_changes && before_WUE_change
+      ? 1
+      : 0;
+   return water_productivity[vegetative_growth_index];
+}
+//_2008-04-28_2008-05-06________________________________________________________
+float64 Crop_parameters::param_reference_biomass_transpiration_coef(bool before_WUE_change) const
+{  int vegetative_growth_index =
+      WUE_changes && before_WUE_change
+      ? 1
+      : 0;
+   return reference_biomass_transpiration_coef[vegetative_growth_index];
+} //(kg/m2)(kPa)/m
+//_2004-07-29__2008-05-06_______________________________________________________
+float64 Crop_parameters::param_RUE_max(bool before_WUE_change ) const
+{  float64 RUE_max_total_radiation = RUE_max;
+//080731 WARNING this 1.8 adjustment is currently only an estimate, Claudio will provide a better way to convert
+// PAR based to total radiation based!!!!!!!!!!!!!!!!
+   return RUE_max_total_radiation;  // 080731 season_RUE_max;
+}
+//_2008-04-28___________________________________________________________________
+
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+// This mode is for compatibility with previous versions
+// These parameters are deprecated and will be removed in version 5
+
+//______________________________________________________________________________
+float64 Crop_parameters::param_reference_light_to_biomass_g_MJ(bool during_vegetative_growth)   const
+{return param_reference_light_to_biomass_kg_MJ(during_vegetative_growth)*1000.0;
+}
+//_1998-02-30___________________________________________________________________
+float64 Crop_parameters::param_reference_light_to_biomass_kg_MJ(bool during_vegetative_growth)   const
+{  float32 season_ref_light_to_biomass = reference_light_to_biomass_kg_MJ_deprecated;
+   return season_ref_light_to_biomass;
+};
+//_1998-02-20___________________________________________________________________
+#endif
+//______________________________________________________________________________
+/*010109_*/ void Crop_parameters::expect_structure(bool for_write)
+/*_______*/ {
+/*021015_*/    Common_parameters_data_record ::expect_structure(for_write);
+               structure_defined = false;                                                    //120314
+/*020715_*/    bool UNKNOWN = !for_write || (harvested_part_labeled.get() == UNKNOWN_PART);
+/*020715_*/    bool CROPSYST_FRUIT = (crop_model_labeled.get() == CROPSYST_FRUIT_MODEL);
+/*020715_*/    bool CROPSYST_FRUIT_OR_UNKNOWN = CROPSYST_FRUIT || UNKNOWN;
+/*020405_*/    bool TUBER_ROOT_OR_UNKNOWN    =((harvested_part_labeled.get() == TUBER_CROP) || (harvested_part_labeled.get() == ROOT_CROP) || UNKNOWN /*(harvested_part_labeled.get() == UNKNOWN_PART)*/);
+/*020405_*/    bool NOT_ANY_FRUIT_OR_UNKNOWN     =(  !  (harvested_part_labeled.get() == FRUIT) ||UNKNOWN );
+/*_______*/    set_current_section(LABEL_crop);
+#ifdef LADSS_MODE
+/*021220_*/       expect_int32(LABEL_LADSS_land_use_ID,LADSS_land_use_ID);
+#endif
+/*021114_*/       expect_string("feed_name_immature"  ,feed_name_immature_early,50);
+/*021114_*/       expect_string("feed_name_midmature" ,feed_name_midmature_headed_normal,50);
+/*021114_*/       expect_string("feed_name_mature"    ,feed_name_mature_normal,50);
+/*020408_*/       expect_enum("model",crop_model_labeled);
+/*080725_*/       expect_enum("canopy_growth",canopy_growth_labeled);
+/*020405_*/       expect_enum(LABEL_harvested_part,harvested_part_labeled);
+/*_______*/    // Options
+/*020324_*/    expect_enum(LABEL_C_species,C_species_labeled); // C_species,C_species_label_table);
+#ifdef V234
+/*970123P*/    expect_bool(LABEL_perennial_obs,perennial_obsolete,CROPSYST_VV_BOOL_FORM);
+#endif
+/*020716_*/    expect_enum(LABEL_life_cycle,life_cycle_labeled);
+/*080722_*/    expect_enum("stem_type",stem_type_labeled);
+/*020405_*/    if (CROPSYST_FRUIT_OR_UNKNOWN)
+/*020405_*/       expect_bool(LABEL_deciduous,deciduous);
+/*060817_*/    expect_enum("senesced_biomass_fate",senesced_biomass_fate_labeled);
+/*030520_*/    expect_bool("tea",tea);
+/*020324_*/    expect_enum(LABEL_land_use,land_use_labeled); //,Land_uses_label_table);
+/*080331_*/    expect_enum("season_dormancy_mode",season_dormancy_mode_labeled);
+#ifdef USE_PARAMS
+/*080910_*/    expect_parameter(p_linger_days);
+#else
+/*080910_*/    expect_valid_int16(v_linger_days);
+#endif
+
+/*100520_*/    emergence.setup_structure(*this,for_write);
+
+/*080818_*/    set_current_section("water_use_efficiency");
+/*060720_*/       expect_float32("season2_adj",season_biomass_adjustment[2],"");
+/*060720_*/       expect_float32("season3_adj",season_biomass_adjustment[3],"");
+/*060720_*/       expect_float32("season4_adj",season_biomass_adjustment[4],"");
+/*060720_*/       expect_float32("season5_adj",season_biomass_adjustment[5],"");
+/*_______*/    // Growth
+/*020405_*/    set_current_section(LABEL_growth);
+/*080508_*/       expect_bool("WUE_changes",WUE_changes);
+/*080514_*/       // Note that the thermal time for the WUE change is in thermal time parameters
+/*080505_*/       expect_enum("TUE_equation",TUE_equation_labeled);
+#ifdef USE_PARAMS
+/*080505_*/       expect_parameter(p_TUE_scaling_coef);
+/*080506_*/       {
+/*080506_*/          expect_parameter(p_TUE_at_1kPa_VPD);
+/*080506_*/          expect_parameter(p_TUE_at_1kPa_VPD_vegetative);
+/*080506_*/       };
+/*080506_*/       {
+/*080505_*/          expect_parameter(p_water_productivity);
+/*080505_*/          expect_parameter(p_water_productivity_vegetative);
+/*080506_*/       };
+/*040428_*/       expect_parameter(p_RUE_max);
+/*080506_*/       {
+/*040729_*/         expect_parameter(p_biomass_transpiration_coef);
+/*040729_*/         expect_parameter(p_biomass_transpiration_coef_vegetative);
+/*080506_*/       };
+#else
+/*080505_*/       expect_valid_float32(v_TUE_scaling_coef);
+/*080506_*/       {
+/*080506_*/          expect_valid_float32(v_TUE_at_1kPa_VPD);
+/*080506_*/          expect_valid_float32(v_TUE_at_1kPa_VPD_vegetative);
+/*080506_*/       };
+/*080506_*/       {
+/*080505_*/          expect_valid_float32(v_water_productivity);
+/*080505_*/          expect_valid_float32(v_water_productivity_vegetative);
+/*080506_*/       };
+/*040428_*/       expect_valid_float32(v_RUE_max);
+/*080506_*/       {
+/*040729_*/          expect_valid_float32(v_biomass_transpiration_coef);
+/*040729_*/          expect_valid_float32(v_biomass_transpiration_coef_vegetative);
+/*080506_*/       };
+#endif
+
+/*080801_*/       expect_enum("max_RUE_mode",max_RUE_mode_labeled);
+#ifdef USE_PARAMS
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+/*980220P*/       expect_parameter(p_light_to_biomass_deprecated); // for file import compatability
+#endif
+/*080506_*/       expect_parameter(p_reduce_canopy_expansion_LWP);
+/*080506_*/       expect_parameter(p_stop_canopy_expansion_LWP);
+
+/*_______*/       expect_parameter(p_at_pt_root_limit);
+#else
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+/*980220P*/       expect_valid_float32(v_light_to_biomass_deprecated); // for file import compatability
+#endif
+/*080506_*/       expect_valid_float32(v_reduce_canopy_expansion_LWP);
+/*080506_*/       expect_valid_float32(v_stop_canopy_expansion_LWP);
+
+/*_______*/       expect_valid_float32(v_at_pt_root_limit);
+#endif
+
+/*020405_*/       if (NOT_ANY_FRUIT_OR_UNKNOWN)
+/*080726_*/       {
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+/*080725_*/          if (!for_write) // This parameter was renamed
+/*080725_*/             expect_float32(LABEL_opt_temp_for_growth_obs,early_growth_limit_temp);
+#endif
+#ifdef USE_PARAMS
+/*_______*/          expect_parameter(p_early_growth_limit_temp);
+#else
+/*_______*/          expect_valid_float32(v_early_growth_limit_temp );
+#endif
+/*080726_*/       }
+#ifdef LADSS_MODE
+/*021220_*/       if (LADSS_mode)
+/*030303_*/       {
+#ifdef USE_PARAMS
+#ifdef OLD_ROOTS
+/*030303_*/          expect_parameter(p_max_root_depth);
+#else
+/*061212_*/          expect_parameter(root.p_max_depth);
+#endif
+/*030303_*/          expect_parameter(p_max_canopy_height);
+#else
+#ifdef OLD_ROOTS
+/*030303_*/          expect_valid_float32(v_max_root_depth);
+#else
+/*061212_*/          expect_valid_float32(root.v_max_depth);
+#endif
+/*030303_*/          expect_valid_float32(v_max_canopy_height);
+#endif
+
+/*021220_*/       };
+#endif
+/*020405_*/    set_current_section(LABEL_transpiration);
+#ifdef USE_PARAMS
+/*_______*/       expect_parameter(p_kc);   //Extinction coefficient for solar radiation
+/*_______*/       expect_parameter(p_ET_coef);
+/*_______*/       expect_parameter(p_max_water_uptake);
+/*_______*/       expect_parameter(p_stomatal_closure_leaf_water_pot); // leaf water pot at onset of stomatal closure
+/*_______*/       expect_parameter(p_wilt_leaf_water_pot);
+#ifdef LADSS_MODE
+/*021220_*/       if (LADSS_mode)
+/*021220_*/          expect_float32(LABEL_critical_leaf_water_pot_obs,stomatal_closure_leaf_water_pot); // for LADSS
+#endif
+#else
+/*_______*/       expect_valid_float32(v_kc);   //Extinction coefficient for solar radiation
+/*_______*/       expect_valid_float32(v_ET_coef);
+/*_______*/       expect_valid_float32(v_max_water_uptake);
+/*_______*/       expect_valid_float32(v_stomatal_closure_leaf_water_pot); // leaf water pot at onset of stomatal closure
+/*_______*/       expect_valid_float32(v_wilt_leaf_water_pot);
+#ifdef LADSS_MODE
+/*021220_*/       if (LADSS_mode)
+/*021220_*/          expect_float32(LABEL_critical_leaf_water_pot_obs,stomatal_closure_leaf_water_pot); // for LADSS
+#endif
+#endif
+
+/*080703_*/    // The following is only for the simple crop model
+/*100730_*/    canopy_growth_cover_based.setup_structure(*this,for_write);
+/*100730_*/    canopy_growth_LAI_based.setup_structure(*this,for_write);
+
+/*020405_*/    set_current_section(LABEL_leaf);
+/*040808_*/       expect_bool(LABEL_senesces,senesces);
+
+/*100611_*/    phenology.setup_structure(*this,for_write);
+
+#ifdef LADSS_MODE
+/*021220_*/       if (LADSS_mode)
+/*021220_*/       {
+/*021220_*/          expect_int16("EMERGE_DD"         ,phenology.emergence_deg_day);
+/*021220_*/          expect_int16("TUBER_INIT_DD"     ,phenology.tuber_initiation_deg_day);
+/*021220_*/          expect_int16("FLOWER_DD"         ,phenology.begin_flowering_deg_day);
+/*021220_*/          expect_int16("PEAK_LAI_DD"       ,phenology.end_vegetative_growth_deg_day);
+/*021220_*/          expect_int16("MAX_ROOT_DEPTH_DD" ,phenology.max_root_depth_deg_day);
+/*021220_*/          expect_int16("FILLING_DD"        ,phenology.begin_filling_deg_day);
+/*050628_*/          expect_float32("MATURITY_DD"     ,phenology.begin_maturity_deg_day);
+/*061006_*/          expect_float32("RAPID_GROWTH_DD" ,phenology.begin_rapid_fruit_growth_deg_day);
+/*021220_*/       };
+#endif
+
+/*100730_*/    thermal_time.setup_structure(*this,for_write);
+               // The following are actually thermal time accumulation parameters
+               // in version 5 we will have a separate section
+
+/*100730_*/    root.setup_structure(*this,for_write);
+/*100610*/     inactive_period.setup_structure(*this,for_write);
+/*020418_*/    if (CROPSYST_FRUIT || !for_write) // ORCHARD_VINEYARD_MODEL_OR_UNKNOWN
+/*100610_*/       dormancy       .setup_structure(*this,for_write);
+/*_______*/    // Residue
+/*020408_*/    if (residue_decomposition) residue_decomposition->setup_structure(*this,for_write);
+
+/*020508_*/    set_current_section(LABEL_morphology);
+// Prior to version 4.06.03 root parameters were under morphology
+// Starting version 5 we will no longer import
+#ifdef USE_PARAMS
+/*990213P*/       expect_parameter(p_max_canopy_height);
+#else
+/*990213P*/       expect_valid_float32(v_max_canopy_height);
+#endif
+
+/*_______*/    // Harvest index
+/*020405_*/    set_current_section(LABEL_harvest_index);
+#ifdef USE_PARAMS
+/*_______*/       expect_parameter(harvest_index->p_unstressed);
+/*020405_*/       if ( UNKNOWN // (harvested_part_labeled.get() == UNKNOWN_PART) // When reading crop
+/*020405_*/          ||(harvested_part_labeled.get() == ROOT_CROP)
+/*020405_*/          ||(harvested_part_labeled.get() == TUBER_CROP)
+/*051207_*/          ||(!for_write)
+/*020405_*/          )
+/*020405_*/       { // Tuber and root crops
+/*_______*/          expect_parameter(harvest_index->p_tuber_init_sensitivity);
+/*_______*/          expect_parameter(harvest_index->p_tuber_growth_sensitivity);
+/*_______*/       };
+/*020405_*/       if ( UNKNOWN // (harvested_part_labeled.get() == UNKNOWN_PART) // When reading crop
+/*020405_*/          ||(harvested_part_labeled.get() == SEED_CROP)
+/*020405_*/          ||(harvested_part_labeled.get() == TUBER_CROP)
+/*051207_*/          ||(!for_write))
+/*020405_*/       { // Seed crops
+/*_______*/          expect_parameter(harvest_index->p_flowering_sensitivity);
+/*101018_*/          expect_parameter(harvest_index->p_filling_sensitivity);
+/*081125_*/          expect_parameter(harvest_index->p_filling_duration);
+//081125obs /*_______*/          expect_valid_float32(harvest_index->v_filling_sensitivity);
+/*020405_*/       };
+///*020405_*/      if (harvested_part_labeled.get() == SEED_CROP)
+/*081121_*/      {
+//081125/*081121_*/          expect_bool("temperature_stress_sensitive",harvest_index->temperature_stress_sensitive);
+/*081121_*/          expect_parameter(harvest_index->p_temperature_stress_sensitivity);
+/*081121_*/      }
+//081125 /*_______*/       expect_valid_float32(harvest_index->v_translocation_factor);
+/*020419_*/       if ( UNKNOWN // (harvested_part_labeled.get() == UNKNOWN_PART) // When reading crop
+/*020419_*/          ||(harvested_part_labeled.get() == LEAF_CROP)
+/*020419_*/          || tea /*(harvested_part_labeled.get() == TEA_CROP)*/
+/*051207_*/          ||(!for_write)
+/*020419_*/          )
+/*020419_*/       { // leaf and crops
+/*020419_*/          expect_parameter(harvest_index->p_unstressed);
+/*020419_*/          expect_parameter(harvest_index->p_growth_sensitivity);
+/*020419_*/       };
+#else
+/*_______*/       expect_valid_float32(harvest_index->v_unstressed);
+/*020405_*/       if ( UNKNOWN // (harvested_part_labeled.get() == UNKNOWN_PART) // When reading crop
+/*020405_*/          ||(harvested_part_labeled.get() == ROOT_CROP)
+/*020405_*/          ||(harvested_part_labeled.get() == TUBER_CROP)
+/*051207_*/          ||(!for_write)
+/*020405_*/          )
+/*020405_*/       { // Tuber and root crops
+/*_______*/          expect_valid_float32(harvest_index->v_tuber_init_sensitivity);
+/*_______*/          expect_valid_float32(harvest_index->v_tuber_growth_sensitivity);
+/*_______*/       };
+/*020405_*/       if ( UNKNOWN // (harvested_part_labeled.get() == UNKNOWN_PART) // When reading crop
+/*020405_*/          ||(harvested_part_labeled.get() == SEED_CROP)
+/*020405_*/          ||(harvested_part_labeled.get() == TUBER_CROP)
+/*051207_*/          ||(!for_write))
+/*020405_*/       { // Seed crops
+/*_______*/          expect_valid_float32(harvest_index->v_flowering_sensitivity);
+/*_______*/          expect_valid_float32(harvest_index->v_filling_sensitivity);
+/*081125_*/          expect_valid_int16(harvest_index->v_filling_duration);
+/*020405_*/       };
+///*020405_*/      if (harvested_part_labeled.get() == SEED_CROP)
+/*081121_*/      {
+//081125/*081121_*/          expect_bool("temperature_stress_sensitive",harvest_index->temperature_stress_sensitive);
+/*081121_*/          expect_valid_float32(harvest_index->v_temperature_stress_sensitivity);
+/*081121_*/      }
+//081125 /*_______*/       expect_valid_float32(harvest_index->v_translocation_factor);
+/*020419_*/       if ( UNKNOWN // (harvested_part_labeled.get() == UNKNOWN_PART) // When reading crop
+/*020419_*/          ||(harvested_part_labeled.get() == LEAF_CROP)
+/*020419_*/          || tea /*(harvested_part_labeled.get() == TEA_CROP)*/
+/*051207_*/          ||(!for_write)
+/*020419_*/          )
+/*020419_*/       { // leaf and crops
+/*020419_*/          expect_valid_float32(harvest_index->v_unstressed);
+/*020419_*/          expect_valid_float32(harvest_index->v_growth_sensitivity);
+/*020419_*/       };
+#endif
+/*_______*/    // Harvest
+/*020405_*/       if (/*081103 xfruit &&*/ (CROPSYST_FRUIT || !for_write)) // ORCHARD_VINEYARD_MODEL_OR_UNKNOWN)
+/*020405_*/       { // fruit trees and grape harvest parameters
+/*020405_*/          set_current_section(LABEL_fruit);
+/*021206_*/          expect_bool("grape",fruit.grape);
+/*081204_*/          expect_enum         ("harvest_condition",fruit.harvest_condition_mode_labeled);
+/*020405_*/       };
+#ifdef USE_PARAMS
+/*000630_*/          expect_parameter(fruit.p_fract_total_solids);
+/*000616_*/          expect_parameter(fruit.p_max_fruit_load_kg_ha);
+/*030521_*/          expect_parameter(fruit.p_initial_growth_fraction_to_fruit);
+/*030521_*/          expect_parameter(fruit.p_rapid_growth_fraction_to_fruit);   // grapes
+
+/*081204_*/          expect_parameter(fruit.p_harvest_temperature);
+/*081204_*/          expect_parameter(fruit.p_harvest_temperature_days);
+/*081204_*/          expect_parameter(fruit.p_harvest_DOY_earliest);
+/*081204_*/          expect_parameter(fruit.p_harvest_DOY_latest);
+
+/*091202_*/          expect_parameter(fruit.p_max_water_uptake_before_fruiting);
+/*091202_*/          expect_parameter(fruit.p_max_water_uptake_during_initial_fruit);
+/*091202_*/          expect_parameter(fruit.p_max_water_uptake_during_radid_fruit);
+/*091202_*/          expect_parameter(fruit.p_max_water_uptake_during_veraison);
+/*091202_*/          expect_parameter(fruit.p_max_water_uptake_after_maturity);
+#else
+/*000630_*/          expect_valid_float32(fruit.v_fract_total_solids);
+/*000616_*/          expect_valid_float32(fruit.v_max_fruit_load_kg_ha);
+/*030521_*/          expect_valid_float32(fruit.v_initial_growth_fraction_to_fruit);
+/*030521_*/          expect_valid_float32(fruit.v_rapid_growth_fraction_to_fruit);   // grapes
+
+/*081204_*/          expect_valid_float32(fruit.v_harvest_temperature);
+/*081204_*/          expect_valid_int16  (fruit.v_harvest_temperature_days);
+/*081204_*/          expect_valid_int16  (fruit.v_harvest_DOY_earliest);
+/*081204_*/          expect_valid_int16  (fruit.v_harvest_DOY_latest);
+
+/*091202_*/          expect_valid_float32(fruit.v_max_water_uptake_before_fruiting);
+/*091202_*/          expect_valid_float32(fruit.v_max_water_uptake_during_initial_fruit);
+/*091202_*/          expect_valid_float32(fruit.v_max_water_uptake_during_radid_fruit);
+/*091202_*/          expect_valid_float32(fruit.v_max_water_uptake_during_veraison);
+/*091202_*/          expect_valid_float32(fruit.v_max_water_uptake_after_maturity);
+
+#endif
+/*020405_*/    if (vernalization)
+/*100730_*/        vernalization->setup_structure(*this,for_write);
+/*020405_*/    if (photoperiod)
+/*100513_*/       photoperiod->setup_structure(*this,for_write);
+
+/*020405_*/    if ((!CROPSYST_FRUIT || !for_write) /*NOT_ORCHARD_VINEYARD_MODEL_OR_UNKNOWN*/ && nitrogen)
+/*_______*/    { // Nitrogen
+/*020405_*/       set_current_section(LABEL_nitrogen);
+/*_______*/       expect_bool(LABEL_fixation,nitrogen->fixating);
+/*070105_*/       expect_float32("legume_fraction",nitrogen->legume_fraction);
+#ifdef USE_PARAMS
+/*061129_*/       expect_parameter(nitrogen->p_max_uptake_daily_rate);
+/*061214_*/       expect_parameter(nitrogen->p_stubble_max_conc);
+/*061216_*/       expect_parameter(nitrogen->p_root_conc);
+/*061213_*/       expect_parameter(nitrogen->p_demand_adjust);
+/*070209_*/       expect_parameter(nitrogen->p_PAW_where_N_uptake_rate_decreases);
+/*070209_*/       expect_parameter(nitrogen->p_residual_N_not_available_for_uptake);
+/*070209_*/       expect_parameter(nitrogen->p_soil_N_conc_where_N_uptake_decreases);
+#else
+/*061129_*/       expect_valid_float32(nitrogen->v_max_uptake_daily_rate);
+/*061214_*/       expect_valid_float32(nitrogen->v_stubble_max_conc);
+/*061216_*/       expect_valid_float32(nitrogen->v_root_conc);
+/*061213_*/       expect_valid_float32(nitrogen->v_demand_adjust);
+/*070209_*/       expect_valid_float32(nitrogen->v_PAW_where_N_uptake_rate_decreases);
+/*070209_*/       expect_valid_float32(nitrogen->v_residual_N_not_available_for_uptake);
+/*070209_*/       expect_valid_float32(nitrogen->v_soil_N_conc_where_N_uptake_decreases);
+#endif
+#ifdef NYI
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+//080916#if (CROPSYST_VERSION < 5)
+// 080818 these parameters were renamed
+/*080818_*/       if (!for_write)
+/*080818_*/       {  expect_float32("uptake_adj",nitrogen->max_uptake_daily_rate);
+
+
+
+
+availability_adj=0.6999999881 Nitrogen availability adjustment
+residual=4.0000000000 Amount of residual nitrogen per soil layer
+max_conc_emerge=0.0379999988 Maximum N concentration during early growth
+min_conc_mature=0.0070000002 Minimum N concentration at maturity
+max_conc_mature=0.0120000001 Maximum N concentration at maturity
+max_stubble=0.0099999998 Maximum N content of standing stubble
+
+/*080818_*/       };
+#endif
+#endif
+
+/*070227_*/       expect_enum("nitrogen_leaf_stress_mode",nitrogen->nitrogen_leaf_stress_mode_labeled);
+/*_______*/     };
+/*020405_*/    if ((!CROPSYST_FRUIT || !for_write) && salinity) // this may be NOT_ANY_FRUIT_OR_UNKNOWN Warning checking with Claudio
+/*_______*/    {  // Salinity
+/*_______*/       set_current_section("salinity");
+#ifdef USE_PARAMS
+/*_______*/       expect_parameter(salinity->p_osmotic_pot_50);
+/*_______*/       expect_parameter(salinity->p_salt_tolerance_P);
+#else
+/*_______*/       expect_valid_float32(salinity->v_osmotic_pot_50);
+/*_______*/       expect_valid_float32(salinity->v_salt_tolerance_P);
+#endif
+
+/*_______*/    };
+/*020405_*/    if (CO2_response)
+/*000810_*/    {  // CO2
+/*980223P*/       set_current_section(LABEL_CO2);
+#ifdef USE_PARAMS
+/*980223P*/       expect_parameter(CO2_response->p_growth_ratio_elevated_to_baseline_ppm);
+/*980223P*/       expect_parameter(CO2_response->p_elevated_reference_conc);
+/*980223P*/       expect_parameter(CO2_response->p_baseline_reference_conc);
+#else
+/*980223P*/       expect_valid_float32(CO2_response->v_growth_ratio_elevated_to_baseline_ppm);
+/*980223P*/       expect_valid_float32(CO2_response->v_elevated_reference_conc);
+/*980223P*/       expect_valid_float32(CO2_response->v_baseline_reference_conc);
+#endif
+
+/*020405_*/    };
+/*020717_*/    if (hardiness)
+/*020717_*/    {  //  Hardiness
+/*000330_*/       set_current_section(LABEL_hardiness);
+/*021015_*/          expect_bool(LABEL_enabled,hardiness->enabled);
+/*020410_*/          alias_entry(LABEL_salvageable_days_before_maturity,LABEL_salvagable_days_LADSS_alias);
+#ifdef USE_PARAMS
+/*000330_*/          expect_parameter(hardiness->p_salvageable_days_before_maturity);
+/*990129C*/          expect_parameter(hardiness->p_leaf_damage_cold_temp);
+/*991029C*/          expect_parameter(hardiness->p_leaf_lethal_cold_temp);
+#else
+/*000330_*/          expect_valid_int16(hardiness->v_salvageable_days_before_maturity);
+/*990129C*/          expect_valid_float32(hardiness->v_leaf_damage_cold_temp);
+/*991029C*/          expect_valid_float32(hardiness->v_leaf_lethal_cold_temp);
+#endif
+/*081108_*/          expect_float32("tuber_crit_temperature",hardiness->tuber_critical_temperature);
+/*020717_*/    };
+/*020405_*/    if (CROPSYST_FRUIT || !for_write)
+/*020405_*/    { //  canopy characteristics
+/*000330_*/       set_current_section(LABEL_canopy_characteristics);
+/*020405_*/       if ((CROPSYST_FRUIT || !for_write)) // ORCHARD_VINEYARD_MODEL_OR_UNKNOWN)
+/*020405_*/       {
+#ifdef USE_PARAMS
+/*081128_*/          expect_parameter(hardiness->p_fruit_damage_cold_temp);
+/*081128_*/          expect_parameter(hardiness->p_fruit_lethal_cold_temp);
+/*020405_*/          expect_parameter(canopy_characteristics_hedge_row->p_initial_width);
+/*020405_*/          expect_parameter(canopy_characteristics_hedge_row->p_final_width);
+/*071116_*/          expect_parameter(canopy_characteristics_hedge_row->p_initial_breadth);  // along the row
+/*071116_*/          expect_parameter(canopy_characteristics_hedge_row->p_final_breadth);
+/*020405_*/          expect_parameter(canopy_characteristics_hedge_row->p_initial_height);
+/*030520_*/          expect_parameter(canopy_characteristics_hedge_row->p_final_height);
+/*071116_*/          expect_parameter(canopy_characteristics_hedge_row->p_branch_insertion_height);
+#else
+/*081128_*/          expect_valid_float32(hardiness->v_fruit_damage_cold_temp);
+/*081128_*/          expect_valid_float32(hardiness->v_fruit_lethal_cold_temp);
+/*020405_*/          expect_valid_float32(canopy_characteristics_hedge_row->v_initial_width);
+/*020405_*/          expect_valid_float32(canopy_characteristics_hedge_row->v_final_width);
+/*071116_*/          expect_valid_float32(canopy_characteristics_hedge_row->v_initial_breadth);  // along the row
+/*071116_*/          expect_valid_float32(canopy_characteristics_hedge_row->v_final_breadth);
+/*020405_*/          expect_valid_float32(canopy_characteristics_hedge_row->v_initial_height);
+/*030520_*/          expect_valid_float32(canopy_characteristics_hedge_row->v_final_height);
+/*071116_*/          expect_valid_float32(canopy_characteristics_hedge_row->v_branch_insertion_height);
+#endif
+/*020405_*/       };
+/*020405_*/       if (layout)
+/*020405_*/       {  // layout
+/*020405_*/          set_current_section(LABEL_layout);
+#ifdef USE_PARAMS
+/*020405_*/          expect_parameter(layout->p_row_spacing);
+/*020405_*/          expect_parameter(layout->p_row_azimuth);
+/*020405_*/          expect_parameter(layout->p_col_spacing);
+#else
+/*020405_*/          expect_valid_float32(layout->v_row_spacing);
+/*020405_*/          expect_valid_float32(layout->v_row_azimuth);
+/*020405_*/          expect_valid_float32(layout->v_col_spacing);
+#endif
+
+/*020405_*/       };
+/*020405_*/    };
+/*031121_*/    if ((!for_write || (crop_model_labeled.get() == CROPGRO_MODEL)) && cropgro)
+/*031121_*/    {
+/*031121_*/       expect_filename("model_input",cropgro->model_input_file,255);
+/*031121_*/    };
+               structure_defined = true;                                         //120314
+/*_______*/ };
+//______________________________________________________________________________
+/*010109x*/ void Crop_parameters::get_end()
+/*_______*/ {
+/*020408_*/    Common_parameters_data_record::get_end();
+/*071121_*/    bool CROPSYST_FRUIT = (crop_model_labeled.get() == CROPSYST_FRUIT_MODEL);
+/*020419_*/    setup_optional_parameters();
+/*020716_*/    if (crop_model_labeled.get() == CROPSYST_FRUIT_MODEL)
+/*030514_*/    {  // Need to make sure that the harvested part is fruit is selected, because it is not show in the parameter editor.
+//081103/*0030515_*/      if (fruit && fruit->grape)
+/*0030515_*/      if (fruit.grape)
+/*0030515_*/         deciduous = true;
+/*030514_*/       harvested_part_labeled.set(FRUIT);
+/*030529_*/       // In the fruit crop model, the peak_LAI_deg_day is essentially the begin_rapid_fruit_growth_deg_day where LAI accumulation stops.
+/*030514_*/    } else
+/*040517_*/       deciduous = false;
+/*0020716_*/   if (perennial_obsolete)
+/*040525_*/    {
+/*0020716_*/      life_cycle_labeled.set(perennial_life_cycle);
+/*080722_*/       stem_type_labeled.set(herbaceous_stem);
+/*040525_*/       harvested_part_labeled.set(LEAF_CROP);
+/*040525_*/    };
+/*040525_*/    if (land_use_labeled.get() == PASTURE)
+/*040525_*/       harvested_part_labeled.set(LEAF_CROP);
+/*030520_*/    if (!parameter_editor_mode)
+/*_______*/    {
+/*020718_*/    if (vernalization)
+/*021015_*/    {  // The following if is for version 3 file compatilibiity
+/*020718_*/       if (CORN::is_approximately<float32>(vernalization->end,0.0,0.000001))
+/*020718_*/          vernalization->enabled = false;
+/*020718_*/    };
+#ifdef OBSOLETE
+100513 start and end parameters obsolete
+/*020718_*/    if (photoperiod)
+/*021015_*/    {  // The following if is for version 3 file compatilibiity
+/*020718_*/       if ((is_approximately(param_photoperiod_start(),0.0,0.00001) &&
+/*020718_*/            is_approximately(param_photoperiod_end()  ,0.0,0.00001)))
+/*020718_*/          photoperiod->enabled = false;
+/*020419_*/    };
+#endif
+/*050927_*/    if (!was_section_encountered(LABEL_hardiness))
+/*021015_*/    {  delete_section(LABEL_hardiness);
+/*021015_*/       if (hardiness) delete hardiness;   hardiness= 0;
+/*021015_*/    };
+/*020716_*/    if (crop_model_labeled.get() != CROPSYST_FRUIT_MODEL)
+//*030514_*/    {  // Need to make sure that the harvested part is fruit is selected, because it is not show in the parameter editor.
+//*030514_*/       harvested_part_labeled.set(FRUIT);
+//*030514_*/    }
+//*030514_*/    else
+/*020716_*/    {  delete_section(LABEL_fruit);
+//081103/*020716_*/       if (fruit) delete fruit; fruit = 0;
+/*020716_*/    };
+/*020716_*/    if (!CROPSYST_FRUIT)
+/*020716_*/    {  delete_section(LABEL_layout);
+/*_______*/       if (layout)   delete layout;   layout  = 0;
+/*020716_*/    };
+/*020405_*/    if (!CROPSYST_FRUIT)
+/*020419_*/    {  delete_section(LABEL_canopy_characteristics);
+/*020419_*/       if (canopy_characteristics_hedge_row)   delete canopy_characteristics_hedge_row;   canopy_characteristics_hedge_row  = 0;
+/*020419_*/    };
+/*030520_*/    };
+/*010109_*/    initialize_after_load();
+/*060726_*/    if (harvested_part_labeled.get() == UNKNOWN_PART) harvested_part_labeled.set(SEED_CROP);
+
+#ifdef NYI
+080506
+For compatibility with previous version
+at_pt_limit has been replaced by these,
+
+/*080506_*/ ,reduce_canopy_expansion_LWP     (-1000.0), v_reduce_canopy_expansion_LWP(reduce_canopy_expansion_LWP, UC_J_kg,"LWP_reduces_canopy_expansion" ,2,)
+/*080506_*/ ,stop_canopy_expansion_LWP       (-1200.0), v_stop_canopy_expansion_LWP  (stop_canopy_expansion_LWP  , UC_J_kg,"LWP_stops_canopy_expansion"   ,2,)
+
+#endif
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+/*080731_*/    if (max_RUE_mode_labeled.get() == unspecified_max_RUE_mode)
+/*080731_*/    {
+/*080731_*/        RUE_max= kg_to_g(reference_light_to_biomass_kg_MJ_deprecated); // Convert from kg/MJ to g/MJ)
+/*080731_*/        max_RUE_mode_labeled.set(photosynthetically_active_radiation);
+/*080731_*/    };
+#endif
+/*_______*/ };
+//______________________________________________________________________________
+/*020419_*/ void Crop_parameters::setup_optional_parameters()
+/*_______*/ {
+/*070801_*/    if (parameter_editor_mode) return; // In parameter editor, we have already bound UI controls to these members so we can't delete them
+/*020405_*/    if (   (crop_model_labeled.get() == CROPSYST_FRUIT_MODEL))
+/*020405_*/    {  // the orchard and vineyard models don't have the following parameters
+/*020405_*/       land_use_labeled.set(FALLOW); // Presuming that fallow most closely describes orchard soil condition
+/*020405_*/       delete_section(LABEL_vernalization);
+/*020405_*/       if (vernalization)   delete vernalization;   vernalization  = 0;
+/*020405_*/       delete_section(LABEL_photoperiod);
+/*020405_*/       if (photoperiod)     delete photoperiod;     photoperiod    = 0;
+/*020405_*/       delete_section(LABEL_salinity);
+/*020405_*/       if (salinity)        delete salinity;        salinity       = 0;
+/*020405_*/       delete_section(LABEL_residue);
+/*020405_*/       if (residue_decomposition)  delete residue_decomposition;  residue_decomposition = 0;
+/*020405_*/       delete_section(LABEL_nitrogen);
+/*020405_*/       if (nitrogen)        delete nitrogen;        nitrogen       = 0;
+/*020423_*/       if (harvested_part_labeled.get() == UNKNOWN_PART)
+/*020423_*/          harvested_part_labeled.set(FRUIT);
+/*080722_*/       life_cycle_labeled.set(perennial_life_cycle);
+/*080722_*/       stem_type_labeled.set(woody_stem);
+/*020405_*/    }
+//031121       NYI  somethings could be deleted for CropGro model
+/*020423_*/    else
+/*020423_*/       if (harvested_part_labeled.get() == UNKNOWN_PART)
+/*020423_*/          harvested_part_labeled.set(SEED_CROP);
+/*_______*/ };
+//______________________________________________________________________________
+/*010109x*/ void Crop_parameters::set_start()
+/*_______*/ {
+/*990301_*/    if (description == "") description = "-"; // Pascal has problem reading empty strings.
+/*020405_*/    if (vernalization && (harvested_part_labeled.get() == FRUIT))
+/*020405_*/    {  delete vernalization; vernalization = 0; };
+/*020405_*/    if (photoperiod  && (harvested_part_labeled.get() == FRUIT))
+/*020405_*/    {  delete photoperiod; photoperiod = 0; };
+/*020405_*/    if (nitrogen && (harvested_part_labeled.get() == FRUIT))
+/*020405_*/    {  delete nitrogen; nitrogen = 0; };
+/*020408_*/    Common_parameters_data_record::set_start();
+/*_______*/ };
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::Nitrogen::Nitrogen()
+/*_______*/ :fixating(false)
+/*070105_*/ ,legume_fraction                     (1.0) // default must be 1.0 (non pasture)
+/*061129_*/ ,max_uptake_daily_rate_kg_ha         (5.0)
+/*061213_*/ ,demand_adjust                       (1.0)
+/*061214_*/ ,stubble_max_conc                    (0.007)
+/*061214_*/ ,root_conc                           (0.007)
+/*070227_*/ ,nitrogen_leaf_stress_mode_labeled   (no_leaf_stress) // default no_leaf_stress if for compatibility with previous version
+/*070209_*/ ,residual_N_not_available_for_uptake (1.0)
+/*070209_*/ ,soil_N_conc_where_N_uptake_decreases(5.0)
+/*070209_*/ ,PAW_where_N_uptake_rate_decreases   (0.5)
+#ifdef USE_PARAMS
+/*_______*/ ,p_max_uptake_daily_rate               (max_uptake_daily_rate_kg_ha           ,PP_max_uptake_daily_rate,PPN_max_uptake_daily_rate)
+/*_______*/ ,p_demand_adjust                       (demand_adjust                         ,PP_demand_adjust,PPN_demand_adjust)
+/*_______*/ ,p_stubble_max_conc                    (stubble_max_conc                      ,PP_stubble_max_conc,PPN_stubble_max_conc)
+/*_______*/ ,p_root_conc                           (root_conc                             ,PP_root_conc,PPN_root_conc)
+/*_______*/ ,p_residual_N_not_available_for_uptake (residual_N_not_available_for_uptake   ,PP_residual_N_not_available_for_uptake,PPN_residual_N_not_available_for_uptake)
+/*_______*/ ,p_soil_N_conc_where_N_uptake_decreases(soil_N_conc_where_N_uptake_decreases  ,PP_soil_N_conc_where_N_uptake_decreases,PPN_soil_N_conc_where_N_uptake_decreases)
+/*_______*/ ,p_PAW_where_N_uptake_rate_decreases   (PAW_where_N_uptake_rate_decreases     ,PP_PAW_where_N_uptake_rate_decreases,PPN_PAW_where_N_uptake_rate_decreases)
+#else
+/*_______*/ ,v_max_uptake_daily_rate         (max_uptake_daily_rate_kg_ha      ,UC_kg_ha              ,"max_uptake_daily_rate" ,2,5.0  , 0.0  ,20.0 /*?*/ ,0.0,100.0/*?*/ ,"kg/ha/day","Maximum uptake during rapid linear growth") // Warning need valid ranges
+/*_______*/ ,v_demand_adjust                       (demand_adjust                         ,UC_adjustment       ,"demand_adjust"                       ,2,1.0  , 0.5  ,1.5 ,0.0,2.0,"adjustment" ,"Nitrogen demand adjustment")
+/*_______*/ ,v_stubble_max_conc                    (stubble_max_conc                      ,UC_kg_kg            ,"stubble_max_conc"                    ,3,0.007, 0.003,0.01,0.0,0.03,TU_kgN_kgDM ,"Maximum N concentration of chaff and stubble"/*061214 TL_Maximum_N_content_of_standing_stubble*/)
+/*_______*/ ,v_root_conc                           (root_conc                             ,UC_kg_kg            ,"root_conc"                           ,3,0.007, 0.001,0.10,0.0,0.03,TU_kgN_kgDM ,"Standard root N concentration" )
+/*_______*/ ,v_residual_N_not_available_for_uptake (residual_N_not_available_for_uptake   ,UC_ppm              ,"residual_N_not_available_for_uptake" ,3,1.0  , 0.0  , 10 ,0.0, 100,"ppm"       ,"Residual N not available for uptake" )
+/*_______*/ ,v_soil_N_conc_where_N_uptake_decreases(soil_N_conc_where_N_uptake_decreases  ,UC_ppm              ,"soil_N_conc_where_N_uptake_decreases",3,5.0  , 0.0  ,100 ,0.0,1000,"ppm"       ,"Soil N concentration at which N uptake starts decreasing" )
+/*_______*/ ,v_PAW_where_N_uptake_rate_decreases   (PAW_where_N_uptake_rate_decreases     ,UC_decimal_percent  ,"PAW_where_N_uptake_rate_decreases"   ,3,0.5  , 0.0  ,1.0 ,0.0, 1.0,"0-1"       ,"Plant available water at which N uptake starts decreasing" )
+#endif
+/*020408_*/ {};
+//______________________________________________________________________________
+/*020408_*/ void Crop_parameters::Nitrogen::set_fallow_conditions()
+/*020408_*/ {
+/*061129_*/    max_uptake_daily_rate_kg_ha         = 0.0; // Currently fallow is not allowed to uptake
+/*_______*/    stubble_max_conc              =0.007;
+/*_______*/    root_conc                     =0.01;
+/*_______*/ };
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::Harvest_index::Harvest_index()
+/*_______*/ :unstressed                (0.50)
+//081125obs/*_______*/ ,translocation_factor      (0.3)
+/*_______*/ ,flowering_sensitivity     (0.0)
+/*101018_*/ ,filling_sensitivity       (0.0)
+/*081125_*/ ,filling_duration          (1) // 101128(30) // days
+/*020419_*/ ,growth_sensitivity        (0.0)
+/*_______*/ ,tuber_init_sensitivity    (0.0)
+/*_______*/ ,tuber_growth_sensitivity  (0.0)
+//081125/*081121_*/ ,temperature_stress_sensitive(false)
+/*081121_*/ ,temperature_stress_sensitivity(0.0)
+//081125/*_______*/ ,v_translocation_factor    (translocation_factor      ,U_units_not_specified  ,LABEL_translocation_factor,2,0.3, 0.0,0.4,  0.0,1.0 ,TU_0_0_0_4,"Translocation to yield factor" /*TL_Translocation_factor*/)
+#ifdef USE_PARAMS
+/*_______*/ ,p_temperature_stress_sensitivity(temperature_stress_sensitivity        ,PP_temperature_stress_sensitivity,PPN_stress_sensitivity)
+/*_______*/ ,p_unstressed              (unstressed                ,PP_unstressed,PPN_unstressed)
+/*_______*/ ,p_flowering_sensitivity   (flowering_sensitivity     ,PP_flowering_sensitivity,PPN_stress_sensitivity)
+/*101018_*/ ,p_filling_sensitivity     (filling_sensitivity       ,PP_filling_sensitivity,PPN_stress_sensitivity)
+/*081125_*/ ,p_filling_duration        (filling_duration          ,PP_filling_duration,PPN_filling_duration)
+/*020419_*/ ,p_growth_sensitivity      (growth_sensitivity        ,PP_growth_sensitivity,PPN_stress_sensitivity)
+/*_______*/ ,p_tuber_init_sensitivity  (tuber_init_sensitivity    ,PP_tuber_init_sensitivity,PPN_stress_sensitivity)
+/*_______*/ ,p_tuber_growth_sensitivity(tuber_growth_sensitivity  ,PP_tuber_growth_sensitivity,PPN_stress_sensitivity)
+#else
+/*_______*/ ,v_temperature_stress_sensitivity(temperature_stress_sensitivity        ,U_units_not_specified  ,"temperature_stress_sensitivity",2,0.0, 0.5,1.5,  0.0,2.0 ,"0.5-1.5","Sensitivity to temperature stress during flowering")
+/*_______*/ ,v_unstressed              (unstressed                ,UC_index               ,LABEL_unstressed,2,0.50, 0.0,1.0,  0.0,1.0 ,TU_0_1,TL_Unstress_harvest_index)
+/*_______*/ ,v_flowering_sensitivity   (flowering_sensitivity     ,U_units_not_specified  ,LABEL_flowering_sensitivity,2,0.0, 0.5,1.5,  0.0,2.0 ,"0.5-1.5","flowering","Sensitivity to water and nitrogen stress")
+/*_______*/ ,v_filling_sensitivity     (filling_sensitivity       ,U_units_not_specified  ,LABEL_filling_sensitivity,2,0.0, 0.0,1.0,  0.0,1.0 ,TU_0_1,"filling/bulking","Sensitivity to water and nitrogen stress")
+/*081125_*/ ,v_filling_duration        (filling_duration          /*NYI ,U_days*/         ,"filling_duration",  1/*101128 30*/,0,90,0,365,"Days","Duration of grain filling period (unstressed)")
+/*020419_*/ ,v_growth_sensitivity      (growth_sensitivity        ,U_units_not_specified  ,LABEL_growth_sensitivity,2,0.0, 0.5,1.5,  0.0,2.0 ,"0.5-1.5","Sensitivity to water and nitrogen stress during active growth"/*,"during active growth",TL_Sensitivity_to_water_stress*/)
+/*_______*/ ,v_tuber_init_sensitivity  (tuber_init_sensitivity    ,U_units_not_specified  ,LABEL_tuber_init_sensitivity,2,0.0,  0.5,1.5,  0.0,2.0 ,"0.5-1.5",TL_during_tuber_init,TL_Sensitivity_to_water_stress)
+/*_______*/ ,v_tuber_growth_sensitivity(tuber_growth_sensitivity  ,U_units_not_specified  ,LABEL_tuber_growth_sensitivity,2,0.0,  0.5,1.5,  0.0,2.0 ,"0.5-1.5",TL_during_tuber_growth,TL_Sensitivity_to_water_stress)
+#endif
+/*020408_*/ {};
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::Fruit::Fruit()
+/*000635_*/ :fract_total_solids                     (0.35)
+/*000616_*/ ,max_fruit_load_kg_ha                   (20000)
+/*071127_*/ ,initial_fruit_mass                     (0.02)
+/*071127_*/ ,initial_reserves_release_rate          (0.02)
+/*071127_*/ ,clusters_per_vine                      (30)
+/*071127_*/ ,berries_per_cluster                    (25)
+/*071127_*/ ,fruits_per_tree                        (250)
+/*030521_*/ ,initial_growth_fraction_to_fruit       (0.9)
+/*030521_*/ ,rapid_growth_fraction_to_fruit         (0.65)
+/*081204_*/ ,harvest_condition_mode_labeled         (management_scheduled_harvest)
+/*081204_*/ ,harvest_temperature                    (15)
+/*081204_*/ ,harvest_temperature_days               (5)
+/*081204_*/ ,harvest_DOY_earliest                   (258)
+/*081204_*/ ,harvest_DOY_latest                     (275)
+
+/*091202_*/ ,max_water_uptake_before_fruiting_mm       (10.0)
+/*091202_*/ ,max_water_uptake_during_initial_fruit_mm  (10.0)
+/*091202_*/ ,max_water_uptake_during_radid_fruit_mm    (10.0)
+/*091202_*/ ,max_water_uptake_during_veraison_mm       (10.0)
+/*091202_*/ ,max_water_uptake_after_maturity_mm        (10.0)
+
+#ifdef USE_PARAMS
+/*000635_*/ , p_fract_total_solids              (fract_total_solids                 ,PP_fract_total_solids,PPN_fract_total_solids)
+/*000616_*/ , p_max_fruit_load_kg_ha            (max_fruit_load_kg_ha               ,PP_max_fruit_load_kg_ha,PPN_max_fruit_load_kg_ha)
+/*071127_*/ , p_initial_fruit_mass              (initial_fruit_mass                 ,PP_initial_fruit_mass,PPN_initial_fruit_mass)
+/*071127_*/ , p_initial_reserves_release_rate   (initial_reserves_release_rate      ,PP_initial_reserves_release_rate,PPN_initial_reserves_release_rate)
+/*071127_*/ , p_clusters_per_vine               (clusters_per_vine                  ,PP_clusters_per_vine,PPN_clusters_per_vine)
+/*071127_*/ , p_berries_per_cluster             (berries_per_cluster                ,PP_berries_per_cluster,PPN_berries_per_cluster)
+/*071127_*/ , p_fruits_per_tree                 (fruits_per_tree                    ,PP_fruits_per_tree,PPN_fruits_per_tree)
+/*030521_*/ , p_initial_growth_fraction_to_fruit(initial_growth_fraction_to_fruit   ,PP_initial_growth_fraction_to_fruit,PPN_initial_growth_fraction_to_fruit)
+/*030521_*/ , p_rapid_growth_fraction_to_fruit  (rapid_growth_fraction_to_fruit     ,PP_rapid_growth_fraction_to_fruit,PPN_rapid_growth_fraction_to_fruit)
+/*081204_*/ , p_harvest_temperature             (harvest_temperature                ,PP_harvest_temperature,PPN_harvest_temperature)
+/*081204_*/ , p_harvest_temperature_days        (harvest_temperature_days           ,PP_harvest_temperature_days,PPN_harvest_temperature_days)
+/*081204_*/ , p_harvest_DOY_earliest            (harvest_DOY_earliest               ,PP_harvest_DOY_earliest,PPN_harvest_DOY_earliest)
+/*081204_*/ , p_harvest_DOY_latest              (harvest_DOY_latest                 ,PP_harvest_DOY_latest,PPN_harvest_DOY_latest)
+
+/*091202_*/ , p_max_water_uptake_before_fruiting      (max_water_uptake_before_fruiting      ,PP_max_water_uptake_before_fruiting      ,PPN_max_water_uptake_before_fruiting)
+/*091202_*/ , p_max_water_uptake_during_initial_fruit (max_water_uptake_during_initial_fruit ,PP_max_water_uptake_during_initial_fruit ,PPN_max_water_uptake_during_initial_fruit)
+/*091202_*/ , p_max_water_uptake_during_radid_fruit   (max_water_uptake_during_radid_fruit   ,PP_max_water_uptake_during_radid_fruit   ,PPN_max_water_uptake_during_radid_fruit)
+/*091202_*/ , p_max_water_uptake_during_veraison      (max_water_uptake_during_veraison      ,PP_max_water_uptake_during_veraison      ,PPN_max_water_uptake_during_veraison)
+/*091202_*/ , p_max_water_uptake_after_maturity       (max_water_uptake_after_maturity       ,PP_max_water_uptake_after_maturity       ,PPN_max_water_uptake_after_maturity)
+
+#else
+/*000635_*/ , v_fract_total_solids              (fract_total_solids                 ,UC_decimal_percent  ,LABEL_fract_total_solids              ,2,0.35,0.1,0.5  ,0.0,1.0   ,TU_0_1    ,TL_Fraction_of_total_solids)
+/*000616_*/ , v_max_fruit_load_kg_ha            (max_fruit_load_kg_ha               ,UC_kg_ha            ,LABEL_max_fruit_load                  ,2,5000,0  ,20000,0  ,100000,TU_kg_ha  ,"Max. fruit load (fresh mass)" /*TL_Max_fruit_load*/)// Warning need good value
+/*071127_*/ , v_initial_fruit_mass              (initial_fruit_mass           ,UC_kg_ha,"initial_fruit_mass"           ,2,0.02, 0.0,1000.0,  0.0,1000.0,TU_kg_ha,"Initial fruit mass",TL_Sensitivity_to_water_stress)
+/*071127_*/ , v_initial_reserves_release_rate   (initial_reserves_release_rate,UC_kg_ha,"initial_reserves_release_rate",2,0.02, 0.0,1000.0,0.0,1000.0,TU_kg_ha,"Initial release rate of biomass reserves (per day)") // Warning need default and ranges
+/*071127_*/ , v_clusters_per_vine               (clusters_per_vine            /*count*/,"clusters_per_vine" ,30,10,100,0,1000,"clusters","Clusters per vine")  // Warning need default and ranges
+/*071127_*/ , v_berries_per_cluster             (berries_per_cluster          /*count*/,"berries_per_cluster",100,0,200,0,500,"berries","Berries per cluster")// Warning need default and ranges
+/*071127_*/ , v_fruits_per_tree                 (fruits_per_tree         /*count*/,"fruits_per_tree",250,0,500,0,1000,"fruits","Fruits per tree")// Warning need default and ranges
+/*030521_*/ , v_initial_growth_fraction_to_fruit(initial_growth_fraction_to_fruit   ,UC_decimal_percent  ,LABEL_initial_growth_fraction_to_fruit   ,2, 0.5,0  ,1    ,0  ,100   ,TU_0_1    ,"Fraction of above biomass apportioned to fruit after flowering")
+/*030521_*/ , v_rapid_growth_fraction_to_fruit  (rapid_growth_fraction_to_fruit     ,UC_decimal_percent  ,LABEL_rapid_growth_fraction_to_fruit     ,2, 0.5,0  ,1    ,0  ,100   ,TU_0_1    ,"Fraction of above biomass apportioned to fruit during accelerated fruit growth")
+/*081204_*/ , v_harvest_temperature             (harvest_temperature                ,UC_celcius          ,"harvest_temperature",1,15.01,-10.0,20.0 ,-20.0,40.0,"°C","Low temperature for harvest")
+/*081204_*/ , v_harvest_temperature_days        (harvest_temperature_days           /*,UT_days*/         ,"harvest_temperature_days",5,0,30,0,365,"Days","Consecutive days below the low temperature for to consider harvest")
+/*081204_*/ , v_harvest_DOY_earliest            (harvest_DOY_earliest               /*,UT_day_of_year*/  ,"earliest_harvest"      ,258 ,1,365,1,365,"DOY","Day to start looking for harvest conditions")
+/*081204_*/ , v_harvest_DOY_latest              (harvest_DOY_latest                 /*,UT_day_of_year*/  ,"latest_harvest"        ,275 ,1,365,1,365,"DOY","Day to force harvest (or fixed date)")
+
+/*091202_*/ , v_max_water_uptake_before_fruiting      (max_water_uptake_before_fruiting_mm      ,UC_mm_per_day  ,"max_water_uptake_before_fruiting"      ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"before fruiting")
+/*091202_*/ , v_max_water_uptake_during_initial_fruit (max_water_uptake_during_initial_fruit_mm ,UC_mm_per_day  ,"max_water_uptake_during_initial_fruit" ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"during intial fruit")
+/*091202_*/ , v_max_water_uptake_during_radid_fruit   (max_water_uptake_during_radid_fruit_mm   ,UC_mm_per_day  ,"max_water_uptake_during_radid_fruit"   ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"during rapid fruit")
+/*091202_*/ , v_max_water_uptake_during_veraison      (max_water_uptake_during_veraison_mm      ,UC_mm_per_day  ,"max_water_uptake_during_veraison"      ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"during veraison")
+/*091202_*/ , v_max_water_uptake_after_maturity       (max_water_uptake_after_maturity_mm       ,UC_mm_per_day  ,"max_water_uptake_after_maturity"       ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"after maturity")
+#endif
+/*021206_*/ ,grape(false)
+/*020408_*/ {};
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::Fruit::Fruit(const Fruit &copy_from)
+/*000635_*/ :fract_total_solids                    (copy_from.fract_total_solids)
+/*000616_*/ ,max_fruit_load_kg_ha                  (copy_from.max_fruit_load_kg_ha) // Warning need good value
+/*021206_*/ ,grape                                 (copy_from.grape)
+/*071127_*/ ,initial_fruit_mass                    (copy_from.initial_fruit_mass)
+/*071127_*/ ,initial_reserves_release_rate         (copy_from.initial_reserves_release_rate)
+/*071127_*/ ,clusters_per_vine                     (copy_from.clusters_per_vine)
+/*071127_*/ ,berries_per_cluster                   (copy_from.berries_per_cluster)
+/*071127_*/ ,fruits_per_tree                       (copy_from.fruits_per_tree)
+/*030521_*/ ,initial_growth_fraction_to_fruit      (copy_from.initial_growth_fraction_to_fruit)
+/*030521_*/ ,rapid_growth_fraction_to_fruit        (copy_from.rapid_growth_fraction_to_fruit)
+
+/*081204_*/ ,harvest_condition_mode_labeled        (copy_from.harvest_condition_mode_labeled.get())
+/*081204_*/ ,harvest_temperature_days              (copy_from.harvest_temperature_days)
+/*081204_*/ ,harvest_temperature                   (copy_from.harvest_temperature)
+/*081204_*/ ,harvest_DOY_earliest                  (copy_from.harvest_DOY_earliest)
+/*081204_*/ ,harvest_DOY_latest                    (copy_from.harvest_DOY_latest)
+
+/*091202_*/ , max_water_uptake_before_fruiting_mm       (copy_from.max_water_uptake_before_fruiting_mm)
+/*091202_*/ , max_water_uptake_during_initial_fruit_mm  (copy_from.max_water_uptake_during_initial_fruit_mm)
+/*091202_*/ , max_water_uptake_during_radid_fruit_mm    (copy_from.max_water_uptake_during_radid_fruit_mm)
+/*091202_*/ , max_water_uptake_during_veraison_mm       (copy_from.max_water_uptake_during_veraison_mm)
+/*091202_*/ , max_water_uptake_after_maturity_mm        (copy_from.max_water_uptake_after_maturity_mm)
+
+#ifdef USE_PARAMS
+/*071127_*/ , p_initial_fruit_mass           (initial_fruit_mass           ,PP_initial_fruit_mass,PPN_initial_fruit_mass)
+/*071127_*/ , p_initial_reserves_release_rate(initial_reserves_release_rate,PP_initial_reserves_release_rate,PPN_initial_reserves_release_rate)
+/*071127_*/ , p_clusters_per_vine            (clusters_per_vine            ,PP_clusters_per_vine,PPN_clusters_per_vine)
+/*071127_*/ , p_berries_per_cluster          (berries_per_cluster          ,PP_berries_per_cluster,PPN_berries_per_cluster)
+/*071127_*/ , p_fruits_per_tree              (fruits_per_tree              ,PP_fruits_per_tree,PPN_fruits_per_tree)
+
+/*081204_*/ , p_harvest_temperature_days        (harvest_temperature_days           ,PP_harvest_temperature_days,PPN_harvest_temperature_days)
+/*081204_*/ , p_harvest_temperature (harvest_temperature ,PP_harvest_temperature,PPN_harvest_temperature)
+/*081204_*/ , p_harvest_DOY_earliest(harvest_DOY_earliest,PP_harvest_DOY_earliest,PPN_harvest_DOY_earliest)
+/*081204_*/ , p_harvest_DOY_latest  (harvest_DOY_latest  ,PP_harvest_DOY_latest,PPN_harvest_DOY_latest)
+
+/*000630_*/ , p_fract_total_solids                  (fract_total_solids                 ,PP_fract_total_solids,PPN_fract_total_solids)
+/*000616_*/ , p_max_fruit_load_kg_ha                (max_fruit_load_kg_ha               ,PP_max_fruit_load_kg_ha,PPN_max_fruit_load_kg_ha)
+/*030520_*/ , p_initial_growth_fraction_to_fruit    (initial_growth_fraction_to_fruit   ,PP_initial_growth_fraction_to_fruit,PPN_initial_growth_fraction_to_fruit)
+/*030520*/  , p_rapid_growth_fraction_to_fruit      (rapid_growth_fraction_to_fruit     ,PP_rapid_growth_fraction_to_fruit,PPN_rapid_growth_fraction_to_fruit)
+
+/*091202_*/ , p_max_water_uptake_before_fruiting      (max_water_uptake_before_fruiting      ,PP_max_water_uptake_before_fruiting      ,PPN_max_water_uptake_before_fruiting)
+/*091202_*/ , p_max_water_uptake_during_initial_fruit (max_water_uptake_during_initial_fruit ,PP_max_water_uptake_during_initial_fruit ,PPN_max_water_uptake_during_initial_fruit)
+/*091202_*/ , p_max_water_uptake_during_radid_fruit   (max_water_uptake_during_radid_fruit   ,PP_max_water_uptake_during_radid_fruit   ,PPN_max_water_uptake_during_radid_fruit)
+/*091202_*/ , p_max_water_uptake_during_veraison      (max_water_uptake_during_veraison      ,PP_max_water_uptake_during_veraison      ,PPN_max_water_uptake_during_veraison)
+/*091202_*/ , p_max_water_uptake_after_maturity       (max_water_uptake_after_maturity       ,PP_max_water_uptake_after_maturity       ,PPN_max_water_uptake_after_maturity)
+
+#else
+/*071127_*/ , v_initial_fruit_mass           (initial_fruit_mass           ,UC_kg_ha,"initial_fruit_mass"           ,2,0.02, 0.0,1000.0,  0.0,1000.0,TU_kg_ha,"Initial fruit mass",TL_Sensitivity_to_water_stress)
+/*071127_*/ , v_initial_reserves_release_rate(initial_reserves_release_rate,UC_kg_ha,"initial_reserves_release_rate",2,0.02, 0.0,1000.0,0.0,1000.0,TU_kg_ha,"Initial release rate of biomass reserves (per day)") // Warning need default and ranges
+/*071127_*/ , v_clusters_per_vine            (clusters_per_vine            /*count*/,"clusters_per_vine" ,30,10,100,0,1000,"clusters","Clusters per vine")  // Warning need default and ranges
+/*071127_*/ , v_berries_per_cluster          (berries_per_cluster          /*count*/,"berries_per_cluster",100,0,200,0,500,"berries","Berries per cluster")// Warning need default and ranges
+/*071127_*/ , v_fruits_per_tree              (fruits_per_tree              /*count*/,"fruits_per_tree",250,0,500,0,1000,"fruits","Fruits per tree")// Warning need default and ranges
+
+/*081204_*/ , v_harvest_temperature_days        (harvest_temperature_days           /*,UT_days*/         ,"harvest_temperature_days",5,0,30,0,365,"Days","Consecutive days below the low temperature for to consider harvest")
+/*081204_*/ , v_harvest_temperature (harvest_temperature ,UC_celcius,"harvest_condition_mode",15,1,-10.0,20.0 ,-20.0,40.0,"°C","Low temperature")
+/*081204_*/ , v_harvest_DOY_earliest(harvest_DOY_earliest/*,UT_DOY*/,"earliest_harvest"      ,258 ,1,365,1,365,"DOY","Day to start looking for harvest conditions")
+/*081204_*/ , v_harvest_DOY_latest  (harvest_DOY_latest  /*,UT_DOY*/,"latest_harvest"        ,275 ,1,365,1,365,"DOY","Day to force harvest (or fixed date)")
+
+/*000630_*/ , v_fract_total_solids                  (fract_total_solids                 ,UC_decimal_percent  ,LABEL_fract_total_solids              ,2,0.35,0.1,0.5  ,0.0,1.0   ,TU_0_1    ,TL_Fraction_of_total_solids)
+/*000616_*/ , v_max_fruit_load_kg_ha                (max_fruit_load_kg_ha               ,UC_kg_ha            ,LABEL_max_fruit_load                  ,2,5000,0  ,20000,0  ,100000,TU_kg_ha  ,"Max. fruit load (fresh mass)" /*TL_Max_fruit_load*/)
+/*030520_*/ , v_initial_growth_fraction_to_fruit    (initial_growth_fraction_to_fruit   ,UC_decimal_percent  ,LABEL_initial_growth_fraction_to_fruit   ,2, 0.5,0  ,1    ,0  ,100   ,TU_0_1    ,"Fraction of above biomass apportioned to fruit after flowering")
+/*030520*/  , v_rapid_growth_fraction_to_fruit      (rapid_growth_fraction_to_fruit     ,UC_decimal_percent  ,LABEL_rapid_growth_fraction_to_fruit      ,2, 0.5,0  ,1    ,0  ,100   ,TU_0_1    ,"Fraction of above biomass apportioned to fruit during accelerated fruit growth")
+
+/*000635_*/ , v_max_water_uptake_before_fruiting      (max_water_uptake_before_fruiting_mm      ,UC_mm_per_day  ,"max_water_uptake_before_fruiting"      ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"before fruiting")
+/*000635_*/ , v_max_water_uptake_during_initial_fruit (max_water_uptake_during_initial_fruit_mm ,UC_mm_per_day  ,"max_water_uptake_during_initial_fruit" ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"during intial fruit")
+/*000635_*/ , v_max_water_uptake_during_radid_fruit   (max_water_uptake_during_radid_fruit_mm   ,UC_mm_per_day  ,"max_water_uptake_during_radid_fruit"   ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"during rapid fruit")
+/*000635_*/ , v_max_water_uptake_during_veraison      (max_water_uptake_during_veraison_mm      ,UC_mm_per_day  ,"max_water_uptake_during_veraison"      ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"during veraison")
+/*000635_*/ , v_max_water_uptake_after_maturity       (max_water_uptake_after_maturity_mm       ,UC_mm_per_day  ,"max_water_uptake_after_maturity"       ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,"after maturity")
+#endif
+/*020408_*/ {};
+//______________________________________________________________________________
+#ifdef OBSOLETE
+/*020408_*/ Photoperiod_parameters::Photoperiod_parameters()
+/*_______*/ :start                      (0.0)
+/*_______*/ ,end                        (0.0)
+#ifdef USE_PARAMS
+/*090414_*/ ,p_start (start,PP_photoperiod_start   ,PPN_photoperiod_start_and_end)
+/*090414_*/ ,p_end   (end  ,PP_photoperiod_end     ,PPN_photoperiod_start_and_end)
+#else
+/*_______*/ ,v_start                    (start  ,UT_hour,LABEL_start    ,2,0.0, 0.0,24.0, 0.0,24.0 ,TL_hours,TL_to_inhibit_flowering,TL_Day_length_photo_period)
+/*_______*/ ,v_end                      (end    ,UT_hour,LABEL_end      ,2,0.0, 0.0,24.0, 0.0,24.0 ,TL_hours,TL_for_insensitivity,TL_Day_length_photo_period)
+#endif
+/*020718_*/ ,enabled(false)
+
+/*020408_*/ {};
+#endif
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::Salinity::Salinity()
+/*_______*/ :osmotic_pot_50      (-0.0000001) // was -200.0
+/*_______*/ ,salt_tolerance_P    (0.0000001)
+#ifdef USE_PARAMS
+/*990605_*/ ,p_osmotic_pot_50    (osmotic_pot_50   ,PP_osmotic_pot_50,PPN_osmotic_pot_50)
+/*_______*/ ,p_salt_tolerance_P  (salt_tolerance_P ,PP_salt_tolerance_P,PPN_salt_tolerance_P)
+#else
+/*990605_*/ ,v_osmotic_pot_50    (osmotic_pot_50   ,UC_kPa               ,LABEL_osmotic_pot_50,1,-0.0000001, -500.0,-100.0,  -1000.0,0.0 ,TU_kPa,TL_Soil_solution_osmotic_pot_for_50_yield_reduction)
+/*_______*/ ,v_salt_tolerance_P  (salt_tolerance_P ,U_units_not_specified,LABEL_tolerance_P   ,3,0.0000001, 1.0,5.0,    0.0,10.0 ,TU_1_5,TL_Salt_tolerance)
+#endif
+/*020408_*/ {};
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::CO2_Response_parameters::CO2_Response_parameters()
+/*_______*/ :growth_ratio_elevated_to_baseline_ppm(1.25)  // No change
+/*980223P*/ ,elevated_reference_conc(660.0)
+/*980223P*/ ,baseline_reference_conc(350.0)
+#ifdef USE_PARAMS
+/*980223P*/ ,p_growth_ratio_elevated_to_baseline_ppm(growth_ratio_elevated_to_baseline_ppm,PP_growth_ratio_elevated_to_baseline_ppm,PPN_growth_ratio_elevated_to_baseline_ppm)
+/*980223P*/ ,p_elevated_reference_conc              (elevated_reference_conc        ,PP_elevated_reference_conc,PPN_reference_conc)
+/*000810_*/ ,p_baseline_reference_conc              (baseline_reference_conc        ,PP_baseline_reference_conc,PPN_reference_conc)
+#else
+/*980223P*/ ,v_growth_ratio_elevated_to_baseline_ppm(growth_ratio_elevated_to_baseline_ppm,UC_ratio,LABEL_growth_ratio_elevated_to_baseline_ppm,2, 1.25,1.0,   2.0,0.0,   4.0 ,TU_unitless,TL_Growth_ratio_elevated_to_baseline_ppm_CO2)
+/*980223P*/ ,v_elevated_reference_conc              (elevated_reference_conc        ,UC_parts_per_million,LABEL_elevated_reference_conc        ,1,660.0,0.0,1000.0,0.0,5000.0 ,TU_ppm     ,TL_Elevated_reference_CO2_conc)
+/*000810_*/ ,v_baseline_reference_conc              (baseline_reference_conc        ,UC_parts_per_million,LABEL_baseline_reference_conc        ,1,350.0,0.0,1000.0,0.0,5000.0 ,TU_ppm     ,TL_Baseline_reference_CO2_conc)
+#endif
+/*020408_*/ {};
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::Hardiness::Hardiness()
+/*021016_*/ :enabled(false)
+/*991115P*/ ,leaf_damage_cold_temp              (-5)
+/*991116P*/ ,leaf_lethal_cold_temp             (-10)
+/*081126_*/ ,fruit_damage_cold_temp             (-5)
+/*081126_*/ ,fruit_lethal_cold_temp            (-10)
+/*000330_*/ ,salvageable_days_before_maturity    (0)
+/*081109_*/ ,tuber_critical_temperature         (17)
+// NYI         v_tuber_critical_temperature (tuber_critical_temperature,"tuber_crit_temperature",1,17,0,25,0,40,TU_degrees_C,"Critical high temperature for tuber initiation stress");
+#ifdef USE_PARAMS
+/*991116P*/ ,p_leaf_damage_cold_temp            (leaf_damage_cold_temp,PP_leaf_damage_cold_temp,PPN_hardiness_temperature)
+/*991116P*/ ,p_leaf_lethal_cold_temp            (leaf_lethal_cold_temp,PP_leaf_lethal_cold_temp,PPN_hardiness_temperature)
+/*081126_*/ ,p_fruit_damage_cold_temp           (fruit_damage_cold_temp,PP_fruit_damage_cold_temp,PPN_hardiness_temperature)
+/*081126_*/ ,p_fruit_lethal_cold_temp           (fruit_lethal_cold_temp,PP_fruit_lethal_cold_temp,PPN_hardiness_temperature)
+/*000330_*/ ,p_salvageable_days_before_maturity (salvageable_days_before_maturity,PP_salvageable_days_before_maturity,PPN_salvageable_days_before_maturity)
+#else
+/*991116P*/ ,v_leaf_damage_cold_temp            (leaf_damage_cold_temp,UC_celcius,LABEL_damage_cold_temp,2,-5.0,-20,20,-100,100,TU_degrees_C,"Cold temperature which begins to damage the plant (leaves)")
+/*991116P*/ ,v_leaf_lethal_cold_temp            (leaf_lethal_cold_temp,UC_celcius,LABEL_lethal_cold_temp,2,-10,-20,20,-100,100,TU_degrees_C,"Cold temperature which is lethal to the plant (leaves)")
+/*081126_*/ ,v_fruit_damage_cold_temp           (fruit_damage_cold_temp,UC_celcius,"fruit_damage_cold_temp",2,-5.0,-20,20,-100,100,TU_degrees_C,"Cold temperature which begins to damage flower/fruit")
+/*081126_*/ ,v_fruit_lethal_cold_temp           (fruit_lethal_cold_temp,UC_celcius,"fruit_lethal_cold_temp",2,-10,-20,20,-100,100,TU_degrees_C,"Cold temperature which is lethal to flower/fruit")
+/*000330_*/ ,v_salvageable_days_before_maturity (salvageable_days_before_maturity,LABEL_salvageable_days_before_maturity,1,0,100,0,1000,T_date_Days,TL_Number_of_days_before_maturity_to_salvage)
+#endif
+/*020408_*/ {};
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::Canopy_characteristics_hedge_row::Canopy_characteristics_hedge_row()
+/*040715_*/ :initial_width                (1.0)
+/*040715_*/ ,final_width                  (1.0)
+/*071116_*/ ,initial_breadth              (2.0)
+/*071116_*/ ,final_breadth                (2.0)
+/*040715_*/ ,initial_height               (1.2)
+/*040715_*/ ,final_height                 (1.2)
+/*071116_*/ ,branch_insertion_height      (0.6)
+#ifdef USE_PARAMS
+/*040715_*/ ,p_initial_width              (initial_width          ,PP_initial_width    ,PPN_canopy_dimension)
+/*040715_*/ ,p_final_width                (final_width            ,PP_final_width      ,PPN_canopy_dimension)
+/*071116_*/ ,p_initial_breadth            (initial_breadth        ,PP_initial_breadth  ,PPN_canopy_dimension)
+/*071116_*/ ,p_final_breadth              (final_breadth          ,PP_final_breadth    ,PPN_canopy_dimension)
+/*040715_*/ ,p_initial_height             (initial_height         ,PP_initial_height   ,PPN_canopy_dimension)
+/*040715_*/ ,p_final_height               (final_height           ,PP_final_height     ,PPN_canopy_dimension)
+/*071116_*/ ,p_branch_insertion_height    (branch_insertion_height,PP_branch_insertion_height,PPN_branch_insertion_height)
+#else
+/*040715_*/ ,v_initial_width              (initial_width          ,UC_meter   ,"initial_width"            ,2,1.0,0.0,10.0,0.0,10.0,TU_m,"Initial tree width")
+/*040715_*/ ,v_final_width                (final_width            ,UC_meter   ,"final_width"              ,2,1.0,0.0,10.0,0.0,10.0,TU_m,"Final tree width")
+/*071116_*/ ,v_initial_breadth            (initial_breadth        ,UC_meter   ,"initial_breadth"          ,2,2.0,0.0,10.0,0.0,10.0,TU_m,"Initial tree width along the row")
+/*071116_*/ ,v_final_breadth              (final_breadth          ,UC_meter   ,"final_breadth"            ,2,2.0,0.0,10.0,0.0,10.0,TU_m,"Final tree width along along the row")
+/*040715_*/ ,v_initial_height             (initial_height         ,UC_meter   ,"initial_height"           ,2,1.2,0.0,10.0,0.0,10.0,TU_m,"Initial tree height")
+/*040715_*/ ,v_final_height               (final_height           ,UC_meter   ,"final_height"             ,2,1.2,0.0,10.0,0.0,10.0,TU_m,"Final tree height")
+/*071116_*/ ,v_branch_insertion_height    (branch_insertion_height,UC_meter   ,"branch_insertion_height"       ,2,0.5,0.0, 3.0,0.0,10.0,TU_m,"Branch insertion height")
+#endif
+/*_______*/ {};
+//______________________________________________________________________________
+/*020408_*/ Crop_parameters::Layout::Layout()
+/*040715_*/ :row_spacing  (2.7)
+/*_______*/ ,row_azimuth_true_north_deg(0)
+/*040715_*/ ,col_spacing  (2.5)
+#ifdef USE_PARAMS
+/*040715_*/ ,p_row_spacing(row_spacing                ,PP_row_spacing,PPN_row_or_col_spacing)
+/*_______*/ ,p_row_azimuth(row_azimuth_true_north_deg ,PP_row_azimuth,PPN_row_azimuth)
+/*040715_*/ ,p_col_spacing(col_spacing                ,PP_col_spacing,PPN_row_or_col_spacing)
+#else
+/*040715_*/ ,v_row_spacing(row_spacing                ,UC_meter/*_width*/      ,LABEL_row_spacing    ,2,2.7,0.0, 10.0,0.0, 10.0,TU_m,"Spacing between rows")
+/*_______*/ ,v_row_azimuth(row_azimuth_true_north_deg ,UC_degree_from_north,LABEL_row_azimuth        ,2,0.0,0.0,360.0,0.0,360.0,"degree(0=N,90=0)","Row azimuth")
+/*040715_*/ ,v_col_spacing(col_spacing                ,UC_meter/*_width*/      ,LABEL_col_spacing    ,2,2.5,0.0, 10.0,0.0, 10.0,TU_m,"Spacing along (within) rows")
+#endif
+/*_______*/ {};
+//______________________________________________________________________________
+/*020409_*/ Crop_parameters::   ~Crop_parameters()
+/*_______*/ {
+/*020408_*/    if (nitrogen)              delete nitrogen;        nitrogen=0;
+/*020408_*/    if (salinity)              delete salinity;        salinity=0;
+/*020408_*/    if (residue_decomposition) delete residue_decomposition;  residue_decomposition=0;
+/*020408_*/    if (CO2_response)          delete CO2_response;    CO2_response=0;
+/*020408_*/    if (harvest_index)         delete harvest_index;   harvest_index=0;
+/*020408_*/    if (vernalization)         delete vernalization;   vernalization=0;
+/*020408_*/    if (photoperiod)           delete photoperiod;     photoperiod=0;
+/*020408_*/    if (salinity)              delete salinity;        salinity=0;
+/*020408_*/    if (hardiness)             delete hardiness;       hardiness=0;
+/*020408_*/    if (layout)                delete layout;          layout=0;
+/*020408_*/    if (canopy_characteristics_hedge_row)     delete canopy_characteristics_hedge_row;     canopy_characteristics_hedge_row    =0;
+/*031121_*/    if (cropgro)               delete cropgro;         cropgro=0;
+/*_______*/ };
+//______________________________________________________________________________
+/*010109_*/ Crop_parameters::Crop_parameters
+/*020408_*/ (bool nitrogen_simulation
+/*020408_*/ ,bool salinity_simulation
+/*020408_*/ ,bool residue_simulation
+/*020408_*/ ,bool CO2_simulation)
+/*050323_*/ :Common_parameters_data_record(NO_ASSOCIATED_DIRECTORY,CS_VERSION_NUMBERS,LABEL_crop)
+/*051129x*/ , sowing_event_ID       ("") // Will be assigned for LADSS when parameters are instanciated for sowing event
+/*020408_*/ ,nitrogen               (nitrogen_simulation ? new Nitrogen() : 0)
+/*020408_*/ ,salinity               (salinity_simulation ? new Salinity() : 0)
+/*020408_*/ ,residue_decomposition  (residue_simulation  ? new Residue_decomposition_parameters() : 0)
+/*020408_*/ ,CO2_response           (CO2_simulation      ? new CO2_Response_parameters() : 0)
+/*020409_*/ ,hardiness              (new Hardiness)
+/*020409_*/ ,harvest_index          (new Harvest_index)
+/*020628_*/ ,thermal_time()
+/*080722_*/ ,phenology()
+/*020409_*/ ,vernalization          (new Vernalization_parameters)
+/*020409_*/ ,photoperiod            (new Photoperiod_parameters)
+/*020409_*/ ,canopy_characteristics_hedge_row(new Canopy_characteristics_hedge_row)
+/*020409_*/ ,layout                 (new Layout)
+/*031121_*/ ,cropgro                (new CropGro_parameters)
+/*020508_*/ ,crop_model_labeled     (CROPSYST_CROP_MODEL)
+/*020508_*/ ,harvested_part_labeled (UNKNOWN_PART) // Must be unknown else we can't load option parameters
+/*030520_*/ ,tea                    (false)
+/*_______*/ ,C_species_labeled      (C3)
+/*020716_*/ ,perennial_obsolete     (false)
+/*020716_*/ ,life_cycle_labeled     (annual_life_cycle /* 080729 ANNUAL */)
+/*080722_*/ ,stem_type_labeled      (herbaceous_stem)
+/*040517_*/ ,deciduous              (true)
+/*040808_*/ ,senesces               (true)
+/*060817_*/ ,senesced_biomass_fate_labeled(senesced_biomass_shed)  // note that this will be incompatible with previous version (for perennials)
+/*_______*/ ,land_use_labeled       (ROW_CROPS)
+/*080508_*/ ,WUE_changes             (false)
+/*080408_*/ ,TUE_equation_labeled   (TUE_Tanner_Sinclair) // Default to the original model.
+/*080725_*/ ,canopy_growth_labeled  (leaf_area_index_based)
+/*990213_*/ ,max_canopy_height                     (1.5)
+#ifdef OLD_ROOTS
+obsolete
+/*_______*/ ,max_root_depth                        (1.5)    ,v_max_root_depth                      (max_root_depth                     ,UC_meter/*_depth*/     ,LABEL_max_root_depth                        ,2,1.5, 0.1, 3.0, 0.0, 4.0,TU_m,TL_Maximum_rooting_depth)
+/*030722_*/ ,surface_root_density                  (3.0)    ,v_surface_root_density                (surface_root_density               ,U_units_not_specified  ,LABEL_surface_root_density                  ,2,6.0, 0.0, 10.0, 0.0, 30.0,"cm/cm³","Surface root density")
+/*030722_*/ ,root_density_distribution_curvature	(0.1)    ,v_root_density_distribution_curvature	(root_density_distribution_curvature,U_units_not_specified  ,LABEL_root_density_distribution_curvature   ,3,0.1,0.0001,3,0.001,10,"0.0001-3.0","Curvature of root density distribution")
+/*060612_*/ ,root_length_per_unit_mass_km_kg       (90.0)   ,v_root_length_per_unit_mass	         (root_length_per_unit_mass_km_kg ,UC_km_kg ,"root_length_per_unit_mass"    ,2,90.0,70.0,110.0,0,1000.0,"km/kg","Root length per unit root mass")
+/*061212_*/ ,root_sensitivity_to_water_stress      (0.0)    ,v_root_sensitivity_to_water_stress    (root_sensitivity_to_water_stress,UC_index ,"root_sensitivity_water_stress",2, 0.0, 0.0,  1.1,0,   1.0,"index","Root sensitivity to water stress")
+/*061212_*/ ,root_length_at_emergence_cm           (2.0)    ,v_root_length_at_emergence            (root_length_at_emergence_cm     ,UC_cm    ,"root_length_at_emergence",    ,2, 2.0, 1.0, 10.0,0,  20.0,"cm"   ,"Root length at emergence")
+#endif
+/*_______*/ ,ET_coef                          (1.0)
+// /*990228_*/ ,at_pt_limit                           (0.8)
+                                                       // I think these defaults will be effectively the same as the original
+/*_______*/ ,normal_max_water_uptake_mm            (10.0)
+/*990228_*/ ,at_pt_root_limit                      (0.5)
+/*080726_*/ ,early_growth_limit_temp               (10.0)
+/*020418_*/ ,stomatal_closure_leaf_water_pot       (-700.0)
+/*_______*/ ,wilt_leaf_water_pot                   (-1600.0)
+/*990228_*/ ,kc                                    (0.5)
+//050715  Note, I haven't assigned units codes to all these.  It is not critical yet
+// Warning I need a range of values from Claudio
+/*080506_*/ ,reduce_canopy_expansion_LWP           (-800.0)
+/*080506_*/ ,stop_canopy_expansion_LWP       (-1200.0)
+/*030520_*/ ,parameter_editor_mode(false)
+                                                  //Note these are grams of biomass per kg water (NOT PPM)
+//091201/*080505_*/ ,TUE_scaling_coef(0.45)
+/*040428_*/ ,RUE_max(2.0)
+/*080728_*/ ,max_RUE_mode_labeled(unspecified_max_RUE_mode)
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+//080505 /*080428_*/ ,use_deprecated_transpriation_dependent_growth(true)
+//080728/*080428_*/ ,use_deprecated_PAR_radiation_dependent_growth(true)
+/*040121_*/ ,reference_light_to_biomass_kg_MJ_deprecated      (0.003)
+#endif
+/*080916_*/ ,inactive_period()
+/*080910_*/ ,linger_days(90)
+#ifdef USE_PARAMS
+/*040715_*/ , p_max_canopy_height                     (max_canopy_height                   ,PP_max_canopy_height                  ,PPN_max_canopy_height)
+/*_______*/ , p_ET_coef                          (ET_coef                        ,PP_ET_coef                       ,PPN_ET_coef)
+/*_______*/ , p_reduce_canopy_expansion_LWP     (reduce_canopy_expansion_LWP   ,PP_reduce_canopy_expansion_LWP  ,PPN_LWP)
+/*_______*/ , p_stop_canopy_expansion_LWP       (stop_canopy_expansion_LWP     ,PP_stop_canopy_expansion_LWP    ,PPN_LWP)
+/*040726_*/ , p_max_water_uptake                      (normal_max_water_uptake_mm          ,PP_max_water_uptake                   ,PPN_max_water_uptake)
+/*990228_*/ , p_at_pt_root_limit                      (at_pt_root_limit                    ,PP_at_pt_root_limit                   ,PPN_at_pt_root_limit)
+/*990228_*/ , p_early_growth_limit_temp               (early_growth_limit_temp             ,PP_early_growth_limit_temp            ,PPN_early_growth_limit_temp)
+/*_______*/ , p_stomatal_closure_leaf_water_pot       (stomatal_closure_leaf_water_pot     ,PP_stomatal_closure_leaf_water_pot    ,PPN_stomatal_closure_leaf_water_pot)
+/*_______*/ , p_wilt_leaf_water_pot                   (wilt_leaf_water_pot                 ,PP_wilt_leaf_water_pot                ,PPN_wilt_leaf_water_pot)
+/*990228_*/ , p_kc                                    (kc                                  ,PP_kc                                 ,PPN_kc)
+/*080731_*/ ,p_season_biomass_adjustment_2            (season_biomass_adjustment[2],PP_season_biomass_adjustment_2,PPN_season_biomass_adjustment)
+/*080731_*/ ,p_season_biomass_adjustment_3            (season_biomass_adjustment[3],PP_season_biomass_adjustment_3,PPN_season_biomass_adjustment)
+/*080731_*/ ,p_season_biomass_adjustment_4            (season_biomass_adjustment[4],PP_season_biomass_adjustment_4,PPN_season_biomass_adjustment)
+/*080731_*/ ,p_season_biomass_adjustment_5            (season_biomass_adjustment[5],PP_season_biomass_adjustment_5,PPN_season_biomass_adjustment)
+/*080428_*/ ,p_TUE_at_1kPa_VPD                        (TUE_at_1kPa_VPD                       [0],PP_TUE_at_1kPa_VPD,PPN_TUE_at_1kPa_VPD)
+/*080428_*/ ,p_TUE_at_1kPa_VPD_vegetative             (TUE_at_1kPa_VPD                       [1],PP_TUE_at_1kPa_VPD_vegetative,PPN_TUE_at_1kPa_VPD)
+/*_______*/ ,p_TUE_scaling_coef                       (TUE_scaling_coef                      [0],PP_TUE_scaling_coef,PPN_TUE_scaling_coef)
+/*091201_*/ ,p_TUE_scaling_coef_veg                   (TUE_scaling_coef                      [1],PP_TUE_scaling_coef_veg,PPN_TUE_scaling_coef)
+/*080428_*/ ,p_water_productivity                     (water_productivity                    [0],PP_water_productivity,PPN_water_productivity)
+/*080428_*/ ,p_water_productivity_vegetative          (water_productivity                    [1],PP_water_productivity_vegetative,PPN_water_productivity)
+/*040729_*/ ,p_biomass_transpiration_coef             (reference_biomass_transpiration_coef  [0],PP_biomass_transpiration_coef,PPN_biomass_transpiration_coef)
+/*040729_*/ ,p_biomass_transpiration_coef_vegetative  (reference_biomass_transpiration_coef  [1],PP_biomass_transpiration_coef_vegetative,PPN_biomass_transpiration_coef)
+/*_______*/ ,p_RUE_max(RUE_max         ,PP_RUE_max,PPN_RUE_max)
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+/*981114X*/ ,p_light_to_biomass_deprecated                     (reference_light_to_biomass_kg_MJ_deprecated   ,PP_light_to_biomass_deprecated,PPN_light_to_biomass_deprecated)
+#endif
+/*_______*/ , p_linger_days(linger_days,PP_linger_days,PPN_linger_days)
+#else
+/*040715_*/ , v_max_canopy_height                    (max_canopy_height                  ,UC_meter/*_height*/    ,LABEL_max_canopy_height                     ,2,1.5, 0.1, 3.0, 0.0, 4.0,TU_m,TL_Maximum_plant_height)
+/*_______*/ , v_ET_coef                         (ET_coef                       ,U_units_not_specified  ,LABEL_ET_crop_coef                          ,2,1.0, 0.8,1.4,  0.5,2.0,TU_0_8_1_4,TL_ET_crop_coefficient_at_full_canopy)
+/*_______*/ , v_reduce_canopy_expansion_LWP(reduce_canopy_expansion_LWP, UC_J_kg,"LWP_reduces_canopy_expansion" ,2,-800.0,-3000.0,0.0,-2000.0,0.0,"J/kg","Leaf water potential that begins reduction of canopy expansion")
+/*_______*/ , v_stop_canopy_expansion_LWP  (stop_canopy_expansion_LWP  , UC_J_kg,"LWP_stops_canopy_expansion"  ,2,-1200.0,-3000.0,0.0,-2000.0,0.0,"J/kg","Leaf water potential that stops canopy expansion")
+/*040726_*/ , v_max_water_uptake                     (normal_max_water_uptake_mm         ,UC_mm_per_day   ,LABEL_max_water_uptake                      ,2,10.0,    5.0,15.0,  3.0,20.0,TU_mm_day,TL_Maximum_water_uptake)
+/*990228_*/ , v_at_pt_root_limit                     (at_pt_root_limit                   ,U_units_not_specified  ,LABEL_at_pt_root_limit                      ,2,0.5,    0.0,1.0,  0.0,1.0 ,TU_0_1,TL_AT_PT_ratio_limit_to_root_growth)
+/*990228_*/ , v_early_growth_limit_temp                  (early_growth_limit_temp                ,UC_celcius             ,LABEL_early_growth_limit_temp                    ,2,10.0,    0.0,25.0,  0.0,30.0 ,TU_degrees_C,"Mean daily temperature that limits early growth" /*080725 TL_Optimum_mean_daily_temperature_for_growth*/)
+/*_______*/ , v_stomatal_closure_leaf_water_pot      (stomatal_closure_leaf_water_pot    ,UC_J_kg  ,LABEL_stomatal_closure_leaf_water_pot       ,2,-1000.0,-2000,-500.0,  -3000.0,0.0 ,TU__J_kg,TL_Critical_leaf_water_potential)
+/*_______*/ , v_wilt_leaf_water_pot                  (wilt_leaf_water_pot                ,UC_J_kg  ,LABEL_wilt_leaf_water_pot                   ,2,-1600.0,-3000,-1100,-3500.0,-800.0,TU__J_kg,TL_Wilting_leaf_water_potential)
+/*990228_*/ , v_kc                                   (kc                                 ,U_units_not_specified  ,LABEL_kc                                    ,2,0.5, 0.3,0.8, 0.0,1.0,TU_0_1,"Canopy extinction coefficient for total (global) solar radiation")
+                                                                                                                                                                                               
+/*080731_*/ ,v_season_biomass_adjustment_2(season_biomass_adjustment[2],UC_adjustment,"season2_adj"  ,2,1.0,0.0,1.0,0.0,1.0,"multiplier","Season 2","attainable biomass growth adjustment")
+/*080731_*/ ,v_season_biomass_adjustment_3(season_biomass_adjustment[3],UC_adjustment,"season3_adj"  ,2,1.0,0.0,1.0,0.0,1.0,"multiplier","Season 3","attainable biomass growth adjustment")
+/*080731_*/ ,v_season_biomass_adjustment_4(season_biomass_adjustment[4],UC_adjustment,"season4_adj"  ,2,1.0,0.0,1.0,0.0,1.0,"multiplier","Season 4","attainable biomass growth adjustment")
+/*080731_*/ ,v_season_biomass_adjustment_5(season_biomass_adjustment[5],UC_adjustment,"season5_adj"  ,2,1.0,0.0,1.0,0.0,1.0,"multiplier","Season 5 and all following seasons","attainable biomass growth adjustment")
+/*080428_*/ ,v_TUE_at_1kPa_VPD                        (TUE_at_1kPa_VPD                       [0],UC_g_per_kg,"TUE_at_1pKa_VPD"  ,2,5.0,3.0,10.0,0.0,10.0,"g BM/kg H2O","Transpiration Use Efficiency when VPD is at 1kPa","when VPD is at 1kPa")
+/*080428_*/ ,v_TUE_at_1kPa_VPD_vegetative             (TUE_at_1kPa_VPD                       [1],UC_g_per_kg,"TUE_at_1pKa_VPD_veg"  ,2,5.0,3.0,10.0,0.0,10.0,"g BM/kg H2O","Transpiration Use Efficiency when VPD is at 1kPa","when VPD is at 1kPa")
+/*_______*/ ,v_TUE_scaling_coef                       (TUE_scaling_coef                      [0],UC_coefficient,"TUE_scaling_coef"      ,2,0.45,0.0,6.0, 0.0,10.0,"-","Scaling coefficient of TUE regression (power function)")
+/*091201_*/ ,v_TUE_scaling_coef_vegetative            (TUE_scaling_coef                      [1],UC_coefficient,"TUE_scaling_coef_veg"      ,2,0.45,0.0,6.0, 0.0,10.0,"-","Scaling coefficient of TUE regression (power function)")
+/*080428_*/ ,v_water_productivity                     (water_productivity                    [0],UC_g_per_kg,"water_productivity"  ,2,5.0,3.0,10.0,0.0,10.0,"g BM/kg H2O","Water productivity","FAO AquaCrop water productivity during reproductive growth (or throughout the season depending on the WUE mode)")
+/*080428_*/ ,v_water_productivity_vegetative          (water_productivity                    [1],UC_g_per_kg,"water_productivity_veg"  ,2,5.0,3.0,10.0,0.0,10.0,"g BM/kg H2O","Water productivity","as in AquaCrop")
+/*040729_*/ ,v_biomass_transpiration_coef             (reference_biomass_transpiration_coef  [0],UC_pascal_pressure ,"biomass_transpiration_coef"           ,2,5,    1.0,15.0,  1.0,20.0 ,"Pa" /*080406 TU_kPa_kg_m3*/,"Above ground biomass transpiration coefficient (K) for annuals" /*TL_Biomass_transpiration_coefficient*/,"annual")
+/*040729_*/ ,v_biomass_transpiration_coef_vegetative  (reference_biomass_transpiration_coef  [1],UC_pascal_pressure ,"biomass_transpiration_coef_veg"           ,2,5,    1.0,15.0,  1.0,20.0 ,"Pa" /*080406 TU_kPa_kg_m3*/,"Above ground biomass transpiration coefficient (K) for annuals" /*TL_Biomass_transpiration_coefficient*/,"annual")
+/*_______*/ ,v_RUE_max(RUE_max         ,UC_g_MJ    ,"RUE_max"          ,2,2.0,1.0, 7.0,  0.0,7.0,"g/MJ","Maximum Radiation Use Efficiency (unstressed, low vapor pressure deficit)")
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+/*981114X*/ ,v_light_to_biomass_deprecated                     (reference_light_to_biomass_kg_MJ_deprecated   ,UC_kg_MJ               ,LABEL_light_to_biomass                     ,4,0.003,    0.001,7.0,  0.0,7.0,TU_kg_MJ,"Maximum Radiation Use Efficiency (unstressed, low vapor pressure deficit) PAR")
+#endif
+/*_______*/ , v_linger_days(linger_days,/*UC_days*/"linger" ,90,0,365,0,9999,"days","Time that senesced leaves linger with (remain standing/attached to) the plant")  // Warning need default and ranges
+#endif
+/*_______*/ {
+/*080506_*/    for (int j = 0; j < 2; j++)
+/*080506_*/    {
+/*080428_*/       for (int season = 0; season <= 5; season++)
+/*080731_*/          season_biomass_adjustment[season] = 1.0;
+/*080505_*/       TUE_at_1kPa_VPD                     [j] = 5.0;
+/*080505_*/       water_productivity                  [j] = 5.0;
+/*040729_*/       reference_biomass_transpiration_coef[j] = 5.0;
+/*091201_*/       TUE_scaling_coef                    [j] = 0.45;
+/*080506_*/    };
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+#  ifdef USE_PARAMS
+/*090422_*/    p_light_to_biomass_deprecated.set_alt_units_codes(alt_RUE_units);
+#  else
+/*040505x*/    v_light_to_biomass_deprecated.set_alt_units_codes(alt_RUE_units);
+#  endif
+#endif
+/*_______*/ };
+//______________________________________________________________________________
+/*990217X*/ void Crop_parameters::initialize_fallow()
+/*_______*/ {
+/*020330_*/    description = TL_Fallow;
+/*_______*/    land_use_labeled.set(FALLOW);
+/*_______*/    C_species_labeled.set(C3);
+/*_______*/    perennial_obsolete = false;
+/*021124_*/    thermal_time.base_temperature                       =0.0;
+/*021124_*/    thermal_time.cutoff_temperature                     =40.0;
+/*021124_*/    thermal_time.opt_temperature                        =40.0;
+/*021124_*/    thermal_time.max_temperature                        =40.0;
+/*021124_*/    thermal_time.resolution_labeled.set(/*Thermal_time_parameters::*/DAILY); // Fallow does not need hourly resolution.
+/*_______*/    phenology.emergence_deg_day                      =1;
+/*_______*/    phenology.begin_flowering_deg_day                =1;
+/*_______*/    phenology.tuber_initiation_deg_day               =1;
+/*_______*/    phenology.begin_maturity_deg_day                 =1;
+/*080319_*/    phenology.maturity_significant                   =false;
+/*030521*/     phenology.begin_rapid_fruit_growth_deg_day       =1;
+/*_______*/    phenology.end_vegetative_growth_deg_day          = 1000; //{???}
+/*070321_*/    phenology.max_root_depth_deg_day                 = 1000; //{???}
+/*_______*/    phenology.begin_filling_deg_day                  = 1000; //{???}
+#ifdef OLD_ROOTS
+/*_______*/    max_root_depth                   =0.001;
+#endif
+/*_______*/    normal_max_water_uptake_mm              = 0.0;
+/*_______*/    canopy_growth_LAI_based.max_LAI                          =0.011;
+/*000207_*/    canopy_growth_LAI_based.initial_GAI                      = 0.5;
+/*080207_*/    canopy_growth_LAI_based.regrowth_GAI                     = 0.5;
+/*_______*/    canopy_growth_LAI_based.fract_LAI_mature                 = 0.8;
+/*_______*/    canopy_growth_LAI_based.specific_leaf_area               = 1.0; //{???}
+/*_______*/    canopy_growth_LAI_based.stem_leaf_partition              = 0.5; //{???}
+/*_______*/    canopy_growth_LAI_based.leaf_duration_deg_day            = 1000; //{???}
+/*_______*/    canopy_growth_LAI_based.leaf_duration_sensitivity_stress = 1.0; //{???}
+/*_______*/    ET_coef                     =1.0;
+/*080506_*/    for (int j = 0; j < 2; j++)
+/*080506_*/    {
+/*080428_*/       for (int season = 0; season <= 5; season++)
+/*080731_*/          season_biomass_adjustment[season] = 1.0;
+/*040729_*/       TUE_at_1kPa_VPD   [j]= 5.0;
+/*080505_*/       water_productivity[j] = 5.0;
+/*080428_*/       reference_biomass_transpiration_coef[j]= 5.0;
+/*091201_*/       TUE_scaling_coef  [j] = 0.45;
+/*040729_*/    };
+/*040121_*/    RUE_max = 3.0;
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+/*080428_*/    reference_light_to_biomass_kg_MJ_deprecated = 0.003;
+#endif
+// Warning need defaults from Claudio
+/*080506_*/    reduce_canopy_expansion_LWP = 0.8; // J/kg
+/*080506_*/    stop_canopy_expansion_LWP   = 0.8; // J/kg
+/*_______*/    at_pt_root_limit                 = 0.0;
+/*080726_*/    early_growth_limit_temp          = 10.0;
+/*020418_*/    stomatal_closure_leaf_water_pot  = -1000.0; //         {PAW_root_impedes = 0.1;  <-   this must be added}
+/*_______*/    wilt_leaf_water_pot              = -1500.0;
+/*_______*/    phenology.phenologic_sensitivity_water_stress = 1.0;
+/*_______*/    kc =0.0;
+/*020408_*/    if (vernalization)   delete vernalization;   vernalization = 0;
+/*020408_*/    if (photoperiod)     delete photoperiod;     photoperiod = 0;
+/*020408_*/    if (residue_decomposition)  delete residue_decomposition;  residue_decomposition = 0;
+/*020408_*/    if (harvest_index)   delete harvest_index;   harvest_index = 0;
+/*020408_*/    if (hardiness)       delete hardiness;       hardiness = 0;
+/*020408_*/    if (salinity)        delete salinity;        salinity = 0;
+/*_______*/    if (nitrogen)        nitrogen->set_fallow_conditions();
+/*031121_*/    if (cropgro)         delete cropgro;         cropgro = 0;
+/*_______*/ };
+//______________________________________________________________________________
+#if (CS_VERSION==4)
+#define CROP_PARAMETER_CHANGE_COUNT   79
+/*_______*/ Section_entry_change crop_parameter_changes[CROP_PARAMETER_CHANGE_COUNT] =
+/*_______*/ {
+/*_______*/ // NC indicates no change yet.
+/*_______*/ //NC   {LABEL_crop,LABEL_description,LABEL_crop,LABEL_description}
+
+/*_______*/    {CHANGE_V4,LABEL_crop,LABEL_class_obs,LABEL_crop,LABEL_harvested_part}
+/*_______*/ //NC,  {LABEL_crop,LABEL_C_species,
+/*_______*/ //NC,  {LABEL_crop,LABEL_perennial,
+/*_______*/ //NC,  {LABEL_crop,LABEL_land_use
+/*_______*/
+/*_______*/ //NC,  {LABEL_crop,LABEL_vernalization,  obsolete?
+/*_______*/ //NC,  {LABEL_crop,LABEL_photoperiod,    obsolete?
+/*_______*/ //NC,  {LABEL_crop,LABEL_stages,         obsolete
+/*_______*/ // Version 4 New section [growth]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_light_to_biomass             ,LABEL_growth,LABEL_light_to_biomass}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_at_pt_limit                  ,LABEL_growth,LABEL_at_pt_limit}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_at_pt_root_limit             ,LABEL_growth,LABEL_at_pt_root_limit}
+//080828/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_opt_temp_for_growth_obs          ,LABEL_growth,LABEL_early_growth_limit_temp /*080725 LABEL_opt_temp_for_growth*/}
+/*_______*/ // Version 4 New section [transpiration]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_kc                           ,LABEL_transpiration,LABEL_kc}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_ET_crop_coef                 ,LABEL_transpiration,LABEL_ET_crop_coef}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_max_water_uptake             ,LABEL_transpiration,LABEL_max_water_uptake}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_critical_leaf_water_pot_obs  ,LABEL_transpiration,LABEL_stomatal_closure_leaf_water_pot}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_wilt_leaf_water_pot          ,LABEL_transpiration,LABEL_wilt_leaf_water_pot}
+/*_______*/ // Version 4 New section [leaf]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_max_LAI                   ,LABEL_leaf,LABEL_max_LAI}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_fract_LAI_mature          ,LABEL_leaf,LABEL_fract_LAI_mature}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_initial_GAI               ,LABEL_leaf,LABEL_initial_GAI}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_specific_leaf_area        ,LABEL_leaf,LABEL_specific_leaf_area}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_stem_leaf_partition       ,LABEL_leaf,LABEL_stem_leaf_partition}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_leaf_duration_obs ,LABEL_leaf,LABEL_duration}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_leaf_duration_sensitivity_stress_obs,LABEL_leaf,LABEL_duration_stress_sensitivity}
+/*_______*/ // Version 4 New section [morphology]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_max_root_depth            ,LABEL_morphology,LABEL_max_root_depth}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_max_canopy_height         ,LABEL_morphology,LABEL_max_canopy_height}
+/*_______*/ // Version 4 New section [phenology]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_grain_filling_obs                ,LABEL_phenology,LABEL_filling}
+/*021203_*/ ,   {CHANGE_V4,LABEL_crop,LABEL_flowering                    ,LABEL_phenology,LABEL_flowers}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_base_temp_obs        ,LABEL_phenology,LABEL_base_temp}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_cutoff_temp_obs      ,LABEL_phenology,LABEL_cutoff_temp}
+//021124_      // opt_temp and max_temp did not exist prior to V4
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_emerge_obs           ,LABEL_phenology,LABEL_emergence}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_tuber_initiation_obs ,LABEL_phenology,LABEL_tuber_init}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_begin_flower_obs     ,LABEL_phenology,LABEL_flowering}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_peak_LAI_obs         ,LABEL_phenology,LABEL_peak_LAI}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_begin_grain_filling_obs,LABEL_phenology,LABEL_filling}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_begin_maturity_obs   ,LABEL_phenology,LABEL_maturity}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_deg_day_begin_veraison_obs   ,LABEL_phenology,LABEL_rapid_fruit_growth}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_phenologic_sensitivity_water_stress_obs,LABEL_phenology,LABEL_water_stress_sensitivity}
+/*_______*/ // Version 4 New section [dormancy]
+/*_______*/ ,  {CHANGE_V4,LABEL_crop,LABEL_induce_dormancy_temp_obs          ,LABEL_dormancy,LABEL_inducement_temperature}
+/*_______*/ ,  {CHANGE_V4,LABEL_crop,LABEL_start_dormancy_valid_date_obs ,LABEL_dormancy,LABEL_start_valid_date}
+/*_______*/ ,  {CHANGE_V4,LABEL_crop,LABEL_leave_dormancy_valid_date_obs ,LABEL_dormancy,LABEL_leave_valid_date}
+/*_______*/ // Version 4 New section [residue]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_decomposition_time           ,LABEL_residue,LABEL_decomposition_time}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_residue_area_mass_obs        ,LABEL_residue,LABEL_area_covered_to_mass_ratio}
+/*_______*/ // Version 4 New section [harvest_index]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_harvest_ndx_unstressed_obs               ,LABEL_harvest_index,LABEL_unstressed}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_harvest_ndx_flowering_sensitivity_obs    ,LABEL_harvest_index,LABEL_flowering_sensitivity}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_harvest_ndx_filling_sensitivity_obs      ,LABEL_harvest_index,LABEL_filling_sensitivity}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_harvest_ndx_tuber_init_sensitivity_obs   ,LABEL_harvest_index,LABEL_tuber_init_sensitivity}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_harvest_ndx_tuber_growth_sensitivity_obs ,LABEL_harvest_index,LABEL_tuber_growth_sensitivity}
+//081125obs/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_translocation_factor                     ,LABEL_harvest_index,LABEL_translocation_factor}
+/*_______*/ // Version 4 New section [fruit]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_fract_total_solids                    ,LABEL_fruit,LABEL_fract_total_solids}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_max_fruit_load                        ,LABEL_fruit,LABEL_max_fruit_load}
+/*030521_*/ ,   {CHANGE_V4,LABEL_crop,LABEL_development_fraction_to_fruit_obs     ,LABEL_fruit,LABEL_initial_growth_fraction_to_fruit}
+/*030521_*/ ,   {CHANGE_V4,LABEL_crop,LABEL_veraison_fraction_to_fruit_obs        ,LABEL_fruit,LABEL_rapid_growth_fraction_to_fruit}
+/*_______*/ // Version 4 New section [vernalization]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_vernalization_low_temp_obs            ,LABEL_vernalization,LABEL_low_temp}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_vernalization_high_temp_obs           ,LABEL_vernalization,LABEL_high_temp}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_vernalization_start_obs               ,LABEL_vernalization,LABEL_start}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_vernalization_end_obs                 ,LABEL_vernalization,LABEL_end}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_vernalization_min_factor_obs          ,LABEL_vernalization,LABEL_min_factor}
+/*020610_*/ // LADSS
+/*020610_*/ ,   {1,0,0,LABEL_crop,LABEL_v_start                   ,LABEL_vernalization,LABEL_start}
+/*020610_*/ ,   {1,0,0,LABEL_crop,LABEL_v_end                     ,LABEL_vernalization,LABEL_end}
+/*_______*/ // Version 4 New section [photoperiod]
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_photoperiod_start_obs                ,LABEL_photoperiod,LABEL_start}
+/*_______*/ ,   {CHANGE_V4,LABEL_crop,LABEL_photoperiod_end_obs                  ,LABEL_photoperiod,LABEL_end}
+/*020610_*/ // LADSS
+/*020610_*/ ,   {1,0,0,LABEL_crop,LABEL_pp_start                                 ,LABEL_photoperiod,LABEL_start}
+/*020610_*/ ,   {1,0,0,LABEL_crop,LABEL_pp_end                                   ,LABEL_photoperiod,LABEL_end}
+/*_______*/ // Version 4 New section [Nitrogen]
+/*_______*/ ,  {CHANGE_V4,LABEL_crop,LABEL_N_fixation_obs                      ,LABEL_nitrogen,LABEL_fixation}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_adjust_N_uptake_obs                 ,LABEL_nitrogen,LABEL_uptake_adj}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_adjust_N_availability_obs           ,LABEL_nitrogen,LABEL_availability_adj}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_N_max_concentration_emerge_obs      ,LABEL_nitrogen,LABEL_max_conc_emerge}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_N_max_concentration_mature_obs      ,LABEL_nitrogen,LABEL_max_conc_mature}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_N_min_concentration_mature_obs      ,LABEL_nitrogen,LABEL_min_conc_mature}
+/*_______*/ ,  {CHANGE_V4,LABEL_crop,LABEL_max_N_stubble_obs                   ,LABEL_nitrogen,LABEL_max_stubble}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_adjust_N_uptake_obs                 ,LABEL_nitrogen,LABEL_uptake_adj}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_adjust_N_availability_obs           ,LABEL_nitrogen,LABEL_availability_adj}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_max_concentration_emerge_obs        ,LABEL_nitrogen,LABEL_max_conc_emerge}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_max_concentration_mature_obs        ,LABEL_nitrogen,LABEL_max_conc_mature}
+/*021013_*/ ,  {CHANGE_V4,LABEL_crop,LABEL_min_concentration_mature_obs        ,LABEL_nitrogen,LABEL_min_conc_mature}
+/*_______*/ // Version 4 New section [salinity]
+/*_______*/ ,  {CHANGE_V4,LABEL_crop,LABEL_osmotic_pot_50                      ,LABEL_salinity,LABEL_osmotic_pot_50}
+/*_______*/ ,  {CHANGE_V4,LABEL_crop,LABEL_salt_tolerance_P_obs                ,LABEL_salinity,LABEL_tolerance_P}
+/*_______*/ // There has been no change to CO2 parameter section or entries
+/*_______*/ ,   {CHANGE_V4,LABEL_CO2,LABEL_growth_ratio_elevated_to_baseline_ppm_CO2_obs,LABEL_CO2,LABEL_growth_ratio_elevated_to_baseline_ppm}
+/*_______*/ ,   {CHANGE_V4,LABEL_CO2,LABEL_elevated_reference_CO2_conc_obs              ,LABEL_CO2,LABEL_elevated_reference_conc}
+/*_______*/ ,   {CHANGE_V4,LABEL_CO2,LABEL_baseline_reference_CO2_conc_obs              ,LABEL_CO2,LABEL_baseline_reference_conc}
+/*_______*/ // Hardiness changes for LADSS
+/*_______*/ //,   {LABEL_hardiness,LABEL_damage_cold_temp,LABEL_hardiness,LABEL_damage_cold_temp}
+/*_______*/ //,   {LABEL_hardiness,LABEL_lethal_cold_temp,LABEL_hardiness,LABEL_lethal_cold_temp}
+/*_______*/ ,   {CHANGE_V4,LABEL_hardiness,LABEL_salvagable_days_LADSS_alias           ,LABEL_hardiness     ,LABEL_salvageable_days_before_maturity}
+/*061025_*/ ,   {CHANGE_V4,LABEL_transpiration,LABEL_stomatal_closure_LWP_LADSS_alias  ,LABEL_transpiration ,LABEL_stomatal_closure_leaf_water_pot}
+/*061025_*/ ,   {CHANGE_V4,LABEL_transpiration,LABEL_wilt_LWP                          ,LABEL_transpiration,LABEL_wilt_leaf_water_pot}
+/*061025_*/ ,   {CHANGE_V4,LABEL_growth,LABEL_root_density_distr_curv_LADSS_alias      ,LABEL_growth        ,LABEL_root_density_distribution_curvature}
+///*080725_*/ ,   {CHANGE_V4,LABEL_growth,LABEL_opt_temp_for_growth_obs                  ,LABEL_growth        ,LABEL_early_growth_limit_temp}
+/*_______*/ //,   {LABEL_hardiness,LABEL_sensitive_to_cold,LABEL_hardiness,LABEL_sensitive_to_cold}
+/*_______*/ };
+#endif
+//______________________________________________________________________________
+#if (CS_VERSION==4)
+/*_______*/ Section_entry_change * Crop_parameters::get_section_entry_changes(uint16 &count) const
+/*_______*/ {  count = CROP_PARAMETER_CHANGE_COUNT;
+/*040510x*/    {  // The the file read is the current version, no need to set up changes (return 0 count)
+/*040510x*/       uint8 option_version[3] = {  CS_VERSION_NUMBERS };
+/*040510x*/       if ((option_version[0] == IO.major)
+/*040510x*/           && (option_version[1] == IO.release)
+/*040510x*/           && (option_version[2] == IO.minor))
+/*040510x*/           count = 0;
+/*040510x*/    };
+/*_______*/    return crop_parameter_changes;
+/*_______*/ };
+#endif
+//______________________________________________________________________________
+/*020716_*/ bool Crop_parameters::is_perennial()  const
+/*_______*/ {  Life_cycle life_cycle = (Life_cycle)life_cycle_labeled.get();
+/*080722_*/    return life_cycle >= perennial_life_cycle;
+/*_______*/ };
+//______________________________________________________________________________
+/*020716_*/ bool Crop_parameters::is_annual()  const
+/*_______*/ {  Life_cycle life_cycle = (Life_cycle)life_cycle_labeled.get();
+/*_______*/    return (life_cycle == annual_life_cycle /* 080729 ANNUAL */) ;
+/*_______*/ };
+//______________________________________________________________________________
+/*030521_*/ bool Crop_parameters::has_leaf_senescence() const
+/*_______*/ {
+/*040808_*/    bool any_senescence = deciduous || senesces
+/*_______*/       || (life_cycle_labeled.get() == annual_life_cycle) ;
+/*_______*/                                                // May move to parameter editor
+/*_______*/    return any_senescence;
+/*_______*/ };
+//______________________________________________________________________________
+/*040614_*/ bool Crop_parameters::apply_harvest_index() const
+/*_______*/ {
+/*_______*/    bool apply = (crop_model_labeled.get() == CROPSYST_CROP_MODEL);
+/*_______*/    if (harvested_part_labeled.get() >= HARVEST_CANOPY)   apply = false;
+/*_______*/    if (land_use_labeled.get() == PASTURE)                apply = false;
+/*_______*/    if (tea) apply = true;
+/*_______*/    return apply;
+/*_______*/ };
+//______________________________________________________________________________
+/*030521_*/ Crop_parameters::CropGro_parameters::CropGro_parameters()
+/*_______*/ : model_input_file("filename.INP","INP","CropGro model input","*.INP")
+/*_______*/ {};
+//______________________________________________________________________________
+/*981203x*/ float64 Crop_parameters::param_max_water_uptake_m(uint32 growth_stage)                const
+/*_______*/ {  float64 max_water_uptake_mm = 0.0;
+/*_______*/    if (crop_model_labeled.get() == CROPSYST_FRUIT_MODEL)
+/*_______*/    {
+/*_______*/       switch (growth_stage)
+/*_______*/       {
+/*_______*/          case INITIAL_FRUIT_GROWTH  : max_water_uptake_mm  = fruit.max_water_uptake_during_initial_fruit_mm;break;
+/*_______*/          case RAPID_FRUIT_GROWTH    : max_water_uptake_mm  = fruit.max_water_uptake_during_radid_fruit_mm;  break;
+/*_______*/          case VERAISON              : max_water_uptake_mm  = fruit.max_water_uptake_during_veraison_mm;     break;
+/*_______*/
+/*_______*/          case MATURITY        :
+/*_______*/          case HARVESTABLE     :
+/*_______*/          case HARVESTED       : max_water_uptake_mm  = fruit.max_water_uptake_after_maturity_mm;      break;
+/*_______*/
+/*_______*/          case PREEMERGENCE    :
+/*_______*/          case EMERGENCE       :
+/*_______*/          case RESTART         : // case START_SEASON    :
+/*_______*/          case BUD_BREAK       :
+/*_______*/          case ACTIVE_GROWTH   :
+/*_______*/          case FLOWERING       :
+/*_______*/          default              : max_water_uptake_mm  = fruit.max_water_uptake_before_fruiting_mm;     break;
+/*_______*/       };
+/*_______*/    }
+/*_______*/    else
+/*_______*/       max_water_uptake_mm = normal_max_water_uptake_mm;
+/*_______*/    return mm_to_m(max_water_uptake_mm);
+/*_______*/ };    // mm/day
+//______________________________________________________________________________
+//#if (CROPSYST_VERSION >= 5)
+}; // namespace CropSyst
+//#endif
+

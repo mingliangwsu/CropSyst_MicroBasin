@@ -1,0 +1,390 @@
+#ifndef file_system_engineH
+#define file_system_engineH
+#include "corn/OS/file_system.h"
+#include "corn/OS/directory_entry_name.h"
+
+#define NAME_WILDCARD_NONE 0
+#define QUALIFIED true
+#define UNQUALIFIED false
+#define LINK_SYMBOLIC true
+#define LINK_HARD     false
+
+namespace CORN {
+class Seclusion;                                                                 //160814
+namespace OS {
+//_______________________________________________________forward declarations__/
+interface_ File_system_engine
+{
+ public: // Methods that change the file system structure
+   virtual bool create_directory
+      (const Directory_name &directory_name
+      ,bool create_parents_as_needed = true)                               const = 0;//121222
+      /**< Creates a directory with the specified name in the file system.
+       \return true if the directory could be created (or already exists)
+       or null if the operating system was unable to create the directory.
+       Also creates the interrum directories in the path.
+      **/
+   virtual bool provide_directory                                                //140825
+      (const Directory_name &directory_name
+      ,bool create_parents_as_needed)                                      const = 0;
+      /** Calls create_directory
+       * \return true if the directory was created or already exists.
+       **/
+   virtual
+      bool create_directory_link
+      (const Directory_name &actual_target_directory_name
+      ,const Directory_name &link_directory_name
+      ,bool symbolic = LINK_SYMBOLIC)                                      const = 0;
+      /**< Create a hard link to a directory
+         Note that this is dangerous, and some operating systems do not
+         support this.
+         It is recommended to use only symbolic links to directories.
+         \return true if successfully created
+      **/
+   virtual bool create_file_link
+      (const File_name &actual_file_name
+      ,const File_name &link_file_name
+      //161026 obsolete ,bool  dereference = true
+         /*
+         Unix/Linux ln command has a no-dereference option.
+         which says "treat destination that is a symlink to a directory as if it were a normal file"
+         I am not sure exactly what it does.
+         I think if the destination is itself a symlink there is the option
+         to either dereference so the new link references directly the
+         absolute file or link to the link.
+         */
+      ,bool symbolic = LINK_SYMBOLIC)                                      const = 0;
+      /**< Create a link to a file
+      \return the created directory element or null if the OS was unable to create the directory.
+      **/
+   virtual bool recycle
+      (const Directory_entry_name  &entry_name  ///< Name of the directory or file to be recycled
+      , bool delete_forever                     ///< Permenantly and irrevokably delete it
+      )                                                                    const = 0;
+      ///< Moves the directory item to the recycle bin.
+      ///< For operating systems/shells that don't have recycle bin,
+      ///< the file is not deleted unless delete_forever is true;
+      ///<\return true if the file was successfully recycled, false if it failed (nothing happened).
+   virtual bool delete_directory                                                 //000211
+      (const Directory_name &directory_name_to_delete
+      ,bool recurse_subdirectories
+      ,CORN::Container *remember_deleted_file_names_optional            = 0
+      ,CORN::Container *remember_not_deleted_file_names_optional        = 0
+      ,CORN::Container *remember_deleted_subdirectory_names_optional    = 0
+      ,CORN::Container *remember_not_deleted_subdirectory_name_optional = 0
+      ,CORN::Text_list *error_log_optional                              = 0
+      ,bool delete_only_file_and_preserve_folder_and_subfolders = false)   const = 0;
+      ///< Delete the directory, all files and all subdirectories.
+      ///< File folders that were deleted are listed in deleted_items.
+      ///< File and folders that were deleted are listed in not_deleted_items
+      ///< If any files could not be deleted error log reports why not_deleted_items could not be deleted.
+      ///< \returns true if the directory itself was deleted
+ public:
+   // In the following methods
+   // DEN denotes a qualified names either file, directory or other directory entry type.
+   // name denotes unqualified names including only the name and extension.
+
+   // The deprecated methods are obsolete and should be replaced
+   // with the new seclusion methods
+
+   virtual nat32 list_DENs                                                       //161013_160814
+      (const Directory_name & directory_name
+      ,CORN::Container *file_names       //= 0 // Optional, pass null if file list not wanted
+      ,CORN::Container *directory_names  //= 0 // optional, pass null if file list not wanted
+      ,const Seclusion &seclusion
+      ,File_system::Recursion recursion = File_system::none_recursion_inclusive
+      ,const Directory_name *logical_root = 0
+         // Optional directory at which super directory recursion stops
+         // By default recursion stops at the users (home) directory
+         // This option will override to stop before or continue up
+         // above the home directory.
+         // May be omitted if not using superdirectory recursion
+      ,Directory_entry_name::Qualification qualification = Directory_entry_name::full_qualification
+      ) const = 0;
+      ///< seclusion specifies the rules for including/excluding entries in the list
+      /// It directory patterns with trailin / will also restrict the recursion,
+      /// that is recursions will not go down into excluded subdirectories
+      /// nor up into superdirectories were the name matches an exclude pattern.
+
+   /*161029 this wont work because seclusions may include patterns
+     that may span names in the path  I.e. xx/yy
+     but list_names only know items in the target directory
+     so only simple wildcard in file and/or extension would work
+   virtual nat32 list_names_in // was list_entry_names_in                 //151212
+      (const Directory_name & directory_name
+      ,CORN::Text_list *file_name_list_unqual
+      ,CORN::Text_list *directory_name_list_unqual
+      ,const Seclusion &seclusion)                                         const = 0;
+   */
+   virtual nat32 list_names_in                                                   //161029
+      (const Directory_name & directory_name
+      ,CORN::Text_list *file_name_list_unqual
+      ,CORN::Text_list *directory_name_list_unqual)                   const = 0;
+      // wildcard pattern name and/or extension pattern
+
+   /*161105
+   virtual nat32 list_entry_names_in_deprecated                                  //151212
+      (const Directory_name & directory_name
+      ,CORN::Text_list *file_name_list_unqual
+      ,CORN::Text_list *directory_name_list_unqual
+      ,const wchar_t *name_wild_card      = 0
+      ,const wchar_t *extension_filter    = 0
+      ,const CORN::Text_list *exclude_directories = 0)                     const = 0;
+      ///< Lists files and directories only in the specified directory
+      /// (without recursion)
+      /// exclude_directories is a list of unqualified directory entry names
+      /// It is used to restrict the recursion, that is
+      /// recursions will not go down into subdirectories
+      /// nor up into superdirectories were the name matches any name in the
+      /// exclude_directories list.
+      /// directories listed in exclude_directories will not be recursed down into
+      /// nor up into parents.
+      /// It is intended that the names eventually can be Regular expressions
+      /// (or at least wildcards) but this is not currently implemented.
+   */
+   /*161105
+   virtual nat32 list_entry_names_deprecated                                                //130103
+      (const Directory_name & directory_name
+      ,CORN::Container *file_name_list       //= 0 // Optional, pass null if file list not wanted
+      ,CORN::Container *directory_name_list  //= 0 // optional, pass null if file list not wanted
+      ,File_system::Recursion recursion                                          //150908
+      ,Directory_entry_name::Qualification qualification                         //150908
+      ,const wchar_t *name_wild_card      = 0
+      ,const wchar_t *extension_filter    = 0
+      ,const CORN::Text_list *exclude_directories = 0)                     const = 0;
+      ///< exclude_directories is a list of unqualified directory entry names
+      /// It is used to restrict the recursion, that is
+      /// recursions will not go down into subdirectories
+      /// nor up into superdirectories were the name matches any name in the
+      /// exclude_directories list.
+      /// directories listed in exclude_directories will not be recursed down into
+      /// nor up into parents.
+      /// It is intended that the names eventually can be Regular expressions
+      /// (or at least wildcards) but this is not currently implemented.
+   */
+   /*161105
+   inline virtual nat32 list_file_names_deprecated                               //100101
+      (const Directory_name & directory_name
+      ,CORN::Container &file_name_list
+      ,File_system::Recursion recursion                                          //150908
+      ,Directory_entry_name::Qualification qualification                         //150908
+      ,const wchar_t *name_wild_card   = 0
+      ,const wchar_t *extension_filter = 0
+      ,const CORN::Text_list *exclude_directories = 0)                     const //130103
+      {  list_entry_names_deprecated                                             //151125
+         (directory_name
+         ,&file_name_list,0
+         ,recursion
+         ,qualification
+         ,name_wild_card,extension_filter,exclude_directories);
+         return file_name_list.count();                                          //151125
+      }
+   */
+   /*161105
+   inline virtual nat32 list_directory_names_deprecated                                     //100101
+      (const Directory_name & directory_name
+      ,CORN::Container &directory_name_list
+      ,File_system::Recursion recursion                                          //150908
+      ,Directory_entry_name::Qualification qualification                         //150908
+      ,const wchar_t *name_wild_card   = 0
+      ,const wchar_t *extension_filter = 0
+      ,const CORN::Text_list *exclude_directories = 0)                     const //130103
+      {  list_entry_names_deprecated //161013 list_entry_names                                                        //151125
+            (directory_name
+            ,0
+            ,&directory_name_list
+            ,recursion                                                           //150908
+            ,qualification                                                       //150908
+            ,name_wild_card,extension_filter,exclude_directories);
+        return directory_name_list.count();                                      //151125
+      }
+      */
+      /**<  In the list* methods:
+      name_wild_card Optional wildcard pattern (any valid Unix/Windows/DOS wild card) //091212
+      extension_filter can be used to limit the list to certain extensions  (without dot)   //020208
+      **/
+
+ public:
+   virtual bool exists
+      (const Directory_entry_name &directory_entry_name)                   const = 0;
+      ///< \return true if the named file or directory exists
+   virtual Datetime64 get_modification_date_time
+      (const Directory_entry_name &directory_entry_name)                   const = 0;
+   virtual File_system::Directory::Type identify_type
+      (const Directory_entry_name &entry_name)                             const = 0;
+      // This queries the operating system to identify the actual
+      // type of this named directory entry in the file system.
+      // (Will return unknown_entry if this file name does not exist).
+   virtual bool is_symbolic_link(const Directory_entry_name &file_name)    const = 0;//121101
+      /** Queries the operating system and returns true if the specified file
+         is a symbolic link.
+      **/
+   virtual bool is_shortcut(const Directory_entry_name &file_name)         const = 0;//151207
+      /** Queries the operating system and returns true if the specified file
+       *  is a Windows style shortcut.
+      **/
+   virtual Directory_name *render_current_working_directory()              const = 0;//091208
+      // Instanciates a directory name corresponding to the
+      // the current working directory.
+      // The directory name object is relinquished to the caller.
+   virtual Directory_name *render_current_working_directory_on_drive(const Drive_designator &logical_drive_name)     const = 0;//120430
+      // Instanciates a directory name corresponding to the
+      // the current working directory on the specified drive.
+      // Logical drive name is
+      // The directory name object is relinquished to the caller.
+
+      // Note this is applicable only to Windows AmigaDOS
+      // and other OS with drive designator
+
+   virtual bool browse_directory                                                 //080929
+      (const Directory_name &dir_name
+      ,bool open_new_window         = true
+      ,bool show_directory_tree_view= true
+      ,bool show_as_apparent_root   = false
+      ,bool select                  = false)                               const = 0;
+      /**< Opens the directory entry with a File manager/browser (Window Explorer) window.
+         \param open_new_window Opens a new window otherwise opens and brings to front an existing window that is already open to the directory. //091215_
+         \param show_directory_tree_view Show directory tree view panel as well as the file list view panel //091215
+         \param show_as_apparent_root show_as_apparent_root This directory will appear as root (so you can't navigate to parent directories). //091215
+         \param select Selects/Highlights this directory in the file list view.
+      **/
+   virtual bool edit_file  (const File_name &file_name)                    const = 0;  //091215
+      ///< Edit the file with a suitable  associated editor program.
+      ///< return true if the file could be edited and editor was invoked.
+   virtual bool view_file  (const File_name &file_name)                    const = 0;  //091215
+      ///< View the file with a suitable  associated viewer program.
+      ///< The OS may elect to open the file with an editor (hopefully in read_only mode)
+      ///< if there is no specific viewer.
+      ///< return true if the file could be viewed and viewer was invoked.
+   virtual bool print_file (const File_name &file_name)                    const = 0;  //091215
+      ///< Print the file with a suitable printing program.
+      ///< The OS may have a specific printing facility for the file's type
+      ///< or it may invoke and editor or viewer and initiate the print command.
+      ///< return true if the file could be printed and printer was invoked.
+   virtual bool open_file  (const File_name &file_name)                    const = 0;  //091215
+      ///< Opens the file with the default open method. This could be an editor or a viewer or other default action.
+      ///< return true if the file was openned.
+   virtual Directory_name *render_CSIDL_directory_name(nat16 CSIDL)       const = 0;  //100101
+      ///< Instanciates a directory name for the specified CSIDL directory code
+      ///< This is primarily intended for Windows but could be generally applicable
+      ///< \return 0 if the CSIDL code is unknown.
+      // under UNIX, the conventional application data local settings folder is typically $HOME/.local
+      // For other operating systems
+      // there may or may not be special folders matching the Windows CSIDL codes.
+   virtual bool copy_file
+      (const File_name &source, const File_name &destination
+      ,bool fail_if_exists)                                                const = 0; //120209
+      /**< Currently this copies one file
+         Source and destination file can be either qualified, fully qualified
+         or unqualified for the current working directory.
+         (Should be able to handle relatively qualified file name paths,
+          but this has not yet been tested)
+      **/
+   virtual bool copy_directory                                                   //130215
+      (const Directory_name &source, const Directory_name &target
+      // conceptual add seclusion idiom const Seclusion &seclusion
+      ,bool fail_if_exists)                                                const = 0;
+   virtual bool copy_directory_contents                                          //161105
+      (const Directory_name &source, const Directory_name &target
+      ,const Seclusion *seclusion_optional = 0
+      // conceptual add seclusion idiom const Seclusion &seclusion
+      ,bool use_links = false
+      ,bool fail_if_exists = false)                                        const = 0;
+
+/*conceptual
+   virtual bool copy_directory_with_linking
+      (const Directory_name &source, const Directory_name &target
+      ,const Seclusion &seclusion);
+
+      )                                                const = 0; //130215
+*/
+   /**< Create a (target) directory structure that matches the source
+
+      In the target links will be made to actual files in the source.
+      (So the target directory, subdirectories will be actual directories
+       and files will be links to the actual files in the source
+       (if the source directory item is itself a link, the link is copied in the target).
+
+
+      // probably should always fail if exists because if the
+      // target is inadvertently the same as the source
+      // or there already exists actual files in the target with the same names as in the source
+      // real files would be replaced with less real links
+
+
+   **/
+
+   // Conceptual: eventually add regular expression for the file names.
+   virtual bool rename(const Directory_entry_name &old_name,const Directory_entry_name &new_name) const = 0;
+   virtual Directory_entry_name *render_resolved_shortcut_or_assume_actual
+      (const Directory_entry_name &actual_directory_entry_or_shortcut_LNK) rendition_ = 0;
+   virtual Directory_entry_name *render_resolved_absolute_DEN //161013RLN was render_resolved_absolute_directory_entry_name
+      (const Directory_entry_name &relative_or_absolute_actual_directory_entry_or_shortcut_LNK
+      ,const Directory_name &with_respect_to_directory_name)           rendition_= 0; //120430
+      /**<
+         Does whatever is necessary to resolve the actual file name.
+         Always returns a rendered fully qualified filename.
+      **/
+   virtual Directory_entry_name *render_resolved_symbolic_link_or_shortcut
+      (const Directory_entry_name &director_entry_name,bool relative)  rendition_= 0;//121101
+      /**
+         \return
+            If the specified file is a symbolic link
+            (or a shortcut in Windows or a Junction point in Windows
+            or a ??? in MacOS)
+            returns a rendered directory entry name that the link.
+            or returns 0 if name is not any type of link.
+      **/
+   virtual nat32 get_file_size_bytes(const File_name &file_name)           const = 0; //121101
+
+   virtual Directory_entry_name *find_qualified_name_in_path
+      (const std::wstring &unqualified_name
+      ,const CORN::OS::Directory_name &from_directory
+      ,Path_inclusion include_path_directories_in_search = Directory_entry_name::include_all)    rendition_= 0; //131111
+
+ // I probably should rename the to find_name_in_path and
+ // pass Qualification option 150908
+
+
+      /* Search the from_directory for the specified filename
+         If include_path_directories_in_search
+         Recursively searches up the specified directory tree
+         until the specified file/directory name is found in an
+         the from_directory, its parent or an ancestor directory.
+         \return qualified rendered directory entry name if it exists
+            or 0 if not found.
+      */
+   /* not implemented because this can  be done with list_entry_names
+   virtual nat16 find_names_in_path_with_substring
+      (const std::wstring              *name_substring
+      ,modified_ CORN::Container       &found_entries
+      ,const CORN::OS::Directory_name  &from_directory
+      ,bool                             relative
+      ,Path_inclusion include_path_directories_in_search = Directory_entry_name::include_all) rendition_;
+
+   */
+   virtual CORN::OS::File_name        *find_file_name                            //150412
+      (const std::wstring             &target_filename
+      ,const CORN::OS::Directory_name &from_directory
+      ,File_system::Recursion          recursion                                 //150908
+      ,const Directory_name           *logical_root = 0
+      ,bool case_insensitive = FILENAME_CASE_INSENSITIVITY)           rendition_=0;//160924
+
+   virtual CORN::OS::Directory_name   *render_home()                  rendition_=0;//161025
+      // Renders directory name which is the user's home directory
+ protected:
+   virtual bool matches_any_in                                                   //151212
+      (const std::wstring &name_with_ext
+      ,const CORN::Text_list &wild_card_patterns_to_compare
+      ,bool case_insensitive = false)                               affirmation_=0;
+      // Eventually make this public, put in interface, and/or implement as function in CORN::Text_list
+
+   //______________________________________________________________________________
+ public:
+   virtual bool set_current_working_directory(const Directory_name &dir_name) const=0;
+};
+//_________________________________________________________File_system_engine__/
+extern File_system_engine &file_system_engine;
+} } // namespace CORN OS
+#endif
+

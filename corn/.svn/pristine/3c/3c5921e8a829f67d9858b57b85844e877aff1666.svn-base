@@ -1,0 +1,64 @@
+#ifndef statistics_recorderH
+#define statistics_recorderH
+#include "corn/primitive.h"
+#include "corn/const.h"
+#include <fstream>
+namespace CORN
+{
+   class Statistical_base;
+   class Statistical_data_set;
+//______________________________________________________________________________
+class Statistics_recorder
+{public:
+   virtual nat32  write_descriptive_summary_variable_value
+      (std::ostream &strm
+      ,const Statistical_base &summary_statistics
+      ,nat32         desired_descriptive_summary_elements
+      ,const char *section = 0
+      ,const char *units_caption = 0)                                      const;
+   virtual nat32  write_probability_summary_variable_value
+      (std::ostream &strm
+      ,const Statistical_data_set &data_set
+      ,nat32  desired_probability_10s_summary
+      ,nat32  desired_probability_5s_summary
+      ,const char *section)                                                const;
+   virtual nat32  write_descriptive_summary_tabular_header
+      (std::ostream &strm
+      ,nat32         desired_descriptive_summary_elements
+      ,const char *section
+      ,const char *units_caption
+      ,char delimitor)                                                     const;
+   virtual nat32  write_descriptive_summary_tabular
+      (std::ostream &strm
+      ,const Statistical_base &summary_statistics
+      ,nat32         desired_descriptive_summary_elements
+      ,char delimitor)                                                     const;
+   virtual nat32  write_probability_summary_tabular_header
+      (std::ostream &strm
+      ,nat32  desired_probability_10s_summary
+      ,nat32  desired_probability_5s_summary
+      ,const char *section
+      ,const char   *units_caption
+      ,char delimitor)                                                     const;
+   virtual nat32  write_probability_summary_tabular
+      (std::ostream &strm
+      ,const Statistical_data_set &data_set
+      ,nat32  desired_probability_10s_summary
+      ,nat32  desired_probability_5s_summary
+      ,char delimitor)                                                     const;
+/* NYI
+   virtual nat32  write_observations_variable_value
+      (const Statistical_data_set &data_set
+      ,const Statistical_base &summary_statistics
+      ,const char *section = 0
+      ,const char *units_caption = 0)                                      const;
+*/
+/*NYI
+   virtual nat32  record_observations
+      (const Statistical_data_set &data_set)                               const = 0;
+*/
+};
+//______________________________________________________________________________
+}; //  namespace CORN
+#endif
+

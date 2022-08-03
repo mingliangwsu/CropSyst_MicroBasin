@@ -1,0 +1,290 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{5958FE40-16B2-478C-A5BC-3BF5E2A1558D}</ProjectGuid>
+			<ProjectType>CppStaticLibrary</ProjectType>
+			<Config Condition="'$(Config)'==''">Debug</Config>
+			<ProjectVersion>12.0</ProjectVersion>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<TLIB_PageSize>32</TLIB_PageSize>
+			<IncludePath>c:\dev\common;c:\dev;$(IncludePath)</IncludePath>
+			<BRCC_Defines>_RTLDLL;NO_STRICT;$(BRCC_Defines)</BRCC_Defines>
+			<PackageImports>rtl.bpi;vcl.bpi;vclx.bpi;xmlrtl.bpi;vclie.bpi;inet.bpi;inetdbbde.bpi;inetdbxpress.bpi;vclactnband.bpi;dbrtl.bpi;vcldb.bpi;bdertl.bpi;TMSD2006.bpi;tmsexd2006.bpi;bcbofficexp.bpi;bcbsmp.bpi;soaprtl.bpi;dsnap.bpi;bcbie.bpi;K102_R70.bpi;RNAutoControls_CORN_package.bpi;EasyListviewD10.bpi;VirtualTreesD10.bpi;VirtualShellToolsD10.bpi;JamShellD2006Win32.bpi</PackageImports>
+			<DCC_ResourcePath>..\;BDS;..\..\common\geolocation;..\..\common\weather;..\..\common\weather\database;..\..\common\simulation;..\..\CS_suite\ClimGen;..\..\common\weather\stations;..\..\cropsyst\cpp;..\..\Climgen\source;..\..\..\Climgen\source;..\..\..\cropsyst\cpp;..\..\..\common\weather\stations;..\..\..\CS_suite\ClimGen;..\..\..\common\simulation;..\..\..\common\weather\database;..\..\..\common\weather;..\..\..\common\geolocation;C:\dev\ued\convert;$(DCC_ResourcePath)</DCC_ResourcePath>
+			<TASM_Defines>_RTLDLL;NO_STRICT;$(TASM_Defines)</TASM_Defines>
+			<BCC_PCHCache>true</BCC_PCHCache>
+			<BCC_IncludePath>..\;BDS;..\..\common\geolocation;..\..\common\weather;..\..\common\weather\database;..\..\common\simulation;..\..\CS_suite\ClimGen;..\..\common\weather\stations;..\..\cropsyst\cpp;..\..\Climgen\source;..\..\..\Climgen\source;..\..\..\cropsyst\cpp;..\..\..\common\weather\stations;..\..\..\CS_suite\ClimGen;..\..\..\common\simulation;..\..\..\common\weather\database;..\..\..\common\weather;..\..\..\common\geolocation;C:\dev\ued\convert;$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;$(BCC_IncludePath)</BCC_IncludePath>
+			<BRCC_IncludePath>..\;BDS;..\..\common\geolocation;..\..\common\weather;..\..\common\weather\database;..\..\common\simulation;..\..\CS_suite\ClimGen;..\..\common\weather\stations;..\..\cropsyst\cpp;..\..\Climgen\source;..\..\..\Climgen\source;..\..\..\cropsyst\cpp;..\..\..\common\weather\stations;..\..\..\CS_suite\ClimGen;..\..\..\common\simulation;..\..\..\common\weather\database;..\..\..\common\weather;..\..\..\common\geolocation;C:\dev\ued\convert;$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;$(BRCC_IncludePath)</BRCC_IncludePath>
+			<TASM_IncludePath>..\;BDS;..\..\common\geolocation;..\..\common\weather;..\..\common\weather\database;..\..\common\simulation;..\..\CS_suite\ClimGen;..\..\common\weather\stations;..\..\cropsyst\cpp;..\..\Climgen\source;..\..\..\Climgen\source;..\..\..\cropsyst\cpp;..\..\..\common\weather\stations;..\..\..\CS_suite\ClimGen;..\..\..\common\simulation;..\..\..\common\weather\database;..\..\..\common\weather;..\..\..\common\geolocation;C:\dev\ued\convert;$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;$(TASM_IncludePath)</TASM_IncludePath>
+			<DCC_IncludePath>..\;BDS;..\..\common\geolocation;..\..\common\weather;..\..\common\weather\database;..\..\common\simulation;..\..\CS_suite\ClimGen;..\..\common\weather\stations;..\..\cropsyst\cpp;..\..\Climgen\source;..\..\..\Climgen\source;..\..\..\cropsyst\cpp;..\..\..\common\weather\stations;..\..\..\CS_suite\ClimGen;..\..\..\common\simulation;..\..\..\common\weather\database;..\..\..\common\weather;..\..\..\common\geolocation;C:\dev\ued\convert;C:\Documents and Settings\rnelson\My Documents\Borland Studio Projects;$(BDS)\lib;$(BDS)\lib\obj;$(DCC_IncludePath)</DCC_IncludePath>
+			<DCC_UnitSearchPath>..\;BDS;..\..\common\geolocation;..\..\common\weather;..\..\common\weather\database;..\..\common\simulation;..\..\CS_suite\ClimGen;..\..\common\weather\stations;..\..\cropsyst\cpp;..\..\Climgen\source;..\..\..\Climgen\source;..\..\..\cropsyst\cpp;..\..\..\common\weather\stations;..\..\..\CS_suite\ClimGen;..\..\..\common\simulation;..\..\..\common\weather\database;..\..\..\common\weather;..\..\..\common\geolocation;C:\dev\ued\convert;C:\Documents and Settings\rnelson\My Documents\Borland Studio Projects;$(BDS)\lib;$(BDS)\lib\obj;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<BCC_GenerateWindowsApp>true</BCC_GenerateWindowsApp>
+			<OutputExt>lib</OutputExt>
+			<AllPackageLibs>rtl.lib;vcl.lib</AllPackageLibs>
+			<BCC_GenerateMultithreaded>true</BCC_GenerateMultithreaded>
+			<Multithreaded>true</Multithreaded>
+			<BCC_Defines>_RTLDLL;NO_STRICT;$(BCC_Defines)</BCC_Defines>
+			<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
+			<ILINK_LibraryPath>$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<DCC_ObjPath>..\;BDS;..\..\common\geolocation;..\..\common\weather;..\..\common\weather\database;..\..\common\simulation;..\..\CS_suite\ClimGen;..\..\common\weather\stations;..\..\cropsyst\cpp;..\..\Climgen\source;..\..\..\Climgen\source;..\..\..\cropsyst\cpp;..\..\..\common\weather\stations;..\..\..\CS_suite\ClimGen;..\..\..\common\simulation;..\..\..\common\weather\database;..\..\..\common\weather;..\..\..\common\geolocation;C:\dev\ued\convert;$(DCC_ObjPath)</DCC_ObjPath>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<IntermediateOutputDir>Debug</IntermediateOutputDir>
+			<TLIB_PageSize>64</TLIB_PageSize>
+			<BCC_Defines>_DEBUG;$(BCC_Defines);$(BCC_Defines)</BCC_Defines>
+			<ILINK_LibraryPath>$(BDS)\lib\debug;$(ILINK_LibraryPath);$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<BCC_UserSuppliedOptions> -k</BCC_UserSuppliedOptions>
+			<DCC_Define>DEBUG;$(DCC_Define);$(DCC_Define)</DCC_Define>
+			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
+			<BCC_IncludePath>c:\dev;$(BCC_IncludePath);$(BCC_IncludePath)</BCC_IncludePath>
+			<ILINK_DisableIncrementalLinking>true</ILINK_DisableIncrementalLinking>
+			<TASM_Debugging>Full</TASM_Debugging>
+			<BCC_DisableOptimizations>true</BCC_DisableOptimizations>
+			<DCC_AdditionalSwitches> -V</DCC_AdditionalSwitches>
+			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+			<TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>
+			<BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<IntermediateOutputDir>Release</IntermediateOutputDir>
+			<BCC_Defines>NDEBUG;$(BCC_Defines);$(BCC_Defines)</BCC_Defines>
+			<BCC_UserSuppliedOptions> -r</BCC_UserSuppliedOptions>
+			<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
+			<TASM_Debugging>None</TASM_Debugging>
+			<ILINK_LibraryPath>$(BDS)\lib\release;$(ILINK_LibraryPath);$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<DCC_AdditionalSwitches> -$O+</DCC_AdditionalSwitches>
+		</PropertyGroup>
+		<ItemGroup>
+			<CppCompile Include="..\..\..\station_database.cpp">
+				<BuildOrder>3</BuildOrder>
+				<BuildOrder>12</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\sun.cpp">
+				<BuildOrder>19</BuildOrder>
+				<BuildOrder>10</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\validator.cpp">
+				<BuildOrder>7</BuildOrder>
+				<BuildOrder>22</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\Climgen\source\options.cpp">
+				<BuildOrder>6</BuildOrder>
+				<BuildOrder>21</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\convertor.cpp">
+				<BuildOrder>-1</BuildOrder>
+				<BuildOrder>1</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\convert_response.cpp">
+				<BuildOrder>2</BuildOrder>
+				<BuildOrder>14</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\geodesy\geolocation.cpp">
+				<DependentOn>..\..\..\..\..\common\geodesy\geolocation.h</DependentOn>
+				<BuildOrder>22</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\geomatics\USA_state_FIPS_code.cpp">
+				<DependentOn>..\..\..\..\..\common\geomatics\USA_state_FIPS_code.h</DependentOn>
+				<BuildOrder>23</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\database\common_weather_creators.cpp">
+				<BuildOrder>9</BuildOrder>
+				<BuildOrder>18</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\geodesy\geocoordinate.cpp">
+				<DependentOn>..\..\..\..\..\common\geodesy\geocoordinate.h</DependentOn>
+				<BuildOrder>23</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\physics\property\P_vapor_pressure.cpp">
+				<DependentOn>..\..\..\..\..\common\physics\property\P_vapor_pressure.h</DependentOn>
+				<BuildOrder>39</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\stations\all_stations.cpp">
+				<BuildOrder>4</BuildOrder>
+				<BuildOrder>13</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\stations\WMO_stations.cpp">
+				<BuildOrder>5</BuildOrder>
+				<BuildOrder>17</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\convertor_weather.cpp">
+				<BuildOrder>40</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\stations\ncdc_stations.cpp">
+				<BuildOrder>2</BuildOrder>
+				<BuildOrder>14</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\stations\UCAR_stations.cpp">
+				<BuildOrder>16</BuildOrder>
+				<BuildOrder>1</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\stations\CC_station_datarec.cpp">
+				<BuildOrder>9</BuildOrder>
+				<BuildOrder>18</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\GEN_DAT_filename.cpp">
+				<BuildOrder>7</BuildOrder>
+				<BuildOrder>22</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\stations\AgriMet_stations.cpp">
+				<BuildOrder>15</BuildOrder>
+				<BuildOrder>0</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\stations\PAWS_stations.cpp">
+				<BuildOrder>19</BuildOrder>
+				<BuildOrder>10</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\geomatics\Canada_province_code.cpp">
+				<DependentOn>..\..\..\..\..\common\geomatics\Canada_province_code.h</DependentOn>
+				<BuildOrder>24</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\corn\tabular\delineated_datarec.cpp">
+				<DependentOn>..\..\..\..\..\corn\tabular\delineated_datarec.h</DependentOn>
+				<BuildOrder>23</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\weather_provider.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\weather_provider.h</DependentOn>
+				<BuildOrder>23</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\parameter\WC_air_temperature.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\parameter\WC_air_temperature.h</DependentOn>
+				<BuildOrder>29</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\ED_tabular_format.cpp">
+				<DependentOn>..\..\..\ED_tabular_format.h</DependentOn>
+				<BuildOrder>24</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\parameter\WP_wind_speed.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\parameter\WP_wind_speed.h</DependentOn>
+				<BuildOrder>28</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\parameter\WP_precipitation.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\parameter\WP_precipitation.h</DependentOn>
+				<BuildOrder>24</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\parameter\WC_dew_point_temperature.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\parameter\WC_dew_point_temperature.h</DependentOn>
+				<BuildOrder>30</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\parameter\WC_relative_humidity.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\parameter\WC_relative_humidity.h</DependentOn>
+				<BuildOrder>31</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\CS_suite\ClimGen\ClimGen_settings.cpp">
+				<BuildOrder>3</BuildOrder>
+				<BuildOrder>12</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\parameter\WC_solar_radiation.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\parameter\WC_solar_radiation.h</DependentOn>
+				<BuildOrder>32</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\parameter\WP_dew_point_temperature.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\parameter\WP_dew_point_temperature.h</DependentOn>
+				<BuildOrder>35</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\weather_types.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\weather_types.h</DependentOn>
+				<BuildOrder>36</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\weather\parameter\WP_vapor_pressure.cpp">
+				<DependentOn>..\..\..\..\..\common\weather\parameter\WP_vapor_pressure.h</DependentOn>
+				<BuildOrder>38</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\physics\property.cpp">
+				<DependentOn>..\..\..\..\..\common\physics\property.h</DependentOn>
+				<BuildOrder>39</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\..\..\common\solar\irradiance_extraterrestrial.cpp">
+				<DependentOn>..\..\..\..\..\common\solar\irradiance_extraterrestrial.h</DependentOn>
+				<BuildOrder>41</BuildOrder>
+			</CppCompile>
+			<BuildConfiguration Include="Base">
+				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<Import Project="$(BDS)\Bin\CodeGear.Cpp.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Cpp.Targets')"/>
+		<ProjectExtensions>
+			<Borland.Personality>CPlusPlusBuilder.Personality.12</Borland.Personality>
+			<Borland.ProjectType>CppStaticLibrary</Borland.ProjectType>
+			<BorlandProject>
+				<CPlusPlusBuilder.Personality>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">1033</VersionInfo>
+						<VersionInfo Name="CodePage">1252</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Debugging>
+						<Debugging Name="DebugSourceDirs"/>
+					</Debugging>
+					<Parameters>
+						<Parameters Name="RunParams"> &quot;C:\temp\MoscowMt\convert.rsp&quot;</Parameters>
+						<Parameters Name="Launcher"/>
+						<Parameters Name="UseLauncher">False</Parameters>
+						<Parameters Name="DebugCWD">C:\temp\MoscowMt</Parameters>
+						<Parameters Name="HostApplication"/>
+						<Parameters Name="RemoteHost"/>
+						<Parameters Name="RemotePath"/>
+						<Parameters Name="RemoteParams"/>
+						<Parameters Name="RemoteLauncher"/>
+						<Parameters Name="UseRemoteLauncher">False</Parameters>
+						<Parameters Name="RemoteCWD"/>
+						<Parameters Name="RemoteDebug">False</Parameters>
+						<Parameters Name="Debug Symbols Search Path"/>
+						<Parameters Name="LoadAllSymbols">True</Parameters>
+						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+					</Parameters>
+					<ProjectProperties>
+						<ProjectProperties Name="AutoShowDeps">False</ProjectProperties>
+						<ProjectProperties Name="ManagePaths">False</ProjectProperties>
+						<ProjectProperties Name="VerifyPackages">True</ProjectProperties>
+					</ProjectProperties>
+				</CPlusPlusBuilder.Personality>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+	</Project>

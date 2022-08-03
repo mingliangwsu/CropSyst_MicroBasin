@@ -1,0 +1,195 @@
+//140119 #  include "corn/std/std_fstream.h"
+#  include "options.h"
+#  include "cs_operation.h"
+#  include "corn/data_source/datarec.h"
+#  include "cs_till.h"
+#  include "cs_operation_codes.h"
+#  include "USDA/NRCS/RUSLE2/SDR_field_ops.h"
+using namespace std;
+namespace CropSyst {
+//______________________________________________________________________________
+Operation::Operation
+(CropSyst_Op op_code)
+: Common_operation()
+, op_ID(0)                                                                       //031124
+, op_labeled(op_code)                                                            //030824
+, carbon_footprint_kgCO2e_ha(0)                                                  //120427
+{}
+//______________________________________________________________________________
+Operation::Operation(const Operation &copy_from)
+: Common_operation(copy_from)
+, op_ID(copy_from.op_ID)
+, op_labeled(copy_from.op_labeled.get())
+, carbon_footprint_kgCO2e_ha(copy_from.carbon_footprint_kgCO2e_ha)
+{}
+//_2014-08-28___________________________________________________________________
+void Operation::setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_
+{  Common_operation::setup_parameters(data_rec,for_write);
+   data_rec.expect_int16("OP_ID",op_ID);                                         //031124
+   data_rec.expect_float32("carbon_footprint",carbon_footprint_kgCO2e_ha);       //120427
+}
+//_1998-10-07___________________________________________________________________
+const char *Operation::label_cstr(char *result)                            const
+{  // We dont call Common_operation::label because it is pure
+   strcpy(result,CropSyst_op_text[get_type()]);                                  //020507
+   strcat(result,":");                                                           //020507
+   return result;
+}
+//_2001-12-09___________________________________________________________________
+void Operation::log(ostream &log_file)                                     const
+{  Common_operation::log(log_file);
+   //060725 NYI (probably not needed since we get get the parameters from the operation lookup in the schedule file
+}
+//_2008-08-10___________________________________________________________________
+void Operation::log_ID_and_type(ostream &log_file)                         const
+{  Common_operation::log_ID_and_type(log_file);
+   log_file << "op_ID=" << op_ID << endl;
+   log_file << "type=" << CropSyst_op_text[get_type()] << endl;
+}
+//_2005-01-10__________________________________________________________________/
+void Operation::set_description(const char *i_description)
+{    // set description is currently used only to update descriptions when importing V3 operations
+   description.brief.assign(i_description);                                      //150112RLN
+}
+//_2004-06-14__________________________________________________________________/
+const char *recal_var_code_label_table[] =
+{ "WC"   // WC_RECAL
+, "NO3"  // NO3_RECAL
+, "NH4"  // NH4_RECAL
+, "%OM"  // POM_RECAL
+, "SNOW" // SNOW_RECAL
+, "PAW"  // PAW_RECAL
+, "RBM"  // RBM_RECAL
+, "MBM"  // MBM_RECAL
+#if ((CROPSYST_VERSION > 1) && (CROPSYST_VERSION < 5))
+// In version 5 CO2 data may be stored in UED files
+// (Actually all of these could be in UED files
+/*060605_*/ , "CO2"  // CO2_RECAL                                                         //060605
+#endif
+, 0
+};
+//_2002-08-12__________________________________________________________________/
+Recalibration_operation::Recalibration_operation(ifstream &in_file)
+:Operation(CS_OP_RECALIBRATION)                                                  //011207
+,var_code_labeled(WC_RECAL)
+,values_by_horizon(10,10,0)
+{  std::string var_code_str;
+   //Should not need to clear, dynamic arrays are initially clear /*011116x*/    values_by_layer.clear();
+   in_file >> var_code_str;
+   var_code_labeled.set_label(var_code_str.c_str());                             //020812
+   nat8 horizon = 1;
+   if (!in_file.eof())
+   while ((in_file.peek() != '\n') && (!in_file.eof()))
+   {  float32 value;                                                             //010228
+      in_file >> value;                                                          //010228
+      values_by_horizon.set(horizon,value);                                      //010228
+      horizon += (uint8)1;
+   }
+}
+//_____________________________________________________________________________/
+Recalibration_operation::Recalibration_operation
+   (Recal_var_code _var_code
+   ,soil_horizon_array32(_values_by_horizon))
+:Operation(CS_OP_RECALIBRATION)                                       //011207
+,var_code_labeled(_var_code)
+,values_by_horizon(10,10,0)
+{  // This constructor is used for adding recalibration
+   // to reinitialize the soil profile.
+   values_by_horizon.set_values(_values_by_horizon,MAX_soil_horizons);           //011119
+}
+//_2001-11-16__________________________________________________________________/
+const char *Recalibration_operation::label_cstr(char *buffer)              const
+{  Operation::label_cstr(buffer);
+   strcat(buffer,"Recalibration");                                               //020330
+   strcat(buffer," ");
+   strcat(buffer,var_code_labeled.get_label());
+   return buffer;
+}
+//_____________________________________________________________________________/
+void Recalibration_operation::log(ostream &log_file)                       const
+{  Operation::log(log_file);
+   log_file << "recalibration=" << var_code_labeled.get_label() << endl;
+   // Not I could dump out the values here
+}
+//_2002-08-10__________________________________________________________________/
+Field_operation::Field_operation
+(CropSyst_Op op_code
+, int16 /* _NRCS_SDR_operation_number_unused_in_this_model (used in derived classes) */
+, int16 /* reserved_unused_in_this_model*/ )
+: Operation(op_code)
+, NRCS_operation_description("")                                                 //060802
+{}
+//______________________________________________________________________________
+Field_operation::Field_operation(const Field_operation &copy_from)
+: Operation(copy_from)
+, NRCS_operation_description(copy_from.NRCS_operation_description)
+{}
+//_2014-08-28 _____________________________________________________________________________
+void Field_operation::setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_
+{  Operation::setup_parameters(data_rec,for_write);
+   data_rec.expect_bool(LABEL_terminate_crop,terminate_crop,CROPSYST_VV_BOOL_FORM);  //970616P  //110115 moved from tillage/residue/harvest
+   data_rec.expect_string("NRCS_field_op",NRCS_operation_description,100);       //060725
+}
+//_1998-10-07_________________________________________________setup_parameters_/
+const char *Field_operation::label_cstr(char *result)                      const
+{  // We dont call Common_operation::label because it is pure
+   Operation::label_cstr(result);                                                //020507
+   if (NRCS_operation_description.length())                                      //011209
+   {  strcat(result," (field operation:");                                       //020507
+      strcat(result, NRCS_operation_description.c_str());                        //040506
+      strcat(result,")");                                                        //020507
+   }
+   strcat(result,":");                                                           //020507
+   return result;
+}
+//_2001-12-09_______________________________________________________label_cstr_/
+void Field_operation::log(std::ostream &log_file)                          const
+{  Operation::log(log_file);
+   if (NRCS_operation_description.length())
+      log_file << "NRCS="<<NRCS_operation_description<<std::endl;                //060802
+}
+//_2012-09-24___________________________________________________________________
+//#if ((CROPSYST_VERSION > 1) && (CROPSYST_VERSION < 5))
+#if (((CROPSYST_VERSION > 1) && (CROPSYST_VERSION < 5)) && !defined(REACCH_VERSION))
+Field_operation_V4::Field_operation_V4
+(CropSyst_Op   _op_code
+, int16        _NRCS_SDR_operation_number
+, int16        _SCS_code)
+: Field_operation(_op_code,_NRCS_SDR_operation_number)
+, SCS_code(_SCS_code)
+{}
+//_____________________________________________________________________________/
+void Field_operation_V4::setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_
+{  Field_operation::setup_parameters(data_rec,for_write);
+   data_rec.expect_int16(LABEL_SCS_code,SCS_code);
+}
+//_2001-03-23__________________________________________________________________/
+void Field_operation_V4::log(ostream &log_file)                            const
+{  Field_operation::log(log_file);
+   if (SCS_code)
+   {
+      log_file << LABEL_SCS_code << '=' << SCS_code << endl;
+         //040506_//       CORN_string practice;
+         //040506_//       log_file << "SCS_practice=" << lookup_SCS_description(SCS_code,practice) << endl;
+      #ifndef AGMIP
+      log_file << "SCS_practice=" << lookup_SCS_description_deprecated_V4_7(SCS_code) << endl;
+      #endif
+   }
+}
+//_2010-03-23__________________________________________________________________/
+const char *Field_operation_V4::label_cstr(char *result)                   const
+{  // We dont call Common_operation::label because it is pure
+   Field_operation::label_cstr(result) ;                                         //020507
+   if (SCS_code)                                                                 //011209
+   {
+      strcat(result," (SCS code:");                                              //020507
+      strcat(result,lookup_SCS_description_deprecated_V4_7(SCS_code));           //040506
+      strcat(result,")");                                                        //020507
+   }
+   strcat(result,":");                                                           //020507
+   return result;
+}
+//_2001-12-09__________________________________________________________________/
+#endif
+} // namespace CropSyst
+

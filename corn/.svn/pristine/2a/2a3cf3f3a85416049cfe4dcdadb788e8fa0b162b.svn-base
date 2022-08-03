@@ -1,0 +1,16 @@
+#ifndef date_typesHPP
+#define date_typesHPP
+
+#ifndef primitiveH
+#   include "corn/primitive.h"
+#endif
+
+namespace CORN {
+#include "corn/chronometry/date_types.hh"
+//  Class forward declaration
+class Date; 
+class Date_time_64;
+
+}; // namespace CORN
+
+#endif

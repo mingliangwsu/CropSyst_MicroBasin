@@ -1,0 +1,37 @@
+#ifndef Geolocation_itemH
+#define Geolocation_itemH
+#include "geodesy/geolocation.h"
+#include "corn/container/association.h"
+//______________________________________________________________________________
+class Geolocation_item
+: public implements_ CORN::Association
+, public extends_ Geolocation
+{
+public:
+   Geolocation_item();                                                           //130529
+   inline Geolocation_item(const Geolocation &copy_from)
+      : CORN::Association()
+      , Geolocation(copy_from)
+      {}
+   inline virtual const char *get_key() const {return station_ID_code.c_str();}
+   virtual const char *label_cstr(char *buffer) const;
+};
+//______________________________________________________________________________
+class Geocoordinate_item
+: public implements_ CORN::Association
+, public extends_ Geocoordinate
+{
+   contribute_ char key[50]; // this is only temporary until I replace container get_key to take the buffer
+public:
+   Geocoordinate_item();                                                         //130529
+   inline Geocoordinate_item(const Geocoordinate /*_item*/ &copy_from)
+      : CORN::Association()
+      , Geocoordinate(copy_from)
+      {}
+   virtual const char *get_key()                                           const;
+   virtual const char *label_cstr(char *buffer)                            const;
+   virtual int compare(const CORN::Item &other_item)                       const;
+};
+//_2014-01-24____________________________________________________________________
+
+#endif

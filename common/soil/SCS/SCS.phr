@@ -1,0 +1,140 @@
+L_Hydrologic_condition,
+/* scs  VALIDATE  PARAMS CS
+en Hydrologic condition
+fr Conditions hydrologiques
+it Condizioni idrologiche
+es Condición hidrológica
+ca Condició hidrològica
+*/
+L_Poor,
+/* scs  VALIDATE PARAMS CS
+en Poor
+fr Pauvre
+it Cattive
+es Pobre
+ca Pobre
+*/
+L_Fair,
+/* scs  PARAMS CS VALIDATE
+en Fair
+fr Moyen
+it Adeguato
+es Adecuada
+ca Adequada
+*/
+L_Good,
+/* scs  VALIDATE PARAMS it-gb
+en Good
+fr Bon
+it Buone
+es Bueno
+ca Bo
+*/
+L_Hydrologic_group,
+/* scs  PARAMS CS VALIDATE
+en Hydrologic group
+fr Groupe hydrologique
+it Gruppo idrologico
+es Grupo hidrológico
+ca Grup hidrològic
+*/
+L_Land_treatment,
+/* scs  PARAMS CS VALIDATE  it-gb
+en Land treatment
+it Tipo di semina
+es Manejo del suelo
+fr Façon de travailler
+ca Labors del sòl
+*/
+L_Fallow,
+/* scs  CROPSYST VALIDATE PARAMS CS
+en Fallow
+fr Jachère
+it Maggese
+es Barbecho
+ca Guaret
+*/
+L_Row_crops,
+/* scs  PARAMS CS VALIDATE
+en Row crops
+fr Cultures en lignes
+it Colt. semin. a file
+es_ch Cultivos en hilera
+es Cultivo en surcos
+ca Conreu en solcs
+*/
+L_Small_grain,
+/* scs  PARAMS CS VALIDATE
+en Small grain
+fr Petit grain
+it Piccole granelle
+es_ch Cultivos de granos
+es Grano pequeño
+ca Gra petit
+*/
+L_Close_seed_legumes,
+/* scs  PARAMS CS VALIDATE
+en Close seed legumes
+fr Oléagineux
+it Leguminose
+es Leguminosas
+ca Lleguminoses
+*/
+L_Pasture,
+/* scs  PARAMS CS VALIDATE
+en Pasture
+fr Pâturage
+it Prati
+es Pasto
+ca Prat
+*/
+L_Dirt_road,
+/* scs  VALIDATE PARAMS  it-gb
+en Dirt road
+fr Route (gavier)
+it Strada sterrata
+es Camino de tierra
+ca Camí de terra
+*/
+L_Paved_road,
+/* scs  PARAMS CS VALIDATE
+en Paved road
+fr Route (pavé)
+it Strada asfaltata
+es Camino pavimentado
+ca Camí pavimentat
+*/
+L_Farmstead,
+/* scs  PARAMS CS VALIDATE
+en Farmstead
+fr Ferme
+it Aree cortilive
+es Granja
+ca Granja
+*/
+L_Straight_Row,
+/* scs  PARAMS CS VALIDATE
+en Straight row
+fr Lignes droites
+it File diritte
+es_ch Hileras rectas
+es Surcos rectos
+ca Solcs rectes
+*/
+L_Contoured,
+/* scs  PARAMS CS VALIDATE
+en Contoured
+fr En Contour
+it Secondo le linee di livello
+es_ch En contorno
+es Delimitado
+ca Delimitat
+*/
+L_Terraced,
+/* scs  ?  REPORT  ARCCS CROPSYST  VALIDATE PARAMS CS    RPRTGRPH
+en Terraced
+fr En Terrasse
+it Terrazzato
+es En terrazas
+ca En terrasses
+*/

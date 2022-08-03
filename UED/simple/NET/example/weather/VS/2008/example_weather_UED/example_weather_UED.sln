@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example_weather_UED", "example_weather_UED.csproj", "{C82DCD4A-3287-4991-9110-DE88BD0EBABD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|Win32 = Debug|Win32
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C82DCD4A-3287-4991-9110-DE88BD0EBABD}.Release|Win32.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

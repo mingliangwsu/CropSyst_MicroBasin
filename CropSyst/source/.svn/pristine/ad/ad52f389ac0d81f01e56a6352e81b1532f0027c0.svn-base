@@ -1,0 +1,198 @@
+#ifndef patH
+#define patH
+/*
+   This class is used for working with polygon attributes tables
+   in the ArcInfo/CropSyst cooperator.
+*/
+
+#include "corn/data_source/dbase_datasrc.h"
+#include "corn/data_source/datarec.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+using namespace CORN;
+//______________________________________________________________________________
+class Polygon_attribute_table
+: public Dynamic_int32_indexed_dBase_data_source                                 //030220
+{
+   std::string polygon_ID_field; // The name of the field corresponding to the xxx_ID polygon ID field
+   std::string soil_field;       // The name of the field corresponding to the mapped soils
+   std::string steepness_field;  // The name of the field corresponding to the steepness
+   std::string uniform_sand_field;                                               //050630
+   std::string uniform_clay_field;                                               //050630
+   std::string soil_depth_field;                                                 //050630
+   std::string init_PAW_field;   // The name of the field corresponding to the initial plant available water
+   std::string init_NO3_field;   // The name of the field corresponding to the initial NO3
+   std::string weather_field;
+   std::string rotation_field;
+   std::string recalibration_field;                                              //060411
+   std::string water_table_field;                                                //060706
+ private :
+    std::string str_buffer; // Buffer for string gets
+
+ public : // The following are determined when the file is first openned
+   bool tallied;                                                                 //981218
+   int16   total_polygon_run_count;                                              //981219
+    float32 total_polygon_area; // The sum of all the polygon areas excluding negative areas
+    sint32  *record_equivalences;    // I think this is signed because negative values used to indicate
+    sint32  *polygon_equivalences;
+ public:
+   inline Polygon_attribute_table
+   (const char *pat_filename // const File_name &pat_filename                    //030220
+   ,const char *_polygon_ID_field
+   ,const char *_soil_field
+   ,const char *_steepness_field
+   ,const char *_uniform_sand_field                                              //050630
+   ,const char *_uniform_clay_field                                              //050630
+   ,const char *_soil_depth_field                                                //050630
+   ,const char *_init_PAW_field
+   ,const char *_init_NO3_field
+   ,const char *_weather_field
+   ,const char *_rotation_field
+   ,const char *_recalibration_field
+   ,const char *_water_table_field                                               //060706
+   ,int32      *_record_equivalences = 0
+   ,int32      *_polygon_equivalences = 0)                                       //010130
+   :Dynamic_int32_indexed_dBase_data_source                                      //030220
+      (pat_filename,_polygon_ID_field
+      ,std::ios_base::in | std::ios_base::out)                                   //111026
+      // need to check where this is used it may only need to be in
+
+   , polygon_ID_field      (_polygon_ID_field) // The name of the field corresponding to the xxx_ID polygon ID field
+   , soil_field            (_soil_field)       // The name of the field corresponding to the mapped soils
+   , uniform_sand_field    (_uniform_sand_field)                                 //050630
+   , uniform_clay_field    (_uniform_clay_field)                                 //050630
+   , soil_depth_field      (_soil_depth_field)                                   //050630
+   , steepness_field       (_steepness_field)  // The name of the field corresponding to the steepness
+   , init_PAW_field        (_init_PAW_field)   // The name of the field corresponding to the initial plant available water
+   , init_NO3_field        (_init_NO3_field)   // The name of the field corresponding to the initial NO3
+   , weather_field         (_weather_field)
+   , rotation_field       (_rotation_field)
+   , recalibration_field   (_recalibration_field)
+   , water_table_field     (_water_table_field)                                  //060706
+   , record_equivalences   (_record_equivalences)                                //981219
+   , polygon_equivalences  (_polygon_equivalences)                               //981219
+// The following are not currently used
+   { };
+ public: // General properties of the simulation coverage
+    float get_total_polygon_area();
+ private: // Housekeeping
+    void tally();
+};
+//______________________________________________________________________________
+class Polygon_simulation_parameters
+{  // These values are common to polygon attribute data record
+   // GIS record  and Simulation_override_record
+   //
+ protected: // In the case of the GIS simulation override table, these field names are fixed, in the PAT they are user selectable
+   std::string polygon_ID_field; // The name of the field corresponding to the xxx_ID polygon ID field
+   std::string soil_field;       // The name of the field corresponding to the mapped soils
+   std::string steepness_field;  // The name of the field corresponding to the steepness
+   std::string uniform_sand_field;                                             //050630
+   std::string uniform_clay_field;                                             //050630
+   std::string soil_depth_field;                                               //050630
+   std::string init_PAW_field;   // The name of the field corresponding to the initial plant available water
+   std::string init_NO3_field;   // The name of the field corresponding to the initial NO3
+   std::string weather_field;
+   std::string rotation_field;
+   std::string recalibration_field;
+   std::string water_table_field;                                                //060706
+ public:     // control flags used to prevent outputting uncesssary fields
+   bool        soils_mapped;
+   bool        uniform_soil_profile_mapped;                                      //050505
+   bool        soil_sand_mapped;    // for uniform soil texture                  //050505
+   bool        soil_clay_mapped;    // for uniform soil texture                  //050505
+   bool        soil_depth_mapped;   // Total soil profile depth                  //050505
+   bool        weather_mapped;
+   bool        rotations_mapped;
+   bool        recalibration_mapped;                                             //060411
+   bool        water_table_mapped;                                               //060706
+   bool        locations_mapped;                                                 //010520
+   bool        steepness_mapped;                                                 //010520
+   bool        aspect_mapped;                                                    //010520
+   bool        init_PAW_mapped;                                                  //010520
+   bool        init_NO3_mapped;                                                  //010520
+ public:
+   sint32         polygon_ID;       // Polygon, cell or scenario ID   signed because negative values represent offsite
+   std::string    weather_code;
+   std::string    rotation_code;
+   std::string    recalibration_code;                                            //060411
+   std::string    water_table_code;                                              //060706
+   std::string    soil_code;
+   uint16         sow_DOY;                                                       //050619
+   float32        steepness;
+   float32        uniform_sand;                                                  //050630
+   float32        uniform_clay;                                                  //050630
+   float32        soil_depth_cm;                                                 //050630
+   float32        init_PAW;
+   float32        init_NO3;
+   // The following fields are from STATSGO, they have fixed field names
+   std::string    MUID;
+   uint16         SEQNUM;                                                        //050729
+// The sequence number, if specified (not 0), indicates that
+// the sequence has been selected for the polygon
+// otherwise we are running the simulation for all sequences
+// for the MUID polygon.  Later the results for all
+// the sequences will need to be aggregates using a weighted
+// average (weighted by comp.dbf#COMPPTC).
+// When we are actually running the simulation
+// in regional database GIS mode, the sequence number
+// Is stored in the results tables
+   std::string    COMPNAME;  // The component name from the STATSGO database  (optional, leave empty string if not used)   //051115
+   float32        site_aspect_N0_E90;  // This orientation matches ArcView       //020611
+ public:
+   bool           combine_similar_sequences;  // In this mode SEQNUM is not used in compare, but COMPNAME is //051115
+ public:
+   Polygon_simulation_parameters(bool expect_everything=false);
+   // Constructor for simulation override table record
+   // Use true in CropSyst GIS override table mode because we don't know what selections there are
+   Polygon_simulation_parameters
+      (const char *_polygon_ID_field
+      ,const char *_soil_field
+      ,const char *_steepness_field
+      ,const char *_sand_field
+      ,const char *_clay_field
+      ,const char *_depth_field
+      ,const char *_init_PAW_field
+      ,const char *_init_NO3_field
+      ,const char *_weather_field
+      ,const char *_rotation_field
+      ,const char *_recalibration_field
+      ,const char *_water_table_field);
+      // Constructor for PAT
+   Polygon_simulation_parameters(const Polygon_simulation_parameters &copy_from);   //050630
+   // Copy constructor when generating a Simulation override record from a PAT
+   sint8  compare(const Polygon_simulation_parameters &other) const;
+   virtual void setup_structure(CORN::Data_record &data_rec,bool for_write/* = false*/ ) modification_;
+};
+//_2005-06-30___________________________________________________________________
+class Polygon_attribute_data_record
+: public CORN::Data_record
+{protected:
+   CORN::OS::File_name_concrete filename_buffer; // buffer for filename gets
+ public:
+   float32     area;  // Negative value indicates the bounding polygon.
+   Polygon_simulation_parameters sim_params;                                     //050630
+   //000125  For Javier Marcos' project, we compose the polygon (cell) ID from the X Y fields.
+   int32       X;  // Must be signed 32bit  (ArcView/ArcGIS UTM coordinates may be quite large may even need to be float)
+   int32       Y;  // But if I make this float I will have to do something with the generated cell code in grid based simulations
+ public:
+   Polygon_attribute_data_record
+      (const char *_polygon_ID_field
+      ,const char *_soil_field
+      ,const char *_steepness_field
+      ,const char *_sand_field                                                   //050630
+      ,const char *_clay_field                                                   //050630
+      ,const char *_depth_field                                                  //050630
+      ,const char *_init_PAW_field
+      ,const char *_init_NO3_field
+      ,const char *_weather_field
+      ,const char *_rotation_field
+      ,const char *_recalibration_field                                          //060411
+      ,const char *_water_table_field);                                          //060706
+    virtual bool expect_structure(bool for_write);                               //161025
+    virtual bool get_end();                                                      //161025
+    const char *get_record_soil_filename(const char *template_soil_file_name);
+    //050630 may want to move this to Polygon_simulation_parameters
+};
+//______________________________________________________________________________
+#endif
+

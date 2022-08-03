@@ -1,0 +1,9 @@
+L_is_not_a_reasonable_value ='is not a reasonable value';
+L_must_be_greater_than ='must be greater than';
+L_must_be_less_than ='must be less than';
+L_must_range_from ='must range from';
+L_should_be_greater_than ='should be greater than';
+L_should_be_less_than ='should be less than';
+L_should_range_from ='should range from';
+L_Valid ='Valid';
+L_Validating ='Validating';

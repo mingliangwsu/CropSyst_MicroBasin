@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">Default.Personality</Option>
+			<Option Name="ProjectType"></Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{20EB5FD9-CC25-4312-8BA2-57D4F29B6ABB}</Option>
+		</Option>
+	</PersonalityInfo>
+	<Default.Personality>  
+    
+    
+    
+    
+    
+    <Projects>
+      <Projects Name="corn_complete_OS_FS_static.lib">..\..\..\..\corn\build\BDS\corn_complete_OS_FS_static.bdsproj</Projects>
+      <Projects Name="generate.exe">..\..\..\..\Climgen\source\console\BDS\generate.bdsproj</Projects>
+      <Projects Name="ued_static.lib">..\..\..\..\UED\library\build\BDS\ued_static.bdsproj</Projects>
+      <Projects Name="PAT_tally.exe">..\..\..\CropSyst\PAT_run\build\BDS\2006\PAT_tally.bdsproj</Projects>
+      <Projects Name="Targets">corn_complete_OS_FS_static.lib generate.exe ued_static.lib PAT_tally.exe</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+</BorlandProject>

@@ -1,0 +1,78 @@
+
+Begin test
+3.14159
+testing test program - should report error
+   ... doing test 1
+Error at test 1:
+prstr: just testing - 1 [0]: should be just testing - 2 [0]
+preliminary tests
+   ... doing test 2
+test string creation and copying
+   ... doing test 17
+test reserve
+   ... doing test 75
+test append
+   ... doing test 97
+test element access
+   ... doing test 119
+test assign
+   ... doing test 134
+test substring
+   ... doing test 146
+test insert
+   ... doing test 151
+test erase
+   ... doing test 157
+test replace
+   ... doing test 163
+test insert with capacity
+   ... doing test 180
+test erase with capacity
+   ... doing test 186
+test replace with capacity
+   ... doing test 191
+test some weirdos
+   ... doing test 207
+test comparisons
+   ... doing test 260
+test compare
+   ... doing test 368
+test add
+   ... doing test 404
+test find
+   ... doing test 433
+test single character find functions
+   ... doing test 474
+test rfind
+   ... doing test 508
+test find_first_of
+   ... doing test 546
+test find_last_of
+   ... doing test 568
+test find_first_not_of
+   ... doing test 592
+test find_last_not_of
+   ... doing test 614
+test finds with zero length string
+   ... doing test 636
+test multiple reference to sum
+   ... doing test 672
+test substitution in function
+   ... doing test 676
+test input
+   ... doing test 677
+test string functions
+   ... doing test 690
+test substitute functions
+   ... doing test 704
+test printing - the following 2 lines should be identical
+The quick brown fox
+The quick brown fox
+printing npos
+4294967295
+(The following memory checks are probably not valid with all
+compilers - see newmat documentation)
+Checking for lost memory (large block): 9190896 9190896  - ok
+Checking for lost memory (small block): 9190896 9190896  - ok
+Number of errors (should be 1): 1
+Number of tests ..............: 729

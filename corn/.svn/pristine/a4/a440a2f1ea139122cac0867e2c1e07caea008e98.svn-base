@@ -1,0 +1,192 @@
+#ifndef sample_TH
+#define sample_TH
+#include "corn/math/statistical/statistics_descriptive.h"
+#include "corn/dynamic_array/dynamic_array_T.h"
+namespace CORN {
+
+//______________________________________________________________________________
+/*
+template
+   <typename Observation_type >
+*/
+interface_ Statistical_sample_interface
+: public extends_interface_ Statistics_descriptive_interface
+{
+ public:
+   virtual bool commit()                                        modification_=0;
+   virtual STAT_mask get_applicable()                                  const =0;
+      /// \returns applicable bitmask
+   inline virtual bool is_applicable(Statistic statistic)           affirmation_ //160617
+      { return get_applicable() & (1 << statistic); }
+   virtual bool reset()                                                      =0;
+//   virtual Observation_type ref_current()                                        =0;
+};
+//_2015-11-11___________________________interface Statistical_sample_interface_/
+// Observation type is the type of the value being observed any float or integer
+// Element_type is the type to store calculated element values.
+// Generally use double, but if precision is not significant and memory space is at a premium float can be used
+
+template
+   <typename Observation_type                                                    //140624
+   ,typename Element_type>
+class Statistical_sample
+: public extends_    Statistics_descriptive_data<Element_type>
+, public implements_ Statistical_sample_interface
+{protected:
+   mutable Observation_type current;
+   // The more recent value appended to the dataset.   //040812
+ protected:
+   const Observation_type &observation;
+      // This is a reference to a variable that we are following
+      // The reference is set with the observe() method.
+ protected:
+   contribute_ STAT_mask   valid;
+   contribute_ STAT_mask   applicable;                                           //150820
+      // Applicable identifies which descriptive elements should be tallied.
+   //___________________________________________________________________________
+ public:
+   Statistical_sample(STAT_mask applicable_ = STAT_ALL_bits)                     //150820
+      : Statistics_descriptive_data<Element_type>()
+      , observation(current)
+      , applicable(applicable_)                                                  //150820
+      {  ensure_applicable();                                                    //150820
+         reset();
+      }
+   Statistical_sample
+      (const Observation_type &observation_
+      ,STAT_mask applicable_/*150929  = STAT_ALL_bits*/)                         //150820
+      : Statistics_descriptive_data<Element_type>()
+      , observation(observation_)                                                //140624
+      , applicable(applicable_)                                                  //150820
+      {   ensure_applicable();                                                   //150820
+          reset(); }
+   //___________________________________________________________________________
+   virtual Observation_type &ref_current()
+      { return current;}
+   //_2015-11-11________________________________________________________________
+   virtual nat16 get_applicable()                                          const
+   {  return applicable;
+   }
+   //_2015-11-11________________________________________________________________
+   nat16 ensure_applicable()
+   {
+      if (applicable & STAT_coef_var_bit)         applicable |= STAT_std_dev_bit;
+      if (applicable & STAT_std_dev_bit)          applicable |= STAT_arithmetic_mean_bit;
+      if (applicable & STAT_arithmetic_mean_bit)  applicable |= (STAT_sum_bit | STAT_count_bit);
+      return applicable;
+   }
+   //_2015-08-20________________________________________________________________
+   nat16 set_valid(STAT_mask validity_to_set)                      contribution_{ valid |= validity_to_set; return valid; }
+   //___________________________________________________________________________
+   nat16 get_valid(STAT_mask validity_to_get)                              const { return valid & validity_to_get; }
+   //___________________________________________________________________________
+   nat16 invalidate(STAT_mask validity_to_clear = STAT_ALL_bits)   contribution_{ valid &= (STAT_mask)(~validity_to_clear); return valid; }
+   //___________________________________________________________________________
+   virtual float64 get_current()                                           const { return current; }
+   virtual Observation_type &ref_current()                                 const { return current; }
+   virtual bool reset()
+   // my want to return bool
+      {  Statistics_descriptive_data<Element_type>::reset();
+         valid = 0;
+         current = std::numeric_limits<Observation_type>::quiet_NaN();
+         return true;
+      }
+   //___________________________________________________________________________
+   virtual Observation_type append(Observation_type value)          modification_
+      {  invalidate();
+         current = value ;
+         set_valid(STAT_value_bit);
+         return current;
+      }
+      // Normally the append and commit methods are not used at the same time.
+      // That is you don't append values of variables that are observed
+      // and will be commited.
+      // However, one might use the append method to load the data sample
+      // with some values that are not part of an observation.
+   //___________________________________________________________________________
+   // The append dataset methods are used to load the sample with values
+   // from data sets.
+   // Normally one would not append dataset that have (or will be) also observed.
+   // As with append() one might use append_dataset methods to
+   // load the sample with values that are not part of an observation.
+   void append_dataset_float32
+      (const Dynamic_array<float32> &data_append
+      ,nat32 append_first_count =
+         #ifdef __BCPLUSPLUS__
+         std::numeric_limits<nat32>::max()
+         #else
+         0xFFFFFFFF
+         #endif
+         // By default append everything
+      )
+      {  append_first_count = std::min<nat32>(append_first_count,data_append.get_count());
+         for (nat32 i = 0; i < append_first_count; i++)
+            append((Observation_type)data_append.get(i));
+      }
+   //_2009-12-17________________________________________________________________
+   void append_dataset_float64
+      (const Dynamic_array<float64> &data_append
+      ,nat32 append_first_count =
+         #ifdef __BCPLUSPLUS__
+         std::numeric_limits<nat32>::max()
+         #else
+         0xFFFFFFFF
+         #endif
+         // By default append everything
+      )
+      {  append_first_count = std::min<nat32>(append_first_count,data_append.get_count());
+         for (nat32 i = 0; i < append_first_count; i++)
+            append((Observation_type)data_append.get(i));
+      }
+   //_2009-12-17________________________________________________________________
+   float64 /*Real*/ calc_coefficient_of_variation()                        const
+      {  float64 /*Real*/ mean = get_mean();
+         float64 /*Real*/ std_dev = get_standard_deviation();
+         float64 /*Real*/ coef_var = (mean != 0.0)
+            ? (std_dev / mean)*100.0
+            : 0.0;
+         return coef_var;
+      }
+   //_2009-10-02___________________________________________________________________
+   virtual float64 /*Real*/ provide_standard_deviation()              provision_{ return (float64)Statistical_sample<Observation_type,Element_type>::standard_deviation; }
+   virtual float64 /*Real*/ provide_coefficient_of_variation()        provision_=0;
+//   virtual float64 /*Real*/ provide_initial()                                      provision_=0;//130918
+
+   virtual float64 /*Element_type*/ provide_min()                     provision_{ return (float64)Statistical_sample<Observation_type,Element_type>::minimum; }
+   virtual float64 /*Element_type*/ provide_max()                     provision_{ return (float64)Statistical_sample<Observation_type,Element_type>::maximum; }
+   virtual float64 /*Element_type*/ provide_sum()                     provision_{ return (float64)Statistical_sample<Observation_type,Element_type>::summation; }
+   virtual float64 /*Element_type*/ provide_arithmetic_mean()         provision_{ return (float64)Statistical_sample<Observation_type,Element_type>::arithmetic_mean; }
+   virtual float64 /*Element_type*/ provide_sum_of_squares()          provision_{ return (float64)Statistical_sample<Observation_type,Element_type>::sum_of_squares; }
+   virtual float64 /*Element_type*/ provide_initial()                 provision_=0; // { return (float64)initial; }
+   virtual float64 /*Element_type*/ provide_final()                   provision_=0; // { return (float64)final; }
+   //   virtual Real provide_median()                                           const=0;
+   //___________________________________________________________________________
+   virtual float64 get_min()                                               const { return (float64)provide_min(); }
+   virtual float64 get_max()                                               const { return (float64)provide_max(); }
+   virtual float64 get_sum()                                               const { return (float64)provide_sum(); }
+   virtual float64 get_arithmetic_mean()                                   const { return (float64)provide_arithmetic_mean(); }
+   virtual float64 get_mean() /*alias */                                   const { return (float64)provide_arithmetic_mean(); }
+   virtual float64 get_sum_of_squares()                                    const { return (float64)provide_sum_of_squares(); }
+   virtual float64 get_standard_deviation()                                const { return (float64)provide_standard_deviation(); }
+   virtual float64 get_coefficient_of_variation()                          const { return (float64)provide_coefficient_of_variation(); }
+   virtual float64 get_initial()                                           const { return (float64)provide_initial(); }
+   virtual float64 get_final()                                             const { return (float64)provide_final(); }
+   //___________________________________________________________________________
+ public:
+/* Not sure how to setup observer after instanciation
+   bool observe(const Observation_type *& _observer)             contribution_ //140624
+      { observer = _observer; return observer!=nul;}
+      // The observe method is optional it is used in conjunction with the
+      // commit() method
+*/
+   virtual bool commit()                                           modification_
+      {  append(((Element_type)(Statistical_sample<Observation_type,Element_type>::observation))); //140624
+         return true;
+      }
+   //_2015-11-11________________________________________________________________
+
+//   virtual float64 get_median()                                            const { return (float64)provide_median(); }
+};
+//_2013-08-01___________________________________________________________________
+} // namespace CORN
+#endif

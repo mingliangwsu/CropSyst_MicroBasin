@@ -1,0 +1,105 @@
+#ifndef argumentsH
+#define argumentsH
+#include "corn/data_source/datarec.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "corn/application/progress.h"
+#include "corn/application/verbosity.h"
+namespace CORN
+{
+//______________________________________________________________________________
+#define FIND_RESPONSES_FIRST 1
+#define FIND_RESPONSES_LAST  3
+//______________________________________________________________________________
+class Arguments
+: public extends_ Data_record
+{
+ protected:
+   nat16 recognized_count; // Check if still used
+   cognate_ std::string manual_URI;
+ public: // options
+   //170328 std::string program_path_name; // fully qualified program
+   //NYN CORN::OS::File_name *program_filename; // fully qualified program
+   //bool verbose;
+   nat8 verbose;
+      // The larger the number the greater the verbose level
+      // recommended bit patterns are shown above
+   bool quiet;       // no prompts
+   bool debug;                                                                   //170317
+   bool help;
+   nat8 find_responses;
+      // if enabled (disabled by default)
+      // find and process accessible response files.
+      // Bit mask
+      // Bit 0 (1=enabled)
+      // Bit 1 (0=find first, 1=find last)
+   std::wstring response_filename_extension;
+   Progress_parameter progress;                                                  //170316
+ public:
+   contribute_ OS::Directory_name_concrete  start_directory;
+      // initially the current working directory
+ private:
+   bool prompts_shown;
+ public:
+   Arguments(); //(const char *program_path_name_=0);
+   virtual ~Arguments() {}
+ public: // Data_record implementations
+   virtual bool get_start();
+   virtual bool get_end();
+ public:
+   virtual bool write_help()                                              const;
+   // conceptual: add method to render or get command line
+   // this would be used to echo back to the user how write
+   // where what entered interactively via command line
+   inline virtual bool has_interactive_prompts()                    affirmation_
+      { return false; }
+   inline virtual bool is_response_file_enabled()                   affirmation_
+      { return false; }
+      // eventually this should default to true
+      // derived classes can override to support response files
+   virtual bool interactive_prompt()                              modification_;
+      // Prompts user for arguments that have not be
+      // provided on the command line (default values not modified).
+   nat16 compose_command_line(std::string &command);
+      // composes the current command line assignments and setting
+      // returns the number of assignments and settings
+   inline virtual bool get_author_mailto_URI(std::string &/*email_URI*/)   const
+      { return false; }
+   inline virtual bool get_program_version(std::string &version)           const
+      { version = "unknown"; return false; }
+   inline virtual bool are_required_provided()                      affirmation_
+      { return true; }
+      // contact email for the author of this program i.e. mailto:rnelson@wsu.edu
+      // All program help really should provide a contact email.
+
+   inline virtual bool know_manual_URI(const std::string &manual_URI_)cognition_
+      {  manual_URI.assign(manual_URI_);
+         return true; }
+   inline virtual const std::wstring &get_response_file_extension()        const
+      { return response_filename_extension;}
+   inline virtual bool is_verbose(nat8 level)                       affirmation_ //170317
+      { return IS_VERBOSE(verbose,level); }
+   inline virtual bool is_verbose_in_depth(nat8 level)              affirmation_ //170317
+      { return IS_VERBOSE_IN_DEPTH(verbose,level,global_verbosity_depth); }
+   inline virtual bool is_verbose_debug(nat8 level)                 affirmation_ //170317
+      { return IS_VERBOSE_DEBUG(verbose,level,global_verbosity_depth,debug); }
+ public:
+      // Novel methods which may be reimplemented by derived class
+      // that would likely provide additional arguments.
+      // This should intern call these methods to pickup default arguments.
+   virtual bool recognize(const std::string &paramstring)         modification_;
+   virtual bool recognize_option(const std::string &paramstring)  modification_;
+   virtual bool recognize_assignment
+      (const std::string &variable
+      ,const std::string &value)                                  modification_;
+   virtual bool recognize_DEN
+      (const CORN::OS::Directory_entry_name &param_DEN)           modification_;
+   void display_interactive_instructions();
+  protected:
+   bool read_response_file
+      (const CORN::OS::File_name &response_filename)              modification_;
+   nat32 find_and_read_response_files()                           modification_;
+ };
+//______________________________________________________________________________
+} // namespace CORN
+#endif
+

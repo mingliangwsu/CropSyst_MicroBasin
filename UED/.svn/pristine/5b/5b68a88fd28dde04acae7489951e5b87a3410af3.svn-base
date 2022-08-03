@@ -1,0 +1,141 @@
+#ifndef UED_database_interpolatorH
+#define UED_database_interpolatorH
+
+#include "corn/math/numerical/interpolate_2d_3d.h"
+#include "corn/dynamic_array/dynamic_array_T.h"
+#define Dynamic_float_array Dynamic_array<float32>
+#define Dynamic_uint8_array Dynamic_array<nat8>
+
+#include "corn/container/association.h"
+#include "corn/container/enumlist.h"
+#include "UED/library/varcodes.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "UED/library/database_file.h"
+#include "common/geodesy/geolocation.h"
+#include "corn/chronometry/date_types.hpp"
+#include "corn/dynamic_array/dynamic_array_T.h"
+#define Dynamic_float_array Dynamic_array<float32>
+
+using namespace CORN;
+class UED_database_interpolate_data_record;
+
+#define MULTI_INTERPS
+// I Now have a separate interpolator for each combination of valid points
+
+//______________________________________________________________________________
+class Latitude_longitude_inverse_distance_weighted_interpolator
+: public Inverse_distance_weighted_interpolator
+{
+public:
+   class Weighted_point
+   : public Inverse_distance_weighted_interpolator::Weighted_point
+   , public Geolocation
+   {
+      nat32  index;
+   public:
+      Weighted_point
+      (  const Geolocation &copy_from_geolocation
+      , nat32  _index
+      )
+      : Inverse_distance_weighted_interpolator::Weighted_point()
+      , Geolocation(copy_from_geolocation)
+      , index(_index)
+      {};
+      virtual void update_distance_to(Inverse_distance_weighted_interpolator::Weighted_point &target_point); // float64 target_x, float64 target_y, float64 target_z);
+   };
+public:
+   Latitude_longitude_inverse_distance_weighted_interpolator
+   (Method _method = shepards_method, float64 _power_parameter = 2);
+   const Weighted_point & append_point(const Geolocation &from_geolocation,nat32  point_index);
+   void set_target(const Geolocation &_from_geolocation);
+};
+//______________________________________________________________________________
+#ifdef  MULTI_INTERPS
+
+// There is one interpolator for each combination of stations.
+// This is because not every station will have data every day for every value.
+// In order not to have to recalculate the weight each time a daily
+// value is not present the is a separate interpolator
+
+//______________________________________________________________________________
+class Stations_interpolator
+: public Latitude_longitude_inverse_distance_weighted_interpolator
+, public Enumeration // Item
+{
+   nat32  valid_sources; // one bit for each source database the is used (valid)
+   Dynamic_float_array  &current_value;  // Each item in this array corresponds to the respective value from each source database
+   int   valid_count_debug_only;
+public:
+   Stations_interpolator
+   (nat32  encoded_valid_stations
+   , Dynamic_float_array  &_current_value
+   ,Unidirectional_list &_all_points_in_range
+   ,Geolocation        *target_geolocation
+   );
+   virtual float64 calc_prescribed_function(nat32  index)                  const;
+   virtual nat32  get_key_nat32()                                          const { return valid_sources; };
+};
+#endif
+//______________________________________________________________________________
+class UED_database_interpolator
+#ifndef  MULTI_INTERPS
+: public Latitude_longitude_inverse_distance_weighted_interpolator
+#endif
+{
+   const UED_database_interpolate_data_record &options;                            //100926
+   // Each step in the loop we interpolate the value for the current variable for the current timestep
+   // current_values is an array storing the value from each database/scatter point
+   // current quality is the quality for that value.
+   // If the value is invalid (missing) then we don't include the point
+   // in the interpolation.
+   // This means we also have to recompute the weights, completely excluding the invalid/missing point.
+   Dynamic_float_array  current_value;
+//   Dynamic_uint8_array  current_valid;
+   nat32                current_valid_encoded;
+
+   std::ofstream        included_stations_log;
+#ifdef MULTI_INTERPS
+   CORN::Enumeration_list stations_interpolators;
+   Unidirectional_list  all_points_in_range;
+#else
+   Dynamic_uint8_array  previous_valid;
+#endif
+private: // Parameters
+   CORN_File_name_instance    target_UED_filename;
+   UED_indexed_database *target_database;
+   Geolocation        *target_geolocation;   // Owned by target database
+   Association_list   source_databases;
+   UED_variable_code  *variables_to_include;
+   // The UED database may contain several variables (I.e. for weather)
+   // we may only be interested in a specific set of variables.
+   // This is a null terminated list of variables specifying
+   // the variables to be included in the interpolation.
+   bool              verbose;
+public:
+   UED_database_interpolator
+   (const UED_database_interpolate_data_record &options                          //100926
+   ,UED_variable_code  _variables_to_include[]
+   ,Association_list  &_database_filenames_list
+   ,Association_list  &_database_filenames_not_included); // return
+   // The database_filenames_list
+   // lists the filenames of a set of UED databases for known points
+   // containing generated data for (at least) the same time period.
+   // If for some dates the there is not data in some of the
+   // databases, this data will be omitted.
+   virtual ~UED_database_interpolator();                                         //100926
+#ifdef MULTI_INTERPS
+   Stations_interpolator *provide_stations_interpolator_for_current_value();
+   const Latitude_longitude_inverse_distance_weighted_interpolator::Weighted_point &  append_point(const Geolocation &from_geolocation,nat32  _point_index);
+#else
+   virtual float64 calc_prescribed_function(nat32  index) const;
+#endif
+   void interpolate_all_using_inverse_distance();
+   void interpolate_all_using_nearest();
+   bool  is_good() const { return target_geolocation; };
+      // must have target_geolocation
+private:
+   nat32   encode_valid_sources(Dynamic_uint8_array &valid_stations) const;
+};
+//______________________________________________________________________________
+#endif
+

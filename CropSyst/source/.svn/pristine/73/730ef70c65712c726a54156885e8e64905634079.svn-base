@@ -1,0 +1,317 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{D7FC232B-A690-43BE-92FA-DB6A64BCB455}</ProjectGuid>
+			<ProjectVersion>12.0</ProjectVersion>
+			<Config Condition="'$(Config)'==''">Debug</Config>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<TLIB_PageSize>128</TLIB_PageSize>
+			<IntermediateOutputDir>Debug_V5\</IntermediateOutputDir>
+			<BCC_OutputDir>Debug_V5\</BCC_OutputDir>
+			<OutputExt>lib</OutputExt>
+			<ProjectType>CppStaticLibrary</ProjectType>
+			<AllPackageLibs>rtl.lib;vcl.lib</AllPackageLibs>
+			<PackageImports>vcl.bpi;rtl.bpi;bcbie.bpi;vclx.bpi;vclactnband.bpi;xmlrtl.bpi;bcbsmp.bpi;vclimg.bpi;VclSmp.bpi;vclie.bpi;inet.bpi;inetdbbde.bpi;inetdbxpress.bpi;DbxCommonDriver.bpi;DbxClientDriver.bpi;DBXInterBaseDriver.bpi;DBXMySQLDriver.bpi;tmsexd2010.bpi;tmsd2010.bpi;dbrtl.bpi;vcldb.bpi;bdertl.bpi;JamShellD2010Win32.bpi;tmswizd2010.bpi;TeeUI.bpi;TeeDB.bpi;Tee.bpi;tmsxlsd2010.bpi;intrawebdb_100_140.bpi;Intraweb_100_140.bpi;RNAutoControls_CORN_package.bpi;vclribbon.bpi;EasyListviewD13.bpi</PackageImports>
+			<Defines>CS_VERSION=5;CROPSYST_VERSION=5;CROPSYST_PROPER=5;CROPSYST;USE_WEATHER_PROVIDER;WEATHER_PROVIDER_VERSION=5;xCROP_INTERFACE_VERSION=5;NYI_YAML_PARAM_VERSION=1;EVENT_SCHEDULER_VERSION=5;OLD_ORCHARD;RUSLE_DETAIL;VERBOSE;CROP_PARAM_ADJUST;OLD_PHENOLOGY_SEQUENCER;CS_INSPECTOR_VERSION;NEEDS_VERIFICATION;WEATHER_PROVIDER_VERSION=5;DETAIL_DENITR;xDETAILED_BALANCES;xOLD_LOAD_ROTATION;$(Defines)</Defines>
+			<FinalOutputDir>Debug_V5\</FinalOutputDir>
+			<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
+			<DynamicRTL>true</DynamicRTL>
+			<UsePackages>true</UsePackages>
+			<IncludePath>$(BDS)\include;$(BDS)\include\dinkumware;c:\dev;..\..\;..\..\..\;..\..\..\..\;..\..\..\..\..;c:\dev\common;$(IncludePath)</IncludePath>
+			<ILINK_LibraryPath>..\..\..\..\..\..\corn\OS\;..\..\..\..\..\..\corn\application\;..\..\..\..\..\..\CS_suite\;..\..\..\..\..\..\CS_suite\CAFE\;..\..\..\..\..\..\CAFE\dairy\GUI\VCL\;..\..\..\..\..\..\CAFE\dairy\model\;..\..\..\..\..\..\NIFA\dairy\GUI\build\RadStudio\2010\;..\..\..\..\..\..\CANMS\dairy\;..\..\..\VCL\;..\..\..\..\model\;..\..\..\..\;..\..\..\..\..\..\GUI\translator\;..\..\..\..\..\..\common\simulation\;..\..\..\..\..\..\CropSyst\source\;..\..\..\..\..\..\CANMS\src\facility\function\;..\..\..\..\..\..\CANMS\src\biomatter\bedding\;..\..\..\..\..\..\GUI\parameter\;..\..\..\..\..\..\CANMS\src\equipment\function\;..\..\..\..\..\..\corn\application\user\;..\..\..\..\..\..\common\residue\;..\..\..\..\..\..\CAFE_dairy\GUI\;..\..\..\..\..\..\corn\data_source\;..\..\..\..\CAFE\dairy\GUI\build\RadStudio\2010\;..\..\..\..\corn\application\user\;..\..\..\..\CropSyst\source\;..\..\..\..\common\residue\;E:\backup\20111006\dev\CANMS\src\equipment\function\;..\..\..\..\CANMS\src\equipment\function\;..\..\..\..\CANMS\src\facility\function\;..\..\..\..\corn\OS\;..\..\..\..\cropsyst\cpp\crop\;..\..\..\..\corn\;..\..\..\..\corn\metrology\;..\..\..\..\corn\parameters\;..\..\..\..\corn\data_source\;..\..\..\..\common\simulation\;..\..\..\..\corn\file_sys\;..\..\..\..\GUI\help\VCL\;..\..\..\..\common\simulation\RS\2010\Debug\;C:\Documents and Settings\All Users\Documents\RAD Studio\7.0\Dcp\;..\..\..\..\corn\datetime\;..\..\..\..\corn\string\;..\..\..\..\components\RNAutoControls\basic\;$(BDS)\lib\release\;..\..\..\..\corn\spreadsheet\Excel_OLE_early\;..\..\..\..\cropsyst\cpp\;..\..\..\..\CANMS\src\facility\;..\..\..\biophysical_model\RS2010\Debug\;..\..\..\..\common\biometeorology\;..\..\..\..\common\biomatter\;..\..\..\..\common\physics\;..\..\..\..\common\weather\database\;..\..\..\..\common\geolocation\;C:\temp\lib\RS2010\debug\;..\..\..\..\CANMS\src\biomatter\bedding\;..\..\..\biophysical_model\;$(BDS)\lib\;..\..\..\..\GUI\translator\;..\..\..\..\GUI\parameter\;C:\temp\lib\RS2010\release\;..\..\..\..\components\RNAutoControls\corn\;..\..\;C:\dev\CAFE_dairy\GUI\RS\2010\;C:\dev\CAFE_dairy\GUI\;$(BDS)\lib\obj;C:\Documents and Settings\rnelson\My Documents\RAD Studio\Projects\Debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<BCC_wpar>false</BCC_wpar>
+			<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
+			<BCC_ExtendedErrorInfo>true</BCC_ExtendedErrorInfo>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
+			<BCC_DisableOptimizations>true</BCC_DisableOptimizations>
+			<DCC_Optimize>false</DCC_Optimize>
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+			<Defines>_DEBUG;$(Defines)</Defines>
+			<BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
+			<IntermediateOutputDir>Debug</IntermediateOutputDir>
+			<BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>
+			<DCC_Define>DEBUG</DCC_Define>
+			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+			<TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>
+			<BCC_StackFrames>true</BCC_StackFrames>
+			<ILINK_LibraryPath>$(BDS)\lib\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
+			<TASM_Debugging>Full</TASM_Debugging>
+			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<Defines>NDEBUG;$(Defines)</Defines>
+			<IntermediateOutputDir>Release</IntermediateOutputDir>
+			<ILINK_LibraryPath>$(BDS)\lib\release;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<TASM_Debugging>None</TASM_Debugging>
+		</PropertyGroup>
+		<ItemGroup>
+			<CppCompile Include="..\..\..\canopy_growth_LAI_based_V5.cpp">
+				<DependentOn>..\..\..\canopy_growth_LAI_based_V5.h</DependentOn>
+				<BuildOrder>24</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_root.cpp">
+				<DependentOn>..\..\..\crop_root.h</DependentOn>
+				<BuildOrder>34</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\phenology_interface.cpp">
+				<DependentOn>..\..\..\phenology_interface.h</DependentOn>
+				<BuildOrder>27</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\extreme_temperature_response.cpp">
+				<DependentOn>..\..\..\extreme_temperature_response.h</DependentOn>
+				<BuildOrder>29</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\event_scheduler_crop.cpp">
+				<DependentOn>..\..\..\event_scheduler_crop.h</DependentOn>
+				<BuildOrder>30</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_types.cpp">
+				<DependentOn>..\..\..\crop_types.h</DependentOn>
+				<BuildOrder>31</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\canopy_growth_portioned.cpp">
+				<DependentOn>..\..\..\canopy_growth_portioned.h</DependentOn>
+				<BuildOrder>23</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\CO2_response.cpp">
+				<DependentOn>..\..\..\CO2_response.h</DependentOn>
+				<BuildOrder>22</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\yield.cpp">
+				<DependentOn>..\..\..\yield.h</DependentOn>
+				<BuildOrder>26</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\canopy_growth_LAI_based.cpp">
+				<DependentOn>..\..\..\canopy_growth_LAI_based.h</DependentOn>
+				<BuildOrder>25</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\growth_stages.cpp">
+				<DependentOn>..\..\..\growth_stages.h</DependentOn>
+				<BuildOrder>28</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\greenhouse\crop_greenhouse.cpp">
+				<DependentOn>..\..\..\greenhouse\crop_greenhouse.h</DependentOn>
+				<BuildOrder>36</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\quiescence.cpp">
+				<DependentOn>..\..\..\quiescence.h</DependentOn>
+				<BuildOrder>38</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_fruit.cpp">
+				<DependentOn>..\..\..\crop_fruit.h</DependentOn>
+				<BuildOrder>40</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\transpiration_dependent_growth_V4.cpp">
+				<DependentOn>..\..\..\transpiration_dependent_growth_V4.h</DependentOn>
+				<BuildOrder>39</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\transpiration_dependent_growth.cpp">
+				<BuildOrder>2</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_emergence.cpp">
+				<DependentOn>..\..\..\crop_emergence.h</DependentOn>
+				<BuildOrder>19</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\canopy_growth.cpp">
+				<DependentOn>..\..\..\canopy_growth.h</DependentOn>
+				<BuildOrder>8</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\transpiration_dependent_growth_V5.cpp">
+				<DependentOn>..\..\..\transpiration_dependent_growth_V5.h</DependentOn>
+				<BuildOrder>38</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\canopy_cover_continuum.cpp">
+				<DependentOn>..\..\..\canopy_cover_continuum.h</DependentOn>
+				<BuildOrder>6</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_common.cpp">
+				<DependentOn>..\..\..\crop_common.h</DependentOn>
+				<BuildOrder>21</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\canopy_cover_curve.cpp">
+				<DependentOn>..\..\..\canopy_cover_curve.h</DependentOn>
+				<BuildOrder>7</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\phenology_common.cpp">
+				<DependentOn>..\..\..\phenology_common.h</DependentOn>
+				<BuildOrder>4</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_N_V5.cpp">
+				<DependentOn>..\..\..\crop_N_V5.h</DependentOn>
+				<BuildOrder>38</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\phenology_sequencer.cpp">
+				<DependentOn>..\..\..\phenology_sequencer.h</DependentOn>
+				<BuildOrder>5</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_root_V5.cpp">
+				<DependentOn>..\..\..\crop_root_V5.h</DependentOn>
+				<BuildOrder>6</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_N_balancer.cpp">
+				<DependentOn>..\..\..\crop_N_balancer.h</DependentOn>
+				<BuildOrder>15</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_orchard_common.cpp">
+				<DependentOn>..\..\..\crop_orchard_common.h</DependentOn>
+				<BuildOrder>14</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_interfaced.cpp">
+				<DependentOn>..\..\..\crop_interfaced.h</DependentOn>
+				<BuildOrder>17</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_interfaced_cropsyst.cpp">
+				<DependentOn>..\..\..\crop_interfaced_cropsyst.h</DependentOn>
+				<BuildOrder>16</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\canopy_growth_cover_based.cpp">
+				<DependentOn>..\..\..\canopy_growth_cover_based.h</DependentOn>
+				<BuildOrder>9</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_orchard_Kemanian_Stockle.cpp">
+				<DependentOn>..\..\..\crop_orchard_Kemanian_Stockle.h</DependentOn>
+				<BuildOrder>13</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_param_class.cpp">
+				<DependentOn>..\..\..\crop_param_class.h</DependentOn>
+				<BuildOrder>11</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_cropsyst.cpp">
+				<DependentOn>..\..\..\crop_cropsyst.h</DependentOn>
+				<BuildOrder>20</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_orchard_Oyarzun_Stockle.cpp">
+				<DependentOn>..\..\..\crop_orchard_Oyarzun_Stockle.h</DependentOn>
+				<BuildOrder>12</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\transpiration.cpp">
+				<DependentOn>..\..\..\transpiration.h</DependentOn>
+				<BuildOrder>38</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_N_common.cpp">
+				<DependentOn>..\..\..\crop_N_common.h</DependentOn>
+				<BuildOrder>37</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\thermal_time_daily.cpp">
+				<DependentOn>..\..\..\thermal_time_daily.h</DependentOn>
+				<BuildOrder>39</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_param_struct.cpp">
+				<DependentOn>..\..\..\crop_param_struct.h</DependentOn>
+				<BuildOrder>10</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\thermal_time_common.cpp">
+				<DependentOn>..\..\..\thermal_time_common.h</DependentOn>
+				<BuildOrder>38</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="..\..\..\crop_param_V4.cpp">
+				<DependentOn>..\..\..\crop_param_V4.h</DependentOn>
+				<BuildOrder>39</BuildOrder>
+			</CppCompile>
+			<BuildConfiguration Include="Base">
+				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<Import Project="$(BDS)\Bin\CodeGear.Cpp.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Cpp.Targets')"/>
+		<ProjectExtensions>
+			<Borland.Personality>CPlusPlusBuilder.Personality.12</Borland.Personality>
+			<Borland.ProjectType>CppStaticLibrary</Borland.ProjectType>
+			<BorlandProject>
+				<CPlusPlusBuilder.Personality>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">1033</VersionInfo>
+						<VersionInfo Name="CodePage">1252</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Debugging>
+						<Debugging Name="DebugSourceDirs">C:\dev\components\RNAutoControls\corn\;C:\Program Files\Embarcadero\RAD Studio\7.0\source\Win32\ComServers\Office2K\;C:\dev\CANMS\src\facility\function\manure_storage\;C:\dev\common\weather\day\;C:\dev\common\weather\hour\;C:\dev\common\weather\;C:\dev\components\RNAutoControls\basic\</Debugging>
+					</Debugging>
+					<Parameters>
+						<Parameters Name="RunParams"/>
+						<Parameters Name="Launcher"/>
+						<Parameters Name="UseLauncher">False</Parameters>
+						<Parameters Name="DebugCWD">C:\Simulation\Projects\FlexCropping\B\Kaur\Slim\Scenarios\test2\annual\stable\sC-wW_annual\46.7700N117.1048W\0\average</Parameters>
+						<Parameters Name="HostApplication"/>
+						<Parameters Name="RemoteHost"/>
+						<Parameters Name="RemotePath"/>
+						<Parameters Name="RemoteParams"/>
+						<Parameters Name="RemoteLauncher"/>
+						<Parameters Name="UseRemoteLauncher">False</Parameters>
+						<Parameters Name="RemoteCWD"/>
+						<Parameters Name="RemoteDebug">False</Parameters>
+						<Parameters Name="Debug Symbols Search Path"/>
+						<Parameters Name="LoadAllSymbols">True</Parameters>
+						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+					</Parameters>
+					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dbx140.bpl">Embarcadero SQL Explorer UI Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclmid140.bpl">Embarcadero MyBase DataAccess Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclIndyCore140.bpl">Indy 10 Core Design Time</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dcldbx140.bpl">Embarcadero dbExpress Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclemacsedit140.bpl">Embarcadero Editor Emacs Enhancements</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclmlwiz140.bpl">Embarcadero Markup Language Wizards</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dcltouch140.bpl">Embarcadero Touch Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclmcn140.bpl">Embarcadero DataSnap Connection Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\Bin\dclIndyProtocols140.bpl">Indy 10 Protocols Design Time</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclsoap140.bpl">Embarcadero SOAP Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclribbon140.bpl">Embarcadero Ribbon Controls</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dcldbxcds140.bpl">Embarcadero SimpleDataset Component (DBX)</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclbde140.bpl">Embarcadero BDE DB Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclado140.bpl">Embarcadero ADO DB Components</Excluded_Packages>
+					</Excluded_Packages>
+					<ProjectProperties>
+						<ProjectProperties Name="AutoShowDeps">False</ProjectProperties>
+						<ProjectProperties Name="ManagePaths">False</ProjectProperties>
+						<ProjectProperties Name="VerifyPackages">True</ProjectProperties>
+					</ProjectProperties>
+				</CPlusPlusBuilder.Personality>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+	</Project>

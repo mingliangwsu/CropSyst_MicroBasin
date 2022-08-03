@@ -1,0 +1,290 @@
+#ifndef LADSSH
+#define LADSSH
+
+#include "LADSS_database.h"
+#include "cs_mod.h"
+#include "rot_param.h"
+#include "mgmtevnt.h"
+#include "cs_events.h"
+#include "common/simulation/event.h"
+#include "corn/condcomp.h"
+
+#define LABEL_SOIL_LYR_ID        "SOIL_LYR_ID"
+
+#define UNUSED _COMMENT_
+// Indicates this field is not currently used by CropSyst
+//______________________________________________________________________________
+// Forward declarations
+class Smart_soil_parameters;
+class Crop_interfaced;
+
+namespace CropSyst
+{
+   class Crop_parameters;
+   class Rotation_parameters;
+   class Sowing_event;
+   class Sowing_operation;
+   class Land_unit_simulation;                                                   //141206_111108
+   class Management;
+};
+//______________________________________________________________________________
+extern soil_horizon_array32(horizon_LADSS_H2O);    //{m3/m3 initial water content }
+#ifdef NITROGEN
+extern    soil_horizon_array32(horizon_LADSS_N_NO3);  //{kg N/ha initial N}
+extern    soil_horizon_array32(horizon_LADSS_N_NH4);  //{kg N/ha initial N}
+#endif
+#ifdef CHEM_PROFILE
+extern    soil_horizon_array32(horizon_LADSS_percent_organic_matter); //{ 0-10 (0-100) }
+#endif
+//______________________________________________________________________________
+class LADSS_LBF
+: public CORN::Data_record
+{
+ public:
+   int32          LBF_ID;
+   std::string /*131008 CORN::Ustring*/    LBF_name;
+#ifdef UNUSED
+   float32        land_area;
+   int32          LFA_ID;
+   int32          LB_ID;
+#endif
+   int32          soil_ID;
+   int32          topo_ID;                                                       //030920
+   int32          LBF_init_ID;
+ public:
+   LADSS_LBF()
+   : CORN::Data_record("-")
+   {};
+  virtual void expect_structure(bool for_write = false);
+};
+//_2003-01-25___________________________________________________________________
+class LADSS_topography
+: public CORN::Data_record
+{
+ public:
+   int32          topo_ID;
+   //UNUSED         int16          frost_days;
+   float32        altitude;
+   //UNUSED         int16          topex;
+   float32        slope;
+   float32        slope_length;
+   //UNUSED         std::string /*131008 CORN::Ustring*/    site_drainage_class;
+ public:
+   LADSS_topography() ;
+   virtual void expect_structure(bool for_write);
+};
+//_2003-09-20___________________________________________________________________
+class LADSS_LBF_location
+: public CORN::Data_record
+{public:
+   sint32    LBF_loc_ID;
+   sint32    LBF_ID;
+   sint32    loc_ID;
+public:
+   LADSS_LBF_location();
+   virtual void expect_structure(bool for_write);
+};
+//_2006-04-06___________________________________________________________________
+class LADSS_allocation
+: public CORN::Data_record
+{public:
+   int32          alloc_ID;
+   std::string /*131008 CORN::Ustring*/        description;
+   int32          sim_ID;
+   int32          LBF_loc_ID;                                                    //060406
+   int32          rot_ID;
+public:
+  LADSS_allocation();
+  virtual void expect_structure(bool for_write);
+};
+//_2003-01-09___________________________________________________________________
+class LADSS_soil_data_source
+{  int32 soil_ID;
+   Database_data_source soil_table;
+public:
+   LADSS_soil_data_source(int32 i_soil_ID);
+   bool get(Smart_soil_parameters &soil);
+};
+//_2002-06-12___________________________________________________________________
+class LADSS_crop_data_source
+{  int32       land_use_ID;  // Essentially the crop ID
+   Database_data_source    crop_table;
+   class Crop_components_data_record
+   : public CORN::Data_record
+   {public:
+      int32    grow_ID;
+      int32    phen_ID;
+      int32    vern_ID;
+      int32    photo_ID;
+      int32    res_ID;
+      int32    nitro_ID;
+SALT  int32    sal_ID;
+CO2   int32    CO2_ID;
+      int32    dorm_ID;
+      int32    leaf_ID;
+      int32    transp_ID;
+      int32    fruit_ID;
+      int32    harv_ndx_ID;
+      int32    hard_ID;
+   public:
+      virtual void expect_structure(bool for_write);
+      Crop_components_data_record();
+   };
+ public:
+   LADSS_crop_data_source(int32 i_land_use_ID);
+   bool get(CropSyst:: /*140318 CropSyst_NS */Crop_parameters &crop);
+};
+//_2002-06-12___________________________________________________________________
+extern const char *Land_use_type_label_table[];
+enum Land_use_type { UNKNOWN_LAND_USE,CROP_LAND_USE,FOREST_LAND_USE,LIVESTOCK_LAND_USE };
+DECLARE_LABELED_ENUM(Land_use_type_labeled,Land_use_type,Land_use_type_label_table);
+//_2008-08-11___________________________________________________________________
+class Rotation_components_data_record
+: public CORN::Data_record
+{
+public:
+   int32                      rot_comp_ID;  // uniquely identifies the rotation event  (not used by CropSyst)
+   int32                      event_date;    // currently LADSS only uses actual dates for sowing events //031025
+   Land_use_type_labeled      land_use_type_labeled;
+   int32                      land_use_ID;
+   int32                      mgt_ID;
+   int32                      rot_ID;  // <- Key
+   int32                      sow_ID;
+public:
+   Rotation_components_data_record()
+   :CORN::Data_record("-")
+   , event_date(0)                                                            //031025
+   , land_use_type_labeled(UNKNOWN_LAND_USE)
+   {};
+   virtual void expect_structure(bool for_write);
+};
+//______________________________________________________________________________
+class Event_data_record
+: public CORN::Data_record
+, public CropSyst::Event /*131101 CropSyst_event*/
+{public:
+   int32 event_ID;      // Although Common_event has ID, event ID is an integer in LADSS  //031124
+   CropSyst_Op_labeled  op_labeled;                                           //030310
+   int32 res_set_ID;
+   int32 op_ID;
+   int32 mgt_ID;
+ public:
+   Event_data_record()
+      : CORN::Data_record("-")
+      , event_ID(0)                                                              //031124
+      , CropSyst::Event /*131101 CropSyst_event*/()
+      , op_labeled(CS_OP_NONE)                                                   //030310
+      {};
+   virtual void expect_structure(bool for_write);                             //031012
+};
+//______________________________________________________________________________
+class LADSS_rotation_components_data_source
+{  int32                rot_ID;
+   Database_data_source rotation_components_table;
+   // The  LADSS_rotation_components_data_source will also maintain
+   // the  sowing tables because these are
+   // all loaded at the time the rotation is loaded.
+   Database_data_source sowing_data_source;                                         //020915
+public:
+   LADSS_rotation_components_data_source(int32 i_rot_ID);
+   bool get(CropSyst::Rotation_parameters &rotation_params);
+   CropSyst::Sowing_event* create_sowing_event(const Rotation_components_data_record &rot_comp_DR); //031013
+};
+//_2002-08-11___________________________________________________________________
+class LADSS_management_data_source
+{  int32                mgt_ID;
+   Database_data_source crop_management_data_source;
+   Database_data_source event_data_source;
+   class Resource_set_data_record
+   : public CORN::Data_record
+   {
+   public:
+      int32 res_set_ID;
+      std::string /*131008 CORN::Ustring*/ description;
+      int16 SCS_code;
+   public:
+       Resource_set_data_record()
+       : CORN::Data_record("-")
+       , res_set_ID(0)
+       , description("")
+       , SCS_code(0)
+       {};
+      virtual void expect_structure(bool for_write);
+   };
+   //___________________________________________________________________________
+public:
+   LADSS_management_data_source(int32 i_mgt_ID );
+   bool get(CropSyst::Management &management);
+};
+//_2002-09-15___________________________________________________________________
+class LADSS_season_output_data_record
+: public CORN::Data_record
+{
+   //040923       Note, I now have a datarecord (see UED_season) for UED output that could also replace this data record for LADSS
+   // uses GP accumulators
+   int32       s_out_ID;
+   int32       alloc_ID;
+   int32       land_use_ID;  // Essentially the crop name  051129 This is no longer needed, it can be removed  //030331
+   int32       rot_comp_ID;                                                      //051129
+   CORN::Date  planting_date;                                                    //041205
+   CORN::Date  restart_date;                                                     //041205
+   CORN::Date  emergence_date;
+   CORN::Date  flowering_date;
+   CORN::Date  tuber_init_date;                                                  //081111
+   CORN::Date  grain_filling_date;
+   CORN::Date  peak_LAI_date;
+   CORN::Date  maturity_date;
+   CORN::Date  harvest_date;
+   float32     total_yield;                                                      //030516
+   float32     dry_biomass;
+   float32     root_depth;
+   float32     nitrogen_leached_total;
+   float32     nitrogen_uptake_total;
+   float32     nitrogen_available;      // seasonal nitrogen available
+   float32     total_mineralization;
+   float32     used_biomass;                                                     //040920
+   float32     grazed_biomass;                                                   //040920
+   float32     residue_biomass;                                                  //040920
+   float32     disposed_biomass;                                                 //040920
+ public:
+   LADSS_season_output_data_record                                               //040217
+      (int32 _alloc_ID,CropSyst::Land_unit_simulation &simulation
+      ,const CropSyst::Crop_interfaced *crop);                                   //130716  //131008NS
+   virtual void expect_structure(bool for_write = true);                         //981208
+};
+//_2002-09-23___________________________________________________________________
+class LADSS_annual_output_data_record
+: public CORN::Data_record
+{
+   //040923       Note, I now have a datarecord (see UED_season) for UED output that could also replace this data record for LADSS
+   // uses annual accumulators
+ public:
+   sint32       a_out_ID;
+   sint32       alloc_ID;
+   int16       year;
+   float32     ET_pot;
+   float32     ET_act;
+   float32     transp_pot;
+   float32     transp_act;
+   float32     evap_soil_pot;
+   float32     evap_soil_act;
+   float32     precipitation;
+   float32     crop_water_intrcpt;
+   float32     surface_water_runoff;
+   float32     ponded_water;
+   float32     water_enter_soil;
+   float32     soil_water_drainage;
+   float32     soil_water_balance;
+   float32     nitrogen_applied_total;
+   float32     nitrogen_leached_total;
+   float32     nitrogen_uptake_total;
+   float32     total_mineralization;
+   float32     organic_N_applied;
+ public:
+   LADSS_annual_output_data_record(sint32 i_alloc_ID, Year year,CropSyst::Land_unit_simulation &simulation);
+   virtual void expect_structure(bool for_write = true);
+};
+//_2002-09-23___________________________________________________________________
+#endif
+//ladss.h
+

@@ -1,0 +1,74 @@
+#-------------------------------------------------
+#
+# Project created by QtCreator 2014-09-03T13:13:32
+#
+#-------------------------------------------------
+
+QT       += core
+
+QT       -= gui
+
+TARGET = UED_collate
+CONFIG   += console
+CONFIG   -= app_bundle
+DEFINES  += USE_xlslib
+
+TEMPLATE = app
+
+INCLUDEPATH += ../../../../.. \
+   ../../../../../common
+
+
+SOURCES += \
+    ../../../collate_engine.cpp \
+    ../../../collate_main.cpp \
+    ../../../../convert/convertor.cpp \
+    ../../../../convert/ED_tabular_format.cpp \
+    ../../../../convert/convert_response.cpp \
+    ../../../../convert/text_dBase_Excel_with_TDF/tabular_file_with_TDF_convertor.cpp \
+    ../../../../convert/text_dBase_Excel_with_TDF/text_dbase_excel_with_tdf_convertor.cpp \
+    ../../../../../common/weather/database/common_weather_creators.cpp \
+    ../../../../../common/geodesy/geocoordinate.cpp \
+    ../../../../../common/geodesy/geolocation.cpp \
+    ../../../../../common/weather/validator.cpp \
+    ../../../../../common/physics/mass_common.cpp \
+    ../../../../../common/physics/mass.cpp \
+    ../../../../../common/physics/property.cpp \
+    ../../../../convert/text_dBase_Excel_with_TDF/tuple_index.cpp \
+    ../../../../convert/text_dBase_Excel_with_TDF/import_column.cpp \
+    ../../../../convert/text_dBase_Excel_with_TDF/export_column.cpp \
+    ../../../../../common/weather/GEN_DAT_filename.cpp \
+    ../../../../../common/geomatics/Canada_province_code.cpp \
+    ../../../../../common/geomatics/USA_state_FIPS_code.cpp \
+    ../../../../../common/geodesy/geolocation_item.cpp \
+    ../../../../../common/weather/sun.cpp \
+    ../../../../../corn/float16.cpp \
+    ../../../../../common/solar/irradiance_extraterrestrial.cpp \
+    ../../../../../common/weather/hour/sun_hours.cpp \
+    ../../../../../common/weather/atmospheric_CO2_change_recalibration.cpp \
+    ../../../../../corn/chronometry/date_32.cpp \
+    ../../../../../corn/chronometry/date_abstract.cpp \
+    ../../../../../corn/chronometry/date_format.cpp \
+    ../../../../../corn/chronometry/date_time_64.cpp \
+    ../../../../../corn/chronometry/date_time_abstract.cpp \
+    ../../../../../corn/chronometry/date_translator.cpp \
+    ../../../../../corn/chronometry/temporal.cpp \
+    ../../../../../corn/chronometry/time_abstract.cpp \
+    ../../../../../corn/chronometry/time_conversion.cpp \
+    ../../../../../corn/chronometry/time_format.cpp \
+    ../../../../../corn/chronometry/time_second.cpp
+
+HEADERS += \
+    ../../../../convert/text_dBase_Excel_with_TDF/export_column.h \
+    ../../../../../corn/chronometry/date_types.hpp
+
+
+LIBS += -L$$PWD/../../../../library/build/Qt/UED_static/bin/Release/ -lUED_static
+INCLUDEPATH += $$PWD/../../../../library/build/Qt/UED_static/bin/Release/
+DEPENDPATH += $$PWD/../../../../library/build/Qt/UED_static/bin/Release/
+PRE_TARGETDEPS += $$PWD/../../../../library/build/Qt/UED_static/bin/Release/libUED_static.a
+
+LIBS += -L$$PWD/../../../../../corn/build/Qt/corn_complete_static/bin/Release/ -lcorn_complete_static
+INCLUDEPATH += $$PWD/../../../../../corn/build/Qt/corn_complete_static/bin/Release/
+DEPENDPATH += $$PWD/../../../../../corn/build/Qt/corn_complete_static/bin/Release/
+PRE_TARGETDEPS += $$PWD/../../../../../corn/build/Qt/corn_complete_static/bin/Release/libcorn_complete_static.a

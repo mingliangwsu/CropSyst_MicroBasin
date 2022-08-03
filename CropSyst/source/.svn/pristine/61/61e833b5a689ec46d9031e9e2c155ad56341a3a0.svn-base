@@ -1,0 +1,766 @@
+#ifndef mgmt_paramH
+#define mgmt_paramH
+#include "options.h"
+#define LABEL_management            "management"
+
+
+#if ((CROPSYST_VERSION == 5) && (MANAGEMENT!=4))
+#include "management/management_param_V5.h"
+#endif
+#if (MANAGEMENT==4)
+#  include "management/management_param_V4.h"
+#  ifdef OLD_MGMT_PARAM
+#  error obsolete
+// eventually will be obsolete, but still currently used for management editor 120710
+#  include "cs_operation.h"
+#  include "mgmt_types.h"
+#  include "N_sources.h"
+#  include <common/biomatter/manure_form.h>
+#  include "USDA/NRCS/RUSLE2/SDR_field_ops.h"
+#  include "common/soil/SCS/SCS.h"
+#  include "cs_filenames.h"
+#  include "common/simulation/event.h"
+#  include "crop/crop_types.h"
+#  include "common/biomatter/biomass_decomposition_param.h"
+class Crop_production_function_simulation;
+#if (CROPSYST_VERSION >=5)
+namespace CropSyst {
+#endif
+#define AUTO_IRRIGATION  1
+#define AUTO_NITROGEN    2
+
+#define LABEL_land_treatment        "land_treatment"
+#define LABEL_automatic_nitrogen    "automatic_nitrogen"
+#define LABEL_automatic_NO3_application_mode "automatic_NO3_application_mode"
+#define LABEL_automatic_clipping    "automatic_clipping"
+#define LABEL_automatic_irrigation  "automatic_irrigation"
+
+#define LABEL_chemical               "chemical"
+#define LABEL_irrigation             "irrigation"
+#define LABEL_tillage                "tillage"
+#define LABEL_residue                "residue"
+#define LABEL_fertilization          "fertilization"
+#define LABEL_organic_fertilization  "organic_fertilization"
+#define LABEL_clipping               "clipping"
+#define LABEL_salt                   "salt"
+#define LABEL_salinity               "salinity"
+#define LABEL_chemicals              "chemicals"
+#define LABEL_irrigations            "irrigations"
+#define LABEL_tillages               "tillages"
+#define LABEL_residues               "residues"
+#define LABEL_fertilizations         "fertilizations"
+#define LABEL_organic_fertilizations "organic_fertilizations"
+
+#define LABEL_amount                "amount"
+#define LABEL_concentration         "concentration"
+#if ((CROPSYST_VERSION >0) && (CROPSYST_VERSION < 5))
+#define LABEL_NH4_amount            "NH4_amount"
+#define LABEL_NH3_amount            "NH3_amount"
+#define LABEL_NO3_amount            "NO3_amount"
+#endif
+
+#define LABEL_soil_conservation_factor             "soil_conservation_factor"
+
+// Automatic irrigation:
+#define LABEL_automatic_irrigation_obsolete        "automatic_irrigation"
+// Automatic irrigation periods are now entered as events.
+
+
+#define LABEL_max_allowable_depletion              "max_allowable_depletion"
+#define LABEL_depletion_observe_depth              "depletion_observe_depth"
+#define LABEL_net_irrigation_mult                  "net_irrigation_mult"
+#define LABEL_refill_point                         "refill_point"
+#define LABEL_max_application                      "max_application"
+
+//Automatic nitrogen
+#define LABEL_automatic_nitrogen_mode_obsolete     "automatic_nitrogen_mode"
+
+//120712 #define LABEL_automatic_NO3_mode                   "automatic_NO3_mode"
+#define LABEL_automatic_N_mode                   "automatic_N_mode"
+
+#define LABEL_balance_based                        "balance_based"
+#define LABEL_local_calibration                    "local_calibration"
+//#define LABEL_split_auto_NO3_applications        "split_auto_NO3_applications"
+//120712 #define LABEL_auto_NO3_application                 "auto_NO3_application"
+#define LABEL_auto_N_application                   "auto_N_application"
+//120712#define LABEL_split_auto_NO3_applications_obsolete "split_auto_NO3_applications"
+#define LABEL_split_applications                   "split_applications"
+
+#define LABEL_target_yield_N_uptake                "target_yield_N_uptake"
+#define LABEL_critical_soil_N_for_no_response      "critical_soil_N_for_no_response"
+//120712 #define LABEL_critical_soil_NO3_for_no_response    "critical_soil_NO3_for_no_response"
+#define LABEL_fertilizer_use_efficiency            "fertilizer_use_efficiency"
+#define LABEL_automatic_nitrogen_applications      "automatic_nitrogen_applications"
+#define LABEL_automatic_nitrogen_application       "automatic_nitrogen_application"
+#define LABEL_percent                              "percent"
+
+#define LABEL_soil_N_sampling                      "soil_N_sampling"
+
+#define LABEL_NH4_volatilization                   "NH4_volatilization"
+#define LABEL_NH4_volatilization_calculated        "NH4_volatilization_calculated"
+//#define LABEL_org_N_NH4_volatilization           "org_N_NH4_volatilization"
+#define LABEL_long_term_org_N_volatilization       "long_term_org_N_volatilization"
+#define LABEL_org_N_volatilization_calculated      "org_N_volatilization_calculated"
+#define LABEL_org_N                                "org_N"
+#define LABEL_decomposition_time_calculated        "decomposition_time_calculated"
+#define LABEL_decomposition_time                   "decomposition_time"
+#define LABEL_decomposition_time_50                "decomposition_time_50"
+// May want to call this half life?
+
+
+#define   LABEL_liquid                 "liquid"
+
+#define   LABEL_auto_clip_biomass      "auto_clip_biomass"
+
+#define LABEL_clipping_frequency       "clipping_frequency"
+#define LABEL_trim_biomass_removed     "trim_biomass_removed"
+#define LABEL_trim_removed_to_surface  "trim_removed_to_surface"
+#define LABEL_adjust_relative_growth_rate_for_clipping_obs   "adjust_relative_growth_rate_for_clipping"
+#define LABEL_adj_rel_growth           "adj_rel_growth"
+
+//#define LABEL_minimum_biomass_required_for_clipping "minimum_biomass_required_for_clipping"
+
+#define LABEL_biomass_forces_clipping_obs   "biomass_forces_clipping" /*replaced by max_biomass*/
+#define LABEL_max_biomass              "max_biomass"
+#define LABEL_max_LAI                  "max_LAI"
+
+#define LABEL_terminate_crop           "terminate_crop"
+
+#define LABEL_harvest                  "harvest"
+#define LABEL_harvest_wait             "harvest_wait"
+#define LABEL_straw_to_residue         "straw_to_residue"
+
+#define LABEL_earliest_date_to_clip    "earliest_date_to_clip"
+#define LABEL_latest_date_to_clip      "latest_date_to_clip"
+#define LABEL_latest_date_to_harvest   "latest_date_to_harvest"
+#define LABEL_minimum_LAI_required_for_clipping_obsolete "minimum_LAI_required_for_clipping"
+#define LABEL_minimum_biomass_required_for_clipping_obsolete "minimum_biomass_required_for_clipping"
+
+#define LABEL_min_LAI                  "min_LAI"
+#define LABEL_min_biomass              "min_biomass"
+
+#define LABEL_V3_clipping_fate           "clipping_fate"
+
+#define LABEL_percent_N_as_OM          "percent_N_as_OM"
+#define LABEL_percent_N_as_NH3         "percent_N_as_NH3"
+
+#define LABEL_row_layout      "row_layout"
+#define LABEL_azimuth         "azimuth"
+#define LABEL_spacing         "spacing"
+#define LABEL_initial_width   "initial_width"
+#define LABEL_initial_height  "initial_height"
+#define LABEL_final_width     "final_width"
+#define LABEL_final_height    "final_height"
+
+#define LABEL_depth_obsolete                    "sampling_depth"
+#define LABEL_sampling_depth                    "sampling_depth"
+
+#define LABEL_mode                              "mode"
+
+#define DEFAULT_soil_conservation_factor  1.0
+
+#define DEFAULT_land_treatment            STRAIGHT
+
+#define NO_adj_relative_growth_rate 1.0
+#define NO_LAI_forces_clipping      0.0
+#define NO_biomass_forces_clipping  0.0
+#define NO_flowering_forces_clipping 0
+//______________________________________________________________________________
+class Biomass_decomposition_parameters;
+class Harvest_or_clipping_event; // forward declaration  (only for V3 compatibility)
+class N_application_soil_observation_mode_event;
+class Automatic_clip_biomass_mode_event; // forward declaration  (only for V3 compatibility)
+class Automatic_NO3_appl_mode_event;
+
+namespace CropSyst {
+
+extern const char *automatic_NO3_mode_label_table[];
+class Management_parameters; // forward decl for friendship                      //011207
+//______________________________________________________________________________
+class Tillage_operation
+: public CropSyst_field_operation_VX                                             //011207
+{
+public:
+   bool    dust_mulch_enable;                                                    //051206
+   float32 dust_mulch_depth_cm;       Valid_float32 v_dust_mulch_depth_cm;       //051206
+   int16   dust_mulch_effective_days; Valid_int16   v_dust_mulch_effective_days; //051206
+   float32 dust_mulch_intensity;      Valid_float32 v_dust_mulch_intensity;      //051212
+      // 0 to 1 where 0 is no effect and 1 is most intense value
+   struct Oxidation_effect                                                       //100121
+   {  float32 sand;                                                              //100121
+      float32 clay;                                                              //100121
+               public:
+                  inline Oxidation_effect()
+                  : sand(1.5)
+                  , clay(0.5)
+                  {}
+   } oxidation_effect;                                                           //100121
+   Valid_float32 v_oxidation_effect_sand; // 1.5 is low  6.0 is high             //100121
+   Valid_float32 v_oxidation_effect_clay; // 0.5 is low  2.0 is high             //100121
+public: // values computed during simulation
+    float64 straw_to_residue;  // Not sure how used (for schedule output?)  I think obsolete with new biomas fate      //990414P
+public: // constructor
+   Tillage_operation() ;
+public: // virtual methods
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_; //970709
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const; //030123
+   virtual const char *label_string(std::string &buffer)                  const; //170423
+   virtual void log(std::ostream &log_file)                               const; //020810
+   inline virtual int compare(const Item &other)                           const { return 0; } // At this point nothing really to compare eventuall compare phen sync;
+   inline virtual int32 /*enumXX */ get_type()                             const { return CS_OP_MGMT_TILLAGE;}   //011207
+};
+//______________________________________________________________________________
+class Residue_operation
+: public Tillage_operation                                                       //020524
+{
+public:  // constructor
+    Residue_operation(); // section setup constructor
+public: // virtual methods
+    virtual void setup_parameters
+      (CORN::Data_record &data_rec,bool for_write) modification_;                //970709
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const;//030121
+   virtual const char *label_string(std::string &buffer)                  const;//170423
+   virtual void log(std::ostream &log_file)                              const;//020810 temporarily abstract so I make sure to implement
+   virtual int compare(const Item &other)                                  const { return 0; } // At this point nothing really to compare eventuall compare phen sync;
+   virtual int32 /*enumXX */ get_type()                                    const { return CS_OP_MGMT_RESIDUE;}     //011207
+ };
+//_2004-01-24___________________________________________________________________
+class Harvest_or_clipping_operation
+: public CropSyst_field_operation_VX   // CropSyst_field_operation may be sufficient  011207
+{
+   friend class Management_parameters;                                           //030908
+public: // The following parameters apply to either specific or auto mode.
+   Harvest_amount_mode_labeled  harvest_amount_mode_labeled;                     //050822
+   float32              remove_amount_kg_ha; // above ground biomass removed kg/ha (0.0 if not remove_fixed_amount)  050822_
+   bool                 accept_less;         // Applies only to fixed amount removed mode. If the canopy biomass - reserve is less than remove amount is less then do remove up to the reserve.  050822_
+   float32              min_retain_GAI;      // Minimum amount of GAI m2/m2 to leave in the field after cutting. (for remove biomass mode)  051103_
+#ifndef linux
+// g++ compiler is having problems with friendship so prior version importing is not supported in Linux
+   float32              retain_GAI_obsolete_V4_3; // Not just use min         // Amount of GAI m?/m? to leave in the field after cutting.  050822_
+
+   float32              max_retain_GAI_obsolete;  // remove in V5    // Maximum amount of GAI m?/m? to leave in the field after cutting. (for percent_biomass mode) 051103_
+#endif
+public: // The following parameters do not apply to auto clip biomass mode
+   float32        min_LAI_required;        // m2/m2 minimum_LAI_required_for_clipping  (0.0 disables this constraint) 020314_
+   float32        min_biomass_required_kg_ha;  // kg/ha  minimum biomass required for clipping 040628_
+   float32        reserve_biomass_kg_ha;       // This is an amount of biomass that can not or should not be removed 040807_
+#ifndef linux
+// g++ compiler is having problems with friendship so prior version importing is not supported in Linux
+public: // These are from version 3 they are used only for importing
+   V3_Biomass_fate_labeled  V3_biomass_fate_labeled;  // Rename this to harvest mode 020322_
+   int16          V3_trim_biomass_removed;      //{ % 0-100    added trim } 960106_
+   int16          V3_trim_removed_to_surface;   //{ % 0-100    of the amount trimmed how much biomatter is returned to the surface (plant material or grazing manure) } 960106_
+#endif
+public:
+   Harvest_fate_mode_labeled  harvest_fate_mode_labeled; // recorded only for parameter editor
+   Biomass_fate_parameters  biomass_fate_percents;
+   float32        pasture_composition_legumes_percent;  // for grazing model     //040917
+   // The following two are for grazing mode:
+   int16         grazing_percent_N_as_OM;   // organic matter                    //040126
+   int16         grazing_percent_N_as_NH3;  // ammonia                           //040126
+public: // Validators
+   Valid_float32  v_min_LAI_required;                                            //020314
+   Valid_float32  v_min_biomass_required_kg_ha;                                  //040628
+   Valid_float32  v_reserve_biomass_kg_ha;                                       //040907
+   Valid_float32  v_remove_amount_kg_ha;                                         //040629
+   Valid_float32  v_min_retain_GAI;                                              //051103
+#ifndef linux
+   Valid_float32  v_retain_GAI_obsolete;                                         //050822
+   Valid_float32  v_max_retain_GAI_obsolete;  // remove in V5                    //051105
+   Valid_int16    v_V3_trim_biomass_removed;
+   Valid_int16    v_V3_trim_removed_to_surface;
+#endif
+   Valid_int16    v_remove_for_use_percent;
+   Valid_int16    v_remove_for_grazing_percent;
+   Valid_int16    v_biomass_returned_as_manure; // v_manure_applied_to_field;
+   Valid_int16    v_remove_for_disposal_percent;
+   Valid_int16    v_remain_as_residue_percent;
+   Valid_int16    v_remain_standing_live_percent;
+   Valid_int16    v_remain_standing_dead_percent;
+   Valid_int16    v_remain_roots_as_dead_residue_percent;
+   Valid_int16    v_remove_roots_as_loss_percent;
+   Valid_int16    v_remain_roots_live_percent;
+   Valid_int16    v_grazing_percent_N_as_OM;                                     //040126
+   Valid_int16    v_grazing_percent_N_as_NH3;                                    //040126
+public: // constructors
+   Harvest_or_clipping_operation(); // section setup constructor
+   Harvest_or_clipping_operation(const Harvest_or_clipping_operation &to_be_copied); // <- This may be obsolete
+public: // CropSyst operation virtual overrides
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_; //970709
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const;//030123
+   virtual const char *label_string(std::string &buffer)                  const;//170423
+   virtual void log(std::ostream &log_file)                               const;//020810
+   inline virtual int compare(const Item &other)                           const { return 0; } // At this point nothing really to compare eventuall compare phen sync;
+   inline virtual int32 /*enumXX */ get_type()                             const { return CS_OP_MGMT_HARVEST_OR_CLIPPING;}      //011207
+   inline virtual int16 get_SCS_code()                                     const { return  89;} // Clipping operation is always 89 (This is reserved by CropSyst and not used by SCS). //990516_
+};
+//______________________________________________________________________________
+class Auto_clip_biomass_mode                                                     //011207
+: public Harvest_or_clipping_operation                                           //040204
+{
+   friend class Management_parameters;                                           //090316
+public:
+   // Considerations are not saved to the file, they are updated based on selections   040831
+   float32  adj_relative_growth_rate;  Valid_float32  v_adjust_relative_growth_rate_for_clipping;     bool consider_adjust_rate; // 0-2  011208
+   float32  LAI_forces_clipping;       Valid_float32  v_LAI_forces_clipping;        bool consider_LAI;// m2/m2  If this LAI is reached clipping will occur  (0.0 disables this condition)  040830
+   float32  biomass_forces_clipping;   Valid_float32  v_biomass_forces_clipping;    bool consider_biomass;// kg/ha  function used kg/m2 970521
+   int16    flowering_forces_clipping; Valid_int16    v_flowering_forces_clipping;  bool consider_flowering; // Days (0 = not considered) 040830
+
+   V3_Automatic_clipping_mode_labeled V3_automatic_clipping_mode_labeled; // for V3 compatilibity only 980826P
+public: // constructors
+   Auto_clip_biomass_mode();
+   // copy constructor
+   Auto_clip_biomass_mode(const Auto_clip_biomass_mode& to_be_copied); // <- Might not be needed
+public: // virtual methods
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_;   //970709
+   virtual void log(std::ostream &log_file)                              const;  // temporarily abstract so I make sure to implement 020810
+   virtual int32  get_type()                                               const { return CS_OP_MGMT_AUTO_CLIP_BIOMASS;}    //011207
+    inline virtual int16 get_SCS_code()                                    const { return  89;} // Clipping operation is always 89 (This is reserved by CropSyst and not used by SCS). 990516_
+public:
+   virtual inline bool is_mode()                                           const { return true;} //020322
+   void update_considerations()                                    modification_;//040831
+   void set_considerations()                                       modification_;//040831
+};
+//______________________________________________________________________________
+class Irrigation_operation
+: public CropSyst_field_operation_VX   // CropSyst_field_operation may be sufficient  011207
+{
+ public:
+    Irrigation_application_mode_labeled   application_mode_labeled;              //041028
+    Irrigation_consideration_mode_labeled consideration_mode_labeled;            //091201
+ protected: friend class Crop_production_function_simulation;
+   float32     amount_mm_32;   //{ irrigation: amount (mm), converted to m when event table is generated}  value for fixed amount mode
+   float32     salinity_32; //{ salt dS/m converted to kg chem/m3 soil. }
+   float32     ECw_to_TDS;  // Usually about 0.64 Electrical Conductivity dS/m to Totals Dissolved Solids (kg/m3) 080402_
+   float32     NO3_N_concentration; // { concentration (kg chem/m3 soil) (With irrigation)} 080213
+   float32     NH4_N_concentration; // { concentration (kg chem/m3 soil) (With irrigation)} 080213
+
+   float32     net_irrigation_mult_32; // for simple irrigation event the default value is 1.0 this is overridden auto irrig events
+   float32     refill_point_32;   // 0-1 0 refills to PWP  1 refills to FC 051228_
+ public: // The following used to be only in auto irrig, but Luca pointed out they can also be useful
+         // in the option when the specific date irrigation recharges soil profile. 041028
+   float32 max_allowable_depletion_32;
+   Depletion_observation_depth_mode_labeled depletion_observation_depth_mode_labeled;  //070606
+   float32 depletion_observe_depth_m;          //{ m this is the maximum depth we examine for automatic irrigaiton conditions }
+   float32 depletion_observe_root_zone_fract;  // fraction 0 or greater (usually less than 1.0 and mostly less than 2.0, but unbounded 070606_
+   float32 min_application_mm;  // mm   This was added because Rolf Sommer identified that with many irrigation systems it is not possible for equipment to provide trivial amounts 060719_
+   float32 max_application_mm;  // mm
+   float32 leaf_water_potential; // -J/kg                                        //091201
+   float32 surface_evaporation_area_fraction;                                    //130321
+   float32 profile_volume_fraction;                                              //130321
+
+   Directed_irrigation_soil_wetting soil_wetting;                                //130313
+
+ public: // public for editor
+    Valid_float32 v_max_allowable_depletion;
+    Valid_float32 v_depletion_observe_depth;
+    Valid_float32 v_depletion_observe_root_zone_fract;                           //070606
+    Valid_float32 v_min_application;                                             //060719
+    Valid_float32 v_max_application;
+    Valid_float32 v_leaf_water_potential;                                        //091201
+   Valid_float32 v_surface_evaporation_area_fraction;                            //130321
+   Valid_float32 v_profile_volume_fraction;                                      //130321
+
+ public: // Accessor
+   inline Depletion_observation_depth_mode
+      get_depletion_observation_depth_mode()                               const { return depletion_observation_depth_mode_labeled.get(); } //070606
+   inline float64 get_max_allowable_depletion()                            const { return max_allowable_depletion_32; }                     //981212
+   inline float64 get_depletion_observe_depth()                            const { return depletion_observe_depth_m; }                      //981212
+   inline float64 get_depletion_observe_root_zone_fract()                  const { return depletion_observe_root_zone_fract; }              //070606
+   float64 get_min_application_m()                                         const;//060719
+   float64 get_max_application_m()                                         const;//981212
+   bool multiply_amount_by(float32 multiplier)                     modification_;//070716
+ public:
+    Valid_float32 v_amount;                                                      //020313
+    Valid_float32 v_salinity;                                                    //020313
+    Valid_float32 v_ECw_to_TDS;                                                  //080402
+    Valid_float32 v_NO3_N_concentration;                                         //020313
+    Valid_float32 v_NH4_N_concentration;                                         //020313
+// NYI     Valid_float32 v_chemical_concentration;  perhaps eventually for pesticides
+    Valid_float32 v_net_irrigation_mult;                                         //020313
+    Valid_float32 v_refill_point;                                                //051228
+    std::string chemical_name;
+ public: // accessors
+   inline float64 get_amount_mm()                                          const { return amount_mm_32; }           //020313
+   inline float64 get_salinity()                                           const { return salinity_32; }            //020313
+   inline float64 get_ECw_to_total_dissolved_solids()                      const { return ECw_to_TDS; }             //080402
+   inline float64 get_NO3_N_concentration()                                const { return NO3_N_concentration  ; }  //080213
+   inline float64 get_NH4_N_concentration()                                const { return NH4_N_concentration  ; }  //080213
+   inline float64 get_net_irrigation_mult()                                const { return net_irrigation_mult_32;}   //981212
+   inline float64 get_refill_point()                                       const { return refill_point_32;}         //051228
+public: // constructor
+   Irrigation_operation(CropSyst_Op  irrig_or_auto_irrig_code = CS_OP_MGMT_IRRIGATION) ;
+public: // CropSyst operation virtual methods
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_; //970709x
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const;//030123
+   virtual const char *label_string(std::string &buffer)                  const;//170423
+   virtual void log(std::ostream &log_file)                               const;// temporarily abstract so I make sure to implement  //020810
+   inline virtual int compare(const Item &other)                           const { return 0; } // At this point nothing really to compare eventuall compare phen sync;
+   inline virtual int32 /*enumXX */ get_type()                             const { return CS_OP_MGMT_IRRIGATION;} //011207
+ };
+//______________________________________________________________________________
+class Automatic_irrigation_mode
+: public Irrigation_operation
+   // Now derived from Irrigation operation so we can get the salinity and chemical values  020313
+{  // When simulating salinity, the automatic irrigation with have a default concentration.
+public: // constructor
+   Automatic_irrigation_mode();                                                  //990224
+public: // Common operation virtual methods
+   virtual int32 /*enumXX */ get_type()                                   const { return CS_OP_MGMT_AUTO_IRRIGATION; }   //011207
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const; //030123
+   virtual const char *label_string(std::string &buffer)                  const; //170423
+   virtual void log(std::ostream &log_file)                               const; //020810
+   virtual inline bool is_mode()                                          const { return true;}//020322
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_; //970709
+};
+//_2002-03-13___________________________________________________________________
+#ifdef OBSOLETE
+120711
+class Inorganic_nitrogen_operation
+: public CropSyst_field_operation_VX //CropSyst_field_operation may be sufficient //011207
+{
+ public:
+    float32          NO3_N_kg_ha; //  {NO3 (kg/ha), converted to kg/m2 when event table is generated }  // 060717 was NO3_amount_32
+    float32          NH4_N_kg_ha; //   {NH4 (kg/ha), converted to kg/m2 when event table is genrated}  // 060717 was NH4_amount_32
+    Ammonium_source_labeled  NH4_source_labeled;                                 //020322
+    NH4_Appl_method_labeled  NH4_appl_method_labeled;                            //020322
+    bool             NH4_volatilization_calculated;                              //990227
+         // Force user supplied NH4_volatilization to be used overriding any
+         // selections made by the radio buttons and computed by the model.}
+    float32          NH4_volatilization_32; // % When NH4 is applied with no organic N
+                                 // 0.0 is now a valid value (it used to disabled automatic calculation
+ public:
+    Valid_float32 v_NO3_N;
+    Valid_float32 v_NH4_N;
+    Valid_float32 v_NH4_volatilization;
+ public: //accessors
+   inline float64 get_NO3_N_kg_ha()                                        const { return NO3_N_kg_ha; }            //060717
+   inline float64 get_NH4_N_kg_ha()                                        const { return NH4_N_kg_ha; }            //060717
+   inline float64 param_NH4_volatilization()                               const { return NH4_volatilization_32; }  //981212
+ public:
+   Inorganic_nitrogen_operation() ;
+public: //virtual methods
+   virtual void setup_parameters
+      (CORN::Data_record &data_rec,bool for_write)                modification_;//970709
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const;//030123
+   virtual const char *label_string(std::string &buffer)                  const;//170423
+   virtual void log(std::ostream &log_file)                              const;// temporarily abstract so I make sure to implement //020810
+   inline virtual int compare(const Item &other)                           const { return 0; } // At this point nothing really to compare eventuall compare phen sync;
+   inline virtual int32 /*enumXX */ get_type()                             const { return CS_OP_MGMT_INORGANIC_NITROGEN;}   //011207
+   bool multiply_amount_by(float32 multiplier)                     modification_;//070716
+};
+#endif
+//______________________________________________________________________________
+class Organic_nitrogen_operation_abstract
+: public CropSyst_field_operation_VX   // CropSyst_field_operation may be sufficient //011207
+{
+   friend class Management_parameters;                                           //040830
+public:
+   //110831 Residue_source_labeled     org_N_source_labeled;                     //110104
+   Organic_matter_source_labeled  organic_matter_source_labeled;                 //110831
+   float32                    org_N_kg_ha; Valid_float32 v_org_N; //  in the CropSyst model, kg/ha N converted to kg/m2 in the form of organic matter  //060717_
+/*
+// Manure N is only from solid (organic) not including ureas
+Managing Nitrogen for GroundWater QUality and Farm Profitability
+R.F. Follett, D.R. Keeney, and R. M. Cruse (eds)
+*/
+   float32                    NH3_N_kg_ha; Valid_float32 v_NH3_N;//   {NH4 (kg/ha), converted to kg/m2 when event table is genrated}    //060717_
+   Org_N_appl_method_labeled  org_N_appl_method_labeled;                         //020322
+   float32                    total_solids_kg_ha;                                //110818
+      // total_solids_kg_ha currently used by CAFE_dairy but is generally applicable
+      // currently CropSyst (parameter editor and the model)
+      // calculates this from org_N
+      // Eventually modify the parameter editor to continue to provide this
+      // calculation, but save the value in the file.
+   float32                    dry_matter_percent; Valid_float32 v_dry_matter;    //060717
+   float32                    long_term_org_N_volatilization_loss_percent;       //020525
+   Valid_float32 v_long_term_org_N_volatilization_loss_percent;                  //020525
+   float32                    water_depth_mm;                                    //110816 added for CAFE dairy
+   float32                    water_volume_m3;                                   //110816 added for CAFE dairy
+public: // constructor
+   Organic_nitrogen_operation_abstract(CropSyst_Op cs_op);
+public: // virtual methods
+   virtual void setup_parameters
+      (CORN::Data_record &data_rec,bool for_write)                 modification_;  //970709x
+   inline  virtual int compare(const Item &other)                          const { return 0; } // At this point nothing really to compare eventuall compare phen sync;
+   virtual void log(std::ostream &log_file)                              const;  // temporarily abstract so I make sure to implement         //020810_
+ public: //accessors
+          virtual bool is_liquid()                                         const; //020322
+   inline float64 get_org_N_kg_ha()                                        const { return org_N_kg_ha; } //060717
+   inline float64 get_NH3_N_kg_ha()                                        const { return NH3_N_kg_ha; } //060717
+   inline float64 param_long_term_org_N_volatilization_loss_percent()      const { return long_term_org_N_volatilization_loss_percent; }  //020525
+ public: //special
+   virtual bool multiply_amount_by(float32 multiplier)             modification_;//070716
+};
+//______________________________________________________________________________
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+// This mode is for compatibility with previous versions
+// I was planning on making these deprecated replaced with
+// Organic_matter_composition_decomposition in version 5,
+// but Claudio is still using this set of parameter in the VB version,
+// also for CAFE dairy.
+//
+class Organic_nitrogen_operation
+: public Organic_nitrogen_operation_abstract                                     //080902
+{
+   friend class Management_parameters;                                           //040830
+public:
+   Solid_liquid_form_labeled  solid_liquid_form_labeled;   // was liquid_form just 0 and 1 now multiple forms are available for Dairy model      //020322
+   bool                       org_N_volatilization_calculated; // Force user supplied NH3_volatilization to be used overriding any        //020252
+                                 // selections made by the radio buttons and
+                                 // computed by the model.}
+   bool                       decomposition_time_calculated;                     //990227
+   int16                      decomposition_time_63; //  The number of days it takes to decompose to 63% (this is being replaced with 50% basis and is here only for import purposes) 040830
+   int16                      decomposition_time_50; //  The number of days it takes to decompose to 50% 040830
+   float32                    carbon_fraction;  // around 0.5                    //080225
+public: // constructor
+   Organic_nitrogen_operation() ;
+public: // virtual methods
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_; //970709
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const; //030121
+   virtual const char *label_string(std::string &buffer)                  const; //170423
+   virtual void log(std::ostream &log_file)                              const;  // temporarily abstract so I make sure to implement    //020810
+   inline  virtual int32 /*enumXX */ get_type()                            const { return CS_OP_MGMT_ORGANIC_NITROGEN;}                   //011207
+ public:
+   Valid_float32 v_carbon_fraction;                                              //080225
+   Valid_int16   v_decomposition_time_63;
+   Valid_int16   v_decomposition_time_50;                                        //040826
+ public: //accessors
+   virtual bool is_liquid()                                                const;//080903_020322
+ };
+ //______________________________________________________________________________
+#endif
+
+//______________________________________________________________________________
+class Biomatter_application_operation
+: public Organic_nitrogen_operation_abstract                                     //080902
+{
+   friend class Management_parameters;
+public:  //decomposition parameters may be stored either in the with this application
+         //or in a common file.
+   Biomass_decomposition_parameters_filename biomatter_param_filename;
+   provided_ Biomass_decomposition_parameters decomposition_parameters;          //110817
+private:
+   //110817 provided_ Biomass_decomposition_parameters *decomposition_parameters; // The parameter are stored in the biomatter parameter file and loaded as needed 100216_
+public: // constructor
+   Biomatter_application_operation();
+   //110817 virtual ~Biomatter_application_operation();
+public: // virtual methods
+   virtual void setup_parameters
+      (CORN::Data_record &data_rec,bool for_write)                 modification_;//970709
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const; //030121
+   virtual const char *label_string(std::string &buffer)                  const; //170423
+   virtual void log(std::ostream &log_file)                               const; //020810 temporarily abstract so I make sure to implement
+   inline  virtual int compare(const Item &other)                          const { return 0; } // At this point nothing really to compare eventuall compare phen sync;
+   inline  virtual int32 /*enumXX */ get_type()                            const { return CS_OP_MGMT_BIOMATTER_APPLICATION;}   //011207
+   const Biomass_decomposition_parameters &provide_decomposition_parameters(Organic_matter_source source = default_source) provision_;  //100216
+   //110817 bool take_decomposition_parameters(Biomass_decomposition_parameters *_parameters) contribution_;   //100216_
+                 // Pass nil to reset the decomposition parameters
+ };
+//_2008-02-29___________________________________________________________________
+class Chemical_operation
+: public CropSyst_field_operation_VX   // CropSyst_field_operation may be sufficient  011207_
+{
+public: // public for parameter editor
+   float32    chemical_concentration_32; // { concentration (kg chem/m3 soil) (With irrigation)}
+   Valid_float32 v_chemical_concentration;
+   std::string chemical_name;
+public: // constructor
+   Chemical_operation() ;
+public: // CropSyst operation virtual methods
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_;  //970709
+   //170424 virtual const char *label_cstr_deprecated(char *buffer)                const; //030121
+   virtual const char *label_string(std::string &buffer)                  const; //170423
+   virtual void log(std::ostream &log_file)                               const; //020810
+   inline virtual int compare(const Item &other)                           const { return 0; } // At this point nothing really to compare eventuall compare phen sync;
+   inline virtual int32 /*enumXX */ get_type()                             const { return CS_OP_MGMT_CHEMICAL;}  //011207
+};
+//______________________________________________________________________________
+class N_application_soil_observation_mode  // was Automatic_NO3_mode
+: public N_application_soil_observation_mode_class                               //120711
+{  // The event date is the sampling date.
+/*120711
+ public:
+   class Split_application // Automatic_NO3_application                           //991122
+   : public CropSyst_field_operation_VX   // CropSyst_field_operation may be sufficient       //011207
+   {  // In auto NO3 mode we can optionally specify when the applications are split.
+      // If no split application are specify, a single application will be generated at runtime.
+   public: // public for parameter editor, we could use friendship
+      int16    percent_of_application; // Could be uint8 but don't have edit class for it yet.
+   public: // values computed during run when ready to apply
+      float32  actual_amount_NO3_kg_m2; // kg/m2 (used only for output?)
+   public: // Constructors
+      inline Split_application(float32 i_actual_amount_NO3_kg_m2 = 0.0)
+      : CropSyst_field_operation_VX(CS_OP_MGMT_AUTO_NO3_APPL,UNKNOWN_NRCS_SDR_operation_number) //030824
+      , percent_of_application(100)                                              //020314
+      , actual_amount_NO3_kg_m2(i_actual_amount_NO3_kg_m2) // computed at planting
+      {}
+   public: // Accessors
+      inline uint8 get_percent_of_application()                            const { return percent_of_application; }    //030103
+   public: // Overrides
+      virtual void setup_parameters
+         (CORN::Data_record &data_rec,bool for_write)              modification_;//970709
+      virtual const char *label_cstr(char *buffer)                         const;//030121
+      virtual void log(std::ostream &log_file)                           const;//020810
+      inline virtual int compare(const Item &other)                        const { return 0; } // At this point nothing really to compare eventually compare phen sync;
+      inline virtual int32  get_type()                          const { return CS_OP_MGMT_AUTO_NO3_APPL;}  //011207
+      inline virtual int16 get_SCS_code()                                  const { return  111;} // Auto NO3 application is always Fertilization Injected. 990516
+      inline bool is_mode()                                                const { return false;}                    //020318
+         // Note that this is not actually a mode because the event date is the soil sampling date.
+         // and there is no period.
+   };
+*/
+public:
+   Automatic_N_mode_labeled automatic_N_mode_labeled;                            //120711_020322
+   //120711 Automatic_NO3_mode_labeled automatic_NO3_mode_labeled;                        //020322
+   float32              target_yield_N_uptake_kg_ha;  // kg/ha  Crop N uptake for target yield    //990208
+   float32              estimated_mineralization_kg_ha;
+   float32              critical_soil_N_for_no_response_kg_ha;// kg/ha           //990208
+   float32              fertilizer_use_efficiency;    // % 0-100                 //990208
+   float32              soil_N_sampling_depth;        // m                       //990208
+   bool                 split_applications;                                                       //000510
+   //040712 I should have a separate set of applications for each mode,
+   //040712 but I would have to store the list for each section, and this was not how
+   //040712 it was stored in V3, normally there will only be one mode entry anyway
+public: // Validators
+   Valid_float32 v_target_yield_N_uptake;// kg/ha  Crop N uptake for target yield  //990208
+   Valid_float32 v_estimated_mineralization;// kg/ha  Crop N uptake for target yield  //990208
+   Valid_float32 v_critical_soil_N_for_no_response;// kg/ha                //990208
+   Valid_float32 v_soil_N_sampling_depth;      // m                              //990208
+   Valid_float32 v_fertilizer_use_efficiency;  // % 0-100                        //990208
+public: // computed at runtime when the Auto_NO3_mode start event is reached     //
+   float32 total_NO3_application_kg_m2;  // will be convered to kg/ha for output //020314
+public:
+   N_application_soil_observation_mode();
+   float64 determine_total_automatic_N_application                               //980824
+      (float64 sum_N_to_sampling_depth // kg/m2
+      ,float64 avg_org_matter_to_transformation_depth); //  kg/m2
+   virtual inline bool is_mode()                                           const { return false;}   //020322
+   virtual void setup_parameters(CORN::Data_record &data_rec,bool for_write) modification_;  //970709
+   //170424 virtual const char *label_cstr_deprecated(char *result)                const;
+   virtual const char *label_string(std::string &result)                  const; //170423
+   virtual void log(std::ostream &log_file)                               const; //020810 temporarily abstract so I make sure to implement
+};
+//______________________________________________________________________________
+class Management_parameters
+: public Common_parameters_data_record                                           //020611
+{
+ public:
+   Land_treatment_labeled  land_treatment_labeled;                               //020322
+   bool                    crop_management;                                      //030606
+   /**<
+      Management file events may either be associated with a crop in a rotation
+      or associated with a simulation run.
+      When associated with a crop, events may be syncronized relative to
+      the Crop planting date and phenologic events.
+      When assicated with a simulation, only those events that are not relevent
+      to crop management will be displayed.
+   **/
+   bool        CANMS_support;    // Used only by the management editor, enables CANMS operation options 060103
+   /* NYI Could apply auto irrigation parameters given crop type (and soil for deep rooted crops)/
+   bool        recommended_automatic_irrigation;                                 //110718
+   Irrigation_system_labeled irrigation_system_labeled;                          //110718
+   */
+      // Irrigation system is used with recommended automatic irrigation.
+   float32  soil_conservation_factor_32;                 // 0-1  for RUSLE
+   float32 seasonal_carbon_footprint_kgCO2e_ha;                                  //120430
+   float32 seasonal_irrigation_carbon_footprint_kgCO2e_ha;                       //120430
+   float32 irrigation_application_carbon_footprint_kgCO2e_ha_mm;                 //120430
+
+   #if ((CS_VERSION > 0) && (CS_VERSION <= 4))
+   public:  // planting_parameters
+   Harvest_or_clipping_event         *V3_harvest_date; // used only for V3 import (will be 0 if not V3) 040523_
+   Automatic_clip_biomass_mode_event *V3_auto_clip_biomass_event; // used only for V3 import (will be 0 if not V3) 040631_
+   CORN::Date                         V3_latest_date_to_harvest_relative; // Perhap move to Autoclipping? 990421
+//             latest date, is now harvest period for automatic clipping, or entereded as a terminating harvest/clipping event
+   private: // The following are provided for version 3 import capability
+   bool              V3_auto_irrig_enabled;                                      //020922
+   #endif
+public: // event lists
+   //011207  The following event list should be renamed to XXXX_events since they hold
+   //       events not operations.
+   Common_event_list irrigation_operations;                                      //981007
+   Common_event_list auto_irrigation_mode_operations;                            //020313
+   Common_event_list inorganic_nitrogen_operations;                              //981007
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+// This mode is for compatibility with previous versions
+// These parameters are deprecated and will be removed in version 5
+// 110104 However, I need them for CAFE diary
+   Common_event_list organic_nitrogen_operations;                                //981228
+   Common_event_list V3_clipping_operations;  // Used only to import V3 files    //040524
+#endif
+   Common_event_list biomatter_application_operations;                           //080902
+   Common_event_list tillage_operations;                                         //981007
+   Common_event_list residue_operations;                                         //981007
+   Common_event_list chemical_operations;                                        //981007
+   Common_event_list harvest_or_clipping_operations;                             //031014
+   N_application_soil_observation_mode_event   *N_application_soil_observation_event;  // allocated on creation but transferred to the event list during run060804_
+   Common_event_list auto_N_applications;  // Currently only one automatic_NO3_application_mode can have split   060804 need to rename this to split_N_applications991122_
+   bool automatic_nitrogen;                                                      //060804
+   Common_event_list auto_clip_biomass_mode_operations;                          //011207
+   Common_event_list LADSS_operations; // In LADSS, all operations are simply put on LADSS_operations list  030810
+ public:  // validators
+      Valid_float32  v_soil_conservation_factor;
+ public: // accessors
+   inline float64 get_soil_conservation_factor()                           const { return soil_conservation_factor_32                 ; }     //981212
+   inline Land_treatment param_land_treatment()                            const { return (Land_treatment)(land_treatment_labeled.get()); }   //990105
+          int16 total_automatic_N_applications()                           const;//020403
+public:
+   Management_parameters();  // default management file
+   virtual ~Management_parameters();                                             //120218_020402
+   virtual void expect_structure(bool for_write = false);                        //981007
+   inline virtual const char *get_primary_section_name()                   const {return LABEL_management;} //020911
+   virtual Section_entry_change *get_section_entry_changes(uint16  &count) const;//020408
+   inline virtual bool preserve_unexpected_entries()                       const { return false; } //020108
+   virtual void get_end()                                          modification_;//020922
+   inline virtual const char *get_type_label()                             const { return "CropSyst management";} //051011
+ public: // Run time methods;
+   void associate_with_crop(const void /*Crop_base*/ *to_crop)     modification_;
+      // Associates all the management events in the list to a crop.
+      // Used when crop is planted.
+   bool ensure_at_least_one_harvest(Crop_model crop_model)         modification_;//031203
+      // A crop will need at least one harvest event
+      // returns true if a default harvest event was added.
+      // returns false if the management file had a harvest event. //031203_
+public:
+   uint32 irrigation_multiply_by(float32 multiplier)               modification_;//070716
+   uint32 fertilization_nitrogen_multiply_by(float multiplier)     modification_;//070716
+      // These multipliers are used by Management generation when generating
+      //  adjusted irrigation and nitrogen fertilization amounts                   070716
+};
+//_2000-05-19__________________________________________________________________/
+} // namespace CropSyst
+
+
+#  define org_N_appl_method_cowl_or_labeled        org_N_appl_method_labeled
+#  define org_N_source_cowl_or_labeled             organic_matter_source_labeled
+#  define automatic_N_mode_cowl_or_labeled         automatic_N_mode_labeled
+//120711 #  define automatic_NO3_mode_cowl_or_labeled       automatic_NO3_mode_labeled
+#  define NH4_source_cowl_or_labeled               NH4_source_labeled
+#  define NH4_appl_method_cowl_or_labeled          NH4_appl_method_labeled
+#  define harvest_amount_mode_cowl_or_labeled      harvest_amount_mode_labeled
+#  define application_mode_cowl_or_labeled         application_mode_labeled
+#  define consideration_mode_cowl_or_labeled       consideration_mode_labeled
+#  define application_mode_cowl_or_labeled         application_mode_labeled
+#  define   depletion_observation_depth_mode_cowl_or_labeled  depletion_observation_depth_mode_labeled
+#  define   harvest_fate_mode_cowl_or_labeled      harvest_fate_mode_labeled
+//org_N_source_labeled
+#else
+#  include  "management/management_param_V4.h"
+#  define   org_N_appl_method_cowl_or_labeled      org_N_appl_method_cowl
+#  define   org_N_source_cowl_or_labeled           organic_matter_source_cowl
+#  define   automatic_N_mode_cowl_or_labeled       automatic_N_mode_cowl
+//120711 #  define   automatic_NO3_mode_cowl_or_labeled     automatic_NO3_mode_cowl
+#  define   NH4_source_cowl_or_labeled             NH4_source_cowl
+#  define   NH4_appl_method_cowl_or_labeled        NH4_appl_method_cowl
+#  define   harvest_amount_mode_cowl_or_labeled    harvest_amount_mode_cowl
+#  define   application_mode_cowl_or_labeled       application_mode_cowl
+#  define   consideration_mode_cowl_or_labeled     consideration_mode_cowl
+#  define   application_mode_cowl_or_labeled       application_mode_cowl
+#  define   depletion_observation_depth_mode_cowl_or_labeled  depletion_observation_depth_mode_cowl
+#  define   harvest_fate_mode_cowl_or_labeled      harvest_fate_mode_cowl
+#endif
+#endif
+// mgmt_param.h
+#endif
+

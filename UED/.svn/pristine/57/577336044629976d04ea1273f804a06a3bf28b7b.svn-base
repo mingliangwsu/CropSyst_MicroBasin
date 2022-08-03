@@ -1,0 +1,172 @@
+//---------------------------------------------------------------------------
+#include <vcl.h>
+#pragma hdrstop
+#include "UED/convert/text_dBase_Excel_with_TDF/tabular_file_with_TDF_convertor.h"
+
+#include "Excel_workbook_form.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma link "AdvGridWorkbook"
+#pragma link "AdvGrid"
+#pragma link "AdvGridExcel"
+#pragma link "BaseGrid"
+#pragma link "tmsAdvGridExcel"
+#pragma resource "*.dfm"
+TForm1 *Form1;
+//---------------------------------------------------------------------------
+__fastcall TForm1::TForm1(TComponent* Owner)
+   : TForm(Owner)
+{
+}
+
+// Note, CORN::Tabular_file assumes the file is only 2 dimensional Rows and Columns
+// But Excel also has sheets, the TDF format accomodates sheets
+// probably would be better to simply read the workbook directly
+//(driven by the TDF format, rather than trying to compose the delineated data record.
+//______________________________________________________________________________
+class  Tabular_AdvGridExcelIO  // Only handles single sheet
+: public CORN::Tabular_file
+{
+   TAdvGridWorkbook *grid_workbook;
+   TAdvGridExcelIO *grid_Excel_IO; // owned by a form
+   int curr_row;  // Row in the spreadsheet 0 based
+ public:
+   Tabular_AdvGridExcelIO(const CORN::File_name &i_filename,TAdvGridWorkbook *_grid_workbook,TAdvGridExcelIO *_grid_Excel_IO)
+   : CORN::Tabular_file(i_filename,false)
+   , grid_Excel_IO(_grid_Excel_IO)
+   , curr_row(0)
+   , grid_workbook(_grid_workbook)
+   {};
+
+   virtual int get_column_count() { return 0; } // Not currently needed for import utility
+   // returns the number of columns identified in the table.
+   virtual int get_column_width(int column) {return 0; } //pure
+   // returns the width (in characters of the specified column
+   // I think it is OK to return 0 if column width is not significant (I.e. spreadsheets)
+   virtual bool get(Data_record &data_rec);
+   virtual bool get_next(Data_record &data_rec);
+   virtual bool   goto_first() {curr_row = 0; return true;}
+   // Goto the first line in the text file with detail line data (not header or column header)
+   virtual bool   goto_index(uint32 zero_based_index) { curr_row = zero_based_index; ; return true; }
+   virtual bool   goto_last() { return false; } // NYI (/NYN)
+   virtual bool   goto_next(int32 skip_records = 1) { return false; } // NYI (/NYN)
+   /* 161013 field type is actually format specification,
+   virtual uint8 get_field_type(const char *field_name) { return false; }; // NYI (/NYN)
+   */
+      // returns the filed type corresponding to VV_entry types
+   virtual uint32 get_current_index_0_based() { return false; } // NYI (/NYN)
+      // returns the index value for the table's current position.
+      // For database tables this is the record number
+      // For memory tables, this is the memory location or object pointer);
+   virtual uint32 append(Data_record &data_rec) { return false; } // NYI (/NYN)
+      // This creates a new record at the end of the table and sets data_rec.
+      // Returns the record index of the new record that was appended.
+   virtual uint32 delete_record() { return false; } // NYI (/NYN)
+      // This marks the current record as deleted.
+      // usually only a flag is set in the record indicating it is deleted
+      // so the record is not actually physically deleted.
+/*170423 	  
+   virtual const char *label_cstr(char *buffer) const
+   {
+   // NYI NYN
+   // Normally (for text output (I.e. Windows title bar)
+   // we would want to show the name of the file and the line (actual line or data line?)being processed
+   // This currently isn't needed for the UED import utilities
+   return buffer;
+   };
+*/   
+   virtual const char *label_cstr(std::string &buffer) const  //170423
+   {
+   // NYI NYN
+   // Normally (for text output (I.e. Windows title bar)
+   // we would want to show the name of the file and the line (actual line or data line?)being processed
+   // This currently isn't needed for the UED import utilities
+   return buffer.c_str();
+   }
+   
+
+   virtual uint32 get_record_count() { return 0; /*NYI */ ; }
+   //               inline virtual int get_data_lines()
+   protected:
+      virtual bool set_data(Data_record &data_rec) { return false; /* NYI */ }
+}
+//_2005-04-10___________________________________________________________________
+bool Tabular_AdvGridExcelIO::get(Data_record &data_rec)
+{  CORN::Tabular_file::get(data_rec);
+   bool got = false;
+   bool all_data_column_cell_values_on_this_row_blank = true;
+   // At this point we should be at a data_record row in the spreadsheet
+
+   //             Currently assume no end file marks (I have not provision for specifying the cell column in the TDF format, but could assume marker text in the first column.
+   //NYI 050426    if (file_extent_layout.end_marker.length() && record_line_string.find(file_extent_layout.end_marker) != NPOS)
+   //NYI 050426          at_end_data_marker  = true;
+   //NYI 050426    if (at_end_data_marker)
+   //NYI 050426        return false;
+   {
+   int curr_col = 0;
+   FOR_EACH_IN(section,VV_Section,data_rec.sections,each_section)
+   {   // This format doesn't really have sections, but the expected data record layout may
+      FOR_EACH_IN(entry,VV_base_entry,section->entries,each_entry)
+      {
+         AnsiString cell_value = grid_workbook->Grid->Cells[curr_col][curr_row];
+         if (cell_value.Length())
+         {  entry->set_str(cell_value.c_str());
+         //NYI  Here we have the raw data as a string
+         //NYI   we should check for special markers
+         //      we would provide CORN::Tabular_file with marker/code pairs (I.e. validation status)
+         //NYI 050518             entry->set_validation_status(validate(/*column_index,*/datum->c_str())); // Here we can check for any attribute markers
+         //                      Derived classes can override check_datum_code for missing markers etc...
+            all_data_column_cell_values_on_this_row_blank = false;
+         };
+         got = true;
+         curr_col ++;                                                            //061018
+      } FOR_EACH_END(each_entry)
+   } FOR_EACH_END(each_section)
+   }
+   if (got) curr_row ++;                                                         //061018
+   return got;
+}
+//_2005-04-06___________________________________________________________________
+bool Tabular_AdvGridExcelIO::get_next(Data_record &data_rec)
+{  bool got = get(data_rec);
+   return got;
+}
+//_2005-04-06___________________________________________________________________
+class Excel_workbook_with_TDF_convertor
+: public Tabular_file_with_TDF_convertor
+{
+   TAdvGridWorkbook *grid_workbook;
+   TAdvGridExcelIO         *grid_Excel_IO; // owned by a form
+   Tabular_AdvGridExcelIO  *tabular_file;
+ public:
+   Excel_workbook_with_TDF_convertor(TAdvGridWorkbook *_grid_workbook,TAdvGridExcelIO *_grid_Excel_IO);
+ protected :
+   virtual CORN::Tabular_file *provide_tabular_file
+   (const char *target_filename
+   ,Year &file_year);
+   // file_year is only used by formats that split files into years
+}
+//______________________________________________________________________________
+Excel_workbook_with_TDF_convertor::Excel_workbook_with_TDF_convertor(TAdvGridWorkbook *_grid_workbook,TAdvGridExcelIO *_grid_Excel_IO)
+: Tabular_file_with_TDF_convertor()
+, grid_workbook(_grid_workbook)
+, grid_Excel_IO(_grid_Excel_IO)
+, tabular_file(0)
+{  setup_from_filenames(ParamStr(0).c_str(),ParamStr(1).c_str());
+}
+//______________________________________________________________________________
+CORN::Tabular_file *Excel_workbook_with_TDF_convertor::provide_tabular_file
+(const char *target_filename
+,Year &file_year_not_applicable)
+{  CORN::File_name target_filename_temp(target_filename);
+   if (!tabular_file) tabular_file = new Tabular_AdvGridExcelIO(target_filename_temp,grid_workbook,grid_Excel_IO);
+   return tabular_file;
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::continue_buttonClick(TObject *Sender)
+{  Excel_workbook_with_TDF_convertor convertor(excel_IO_grid_WB,AdvGridExcelIO1);
+   int result =  convertor.convert();
+   convertor.notify_climgen();
+}
+//---------------------------------------------------------------------------
+

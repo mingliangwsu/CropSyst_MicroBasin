@@ -1,0 +1,346 @@
+#ifdef USE_PCH
+#  include "simulation/CropSyst_sim_pch.h"
+#else
+#include <math.h>
+#include <corn/math/compare.h>
+#include <corn/measure/measures.h>
+#include "crop/crop_param.h"
+#endif
+
+#include "crop/crop_rows.h"
+
+// Warning hours have been entered as 1 to 24  not 0 to 23
+/*
+'Asin = Atn(SSE / Sqr(-SSE * SSE + 1))
+'Acos = Atn(-CSA / Sqr(-CSA * CSA + 1)) + 2 * Atn(1)
+'If Sin(Acos - Row_Azimuth) = 0 Then SA = 1.570796 Else SA = Atn(Tan(Asin) / Sin(Acos - Row_Azimuth))
+'If SA < 0 Then SA = -SA
+*/
+
+#define percent_slope_to_rad(x) atan(x/100)
+
+namespace_CropSyst_begin
+
+float64 debug_equiv_sol_elev = 0;
+float64 debug_sin_equiv_sol_elev = 0;
+
+float64 debug_sol_elev = 0;
+float64 debug_sin_sol_elev = 0;
+
+ofstream debug_rad_pot("rad_pot.dat");
+
+#ifdef DEBUG1
+#include <fstream.h>
+bool distinguished_day = false;
+ofstream hourly("hourly.txt");
+#endif
+//______________________________________________________________________________
+/*_______*/  float64 Crop_row_obsolete::calc_sine_solar_declination(CORN::DOY DOY)
+/*______*/  {  float64 sin_solar_dec = 0.39785
+/*______*/     * sin(deg_to_rad(278.97 + 0.9856 * DOY
+/*______*/                      + 1.9165 * sin(deg_to_rad(356.6 + 0.9856 * DOY))));
+/*______*/     return sin_solar_dec;
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  float64 Crop_row_obsolete::calc_sine_solar_elevation
+/*______*/  (float64 sin_solar_dec  // radians
+/*______*/  ,Hour hour)             // 24 hours
+/*______*/  {
+/*______*/     //Dim Radian As Single, Asin As Single, SSE1 As Single, SSE2 As Single
+/*______*/     float64 asin_SSD = asin(sin_solar_dec);
+/*______*/     float64 SSE1 = sin(Latitude_rad) * sin_solar_dec
+/*______*/        + cos(Latitude_rad) * cos(asin_SSD) * cos(deg_to_rad(15 * (hour - 11)));
+/*______*/     return CORN_must_be_between(SSE1,-0.9999,0.9999);
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  float64 Crop_row_obsolete::calc_cosine_solar_azimuth
+/*______*/  (float64 sin_solar_dec
+/*______*/  ,float64 sin_solar_elev)
+/*______*/  {
+/*______*/     float64 asin_SSE = asin(sin_solar_elev);
+/*______*/     float64 CSA1 = -(sin_solar_dec - sin_solar_elev * sin(Latitude_rad))
+/*______*/                    / (cos(Latitude_rad) * cos(asin_SSE));
+/*______*/     return CORN_must_be_between(CSA1,-0.9999,0.9999);
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  float64 Crop_row_obsolete::calc_shadow_angle
+/*______*/  (float64 Solar_Elev     // radians
+/*______*/  ,float64 Solar_Azimuth  // radians
+/*______*/  )
+/*______*/  {
+/*020410*/     float64 Sine_Row_Solar_Az_Angle = fabs(sin(Solar_Azimuth - layout->get_row_azimuth_rad()));
+/*______*/     float64 _SA = (Sine_Row_Solar_Az_Angle == 0)
+/*______*/     ? 1.570796
+/*______*/     : atan(tan(Solar_Elev) / Sine_Row_Solar_Az_Angle);
+/*______*/     return _SA;
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  float64 Crop_row_obsolete::calc_shadow_length
+/*______*/  (float64 shadow_angle // radians
+/*______*/  )
+/*______*/  {
+/*______*/     float64 _SL = (row_height - row_width + row_width / cos(shadow_angle))
+/*______*/                  / tan(shadow_angle);
+/*______*/     return _SL;
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  float64 Crop_row_obsolete::RSRD             // this function is not currently used
+/*______*/  (float64 sin_solar_elev   // radians
+/*______*/  ,float64  SA   // radians
+/*______*/  )
+/*______*/  {
+/*______*/     float64 asin_SSE = asin(sin_solar_elev);
+/*______*/     float64 ss = (asin_SSE <= 0.0)
+/*______*/     ? 0
+/*______*/     : fabs((row_height - row_width + row_width / cos(SA))
+/*020410*/        / (tan(SA) * layout->row_spacing/*Row_Distance*/));
+/*______*/     return CORN_must_be_between(ss,0.0,1.0);
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  float64 Crop_row_obsolete::calc_hourly_incident_angle
+/*______*/  (float64 Solar_Elev
+/*______*/  ,float64 Solar_Azimuth )
+/*______*/  {
+/*______*/  //This functions determines the cosine of the angle of incidence, defined as the
+/*______*/  //angle measured from a normal to the surface with given aspect and slope.  The
+/*______*/  //equivalent solar elevation angle for the inclined plane is obtained by substracting
+/*______*/  //the incident angle from 90 degrees or pi radians
+/*______*/     float64 Slope_radians = percent_slope_to_rad(Slope_percent);
+/*______*/     float64 Term1 = sin(Slope_radians);
+/*______*/     float64 Term2 = cos(Solar_Elev);
+/*______*/     float64 Term3 = cos(-(Aspect_radians - Solar_Azimuth));
+/*______*/     float64 Term4 = cos(Slope_radians);
+/*______*/     float64 Term5 = sin(Solar_Elev);
+/*______*/     float64 Cos_I_A = Term1 * Term2 * Term3 + Term4 * Term5;
+/*______*/     float64 _IA = atan(-Cos_I_A / sqrt(-Cos_I_A * Cos_I_A + 1.0)) + 2.0 * atan(1.0);
+/*______*/     return _IA;
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  float64 Crop_row_obsolete::calc_corrected_shadow_length
+/*______*/  (float64 Shadow_Length
+/*______*/  ,float64 Solar_Elev
+/*______*/  ,float64 Solar_Azimuth
+/*______*/  )
+/*______*/  {
+/*______*/  // This function corrects shadow length for the effect of aspect and slope
+/*______*/
+/*______*/     float64 Slope_radians = percent_slope_to_rad(Slope_percent);
+/*______*/     float64 Cos_Solar_Aspect_Az_Angle = cos(Aspect_radians - Solar_Azimuth);
+/*______*/     // Determines slope component in the direction of the shadow
+/*______*/     float64 Slope_Comp = Slope_radians * Cos_Solar_Aspect_Az_Angle;
+/*______*/     float64 Cor_Factor = sin(Solar_Elev) / sin(3.14159 - Solar_Elev - Slope_Comp);
+/*______*/     float64 _CorSL = Shadow_Length * Cor_Factor;
+/*______*/     if ((_CorSL < row_width) && (_CorSL > 0) )
+/*______*/        _CorSL = row_width;
+/*______*/     return  CORN_must_be_greater_or_equal_to(_CorSL,0.0);
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  // Warning not sure why this function was originally declared variant.
+/*______*/  float64 Crop_row_obsolete::calc_hourly_direct_radiation_potential(float64 sin_solar_elev)
+/*______*/  {
+/*______*/     float64 _POTRAD = 1360.0 * sin_solar_elev * pow(0.75,(1.0 / sin_solar_elev));
+/*______*/     return CORN_must_be_greater_or_equal_to(_POTRAD,0.0);
+/*______*/  };
+//______________________________________________________________________________
+/*______*/  void Crop_row_obsolete::get_hourly_interception
+/*______*/  (Hour        hour
+/*______*/  ,float64    &Hourly_Direct_Row_Int
+/*______*/  ,float64    &Hourly_Direct_Rad_Pot
+/*______*/  ,float64    &Hourly_Diffuse_Row_Int
+/*______*/  ,float64    &Hourly_Diffuse_Rad_Pot
+/*______*/  ,float64    Sine_Solar_Dec
+/*______*/  )
+/*______*/  {
+/*______*/     Hourly_Direct_Row_Int = 0.0;
+/*______*/     Hourly_Diffuse_Row_Int = 0.0;
+/*______*/     float64 Sine_Solar_Elev = calc_sine_solar_elevation(Sine_Solar_Dec, hour);
+/*______*/     float64 Solar_Elev = CORN_must_be_greater_or_equal_to(asin(Sine_Solar_Elev),0.0);
+                  //this is arcsin: Atn(Sine_Solar_Elev / Sqr(-Sine_Solar_Elev * Sine_Solar_Elev + 1))
+/*______*/
+/*______*/     if (Sine_Solar_Elev > 0)
+/*______*/     {
+/*______*/        float64 Cosine_Solar_Azimuth = calc_cosine_solar_azimuth( Sine_Solar_Dec, Sine_Solar_Elev);
+/*______*/
+/*______*/        float64 Solar_Azimuth = (hour <= 11)
+/*______*/           ? acos(Cosine_Solar_Azimuth)
+/*______*/           : (1.5 * 3.14159 + asin(Cosine_Solar_Azimuth));
+/*______*/
+/*______*/        float64 Hourly_Incident_Angle = calc_hourly_incident_angle(Solar_Elev, Solar_Azimuth);
+/*______*/        float64 Equivalent_Hourly_Solar_Elev = 3.14159 / 2 - Hourly_Incident_Angle;
+/*______*/
+/*______*/        float64 Shadow_Length = 0;
+/*______*/        float64 Corrected_Shadow_Length = 0.0;
+/*______*/        if (Equivalent_Hourly_Solar_Elev > 0)
+/*______*/        {
+/*______*/              float64 Shadow_Angle = calc_shadow_angle(Solar_Elev, Solar_Azimuth);
+/*______*/              Shadow_Length = calc_shadow_length(Shadow_Angle);
+/*______*/              Corrected_Shadow_Length = calc_corrected_shadow_length(Shadow_Length,Solar_Elev,Solar_Azimuth);
+/*______*/        };
+/*______*/
+/*______*/        if (Solar_Elev > 0)
+/*______*/        {
+/*______*/           float64 Shadow_Angle = calc_shadow_angle(Solar_Elev, Solar_Azimuth);
+/*______*/           Shadow_Length = calc_shadow_length(Shadow_Angle);
+/*______*/        }
+/*______*/        else
+/*______*/           Shadow_Length = 0;
+/*______*/
+/*______*/  //         float64 Shadow_Angle = SA(Solar_Elev, Solar_Azimuth/*, Row_Azimuth*/);
+/*______*/  //         float64 Shadow_Length = calc_shadow_length(/*row_width, row_height, */Shadow_Angle);
+/*______*/  //         float64 Corrected_Shadow_Length = calc_corrected_shadow_length(Shadow_Length, Solar_Elev);
+/*020410*/        float32 row_distance = layout->row_spacing;
+/*______*/        Hourly_Direct_Row_Int = CORN_must_be_between(Corrected_Shadow_Length / row_distance,0.0,1.0);
+/*______*/        Hourly_Diffuse_Row_Int = CORN_must_be_between(Shadow_Length / row_distance,0.0,1.0);
+/*______*/
+#ifdef DEBUG1
+DBG1    if (distinguished_day)
+DBG1       hourly   << (int)hour <<','
+DBG1                << rad_to_deg(Solar_Azimuth) <<','
+DBG1                << rad_to_deg(Solar_Elev) << ','
+DBG1                << rad_to_deg(Equivalent_Hourly_Solar_Elev) << ','
+DBG1                << Shadow_Length << ','
+DBG1                << Corrected_Shadow_Length << ','
+DBG1                << Hourly_Direct_Row_Int << ','
+DBG1                << Hourly_Diffuse_Row_Int << endl;
+#endif
+/*______*/
+
+debug_equiv_sol_elev = Equivalent_Hourly_Solar_Elev;
+debug_sin_equiv_sol_elev = sin(Equivalent_Hourly_Solar_Elev);
+
+debug_sol_elev = Equivalent_Hourly_Solar_Elev;
+debug_sin_sol_elev = sin(Equivalent_Hourly_Solar_Elev);
+
+
+/*______*/           Hourly_Direct_Rad_Pot =  (Equivalent_Hourly_Solar_Elev > 0)
+/*______*/           ? calc_hourly_direct_radiation_potential(sin(Equivalent_Hourly_Solar_Elev))
+/*______*/           : 0.0;
+/*______*/
+/*______*/           Hourly_Diffuse_Rad_Pot =  (Solar_Elev > 0)
+/*______*/           ? calc_hourly_direct_radiation_potential(sin(Solar_Elev))
+/*______*/           : 0.0;
+/*______*/        };
+/*______*/  };
+/*______*/
+///*______*/  float64 debug_Daily_Direct_Row_Int = 0;
+///*______*/  float64 debug_Daily_Diffuse_Row_Int = 0;
+//______________________________________________________________________________
+/*______*/  void  Crop_row_obsolete::get_daily_interception
+/*______*/  (CORN::DOY doy
+/*______*/  ,float64 &Daily_Direct_Row_Int
+/*______*/  ,float64 &Daily_Diffuse_Row_Int
+/*______*/  )
+/*______*/  {
+/*______*/     float64 Sine_Solar_Dec = calc_sine_solar_declination(doy);
+/*______*/
+/*______*/     float64 Weighted_Direct_Row_Int = 0;
+/*______*/     float64 Weighted_Diffuse_Row_Int = 0;
+/*______*/     float64 Sum_Direct_Rad_Pot = 0;
+/*______*/     float64 Sum_Diffuse_Rad_Pot = 0;
+/*______*/  
+/*______*/     for (CORN_hour standard_hour = 0; standard_hour <=23; standard_hour++)
+/*______*/     {
+/*______*/        // original basic code uses hours 1-24 we use 0 - 23 hours
+/*______*/  
+/*______*/        float64 Hourly_Direct_Rad_Pot = 0.0001;
+/*______*/        float64 Hourly_Direct_Row_Int = 0.0;
+/*______*/        float64 Hourly_Diffuse_Rad_Pot = 0.0001;
+/*______*/        float64 Hourly_Diffuse_Row_Int = 0.0;
+/*______*/        get_hourly_interception
+/*______*/        (standard_hour
+/*______*/        ,Hourly_Direct_Row_Int  //returned
+/*______*/        ,Hourly_Direct_Rad_Pot  //returned
+/*______*/        ,Hourly_Diffuse_Row_Int //returned
+/*______*/        ,Hourly_Diffuse_Rad_Pot //returned
+/*______*/        ,Sine_Solar_Dec);
+/*______*/  
+/*______*/        Weighted_Direct_Row_Int += Hourly_Direct_Row_Int * Hourly_Direct_Rad_Pot;
+/*______*/        Sum_Direct_Rad_Pot += Hourly_Direct_Rad_Pot;
+/*______*/
+/*______*/        Weighted_Diffuse_Row_Int += Hourly_Diffuse_Row_Int * Hourly_Diffuse_Rad_Pot;
+/*______*/        Sum_Diffuse_Rad_Pot += Hourly_Diffuse_Rad_Pot;
+
+debug_rad_pot << (int)doy << '\t' << (int)standard_hour << '\t'
+<< Hourly_Direct_Row_Int  << '\t'
+<< Hourly_Diffuse_Row_Int  << '\t'
+<< Hourly_Direct_Rad_Pot << '\t'
+<< Hourly_Diffuse_Rad_Pot << '\t'
+<< debug_equiv_sol_elev << '\t'
+<< debug_sin_equiv_sol_elev << '\t'
+<< debug_sol_elev << '\t'
+<< debug_sin_sol_elev
+<< endl;
+
+/*______*/     };
+/*______*/
+/*______*/      Daily_Direct_Row_Int = Weighted_Direct_Row_Int / Sum_Direct_Rad_Pot;
+/*______*/      Daily_Diffuse_Row_Int = Weighted_Diffuse_Row_Int / Sum_Diffuse_Rad_Pot;
+/*______*/
+/*______*/      // RLN The direct interception must be at least the diffuse ???
+/*______*/  //    Daily_Direct_Row_Int = CORN_max(Daily_Diffuse_Row_Int,Daily_Direct_Row_Int);
+/*______*/  };
+//______________________________________________________________________________
+/*000717*/  float64 Crop_row_obsolete::expand_dimension
+/*000717*/  (float64 deg_days_today
+/*000717*/  ,float64 initial_dim
+/*000717*/  ,float64 final_dim
+/*000718*/  ,float64 deg_days_flowering
+/*000718*/  ,float64 deg_days_veraison
+/*000717*/  )
+/*000717*/  {
+/*000717*/     float64 change_dim =
+/*000717*/        (deg_days_today > deg_days_flowering) && (deg_days_today < deg_days_veraison)
+/*000717*/         ? ((final_dim - initial_dim) *
+/*000717*/            (deg_days_today - deg_days_flowering) /
+/*000717*/            (deg_days_veraison - deg_days_flowering))
+/*000717*/         : 0.0;
+/*000717*/     return initial_dim + change_dim;
+/*000717*/  };
+//______________________________________________________________________________
+/*______*/  void Crop_row_obsolete::expand_dimensions
+/*______*/  (float64 deg_days_today
+/*000718*/  ,float64 deg_days_flowering
+/*000718*/  ,float64 deg_days_veraison
+/*______*/  )
+/*______*/  {
+/*______*/     row_width = expand_dimension
+/*______*/        (deg_days_today
+/*______*/        ,canopy_characteristics->initial_width
+/*______*/        ,canopy_characteristics->final_width
+/*______*/        ,deg_days_flowering
+/*______*/        ,deg_days_veraison);
+/*______*/     row_height = expand_dimension
+/*______*/        (deg_days_today
+/*______*/        ,canopy_characteristics->initial_height
+/*______*/        ,canopy_characteristics->final_height
+/*______*/        ,deg_days_flowering,deg_days_veraison);
+/*______*/  };
+//______________________________________________________________________________
+/*______*/ Crop_row_obsolete::Crop_row_obsolete
+/*______*/     (float64  _Latitude_rad
+/*______*/     ,float64  _Slope_percent
+/*______*/     ,float64  _Aspect_N0_E90_degrees
+/*020410*/     ,Crop_parameters::Layout                         *_layout
+/*020410*/     ,Crop_parameters::Canopy_characteristics_hedge_row *_canopy_characteristics
+/*______*/     )
+/*______*/     : Latitude_rad       (_Latitude_rad)
+/*______*/     , Slope_percent      (_Slope_percent)
+/*______*/     , Aspect_radians         (0)    // Calculated below
+/*020410*/     ,layout(_layout)
+/*020410*/     ,canopy_characteristics(_canopy_characteristics)
+/*______*/  {
+/*______*/     // We need to convert Aspect_N0_E90_degrees
+/*______*/     // to the orientation use by this model.
+/*______*/
+//020614//     Armen confirmed that this works for southern hemisphere
+//______//     When negative is used for southern hemisphere.
+/*020612*/     float32 aspect_S0_E90_degrees =
+/*______*/     (_Aspect_N0_E90_degrees > 180.0)
+/*______*/     ? (360 - _Aspect_N0_E90_degrees) + 180
+/*______*/     : (180 - _Aspect_N0_E90_degrees);
+/*______*/
+/*______*/     Aspect_radians = deg_to_rad(aspect_S0_E90_degrees);
+/*______*/  };
+//______________________________________________________________________________
+/*050804_*/ namespace_CropSyst_end;
+

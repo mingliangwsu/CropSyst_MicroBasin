@@ -1,0 +1,140 @@
+#ifdef DEPRECATED
+now use Dynamic_array<nat32>
+
+#ifdef USE_PCH
+#  include <corn/container/struct_pch.h>
+#else
+#  include <corn/dynamic_array/da_uint32.h>
+#endif
+/*001206*/ namespace_CORN_start
+//______________________________________________________________________________
+/*______*/ Dynamic_uint32_array::Dynamic_uint32_array
+/*______*/  (uint32 initial_size       // This is the initial allocation space
+/*______*/  ,uint32 i_resize_overage
+/*______*/  ,uint32 i_default_value
+/*______*/  )   // This is the overage to give on reallocation
+/*000517*/  : Dynamic_array_common(initial_size,i_resize_overage)
+/*______*/  , array(new uint32[(sizeof(uint32) * (initial_size))])
+/*000804*/  , default_value(i_default_value)
+/*______*/ {
+/*______*/       for (uint32 i = 0; i < initial_size; i++)
+/*______*/          array[i] = default_value;
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ Dynamic_uint32_array::Dynamic_uint32_array
+/*______*/  (uint32 i_default_value)
+/*000517*/  : Dynamic_array_common(1,10)
+/*______*/  , array(new uint32[(sizeof(uint32) * (1))])
+/*000804*/  ,default_value(i_default_value)
+/*______*/ {
+/*______*/     for (uint32 i = 0; i < 1; i++)
+/*______*/          array[i] = default_value;
+/*000718*/     terminal_index = 0;
+/*000718*/     empty_list = true;
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ void Dynamic_uint32_array::set(const Dynamic_uint32_array &to_copy,uint32 new_size)
+/*______*/ {
+/*______*/       uint32 tocopy_max_index = to_copy.get_terminal_index();
+/*990428*/       { if (get_terminal_index() != tocopy_max_index)
+/*000225*/           resize(new_size ? new_size : (uint32)(tocopy_max_index+1));
+/*______*/
+/*______*/       for (uint32 i = 0; i <= get_terminal_index(); i++)
+/*______*/          set(i,to_copy.get_no_resize(i));
+/*990428*/       }
+/*______*/       changed = true;
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ Dynamic_uint32_array::~Dynamic_uint32_array()
+/*______*/ {
+/*______*/     if (array)
+/*______*/           delete[] array;
+/*______*/ };
+//______________________________________________________________________________
+/*000225_*/ Dynamic_uint32_array::Dynamic_uint32_array(const Dynamic_uint32_array &to_copy)
+/*000517_*/ : Dynamic_array_common(to_copy)
+/*_______*/ , array(0)
+/*000804_*/ , default_value(to_copy.default_value)
+/*______*/ {
+/*000707*/     uint32 copy_all_elements = terminal_index+1;
+/*000517*/     terminal_index = 0;
+/*______*/     set(to_copy,copy_all_elements);
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ uint32 Dynamic_uint32_array::set(uint32 index,uint32 value)
+/*______*/ {
+/*000517*/     if_necessary_resize_for(index);
+/*______*/     array[index] = value;
+/*000710*/     empty_list = false;
+/*______*/     return value;
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ uint32 Dynamic_uint32_array::get_no_resize(uint32 index) const
+/*______*/ {     bool index_outof_range = ((index >= current_size_plus_overage) || ((int32)index > terminal_index));
+/*990718*/       return  index_outof_range
+/*990408*/       ? default_value
+/*______*/       : array[index];
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ void Dynamic_uint32_array::reallocate_array(uint32 bloated_new_size) const
+/*______*/ {
+/*______*/     uint32 *new_array = new uint32[sizeof(uint32) * bloated_new_size];
+/*000707*/     if (array)
+/*______*/     {
+/*______*/        for (uint32 i = 0; i < bloated_new_size; i++)
+/*______*/          new_array[i] = (i < current_size_plus_overage) ? array[i] : (uint32)default_value;
+/*______*/        delete[] array;
+/*______*/     };
+/*______*/     array = new_array;
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ void Dynamic_uint32_array::remove(uint32 at_index)
+/*______*/ {
+/*______*/
+/*______*/ 		//	This removes the number at the specified index.
+/*______*/ 		//	all following array elements are moved down one cell and the ?max_index? is decremented
+/*000707*/    if (!empty_list)
+/*______*/    {
+/*______*/     for (uint32 i = at_index; (int32)i < terminal_index; i++)
+/*______*/        array[i] = array[i+1];
+/*______*/     if (terminal_index == 0)
+/*______*/        empty_list = true;
+/*______*/     else
+/*______*/        terminal_index = (uint32)(terminal_index - 1);
+/*______*/    };
+/*______*/ };
+//______________________________________________________________________________
+/*______*/ bool Dynamic_uint32_array::is_in_array(uint32 value, uint32 &found_index) const
+/*______*/ {
+/*______*/ 		bool found = false;
+/*______*/ 		//	returns true if the specified value is in the array and returns the index of the first occurance in found_index.
+/*______*/		for (uint32 i = 0; i < get_count() && !found; i++)
+/*______*/     {
+/*______*/			if (get_no_resize(i) == value)
+/*______*/			{	found = true;
+/*______*/ 				found_index = i;
+/*______*/ 			};
+/*______*/     };
+/*______*/		return found;
+/*______*/ };
+//______________________________________________________________________________
+/*041002*/ uint32 Dynamic_uint32_array::append(uint32 value)
+/*______*/ {
+/*030801*/     // Adds the value to the array
+/*______*/      set(get_count(),value);
+/*______*/     return value;
+/*______*/ };
+//______________________________________________________________________________
+/*030801*/ uint32 Dynamic_uint32_array::append_array(uint32 values[], bool null_terminated, uint32 values_count)
+/*______*/ {
+/*030801*/     // Adds the arrays of values (with size indicated by values_count) to the array
+/*______*/     uint32 old_size = get_count();
+/*______*/     for (int i = 0; null_terminated?values[i] :(uint32)i < values_count; i++)
+/*______*/     {
+/*______*/        set(old_size+i,values[i]);
+/*______*/     };
+/*______*/     return get_count();
+/*______*/ };
+//______________________________________________________________________________
+/*001206*/  namespace_CORN_end
+#endif

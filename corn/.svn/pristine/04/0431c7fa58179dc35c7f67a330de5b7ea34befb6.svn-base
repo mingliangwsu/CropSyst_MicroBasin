@@ -1,0 +1,410 @@
+#ifndef dateHPP
+#define dateHPP
+
+/*
+   This C/C++ module will help date functions.
+    UNIX, AMIGADOS, and Borland C++
+
+   Written by Roger Nelson
+   Comments, suggestions, questions and bug reports can be sent to:
+
+       Biological Systems Engr. Dept.
+       Washington State University
+       Pullman, WA 99164-6120
+
+       rnelson@wsuaix.csc.wsu.edu
+
+       Phone: (509)335-11100
+       FAX  : (509)335-2722
+
+    An equivelent module can also be provided for the programming
+   language Turbo Pascal is also available.
+
+    This library can be used with my international language translation
+   module to give month names and month abbreviation in foreign
+   languages.  If using this module, #define LANGUAGE_TRANSLATION.
+
+   -------
+   1.0  Jan. 1993
+   1.01 Spt 9' 1993  Leap year alternation was backwards.
+   1.02 Jun 26'1995  Several minor changes, several new constructors,
+                     Date format may no be specified on creation.
+                     Now has stream output.
+                     Enhanced CORN_date->String function.
+    1.03 Spt 15,1995  Added >> operator.
+                     Added Date(char *date_str) constructor
+                            Added set(char *date_str)
+   1.04 Oct 10,1995  Added math and comparator operators
+                     Renamed Julian to Date because they were not
+                     true Julian dates.
+                     For compatibility with the previous version use:
+                        define Julian DRate
+
+                     The enumerations for months and days of week in the c++
+                     version have been moved within the Date type
+                     For compatilibility with the previous versions use:
+                        #define D_month  Date::month
+                        #define D_days_of_week : Date::days_of_week
+                        #define JANUARY  Date::JANUARY etc..
+
+    1.05 Dec 17,1996  Fixed some problems with setting dates from a string
+                     with character months (I.e.  "Jan 10");
+    1.06 Jan 9, 1997  Fix problem reading dates with no separator I.e. 010197
+   1.07 Apr 6, 1997  Setting date with string representation now looks first
+                     to see if it is a long integer representation and will
+                     attempt to convert from that before attempting to parse
+                            to the fixed to date format. (in order to allow VV_file
+                            read various date).
+    1.08 May 11,1997  Added D_D ordering
+   1.09 Jun 22,1997  Made non-modifying functions const.
+   1.10 Jul  1,1997  Switch int values to int16 or int8 where appropriate.
+   1.11 Oct  3,1997  Added D_Y year only format
+   1.12 Feb 25,1998  Cleaned up types
+                     Added relative year style
+*/
+//______________________________________________________________________________
+#if (__BCPLUSPLUS__ > 0) &&(__BCPLUSPLUS__ < 0x0570)
+#  include "corn/std/std_iostream.h"
+#endif
+#ifndef date_constHPP
+#  include "corn/datetime/date_const.hpp"
+#endif
+//170430 #  include "corn/chronometry/temporal.h"
+#  include "corn/chronometry/date_I.h"
+//#  define OLD_DATE
+/*170430
+#ifndef temporal_baseH
+#  include "corn/datetime/temporal_base.h"
+#endif
+*/
+#ifndef datetime_abstractH
+#  include "corn/datetime/date_time_interface.h"
+#endif
+#ifndef date_formatH
+#  include "corn/datetime/date_format.h"
+#endif
+#ifndef dateH
+#  include "corn/datetime/date.hh"
+#endif
+#include <string>
+//______________________________________________________________________________
+namespace CORN {
+//______________________________________________________________________________
+class Date   //Conforms to ISO8601:2004
+//170430 : virtual public Temporal                                                        //170430
+: public implements_ Date_interface
+//170430 : virtual public Temporal_base                                                   //030401
+, public Date_time     // We are only temporarily deriving from Date_time_abstract until Date_time_old is confirmed obsolete 030713_
+{
+ protected:
+   int32 date_num;   // Dates are represented as integer  year * 1000 + day      //990222
+      // Note that in ISO8601:2004 negative years are 1 - the BC year
+      // I.e.  0 is 1BC  -1 is 2BC
+ public:
+   Date_format format;                                                           //141120
+ public:                                                                         //980206
+   bool is_relative()                                                affirmation_{ return get_year() < 1000; } //140125
+   inline virtual bool is_1_based()                                        const { return ( format.get_styles() & D_relative_1)>0;} //990225
+   inline virtual bool set_relative(bool _relative = true)                       //990225
+      {  if (_relative)                                                          //990225
+         format.styles ^= D_relative ;                                           //040909
+         return is_relative();                                                   //990225
+      }                                                                          //990225
+ protected:
+   const nat8 *get_month_lengths()                                        const;//130222
+      // for current_year
+   virtual const nat8 *get_month_lengths_in_year(Year year)               const;//130222
+   nat8 get_days_in_month(Year year,Month month)                          const;//130222
+ public:   // The following functions are only temporary while Date is derived from datetime_abstract,
+   inline virtual Datetime64 set_DT(const Date &_date, const Time &)modification_//030717
+      {  set(_date);
+         return get_datetime64();
+      }
+   inline virtual Datetime64  set_time(const Time &)                modification_{ return (Datetime64)date_num; }  // does nothing be date does not have time.  //030717
+   inline virtual Datetime64  set_time64(Datetime64 )               modification_{ return (Datetime64)date_num;}
+   inline virtual int32       get_HHMMSS()                                 const { return 0; }
+   inline virtual Datetime64  set_HHMMSS(int32)                     modification_{ return date_num;}
+   inline virtual Datetime64  set_S(Seconds )                       modification_{ return date_num; }
+   inline virtual Datetime64  set_HMS(Hour , Minute , Second )      modification_{ return (Datetime64)date_num;}
+   inline virtual Datetime64  set_HMSm(Hour , Minute , Second ,Millisecond ) modification_{ return (Datetime64)date_num;}
+   inline virtual Datetime64  set_HMSc(Hour , Minute , Second ,Centisecond ) modification_{ return (Datetime64)date_num;}
+   inline virtual Datetime64  inc_hour(Hours )                      modification_{ return date_num;}//030714
+   inline virtual Datetime64  inc_minute(Minutes )                  modification_{ return date_num;}//030714
+   inline virtual Datetime64  inc_second(Seconds )                  modification_{ return date_num;}//030714
+   inline virtual Second      get_second()                                 const { return 0;}
+   inline virtual Minute      get_minute()                                 const { return 0;}
+   inline virtual Hour        get_hour()                                   const { return 0;}
+   inline virtual Centisecond get_centisecond()                            const { return 0;}
+   inline virtual Millisecond get_millisecond()                            const { return 0;}
+   inline virtual Hours       get_hours_after_midnight()                   const { return 0;}
+   inline virtual Minutes     get_minutes_after_midnight()                 const { return 0;}
+   inline virtual Seconds     get_seconds_after_midnight()                 const { return 0;}
+   inline virtual Datetime64  get_time64()                                 const { return 0;}
+ public:  // The following functions were made private  Oct 10 1995  now use operators
+          // but Nov 28, it was decided that they must be public
+          // in order to access these facilities when + = += -=
+          // with pointer to a date would be ambiguous with pointer
+          // arithmetic
+   virtual Datetime64 inc();
+   // Adds 1 to the date. Returns the new date (datetime)
+   virtual Datetime64 dec();
+   // Subtracts one from the date. Returns the new date (datetime)
+   virtual Datetime64 inc_day(int32 days);    // rename to inc_days()
+   // Adds days to the date incrementing the year if necessary.
+   //   If offset is negative, offset days are subtracted (D_CORN_date_date_minus)
+   virtual Datetime64 inc_days(int32 days) { return inc_day(days); }   //170430 rename to inc_days()
+   virtual Datetime64 dec_day(int32 days);
+   // Subtracts days from the date decrementing the year if necessary.
+   //   If offset is negative, offset days are added (D_CORN_date_date_plus)
+   virtual Datetime64  inc_year(int16 years);                                    //970909
+   // Adds offset years to the date.
+   //   If offset is negative, offset years are subtracted
+   inline virtual Datetime64  inc_years(int16 years) { return inc_year(years); } //970909
+
+
+#define plus_year inc_year
+#define minus_year dec_year
+//030608 plus_year renamed to inc_year and minus_year renamed to dec_year, this macro is for backward compatibility
+
+   virtual Datetime64  dec_year(int16 years);                                    //970909
+   // Subtracts offset years to the date.
+   //   If offset is negative, offset years are added
+   virtual Datetime64   inc_month(int16 months);                                 //970909
+   inline virtual Datetime64 inc_months(int16 months) { return inc_month(months); } //170430
+   // Adds months to the date.
+   //   If months is negative,  months are subtracted
+   virtual Datetime64   dec_month(int16 months);                                 //970909
+   // Subtracts months from the date.
+   //   If months is negative,  months are added
+ public:
+   enum D_months {NO_MONTH,JANUARY,FEBRUARY,MARCH,APRIL,MAY,JUNE,JULY,AUGUST,SEPTEMBER,OCTOBER,NOVEMBER,DECEMBER};
+   /*170430 moved to Date_interfaced
+   enum Days_of_week {NO_DOW,SUNDAY,MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY};
+   */
+   virtual Datetime64 set_now();                                                 //030715
+   // Sets to and returns the computer's system date.
+ public: // constructors
+   Date();
+   Date                                                                          //990224
+     (const int32 new_date
+     ,nat16 ordering_BS  = D_YMD
+     ,nat16 styles    = D_YYYY|D_M|D_lead_none
+     ,nat8  separator = '-'
+     ,bool   DOY_indicator = false);
+   Date                                                                          //970915
+      (const Date &new_date
+      ,nat16 ordering_BS  = D_YMD
+      ,nat16 styles    = D_YYYY|D_M|D_lead_none
+      ,nat8  separator = '-'
+      ,bool   DOY_indicator = false);
+      // We make the default string styles unknown because
+      // when we read from most data sources, we need to trigger
+   Date(const char *date_str                                                     //021212
+      ,nat16 ordering_BS = D_unknown_ordering // D_YMD
+      ,nat16 styles    = D_unknown_style // D_YYYY|D_M|D_lead_none
+      ,nat8  separator = 0 // '/'
+      ,bool   DOY_indicator = false);
+      // Generates a date given a string representation
+   Date(Year year,DOY doy
+      ,nat16 _ordering_BS = D_YMD
+      ,nat16 _styles    = D_YYYY|D_M|D_lead_none
+      ,nat8  _separator = '-'
+      ,bool  _DOY_indicator = false);
+      // take year and day of year and generates a Date date
+   Date(const Year year                                                          //970915
+      ,const Month  month
+      ,const DOM    dom
+      ,nat16 _ordering_BS = D_YMD
+      ,nat16 _styles    = D_YYYY|D_M|D_lead_none
+      ,nat8  _separator = '-'
+      ,bool  _DOY_indicator = false);
+ public: // Accessors
+   // takes year month and day of month and generates a Date date
+   inline Date32 get()                                                     const {return (Date32)date_num;} //010724
+   inline virtual Datetime64 get_datetime64()                              const {return (Datetime64)date_num;} //140924_030108
+      ///< \returns the date, time or date time as a 64 bit float (double) 031208
+   inline virtual Date32 get_date32()                                      const { return date_num; } //030717
+
+   // Conceptual:
+   // These set methods should return Date_time to be more consistent and universal.
+
+   inline virtual Datetime64 set_datetime64(Datetime64 value)      modification_ { return date_num = (int32)value; } //031208
+   inline virtual Datetime64 set                                                 //170524
+      (const CORN::Date_const_interface &other)                    modification_
+      { return date_num = other.get_date32(); }
+   virtual Datetime64 set_c_str(const char *date_str);                           //030713
+   virtual Datetime64 set_string(const std::string &date_string);                //140522
+   virtual Datetime64 set_YMD(Year year,Month month,DOM dom);                    //030713
+      // takes year month and day of month and generates a Date date
+   virtual Datetime64 set_YD(Year year,DOY doy);                                 //030713
+   inline virtual Datetime64 set_date32(int32 date32)              modification_ { return date_num=date32;}//030717
+   inline virtual Datetime64 clear()                               modification_ { return set_datetime64(0); }
+//170430   inline const Temporal_base
+   inline const Temporal
+      &set(const Date &new_date)                 modification_{ date_num = new_date.date_num; return *this; } //141120_140721_020867
+
+#ifdef conceptual
+#  if (__BCPLUSPLUS__ >= 0x0550)
+   virtual Date_time set(const TDateTime &new_date)                modification_;//011203
+   virtual TDateTime get_delphi_date_time(TDateTime &new_date)             const;//011203
+#  endif
+#endif
+   virtual
+      //#ifdef OLD_DATE
+      //enum
+     // #else
+      //Date_interface::
+      //#endif
+      Days_of_week day_of_week()                      const;//090227
+      ///< returns the day of week (see days_of_week)
+   virtual Year get_year()                                                 const;
+      ///< extracts the year from the Date date
+   virtual DOY get_DOY()                                                   const;//990214
+      ///< extracts the day of year from the Date date
+   virtual Month get_month()                                               const;
+   virtual DOM   get_DOM()                                                 const;
+
+
+   // Conceptual:
+   // These set methods should return Date_time to be more consistent and universal.
+
+
+   inline virtual Datetime64 set_DOY(DOY doy)                     modification_  { return set_YD(get_year(),doy); }  //030713
+   inline virtual Datetime64 set_year(Year year)                  modification_  { return set_YD(year,get_DOY()); } //030713
+   virtual Datetime64 set_month(Month month)                      modification_;//050406
+   virtual Datetime64 set_DOM(DOM dom)                            modification_;//050406
+
+   virtual void gregorian(Year &year, Month &month, DOM &dom)             const;//990214
+      ///< extracts the year month and day of month from the Date date.
+   virtual bool is_leap_year(Year year)                            affirmation_;
+   virtual bool is_leap_this_year()                                affirmation_;
+      ///< \return TRUE (1) if date is a leap year.
+   virtual nat32 days_between
+      (
+      //NYI const Date &other                                                         //170430
+
+       const Date_time &date2
+      ,bool inclusive=false) const;
+      /**< Counts the number of days from date to date2 (or vica verse).
+         I.e. The number of days between today and tomorrow is 1. if you use inclusive, it is 2.
+         Either date_num may be greater than the other.
+         This always returns a positive number.
+      **/
+
+   /*170430 unsued
+   virtual bool within_period(const Date &earliest_date , const Date &latest_date) const;  //990308
+   */
+
+   #ifndef OLD_DATE
+   virtual nat32 days_between                                                    //170440
+      (
+      //170524 const Date_interface &date2
+      const Date_const_interface &date2                                         //170524
+      ,bool inclusive)                        const;
+/*unused
+   bool within_period                                                            //170430
+      (const Date_interface &earliest_date
+      ,const Date_interface &latest_date)                                 const;
+*/
+   virtual void prefer_date_format(const Date_format *format=0) contribution_{};
+   #endif
+
+   virtual int32 get_days()                                               const; //990506
+      ///< \return the number of days. (Useful after subtracting dates.)
+   #ifdef OLD_DATE
+   int32 days_to(const Date &date2) const;
+   #else
+   virtual int32 days_to(const Date_const_interface &date2)               const; //170524
+   #endif
+      // Counts the number of days to date2 (or vica verse).
+      // Will return a negative
+      // result of this function plus date_num gives date2.)
+   inline virtual DOM days_in_month()                                     const { return date_get_days_in_month(get_year(),get_month());}   //990214
+   inline virtual nat16 days_in_year(Year year)                           const { return date_days_in_year(year); }               //120108
+   inline virtual nat16 days_in_this_year()                               const { return days_in_year(get_year()); }               //130222_120108 990214
+   inline virtual bool is_last_DOY()                                      const { return get_DOY() == days_in_this_year(); } //040524_130225
+   inline virtual bool is_last_DOM()                                      const { return get_DOM() == days_in_month(); }  //LML 150222
+   virtual const std::string &append_to_string(std::string &target)       const; //140614
+
+   inline int32 &ref_date_num()                                                  { return date_num; }//61023
+   // returns the text representation of the date in practically
+   //	any date format you can think of.
+   //
+   // This function used to be called string, but BC4 uses this name for the
+   // string class.
+   //
+   // ordering is one of the Date or gregorian date orderings.
+   // styles may be a year format or'ed with a numeric format and month representation.
+   // separator is the character used to seperate the date fields usually  / - . | or space
+   //    special cases:
+   //	     if separator is NULL, then no separator is used I.e: 1998Jan01
+   //				 if separator is ',', then a comma is used only before last
+   //					 field and spaces are inserted between each field:
+   //		I.e:  Jan 1, 1993  or  26 January, 1993
+   //
+   //	example D_CORN_date_gregorian_str(1993020,D_MDY,D_YYYY|D_lead_zero|D_M,'/');
+   //    gives  01/20/1993.
+// can't overload these operators
+   //  Date operator + (Date date1,Date date2)
+   //  { Date hold;
+//    Date sum;
+//    hold = date;
+//    sum = plus(days_difference(date2));
+//    date = hold;
+//    return(sum);
+//  };
+//  Date operator + (Date date1,int16 days);
+//  Date operator - (Date date1,Date date2);
+//  Date operator - (Date date1,int16 days);
+//
+//  Date operator += (Date date2);
+//  Date operator += (int16 days);
+//  Date operator -= (Date date2);
+//  Date operator -= (int16 days);
+//
+//  Date operator ++ ();
+//  Date operator -- ();
+
+   // The following functions are for formatted output
+   virtual void set_format // was format
+      (nat16 _ordering_BS = D_YMD
+      ,nat16 _styles    = D_YYYY|D_M|D_lead_none
+      ,nat8  _separator = '/'                                                    //020127
+      ,bool  _DOY_indicator  = false                                             //020505
+      ) const;  //mutable
+#if (__BCPLUSPLUS__ > 0) && (__BCPLUSPLUS__ < 0x0570)
+   friend class    STD_NS ostream&    operator<<(STD_NS  ostream& s, Date& x);   //090309
+   friend class    STD_NS istream&    operator>>(STD_NS  istream& s, Date &x);   //090309
+#endif
+/*170430 moved to Date_interface
+   inline  int16 operator <  ( const Date & second_date ) const { return date_num <  second_date.date_num; }
+   inline  int16 operator <= ( const Date & second_date ) const { return date_num <= second_date.date_num; }
+   inline  int16 operator >  ( const Date & second_date ) const { return date_num >  second_date.date_num; }
+   inline  int16 operator >= ( const Date & second_date ) const { return date_num >= second_date.date_num; }
+   inline  int16 operator == ( const Date & second_date ) const { return date_num == second_date.date_num; }
+   inline  int16 operator != ( const Date & second_date ) const { return date_num != second_date.date_num; }
+   inline  void operator ++ ()         { inc(); }
+   inline  void operator -- ()         { dec(); }
+   inline  void operator += ( int dd ) { inc_day((int16)dd); }                  //030614
+   inline  void operator -= ( int dd ) { dec_day((int16)dd); }                  //030614
+#ifdef __BCPLUSPLUS
+   // Actually other compiler are complaining about the multiple assignment operators
+   // this non const argument should actually always be const, I am not sure why I needed it
+   inline  void operator = ( Date & second_date)                       { set(second_date.get()); }
+#endif
+   inline  void operator = (const Date & second_date)                            { set(second_date.get());}//110104
+*/
+
+   virtual int8 compare_date(const Date &second_date)                      const;//030108
+ private:
+   Date *check_concrete() { return new Date(); }
+/*
+ public: // This is just temporary until RNAutoControls is recompile, before which this should be delete
+   inline virtual bool is_style_relative()                                 const { return format.is_style_relative(); }
+*/
+};
+//_1997_________________________________________________________________________
+extern Date NO_DATE ;                                                            //990610
+} // namespace CORN
+#endif
+

@@ -1,0 +1,13 @@
+Operation selection #1
+Terminate crop  (end growth without a harvested yield) #2
+Dust mulching #3
+Mulching layer depth #5
+This is the number of days the mulch layer tends to remain sand like (with no precipitation) #7
+Number of days until mulch effect subsides #8
+0.0 = not effect, 1.0 most sever (actually don''t use 1.0) #10
+Dust mulch intensity #11
+NRCS field operation #13
+Used for surface residue disturbance and fate #14
+The higher the numbers, the greater the cumulative soil disturbance. Ultimately this is intended to affect organic matter decomposition. #156
+Tillage intensity oxidation effect #157
+

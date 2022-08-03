@@ -1,0 +1,130 @@
+L_Soil_clod_factor_rate,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Soil clod factor rate
+fr Facteur de motte
+it Fattore di zollosità
+es Factor de agregación
+ca Factor d'agregació
+*/
+L_Soil_loss,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Soil loss
+fr Perte de sol
+it Perdita di suolo
+es Pérdida de suelo
+ca Pèrdua de sòl
+*/
+L_Surface_water_runoff,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Surface water runoff
+fr Ruissellement eau_de surface
+it Ruscellamento
+es Escorrentía superficial
+ca Escolament superficial
+*/
+L_Water_entering_soil,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Water entering soil
+fr Eau infiltrée_dans_le sol
+it Acqua infiltrata_nel suolo
+es Agua infiltrada en el suelo
+ca Aigua infiltrada al sòl
+*/
+L_Soil_water_drainage,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Soil water drainage
+fr Drainage eau_du sol
+it Percolazione
+es Percolación
+ca Percolació
+*/
+L_Potential_soil_evaporation,
+/* soil  CROPSYST CSW ( PARAMS )
+en Soil evaporation pot.
+fr Evaporation du sol pot.
+it Evaporazione potenziale del suolo
+es Evap. suelo pot.
+ca Evap. sòl pot.
+*/
+L_Evap_soil_pot,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS ) it-gb
+en Evap. soil pot.
+fr Evap. du_sol pot.
+it Evap. pot. suolo
+es Evap. suelo pot.
+ca Evap. sòl pot.
+*/
+L_Actual_soil_evaporation,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Soil evaporation act.
+fr Evaporation du sol réelle
+it Evaporazione effettiva del suolo
+es Evap. del suelo real
+ca Evap. del sòl actual
+*/
+L_Evap_soil_act,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )  it-gb
+en Evap. soil act.
+fr Evap. du_sol réelle
+it Evap. eff. suolo
+es Evap. suelo real
+ca Evap. sòl actual
+*/
+L_Soil_water_depletion,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Soil water depletion
+fr Deficit hydrique du sol
+it Acqua estratta dal suolo
+es Almacenaje de agua en el suelo
+ca Enmagatz. d'aigua en el sòl
+*/
+L_Soil_water_balance,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Soil water balance
+fr Bilan hydrique du sol
+it Bilancio idrico nel suolo
+es Balance de agua en el suelo
+ca Balanç d'aigua al sòl
+*/
+L_Water_potential,
+/* soil  RPRTGRPH CROPSYST CSW ( PARAMS )
+en Water potential
+fr Potentiel hydrique
+it Potenziale idrico
+es Potencial hídrico
+ca Potencial hídric
+*/
+L_Water_content,
+/* soil PARAMS CS VALIDATE CROPSYST  it-gb
+en Water content
+fr Eau contenue
+it Contenuto idrico
+es Contenido hídrico
+ca Contingut d'aigua
+*/
+L_Ponded_water,
+/* soil PARAMS CS VALIDATE CROPSYST  es-cs it-md CHECK TRANSLATIONS fr-rn
+ca-rn
+en Ponded water
+fr Flaque d'eau
+it Acqua stagnante
+es Agua estancada
+ca Aigua estant
+*/
+L_Carbon_profile,
+/* soil PARAMS CS VALIDATE CROPSYST  es-cs it-md CHECK TRANSLATIONS fr-rn
+en Total carbon_to profile_depth
+fr Total carbon_to profile_depth
+it Total carbon_to profile_depth
+es Total carbon_to profile_depth
+ca Total carbon_to profile_depth
+*/
+L_Carbon_30cm,
+/* soil PARAMS CS VALIDATE CROPSYST  es-cs it-md CHECK TRANSLATIONS fr-rn
+en Total carbon_to 30cm_depth
+fr Total carbon_to 30cm_depth
+it Total carbon_to 30cm_depth
+es Total carbon_to 30cm_depth
+ca Total carbon_to 30cm_depth
+*/
+

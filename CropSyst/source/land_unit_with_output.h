@@ -1,0 +1,157 @@
+#ifndef land_unit_with_outputH
+#define land_unit_with_outputH
+
+#include "options.h"
+#include "cs_UED_season.h"
+#include "cs_UED_annual.h"
+#include "cs_UED_harvest.h"
+#include "cs_UED_db.h"
+#ifndef CS_INSPECTOR_VERSION
+#include "cs_UED_daily.h"
+#endif
+#include "CS_suite/observation/CS_desired_vars.h"
+#ifndef REPORTS_IN_CS_MOD
+#  if ((CS_VERSION > 0) && (CS_VERSION < 5))
+#     ifndef REACCH_VERSION
+#        include "cs_report_V4.h"
+#     endif
+#  endif
+#endif
+
+#include "land_unit_sim.h"
+//moved to project defines #define EXTENDS_LAND_UNIT_OUTPUT
+#ifdef EXTENDS_LAND_UNIT_OUTPUT
+#include "land_unit_output.h"
+#else
+extern std::ofstream *SCS_runoff_dat_file;                                       //131216
+enum  CropSyst_period { SIMULATION_PERIOD,GROWING_SEASON_PERIOD,GROWTH_STAGE_PERIOD,MANAGEMENT_PERIOD};
+#endif
+
+#define OUTPUT_NONE     0
+#define OUTPUT_COMPLETE 0xFFFFFFFF
+#define OUTPUT_ANNUAL   0x00000001
+#define OUTPUT_SEASONAL 0x00000002
+#define OUTPUT_HARVEST  0x00000004
+#define OUTPUT_DAILY    0x00000008
+
+
+namespace CropSyst {                                                             //141206
+//______________________________________________________________________________
+class Land_unit_with_output
+: public extends_ Land_unit_simulation
+#ifdef EXTENDS_LAND_UNIT_OUTPUT
+, public extends_ Land_unit_output                                       //170315
+#endif
+{
+#ifndef EXTENDS_LAND_UNIT_OUTPUT
+   nat32 output_flags;                                                           //151227
+      // For GIS and regional simulations,
+      // this indicates that we want to output daily data an other details.
+ public:
+   UED::Database_file_indexed *harvest_UED_db;                                   //041004
+   Harvest_data_source        *harvest_data_src_rec;                             //041004
+   UED::Database_file_indexed *season_UED_db;
+   Season_data_source         *season_data_src_rec;
+   UED::Database_file_indexed *annual_UED_db;
+   Annual_data_source         *annual_data_src_rec;
+ private:
+   datetime64                  latest_sync_date;                                 //041012
+      // latest_sync_date was the date of the last triggered sync
+   Normal_crop_event_sequence  latest_growth_stage_entered;                      //130925_041012
+ private:
+   #ifndef CS_INSPECTOR_VERSION
+
+   CropSyst_UED_database               *daily_UED_db;                            //030715
+   CropSyst::CS_UED_tuple_data_source  *daily_UED_data_src;                      //030715
+   CropSyst::CS_daily_data_record       daily_data_rec;                          //030715
+    #endif
+ public:
+  CS::Desired_variables       *daily_desired_vars;                         //170225
+    // Will be zero if no daily output.
+    // rename to desired_vars_daily
+#endif
+
+ public: // constructor
+   Land_unit_with_output
+      (const CS::Identification &LBF_ID_                                         //151026
+      ,nat32                         cycle_shift_                                //151026
+      ,CropSyst::Scenario           &scenario_control_and_model_options_         //130827
+      ,const CORN::date32 &today_                                                //170525
+      ,const Geocoordinate          &geocoordinate_                              //151116
+      ,const CS::Land_unit_meteorological &meteorology                           //151128
+      #if (CS_VERSION==4)
+      ,Common_simulation_log        &_event_log
+      #endif
+      ,const CropSyst::Scenario_directory *scenario_directory_                   //050619
+      ,CS::Desired_variables  *desired_vars_ = 0);                               //170225_041021
+         // pass 0 if no variables to record
+ public:
+   virtual nat32 perform_triggered_synchronizations_today();                     //131004
+
+   #ifdef EXTENDS_LAND_UNIT_OUTPUT
+   inline virtual bool is_valid()                                   affirmation_
+      { return Land_unit_simulation::is_valid(); } // this is hack probably should return CS::Simulation_element_abstract::is_valid();
+   inline virtual bool start_day()                                 modification_
+      { return Land_unit_simulation::start_day(); }
+   inline virtual bool process_day()                               modification_
+      { return Land_unit_simulation::process_day(); }
+   inline virtual CS::Emanator *render_inspectors
+      (CORN::Container      &inspectors
+      ,const CS::Emanator  *context
+      ,const std::string   &instance)                                 rendition_
+      {  return Land_unit_simulation::render_inspectors
+            (inspectors,context,instance/*170321 ,statistic*/);
+      }
+   #else
+
+   #endif
+   virtual bool start()                                            modification_;//130620_080306
+   virtual bool start_year()                                       modification_;//130620_010202
+   virtual bool start_growing_season                                             //160324
+      //180101       #if ((REACCH_VERSION==2) || (CS_VERSION >= 5) || defined(INTERCROPPING) || defined(OFOOT_VERSION))
+      (modifiable_ CropSyst::Crop_interfaced &crop_at_start_season);
+      //180101       #else
+      //180101       ();
+      //180101       #endif
+   virtual bool end_day()                                          modification_;//130620_070227
+   virtual bool initialize()                                     initialization_;//151227_111221
+   #if (defined(USE_CS_SIMULATION_ROTATOR) || (CS_VERSION >= 5))
+   virtual void harvest_event
+      (const CropSyst::Crop_interfaced &crop_at_harvest)           modification_;//130620_131008NS_130716
+   #else
+   virtual void harvest_event
+      (const CropSyst::Crop_interfaced &crop_at_harvest)           modification_;//130716_130716_131008NS
+   #endif
+   virtual bool end_year()                                         modification_;//130620_111031_010202
+   virtual bool stop()                                             modification_;//160306
+   virtual bool output_growing_season
+      //180101 #if ((REACCH_VERSION==2) || (CS_VERSION >= 5) || defined(INTERCROPPING)|| defined(OFOOT_VERSION))
+      (const CropSyst::Crop_interfaced &crop_at_end_season);                     //130716_131008
+      //180101       #else
+      //180101       ();                                                                        //050114
+      //180101       #endif
+   virtual bool end_growing_season
+      //180101       #if ((REACCH_VERSION==2) || (CS_VERSION >= 5) || defined(INTERCROPPING)|| defined(OFOOT_VERSION))
+      (CropSyst::Crop_interfaced &crop_at_end_season);                           //130716_131008
+      //180101       #else
+      //180101       ();
+      //180101       #endif
+ #ifdef OLD_TRIGGER_SYNC
+   virtual nat16 perform_triggered_synchronizations
+      #ifdef INTERCROPPING
+      (CropSyst::Crop_interfaced *crop_active   //eventually when this is permanent rename to triggering_crop //13100
+      ,nat16            triggered_synchronizations);                             //130717
+      #else
+      ();                                                                        //030516
+      #endif
+ #endif
+/*161219 moved to Land_unit_with_output_V4
+ public: // special outputs.
+   void output_organic_matter_partitioning(bool at_start);                       //070314
+   std::ofstream &provide_denitr_detail()                             provision_;//160128
+*/
+};
+//______________________________________________________________________________
+} // namespace CropSyst
+#endif
+

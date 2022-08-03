@@ -1,0 +1,68 @@
+#ifndef GIF_COLORMAP_H
+#define GIF_COLORMAP_H
+
+//150728 #include <corn/std/std_iostream.h>
+#ifndef primitiveH
+#  include "corn/primitive.h"
+#endif
+#include "corn/image/clrramp.h"
+
+/*______*/  class color_map
+/*______*/  {
+/*______*/
+/*______*/  public:
+/*______*/    uint8 color_resolution;
+/*______*/    uint8 bits_per_pixel;
+/*______*/  
+/*______*/  public:
+/*______*/  	int num_colors;
+/*______*/  	uint8 red[256];
+/*______*/  	uint8 green[256];
+/*______*/  	uint8 blue[256];
+/*______*/
+/*______*/  	bool sorted;
+/*______*/
+/*______*/  public:
+/*______*/
+/*______*/  	color_map(istream &in_strm){read(in_strm);};
+//	color_map(int i_num_colors);
+/*______*/  	color_map(uint8 i_color_resolution = 4,uint8 i_bits_per_pixel = 8);
+/*______*/
+/*991115*/     color_map(const CORN::Color_ramp &color_ramp);
+/*______*/     // Create a color map given a color ramp.
+/*______*/     // Color 0 is reserved for background color.
+/*______*/     // If color ramp has move than 255 colors they will be quantized.
+/*______*/
+/*______*/  	void read(std::istream &in_strm);  // reads the color map from the GIF file.
+/*______*/  	void write(std::ostream &out_strm); // writes the color map to the GIF file.
+/*______*/
+/*______*/  	void sort(unsigned long count[],unsigned char change_to[]);
+/*______*/  	// Count are the number of pixels in the image with the color of
+/*______*/  	// the respective index.
+/*______*/  	// change_to are the colors the respective index should be changed to
+/*______*/  	// after doing the sort.
+/*______*/
+/*______*/     void quantize(int max_colors, uint8 recolor[]);
+/*______*/  	void union_colors(color_map *color_map_2,uint8 recolor1[],uint8 recolor2[]);
+/*______*/     void remove_duplicate_colors(uint8 recolor[]);
+/*______*/     int find(uint8 r, uint8 g, uint8 b);
+/*______*/     void copy_from(color_map &map);
+/*______*/
+/*991220*/     inline void set_color(uint8 index, uint8 i_red,uint8 i_green, uint8 i_blue)
+/*______*/     {  red[index]   = i_red;
+/*______*/        green[index] = i_green;
+/*______*/        blue[index]  = i_blue;
+/*______*/     };
+
+/*000129*/     inline void set_color(uint8 index, uint32 rgb)
+/*______*/     {  red[index]   = (rgb & 0x00FF0000) >> 16 ;
+/*______*/        green[index] = (rgb & 0x0000FF00) >> 8;
+/*______*/        blue[index]  = (rgb & 0x000000FF);
+/*______*/     };
+
+/*000129*/     void dither_safe_colors(bool unix_colors,uint start_at=40);
+//             This creates a palette commonly used for internet colors.
+/*000129*/     void grayscale(uint8 colors=256,uint start_at=0);
+/*______*/  };
+
+#endif

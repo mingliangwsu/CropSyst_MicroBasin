@@ -1,0 +1,133 @@
+#include "corn/container/text_list.h"
+#include "corn/OS/directory_entry_name_concrete.h"
+#include "collate_engine.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/OS/file_system_logical.h"
+
+using namespace UED;
+
+namespace CORN { namespace OS {
+File_system &file_system() { return CORN::OS::file_system_logical; }
+}}
+//______________________________________________________________________________
+void show_usage()
+{
+   std::clog
+      << "The collation is written to standard output.\n\n"
+      << "Command line arguments (these may be listed in any order):\n\n"
+      << "Scenario level directory name (qualified or unqualified).\n"
+      << "(optional: If no directory is specified on the command line, the current\n"
+      << " working directory is assumed as the upper most scenario level directory.\n\n"
+      << "One or more UED filenames to be collated (unqualified with UED extension).\n"
+      << "(optional: If no UED file names are specified then (for CropSyst outputs)\n"
+      << " annual seasonal harvest and daily are processed each in turn.\n\n"
+      << "TDF file name (qualified unqualified).\n"
+      << "(optional: The TDF file can be used to customize the output formant.\n"
+      << " If omitted, a TDF corresponding to the default format is created,\n"
+      << " this can be customized for future runs. \n"
+      << " The default format will be suitable for most cases.  Because the daily output\n"
+      << " can be extensive, one should consider a custom format for daily output.\n\n"
+      << "Level captions  which correspond to the directory structure.\n"
+      << " For CropSyst (REACCH) these would be various levels.\n"
+      << " These should be one word with no spaces (use underscores)\n."
+      << "(recommended/required: otherwise where would be no column header captions)."
+      << std::endl;
+}
+//______________________________________________________________________________
+int main(int argc, const char *argv[])
+{
+   if (argc == 1) show_usage();
+
+   CORN::OS::Directory_name_concrete *top_level_directory = 0;
+   CORN::Text_list UED_names; // unqualified stripted of extension
+   CORN::Text_list level_captions;
+   CORN::Text_list exclude_directories;                                          //160526
+// already available in convert parameters CORN::OS::File_name_concrete      *TDF_filename        = 0;
+   for (int a = 1; a < argc; a++)
+   {  bool arg_identified = false;
+      std::string argv_a(_argv[a]);
+
+      if (argv_a[0] == '-')
+      {
+         if (strncmp(argv_a.c_str(),"--exclude",9) == 0)                                    //160526
+         {
+            // argv_a is initially Initially quoted
+            std::string unquoted_dirname(argv_a,9); // Initially quoted
+            CORN::strip_string(unquoted_dirname,CORN::Leading,'=');
+            CORN::strip_string(unquoted_dirname,CORN::Both,'\"');
+            exclude_directories.add_string(unquoted_dirname);
+         }
+         // Additional options would go here
+      }
+      else
+      {
+
+
+      if ( ! arg_identified)
+      {
+         CORN::OS::File_name_concrete TDF_filename(argv[a]);
+         if (TDF_filename.has_extension_ASCII("TDF"))
+         {
+            arg_identified = true;
+            continue;
+         }
+      }
+
+      /*160606
+      if (!TDF_filename && ! arg_identified)
+      {
+         TDF_filename = new CORN::OS::File_name_concrete(argv[a]);
+         if (TDF_filename->has_extension_ASCII("TDF"))
+         {
+            continue;
+         }
+         else { delete TDF_filename; TDF_filename = 0; }
+      }
+      */
+
+
+      if (!top_level_directory)
+      {  top_level_directory = new CORN::OS::Directory_name_concrete(argv[a]);
+         if ((CORN::OS::file_system_engine.identify_type(*top_level_directory) == CORN::OS::directory_entry)
+              && (CORN::OS::file_system_engine.exists(*top_level_directory)))
+            continue;
+         else { delete top_level_directory; top_level_directory = 0; }
+      }
+      std::string a_str(argv[a]);
+      size_t UED_pos = a_str.find(".UED");
+      if (UED_pos != std::string::npos)
+      {  //UED_filenames.add_cstr(argv[a]);
+         std::string UED_name(a_str,0,UED_pos);
+         UED_names.add_string(UED_name);
+      } else
+      level_captions.add_cstr(argv[a]);
+      }
+   }
+   if (level_captions.count() == 0)
+   {
+      std::cerr << "Scenario level captions should be specified on the command line (I.e. for REACCH: zone rotation weather,  or zone rotation GCM RCP, followed by cell)"
+         << "The captions should ordered matching the directory tree structure." << std::endl;
+      return EXIT_FAILURE;
+   }
+   if (!top_level_directory) // then start with CWD
+        top_level_directory = new CORN::OS::Directory_name_concrete();
+   if (UED_names.count() == 0)
+   {
+      UED_names.add_cstr("annual");
+      UED_names.add_cstr("seasonal");
+      UED_names.add_cstr("harvest");
+      UED_names.add_cstr("daily");
+   }
+   Collate_engine   collate
+      (argc,argv,*top_level_directory,UED_names,level_captions
+      ,exclude_directories                                                       //160526
+//160606 already available in collate_parameters      ,TDF_filename
+      );
+   bool processed = collate.process();
+
+   delete top_level_directory;
+//160606 already available in collate_parameters   delete TDF_filename;
+   return processed ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+//______________________________________________________________________________
+

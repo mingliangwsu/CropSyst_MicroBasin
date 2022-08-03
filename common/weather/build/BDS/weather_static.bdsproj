@@ -1,0 +1,470 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">CPlusPlusBuilder.Personality</Option>
+			<Option Name="ProjectType">CppStaticLibrary</Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{2E59DBCE-FE12-4A13-ADBA-16F0C52FA13E}</Option>
+		</Option>
+	</PersonalityInfo>
+	<CPlusPlusBuilder.Personality>
+		<Source>
+			<Source Name="MainSource">weather_static.cpp</Source>
+		</Source>
+		<BCBPROJECT>
+      <project version="10.0">
+        <property category="build.config" name="active" value="0"/>
+        <property category="build.config" name="count" value="1"/>
+        <property category="build.config" name="excludedefaultforzero" value="0"/>
+        <property category="build.config.0" name="builddir" value="Debug"/>
+        <property category="build.config.0" name="key" value="Debug_Build"/>
+        <property category="build.config.0" name="name" value="Debug Build"/>
+        <property category="build.config.0" name="settings.win32b" value="default"/>
+        <property category="build.config.0" name="type" value="Toolset"/>
+        <property category="build.config.0" name="win32.win32b.builddir" value="Debug_Build"/>
+        <property category="build.config.1" name="key" value="Release_Build"/>
+        <property category="build.config.1" name="name" value="Release Build"/>
+        <property category="build.config.1" name="settings.win32b" value="default"/>
+        <property category="build.config.1" name="type" value="Toolset"/>
+        <property category="build.config.1" name="win32.win32b.builddir" value="Release_Build"/>
+        <property category="build.node" name="lastconfig" value="Debug_Build"/>
+        <property category="build.node" name="libraries" value="vcl.lib rtl.lib"/>
+        <property category="build.node" name="name" value="weather_static.lib"/>
+        <property category="build.node" name="packages" value="vcl;rtl;vclx;xmlrtl;vclactnband;inet;IntrawebDB_80_100;Intraweb_80_100;IndyCore;IndySystem;bcbofficexp;IndyProtocols;bcbie;RNAutoControls_basic_package"/>
+        <property category="build.node" name="sparelibs" value="rtl.lib vcl.lib"/>
+        <property category="build.node" name="use_packages" value="0"/>
+        <property category="build.platform" name="active" value="win32"/>
+        <property category="build.platform" name="win32.Debug_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.Release_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.default" value="win32b"/>
+        <property category="build.platform" name="win32.enabled" value="1"/>
+        <property category="build.platform" name="win32.win32b.enabled" value="1"/>
+        <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="container.SelectedOptimizations.containerenabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="container.SelectedWarnings.containerenabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.1" value="_DEBUG"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.2" value="CS_VERSION=4"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.H=.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.H=.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.Hc.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.He.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.Hs.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.1" value="c:\dev\common"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.O1.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.O2.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.Od.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.disablewarns.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.k.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.r.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.v.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.vi.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.w.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.y.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$O.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.1" value="DEBUG"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\debug"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.z.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zi.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.arg" value="512"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.P.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.dynamicrtl.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.arg.1" value="C:\temp\lib\BDS\debug"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.arg.merge" value="0"/>
+        <property category="win32.Debug_Build.win32b.tlib" name="option.outputdir.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.1" value="NODEBUG"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.2" value="CS_VERSION=4"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.H=.arg.1" value="..\..\..\..\temp\obj\common\weather\bds\weather_static.csm"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.H=.arg.merge" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.H=.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Hc.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.He.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.Hs.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.1" value="C:\dev\common"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.I.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.O2.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.k.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.r.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.vi.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.$D.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.V.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\release"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.z.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zi.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zn.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.arg.1" value="C:\temp\lib\BDS\release"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.arg.merge" value="0"/>
+        <property category="win32.Release_Build.win32b.tlib" name="option.outputdir.enabled" value="1"/>
+        <optionset name="all_configurations">
+          <property category="node" name="displayname" value="All Configurations"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.arg.1" value="APPTYPE_CONSOLE"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.1" value="$(BDS)\lib\vcl100.csm"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.Hc.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.1" value="..\..\..\solar"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.10" value="..\parameter"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.11" value="..\..\biometeorology"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.12" value="..\database"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.13" value="..\..\..\biometeorology"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.14" value="..\..\ET_reference"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.15" value="..\..\year"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.16" value="..\.."/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.17" value="..\..\any_timestep"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.18" value="..\..\day"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.19" value="..\..\database"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.2" value="..\..\..\biometeorology\parameter"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.20" value="..\..\hour"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.21" value="..\..\parameter"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.22" value="C:\dev\common\weather\BDS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.23" value="C:\dev\common\weather\parameter"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.24" value="C:\dev\common\weather\hour"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.25" value="C:\dev\common\weather\database"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.26" value="C:\dev\common\weather\day"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.27" value="C:\dev\common\weather\any_timestep"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.28" value="C:\dev\common\weather"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.29" value="$(BDS)\include"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.3" value="..\..\..\physics\property"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.30" value="$(BDS)\include\dinkumware"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.31" value="$(BDS)\include\vcl"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.32" value="c:\dev"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.4" value="..\..\.."/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.5" value="..\build\BDS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.6" value="..\"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.7" value="..\any_timestep"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.8" value="..\day"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.9" value="..\hour"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.b.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.1" value="NO_STRICT"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tW.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWC.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWD.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWM.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.1" value="..\..\..\solar"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.10" value="..\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.11" value="..\..\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.12" value="..\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.13" value="..\..\..\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.14" value="..\..\ET_reference"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.15" value="..\..\year"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.16" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.17" value="..\..\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.18" value="..\..\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.19" value="..\..\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.2" value="..\..\..\biometeorology\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.20" value="..\..\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.21" value="..\..\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.22" value="C:\dev\common\weather\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.23" value="C:\dev\common\weather\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.24" value="C:\dev\common\weather\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.25" value="C:\dev\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.26" value="C:\dev\common\weather\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.27" value="C:\dev\common\weather\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.28" value="C:\dev\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.3" value="..\..\..\physics\property"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.4" value="..\..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.5" value="..\build\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.6" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.7" value="..\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.8" value="..\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.9" value="..\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.1" value="..\..\..\solar"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.10" value="..\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.11" value="..\..\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.12" value="..\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.13" value="..\..\..\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.14" value="..\..\ET_reference"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.15" value="..\..\year"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.16" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.17" value="..\..\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.18" value="..\..\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.19" value="..\..\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.2" value="..\..\..\biometeorology\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.20" value="..\..\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.21" value="..\..\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.22" value="C:\dev\common\weather\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.23" value="C:\dev\common\weather\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.24" value="C:\dev\common\weather\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.25" value="C:\dev\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.26" value="C:\dev\common\weather\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.27" value="C:\dev\common\weather\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.28" value="C:\dev\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.3" value="..\..\..\physics\property"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.4" value="..\..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.5" value="..\build\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.6" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.7" value="..\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.8" value="..\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.9" value="..\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.1" value="..\..\..\solar"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.10" value="..\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.11" value="..\..\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.12" value="..\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.13" value="..\..\..\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.14" value="..\..\ET_reference"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.15" value="..\..\year"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.16" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.17" value="..\..\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.18" value="..\..\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.19" value="..\..\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.2" value="..\..\..\biometeorology\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.20" value="..\..\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.21" value="..\..\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.22" value="C:\dev\common\weather\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.23" value="C:\dev\common\weather\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.24" value="C:\dev\common\weather\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.25" value="C:\dev\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.26" value="C:\dev\common\weather\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.27" value="C:\dev\common\weather\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.28" value="C:\dev\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.3" value="..\..\..\physics\property"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.4" value="..\..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.5" value="..\build\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.6" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.7" value="..\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.8" value="..\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.9" value="..\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.1" value="..\..\..\solar"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.10" value="..\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.11" value="..\..\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.12" value="..\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.13" value="..\..\..\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.14" value="..\..\ET_reference"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.15" value="..\..\year"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.16" value="..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.17" value="..\..\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.18" value="..\..\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.19" value="..\..\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.2" value="..\..\..\biometeorology\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.20" value="..\..\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.21" value="..\..\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.22" value="C:\dev\common\weather\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.23" value="C:\dev\common\weather\parameter"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.24" value="C:\dev\common\weather\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.25" value="C:\dev\common\weather\database"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.26" value="C:\dev\common\weather\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.27" value="C:\dev\common\weather\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.28" value="C:\dev\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.29" value="C:\Users\rnelson\Documents\Borland Studio Projects"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.3" value="..\..\..\physics\property"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.30" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.31" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.4" value="..\..\.."/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.5" value="..\build\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.6" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.7" value="..\any_timestep"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.8" value="..\day"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.9" value="..\hour"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.1" value="..\..\..\solar"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.10" value="..\..\..\biometeorology"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.11" value="..\..\database"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.12" value="..\build\BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.13" value="..\..\biometeorology"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.14" value="..\ET_reference"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.15" value="..\year"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.16" value="..\"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.17" value="..\any_timestep"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.18" value="..\day"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.19" value="..\database"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.2" value="..\..\..\biometeorology\parameter"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.20" value="..\hour"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.21" value="..\parameter"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.22" value="C:\dev\common\weather\BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.23" value="C:\dev\common\weather\parameter"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.24" value="C:\dev\common\weather\hour"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.25" value="C:\dev\common\weather\database"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.26" value="C:\dev\common\weather\day"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.27" value="C:\dev\common\weather\any_timestep"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.28" value="C:\dev\common\weather"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.3" value="..\..\..\physics\property"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.4" value="..\..\.."/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.5" value="..\.."/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.6" value="..\..\any_timestep"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.7" value="..\..\day"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.8" value="..\..\hour"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.9" value="..\..\parameter"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Gi.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.2" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.3" value="$(BDS)\lib\psdk"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpd.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpe.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpp.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.aa.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.ap.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.dynamicrtl.enabled" value="1"/>
+          <property category="win32.*.win32b.tlib" name="option.P.arg.merge" value="1"/>
+          <property category="win32.*.win32b.tlib" name="option.P.enabled" value="1"/>
+          <property category="win32.*.win32b.tlib" name="option.dynamicrtl.enabled" value="0"/>
+        </optionset>
+      </project>
+      <FILELIST>
+        <FILE FILENAME="weather_static.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="weather_static" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\daily.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="daily" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\loc_param.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="loc_param" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\sky.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sky" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\snow.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="snow" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\sun.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sun" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\weather.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="weather" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\weather_types.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="weather_types" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\wind.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="wind" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\wthr.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="wthr" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\wthrbase.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="wthrbase" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\any_timestep\relhumid_est.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="relhumid_est" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\any_timestep\temperature_est.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="temperature_est" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\day\sun_days.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sun_days" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\day\vapor_pressure_day.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="vapor_pressure_day" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\day\weather_day.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="weather_day" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\hour\solar_irrad_hour.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="solar_irrad_hour" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\hour\sun_hours.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="sun_hours" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_dew_point_temperature.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_dew_point_temperature" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_relative_humidity.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_relative_humidity" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_vapor_pressure.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_vapor_pressure" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_vapor_pressure_act.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_vapor_pressure_act" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_vapor_pressure_deficit.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_vapor_pressure_deficit" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\phrases.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="phrases" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_atmospheric_pressure.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_atmospheric_pressure" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WP_atmospheric_pressure.h"/>
+        <FILE FILENAME="..\..\atmospheric_CO2_change_linear.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="atmospheric_CO2_change_linear" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\atmospheric_CO2_change_linear.h"/>
+        <FILE FILENAME="..\..\atmospheric_CO2_change_recalibration.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="atmospheric_CO2_change_recalibration" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\atmospheric_CO2_change_recalibration.h"/>
+        <FILE FILENAME="..\..\atmospheric_CO2_change_interface.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="atmospheric_CO2_change_interface" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\biometeorology\ET_model.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="ET_model" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\biometeorology\ET_reference_FAO.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="ET_reference_FAO" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_air_temperature.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_air_temperature" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WP_air_temperature.h"/>
+        <FILE FILENAME="..\..\parameter\WP_solar_radiation.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_solar_radiation" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WP_solar_radiation.h"/>
+        <FILE FILENAME="..\..\..\biometeorology\aerodynamics.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="aerodynamics" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\biometeorology\ET_common.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="ET_common" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\biometeorology\ET_common.h"/>
+        <FILE FILENAME="..\..\any_timestep\min_max_to_timestep_estimator.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="min_max_to_timestep_estimator" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\any_timestep\min_max_to_timestep_estimator.h"/>
+        <FILE FILENAME="..\..\hour\weather_hours.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="weather_hours" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\hour\weather_hours.h"/>
+        <FILE FILENAME="..\..\database\common_weather_creators.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="common_weather_creators" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\database\common_weather_creators.h"/>
+        <FILE FILENAME="..\..\parameter\WC_dew_point_temperature.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_dew_point_temperature" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WC_air_temperature.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_air_temperature" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WC_vapor_pressure.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_vapor_pressure" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WC_vapor_pressure_act.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_vapor_pressure_act" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WC_vapor_pressure_deficit.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_vapor_pressure_deficit" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WC_relative_humidity.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_relative_humidity" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WC_solar_radiation.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_solar_radiation" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\physical_parameter.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="physical_parameter" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_vapor_pressure_saturation_slope.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_vapor_pressure_saturation_slope" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WP_vapor_pressure_saturation_slope.h"/>
+        <FILE FILENAME="..\..\parameter\WC_vapor_pressure_saturation_slope.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_vapor_pressure_saturation_slope" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WC_vapor_pressure_saturation_slope.h"/>
+        <FILE FILENAME="..\..\parameter\WC_psychrometric_const.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_psychrometric_const" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WC_psychrometric_const.h"/>
+        <FILE FILENAME="..\..\parameter\WC_psychrometric_const.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WC_psychrometric_const" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WC_psychrometric_const.h"/>
+        <FILE FILENAME="..\..\parameter\WP_latent_heat_vaporization.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_latent_heat_vaporization" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WP_latent_heat_vaporization.h"/>
+        <FILE FILENAME="..\..\seasons.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="seasons" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\seasons.h"/>
+        <FILE FILENAME="..\..\storms.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="storms" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\storms.h"/>
+        <FILE FILENAME="..\..\stormgen.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="stormgen" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\storm_event.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="storm_event" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\parameter\WP_temperature.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_temperature" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WP_temperature.h"/>
+        <FILE FILENAME="..\..\parameter\WP_wind_speed.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="WP_wind_speed" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\parameter\WP_wind_speed.h"/>
+        <FILE FILENAME="..\..\..\physics\property\P_vapor_pressure.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="P_vapor_pressure" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\physics\property\P_vapor_pressure.h"/>
+        <FILE FILENAME="..\..\temperature_amplitude_phase_calibrator.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="temperature_amplitude_phase_calibrator" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\biometeorology\parameter\CO2_atmospheric_conc.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="CO2_atmospheric_conc" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\biometeorology\parameter\CO2_atmospheric_conc.h"/>
+        <FILE FILENAME="..\..\..\biometeorology\parameter\slope_SVP_curve_psychrometric_resistance.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="slope_SVP_curve_psychrometric_resistance" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\solar\irradiance_extraterrestrial.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="irradiance_extraterrestrial" FORMNAME="" DESIGNCLASS=""/>
+      </FILELIST>
+      <IDEOPTIONS>
+        <VersionInfo>
+          <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+          <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+          <VersionInfo Name="MajorVer">1</VersionInfo>
+          <VersionInfo Name="MinorVer">0</VersionInfo>
+          <VersionInfo Name="Release">0</VersionInfo>
+          <VersionInfo Name="Build">0</VersionInfo>
+          <VersionInfo Name="Debug">False</VersionInfo>
+          <VersionInfo Name="PreRelease">False</VersionInfo>
+          <VersionInfo Name="Special">False</VersionInfo>
+          <VersionInfo Name="Private">False</VersionInfo>
+          <VersionInfo Name="DLL">False</VersionInfo>
+          <VersionInfo Name="Locale">1033</VersionInfo>
+          <VersionInfo Name="CodePage">1252</VersionInfo>
+        </VersionInfo>
+        <VersionInfoKeys>
+          <VersionInfoKeys Name="CompanyName"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileDescription"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="InternalName"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
+          <VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductName"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="Comments"></VersionInfoKeys>
+        </VersionInfoKeys>
+        <Debugging>
+          <Debugging Name="DebugSourceDirs"></Debugging>
+        </Debugging>
+        <Parameters>
+          <Parameters Name="RunParams">"P:\OFoot\Nelson\Bean Comparison\Bean bush dry test\.CropSyst_scenario"  "P:\OFoot\Nelson\Bean Comparison\OFoot.FMT"</Parameters>
+          <Parameters Name="Launcher"></Parameters>
+          <Parameters Name="UseLauncher">False</Parameters>
+          <Parameters Name="DebugCWD"></Parameters>
+          <Parameters Name="HostApplication"></Parameters>
+          <Parameters Name="RemoteHost"></Parameters>
+          <Parameters Name="RemotePath"></Parameters>
+          <Parameters Name="RemoteParams"></Parameters>
+          <Parameters Name="RemoteLauncher"></Parameters>
+          <Parameters Name="UseRemoteLauncher">False</Parameters>
+          <Parameters Name="RemoteCWD"></Parameters>
+          <Parameters Name="RemoteDebug">False</Parameters>
+          <Parameters Name="Debug Symbols Search Path"></Parameters>
+          <Parameters Name="LoadAllSymbols">True</Parameters>
+          <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+        </Parameters>
+        <Linker>
+          <Linker Name="LibPrefix"></Linker>
+          <Linker Name="LibSuffix"></Linker>
+          <Linker Name="LibVersion"></Linker>
+        </Linker>
+      </IDEOPTIONS>
+    </BCBPROJECT>
+		<buildevents/>
+	</CPlusPlusBuilder.Personality>
+	<StarTeamAssociation></StarTeamAssociation>
+	<StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>

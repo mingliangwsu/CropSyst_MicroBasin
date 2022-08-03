@@ -1,0 +1,276 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{A75D6F58-777D-4082-88A8-155844114CE9}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\..\CS_suite\build\RS\2010\CS_directory.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\library\build\RS\2010\UED_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\library\build\RS\2010\UED_static_debug.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="UED_convertor_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="C:\dev_other\xlslib\trunk\xlslib\build\RadStudio\2010\xlslib_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\text_dBase_Excel_with_TDF\RS\2010\text_dbase_excel_with_TDF_debug.cbproj">
+				<Dependencies>..\..\..\..\..\CS_suite\build\RS\2010\CS_directory.cbproj;..\..\..\..\library\build\RS\2010\UED_static.cbproj;C:\dev_other\xlslib\trunk\xlslib\build\RadStudio\2010\xlslib_static.cbproj</Dependencies>
+			</Projects>
+			<Projects Include="..\..\..\text_dBase_Excel_with_TDF\RS\2010\text_dbase_excel_with_TDF.cbproj">
+				<Dependencies>..\..\..\..\..\CS_suite\build\RS\2010\CS_directory.cbproj;..\..\..\..\library\build\RS\2010\UED_static.cbproj;C:\dev_other\xlslib\trunk\xlslib\build\RadStudio\2010\xlslib_static.cbproj</Dependencies>
+			</Projects>
+			<Projects Include="..\..\..\..\..\ICASA\library\build\RadStudio\2010\ICASA_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\IBSNAT_ICASA_DSSAT\RS\2010\IBSNAT_ICASA_DSSAT_AgMIP.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\AgriMet\RS\2010\AgriMet.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\..\corn\format\binary\CDBF_unit_test\RS\2010\CDBF_unit_test.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\VIC\RS\2010\VIC.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\omni\build\RadStudio\2010\omni_convertor.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\SASRI\build\RadStudio\2010\SASRI.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\quality\build\RadStudio\import_export.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\APSIM\build\RadStudio\2010\APSIM.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\LARS-WG\RadStudio\2010\LarsWG.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\STICS\build\RadStudio\2010\STICS.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\..\adjustor\build\RadStudio\2010\UED_adjustor.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\..\cropsyst\RadStudio\2010\CropSyst.cbproj">
+				<Dependencies>..\..\..\..\..\CS_suite\build\RS\2010\CS_directory.cbproj;..\..\..\..\library\build\RS\2010\UED_static.cbproj;UED_convertor_static.cbproj;..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj</Dependencies>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="corn_complete_static">
+			<MSBuild Projects="..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="corn_complete_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\corn\build\RS\2010\corn_complete_static.cbproj"/>
+		</Target>
+		<Target Name="CS_directory">
+			<MSBuild Projects="..\..\..\..\..\CS_suite\build\RS\2010\CS_directory.cbproj"/>
+		</Target>
+		<Target Name="CS_directory:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\CS_suite\build\RS\2010\CS_directory.cbproj"/>
+		</Target>
+		<Target Name="CS_directory:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\CS_suite\build\RS\2010\CS_directory.cbproj"/>
+		</Target>
+		<Target Name="UED_static">
+			<MSBuild Projects="..\..\..\..\library\build\RS\2010\UED_static.cbproj"/>
+		</Target>
+		<Target Name="UED_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\library\build\RS\2010\UED_static.cbproj"/>
+		</Target>
+		<Target Name="UED_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\library\build\RS\2010\UED_static.cbproj"/>
+		</Target>
+		<Target Name="UED_static_debug">
+			<MSBuild Projects="..\..\..\..\library\build\RS\2010\UED_static_debug.cbproj"/>
+		</Target>
+		<Target Name="UED_static_debug:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\library\build\RS\2010\UED_static_debug.cbproj"/>
+		</Target>
+		<Target Name="UED_static_debug:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\library\build\RS\2010\UED_static_debug.cbproj"/>
+		</Target>
+		<Target Name="UED_convertor_static">
+			<MSBuild Projects="UED_convertor_static.cbproj"/>
+		</Target>
+		<Target Name="UED_convertor_static:Clean">
+			<MSBuild Targets="Clean" Projects="UED_convertor_static.cbproj"/>
+		</Target>
+		<Target Name="UED_convertor_static:Make">
+			<MSBuild Targets="Make" Projects="UED_convertor_static.cbproj"/>
+		</Target>
+		<Target Name="xlslib_static">
+			<MSBuild Projects="C:\dev_other\xlslib\trunk\xlslib\build\RadStudio\2010\xlslib_static.cbproj"/>
+		</Target>
+		<Target Name="xlslib_static:Clean">
+			<MSBuild Targets="Clean" Projects="C:\dev_other\xlslib\trunk\xlslib\build\RadStudio\2010\xlslib_static.cbproj"/>
+		</Target>
+		<Target Name="xlslib_static:Make">
+			<MSBuild Targets="Make" Projects="C:\dev_other\xlslib\trunk\xlslib\build\RadStudio\2010\xlslib_static.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory;UED_static;xlslib_static" Name="text_dbase_excel_with_TDF_debug">
+			<MSBuild Projects="..\..\..\text_dBase_Excel_with_TDF\RS\2010\text_dbase_excel_with_TDF_debug.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory:Clean;UED_static:Clean;xlslib_static:Clean" Name="text_dbase_excel_with_TDF_debug:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\text_dBase_Excel_with_TDF\RS\2010\text_dbase_excel_with_TDF_debug.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory:Make;UED_static:Make;xlslib_static:Make" Name="text_dbase_excel_with_TDF_debug:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\text_dBase_Excel_with_TDF\RS\2010\text_dbase_excel_with_TDF_debug.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory;UED_static;xlslib_static" Name="text_dbase_excel_with_TDF">
+			<MSBuild Projects="..\..\..\text_dBase_Excel_with_TDF\RS\2010\text_dbase_excel_with_TDF.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory:Clean;UED_static:Clean;xlslib_static:Clean" Name="text_dbase_excel_with_TDF:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\text_dBase_Excel_with_TDF\RS\2010\text_dbase_excel_with_TDF.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory:Make;UED_static:Make;xlslib_static:Make" Name="text_dbase_excel_with_TDF:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\text_dBase_Excel_with_TDF\RS\2010\text_dbase_excel_with_TDF.cbproj"/>
+		</Target>
+		<Target Name="ICASA_static">
+			<MSBuild Projects="..\..\..\..\..\ICASA\library\build\RadStudio\2010\ICASA_static.cbproj"/>
+		</Target>
+		<Target Name="ICASA_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\ICASA\library\build\RadStudio\2010\ICASA_static.cbproj"/>
+		</Target>
+		<Target Name="ICASA_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\ICASA\library\build\RadStudio\2010\ICASA_static.cbproj"/>
+		</Target>
+		<Target Name="IBSNAT_ICASA_DSSAT_AgMIP">
+			<MSBuild Projects="..\..\..\IBSNAT_ICASA_DSSAT\RS\2010\IBSNAT_ICASA_DSSAT_AgMIP.cbproj"/>
+		</Target>
+		<Target Name="IBSNAT_ICASA_DSSAT_AgMIP:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\IBSNAT_ICASA_DSSAT\RS\2010\IBSNAT_ICASA_DSSAT_AgMIP.cbproj"/>
+		</Target>
+		<Target Name="IBSNAT_ICASA_DSSAT_AgMIP:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\IBSNAT_ICASA_DSSAT\RS\2010\IBSNAT_ICASA_DSSAT_AgMIP.cbproj"/>
+		</Target>
+		<Target Name="AgriMet">
+			<MSBuild Projects="..\..\..\AgriMet\RS\2010\AgriMet.cbproj"/>
+		</Target>
+		<Target Name="AgriMet:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\AgriMet\RS\2010\AgriMet.cbproj"/>
+		</Target>
+		<Target Name="AgriMet:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\AgriMet\RS\2010\AgriMet.cbproj"/>
+		</Target>
+		<Target Name="CDBF_unit_test">
+			<MSBuild Projects="..\..\..\..\..\corn\format\binary\CDBF_unit_test\RS\2010\CDBF_unit_test.cbproj"/>
+		</Target>
+		<Target Name="CDBF_unit_test:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\..\corn\format\binary\CDBF_unit_test\RS\2010\CDBF_unit_test.cbproj"/>
+		</Target>
+		<Target Name="CDBF_unit_test:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\..\corn\format\binary\CDBF_unit_test\RS\2010\CDBF_unit_test.cbproj"/>
+		</Target>
+		<Target Name="VIC">
+			<MSBuild Projects="..\..\..\VIC\RS\2010\VIC.cbproj"/>
+		</Target>
+		<Target Name="VIC:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\VIC\RS\2010\VIC.cbproj"/>
+		</Target>
+		<Target Name="VIC:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\VIC\RS\2010\VIC.cbproj"/>
+		</Target>
+		<Target Name="omni_convertor">
+			<MSBuild Projects="..\..\..\omni\build\RadStudio\2010\omni_convertor.cbproj"/>
+		</Target>
+		<Target Name="omni_convertor:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\omni\build\RadStudio\2010\omni_convertor.cbproj"/>
+		</Target>
+		<Target Name="omni_convertor:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\omni\build\RadStudio\2010\omni_convertor.cbproj"/>
+		</Target>
+		<Target Name="SASRI">
+			<MSBuild Projects="..\..\..\SASRI\build\RadStudio\2010\SASRI.cbproj"/>
+		</Target>
+		<Target Name="SASRI:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\SASRI\build\RadStudio\2010\SASRI.cbproj"/>
+		</Target>
+		<Target Name="SASRI:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\SASRI\build\RadStudio\2010\SASRI.cbproj"/>
+		</Target>
+		<Target Name="import_export">
+			<MSBuild Projects="..\..\..\..\quality\build\RadStudio\import_export.cbproj"/>
+		</Target>
+		<Target Name="import_export:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\quality\build\RadStudio\import_export.cbproj"/>
+		</Target>
+		<Target Name="import_export:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\quality\build\RadStudio\import_export.cbproj"/>
+		</Target>
+		<Target Name="APSIM">
+			<MSBuild Projects="..\..\..\APSIM\build\RadStudio\2010\APSIM.cbproj"/>
+		</Target>
+		<Target Name="APSIM:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\APSIM\build\RadStudio\2010\APSIM.cbproj"/>
+		</Target>
+		<Target Name="APSIM:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\APSIM\build\RadStudio\2010\APSIM.cbproj"/>
+		</Target>
+		<Target Name="LarsWG">
+			<MSBuild Projects="..\..\..\LARS-WG\RadStudio\2010\LarsWG.cbproj"/>
+		</Target>
+		<Target Name="LarsWG:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\LARS-WG\RadStudio\2010\LarsWG.cbproj"/>
+		</Target>
+		<Target Name="LarsWG:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\LARS-WG\RadStudio\2010\LarsWG.cbproj"/>
+		</Target>
+		<Target Name="STICS">
+			<MSBuild Projects="..\..\..\STICS\build\RadStudio\2010\STICS.cbproj"/>
+		</Target>
+		<Target Name="STICS:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\STICS\build\RadStudio\2010\STICS.cbproj"/>
+		</Target>
+		<Target Name="STICS:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\STICS\build\RadStudio\2010\STICS.cbproj"/>
+		</Target>
+		<Target Name="UED_adjustor">
+			<MSBuild Projects="..\..\..\..\adjustor\build\RadStudio\2010\UED_adjustor.cbproj"/>
+		</Target>
+		<Target Name="UED_adjustor:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\..\adjustor\build\RadStudio\2010\UED_adjustor.cbproj"/>
+		</Target>
+		<Target Name="UED_adjustor:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\..\adjustor\build\RadStudio\2010\UED_adjustor.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory;UED_static;UED_convertor_static;corn_complete_static" Name="CropSyst">
+			<MSBuild Projects="..\..\..\cropsyst\RadStudio\2010\CropSyst.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory:Clean;UED_static:Clean;UED_convertor_static:Clean;corn_complete_static:Clean" Name="CropSyst:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\cropsyst\RadStudio\2010\CropSyst.cbproj"/>
+		</Target>
+		<Target DependsOnTargets="CS_directory:Make;UED_static:Make;UED_convertor_static:Make;corn_complete_static:Make" Name="CropSyst:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\cropsyst\RadStudio\2010\CropSyst.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="corn_complete_static;CS_directory;UED_static;UED_static_debug;UED_convertor_static;xlslib_static;text_dbase_excel_with_TDF_debug;text_dbase_excel_with_TDF;ICASA_static;IBSNAT_ICASA_DSSAT_AgMIP;AgriMet;CDBF_unit_test;VIC;omni_convertor;SASRI;import_export;APSIM;LarsWG;STICS;UED_adjustor;CropSyst"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="corn_complete_static:Clean;CS_directory:Clean;UED_static:Clean;UED_static_debug:Clean;UED_convertor_static:Clean;xlslib_static:Clean;text_dbase_excel_with_TDF_debug:Clean;text_dbase_excel_with_TDF:Clean;ICASA_static:Clean;IBSNAT_ICASA_DSSAT_AgMIP:Clean;AgriMet:Clean;CDBF_unit_test:Clean;VIC:Clean;omni_convertor:Clean;SASRI:Clean;import_export:Clean;APSIM:Clean;LarsWG:Clean;STICS:Clean;UED_adjustor:Clean;CropSyst:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="corn_complete_static:Make;CS_directory:Make;UED_static:Make;UED_static_debug:Make;UED_convertor_static:Make;xlslib_static:Make;text_dbase_excel_with_TDF_debug:Make;text_dbase_excel_with_TDF:Make;ICASA_static:Make;IBSNAT_ICASA_DSSAT_AgMIP:Make;AgriMet:Make;CDBF_unit_test:Make;VIC:Make;omni_convertor:Make;SASRI:Make;import_export:Make;APSIM:Make;LarsWG:Make;STICS:Make;UED_adjustor:Make;CropSyst:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

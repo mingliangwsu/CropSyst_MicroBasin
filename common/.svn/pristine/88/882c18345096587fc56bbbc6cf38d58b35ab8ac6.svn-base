@@ -1,0 +1,58 @@
+#ifndef soil_provider_commonH
+#define soil_provider_commonH
+#include "corn/container/association.h"
+#include "soil/soil_param.h"
+class Smart_soil_parameters;
+class Geocoordinate; // eventually move to CS namespace 150904
+namespace CS {
+//______________________________________________________________________________
+class Component_composition
+: public CORN::Association
+{  // There may be multiple components in a map unit (polygon)
+ public:
+   Smart_soil_parameters soil_params;
+   float32 profile_depth_m;
+   nat8 &comppct;        // for debugging
+
+   inline Component_composition(nat8 &_comppct)
+      : CORN::Association()
+      , profile_depth_m(0)  // to be calculated
+      , comppct(_comppct)
+      {}
+};
+//______________________________________________________________________________
+class Mapunit_composition : public CORN::Association
+{public:
+   CORN::Association_list components;  //list of Component_composition
+   Component_composition *predominate_component_composition;
+      //150411    float64 profile_depth_m;
+ public:
+   inline Mapunit_composition()                                                  //141230
+      : CORN::Association()
+      , predominate_component_composition(0)
+      //150411 , profile_depth_m(0)
+      {}
+   inline virtual const Smart_soil_parameters &get_soil_parameters()       const
+      { return predominate_component_composition->soil_params ;}
+   inline const Component_composition *get_predominate_component_composition()
+      { return predominate_component_composition; }
+   inline virtual bool commit()
+      { return false; }                                                          //150927
+};
+//______________________________________________________________________________
+class Soil_provider
+: public CORN::Item
+{
+ public:
+   virtual Mapunit_composition *render_selected_map_unit
+      (const std::string &MUkey_or_POLY_ID)                            rendition_= 0;
+   /* NYI
+   virtual bool done_with
+      (const std::string &MUkey_or_POLY_ID) = 0;
+   */
+   virtual Mapunit_composition *render_at_geocoordinate
+      (const Geocoordinate &geocoordinate)                             rendition_= 0;
+};
+//______________________________________________________________________________
+} //namespace CS
+#endif

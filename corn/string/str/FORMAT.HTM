@@ -1,0 +1,341 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-nz">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Format class</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<link rel="stylesheet" type="text/css" href="rbd.css">
+<link REL="SHORTCUT ICON" HREF="favicon.ico">
+</head>
+
+<body>
+
+<h1 align="center"><a name="Top"></a>Format class</h1>
+
+<p><i>May, 2005</i></p>
+
+<ul>
+  <li><a href="#Introduction">Introduction</a></li>
+  <li><a href="#Example">Example</a></li>
+  <li><a href="ol_doc.htm">To online documentation page</a></li>
+  <li><a href="string.htm">To description of string library</a></li>
+</ul>
+
+<h2><a name="Introduction"></a>Introduction</h2>
+<p>The Format class is distributed as part of the <a href="string.htm">string
+library</a>. See the string library documentation on how to customise the
+<tt>include.h</tt> file for your compiler and for the file list.</p>
+<p>This class is intended to provide a more convenient facility for formatting numerical data
+than is provided by the standard IO classes.</p>
+<p>A typical application would look like this</p>
+<pre>   Format F1, F2;
+   ... load attributes into F1, F2;
+   cout &lt;&lt; F1 &lt;&lt; x &lt;&lt; y &lt;&lt; F2 &lt;&lt; z &lt;&lt; endl;</pre>
+<p>Format <i>F1</i> would be applied to <i>x</i> and <i>y</i> and <i> F2</i> to <i>z</i>.</p>
+<p>The variables <i>x</i>, <i>y</i> and <i>z</i> can be any of the following
+types: char, char*, String, int, unsigned int, long, unsigned long, double,
+float.</p>
+<p>The manipulators <i>endl</i>, <i>ends</i> and <i>flush</i> are passed
+directly through to the ostream (such as <i>cout</i>).</p>
+<p>One can also use the code</p>
+<pre>   OstreamWithFormat f1(cout, F1);
+   OstreamWithFormat f2(cout, F2);
+   f1 &lt;&lt; x &lt;&lt; y; f2 &lt;&lt; z &lt;&lt; endl;</pre>
+<p>The attributes are loaded with statements like</p>
+<pre>   F1.precision(2);</pre>
+You can recover their values with statements like
+<pre>   int p = F1.precision();</pre>
+<p>You can recover a pointer to the Format object from an OstreamWithFormat 
+object , <i>f1</i>, with a statement like</p>
+<pre>   Format&amp; F1 = f1.format();</pre>
+<p>The following table shows the functions for accessing the attributes 
+(preferred version in bold):</p>
+<table border="1" cellspacing="0" width="100%" cellpadding="2">
+  <tr>
+    <td width="20%" height="23" valign="top"><b>attribute</b></td>
+    <td width="20%" height="23" valign="top"><b>default value</b></td>
+    <td width="20%" height="23" valign="top"><b>possible values</b></td>
+    <td width="40%" height="23" valign="top"><b>description</b></td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top"><b>min_width</b><br>
+    MinWidth</td>
+    <td width="20%" height="22" valign="top">0</td>
+    <td width="20%" height="22" valign="top">non-negative integer</td>
+    <td width="40%" height="22" valign="top">minimum field width</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top"><b>max_width</b><br>
+    MaxWidth</td>
+    <td width="20%" height="22" valign="top">12</td>
+    <td width="20%" height="22" valign="top">positive integer</td>
+    <td width="40%" height="22" valign="top">maximum field width</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top"><b>width</b><br>
+    Width</td>
+    <td width="20%" height="22" valign="top">&nbsp;</td>
+    <td width="20%" height="22" valign="top">positive integer</td>
+    <td width="40%" height="22" valign="top">sets both min_width
+      and max_width</td>
+  </tr>
+  <tr>
+    <td width="20%" height="44" rowspan="2" valign="top"><b>overflow_policy<br>
+    </b>OverFlowPolicy</td>
+    <td width="20%" height="44" rowspan="2" valign="top">Format::E</td>
+    <td width="20%" height="22" valign="top">Format::E</td>
+    <td width="40%" height="22" valign="top">on overflow use
+      scientific format</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::HASH</td>
+    <td width="40%" height="22" valign="top">on overflow replace
+      field with # characters</td>
+  </tr>
+  <tr>
+    <td width="20%" height="66" rowspan="3" valign="top"><b>underflow_policy</b><br>
+    UnderFlowPolicy</td>
+    <td width="20%" height="66" rowspan="3" valign="top">Format::ZERO</td>
+    <td width="20%" height="22" valign="top">Format::E</td>
+    <td width="40%" height="22" valign="top">on underflow use
+      scientific format</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::HASH</td>
+    <td width="40%" height="22" valign="top">on underflow replace
+      field with # characters</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::ZERO</td>
+    <td width="40%" height="22" valign="top">reduce precision</td>
+  </tr>
+  <tr>
+    <td width="20%" height="88" rowspan="3" valign="top"><b>alignment</b><br>
+    Alignment</td>
+    <td width="20%" height="88" rowspan="3" valign="top">Format::RIGHT</td>
+    <td width="20%" height="22" valign="top">Format::LEFT</td>
+    <td width="40%" height="22" valign="top">left alignment</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::RIGHT</td>
+    <td width="40%" height="22" valign="top">right alignment</td>
+  </tr>
+  <tr>
+    <td width="20%" height="44" valign="top">Format::CENTRE<br>
+    Format::CENTER</td>
+    <td width="40%" height="44" valign="top">centre
+      (center) alignment</td>
+  </tr>
+  <tr>
+    <td width="20%" height="88" rowspan="4" valign="top"><b>format_type</b><br>
+    FormatType</td>
+    <td width="20%" height="88" rowspan="4" valign="top">Format::SIG_FIGS</td>
+    <td width="20%" height="22" valign="top">Format::SIG_FIGS</td>
+    <td width="40%" height="22" valign="top">precision shows
+      number of significant figures</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::DEC_FIGS</td>
+    <td width="40%" height="22" valign="top">precision shows
+      number of decimal figures</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::SCIENTIFIC</td>
+    <td width="40%" height="22" valign="top">scientific (E)
+      format</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::INTEGER</td>
+    <td width="40%" height="22" valign="top">round to an integer</td>
+  </tr>
+  <tr>
+    <td width="20%" height="66" rowspan="3" valign="top"><b>positive</b><br>
+    Positive</td>
+    <td width="20%" height="66" rowspan="3" valign="top">Format::NX</td>
+    <td width="20%" height="22" valign="top">Format::PLUS</td>
+    <td width="40%" height="22" valign="top">non-negative numbers
+      preceded by +</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::SPACE</td>
+    <td width="40%" height="22" valign="top">non-negative numbers
+      preceded by space</td>
+  </tr>
+  <tr>
+    <td width="20%" height="22" valign="top">Format::NX</td>
+    <td width="40%" height="22" valign="top">no additional
+      character preceding non-negative number </td>
+  </tr>
+  <tr>
+    <td width="20%" height="15" valign="top"><b>precision</b><br>
+    Precision</td>
+    <td width="20%" height="15" valign="top">2</td>
+    <td width="20%" height="15" valign="top">non-negative integer</td>
+    <td width="40%" height="15" valign="top">number of decimal or
+      significant figures</td>
+  </tr>
+  <tr>
+    <td width="20%" height="15" valign="top"><b>prefix</b><br>
+    Prefix</td>
+    <td width="20%" height="15" valign="top">&quot;&quot;</td>
+    <td width="20%" height="15" valign="top">String or char*</td>
+    <td width="40%" height="15" valign="top">prefix string</td>
+  </tr>
+  <tr>
+    <td width="20%" height="15" valign="top"><b>suffix</b><br>
+    Suffix</td>
+    <td width="20%" height="15" valign="top">&quot;&quot;</td>
+    <td width="20%" height="15" valign="top">String or char*</td>
+    <td width="40%" height="15" valign="top">suffix string</td>
+  </tr>
+  <tr>
+    <td width="20%" height="15" valign="top"><span lang="en-nz">
+    <b>separator</b><br>
+    Separator</span></td>
+    <td width="20%" height="15" valign="top"><span lang="en-nz">
+    &quot;,&quot;</span></td>
+    <td width="20%" height="15" valign="top"><span lang="en-nz">
+    String or char*</span></td>
+    <td width="40%" height="15" valign="top"><span lang="en-nz">
+    separator string</span></td>
+  </tr>
+  <tr>
+    <td width="20%" height="30" valign="top" rowspan="2"><b>variant<br>
+	</b>Variant</td>
+    <td width="20%" height="30" valign="top" rowspan="2">Format::VAR0</td>
+    <td width="20%" height="15" valign="top">Format::VAR0</td>
+    <td width="40%" height="15" valign="top">default setting</td>
+  </tr>
+  <tr>
+    <td width="20%" height="15" valign="top">Format::VAR1</td>
+    <td width="40%" height="15" valign="top">Affects SIG_FIGS and DEC_FIGS 
+	formats. For number less than 1 in absolute value, there is no 0 before the 
+	decimal point; number with no decimal places will have a decimal point if 
+	there is room.</td>
+  </tr>
+</table>
+<p><i>min_width</i> sets the minimum field width and <i>max_width</i> the maximum field width.
+The program uses the smallest width required to present the number to the
+required precision and format type. If this is less than the minimum field width
+spaces are inserted to reach the desired field width. If the number won't fit
+within the maximum field width the action taken depends on the overflow or
+underflow policy.</p>
+<p>The <i> prefix</i> and <i> suffix</i> strings are printed before and after the field. Their
+space is in addition to the space set by <i> min_width</i> and <i>max_width</i>.</p>
+<p><span lang="en-nz">The <i>separator</i> string is for use by other libraries 
+when outputting data structures.</span></p>
+<p><i>Variant</i> = Format::VAR1 can give a better layout in columns of numbers 
+using the SIG_FIGS format. Use a <i>width</i> value 2 more than the precision.</p>
+<p>Integer objects use only the width, alignment, over flow policy, prefix
+and suffix properties. Convert an integer to double if you really want a decimal
+or scientific format type.</p>
+<p><i>char*</i> and <i>String</i> objects use only the width, alignment, prefix
+and suffix properties. Special characters such as <tt>\n</tt> are unlikely to be handled
+correctly.</p>
+<p><i>char</i> objects always use a field width of 1 and ignore the
+format properties.</p>
+<p>To use the format library you need <tt>#include &quot;format.h&quot;</tt> in your .cpp
+files.</p>
+<h2><a name="Example"></a>Example</h2>
+<pre class="small">// Scientific format
+Format SCI;
+SCI.FormatType(Format::SCIENTIFIC);
+SCI.Precision(8);
+SCI.Width(14);
+SCI.Suffix(&quot;|&quot;);
+
+// Decimal format - switch to scientific on under-flow or over-flow
+Format DEC1;
+DEC1.UnderFlowPolicy(Format::E);
+DEC1.FormatType(Format::DEC_FIGS);
+DEC1.Precision(4);
+DEC1.Width(12);
+DEC1.Suffix(&quot;|&quot;);
+
+// Decimal format - no action on under-flow; hashes on over-flow
+Format DEC2;
+DEC2.OverFlowPolicy(Format::HASH);
+DEC2.FormatType(Format::DEC_FIGS);
+DEC2.Precision(4);
+DEC2.Width(12);
+DEC2.Suffix(&quot;|&quot;);
+
+// Significant figures - switch to scientific on under-flow or over-flow 
+Format SIG1;
+SIG1.UnderFlowPolicy(Format::E);
+SIG1.FormatType(Format::SIG_FIGS);
+SIG1.Precision(8);
+SIG1.Width(11);
+SIG1.Positive(Format::SPACE);
+SIG1.Prefix(&quot; &quot;);
+SIG1.Suffix(&quot;|&quot;);
+
+// Significant figures - reduce precision on under-flow; hashes on over-flow
+Format SIG2;
+SIG2.OverFlowPolicy(Format::HASH);
+SIG2.FormatType(Format::SIG_FIGS);
+SIG2.Precision(8);
+SIG2.Width(11);
+SIG2.Positive(Format::SPACE);
+SIG2.Prefix(&quot; &quot;);
+SIG2.Suffix(&quot;|&quot;);
+
+// Significant figures - reduce precision on under-flow;
+// scientific on over-flow; VAR1 variant
+Format SIG3;
+SIG3.UnderFlowPolicy(Format::ZERO);
+SIG3.OverFlowPolicy(Format::E);
+SIG3.FormatType(Format::SIG_FIGS);
+SIG3.Precision(8);
+SIG3.Width(10);
+SIG3.Positive(Format::SPACE);
+SIG3.Prefix(&quot; &quot;);
+SIG3.Suffix(&quot;|&quot;);
+SIG3.Variant(Format::VAR1);
+
+// Integer format - switch to scientific on over-flow
+Format INT;
+INT.FormatType(Format::INTEGER);
+INT.Width(12);
+
+double x = 1.23456789;
+double mult[] = {0, 1E-100, 1E-20, 0.0001, 0.1, 1, 10, 1000, 1E7, 1E8, 1E9,
+1E10, 1E20, 1E100};
+cout &lt;&lt; SCI &lt;&lt; &quot;SCIENTFIC&quot; &lt;&lt; DEC1 &lt;&lt; &quot;DEC 1&quot; &lt;&lt; DEC2 &lt;&lt; &quot;DEC 2&quot;
+&lt;&lt; SIG1 &lt;&lt; &quot;SIG 1&quot; &lt;&lt; SIG2 &lt;&lt; &quot;SIG 2&quot; &lt;&lt; SIG3 &lt;&lt; &quot;SIG 3&quot;
+&lt;&lt; INT &lt;&lt; &quot;INTEGER&quot; &lt;&lt; endl;
+
+for (i = 0; i &lt; 14; ++i)
+{
+double y = x * mult[i];
+cout &lt;&lt; SCI &lt;&lt; y &lt;&lt; DEC1 &lt;&lt; y &lt;&lt; DEC2 &lt;&lt; y &lt;&lt; SIG1 &lt;&lt; y
+&lt;&lt; SIG2 &lt;&lt; y &lt;&lt; SIG3 &lt;&lt; y &lt;&lt; INT &lt;&lt; y &lt;&lt; endl;
+}
+cout &lt;&lt; endl;
+</pre>
+<p>produces this output</p>
+<pre class="small">     SCIENTFIC|       DEC 1|       DEC 2|       SIG 1|       SIG 2|      SIG 3|     INTEGER
+ 0.0000000e+00|      0.0000|      0.0000|   0.0000000|   0.0000000|  .00000000|           0
+1.2345679e-100| 1.2346e-100|      0.0000|  1.235e-100|  0.00000000|  .00000000|           0
+ 1.2345679e-20|  1.2346e-20|      0.0000|  1.2346e-20|  0.00000000|  .00000000|           0
+ 1.2345679e-04|  1.2346e-04|      0.0001|  1.2346e-04|  0.00012346|  .00012346|           0
+ 1.2345679e-01|  1.2346e-01|      0.1235|  0.12345679|  0.12345679|  .12345679|           0
+ 1.2345679e+00|      1.2346|      1.2346|   1.2345679|   1.2345679|  1.2345679|           1
+ 1.2345679e+01|     12.3457|     12.3457|   12.345679|   12.345679|  12.345679|          12
+ 1.2345679e+03|   1234.5679|   1234.5679|   1234.5679|   1234.5679|  1234.5679|        1235
+ 1.2345679e+07|1.234568e+07|############|    12345679|    12345679|  12345679.|    12345679
+ 1.2345679e+08|1.234568e+08|############|   123456790|   123456790|  123456790|   123456789
+ 1.2345679e+09|1.234568e+09|############|  1234567900|  1234567900|  1.235e+09|  1234567890
+ 1.2345679e+10|1.234568e+10|############|  1.2346e+10| ###########|  1.235e+10| 12345678900
+ 1.2345679e+20|1.234568e+20|############|  1.2346e+20| ###########|  1.235e+20|1.234568e+20
+1.2345679e+100|1.23457e+100|############|  1.235e+100| ###########|  1.23e+100|1.23457e+100
+</pre>
+<ul>
+  <li><a href="#Top">Go to top</a></li>
+  <li><a href="ol_doc.htm">To online documentation page</a></li>
+  <li><a href="string.htm">To description of string library</a></li>
+</ul>
+</body>
+</html>

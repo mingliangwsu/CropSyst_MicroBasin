@@ -1,0 +1,1 @@
+g++ -c  -pipe -fpermissive -w -g -O2 -fPIC  -W -D_REENTRANT -DCS_VERSION=5 -DCROPSYST_VERSION=5 -DVERBOSE -DREACCH_VERSION -DMICROBASIN_VERSION -DVIC_CROPSYST_VERSION=3  -Wno-unused-parameter -Wno-reorder  -I../CS_suite_static -I. -I../../../../common -I../../../.. -I../../../../CropSyst/source  -o CS_arguments.o ../../../CS_arguments.cpp

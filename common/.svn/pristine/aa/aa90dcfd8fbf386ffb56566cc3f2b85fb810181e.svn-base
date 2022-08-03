@@ -1,0 +1,243 @@
+## -*- Makefile -*-
+##
+## User: rnelson
+## Time: Jul 13, 2006 9:53:07 PM
+## Makefile created by Sun Studio.
+##
+## This file is generated automatically.
+##
+
+
+#### Compiler and tool definitions shared by all build targets #####
+CCC = CC
+CXX = CC
+BASICOPTS = -g
+CCFLAGS = $(BASICOPTS) -D VERSION_NUMBERS=4,0,0 -D unix
+CXXFLAGS = $(BASICOPTS) -D VERSION_NUMBERS=4,0,0 -D unix
+CCADMIN = CCadmin -clean
+
+
+# Define the target directories.
+TARGETDIR_weather_static.a=.
+
+
+all: weather_static.a
+
+## Target: weather_static.a
+CPPFLAGS_weather_static.a = \
+	-I../../..
+OBJS_weather_static.a =  \
+	$(TARGETDIR_weather_static.a)/daily.o \
+	$(TARGETDIR_weather_static.a)/et.o \
+	$(TARGETDIR_weather_static.a)/et_model.o \
+	$(TARGETDIR_weather_static.a)/et_ref.o \
+	$(TARGETDIR_weather_static.a)/GEN_DAT_filename.o \
+	$(TARGETDIR_weather_static.a)/loc_param.o \
+	$(TARGETDIR_weather_static.a)/phrases.o \
+	$(TARGETDIR_weather_static.a)/sky.o \
+	$(TARGETDIR_weather_static.a)/snow.o \
+	$(TARGETDIR_weather_static.a)/solar_rad.o \
+	$(TARGETDIR_weather_static.a)/storm_event.o \
+	$(TARGETDIR_weather_static.a)/stormgen.o \
+	$(TARGETDIR_weather_static.a)/sun.o \
+	$(TARGETDIR_weather_static.a)/weather.o \
+	$(TARGETDIR_weather_static.a)/weather_types.o \
+	$(TARGETDIR_weather_static.a)/wind.o \
+	$(TARGETDIR_weather_static.a)/wthr.o \
+	$(TARGETDIR_weather_static.a)/wthrbase.o \
+	$(TARGETDIR_weather_static.a)/min_max_to_timestep_estimator.o \
+	$(TARGETDIR_weather_static.a)/relhumid_est.o \
+	$(TARGETDIR_weather_static.a)/temperature_est.o \
+	$(TARGETDIR_weather_static.a)/common_weather_creators.o \
+	$(TARGETDIR_weather_static.a)/weather_UED_database.o \
+	$(TARGETDIR_weather_static.a)/sun_days.o \
+	$(TARGETDIR_weather_static.a)/vapor_pressure_day.o \
+	$(TARGETDIR_weather_static.a)/weather_day.o \
+	$(TARGETDIR_weather_static.a)/ET_irrad_hour.o \
+	$(TARGETDIR_weather_static.a)/solar_irrad_hour.o \
+	$(TARGETDIR_weather_static.a)/sun_hours.o \
+	$(TARGETDIR_weather_static.a)/weather_hours.o \
+	$(TARGETDIR_weather_static.a)/weather_parameter.o \
+	$(TARGETDIR_weather_static.a)/WP_dew_point_temperature.o \
+	$(TARGETDIR_weather_static.a)/WP_relative_humidity.o \
+	$(TARGETDIR_weather_static.a)/WP_vapor_pressure.o \
+	$(TARGETDIR_weather_static.a)/WP_vapor_pressure_act.o \
+	$(TARGETDIR_weather_static.a)/geolocation.o \
+	$(TARGETDIR_weather_static.a)/UTM.o \
+	$(TARGETDIR_weather_static.a)/LatLong-UTMconversion.o \
+	$(TARGETDIR_weather_static.a)/SwissGrid.o
+
+
+# Link or archive
+ARCPP = $(CCC) -xar -o $@ 
+$(TARGETDIR_weather_static.a)/weather_static.a: $(TARGETDIR_weather_static.a) $(OBJS_weather_static.a)
+	$(ARCPP) $(OBJS_weather_static.a)
+
+
+# Compile source files into .o files
+$(TARGETDIR_weather_static.a)/daily.o: $(TARGETDIR_weather_static.a) ../daily.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../daily.cpp
+
+$(TARGETDIR_weather_static.a)/et.o: $(TARGETDIR_weather_static.a) ../et.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../et.cpp
+
+$(TARGETDIR_weather_static.a)/et_model.o: $(TARGETDIR_weather_static.a) ../et_model.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../et_model.cpp
+
+$(TARGETDIR_weather_static.a)/et_ref.o: $(TARGETDIR_weather_static.a) ../et_ref.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../et_ref.cpp
+
+$(TARGETDIR_weather_static.a)/GEN_DAT_filename.o: $(TARGETDIR_weather_static.a) ../GEN_DAT_filename.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../GEN_DAT_filename.cpp
+
+$(TARGETDIR_weather_static.a)/loc_param.o: $(TARGETDIR_weather_static.a) ../loc_param.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../loc_param.cpp
+
+$(TARGETDIR_weather_static.a)/phrases.o: $(TARGETDIR_weather_static.a) ../phrases.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../phrases.cpp
+
+$(TARGETDIR_weather_static.a)/sky.o: $(TARGETDIR_weather_static.a) ../sky.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../sky.cpp
+
+$(TARGETDIR_weather_static.a)/snow.o: $(TARGETDIR_weather_static.a) ../snow.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../snow.cpp
+
+$(TARGETDIR_weather_static.a)/solar_rad.o: $(TARGETDIR_weather_static.a) ../solar_rad.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../solar_rad.cpp
+
+$(TARGETDIR_weather_static.a)/storm_event.o: $(TARGETDIR_weather_static.a) ../storm_event.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../storm_event.cpp
+
+$(TARGETDIR_weather_static.a)/stormgen.o: $(TARGETDIR_weather_static.a) ../stormgen.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../stormgen.cpp
+
+$(TARGETDIR_weather_static.a)/sun.o: $(TARGETDIR_weather_static.a) ../sun.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../sun.cpp
+
+$(TARGETDIR_weather_static.a)/weather.o: $(TARGETDIR_weather_static.a) ../weather.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../weather.cpp
+
+$(TARGETDIR_weather_static.a)/weather_types.o: $(TARGETDIR_weather_static.a) ../weather_types.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../weather_types.cpp
+
+$(TARGETDIR_weather_static.a)/wind.o: $(TARGETDIR_weather_static.a) ../wind.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../wind.cpp
+
+$(TARGETDIR_weather_static.a)/wthr.o: $(TARGETDIR_weather_static.a) ../wthr.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../wthr.cpp
+
+$(TARGETDIR_weather_static.a)/wthrbase.o: $(TARGETDIR_weather_static.a) ../wthrbase.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../wthrbase.cpp
+
+$(TARGETDIR_weather_static.a)/min_max_to_timestep_estimator.o: $(TARGETDIR_weather_static.a) ../any_timestep/min_max_to_timestep_estimator.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../any_timestep/min_max_to_timestep_estimator.cpp
+
+$(TARGETDIR_weather_static.a)/relhumid_est.o: $(TARGETDIR_weather_static.a) ../any_timestep/relhumid_est.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../any_timestep/relhumid_est.cpp
+
+$(TARGETDIR_weather_static.a)/temperature_est.o: $(TARGETDIR_weather_static.a) ../any_timestep/temperature_est.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../any_timestep/temperature_est.cpp
+
+$(TARGETDIR_weather_static.a)/common_weather_creators.o: $(TARGETDIR_weather_static.a) ../database/common_weather_creators.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../database/common_weather_creators.cpp
+
+$(TARGETDIR_weather_static.a)/weather_UED_database.o: $(TARGETDIR_weather_static.a) ../database/weather_UED_database.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../database/weather_UED_database.cpp
+
+$(TARGETDIR_weather_static.a)/sun_days.o: $(TARGETDIR_weather_static.a) ../day/sun_days.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../day/sun_days.cpp
+
+$(TARGETDIR_weather_static.a)/vapor_pressure_day.o: $(TARGETDIR_weather_static.a) ../day/vapor_pressure_day.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../day/vapor_pressure_day.cpp
+
+$(TARGETDIR_weather_static.a)/weather_day.o: $(TARGETDIR_weather_static.a) ../day/weather_day.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../day/weather_day.cpp
+
+$(TARGETDIR_weather_static.a)/ET_irrad_hour.o: $(TARGETDIR_weather_static.a) ../hour/ET_irrad_hour.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../hour/ET_irrad_hour.cpp
+
+$(TARGETDIR_weather_static.a)/solar_irrad_hour.o: $(TARGETDIR_weather_static.a) ../hour/solar_irrad_hour.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../hour/solar_irrad_hour.cpp
+
+$(TARGETDIR_weather_static.a)/sun_hours.o: $(TARGETDIR_weather_static.a) ../hour/sun_hours.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../hour/sun_hours.cpp
+
+$(TARGETDIR_weather_static.a)/weather_hours.o: $(TARGETDIR_weather_static.a) ../hour/weather_hours.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../hour/weather_hours.cpp
+
+$(TARGETDIR_weather_static.a)/weather_parameter.o: $(TARGETDIR_weather_static.a) ../parameter/weather_parameter.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../parameter/weather_parameter.cpp
+
+$(TARGETDIR_weather_static.a)/WP_dew_point_temperature.o: $(TARGETDIR_weather_static.a) ../parameter/WP_dew_point_temperature.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../parameter/WP_dew_point_temperature.cpp
+
+$(TARGETDIR_weather_static.a)/WP_relative_humidity.o: $(TARGETDIR_weather_static.a) ../parameter/WP_relative_humidity.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../parameter/WP_relative_humidity.cpp
+
+$(TARGETDIR_weather_static.a)/WP_vapor_pressure.o: $(TARGETDIR_weather_static.a) ../parameter/WP_vapor_pressure.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../parameter/WP_vapor_pressure.cpp
+
+$(TARGETDIR_weather_static.a)/WP_vapor_pressure_act.o: $(TARGETDIR_weather_static.a) ../parameter/WP_vapor_pressure_act.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../parameter/WP_vapor_pressure_act.cpp
+
+$(TARGETDIR_weather_static.a)/geolocation.o: $(TARGETDIR_weather_static.a) ../../geolocation/geolocation.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../../geolocation/geolocation.cpp
+
+$(TARGETDIR_weather_static.a)/UTM.o: $(TARGETDIR_weather_static.a) ../../geolocation/UTM.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../../geolocation/UTM.cpp
+
+$(TARGETDIR_weather_static.a)/LatLong-UTMconversion.o: $(TARGETDIR_weather_static.a) ../../geolocation/UTM_conversion/LatLong-UTMconversion.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../../geolocation/UTM_conversion/LatLong-UTMconversion.cpp
+
+$(TARGETDIR_weather_static.a)/SwissGrid.o: $(TARGETDIR_weather_static.a) ../../geolocation/UTM_conversion/SwissGrid.cpp
+	$(COMPILE.cc) $(CCFLAGS_weather_static.a) $(CPPFLAGS_weather_static.a) -o $@ ../../geolocation/UTM_conversion/SwissGrid.cpp
+
+
+
+#### Clean target deletes all generated files ####
+clean:
+	rm -f \
+		$(TARGETDIR_weather_static.a)/weather_static.a \
+		$(TARGETDIR_weather_static.a)/daily.o \
+		$(TARGETDIR_weather_static.a)/et.o \
+		$(TARGETDIR_weather_static.a)/et_model.o \
+		$(TARGETDIR_weather_static.a)/et_ref.o \
+		$(TARGETDIR_weather_static.a)/GEN_DAT_filename.o \
+		$(TARGETDIR_weather_static.a)/loc_param.o \
+		$(TARGETDIR_weather_static.a)/phrases.o \
+		$(TARGETDIR_weather_static.a)/sky.o \
+		$(TARGETDIR_weather_static.a)/snow.o \
+		$(TARGETDIR_weather_static.a)/solar_rad.o \
+		$(TARGETDIR_weather_static.a)/storm_event.o \
+		$(TARGETDIR_weather_static.a)/stormgen.o \
+		$(TARGETDIR_weather_static.a)/sun.o \
+		$(TARGETDIR_weather_static.a)/weather.o \
+		$(TARGETDIR_weather_static.a)/weather_types.o \
+		$(TARGETDIR_weather_static.a)/wind.o \
+		$(TARGETDIR_weather_static.a)/wthr.o \
+		$(TARGETDIR_weather_static.a)/wthrbase.o \
+		$(TARGETDIR_weather_static.a)/min_max_to_timestep_estimator.o \
+		$(TARGETDIR_weather_static.a)/relhumid_est.o \
+		$(TARGETDIR_weather_static.a)/temperature_est.o \
+		$(TARGETDIR_weather_static.a)/common_weather_creators.o \
+		$(TARGETDIR_weather_static.a)/weather_UED_database.o \
+		$(TARGETDIR_weather_static.a)/sun_days.o \
+		$(TARGETDIR_weather_static.a)/vapor_pressure_day.o \
+		$(TARGETDIR_weather_static.a)/weather_day.o \
+		$(TARGETDIR_weather_static.a)/ET_irrad_hour.o \
+		$(TARGETDIR_weather_static.a)/solar_irrad_hour.o \
+		$(TARGETDIR_weather_static.a)/sun_hours.o \
+		$(TARGETDIR_weather_static.a)/weather_hours.o \
+		$(TARGETDIR_weather_static.a)/weather_parameter.o \
+		$(TARGETDIR_weather_static.a)/WP_dew_point_temperature.o \
+		$(TARGETDIR_weather_static.a)/WP_relative_humidity.o \
+		$(TARGETDIR_weather_static.a)/WP_vapor_pressure.o \
+		$(TARGETDIR_weather_static.a)/WP_vapor_pressure_act.o \
+		$(TARGETDIR_weather_static.a)/geolocation.o \
+		$(TARGETDIR_weather_static.a)/UTM.o \
+		$(TARGETDIR_weather_static.a)/LatLong-UTMconversion.o \
+		$(TARGETDIR_weather_static.a)/SwissGrid.o
+# Enable dependency checking
+.KEEP_STATE:
+.KEEP_STATE_FILE:.make.state.Sun-sparc-Solaris
+

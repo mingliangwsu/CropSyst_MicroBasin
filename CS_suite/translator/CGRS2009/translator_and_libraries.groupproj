@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{5AE2591F-42D7-4192-A04A-F482E85BD398}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="..\..\..\corn\container\CGRS2009\container_static.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="translator.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="container_static">
+			<MSBuild Projects="..\..\..\corn\container\CGRS2009\container_static.cbproj"/>
+		</Target>
+		<Target Name="container_static:Clean">
+			<MSBuild Targets="Clean" Projects="..\..\..\corn\container\CGRS2009\container_static.cbproj"/>
+		</Target>
+		<Target Name="container_static:Make">
+			<MSBuild Targets="Make" Projects="..\..\..\corn\container\CGRS2009\container_static.cbproj"/>
+		</Target>
+		<Target Name="translator">
+			<MSBuild Projects="translator.cbproj"/>
+		</Target>
+		<Target Name="translator:Clean">
+			<MSBuild Targets="Clean" Projects="translator.cbproj"/>
+		</Target>
+		<Target Name="translator:Make">
+			<MSBuild Targets="Make" Projects="translator.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="container_static;translator"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="container_static:Clean;translator:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="container_static:Make;translator:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

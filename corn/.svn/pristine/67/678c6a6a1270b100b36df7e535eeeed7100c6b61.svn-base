@@ -1,0 +1,554 @@
+#include <corn/image/gif/gif_lz.h>
+#ifdef _Windows
+#include <conio.h>
+#endif
+
+// The following are for the hash table
+#ifdef __MSDOS__
+#include <io.h>
+#include <alloc.h>
+#else
+#include <sys/types.h>
+#endif /* __MSDOS__ */
+#include <sys/stat.h>
+
+
+
+/*______*/  ///////////////////////////////////////////////////////
+/*______*/  #define NO_SUCH_CODE		4098    /* Impossible code, to signal empty. */
+/*______*/
+/*______*/  LZ_decompresser::LZ_decompresser(istream &in_strm)
+/*______*/  {
+/*______*/  //	 unsigned int *Prefix;
+/*______*/
+/*______*/  	 uint8 CodeSize = in_strm.get();
+/*______*/
+/*______*/  	 Buf[0] = 0;			      /* Input Buffer empty. */
+/*______*/  	 BitsPerPixel = CodeSize;
+/*______*/  	 ClearCode = (1 << BitsPerPixel);
+/*______*/  	 EOFCode = ClearCode + 1;
+/*______*/  	 RunningCode = EOFCode + 1;
+/*______*/  	 RunningBits = BitsPerPixel + 1;	 /* Number of bits per code. */
+/*______*/  	 MaxCode1 = 1 << RunningBits;     /* Max. code + 1. */
+/*______*/  	 StackPtr = 0;		    /* No pixels on the pixel stack. */
+/*______*/  	 LastCode = NO_SUCH_CODE;
+/*______*/  	 CrntShiftState = 0;	/* No information in CrntShiftDWord. */
+/*______*/  	 CrntShiftDWord = 0;
+/*______*/
+/*______*/  	 for (int i = 0; i < LZ_MAX_CODE; i++)
+/*______*/  		Prefix[i] = NO_SUCH_CODE;
+/*______*/  };
+/*______*/
+/*______*/  // ******************************************************************************
+/*______*/  // Routine to trace the Prefixes linked list until we get a prefix which is    *
+/*______*/  // not code, but a pixel value (less than ClearCode). Returns that pixel value.*
+/*______*/  // If image is defective, we might loop here forever, so we limit the loops to *
+/*______*/  // the maximum possible if image O.k. - LZ_MAX_CODE times.		      *
+/*______*/  // ******************************************************************************
+/*______*/
+/*______*/  int LZ_decompresser::GetPrefixChar
+/*______*/  (unsigned int *Prefix, int Code, int ClearCode)
+/*______*/  {
+/*______*/  	int i = 0;
+/*______*/
+/*______*/  	while (Code > ClearCode && i++ <= LZ_MAX_CODE)
+/*______*/  		Code = Prefix[Code];
+/*______*/  	return Code;
+/*______*/  }
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // *   This routines read one gif data block at a time and buffers it internally *
+/*______*/  // * so that the decompression routine could access it.			      *
+/*______*/  // *   The routine returns the next uint8 from its internal buffer (or read next  *
+/*______*/  // * block in if buffer empty) and returns GIF_OK if succesful.		      *
+/*______*/  // ******************************************************************************/
+/*______*/  int LZ_decompresser::buffered_input(istream &in_strm, uint8 *Buf,uint8 *NextByte)
+/*______*/  {
+/*______*/  	if (Buf[0] == 0)
+/*______*/  	{	/* Needs to read the next buffer - this one is empty: */
+/*______*/  	   in_strm.read(&Buf[0],1);
+/*______*/  		if (in_strm.gcount() != 1)
+/*______*/  		{	//RGIFERROR = D_GIF_ERR_READ_FAILED;
+/*______*/  			return GIF_ERROR;
+/*______*/  		};
+/*______*/        in_strm.read(&Buf[1],Buf[0]);
+/*______*/  		if (in_strm.gcount() != Buf[0]) //(fread(&Buf[1], 1, Buf[0], File) != Buf[0])
+/*______*/  		{	//RGIFERROR = D_GIF_ERR_READ_FAILED;
+/*______*/  			return GIF_ERROR;
+/*______*/  		}
+/*______*/  		*NextByte = Buf[1];
+/*______*/  		Buf[1] = 2;	   /* We use now the second place as last char read! */
+/*______*/  		Buf[0]--;
+/*______*/  	}
+/*______*/  	else
+/*______*/  	{	*NextByte = Buf[Buf[1]++];
+/*______*/  		Buf[0]--;
+/*______*/  	}
+/*______*/  	return GIF_OK;
+/*______*/  };
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // *   The LZ decompression input routine:					      *
+/*______*/  // *   This routine is responsable for the decompression of the bit stream from  *
+/*______*/  // * 8 bits (bytes) packets, into the real codes.				      *
+/*______*/  // *   Returns GIF_OK if read succesfully.					      *
+/*______*/  // ******************************************************************************/
+/*______*/  int LZ_decompresser::decompress_input(istream &in_strm,int &Code)
+/*______*/  {
+/*______*/  	 uint8 NextByte;
+/*______*/  	 static unsigned int CodeMasks[] = {
+/*______*/  	0x0000, 0x0001, 0x0003, 0x0007,
+/*______*/  	0x000f, 0x001f, 0x003f, 0x007f,
+/*______*/  	0x00ff, 0x01ff, 0x03ff, 0x07ff,
+/*______*/  	0x0fff
+/*______*/  	 };
+/*______*/
+/*______*/  	 while (CrntShiftState < RunningBits)
+/*______*/  	 {	/* Needs to get more bytes from input stream for next code: */
+/*______*/  		if (buffered_input(in_strm, Buf, &NextByte) == GIF_ERROR)
+/*______*/  		{	return GIF_ERROR;
+/*______*/  		}
+/*______*/  		CrntShiftDWord |=
+/*______*/  			((unsigned long) NextByte) << CrntShiftState;
+/*______*/  		CrntShiftState += 8;
+/*______*/  	 }
+/*______*/  	 Code = CrntShiftDWord & CodeMasks[RunningBits];
+/*______*/
+/*______*/  	 CrntShiftDWord >>= RunningBits;
+/*______*/  	 CrntShiftState -= RunningBits;
+/*______*/
+/*______*/  // 	 /* If code cannt fit into RunningBits bits, must raise its size. Note */
+/*______*/  // 	 /* however that codes above 4095 are used for special signaling.      */
+/*______*/  	 if (++RunningCode > MaxCode1 &&
+/*______*/  			RunningBits < LZ_BITS)
+/*______*/  	 { MaxCode1 <<= 1;
+/*______*/  		RunningBits++;
+/*______*/  	 }
+/*______*/  	 return GIF_OK;
+/*______*/  }
+/*______*/
+/*______*/
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // *   The LZ decompression routine:					      *
+/*______*/  // *   This version decompress the given gif file into Line of length LineLen.   *
+/*______*/  // *   This routine can be called few times (one per scan line, for example), in *
+/*______*/  // * order the complete the whole image.					      *
+/*______*/  // ******************************************************************************/
+/*______*/  int LZ_decompresser::decompress_line(istream &in_strm,uint8 Line[], int LineLen)
+/*______*/  {
+/*______*/  	int CrntPrefix;
+/*______*/  //	int i = 0, j, CrntCode, EOFCode, ClearCode, CrntPrefix, LastCode, StackPtr;
+/*______*/  //	uint8 *Stack, *Suffix;
+/*______*/  //	unsigned int *Prefix;
+/*______*/
+/*______*/  	int i = 0;
+/*______*/
+/*______*/  	if (StackPtr != 0)
+/*______*/  	{ // Let pop the stack off before continueing to read the gif file:
+/*______*/  		while (StackPtr != 0 && i < LineLen)
+/*______*/  			Line[i++] = Stack[--StackPtr];
+/*______*/  	};
+/*______*/
+/*______*/  	while (i < LineLen)
+/*______*/  	{ /* Decode LineLen items. */
+/*______*/  		if (decompress_input(in_strm,CrntCode) == GIF_ERROR)
+/*______*/  			 return GIF_ERROR;
+/*______*/
+/*______*/  		if (CrntCode == EOFCode)
+/*______*/  		{
+/*______*/  			/* Note however that usually we will not be here as we will stop */
+/*______*/  			/* decoding as soon as we got all the pixel, or EOF code will    */
+/*______*/  			/* not be read at all, and DGifGetLine/Pixel clean everything.   */
+/*______*/
+/*______*/  			if (i != LineLen - 1 || PixelCount != 0)
+/*______*/  			{	//RGIFERROR = D_GIF_ERR_EOF_TOO_SOON;
+/*______*/  				return GIF_ERROR;
+/*______*/  			}
+/*______*/  			i++;
+/*______*/  		}
+/*______*/  		else if (CrntCode == ClearCode)
+/*______*/  		{	/* We need to start over again: */
+/*______*/  			int j;
+/*______*/  			for (j = 0; j < LZ_MAX_CODE; j++)
+/*______*/  				Prefix[j] = NO_SUCH_CODE;
+/*______*/  			RunningCode = EOFCode + 1;
+/*______*/  			RunningBits = BitsPerPixel + 1;
+/*______*/  			MaxCode1 = 1 << RunningBits;
+/*______*/  			LastCode = NO_SUCH_CODE;
+/*______*/  		}
+/*______*/  		else
+/*______*/  		{	/* Its regular code - if in pixel range simply add it to output  */
+/*______*/  			/* stream, otherwise trace to codes linked list until the prefix */
+/*______*/  			/* is in pixel range:					     */
+/*______*/  			if (CrntCode < ClearCode)
+/*______*/  			{
+/*______*/  				/* This is simple - its pixel scalar, so add it to output:   */
+/*______*/  				Line[i++] = CrntCode;
+/*______*/  			}
+/*______*/  			else
+/*______*/  			{
+/*______*/  				/* Its a code to needed to be traced: trace the linked list  */
+/*______*/  				/* until the prefix is a pixel, while pushing the suffix     */
+/*______*/  				/* pixels on our stack. If we done, pop the stack in reverse */
+/*______*/  				/* (thats what stack is good for!) order to output.	     */
+/*______*/
+/*______*/  				if (Prefix[CrntCode] == NO_SUCH_CODE)
+/*______*/  				{	/* Only allowed if CrntCode is exactly the running code: */
+/*______*/  					/* In that case CrntCode = XXXCode, CrntCode or the	     */
+/*______*/  					/* prefix code is last code and the suffix char is	     */
+/*______*/  					/* exactly the prefix of last code!			     */
+/*______*/  					if (CrntCode == RunningCode - 2)
+/*______*/  					{	CrntPrefix = LastCode;
+/*______*/  						Suffix[RunningCode - 2] = Stack[StackPtr++]
+/*______*/  							= GetPrefixChar(Prefix,LastCode, ClearCode);
+/*______*/  					}
+/*______*/  					else
+/*______*/  					{	//RGIFERROR = D_GIF_ERR_IMAGE_DEFECT;
+/*______*/  						return GIF_ERROR;
+/*______*/  					}
+/*______*/  				}
+/*______*/  				else
+/*______*/  					CrntPrefix = CrntCode;
+/*______*/
+/*______*/  				/* Now (if image is O.K.) we should not get and NO_SUCH_CODE */
+/*______*/  				/* During the trace. As we might loop forever, in case of    */
+/*______*/  				/* defective image, we count the number of loops we trace    */
+/*______*/  				/* and stop if we got LZ_MAX_CODE. obviously we can not      */
+/*______*/  				/* loop more than that.					     */
+/*______*/  				int j = 0;
+/*______*/  				while (j++ <= LZ_MAX_CODE &&
+/*______*/  						 CrntPrefix > ClearCode &&
+/*______*/  						 CrntPrefix <= LZ_MAX_CODE)
+/*______*/  				{	Stack[StackPtr++] =	Suffix[CrntPrefix];
+/*______*/  					CrntPrefix = Prefix[CrntPrefix];
+/*______*/  				}
+/*______*/
+/*______*/  				if (j >= LZ_MAX_CODE || CrntPrefix > LZ_MAX_CODE)
+/*______*/  				{	//RGIFERROR = D_GIF_ERR_IMAGE_DEFECT;
+/*______*/  					return GIF_ERROR;
+/*______*/  				}
+/*______*/  				/* Push the last character on stack: */
+/*______*/  				Stack[StackPtr++] = CrntPrefix;
+/*______*/
+/*______*/  				/* Now lets pop all the stack into output: */
+/*______*/  				while (StackPtr != 0 && i < LineLen)
+/*______*/  					Line[i++] = Stack[--StackPtr];
+/*______*/  			}
+/*______*/  			if (LastCode != NO_SUCH_CODE)
+/*______*/  			{	Prefix[RunningCode - 2] = LastCode;
+/*______*/
+/*______*/  				if (CrntCode == RunningCode - 2)
+/*______*/  				{	/* Only allowed if CrntCode is exactly the running code: */
+/*______*/  					/* In that case CrntCode = XXXCode, CrntCode or the	     */
+/*______*/  					/* prefix code is last code and the suffix char is	     */
+/*______*/  					/* exactly the prefix of last code!			     */
+/*______*/  					Suffix[RunningCode - 2] =
+/*______*/  						GetPrefixChar(Prefix, LastCode, ClearCode);
+/*______*/  				}
+/*______*/  				else
+/*______*/  				{	Suffix[RunningCode - 2] =
+/*______*/  						GetPrefixChar(Prefix, CrntCode, ClearCode);
+/*______*/  				}
+/*______*/  			}
+/*______*/  			LastCode = CrntCode;
+/*______*/  		}
+/*______*/  	}
+/*______*/
+/*______*/  	LastCode = LastCode;
+/*______*/  	StackPtr = StackPtr;
+/*______*/
+/*______*/  	return GIF_OK;
+/*______*/  };
+/*______*/  ///////////////////////////////////////////////////////
+/*______*/
+/*______*/  #define FLUSH_OUTPUT		4096	/* Impossible code, to signal flush. */
+/*______*/  #define FIRST_CODE		4097    /* Impossible code, to signal first. */
+/*______*/
+/*______*/  LZ_compresser::LZ_compresser(ostream &out_strm,int bits_per_pixel,long i_PixelCount)
+/*______*/  : PixelCount(i_PixelCount)
+/*______*/  {
+/*______*/     uint8 code =(bits_per_pixel < 2) ? 2 : bits_per_pixel;
+/*______*/     out_strm.put(code);
+/*______*/
+/*______*/     Buf[0] = 0;			  /* Nothing was output yet. */
+/*______*/     BitsPerPixel = bits_per_pixel;
+/*______*/     ClearCode = (1 << BitsPerPixel);
+/*______*/     EOFCode = ClearCode + 1;
+/*______*/     RunningCode = EOFCode + 1;
+/*______*/     RunningBits = BitsPerPixel + 1;	 /* Number of bits per code. */
+/*______*/     MaxCode1 = 1 << RunningBits;	   /* Max. code + 1. */
+/*______*/     CrntCode = FIRST_CODE;	   /* Signal that this is first one! */
+/*______*/     CrntShiftState = 0;      /* No information in CrntShiftDWord. */
+/*______*/     CrntShiftDWord = 0;
+/*______*/
+/*______*/     /* Clear hash table and send Clear to make sure the decoder do the same. */
+/*______*/     hash_table.clear();
+/*______*/     if (compress_output(out_strm,ClearCode) == GIF_ERROR);
+/*______*/  }
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // *   The LZ compression routine:						      *
+/*______*/  // *   This version compress the given buffer Line of length LineLen.	      *
+/*______*/  // *   This routine can be called few times (one per scan line, for example), in *
+/*______*/  // * order the complete the whole image.					      *
+/*______*/  // ******************************************************************************/
+/*______*/  #define ZL_MAX_CODE	4095		/* Biggest code possible in 12 bits. */
+/*______*/  int LZ_compresser::compress_line(ostream &out_strm, uint8 *Line, int LineLen)
+/*______*/  {
+/*______*/     if (!Line) return GIF_ERROR;
+/*______*/    // int i = 0,
+/*______*/    unsigned int local_CrntCode;
+/*______*/    int NewCode;
+/*______*/    unsigned long NewKey;
+/*______*/    //  GifPixelType Pixel;
+/*______*/    //  GifHashTableType *HashTable;
+/*______*/
+/*______*/    uint8 Pixel;
+/*______*/
+/*______*/    int i = 0;
+/*______*/    if (CrntCode == FIRST_CODE)		  /* Its first time! */
+/*______*/        local_CrntCode = Line[i++];
+/*______*/    else
+/*______*/        local_CrntCode = CrntCode;     /* Get last code in compression. */
+/*______*/
+/*______*/    while (i < LineLen)
+/*______*/    {   /* Decode LineLen items. */
+/*______*/        Pixel = Line[i++];		      /* Get next pixel from stream. */
+/*______*/        /* Form a new unique key to search hash table for the code combines  */
+/*______*/        /* CrntCode as Prefix string with Pixel as postfix char.	     */
+/*______*/        NewKey = (((unsigned long) local_CrntCode) << 8) + Pixel;
+/*______*/        if ((NewCode = hash_table.exists(NewKey)) >= 0)
+/*______*/        {
+/*______*/           /* This Key is already there, or the string is old one, so	     */
+/*______*/           /* simple take new code as our CrntCode:			     */
+/*______*/           local_CrntCode = NewCode;
+/*______*/        }
+/*______*/        else
+/*______*/        {  /* Put it in hash table, output the prefix code, and make our    */
+/*______*/  	      /* CrntCode equal to Pixel.					     */
+/*______*/           if (compress_output(out_strm, local_CrntCode) == GIF_ERROR)
+/*______*/              return GIF_ERROR; //RGIFERROR = E_GIF_ERR_DISK_IS_FULL;
+/*______*/           local_CrntCode = Pixel;
+/*______*/
+/*______*/           /* If however the HashTable if full, we send a clear first and   */
+/*______*/     	   /* Clear the hash table.					     */
+/*______*/           if (RunningCode >= ZL_MAX_CODE)
+/*______*/           { /* Time to do some clearance: */
+/*______*/              if (compress_output(out_strm,ClearCode) == GIF_ERROR)
+/*______*/                 return GIF_ERROR;  //RGIFERROR = E_GIF_ERR_DISK_IS_FULL;
+/*______*/              RunningCode = EOFCode + 1;
+/*______*/              RunningBits = BitsPerPixel + 1;
+/*______*/              MaxCode1 = 1 << RunningBits;
+/*______*/              hash_table.clear();
+/*______*/           }
+/*______*/           else
+/*______*/           { /* Put this unique key with its relative Code in hash table: */
+/*______*/              hash_table.insert(NewKey, RunningCode++);
+/*______*/           }
+/*______*/        }
+/*______*/    }
+/*______*/    /* Preserve the current state of the compression algorithm: */
+/*______*/    CrntCode = local_CrntCode;
+/*______*/
+/*______*/    if (PixelCount == 0)
+/*______*/    {
+/*______*/        /* We are done - output last Code and flush output buffers: */
+/*______*/        if (compress_output(out_strm, local_CrntCode) == GIF_ERROR)
+/*______*/           return GIF_ERROR; // RGIFERROR = E_GIF_ERR_DISK_IS_FULL;
+/*______*/
+/*______*/        if (compress_output(out_strm, EOFCode) == GIF_ERROR)
+/*______*/           return GIF_ERROR; // RGIFERROR = E_GIF_ERR_DISK_IS_FULL;
+/*______*/        if (compress_output(out_strm,FLUSH_OUTPUT) == GIF_ERROR)
+/*______*/           return GIF_ERROR; //  RGIFERROR = E_GIF_ERR_DISK_IS_FULL;
+/*______*/    }
+/*______*/    return GIF_OK;
+/*______*/  };
+/*______*/
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // *   The LZ compression output routine:					      *
+/*______*/  // *   This routine is responsable for the compression of the bit stream into    *
+/*______*/  // * 8 bits (bytes) packets.						      *
+/*______*/  // *   Returns GIF_OK if written succesfully.				      *
+/*______*/  // ******************************************************************************/
+/*______*/  int LZ_compresser::compress_output(ostream &out_strm,int Code)
+/*______*/  {
+/*______*/     int retval = GIF_OK;
+/*______*/
+/*______*/     if (Code == FLUSH_OUTPUT)
+/*______*/     {
+/*______*/       while (CrntShiftState > 0)
+/*______*/       { /* Get Rid of what is left in DWord, and flush it. */
+/*______*/         if (buffered_output(out_strm,Buf,CrntShiftDWord & 0xff) == GIF_ERROR)
+/*______*/  		    retval = GIF_ERROR;
+/*______*/  	    CrntShiftDWord >>= 8;
+/*______*/  	    CrntShiftState -= 8;
+/*______*/  	   }
+/*______*/        CrntShiftState = 0;			   /* For next time. */
+/*______*/        if (buffered_output(out_strm, Buf, FLUSH_OUTPUT) == GIF_ERROR)
+/*______*/           retval = GIF_ERROR;
+/*______*/     }
+/*______*/     else
+/*______*/     {  CrntShiftDWord |= ((long) Code) << CrntShiftState;
+/*______*/           CrntShiftState += RunningBits;
+/*______*/           while (CrntShiftState >= 8)
+/*______*/           {  /* Dump out full bytes: */
+/*______*/              if (buffered_output(out_strm, Buf, CrntShiftDWord & 0xff) == GIF_ERROR)
+/*______*/                 retval = GIF_ERROR;
+/*______*/              CrntShiftDWord >>= 8;
+/*______*/              CrntShiftState -= 8;
+/*______*/           }
+/*______*/     };
+/*______*/
+/*______*/     /* If code cannt fit into RunningBits bits, must raise its size. Note */
+/*______*/     /* however that codes above 4095 are used for special signaling.      */
+/*______*/     if (RunningCode >= MaxCode1 && Code <= 4095)
+/*______*/       MaxCode1 = 1 << ++RunningBits;
+/*______*/
+/*______*/     return retval;
+/*______*/  };
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // *   This routines buffers the given characters until 255 characters are ready *
+/*______*/  // * to be output. If Code is equal to -1 the buffer is flushed (EOF).	      *
+/*______*/  // *   The buffer is Dumped with first uint8 byte as its size, as GIF format requires. *
+/*______*/  // *   Returns GIF_OK if written succesfully.				      *
+/*______*/  // ******************************************************************************/
+/*______*/  int LZ_compresser::buffered_output(ostream &out_strm, uint8 *Buf, int c)
+/*______*/  {
+/*______*/     if (c == FLUSH_OUTPUT)
+/*______*/     {  // Flush everything out.
+/*______*/        if (Buf[0] != 0)
+                  {  out_strm.write(Buf, Buf[0]+1);
+//obs                     if (out_strm.gcount() != Buf[0] + 1)
+//obs/*______*/              return GIF_ERROR;
+                  };
+/*______*/        // Mark end of compressed data, by an empty block (see GIF doc):
+/*______*/        out_strm.put((uint8)0);
+/*______*/     }
+/*______*/     else
+/*______*/     {
+/*______*/        if (Buf[0] == 255)
+/*______*/        { // Dump out this buffer - it is full:
+/*______*/           out_strm.write(Buf, Buf[0] + 1);
+//obs/*______*/           if (fwrite(Buf, 1, Buf[0] + 1, out_file) != Buf[0] + 1)
+//obs/*______*/              return GIF_ERROR;
+/*______*/           Buf[0] = 0;
+/*______*/        };
+/*______*/        Buf[++Buf[0]] = c;
+/*______*/     };
+/*______*/     return GIF_OK;
+/*______*/  };
+/*______*/
+/*______*/
+/*______*/  /* #define  DEBUG_HIT_RATE    Debug number of misses per hash Insert/Exists. */
+/*______*/
+/*______*/  #ifdef	DEBUG_HIT_RATE
+/*______*/  static long NumberOfTests = 0,
+/*______*/  	    NumberOfMisses = 0;
+/*______*/  #endif
+/*______*/
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // * Initialize HashTable - allocate the memory needed and clear it.	      *
+/*______*/  // ******************************************************************************/
+/*______*/
+/*______*/  GIF_hash_table::GIF_hash_table()
+/*______*/  {
+/*______*/     clear();
+/*______*/  };
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // * Routine to clear the HashTable to an empty state.			      *
+/*______*/  // * This part is a little machine depended. Use the commented part otherwise.   *
+/*______*/  // ******************************************************************************/
+/*______*/  void GIF_hash_table::clear()
+/*______*/  {
+/*______*/     memset(HTable, 0xFF, HT_SIZE * sizeof(long));
+/*______*/  };
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // * Routine to insert a new Item into the HashTable. The data is assumed to be  *
+/*______*/  // * new one.								      *
+/*______*/  // ******************************************************************************/
+/*______*/  void GIF_hash_table::insert(unsigned long Key, int Code)
+/*______*/  {
+/*______*/      int HKey = KeyItem(Key);
+/*______*/  
+/*______*/  #ifdef DEBUG_HIT_RATE
+/*______*/  	NumberOfTests++;
+/*______*/  	NumberOfMisses++;
+/*______*/  #endif /* DEBUG_HIT_RATE */
+/*______*/  
+/*______*/      while (HT_GET_KEY(HTable[HKey]) != 0xFFFFFL)
+/*______*/      {
+/*______*/  #ifdef DEBUG_HIT_RATE
+/*______*/  	    NumberOfMisses++;
+/*______*/  #endif /* DEBUG_HIT_RATE */
+/*______*/        HKey = (HKey + 1) & HT_KEY_MASK;
+/*______*/      };
+/*______*/      HTable[HKey] = HT_PUT_KEY(Key) | HT_PUT_CODE(Code);
+/*______*/  }
+/*______*/
+/*______*/  // /******************************************************************************
+/*______*/  // * Routine to test if given Key exists in HashTable and if so returns its code *
+/*______*/  // * Returns the Code if key was found, -1 if not.				      *
+/*______*/  // ******************************************************************************/
+/*______*/  int GIF_hash_table::exists(unsigned long Key)
+/*______*/  {
+/*______*/     int HKey = KeyItem(Key);
+/*______*/  
+/*______*/     unsigned long HTKey;
+/*______*/  
+/*______*/  
+/*______*/  #ifdef DEBUG_HIT_RATE
+/*______*/     NumberOfTests++;
+/*______*/  	NumberOfMisses++;
+/*______*/  #endif /* DEBUG_HIT_RATE */
+/*______*/
+/*______*/     while
+/*______*/      ((HTKey = HT_GET_KEY(HTable[HKey])) != 0xFFFFFL)
+/*______*/      //&& (HKey < (HT_SIZE-2)))
+/*______*/     {
+#ifdef _Windows
+// Allow multitasking
+/*______*/         kbhit();
+#endif
+/*______*/  #ifdef DEBUG_HIT_RATE
+/*______*/  	    NumberOfMisses++;
+/*______*/  #endif /* DEBUG_HIT_RATE */
+/*______*/        if (Key == HTKey)
+/*______*/           return HT_GET_CODE(HTable[HKey]);
+/*______*/        HKey = (HKey + 1) & HT_KEY_MASK;
+/*______*/     };
+/*______*/  
+/*______*/     return -1;
+/*______*/  };
+/*______*/  
+/*______*/  // /******************************************************************************
+/*______*/  // * Routine to generate an HKey for the hashtable out of the given unique key.  *
+/*______*/  // * The given Key is assumed to be 20 bits as follows: lower 8 bits are the     *
+/*______*/  // * new postfix character, while the upper 12 bits are the prefix code.	      *
+/*______*/  // * Because the average hit ratio is only 2 (2 hash references per entry),      *
+/*______*/  // * evaluating more complex keys (such as twin prime keys) does not worth it!   *
+/*______*/  // ******************************************************************************/
+/*______*/  int GIF_hash_table::KeyItem(unsigned long Item)
+/*______*/  {
+/*______*/      return ((Item >> 12) ^ Item) & HT_KEY_MASK;
+/*______*/  }
+/*______*/  
+/*______*/  #ifdef	DEBUG_HIT_RATE
+/*______*/  // /******************************************************************************
+/*______*/  // * Debugging routine to print the hit ratio - number of times the hash table   *
+/*______*/  // * was tested per operation. This routine was used to test the KeyItem routine *
+/*______*/  // ******************************************************************************/
+/*______*/  void GIF_hash_table::PrintHitRatio(void)
+/*______*/  {
+/*______*/      printf("Hash Table Hit Ratio is %ld/%ld = %ld%%.\n",
+/*______*/  	NumberOfMisses, NumberOfTests,
+/*______*/  	NumberOfMisses * 100 / NumberOfTests);
+/*______*/  }
+/*______*/  #endif	/* DEBUG_HIT_RATE */
+/*______*/  
+

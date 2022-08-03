@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="C:\temp\lib\BCB5\debug\weather_static_debug.lib"/>
+    <OBJFILES value="C:\temp\obj\common\weather\BCB5\\gen_dat_filename.obj 
+      C:\temp\obj\common\weather\BCB5\\loc_param.obj 
+      C:\temp\obj\common\weather\BCB5\\phrases.obj 
+      C:\temp\obj\common\weather\BCB5\\sky.obj 
+      C:\temp\obj\common\weather\BCB5\\snow.obj 
+      C:\temp\obj\common\weather\BCB5\\solar_rad.obj 
+      C:\temp\obj\common\weather\BCB5\\stormgen.obj 
+      C:\temp\obj\common\weather\BCB5\\sun.obj 
+      C:\temp\obj\common\weather\BCB5\\wind.obj 
+      C:\temp\obj\common\weather\BCB5\\wthr.obj 
+      C:\temp\obj\common\weather\BCB5\\wthrbase.obj 
+      C:\temp\obj\common\weather\BCB5\\daily.obj 
+      C:\temp\obj\common\weather\BCB5\\temperature_est.obj 
+      C:\temp\obj\common\weather\BCB5\\wthrfile.obj 
+      C:\temp\obj\common\weather\BCB5\\weather_UED_database.obj 
+      C:\temp\obj\common\weather\BCB5\\storm_event.obj 
+      C:\temp\obj\common\weather\BCB5\\geolocation.obj 
+      C:\temp\obj\common\weather\BCB5\\UTM.obj 
+      C:\temp\obj\common\weather\BCB5\\SwissGrid.obj 
+      C:\temp\obj\common\weather\BCB5\\LatLong-UTMconversion.obj 
+      C:\temp\obj\common\weather\BCB5\\common_weather_creators.obj 
+      C:\temp\obj\common\weather\BCB5\\WP_vapor_pressure_act.obj 
+      C:\temp\obj\common\weather\BCB5\\WP_dew_point_temperature.obj 
+      C:\temp\obj\common\weather\BCB5\\WP_relative_humidity.obj 
+      C:\temp\obj\common\weather\BCB5\\wp_vapor_pressure.obj 
+      C:\temp\obj\common\weather\BCB5\\weather.obj 
+      C:\temp\obj\common\weather\BCB5\\vapor_pressure_day.obj 
+      C:\temp\obj\common\weather\BCB5\\sun_days.obj 
+      C:\temp\obj\common\weather\BCB5\\weather_day.obj 
+      C:\temp\obj\common\weather\BCB5\\weather_hours.obj 
+      C:\temp\obj\common\weather\BCB5\\sun_hours.obj 
+      C:\temp\obj\common\weather\BCB5\\ET_irrad_hour.obj 
+      C:\temp\obj\common\weather\BCB5\\solar_irrad_hour.obj 
+      C:\temp\obj\common\weather\BCB5\\weather_parameter.obj 
+      C:\temp\obj\common\weather\BCB5\\min_max_to_timestep_estimator.obj 
+      C:\temp\obj\common\weather\BCB5\\relhumid_est.obj 
+      C:\temp\obj\common\weather\BCB5\\WP_vapor_pressure_deficit.obj 
+      C:\temp\obj\common\weather\BCB5\\weather_types.obj 
+      C:\temp\obj\common\weather\BCB5\\WP_atmospheric_pressure.obj 
+      C:\temp\obj\common\weather\BCB5\\ET_common.obj 
+      C:\temp\obj\common\weather\BCB5\\ET_reference.obj 
+      C:\temp\obj\common\weather\BCB5\\ET_model.obj 
+      C:\temp\obj\common\weather\BCB5\\ET_reference_FAO.obj"/>
+    <RESFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <PACKAGES value=""/>
+    <PATHCPP value=".;..\..;..\..\any_timestep;..\..\database;..\..\parameter;..\..\day;..\..\hour;..\..\..\biometeorology"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <LINKER value="TLib"/>
+    <USERDEFINES value="VERSION_NUMBERS=4;USE_PCH;LOC_ONLY_FOR_GENx;xOLD_BINARY_FILE;DETAIL_TRACE;_DEBUG;CS_VERSION=4"/>
+    <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
+    <MAINSOURCE value="weather_static_debug.bpf"/>
+    <INCLUDEPATH value="..\..;..\..\..\biometeorology;..\..\hour;..\..\day;..\..\..\geolocation;..\..\database;..\..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..\..;..\..\..\..\cropsyst\cpp;..\..\..\geolocation\UTM_conversion;..\..\parameter;..\..\.."/>
+    <LIBPATH value="..\..;..\..\..\biometeorology;..\..\hour;..\..\day;..\..\parameter;..\..\..\geolocation\UTM_conversion;..\..\..\geolocation;..\..\database;..\..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib;..\..\BCB5\..c:\dev\common\weather"/>
+    <WARNINGS value="-w-par"/>
+    <LISTFILE value=""/>
+  </MACROS>
+  <OPTIONS>
+    <CFLAG1 value="-Od -Vmm -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-N2&quot;C:\temp\obj\common\weather\BCB5\&quot; 
+      -N0&quot;C:\temp\obj\common\weather\BCB5\&quot; -$Y+ -$W -$O- -v -JPHNE -M"/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-l&quot;C:\dev\components\AutoControls\&quot; /P256"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="$(OBJFILES)"/>
+    <ALLLIB value=""/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=30
+Item0=..\;..;..\..\biometeorology;..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter;..\..
+Item1=..;..\..\biometeorology;..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter;..\..
+Item2=..\;..\..\biometeorology;..;..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter;..\..
+Item3=..\..\biometeorology;..\;..;..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter;c:\dev\common
+Item4=..\..\biometeorology;..\;..;..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter
+Item5=..\;..;..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter
+Item6=..;..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter
+Item7=..\;..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter
+Item8=..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter
+Item9=..\hour;..\day;..\..\geolocation;..\database;..\any_timestep;..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;..\parameter
+Item10=..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;c:\dev\common\weather;c:\dev\common\weather\parameter
+Item11=..;..\hour;..\day;..\parameter;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;dev\common\weather
+Item12=..;..\hour;..\day;..\parameter;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;\dev\common\weather
+Item13=..;..\hour;..\day;..\parameter;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion
+Item14=..;..\hour;..\day;..\parameter;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion;c:\dev\common\weather
+Item15=..\;..;..\hour;..\day;..\parameter;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion
+Item16=..\;..\hour;..\day;..;..\parameter;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion
+Item17=..\hour;..\day;..\;..;..\parameter;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion
+Item18=..\;..\parameter;..;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion
+Item19=..\parameter;..\;..;..\..\geolocation;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion
+Item20=..\;..\..\geolocation;..;..\database;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;..\..\geolocation\UTM_conversion
+Item21=..\..\geolocation;..\;..\database;..;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp;C:\dev\Common\geolocation\UTM_conversion
+Item22=..\..\geolocation;..\;..\database;..;..\any_timestep;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp
+Item23=..\database;..\;..\any_timestep;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp
+Item24=..\any_timestep;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp
+Item25=..\any_timestep;..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp
+Item26=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;..\..\..\cropsyst\cpp
+Item27=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..;c:\dev\cropsyst\cpp
+Item28=..\;..;$(BCB)\include;$(BCB)\include\vcl;..\..\..
+Item29=..\;..;$(BCB)\include;$(BCB)\include\vcl;c:\dev
+
+[HistoryLists\hlLibraryPath]
+Count=18
+Item0=..\;..;..\..\biometeorology;..\hour;..\day;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib;..c:\dev\common\weather
+Item1=..;..\..\biometeorology;..\hour;..\day;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib;..c:\dev\common\weather
+Item2=..\;..\..\biometeorology;..;..\hour;..\day;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib;..c:\dev\common\weather
+Item3=..\..\biometeorology;..\;..;..\hour;..\day;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib;..c:\dev\common\weather
+Item4=..\;..;..\hour;..\day;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib;..c:\dev\common\weather
+Item5=..;..\hour;..\day;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib;..c:\dev\common\weather
+Item6=..;..\hour;..\day;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\;..;..\hour;..\day;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib
+Item8=..\;..\hour;..\day;..;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib
+Item9=..\hour;..\day;..\;..;..\parameter;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib
+Item10=..\;..\parameter;..;..\..\geolocation\UTM_conversion;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib
+Item11=..\parameter;..\;..\..\geolocation\UTM_conversion;..;..\..\geolocation;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib
+Item12=..\..\geolocation\UTM_conversion;..\;..\..\geolocation;..;..\database;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib
+Item13=..\..\geolocation;..\;..\database;..;..\any_timestep;$(BCB)\lib\obj;$(BCB)\lib
+Item14=..\database;..\;..\any_timestep;..;$(BCB)\lib\obj;$(BCB)\lib
+Item15=..\any_timestep;..;$(BCB)\lib\obj;$(BCB)\lib
+Item16=..\any_timestep;..\;..;$(BCB)\lib\obj;$(BCB)\lib
+Item17=..\;..;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=22
+Item0=VERSION_NUMBERS=4;USE_PCH;LOC_ONLY_FOR_GENx;xOLD_BINARY_FILE;DETAIL_TRACE;_DEBUG;CS_VERSION=4
+Item1=VERSION_NUMBERS=4;USE_PCH;LOC_ONLY_FOR_GENx;xOLD_BINARY_FILE;DETAIL_TRACE;_DEBUG
+Item2=VERSION_NUMBERS=4;USE_PCH;LOC_ONLY_FOR_GENx;xOLD_BINARY_FILE;DETAIL_TRACE
+Item3=VERSION_NUMBERS=4;USE_PCH;LOC_ONLY_FOR_GENx;xOLD_BINARY_FILE;_DEBUG;DETAIL_TRACE
+Item4=VERSION_NUMBERS=4;0;0;USE_PCH;LOC_ONLY_FOR_GENx;xOLD_BINARY_FILE;_DEBUG
+Item5=VERSION_NUMBERS=4;0;0;USE_PCH;LOC_ONLY_FOR_GENx;OLD_BINARY_FILE;_DEBUG
+Item6=VERSION_NUMBERS=4;0;0;USE_PCH;LOC_ONLY_FOR_GENx;xOLD_BINARY_FILE
+Item7=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;LOC_ONLY_FOR_GENx;xOLD_BINARY_FILE
+Item8=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;LOC_ONLY_FOR_GENx;OLD_BINARY_FILE
+Item9=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;LOC_ONLY_FOR_GENx
+Item10=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;LOC_ONLY_FOR_GEN
+Item11=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;
+Item12=_DEBUG;VERSION_NUMBERS=4,0,0
+Item13=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;X1Master_weather=VP_weather_class;X3Master_weather=Weather;X2Master_weather=Weather_vapor_pressure
+Item14=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;xMaster_weather=VP_weather_class;Master_weather=Weather;XMaster_weather=Weather_vapor_pressure
+Item15=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;xMaster_weather=VP_weather_class;Master_weather=Weather_vapor_pressure
+Item16=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH;Master_weather=VP_weather_class
+Item17=_DEBUG;VERSION_NUMBERS=4,0,0;USE_PCH
+Item18=_DEBUG;SUPPORT_STRING;VERSION_NUMBERS=4,0,0
+Item19=_DEBUG;SUPPORT_STRING;VERSION_NUMBER=4,0,0
+Item20=_DEBUG;SUPPORT_STRING
+Item21=_DEBUG
+
+[HistoryLists\hlIntOutputDir]
+Count=2
+Item0=C:\temp\obj\common\weather\BCB5\
+Item1=C:\temp\obj\common\weather\BCB5
+
+[HistoryLists\hlFinalOutputDir]
+Count=4
+Item0=C:\temp\lib\BCB5\debug\
+Item1=C:\temp\lib\BCB5\debug
+Item2=C:\temp\lib\BCB5\release\
+Item3=C:\temp\lib\BCB5\release
+
+[HistoryLists\hIBPIOutputDir]
+Count=1
+Item0=C:\dev\components\AutoControls\
+
+[HistoryLists\hlTlibPageSize]
+Count=4
+Item0=0x0100
+Item1=0x0080
+Item2=0x0040
+Item3=0x0010
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+
+  <FILES>
+    <FILE type="override" value="..\..\phrases.cpp" translator="Auto">
+      <CFLAG1 value=" -H= -Hc-"/>
+    </FILE>
+  </FILES>
+</PROJECT>

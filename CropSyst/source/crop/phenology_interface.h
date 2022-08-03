@@ -1,0 +1,49 @@
+#ifndef phenology_interfaceH
+#define phenology_interfaceH
+#include "corn/const.h"
+#include "corn/primitive.h"
+#include "corn/chronometry/date_I.h"
+#ifndef growth_stagesHPP
+#  include "growth_stages.hpp"
+#endif
+namespace CropSyst
+{
+//______________________________________________________________________________
+interface_ Phenology_interface
+{
+   virtual nat16 get_days_since_start_of(Normal_crop_event_sequence event) const=0;
+   virtual Normal_crop_event_sequence get_growth_stage_sequence()       const=0;
+         //130425  rename this to get_event_index()
+   virtual const CORN::Date_const &get_initiation_date                           //160609_151005
+      (Normal_crop_event_sequence growth_stage)                         const=0;
+
+   virtual bool has_emerged()                                    affirmation_  ; //101030 was is_in_season
+   virtual bool is_in_yield_formation()                          affirmation_  ;
+   virtual bool is_mature()                                      affirmation_;
+   virtual float64 get_thermal_time_cumulative(bool adjusted_for_clipping) const=0;
+   virtual bool is_in_vegetative_growth()                        affirmation_=0;
+   virtual bool is_flowering()                                   affirmation_  ;
+   virtual bool is_dormant()                                     affirmation_  ;
+   virtual bool is_harvested()                                   affirmation_  ; //170820
+   virtual bool is_in_growing_season()                           affirmation_  ; //130903
+   virtual bool has_matured()                                    affirmation_  ;
+   virtual bool is_in_growth_period()                            affirmation_  ;
+   virtual bool is_in_senescence()                               affirmation_=0; //141125
+   virtual bool is_in_tuber_initiation()                         affirmation_=0; //150825
+   inline virtual bool started_today(Normal_crop_event_sequence growth_stage) affirmation_ //130903
+      { return get_days_since_start_of(growth_stage) == 1; }
+   virtual void clear_days_since_start_of_harvest()              assignation_=0;
+   virtual nat16 day_of_season()                                        const=0;
+   virtual const nat16 &ref_day_of_season()                             const=0;
+   virtual nat16 get_start_day_in_season
+      (Normal_crop_event_sequence growth_stage)                         const=0;//160523
+      // The number days since the start of the season() including today (1 based)
+      // Typically since planting date, but may be restart date in
+      // perennial/dormant crops.
+   virtual nat16 get_duration_of(Normal_crop_event_sequence growth_stage)const=0;//160609
+//NYI   inline virtual const CORN::Date &get_maturity_date()                    const = 0; //141202
+};
+//______________________________________________________________________________
+} // namespace CropSyst
+#endif
+

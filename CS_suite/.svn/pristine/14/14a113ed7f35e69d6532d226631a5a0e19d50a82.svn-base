@@ -1,0 +1,365 @@
+#include "CS_suite/file_system/CS_databases.h"
+#include "corn/OS/file_system_engine.h"
+#include "corn/container/bilist.h"
+namespace CS
+{
+//______________________________________________________________________________
+Databases::Databases
+(const CORN::OS::Directory_name &context_dir
+,nat8 verbose_)
+: verbose(verbose_)
+{  // context_dir would typically be a scenario level,  but could be a project level
+   CORN::Unidirectional_list database_dirs_found;
+   nat32 found_count = CORN::OS::file_system_engine.
+      list_DENs                                                                  //161013
+      (context_dir
+      ,0,&database_dirs_found
+      ,CORN::Inclusion("Database/",true)
+      ,CORN::OS::File_system::superdirectory_recursion_inclusive);
+   CORN::OS::Directory_name *database_dir = 0;
+   while ((database_dir
+           = dynamic_cast<CORN::OS::Directory_name *>
+             (database_dirs_found.pop_at_head())))
+   {  append(new Database_directory(database_dir)); //given
+   }
+   sort();
+}
+//_2016-09-02___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_in_context_wstring
+(const std::wstring &context_name
+,const std::wstring &name
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   CORN::OS::File_name *selected_file = 0;
+   FOR_EACH(DB_dir,Database_directory,each_DB)
+   {
+      CORN::OS::Directory_name_concrete database_context_subdir(*DB_dir->name,context_name);
+      CORN::OS::File_name_concrete *potential_filename_qual
+         = new CORN::OS::File_name_concrete(database_context_subdir,name,extension);
+      if (CORN::OS::file_system_engine.exists(*potential_filename_qual))
+      {  delete selected_file;
+         selected_file = potential_filename_qual;
+      }
+   } FOR_EACH_END(each_DB)
+   return selected_file;
+}
+//_2016-09-02___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_in_context_string
+(const std::wstring &context_name
+,const std::string &name
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   std::wstring name_wide;
+   CORN::string_to_wstring(name,name_wide);
+   return render_find_in_context_wstring(context_name,name_wide,extension);
+}
+//_2016-09-02___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_in_context_string_any_extension
+(const std::wstring &context_name
+,const std::string &file)                                             rendition_
+{
+   CORN::OS::File_name *selected_file = 0;
+   CORN::Bidirectional_list matching_filenames;
+   FOR_EACH(DB_dir,Database_directory,each_DB)
+   {
+      CORN::OS::Directory_name_concrete database_context_subdir(*DB_dir->name,context_name);
+      std::string pattern(file); pattern.append(".*");
+      CORN::Inclusion inclusion(pattern,true);
+
+      CORN::OS::file_system_engine.list_DENs                                        //161013_160814
+      (database_context_subdir
+      ,&matching_filenames
+      ,0
+      ,inclusion
+      ,CORN::OS::File_system::none_recursion_inclusive);
+        // may need to be subdirectory_recursion_inclusive
+   } FOR_EACH_END(each_DB)
+   matching_filenames.sort(CORN::Container::DESCENDING);
+   selected_file = dynamic_cast<CORN::OS::File_name *>(matching_filenames.pop_first());
+      // this should be in the closest context
+   return selected_file;
+}
+//_2016-11-22___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_in_context_int
+(const std::wstring &context_name
+,int number
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   std::wstring name_wide;
+   CORN::append_int32_to_wstring(number,name_wide,10);
+   return render_find_in_context_wstring(context_name,name_wide,extension);
+}
+//_2016-09-02___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_under_context_wstring
+(const std::wstring &context_name
+,const std::wstring &undercontext_name
+,const std::wstring &name
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   CORN::OS::File_name *selected_file = 0;
+   FOR_EACH(DB_dir,Database_directory,each_DB)
+   {
+      CORN::OS::Directory_name_concrete database_context_subdir(*DB_dir->name,context_name);
+      // Note that the context might not necessarily be
+      // in the level's Database directory.
+      CORN::OS::Directory_name *undercontext_subdir =
+         CORN::OS::file_system_engine.find_file_name
+            (undercontext_name,database_context_subdir
+            ,CORN::OS::File_system::subdirectory_recursion_inclusive,0,true);
+      if (undercontext_subdir)
+      {
+         CORN::OS::File_name *potential_filename
+            = new CORN::OS::File_name_concrete(*undercontext_subdir,name,extension);
+         if (CORN::OS::file_system_engine.exists(*potential_filename))
+         {
+            delete selected_file;
+            selected_file = potential_filename;
+         }
+      }
+      delete undercontext_subdir;
+   } FOR_EACH_END(each_DB)
+   return selected_file;
+}
+//_2016-09_19___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_under_context_string
+(const std::wstring &context_name
+,const std::wstring &undercontext_name
+,const std::string &name
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   std::wstring name_wide;
+   CORN::string_to_wstring(name,name_wide);
+   return render_find_under_context_wstring(context_name,undercontext_name,name_wide,extension);
+}
+//_2016-09_19___________________________________________________________________
+CORN::OS::File_name *Databases::render_find_under_context_int
+(const std::wstring &context_name
+,const std::wstring &undercontext_name
+,int number
+,const CORN::OS::Extension &extension)                                rendition_
+{
+   std::wstring name_unqual_wide;
+   CORN::append_int32_to_wstring(number,name_unqual_wide,10);
+   return render_find_under_context_wstring(context_name,undercontext_name,name_unqual_wide,extension);
+}
+//_2016-09_19___________________________________________________________________
+CORN::OS::Directory_name *Databases::render_closest_context
+(const std::wstring &context_name)                                    rendition_
+{
+   CORN::OS::Directory_name *found = 0;
+   FOR_EACH(database_dir,Database_directory,each_database)
+   {
+      CORN::OS::Directory_name_concrete *context
+        = new CORN::OS::Directory_name_concrete(database_dir->get_dir_DEN(),context_name,L"");
+      if (CORN::OS::file_system_engine.exists(*context))
+      {
+         if (found) delete found; // we found a closer directory
+         found = context;
+      }
+      /* returns the context directory (I.e. Soil)
+         scans the list of Databases and returns the
+         Database context directory that exists closest to the
+         project/scenario directory.
+      */
+   } FOR_EACH_END(each_database)
+   return found;
+}
+//_2016-09-29___________________________________________________________________
+CORN::Unidirectional_list *Databases::render_specialization_files_qualified_in_context_string
+(const std::string &context_name)                                     rendition_
+{
+   std::wstring context_name_wide;
+   CORN::string_to_wstring(context_name,context_name_wide);
+   return render_specialization_files_qualified_in_context_wstring(context_name_wide);
+}
+//_2016-10-10___________________________________________________________________
+CORN::Unidirectional_list *Databases::render_specialization_files_qualified_in_context_wstring
+(const std::wstring &context_name)                                    rendition_
+{
+   CORN::Bidirectional_list *specialization_files = new CORN::Bidirectional_list;
+   // List of fully qualified filename
+   FOR_EACH(database_dir,Database_directory,each_database)
+   {  CORN::OS::Directory_name *context_in_this_database =
+         CORN::OS::file_system_engine.find_qualified_name_in_path
+            (context_name,database_dir->get_dir_DEN());
+      if (context_in_this_database)
+      {
+      CORN::Unidirectional_list context_filenames_qual;
+      CORN::OS::file_system_engine.list_DENs                                     //161013_160814
+         (*context_in_this_database // context_dir_qual
+         ,&context_filenames_qual
+         ,0
+         ,CORN::Inclusion("*.*",true)  // parameter file names will have an extension
+         ,CORN::OS::File_system::none_recursion_inclusive);
+      for (CORN::OS::File_name *context_filename = dynamic_cast<CORN::OS::File_name *>
+            (context_filenames_qual.pop_first())
+          ;context_filename
+          ;context_filename = dynamic_cast<CORN::OS::File_name *>
+            (context_filenames_qual.pop_first()))
+      {
+         FIND_FOR_EACH_IN(generalization_filename_found,other_context_filename
+            ,CORN::OS::File_name,*specialization_files,false,each_other)
+         {
+            if (other_context_filename->get_name() == context_filename->get_name())
+            {  generalization_filename_found = other_context_filename;
+               each_other->delete_current();
+               specialization_files->append(context_filename);
+            }
+         } FOR_EACH_END(each_other)
+         if (!generalization_filename_found)
+            specialization_files->append(context_filename);
+      } // for
+      }
+   } FOR_EACH_END(each_database)
+   specialization_files->sort();
+   return specialization_files;
+}
+//_2016-10-10___________________________________________________________________
+nat32 Databases::render_subdirectories
+(CORN::Container       &subdirectories
+,const CORN::Seclusion &seclusion
+,CORN::OS::File_system::Recursion recursion)                          rendition_
+{  FOR_EACH(database,Database_directory,each_database)
+   {  // currently Databases doesn't have seclusion so we check the seclusion here.
+      // probably would want to pass secusion to Databases constructor
+      if (verbose>2) std::clog << "database: " << database->get_dir_DEN();
+      if (seclusion.is_included_DEN(database->get_dir_DEN()))
+      {  if (verbose>2) std::clog << " (included)" << std::endl;
+            CORN::OS::file_system_engine.list_DENs(database->get_dir_DEN()
+            ,0,&subdirectories,seclusion,recursion,0);
+      }
+      else if (verbose>2) std::clog << " (excluded)" << std::endl;
+   } FOR_EACH_END(each_database)
+   if (verbose>3)
+   {  std::clog << "info: database subdirs=" << std::endl;
+      subdirectories.write(std::clog);
+   }
+   return subdirectories.count();
+   // Returns the number of included subdirectories from all databases
+}
+//_2016-10-31___________________________________________________________________
+nat32 Databases::render_subdirectories_with_name
+(CORN::Container        &subdirectories
+,const std::string      &name)                                        rendition_
+{
+   nat32 database_subdir_count = 0;
+   FOR_EACH(database,Database_directory,each_database)
+   {
+      // currently Databases doesn't have seclusion so we check the seclusion here.
+      // probably would want to pass secusion to Databases constructor
+      if (verbose) std::clog << "database :" << database->get_dir_DEN();
+         //if (verbose) std::clog << " (included)" << std::endl;
+         database_subdir_count += CORN::OS::file_system_engine.list_DENs
+            (database->get_dir_DEN(),0,&subdirectories,CORN::Inclusion(name,true)
+            ,CORN::OS::File_system::subdirectory_recursion_inclusive
+            ,0);
+   } FOR_EACH_END(each_database)
+   return database_subdir_count; // Returns the number of included subdirectories from all databases
+}
+//_2016-11-01___________________________________________________________________
+CORN::OS::File_name *CS::Databases
+::render_most_appropriate_existing_in_any_context
+(const std::wstring    &find_extension // must be actual extension
+,const std::string     &name
+,const CORN::Text_list &appropriates
+,CORN::Container       &relevent_database_subdirectories)             rendition_
+{
+   CORN::Unidirectional_list canidate_filenames;
+   std::wstring pattern;
+   CORN::string_to_wstring(name,pattern); pattern.append(L".");
+   pattern.append(find_extension);
+   FOR_EACH_IN(database_subdir,CORN::OS::Directory_name,relevent_database_subdirectories,each_DB)
+   {  CORN::OS::File_name_concrete *candidate = new CORN::OS::File_name_concrete
+         (*database_subdir,name,find_extension);
+      if (CORN::OS::file_system_engine.exists(*candidate))
+         canidate_filenames.append(candidate);
+      else delete candidate;
+   } FOR_EACH_END(each_DB)
+   return extract_most_appropriate_candidate(canidate_filenames,appropriates);
+}
+//_2017-02-02___________________________________________________________________
+CORN::OS::File_name *CS::Databases::extract_most_appropriate_candidate
+(CORN::Container &candidates
+,const CORN::Text_list &appropriates)                                 rendition_
+// essentially given
+{
+   CORN::OS::File_name *most_appropriate_candidate = 0; nat8 mosts_appropriateness = 0;
+   for (CORN::OS::File_name *candidate = dynamic_cast<CORN::OS::File_name *>(candidates.pop_first())
+       ;candidate
+       ;candidate = dynamic_cast<CORN::OS::File_name *>(candidates.pop_first()))
+   {  CORN::Text_list candidate_path_items;
+      candidate->append_path_list_to(candidate_path_items);
+      nat8 appropriateness = 0;
+      FOR_EACH_IN(appropriate,CORN::Text_list::Item,appropriates,each_approp)
+      {  FOR_EACH_IN(dir_name,CORN::Text_list::Item,candidate_path_items, each_dir_name)
+         {  if ((*dir_name) == (*appropriate))
+               appropriateness += 1;
+         } FOR_EACH_END(each_dir_name)
+      } FOR_EACH_END(each_approp)
+      if (appropriateness >= mosts_appropriateness)
+      {  // The >= would select the matching file closest to the scenario directory
+         delete most_appropriate_candidate;
+         most_appropriate_candidate = candidate;
+         mosts_appropriateness = appropriateness;
+      } else
+         delete candidate;
+   }
+   return most_appropriate_candidate;
+
+      /* This is used to heuristically find subscenario filenames in the database
+         given a composed (scenario names) in scenario directory path I.e.
+         C:\Simulation\Projects\projectX\subprojectA\Scenarios\SA\RCP4.5\GCMA\CS1
+         (I.e. scenario directory name created by scenario generator)
+         There could be multiple files in the database that match a given scenario name.
+
+         For example in REACCH/Database a UED file with the same name
+         occurs in each combination of RCP and GCM.
+
+         appropriates are the list of path elements I.e.
+          C: Simulation Projects projectX subprojectA Scenarios SA RCP4.5 GCMA CS1
+
+         Suppose matching canidate filenames for name found are "xyz.UED"
+         are found (some in the master project database and some in the sub project database)
+         Count the number directory name elements common to both the
+         found filenames and the scenario directory name giving the appropriateness score:
+
+         C:\Simulation\Projects\projectX\Database\Weather\historical\xyz.UED  (appropriateness=4)
+         C:\Simulation\Projects\projectX\Database\Weather\RCP4.5\GCMA\xyz.UED (appropriateness=6)
+         C:\Simulation\Projects\projectX\Database\Weather\RCP8.5\GCMA\xyz.UED (appropriateness=5)
+         C:\Simulation\Projects\projectX\Database\Weather\RCP4.5\GCMB\xyz.UED (appropriateness=5)
+         C:\Simulation\Projects\projectX\Database\Weather\RCP8.5\GCMB\xyz.UED (appropriateness=4)
+         C:\Simulation\Projects\projectX\subprojectA\Database\Weather\historical\xyz.UED  (appropriateness=5)
+         C:\Simulation\Projects\projectX\subprojectA\Database\Weather\RCP4.5\GCMA\xyz.UED (appropriateness=7)
+         C:\Simulation\Projects\projectX\subprojectA\Database\Weather\RCP8.5\GCMA\xyz.UED (appropriateness=6)
+         C:\Simulation\Projects\projectX\subprojectA\Database\Weather\RCP4.5\GCMB\xyz.UED (appropriateness=6)
+         C:\Simulation\Projects\projectX\subprojectA\Database\Weather\RCP8.5\GCMB\xyz.UED (appropriateness=5)
+
+         So the most appropriate xyz.UED file with appropriateness score 7 is
+         C:\Simulation\Projects\projectX\subprojectA\Database\Weather\RCP4.5\GCMA\xyz.UED
+      */
+}
+//_2017-02-02___________________________________________________________________
+CORN::OS::File_name *CS::Databases
+::render_find_most_appropriate_in_any_context_string
+(const std::wstring    &find_extension // can be actual or wildcard
+,const std::string     &name
+,const CORN::Text_list &appropriates
+,CORN::Container       &relevent_database_subdirectories)             rendition_
+{
+   CORN::Unidirectional_list canidate_filenames;
+   std::wstring pattern;
+   CORN::string_to_wstring(name,pattern); pattern.append(L".");
+   pattern.append(find_extension);
+   FOR_EACH_IN(database_subdir,CORN::OS::Directory_name,relevent_database_subdirectories,each_DB)
+   {
+      CORN::OS::file_system_engine.list_DENs
+         (*database_subdir,&canidate_filenames,0
+         ,CORN::Inclusion(pattern,false)
+         ,CORN::OS::File_system::none_recursion_inclusive);
+         // could limit to Simulation (or project) directory
+   } FOR_EACH_END(each_DB)
+   return extract_most_appropriate_candidate(canidate_filenames,appropriates);                //170202
+}
+//_2016-10-31___________________________________________________________________
+} // namespace CS
+

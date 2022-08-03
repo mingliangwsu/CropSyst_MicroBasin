@@ -1,0 +1,520 @@
+
+#ifdef USE_PCH
+#  include "simulation/CropSyst_sim_pch.h"
+#else
+#include "cs_accum.h"
+#include "LADSS.h"
+#include <math.h>
+#ifndef compareHPP
+#  include <corn/math/compare.hpp>
+#endif
+
+#include "soil/soil_param.h"
+#include "soil.h"
+#include "soil/chemicals_profile.h"
+#include "cs_report_V4.h"
+#include "crop/crop_param.h"
+#include "cs_mgmt.h"
+#include "land_unit_with_output.h"
+#include "cs_project.h"
+#include "cs_events.h"
+#include "cs_operation.h"
+//check needed #include "crop/crop_N_common.h"
+#include "crop/crop_cropsyst.h"
+#endif
+
+#include "crop/crop_interfaced.h"
+#include "cs_project.h"
+#include "LADSS_datasrc.h"
+//161202 #include "land_unit_output.h"
+#include "corn/data_source/vv_file.h"
+#include "management/management_param_V4.h"
+
+using namespace CORN;
+
+//______________________________________________________________________________
+const char *Land_use_type_label_table[] =
+{ "UNKNOWN"
+, "CROP"
+, "FOREST"
+, "LIVESTOCK"
+, 0
+};
+//__2002-08-11__________________________________________________________________
+LADSS_allocation::LADSS_allocation()
+: CORN::Data_record("-")
+, alloc_ID(0)
+, sim_ID(0)
+, LBF_loc_ID(0)
+, rot_ID(0)
+{}
+//_2003-01-09___________________________________________________________________
+bool LADSS_LBF::expect_structure(bool for_write)
+{  expect_int32     ("LBF_ID",      LBF_ID);
+   expect_string    ("LBF_NAME",    LBF_name,50);
+   expect_int32     ("TOPO_ID",     topo_ID);
+   expect_int32     ("SOIL_ID",     soil_ID);
+   expect_int32     ("LBF_INIT_ID", LBF_init_ID);
+   structure_defined = true;                                                     //120314
+   return true;                                                                  //161129
+}
+//_2001-04-17___________________________________________________________________
+bool LADSS_allocation::expect_structure(bool for_write)
+{  expect_int32     ("ALLOC_ID",      alloc_ID);
+   expect_string    (LABEL_description,      description,50);
+   expect_int32     ("SIM_ID",      sim_ID);
+   expect_int32     ("LBF_LOC_ID",      LBF_loc_ID);
+   expect_int32     ("ROT_ID",      rot_ID);
+   structure_defined = true;                                                     //120314
+   return true;                                                                  //161129
+}
+//_2001-04-17___________________________________________________________________
+LADSS_LBF_location::LADSS_LBF_location()
+: CORN::Data_record("-")
+,LBF_loc_ID (0)
+,LBF_ID     (0)
+,loc_ID     (0)
+{};
+//_2006-04-06___________________________________________________________________
+bool LADSS_LBF_location::expect_structure(bool for_write)
+{  CORN::Data_record::expect_structure(for_write);;
+   expect_int32("LBF_LOC_ID",LBF_loc_ID);
+   expect_int32("LBF_ID",    LBF_ID);
+   expect_int32("LOC_ID",    loc_ID);
+   structure_defined = true;                                                     //120314
+   return true;                                                                  //161129
+}
+//_2001-04-17___________________________________________________________________
+LADSS_soil_data_source::LADSS_soil_data_source(int32 i_soil_ID)
+:soil_table       (LADSS_database_schema table("SOIL")       , "SOIL_ID",std::ios_base::in     database_session)
+,soil_ID(i_soil_ID)
+{}
+//______________________________________________________________________________
+class LADSS_soil_layer
+: public CORN::Data_record
+{
+public:
+   int32    soil_lyr_ID; // not used by Cropsyst
+   int32    layer_no;    // not used by cropsyst
+   float32  thickness;
+   float32  bypass_coef;
+   int32    sand;        // Kevin has these as ints
+   int32    clay;
+   int32    silt;
+   float32  H2O;
+   float32  NO3;
+   float32  NH4;
+   float32  percent_OM;
+   float32  pH;
+   float32  cation_exchange_capacity;
+   float32  bulk_density;
+   float32  perm_wilt_point;
+   float32  field_capacity;
+   float32  vol_WC_at_1500;
+   float32  vol_WC_at_33;
+   float32  xsat_hydraul_cond;
+   float32  saturation;                                                          //080313
+   float32  air_entry_pot;
+   float32  b;
+   int32    soil_ID;
+ public:
+   LADSS_soil_layer()
+      : CORN::Data_record("-")
+      {}
+   virtual bool expect_structure(bool for_write)
+   {
+      expect_int32    (LABEL_SOIL_LYR_ID,soil_lyr_ID); // not used by Cropsyst
+      expect_int32    ("LAYER_NO"   ,layer_no);    // not used by cropsyst
+      expect_float32  (LABEL_thickness,thickness);
+      expect_float32  (LABEL_bypass_coef,bypass_coef);
+      expect_int32    (LABEL_sand,sand);        // Kevin has these as ints
+      expect_int32    (LABEL_clay,clay);
+      expect_int32    (LABEL_silt,silt);
+
+      // 020611 I normally wouldn't put these here, but this is where they are stored in LADSS oracle database
+      expect_float32  ("H2O",H2O);
+      expect_float32  ("NO3",NO3);
+      expect_float32  ("NH4",NH4);
+      expect_float32  ("PERCENT_OM",percent_OM);
+
+      expect_float32  (LABEL_pH,pH);
+      expect_float32  (LABEL_cation_exchange_capacity,cation_exchange_capacity);
+      expect_float32  (LABEL_bulk_density,bulk_density);
+      expect_float32  (LABEL_perm_wilt_point,perm_wilt_point);
+      expect_float32  (LABEL_field_capacity,field_capacity);
+      expect_float32  (LABEL_vol_WC_at_1500,vol_WC_at_1500);
+      expect_float32  (LABEL_vol_WC_at_33,vol_WC_at_33);
+      expect_float32  (LABEL_sat_hydraul_cond,xsat_hydraul_cond);
+      expect_float32  ("saturation",saturation);
+      expect_float32  (LABEL_air_entry_pot,air_entry_pot);
+      expect_float32  (LABEL_b,b);
+      expect_int32    ("SOIL_ID",soil_ID);
+      structure_defined = true;                                                  //120314
+      return true;                                                               //161129
+   }
+};
+//______________________________________________________________________________
+soil_horizon_array32(horizon_LADSS_H2O);    //{m3/m3 initial water content }
+soil_horizon_array32(horizon_LADSS_N_NO3);  //{kg N/ha initial N}
+soil_horizon_array32(horizon_LADSS_N_NH4);  //{kg N/ha initial N}
+soil_horizon_array32(horizon_LADSS_percent_organic_matter); //{ 0-10 (0-100) }
+//_2003-03-03___________________________________________________________________
+bool LADSS_soil_data_source::get(Smart_soil_parameters &soil)
+{  soil_table.where_long("SOIL_ID",soil_ID);
+   soil_table.get(soil);
+   for (int32 horizon = 1; horizon <= soil.number_horizons; horizon++)           //060724
+   {  LADSS_soil_layer soil_layer;
+      Database_data_source soil_layer_table
+      (LADSS_database_schema table("SOIL_LAYER") , "SOIL_LYR_ID",std::ios_base::in database_session);
+      soil_layer_table.where2_long("SOIL_ID",soil_ID,"LAYER_NO",horizon);
+      soil_layer_table.get(soil_layer);
+      // soil_lyr_ID; // not used by Cropsyst
+      // layer_no;    // not used by cropsyst  should match layer
+      soil.horizon_thickness                 [horizon] = soil_layer.thickness;
+      soil.horizon_bypass_coef               [horizon] = soil_layer.bypass_coef;
+      soil.horizon_bulk_density_g_cm3        [horizon] = soil_layer.bulk_density;
+      soil.horizon_permanent_wilt_point      [horizon] = soil_layer.perm_wilt_point;
+      soil.horizon_field_capacity            [horizon] = soil_layer.field_capacity;
+      #ifdef CHECK_USED
+      //130127
+      soil.vol_WC_at_1500                    [horizon] = soil_layer.vol_WC_at_1500;
+      soil.vol_WC_at_33                      [horizon] = soil_layer.vol_WC_at_33;
+      #endif
+
+      soil.horizon_sand                      [horizon] = soil_layer.sand;
+      soil.horizon_clay                      [horizon] = soil_layer.clay;
+      soil.horizon_silt                      [horizon] = soil_layer.silt;
+      soil.horizon_sat_hydraul_cond_m_d       [horizon] = soil_layer.xsat_hydraul_cond;
+      soil.horizon_saturation_WC             [horizon] = soil_layer.saturation;     //080313
+      soil.horizon_air_entry_pot             [horizon] = soil_layer.air_entry_pot;
+      soil.horizon_Campbell_b                [horizon] = soil_layer.b;
+
+      soil.horizon_pH                         [horizon] = soil_layer.pH;
+      soil.horizon_cation_exchange_capacity   [horizon] = soil_layer.cation_exchange_capacity;
+      // soil_ID already indexed
+
+      // I dont want these here
+      horizon_LADSS_H2O                      [horizon] = soil_layer.H2O;
+      horizon_LADSS_N_NO3                    [horizon] = soil_layer.NO3;
+      horizon_LADSS_N_NH4                    [horizon] = soil_layer.NH4;
+      horizon_LADSS_percent_organic_matter   [horizon] = soil_layer.percent_OM;
+      // If there is any missing data, allow texture hydralics to estimate it.
+      soil.user[horizon]                                                          |= Soil_parameters::specified_texture;
+      if (!CORN::is_approximately<float32>(soil.horizon_field_capacity          [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_FC;
+      if (!CORN::is_approximately<float32>(soil.horizon_permanent_wilt_point    [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_PWP;
+      if (!CORN::is_approximately<float32>(soil.horizon_bulk_density_g_cm3      [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_bulk_density;
+      if (!CORN::is_approximately<float32>(soil.horizon_sat_hydraul_cond_m_d            [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_sat_hydraul_cond;
+      if (!CORN::is_approximately<float32>(soil.horizon_saturation_WC           [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_saturation;
+      if (!CORN::is_approximately<float32>(soil.horizon_air_entry_pot           [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_air_entry_pot;
+      if (!CORN::is_approximately<float32>(soil.horizon_Campbell_b              [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_soil_B;
+      if (!CORN::is_approximately<float32>(soil.horizon_sand                    [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_sand;
+      if (!CORN::is_approximately<float32>(soil.horizon_clay                    [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters::specified_clay;
+      if (!CORN::is_approximately<float32>(soil.horizon_silt                    [horizon],0.0,0.0001))  soil.user[horizon] |= Soil_parameters:: specified_silt;
+   }
+   soil.get_end();
+   return true;
+}
+//_2003-11-22___________________________________________________________________
+LADSS_crop_data_source::Crop_components_data_record::Crop_components_data_record()
+: CORN::Data_record("-")
+, grow_ID(0)
+, phen_ID(0)
+, vern_ID(0)
+, photo_ID(0)
+, res_ID(0)
+, nitro_ID(0)
+#ifdef SALINITY
+, sal_ID(0)
+#endif
+#ifdef CO2_CHANGE
+, CO2_ID(0)
+#endif
+, dorm_ID(0)
+, leaf_ID(0)
+, transp_ID(0)
+, fruit_ID(0)
+, harv_ndx_ID(0)
+, hard_ID(0)
+{}
+//______________________________________________________________________________
+bool LADSS_crop_data_source::Crop_components_data_record::expect_structure(bool for_write)
+{  bool expected = CORN::Data_record::expect_structure(for_write);
+   expect_int32("grow_ID",    grow_ID);
+   expect_int32("phen_ID",    phen_ID);
+   expect_int32("vern_ID",    vern_ID);
+   expect_int32("vern_ID",    photo_ID);
+   expect_int32("res_ID",     res_ID);
+   expect_int32("nitro_ID",   nitro_ID);
+#ifdef SALINITY
+   expect_int32("sal_ID",     sal_ID);
+#endif
+#ifdef CO2_CHANGE
+   expect_int32("CO2_ID",     CO2_ID);
+#endif
+   expect_int32("dorm_ID",    dorm_ID);
+   expect_int32("leaf_ID",    leaf_ID);
+   expect_int32("transp_ID",  transp_ID);
+   expect_int32("fruit_ID",   fruit_ID);
+   expect_int32("harv_ndx_ID",harv_ndx_ID);
+   expect_int32("hard_ID",    hard_ID);
+   structure_defined = true;                                                     //120314
+   return expected;                                                              //161129
+}
+//______________________________________________________________________________
+LADSS_topography::LADSS_topography()
+: CORN::Data_record("-")
+, topo_ID(0)
+, altitude(0.0)
+, slope(0.0)
+, slope_length(0.0)
+{}
+//_2003-09-23___________________________________________________________________
+bool LADSS_topography::expect_structure(bool for_write)
+{  expect_int32   ("TOPO_ID"     ,topo_ID);
+   expect_float32 ("ALTITUDE"    ,altitude);
+   expect_float32 ("SLOPE"       ,slope);
+   expect_float32 ("SLOPE_LENGTH",slope_length);
+   structure_defined = true;                                                     //120314
+   return true;                                                                  //161129
+}
+//_2001-04-17___________________________________________________________________
+LADSS_crop_data_source::LADSS_crop_data_source(int32 i_land_use_ID)
+: crop_table(LADSS_database_schema table("CROP") ,"LAND_USE_ID",std::ios_base::in  database_session)
+, land_use_ID(i_land_use_ID)
+{
+   // I dont thing anything else to initialize at this time
+}
+//______________________________________________________________________________
+bool LADSS_crop_data_source::get(CropSyst::Crop_parameters &crop)
+{
+   crop_table.where_long("LAND_USE_ID",land_use_ID);
+   // Now get the component table record ID's
+   // First get the common parameters
+   crop_table.get(crop);
+   Crop_components_data_record components;
+   crop_table.get(components);
+   // Now load the relevent component parameters
+   // Remove the expected description because DESCRIPTION field
+   // exists in each of the subtable fields
+   crop.delete_entry(LABEL_crop,LABEL_description);
+   if (components.grow_ID)
+   {  Database_data_source growth_table(LADSS_database_schema table("GROWTH"),"GROW_ID" ,std::ios_base::in  database_session);
+      growth_table.where_long("GROW_ID",components.grow_ID);
+      growth_table.get(crop);
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+// This mode is for compatibility with previous versions
+// These parameters are deprecated and will be removed in version 5
+      // At this time LADSS is storing this in g/MJ not kg/MJ as CropSyst
+      crop.reference_light_to_biomass_kg_MJ_old/= 1000.0;
+#endif
+#ifdef CHECK_IF_WORKING_NOW
+//030303 WARNING something was wrong with reading of max_root_length and max_canopy_height
+//061212         We now have a new compiler and roots parameters are stored differently
+//               so hopefully this is no longer a problem and this can be deleted
+
+delete this
+
+      crop.max_root_depth = 1.5;
+      crop.max_canopy_height = 1.5;
+#endif
+   }
+   if (components.phen_ID)
+   {  Database_data_source phenology_table(LADSS_database_schema table("PHENOLOGY"), "PHEN_ID",std::ios_base::in  database_session);
+      phenology_table.where_long("PHEN_ID",components.phen_ID);
+      phenology_table.get(crop);
+   }
+   if (components.vern_ID)
+   {  Database_data_source vernalization_table(LADSS_database_schema table("VERNALIZATION"), "VERN_ID" ,std::ios_base::in database_session);
+      vernalization_table.where_long("VERN_ID",components.vern_ID);
+      vernalization_table.get(crop);
+   }
+   if (components.photo_ID)
+   {  Database_data_source photo_period_table(LADSS_database_schema table("PHOTO_PERIOD"),"PHOTO_ID" ,std::ios_base::in  database_session);
+      photo_period_table.where_long("PHOTO_ID",components.photo_ID);
+      photo_period_table.get(crop);
+   }
+   if (components.res_ID)
+   {  Database_data_source residue_table(LADSS_database_schema table("RESIDUE"),"RESID_ID" ,std::ios_base::in  database_session);
+      residue_table.where_long("RES_ID",components.res_ID);
+      residue_table.get(crop);
+   }
+   if (components.nitro_ID)
+   {  Database_data_source nitrogen_table(LADSS_database_schema table("NITROGEN"),"NITRO_ID" ,std::ios_base::in  database_session);
+      nitrogen_table.where_long("NITRO_ID",components.nitro_ID);
+      nitrogen_table.get(crop);
+   }
+   #ifdef SALINITY
+   if (components.sal_ID)
+   {  Database_data_source salinity_table(LADSS_database_schema table("SALINITY"),"SAL_ID" ,std::ios_base::in  database_session);
+      salinity_table.where_long("SAL_ID",components.sal_ID);
+      salinity_table.get(crop);
+   }
+   #endif
+   #ifdef CO2_CHANGE
+   if (components.CO2_ID)
+   {  Database_data_source CO2_table(LADSS_database_schema table("CO2"),"CO2_ID" ,std::ios_base::in  database_session);
+      CO2_table.where_long("CO2_ID",components.CO2_ID);
+      CO2_table.get(crop);
+   }
+   #endif
+   if (components.dorm_ID)
+   {  Database_data_source dormancy_table(LADSS_database_schema table("DORMANCY"),"DORM_ID"  ,std::ios_base::in database_session);
+      dormancy_table.where_long("DORM_ID",components.dorm_ID);
+      dormancy_table.get(crop);
+   }
+   if (components.leaf_ID)
+   {  Database_data_source leaf_table(LADSS_database_schema table("LEAF"),"LEAF_ID" ,std::ios_base::in  database_session);
+      leaf_table.where_long("LEAF_ID",components.leaf_ID);
+      leaf_table.get(crop);
+   }
+   if (components.transp_ID)
+   {  Database_data_source transpiration_table(LADSS_database_schema table("TRANSPIRATION"),"TRANSP_ID",std::ios_base::in   database_session);
+      transpiration_table.where_long("TRANSP_ID",components.transp_ID);
+      transpiration_table.get(crop);
+   }
+   if (components.fruit_ID)
+   {  Database_data_source fruit_table(LADSS_database_schema table("FRUIT"),"FRUIT_ID",std::ios_base::in   database_session);
+      fruit_table.where_long("FRUIT_ID",components.fruit_ID);
+      fruit_table.get(crop);
+   }
+   if (components.harv_ndx_ID)
+   {  Database_data_source harvest_index_table(LADSS_database_schema table("HARVEST_INDEX"),"HARV_NDX_ID" ,std::ios_base::in  database_session);
+      harvest_index_table.where_long("HARV_NDX_ID",components.harv_ndx_ID);
+      harvest_index_table.get(crop);
+      if ((crop.harvest.index_unstressed == 0.0)) crop.harvest.index_unstressed = 0.48; // This is a hack until the database is correct.
+   }
+   if (components.hard_ID)
+   {  Database_data_source hardiness_table(LADSS_database_schema table("HARDINESS"),"HARD_ID" ,std::ios_base::in  database_session);
+      hardiness_table.where_long("HARD_ID",components.hard_ID);
+      hardiness_table.get(crop);
+   }
+VV_File dump_crp("dump.crp");
+dump_crp.set(crop);
+   return true;
+}
+//______________________________________________________________________________
+LADSS_rotation_components_data_source::LADSS_rotation_components_data_source(int32 i_rot_ID)
+: rotation_components_table(LADSS_database_schema table("ROTATION_COMPONENTS"),"ROT_COMP_ID"  ,std::ios_base::in database_session)
+, rot_ID(i_rot_ID)
+, sowing_data_source(LADSS_database_schema table("SOWING") ,"SOW_ID" ,std::ios_base::in database_session)
+{
+   // I dont think anything else to initialize at this time
+}
+//______________________________________________________________________________
+bool LADSS_rotation_components_data_source::get(CropSyst::Rotation_parameters &rotation_params)
+{
+   // This reads all rotation components records where the
+   // rotation_component rot_ID matches the specified rot_ID and
+   // land_use_type is "CROP" a sowing event will create and
+   // appended sowing_events.
+   Rotation_components_data_record rot_comps_DR;
+   rotation_components_table.where_long("ROT_ID",rot_ID);
+   bool record_valid =  rotation_components_table.get(rot_comps_DR);
+   while (record_valid)
+   {  switch (rot_comps_DR.land_use_type_labeled.get())
+      {  case CROP_LAND_USE :
+            rotation_params.sowing_events.append(dynamic_cast<CORN::Item *>(create_sowing_event(rot_comps_DR)));
+         break;
+         default: // All other land_use_types are for other LADSS models.
+         break;
+      }
+      record_valid = rotation_components_table.get_next(rot_comps_DR);
+   }
+   return true;
+}
+//_2002-09-14___________________________________________________________________
+bool Rotation_components_data_record::expect_structure(bool for_write)
+{  bool expected = CORN::Data_record::expect_structure(for_write);
+   expect_int32("ROT_COMP_ID",rot_comp_ID);
+   expect_int32("EVENT_DATE",event_date);
+   expect_enum("LAND_USE_TYPE",land_use_type_labeled);
+   expect_int32("LAND_USE_ID",land_use_ID);
+   expect_int32("MGT_ID",mgt_ID);
+   expect_int32("ROT_ID",rot_ID);
+   expect_int32("SOW_ID",sow_ID);
+   structure_defined = true;                                                     //120314
+   return expected;                                                              //161129
+}
+//______________________________________________________________________________
+CropSyst::Sowing_event* LADSS_rotation_components_data_source::create_sowing_event(const Rotation_components_data_record &rot_comp_DR)
+{  CropSyst::Sowing_event *sow_event = new CropSyst::Sowing_event;
+   if (rot_comp_DR.sow_ID != 0)
+   {  sowing_data_source.where_long("SOW_ID",rot_comp_DR.sow_ID);
+      sowing_data_source.get(*sow_event);
+   }
+   //Currently ladss is only using actual date for sowing date
+   sow_event->begin_sync.set(rot_comp_DR.event_date);
+      char ID_cstr[10];
+      CORN::int32_to_cstr(rot_comp_DR.rot_comp_ID,ID_cstr,10);
+      sow_event->ID = ID_cstr;
+   CropSyst::Sowing_operation &sow_op = sow_event->provide_sowing_operation();   //130128
+   sow_op.LADSS_land_use_ID = rot_comp_DR.land_use_ID;
+   sow_op.LADSS_mgt_ID      = rot_comp_DR.mgt_ID;
+   sow_op.sowing_date_mode_labeled.set(CropSyst::FIXED_DATE);
+   return sow_event;
+}
+//_2002-09-15___________________________________________________________________
+bool LADSS_management_data_source::Resource_set_data_record::expect_structure(bool for_write)
+{  bool expected = CORN::Data_record::expect_structure(for_write);
+   expect_int32("RES_SET_ID",res_set_ID);
+   expect_string("DESCRIPTION",description,255);
+   expect_int16("SCS_CODE",SCS_code);
+   structure_defined = true;                                                     //120314
+   return expected;                                                              //161129
+}
+//______________________________________________________________________________
+LADSS_management_data_source::LADSS_management_data_source(int32 i_mgt_ID)
+: mgt_ID(i_mgt_ID)
+, crop_management_data_source    (LADSS_database_schema table("CROP_MANAGEMENT")       ,"MGT_ID" ,std::ios_base::in database_session)
+, event_data_source              (LADSS_database_schema table("EVENT")                 ,"EVENT_ID",std::ios_base::in  database_session)
+{ }
+//_2002-09-15___________________________________________________________________
+bool Event_data_record::expect_structure(bool for_write)
+{  Common_event::setup_structure(*this,for_write);
+   // LADSS database uses integer date in oracle database for event_date
+   // so we will remove the date file and replace it with an integer field
+   current_section->entries.remove_all_matching_key_cstr("event_date");
+   expect_int32("EVENT_ID",event_ID);
+   expect_int32("EVENT_DATE",begin_sync.ref_date_num());
+      //060831 single event "date" has not be renamed "event_date" in synchronization, so this is probably redundent now.
+   expect_int16(LABEL_offset,begin_sync.days_offset);
+   expect_int16(LABEL_thermal_time,begin_sync.thermal_time);
+   expect_enum("OPERATION",op_labeled);
+   expect_int32("RES_SET_ID",res_set_ID);
+   expect_int32("OP_ID",op_ID);
+   expect_int32("MGT_ID",mgt_ID);
+   structure_defined = true;                                                     //120314
+   return true;                                                                 //161129
+}
+//______________________________________________________________________________
+bool LADSS_management_data_source::get
+(CropSyst::Management &management)
+{
+   crop_management_data_source.where_long("MGT_ID",mgt_ID);
+   crop_management_data_source.get(management);
+   event_data_source.where_long("MGT_ID",mgt_ID);
+   Event_data_record event_DR;
+   bool record_valid = event_data_source.get(event_DR);
+   while (record_valid)
+   {
+      // Create a new event and added it to LADSS_operations.
+      // The operations parameters will be loaded later as needed.
+      event_DR.operation_type_label.assign(event_DR.op_labeled.get_label());
+      char ID_str[10];
+      CORN::int32_to_cstr(event_DR.op_ID,ID_str,10);
+      event_DR.set_operation_name(ID_str);
+
+      CropSyst::Event *mgmt_event = new CropSyst::Event (event_DR);;
+      CORN::int32_to_cstr(event_DR.event_ID,ID_str,10);
+      mgmt_event->ID.assign(ID_str);
+      /*130415  disabled because I haven't yet moved LADSS_operations
+      to new mgmt_param_V4
+      management.LADSS_operations.append(mgmt_event);
+      */
+      record_valid = event_data_source.get_next(event_DR);
+   }
+   return true;
+}
+//_2002-09-15_____________________________________________________________________________
+//060306 808 lines
+

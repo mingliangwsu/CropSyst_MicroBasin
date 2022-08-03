@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <PersonalityInfo>
+    <Option>
+      <Option Name="Personality">Default.Personality</Option>
+      <Option Name="ProjectType"></Option>
+      <Option Name="Version">1.0</Option>
+      <Option Name="GUID">{638868B2-06DC-4AD3-B8FD-C3B301914917}</Option>
+    </Option>
+  </PersonalityInfo>
+  <Default.Personality>
+    
+    
+    
+    <Projects>
+      <Projects Name="ued_static.lib">..\..\..\..\ued\library\BDS\ued_static.bdsproj</Projects>
+      <Projects Name="map_google.exe">map_google.bdsproj</Projects>
+      <Projects Name="Targets">ued_static.lib map_google.exe</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+</BorlandProject>

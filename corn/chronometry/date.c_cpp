@@ -1,0 +1,90 @@
+﻿/* When using C++, this file is #included by date.cpp so do not
+add this date.c file to to be linked with C++ project makefiles or IDE's.
+You can compile this file (to check for errors),
+but don't link the date.o file to C++ programs.
+For a C program/library then do link the date.o file.
+*/
+#include "corn/chronometry/date.hh"
+#include "corn/chronometry/date_types.hh"
+#ifdef __cplusplus
+namespace CORN {
+#endif
+//______________________________________________________________________________
+const char *date_month_names[13] =
+{""
+,"January"
+,"February"
+,"March"
+,"April"
+,"May"
+,"June"
+,"July"
+,"August"
+,"September"
+,"October"
+,"November"
+,"December"};
+
+const char *date_month_abbrevs[13] =
+{""
+,"Jan"
+,"Feb"
+,"Mar"
+,"Apr"
+,"May"
+,"Jun"
+,"Jul"
+,"Aug"
+,"Sep"
+,"Oct"
+,"Nov"
+,"Dec"};
+
+nat8 common_year_month_lengths[13] =
+{ 0,31,28,31,30,31,30,31,31,30,31,30,31};
+nat8 leap_year_month_lengths[13] =
+{ 0,31,29,31,30,31,30,31,31,30,31,30,31};
+//_____________________________________________________________________________
+bool date_is_leap_year(Year year)   //130226 rename to date_is_leap_year
+{
+   Year year_abs = abs(year);                                                  //130222
+   return((year_abs == 0)      ? true :                                              //110715_130222 was false
+         //In the astronomical sequence, leap-years 0, −4, −8, −12 ..., the rule of divisibility by 4 subsists. —Jean Meeus, Astronomical algorithms
+          (year_abs % 4) > 0   ? false :
+          //130222 the ISO standard specifies that dates prior to year 1582 are the proleptic gregorian calendar
+          (year_abs % 100) > 0 ? true :
+          (year_abs % 400) == 0);
+      // I previously thought that dates in calendar systems prior to the 1582
+      // gregorian had all years with 29 days, that is not correct, leap years
+      // have always been in use in some form in historic calendars
+   // Year 0 does not exist in the Gregorian calendar;
+   // however is is specified by the Astronomical, ISO8601 and proleptic Gregorian calendars
+   // and it is considered to be a leap year.
+   
+}
+//______________________________________________________________________________
+DOM date_get_days_in_month(Year year,Month month)
+{  bool leap_year = date_is_leap_year(year);
+   DOM days_in_month =  (DOM)((month == 2) ?
+       (leap_year ? 29 : 28) :
+       common_year_month_lengths[month]);                                        //130222
+       //130222 date_normal_days_in_month[month]);
+   return days_in_month;
+}
+//_1999-02-14_______________________________________________date_days_in_month_/
+const char *date_get_month_abbrev(Month month)
+{  return date_month_abbrevs[month];
+}
+//_1999-03-07________________________________________________date_month_abbrev_/
+const char *date_get_month_name(Month month)     // was CORN_date_month_name
+{  return date_month_names[month];
+}
+//________________________________________________________CORN_date_month_name_/
+nat16 date_days_in_year(Year year)
+{  return  (int)(date_is_leap_year(year) ? 366 : 365);
+}
+//_2017-05-25___________________________________________________________________
+
+#ifdef __cplusplus
+}
+#endif

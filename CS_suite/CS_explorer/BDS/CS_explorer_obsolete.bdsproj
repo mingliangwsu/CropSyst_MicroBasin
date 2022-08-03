@@ -1,0 +1,483 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">CPlusPlusBuilder.Personality</Option>
+			<Option Name="ProjectType">CppVCLApplication</Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{5FB55119-E977-4073-B341-103124E4B96D}</Option>
+		</Option>
+	</PersonalityInfo>
+	<CPlusPlusBuilder.Personality>
+		<Source>
+			<Source Name="MainSource">CS_explorer.cpp</Source>
+		</Source>
+		<BCBPROJECT>
+      <project version="10.0">
+        <property category="build.config" name="active" value="0"/>
+        <property category="build.config" name="count" value="1"/>
+        <property category="build.config" name="excludedefaultforzero" value="0"/>
+        <property category="build.config.0" name="builddir" value="Debug"/>
+        <property category="build.config.0" name="key" value="Debug_Build"/>
+        <property category="build.config.0" name="name" value="Debug Build"/>
+        <property category="build.config.0" name="settings.win32b" value="default"/>
+        <property category="build.config.0" name="type" value="Toolset"/>
+        <property category="build.config.0" name="win32.win32b.builddir" value="Debug_Build"/>
+        <property category="build.config.1" name="key" value="Release_Build"/>
+        <property category="build.config.1" name="name" value="Release Build"/>
+        <property category="build.config.1" name="settings.win32b" value="default"/>
+        <property category="build.config.1" name="type" value="Toolset"/>
+        <property category="build.config.1" name="win32.win32b.builddir" value="Release_Build"/>
+        <property category="build.node" name="dontverifylibs" value="0"/>
+        <property category="build.node" name="lastconfig" value="Debug_Build"/>
+        <property category="build.node" name="libraries" value="VclSmp.lib"/>
+        <property category="build.node" name="name" value="CS_explorer.exe"/>
+        <property category="build.node" name="packages" value="rtl;vcl;vclx;xmlrtl;vclie;inet;inetdbbde;inetdbxpress;vclactnband;dbrtl;vcldb;bdertl;TMSD2006;tmsexd2006;bcbofficexp;bcbsmp;soaprtl;dsnap;bcbie;K102_R70;EasyListviewD10;VirtualTreesD10;VirtualShellToolsD10;JamShellD2006Win32"/>
+        <property category="build.node" name="sparelibs" value="rtl.lib vcl.lib vclx.lib TMSD2006.lib bdertl.lib dbrtl.lib xmlrtl.lib vclactnband.lib vcldb.lib VclSmp.lib JamShellD2006Win32.lib dsnap.lib"/>
+        <property category="build.node" name="use_packages" value="1"/>
+        <property category="build.platform" name="active" value="win32"/>
+        <property category="build.platform" name="win32.Debug_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.Release_Build.toolset" value="win32b"/>
+        <property category="build.platform" name="win32.default" value="win32b"/>
+        <property category="build.platform" name="win32.enabled" value="1"/>
+        <property category="build.platform" name="win32.win32b.enabled" value="1"/>
+        <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.listfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.objfile.merge" value="1"/>
+        <property category="win32.*.win32b.tasm32" name="param.xreffile.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.1" value="_DEBUG"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.2" value="NO_WIN32_LEAN_AND_MEAN"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.3" value="USE_OS_FSx"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.1" value="..\..\..\cropsyst\source"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.2" value="..\..\..\common"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.I.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.Od.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.k.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.r.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.v.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.vi.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.bcc32" name="option.y.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.$O.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.1" value="DEBUG"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.dcc32" name="option.V.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\debug"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Debug_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.z.enabled" value="1"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Debug_Build.win32b.tasm32" name="option.zi.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.1" value="NDEBUG"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.O2.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.k.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.r.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.bcc32" name="option.vi.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.$D.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.$O.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.dcc32" name="option.V.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.1" value="$(BDS)\lib\release"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+        <property category="win32.Release_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.z.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zd.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zi.enabled" value="0"/>
+        <property category="win32.Release_Build.win32b.tasm32" name="option.zn.enabled" value="1"/>
+        <optionset name="all_configurations">
+          <property category="node" name="displayname" value="All Configurations"/>
+          <property category="win32.*.win32b.bcc32" name="container.SelectedOptimizations.containerenabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="container.SelectedWarnings.containerenabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.4.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.5.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.6.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.A.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.AK.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.AU.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.arg.1" value="CS_VERSION=4"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.arg.2" value="frame_navigation_XXXX_h=&quot;GUI/explorer/frame_navigation_JAM.h&quot;"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.D.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.1" value="$(BDS)\lib\vcl100.csm"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.H=.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.Hc.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.1" value="..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.10" value="..\..\..\GUI\explorer"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.11" value="C:\dev_other\LMD2010\lib\d10"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.12" value="C:\Documents and Settings\All Users\Documents\RAD Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.13" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.14" value="c:\dev\cropsyst\cpp"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.15" value="..\..\..\cropsyst\cpp\organic_matter"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.16" value="..\..\..\ued\library"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.17" value="..\..\..\cropsyst\cpp\crop"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.18" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.19" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.2" value="..\..\..\CropSyst\source\organic_matter"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.20" value="..\..\..\corn\OS\Windows\VCL"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.21" value="..\..\..\GUI"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.22" value="..\"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.23" value="C:\dev\CS_suite\CS_explorer\BDS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.24" value="$(BDS)\include"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.25" value="$(BDS)\include\dinkumware"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.26" value="$(BDS)\include\vcl"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.27" value="c:\dev"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.3" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.4" value="..\..\..\CropSyst\source\crop"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.5" value="..\..\..\UED\convert"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.6" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.7" value="..\..\..\corn\OS"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.8" value="..\..\file_system"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.9" value="..\..\..\common\biometeorology"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.Jgi.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.Jgx.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.O1.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.O2.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.Od.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.V0.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.V1.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.Vmd.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.Vmm.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.Vms.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.align-1.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.align-2.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.align-3.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.align-5.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.b.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.disablewarns.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.noregistervars.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.p.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.pm.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.pr.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.ps.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.rd.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.1" value="_RTLDLL"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.2" value="USEPACKAGES"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.3" value="NO_STRICT"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.arg.merge" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.sysdefines.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tW.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWC.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWD.enabled" value="0"/>
+          <property category="win32.*.win32b.bcc32" name="option.tWM.enabled" value="1"/>
+          <property category="win32.*.win32b.bcc32" name="option.w.enabled" value="0"/>
+          <property category="win32.*.win32b.brcc32" name="option.16.enabled" value="0"/>
+          <property category="win32.*.win32b.brcc32" name="option.31.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.$A1.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.$A2.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.$A4.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.$Z2.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.$Z4.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.GD.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.GP.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.GS.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.1" value="..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.10" value="..\..\..\GUI\explorer"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.11" value="C:\dev_other\LMD2010\lib\d10"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.12" value="C:\Documents and Settings\All Users\Documents\RAD Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.13" value="..\..\..\cropsyst\cpp\organic_matter"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.14" value="..\..\..\ued\library"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.15" value="..\..\..\cropsyst\cpp\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.16" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.17" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.18" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.19" value="..\..\..\corn\OS\Windows\VCL"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.2" value="..\..\..\CropSyst\source\organic_matter"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.20" value="..\..\..\GUI"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.21" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.22" value="C:\dev\CS_suite\CS_explorer\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.3" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.4" value="..\..\..\CropSyst\source\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.5" value="..\..\..\UED\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.6" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.7" value="..\..\..\corn\OS"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.8" value="..\..\file_system"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.9" value="..\..\..\common\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.I.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.J.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.JP.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.JPH.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.JPHN.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.1" value="..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.10" value="..\..\..\GUI\explorer"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.11" value="C:\dev_other\LMD2010\lib\d10"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.12" value="C:\Documents and Settings\All Users\Documents\RAD Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.13" value="..\..\..\cropsyst\cpp\organic_matter"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.14" value="..\..\..\ued\library"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.15" value="..\..\..\cropsyst\cpp\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.16" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.17" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.18" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.19" value="..\..\..\corn\OS\Windows\VCL"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.2" value="..\..\..\CropSyst\source\organic_matter"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.20" value="..\..\..\GUI"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.21" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.22" value="C:\dev\CS_suite\CS_explorer\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.3" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.4" value="..\..\..\CropSyst\source\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.5" value="..\..\..\UED\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.6" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.7" value="..\..\..\corn\OS"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.8" value="..\..\file_system"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.9" value="..\..\..\common\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.O.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.1" value="..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.10" value="..\..\..\GUI\explorer"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.11" value="C:\dev_other\LMD2010\lib\d10"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.12" value="C:\Documents and Settings\All Users\Documents\RAD Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.13" value="..\..\..\cropsyst\cpp\organic_matter"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.14" value="..\..\..\ued\library"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.15" value="..\..\..\cropsyst\cpp\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.16" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.17" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.18" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.19" value="..\..\..\corn\OS\Windows\VCL"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.2" value="..\..\..\CropSyst\source\organic_matter"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.20" value="..\..\..\GUI"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.21" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.22" value="C:\dev\CS_suite\CS_explorer\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.3" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.4" value="..\..\..\CropSyst\source\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.5" value="..\..\..\UED\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.6" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.7" value="..\..\..\corn\OS"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.8" value="..\..\file_system"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.9" value="..\..\..\common\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.R.enabled" value="0"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.1" value="..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.10" value="..\..\..\GUI\explorer"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.11" value="C:\dev_other\LMD2010\lib\d10"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.12" value="C:\Documents and Settings\All Users\Documents\RAD Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.13" value="..\..\..\cropsyst\cpp\organic_matter"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.14" value="..\..\..\ued\library"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.15" value="..\..\..\cropsyst\cpp\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.16" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.17" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.18" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.19" value="..\..\..\corn\OS\Windows\VCL"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.2" value="..\..\..\CropSyst\source\organic_matter"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.20" value="..\..\..\GUI"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.21" value="..\"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.22" value="C:\dev\CS_suite\CS_explorer\BDS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.23" value="C:\Documents and Settings\rnelson\My Documents\Borland Studio Projects"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.24" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.25" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.3" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.4" value="..\..\..\CropSyst\source\crop"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.5" value="..\..\..\UED\convert"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.6" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.7" value="..\..\..\corn\OS"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.8" value="..\..\file_system"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.9" value="..\..\..\common\biometeorology"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.arg.merge" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="option.U.enabled" value="1"/>
+          <property category="win32.*.win32b.dcc32" name="param.filenames.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.1" value="..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.10" value="..\..\..\GUI\explorer"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.11" value="C:\dev_other\LMD2010\lib\d10"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.12" value="C:\Documents"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.13" value="and"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.14" value="Settings\All"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.15" value="Users\Documents\RAD"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.16" value="Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.17" value="C:\Documents"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.18" value="and"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.19" value="Settings\All"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.2" value="..\..\..\CropSyst\source\organic_matter"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.20" value="Users\Documents\RAD"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.21" value="Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.22" value="..\..\..\cropsyst\cpp\organic_matter"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.23" value="..\..\..\ued\library"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.24" value="..\..\..\cropsyst\cpp\crop"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.25" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.26" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.27" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.28" value="..\..\..\corn\OS\Windows\VCL"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.29" value="..\..\..\GUI"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.3" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.30" value="..\"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.31" value="C:\dev\CS_suite\CS_explorer\BDS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.4" value="..\..\..\CropSyst\source\crop"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.5" value="..\..\..\UED\convert"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.6" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.7" value="..\..\..\corn\OS"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.8" value="..\..\file_system"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.9" value="..\..\..\common\biometeorology"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.arg.merge" value="1"/>
+          <property category="win32.*.win32b.idl2cpp" name="option.I.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Gi.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.1" value="..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.10" value="..\..\..\GUI\explorer"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.11" value="C:\dev_other\LMD2010\lib\d10"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.12" value="C:\Documents and Settings\All Users\Documents\RAD Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.13" value="..\..\..\cropsyst\cpp\organic_matter"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.14" value="..\..\..\ued\library"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.15" value="..\..\..\cropsyst\cpp\crop"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.16" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.17" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.18" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.19" value="..\..\..\corn\OS\Windows\VCL"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.2" value="..\..\..\CropSyst\source\organic_matter"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.20" value="..\..\..\GUI"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.21" value="..\"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.22" value="..\..\..\components\RNAutoControls\corn\BDS2006\BPL"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.23" value="C:\dev\CS_suite\CS_explorer\BDS"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.24" value="$(BDS)\lib"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.25" value="$(BDS)\lib\obj"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.26" value="$(BDS)\lib\psdk"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.3" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.4" value="..\..\..\CropSyst\source\crop"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.5" value="..\..\..\UED\convert"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.6" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.7" value="..\..\..\corn\OS"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.8" value="..\..\file_system"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.9" value="..\..\..\common\biometeorology"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.arg.merge" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.L.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpd.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpe.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.Tpp.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.aa.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.ap.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.dynamicrtl.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.1" value="..\..\..\common\geodesy"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.10" value="..\..\..\GUI\explorer"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.11" value="C:\dev_other\LMD2010\lib\d10"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.12" value="C:\Documents and Settings\All Users\Documents\RAD Studio\5.0\DCP"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.13" value="..\..\..\cropsyst\cpp\organic_matter"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.14" value="..\..\..\ued\library"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.15" value="..\..\..\cropsyst\cpp\crop"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.16" value="..\..\..\common\weather"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.17" value="..\..\..\cropsyst\cpp"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.18" value="..\..\..\common\simulation"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.19" value="..\..\..\corn\OS\Windows\VCL"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.2" value="..\..\..\CropSyst\source\organic_matter"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.20" value="..\..\..\GUI"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.21" value="..\"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.22" value="..\..\..\components\RNAutoControls\corn\BDS2006\BPL"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.23" value="C:\dev\CS_suite\CS_explorer\BDS"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.3" value="..\..\..\common\geolocation"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.4" value="..\..\..\CropSyst\source\crop"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.5" value="..\..\..\UED\convert"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.6" value="..\..\..\CropSyst\source"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.7" value="..\..\..\corn\OS"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.8" value="..\..\file_system"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.9" value="..\..\..\common\biometeorology"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.arg.merge" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="option.j.enabled" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.outputdir.arg.1" value="..\..\..\..\cs_suite_4"/>
+          <property category="win32.*.win32b.ilink32" name="option.outputdir.arg.merge" value="0"/>
+          <property category="win32.*.win32b.ilink32" name="option.outputdir.enabled" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="param.libfiles.1" value="$(LIBRARIES)"/>
+          <property category="win32.*.win32b.ilink32" name="param.libfiles.2" value="import32.lib"/>
+          <property category="win32.*.win32b.ilink32" name="param.libfiles.3" value="cp32mti.lib"/>
+          <property category="win32.*.win32b.ilink32" name="param.libfiles.merge" value="1"/>
+          <property category="win32.*.win32b.ilink32" name="param.objfiles.1" value="c0w32.obj"/>
+          <property category="win32.*.win32b.ilink32" name="param.objfiles.2" value="$(PACKAGES)"/>
+          <property category="win32.*.win32b.ilink32" name="param.objfiles.3" value="memmgr.lib"/>
+          <property category="win32.*.win32b.ilink32" name="param.objfiles.4" value="sysinit.obj"/>
+          <property category="win32.*.win32b.ilink32" name="param.objfiles.merge" value="1"/>
+        </optionset>
+      </project>
+      <FILELIST>
+        <FILE FILENAME="CS_explorer.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="CS_explorer" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="CS_explorer.res" CONTAINERID="ResTool" LOCALCOMMAND="" UNITNAME="CS_explorer.res" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="C:\temp\lib\BDS\release\CS_directory.lib" CONTAINERID="LibTool" LOCALCOMMAND="" UNITNAME="CS_directory" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\CS_explorer_engine.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="CS_explorer_engine" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\corn\OS\Windows\VCL\registry.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="registry" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="C:\temp\lib\BDS\release\common_sim_static.lib" CONTAINERID="LibTool" LOCALCOMMAND="" UNITNAME="common_sim_static" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\common\weather\weather_types.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="weather_types" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\ued\library\UED_fname.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="UED_fname" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\GUI\explorer\frame_navigation_JAM.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="frame_navigation_JAM" FORMNAME="navigation_frame" DESIGNCLASS="TFrame" ADDITIONAL="..\..\..\GUI\explorer\frame_navigation_JAM.h"/>
+        <FILE FILENAME="..\..\..\GUI\explorer\explorer_engine_abstract.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="explorer_engine_abstract" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\GUI\explorer\explorer_engine_abstract.h"/>
+        <FILE FILENAME="..\..\..\GUI\explorer\form_explorer_common.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="form_explorer_common" FORMNAME="common_explorer_form" DESIGNCLASS="" ADDITIONAL="..\..\..\GUI\explorer\form_explorer_common.h"/>
+        <FILE FILENAME="..\frame_CS_context_functions.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="frame_CS_context_functions" FORMNAME="frame_CS_context" DESIGNCLASS="TFrame" ADDITIONAL="..\frame_CS_context_functions.h"/>
+        <FILE FILENAME="..\..\..\GUI\explorer\frame_current_directory_common.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="frame_current_directory_common" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="C:\temp\lib\BDS\release\corn_complete_static.lib" CONTAINERID="LibTool" LOCALCOMMAND="" UNITNAME="corn_complete_static" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\corn\OS\OS.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="OS" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\corn\OS\OS.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\database_dir.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="database_dir" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\CropSyst\source\database_dir.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\model_options.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="model_options" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\CropSyst\source\model_options.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\cs_project_directory.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_project_directory" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\CropSyst\source\output.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="output" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\UED\convert\convert_response.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="convert_response" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\UED\convert\convert_response.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\crop\growth_stages.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="growth_stages" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\CropSyst\source\crop\growth_stages.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\cs_scenario.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_scenario" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\CropSyst\source\cs_scenario.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\static_phrases.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="static_phrases" FORMNAME="" DESIGNCLASS=""/>
+        <FILE FILENAME="..\..\..\CropSyst\source\cs_operation_codes.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="cs_operation_codes" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\CropSyst\source\cs_operation_codes.h"/>
+        <FILE FILENAME="..\..\..\common\biometeorology\ET_model.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="ET_model" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\common\biometeorology\ET_model.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\crop\crop_types.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="crop_types" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\CropSyst\source\crop\crop_types.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\organic_matter\OM_params.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="OM_params" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\CropSyst\source\organic_matter\OM_params.h"/>
+        <FILE FILENAME="..\..\..\CropSyst\source\organic_matter\OM_types.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="OM_types" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\CropSyst\source\organic_matter\OM_types.h"/>
+        <FILE FILENAME="..\..\..\common\geodesy\geolocation.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="geolocation" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\common\geodesy\geolocation.h"/>
+        <FILE FILENAME="..\..\..\common\geodesy\geocoordinate.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="geocoordinate" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\common\geodesy\geocoordinate.h"/>
+        <FILE FILENAME="..\..\..\common\simulation\event.cpp" CONTAINERID="CCompiler" LOCALCOMMAND="" UNITNAME="event" FORMNAME="" DESIGNCLASS="" ADDITIONAL="..\..\..\common\simulation\event.h"/>
+      </FILELIST>
+      <IDEOPTIONS>
+        <VersionInfo>
+          <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+          <VersionInfo Name="AutoIncBuild">False</VersionInfo>
+          <VersionInfo Name="MajorVer">1</VersionInfo>
+          <VersionInfo Name="MinorVer">0</VersionInfo>
+          <VersionInfo Name="Release">0</VersionInfo>
+          <VersionInfo Name="Build">0</VersionInfo>
+          <VersionInfo Name="Debug">False</VersionInfo>
+          <VersionInfo Name="PreRelease">False</VersionInfo>
+          <VersionInfo Name="Special">False</VersionInfo>
+          <VersionInfo Name="Private">False</VersionInfo>
+          <VersionInfo Name="DLL">False</VersionInfo>
+          <VersionInfo Name="Locale">1033</VersionInfo>
+          <VersionInfo Name="CodePage">1252</VersionInfo>
+        </VersionInfo>
+        <VersionInfoKeys>
+          <VersionInfoKeys Name="CompanyName"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileDescription"></VersionInfoKeys>
+          <VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="InternalName"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys>
+          <VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
+          <VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductName"></VersionInfoKeys>
+          <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+          <VersionInfoKeys Name="Comments"></VersionInfoKeys>
+        </VersionInfoKeys>
+        <Debugging>
+          <Debugging Name="DebugSourceDirs"></Debugging>
+        </Debugging>
+        <Parameters>
+          <Parameters Name="RunParams"> "D:\bechini1\Simulation\Projects\lleida\Scenarios\bechini\.CropSyst_scenario"  "D:\bechini1\Simulation\Projects\lleida\Database\Format\reale.FMT"</Parameters>
+          <Parameters Name="Launcher"></Parameters>
+          <Parameters Name="UseLauncher">False</Parameters>
+          <Parameters Name="DebugCWD"></Parameters>
+          <Parameters Name="HostApplication"></Parameters>
+          <Parameters Name="RemoteHost"></Parameters>
+          <Parameters Name="RemotePath"></Parameters>
+          <Parameters Name="RemoteParams"></Parameters>
+          <Parameters Name="RemoteLauncher"></Parameters>
+          <Parameters Name="UseRemoteLauncher">False</Parameters>
+          <Parameters Name="RemoteCWD"></Parameters>
+          <Parameters Name="RemoteDebug">False</Parameters>
+          <Parameters Name="Debug Symbols Search Path"></Parameters>
+          <Parameters Name="LoadAllSymbols">True</Parameters>
+          <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+        </Parameters>
+        <Linker>
+          <Linker Name="LibPrefix"></Linker>
+          <Linker Name="LibSuffix"></Linker>
+          <Linker Name="LibVersion"></Linker>
+        </Linker>
+      </IDEOPTIONS>
+    </BCBPROJECT>
+	</CPlusPlusBuilder.Personality>
+	<StarTeamAssociation></StarTeamAssociation>
+	<StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>

@@ -1,0 +1,148 @@
+#include "CS_suite/observation/CS_inspection.h"
+
+namespace CS
+{
+nat32 debug_inspection_count = 0;
+
+//______________________________________________________________________________
+Inspection::Inspection
+(const Inspector  &inspector_
+,nat8              level_or_period_
+,CORN::Datetime64  initiation_date_
+,const char       *tally_name_
+,const char       *dataset_name_
+,nat32   applicable_descriptive_summary_elements)
+: CORN::Item()
+, inspector       (inspector_)
+, level_or_period (level_or_period_)
+, tally_name      (tally_name_)
+, dataset_name    (dataset_name_ ? dataset_name_ : "")
+, initiation_date (initiation_date_)
+, tally           (0)
+, record_dataset  (false)
+, tally_as_float  (0)
+, debug_ID(++debug_inspection_count)
+{
+   if (dataset_name_)
+   {  record_dataset = true;
+      switch(inspector_.mode)
+      {
+         case CORN::DT_nat8    : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_with_dataset<nat8 ,float32,float32>(*(inspector_.value.as_const_nat8),applicable_descriptive_summary_elements); break;
+         case CORN::DT_nat16   : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_with_dataset<nat16,float32,float32>(*(inspector_.value.as_const_nat16),applicable_descriptive_summary_elements); break;
+         case CORN::DT_nat32   : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_with_dataset<nat32,float32,float32>(*(inspector_.value.as_const_nat32),applicable_descriptive_summary_elements); break;
+         case CORN::DT_int8    : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_with_dataset<int8 ,float32,float32>(*(inspector_.value.as_const_int8),applicable_descriptive_summary_elements); break;
+         case CORN::DT_int16   : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_with_dataset<int16,float32,float32>(*(inspector_.value.as_const_int16),applicable_descriptive_summary_elements); break;
+         case CORN::DT_int32   : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_with_dataset<int32,float32,float32>(*(inspector_.value.as_const_int32),applicable_descriptive_summary_elements); break;
+         case CORN::DT_float32 : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_with_dataset<float32,float32,float32>(*(inspector_.value.as_const_float32),applicable_descriptive_summary_elements); break;
+         case CORN::DT_float64 :
+            {  tally_as_float = new CORN::Statistical_sample_with_dataset<float64,float32,float32>(*(inspector_.value.as_const_float64),applicable_descriptive_summary_elements);
+               tally = (CORN::Statistical_sample_interface *)tally_as_float;
+            } break;
+      }
+   }
+   else
+   {
+      switch(inspector_.mode)
+      {
+         case CORN::DT_nat8    : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_cumulative<nat8 ,float32>(*(inspector_.value.as_const_nat8),applicable_descriptive_summary_elements); break;
+         case CORN::DT_nat16   : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_cumulative<nat16,float32>(*(inspector_.value.as_const_nat16),applicable_descriptive_summary_elements); break;
+         case CORN::DT_nat32   : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_cumulative<nat32,float32>(*(inspector_.value.as_const_nat32),applicable_descriptive_summary_elements); break;
+         case CORN::DT_int8    : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_cumulative<int8 ,float32>(*(inspector_.value.as_const_int8),applicable_descriptive_summary_elements); break;
+         case CORN::DT_int16   : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_cumulative<int16,float32>(*(inspector_.value.as_const_int16),applicable_descriptive_summary_elements); break;
+         case CORN::DT_int32   : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_cumulative<int32,float32>(*(inspector_.value.as_const_int32),applicable_descriptive_summary_elements); break;
+         case CORN::DT_float32 : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_cumulative<float32,float32>(*(inspector_.value.as_const_float32),applicable_descriptive_summary_elements); break;
+         case CORN::DT_float64 : tally = (CORN::Statistical_sample_interface *)new CORN::Statistical_sample_cumulative<float64,float32>(*(inspector_.value.as_const_float64),applicable_descriptive_summary_elements); break;
+      }
+   }
+}
+//_2016-06-4____________________________________________________________________
+Inspection::~Inspection()
+{  delete tally_as_float;
+}
+//_2015-11-11_______________________________________________________destructor_/
+int   Inspection::compare(const CORN::Item &other_item)                    const
+{  int compare_result = 0; // initially assume the same
+   const Inspection &other = dynamic_cast<const Inspection &>(other_item);
+   nat32 other_inspector_addr = (nat32)(&other.inspector);
+   nat32 this_inspector_addr  = (nat32)(&this ->inspector);
+   if (other_inspector_addr != this_inspector_addr)
+      compare_result = -1; //not the same
+   else
+   {
+      if (this->level_or_period != other.level_or_period)
+         compare_result = -1;
+      else
+         if (this->initiation_date != other.initiation_date) compare_result = -1;
+   }
+   return compare_result;
+}
+//__2016-06-17__________________________________________________________________
+bool Inspection::is_tally_statistic_applicable(CORN::Statistic statistic)  affirmation_
+{  bool applicable = false;
+   if (tally) applicable = tally->is_applicable(statistic);
+   return applicable;
+}
+//__2016-06-17__________________________________________________________________
+float64 Inspection::get_tally_statistic(CORN::Statistic statistic)         const
+{  float64 statistic_value = std::numeric_limits<double>::quiet_NaN();
+   if (tally) statistic_value = tally->get_statistic(statistic);
+   return statistic_value;
+}
+//__2016-06-17__________________________________________________________________
+bool Inspection::commit()                                          modification_
+{  if (inspector.context.get_status() != Emanator::deleted_status)
+      tally->commit();
+   return true;
+}
+//_2016-06-15___________________________________________________________________
+bool Inspections::commit()                                        rectification_
+{  bool all_commited = true;
+   FOR_EACH (inspection,Inspection,each_inspection)
+      if (inspection->inspector.context.get_status() == Emanator::normal_status)
+      all_commited &= inspection->commit();
+   FOR_EACH_END(each_inspection)
+   return all_commited;
+}
+//_2013-07-30__________________________________________________________________/
+bool Inspections::reset()                                          modification_
+{  bool reseted = true;
+   FOR_EACH (inspection,Inspection,each_inspection)
+      inspection->reset();
+   FOR_EACH_END(each_inspection)
+   return reseted;
+}
+//_2015-08-19___________________________________________________________________
+CORN::Dynamic_array<float32> *Inspection::mod_tally_as_float32()
+{
+   CORN::Dynamic_array<float32> *as_DA_float32 =
+       dynamic_cast<CORN::Dynamic_array<float32> *>(&tally_as_float->mod_dataset());
+   return as_DA_float32;
+}
+//_2016-06-09___________________________________________________________________
+
+/*conceptual NYI
+void Inspection::write_tally_elements
+(std::ostream &strm
+,nat32 output_desired_descriptive_summary_elements)                        const
+{  CORN::Units_code stored_UC = properties.units_code;
+   for (nat16 stat=0; (stat<STAT_COUNT)&&(statistic_label_table[stat]); stat++)
+   {  nat32  element = (1 << stat);
+      bool output_this_element =
+         (output_desired_descriptive_summary_elements == STAT_ALL_bits)
+         ? record->get_applicable() & element
+         : element & output_desired_descriptive_summary_elements;
+      if (output_this_element)
+            {  float32 stat_summary_value = get_statistic(stat);
+         float32 stat_summary_value_in_preferred_units = stat_summary_value;
+         if (CORN::statistic_units_matches_observation_units & element)
+            units_convertor.convert
+               (stat_summary_value,stored_UC
+               ,stat_summary_value_in_preferred_units,display_units_code);
+         strm << stat_summary_value_in_preferred_units ;
+         if ( (1 << (stat+1))) strm << '\t';
+      }
+   }
+}
+*/
+//_2013-07-30__________________________________________________________________/
+} // namespace CS

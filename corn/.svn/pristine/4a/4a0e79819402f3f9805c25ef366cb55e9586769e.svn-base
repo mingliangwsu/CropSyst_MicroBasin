@@ -1,0 +1,126 @@
+#ifndef statistics_descriptiveH
+#define statistics_descriptiveH
+#include <limits>
+#ifndef constH
+#  include "corn/const.h"
+#endif
+#include "corn/primitive.h"
+#include "corn/math/statistical/statistics_types.hpp"
+namespace CORN {
+//______________________________________________________________________________
+interface_ Statistics_descriptive_interface
+{
+   virtual nat32   get_count()                                             const = 0;
+   virtual float64 get_current()                                           const=0;
+   virtual float64 get_min()                                               const=0;
+   virtual float64 get_max()                                               const=0;
+   virtual float64 get_sum()                                               const=0;
+   virtual float64 get_mean()                                              const=0;
+   virtual float64 get_sum_of_squares()                                    const=0;
+   virtual float64 get_standard_deviation()                                const=0;
+   virtual float64 get_coefficient_of_variation()                          const=0;
+   virtual float64 get_median()                                            const { return std::numeric_limits<double>::quiet_NaN(); }
+   virtual float64 get_mode()                                              const { return std::numeric_limits<double>::quiet_NaN(); }
+   virtual float64 get_initial()                                           const { return std::numeric_limits<double>::quiet_NaN(); }; //130918
+   virtual float64 get_final()                                             const { return std::numeric_limits<double>::quiet_NaN(); }; //170319
+
+      // median and mode are only available with statistical datasets
+      // so the defaults are to return NaN
+   virtual float64 get_statistic(nat8/*nat16*/ statistic_index)            const
+      {  // This method is a valid interface method because is uses
+         // only interface methods
+         float64 value = std::numeric_limits<double>::quiet_NaN();
+         switch (statistic_index)
+         {
+            case STAT_value_index       : value = get_current();                 break;
+            case STAT_sum_index         : value = get_sum();                     break;
+            case STAT_mean_index        : value = get_mean();                    break;
+            case STAT_std_dev_index     : value = get_standard_deviation();      break;
+            case STAT_coef_var_index    : value = get_coefficient_of_variation();break;
+            case STAT_sum_sqrs_index    : value = get_sum_of_squares();          break;
+            case STAT_min_index         : value = get_min();                     break;
+            case STAT_max_index         : value = get_max();                     break;
+            case STAT_count_index       : value = get_count();                   break;
+            case STAT_median_index      : value = get_median();                  break;
+            case mode_statistic         : value = get_mode();                    break;
+            case initial_statistic      : value = get_initial();                 break; //130918
+            case final_statistic        : value = get_final();                   break; //170319
+         }
+         return value;
+      }
+   inline virtual ~Statistics_descriptive_interface() {}                         //170216
+};
+//_2013-08-01___________________________________________________________________
+//______________________________________________________________________________
+template <typename Real>
+struct Statistics_descriptive_data
+{
+ public:
+   mutable Real summation;
+   mutable Real minimum;
+   mutable Real maximum;
+   mutable Real arithmetic_mean;
+   mutable Real standard_deviation; // actually sample_standard_deviation
+   mutable Real coefficient_of_variation;
+   mutable Real sum_of_squares;
+   // count, median, and mode are specifically implemented
+   // by derived classes so they are not included here.
+ public:
+   virtual bool reset()
+      // NYI specify mask of elements to reset (default to everything)
+      {
+         summation = 0;
+         minimum = 999999999.9;          // can't user MAXFLOAT and MINFLOAT appear to be double floats 020701
+         maximum = -999999999.9;         // can't user MAXFLOAT and MINFLOAT appear to be double floats 020701
+         arithmetic_mean = 0;
+         standard_deviation = 0;
+         coefficient_of_variation = 0;                                                 //120311
+         sum_of_squares  = 0; // moved from Statistical_data_set                       //020701
+         return true;
+      }
+   const Real &ref_summation()                                             const { return summation; }
+   const Real &ref_minimum()                                               const { return minimum; }
+   const Real &ref_maximum()                                               const { return maximum; }
+   const Real &ref_arithmetic_mean()                                       const { return arithmetic_mean; }
+   const Real &ref_standard_deviation()                                    const { return standard_deviation; }
+   const Real &ref_coefficient_of_variation()                              const { return coefficient_of_variation; }
+   const Real &ref_sum_of_squares()                                        const { return sum_of_squares; }
+};
+//_2013-08-01___________________________________________________________________
+template <typename Real>
+class Statistics_descriptive_abstract
+: public extends_ Statistics_descriptive_data<Real>
+, public implements_ Statistics_descriptive_interface
+{
+ public:
+    Statistics_descriptive_abstract()                                            {Statistics_descriptive_data<Real>::reset();}
+ public:
+//   inline virtual float64 get_current()                                           const { return (float64)xxxx; }
+   virtual float64 get_min()                                               const { return (float64)Statistics_descriptive_data<Real>::minimum; }
+   virtual float64 get_max()                                               const { return (float64)Statistics_descriptive_data<Real>::maximum; }
+   virtual float64 get_sum()                                               const { return (float64)Statistics_descriptive_data<Real>::summation; }
+   virtual float64 get_arithmetic_mean()                                   const { return (float64)Statistics_descriptive_data<Real>::arithmetic_mean; }
+   virtual float64 get_mean() /*alias */                                   const { return (float64)Statistics_descriptive_data<Real>::arithmetic_mean; }
+   virtual float64 get_sum_of_squares()                                    const { return (float64)Statistics_descriptive_data<Real>::sum_of_squares; }
+   virtual float64 get_standard_deviation()                                const { return (float64)Statistics_descriptive_data<Real>::standard_deviation; }
+   virtual float64 get_coefficient_of_variation()                          const { return (float64)Statistics_descriptive_data<Real>::coefficient_of_variation; }
+//   virtual float64 get_median()                                            const { return (float64)0; }
+};
+//_2013-08-01___________________________________________________________________
+
+/* these should no longer be needed, I am now making the descriptive variables public
+ public:  // These reference accessor are intened to allow the
+          // statistical tallies to be hooked up to the user interface.
+   inline float32 *bind_from_mean()                   { return &mean; };
+   inline float32 *bind_from_summation()              { return &summation; };
+   inline float32 *bind_from_standard_deviation()     { return &standard_deviation; };
+   inline float32 *bind_from_sum_of_squares()         { return &sum_of_squares; };
+   inline float32 *bind_from_minimum()                { return &minimum; };   //040217
+   inline float32 *bind_from_maximum()                { return &maximum; };   //040217
+*/
+//______________________________________________________Statistics_descriptive_/
+//_2013-08-01___________________________________________________________________
+} // namespace CORN
+#endif
+
+

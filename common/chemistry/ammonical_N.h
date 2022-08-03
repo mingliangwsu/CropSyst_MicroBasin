@@ -1,0 +1,49 @@
+#ifndef ammonical_NH
+#define ammonical_NH
+#include "corn/primitive.h"
+#include "corn/const.h"
+#include <algorithm>
+#include "chemistry/elements.hpp"
+#include "physics/property/P_temperature.h"
+//______________________________________________________________________________
+class Ammoniacal_nitrogen
+: public virtual Mass_nitrogen                                                   //110731
+{  // This is equivelent to TAN
+ private: // Environment
+   const Physical::Temperature &ambient_temperature;                             //150217
+   //160105BRC pH of environment can change //const float64 &pH;
+   float64 &pH;   //160105BRC
+ private:
+   float64 &TAN_N_mass;     // Includes both NH3 and NH4  alias of amount
+ private: // contributes
+   //float64 NH4_N; // These values fluctuate daily as a function of temperature and pH.
+   //float64 NH3_N; // Currently I am assuming they only need to be calculated once daily.
+                  // But probably could always be calculated by the get_NHx_N() methods.
+ public:
+   Ammoniacal_nitrogen
+      (const Physical::Temperature  &_ambient_temperature
+      //160105BRC //,const float64 &_pH
+      ,float64 &_pH  //160105BRC removed const
+      ,const Physical::Matter &of_matter);                                       //100819
+ public: //Mass elemental implementation
+   virtual float64 atomic_mass()                                           const { return 14.0067; } // relative_atomic_mass
+   virtual float64 add(const Physical::Mass &addend)               modification_;
+   virtual float64 multiply_by(float64 multiplier)                 modification_;
+   virtual float64 calc_fraction_ammonia()                                 const; //141125BRC
+ public: //accessors
+   inline float64 get_N_mass()                                             const { return TAN_N_mass; }
+   inline float64 get_NH4_N()                                              const { return TAN_N_mass - get_NH3_N() ; } //141125BRC
+   inline float64 get_NH3_N()                                              const { return TAN_N_mass * calc_fraction_ammonia(); } //141125BRC
+   inline float64 set_pH(float64 _pH)                              modification_ { pH = _pH; return pH; }  //160105BRC
+   inline float64 get_pH()                                                 const { return pH; } //160106BRC
+public: // processors
+   void update();
+   inline float64 initialize_N_mass(float64 new_TAN_N_mass)        modification_ { TAN_N_mass = new_TAN_N_mass; return TAN_N_mass;}
+   float64 take_NH4_N_mass (float64 NH4_N_mass_given)              modification_;
+   float64 give_N_mass     (float64 NH4_N_mass_requested)          modification_;   //141201BRC
+   float64 give_NH4_N_mass (float64 NH4_N_mass_requested)          modification_;
+   float64 give_NH3_N_mass (float64 NH3_N_mass_requested)          modification_;
+};
+//______________________________________________________________________________
+#endif
+

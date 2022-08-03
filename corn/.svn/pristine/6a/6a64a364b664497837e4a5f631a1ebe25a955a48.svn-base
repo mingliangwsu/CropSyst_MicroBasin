@@ -1,0 +1,3122 @@
+#############################################################################
+# Makefile for building: libcorn_complete_static.a
+# Project:  ../corn_complete_static/corn_complete_static.pro
+# Template: lib
+#############################################################################
+
+
+
+####### Compiler, tools and options
+
+#CC            = gcc
+#CXX           = g++
+DEFINES       = 
+CFLAGS        = $(TARGET_64_32_BIT) -pipe -O2 -fPIC  -W -D_REENTRANT $(DEFINES)
+CXXFLAGS      = $(TARGET_64_32_BIT) -pipe -Wno-reorder -Wno-unused-parameter -fpermissive -w -g -O2 -fPIC  -W -D_REENTRANT $(DEFINES)
+INCPATH       = -I../corn_complete_static -I. -I../../../.. -I../../../../corn
+
+DEL_FILE      = rm -f
+CHK_DIR_EXISTS= test -d
+MKDIR         = mkdir -p
+COPY          = cp -f
+COPY_FILE     = cp -f
+COPY_DIR      = cp -f -R
+INSTALL_FILE  = install -m 644 -p
+INSTALL_PROGRAM = install -m 755 -p
+INSTALL_DIR   = cp -f -R
+DEL_FILE      = rm -f
+SYMLINK       = ln -f -s
+DEL_DIR       = rmdir
+MOVE          = mv -f
+TAR           = tar -cf
+COMPRESS      = gzip -9f
+DISTNAME      = corn_complete_static1.0.0
+
+AR            = ar cqs
+RANLIB        = 
+SED           = sed
+STRIP         = strip
+
+####### Output directory
+
+OBJECTS_DIR   = ./
+
+####### Files
+
+SOURCES       = ../../../labeled_enum.cpp \
+		../../../data_type_enum.cpp \
+		../../../validate/validtyp.cpp \
+		../../../tabular/delineation.cpp \
+		../../../tabular/tabular_text.cpp \
+		../../../tabular/tabular.cpp \
+		../../../string/uiostring.cpp \
+		../../../string/ustring.cpp \
+		../../../application/explaination/explaination_location.cpp \
+		../../../application/explaination/explainations.cpp \
+		../../../application/user/settings.cpp \
+		../../../application/translations.cpp \
+		../../../container/unilist.cpp \
+		../../../container/text_list.cpp \
+		../../../container/search_tree.cpp \
+		../../../container/SDF_list.cpp \
+		../../../container/item.cpp \
+		../../../container/indexer.cpp \
+		../../../container/enumlist.cpp \
+		../../../container/container.cpp \
+		../../../container/binary_tree.cpp \
+		../../../container/bilist.cpp \
+		../../../container/association.cpp \
+		../../../container/array.cpp \
+		../../../data_source/vv_entry.cpp \
+		../../../data_source/generic_datarec.cpp \
+		../../../data_source/dbase_datasrc.cpp \
+		../../../data_source/datasrc.cpp \
+		../../../datetime/date_format.cpp \
+		../../../datetime/date_translator.cpp \
+		../../../datetime/time_format.cpp \
+		../../../datetime/time.cpp \
+		../../../datetime/date_time_format.cpp \
+		../../../datetime/datetime64.cpp \
+		../../../format/binary/binary_record_file.cpp \
+		../../../format/binary/binary_record.cpp \
+		../../../format/binary/binary_file_fstream.cpp \
+		../../../format/binary/binary_file_abstract.cpp \
+		../../../format/html/form_IO/content.cpp \
+		../../../format/MicroSoft/Access/import_export_table.cpp \
+		../../../measure/units_enum.cpp \
+		../../../measure/unitconv.cpp \
+		../../../measure/common_units.cpp \
+		../../../math/statistical/stats.cpp \
+		../../../metrology/timestep.cpp \
+		../../../metrology/units_symbology.cpp \
+		../../../metrology/units_clad.cpp \
+		../../../OS/file_system_logical.cpp \
+		../../../OS/file_system_engine_common.cpp \
+		../../../OS/file_system.cpp \
+		../../../parameters/parameters_datarec.cpp \
+		../../../parameters/parameters.cpp \
+		../../../parameters/parameter.cpp \
+		../../../parameters/parameters_directory_OS_FS.cpp \
+		../../../measure/measures.cpp \
+		../../../measure/units.cpp \
+		../../../format/excel/BIFF_record.cpp \
+		../../../format/spreadsheet/biff.cpp \
+		../../../format/spreadsheet/css_file.cpp \
+		../../../math/moremath.cpp \
+		../../../math/random.cpp \
+		../../../math/numerical/interpolate.cpp \
+		../../../math/statistical/stats_best.cpp \
+		../../../data_source/vv_file.cpp \
+		../../../application/application_directory_OS_FS.cpp \
+		../../../application/project_directory_OS_FS.cpp \
+		../../../datetime/date_unconventional.cpp \
+		../../../data_source/vv_datasrc.cpp \
+		../../../data_source/datarec.cpp \
+		../../../datetime/date.cpp \
+		../../../quality.cpp \
+		../../../application/program_directory_OS_FS.cpp \
+		../../../application/adjunct_directory_OS_FS.cpp \
+		../../../application/documentation_directory_OS_FS.cpp \
+		../../../application/suite_directory_OS_FS.cpp \
+		../../../math/statistical/statistics_types.cpp \
+		../../../math/statistical/distribution_normal.cpp \
+		../../../OS/filtered_filename.cpp \
+		../../../tabular/tabular_format.cpp \
+		../../../OS/file_type_description.cpp \
+		../../../string/strconv.cpp \
+		../../../float16.cpp \
+		../../../OS/directory_entry_name.cpp \
+		../../../OS/directory_entry_name_abstract.cpp \
+		../../../application/user/appdata_directory_OS_FS.cpp \
+		../../../tabular/delineated_datarec.cpp \
+		../../../OS/directory_entry_name_concrete.cpp \
+		../../../parameters/number_keyed.cpp \
+		../../../OS/uniform_resource_identifier.cpp \
+		../../../OS/uniform_resource_locator.cpp \
+		../../../labeled_bitmask.cpp \
+		../../../data_source/command_options_datasrc.cpp \
+		../../../seclusion.cpp \
+		../../../application/project.cpp \
+		../../../application/arguments.cpp \
+		../../../OS/file_system_engine_Unix_and_Linux.cpp \
+                ../../../application/progress.cpp \
+                ../../../chronometry/temporal.cpp
+OBJECTS       = labeled_enum.o \
+		file_system_engine_Unix_and_Linux.o \
+		data_type_enum.o \
+		validtyp.o \
+		delineation.o \
+		tabular_text.o \
+		tabular.o \
+		uiostring.o \
+		ustring.o \
+		explaination_location.o \
+		explainations.o \
+		settings.o \
+		translations.o \
+		unilist.o \
+		text_list.o \
+		search_tree.o \
+		SDF_list.o \
+		item.o \
+		indexer.o \
+		enumlist.o \
+		container.o \
+		binary_tree.o \
+		bilist.o \
+		association.o \
+		array.o \
+		vv_entry.o \
+		generic_datarec.o \
+		dbase_datasrc.o \
+		datasrc.o \
+		date_format.o \
+		date_translator.o \
+		time_format.o \
+		time.o \
+		date_time_format.o \
+		datetime64.o \
+		binary_record_file.o \
+		binary_record.o \
+		binary_file_fstream.o \
+		binary_file_abstract.o \
+		content.o \
+		import_export_table.o \
+		units_enum.o \
+		unitconv.o \
+		common_units.o \
+		stats.o \
+		timestep.o \
+		units_symbology.o \
+		units_clad.o \
+		file_system_logical.o \
+		file_system_engine_common.o \
+		file_system.o \
+		parameters_datarec.o \
+		parameters.o \
+		parameter.o \
+		parameters_directory_OS_FS.o \
+		measures.o \
+		units.o \
+		BIFF_record.o \
+		biff.o \
+		css_file.o \
+		moremath.o \
+		random.o \
+		interpolate.o \
+		stats_best.o \
+		vv_file.o \
+		application_directory_OS_FS.o \
+		project_directory_OS_FS.o \
+		date_unconventional.o \
+		vv_datasrc.o \
+		datarec.o \
+		date.o \
+		quality.o \
+		program_directory_OS_FS.o \
+		adjunct_directory_OS_FS.o \
+		documentation_directory_OS_FS.o \
+		suite_directory_OS_FS.o \
+		statistics_types.o \
+		distribution_normal.o \
+		filtered_filename.o \
+		tabular_format.o \
+		file_type_description.o \
+		strconv.o \
+		float16.o \
+		directory_entry_name.o \
+		directory_entry_name_abstract.o \
+		appdata_directory_OS_FS.o \
+		delineated_datarec.o \
+		directory_entry_name_concrete.o \
+		number_keyed.o \
+		uniform_resource_identifier.o \
+		uniform_resource_locator.o \
+		labeled_bitmask.o \
+		command_options_datasrc.o \
+		seclusion.o \
+		project.o \
+		arguments.o \
+                progress.o
+
+TARGET        = libcorn_complete_static.a
+
+
+first: all
+####### Implicit rules
+
+.SUFFIXES: .o .c .cpp .cc .cxx .C
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o "$@" "$<"
+
+####### Build rules
+
+staticlib: $(TARGET)
+
+$(TARGET):  $(OBJECTS) $(OBJCOMP) 
+	-$(DEL_FILE) $(TARGET)
+	$(AR) $(TARGET) $(OBJECTS)
+
+all:  $(TARGET)
+
+clean: compiler_clean 
+	-$(DEL_FILE) $(OBJECTS)
+	-$(DEL_FILE) *~ core *.core
+
+
+
+
+####### Sub-libraries
+
+mocclean: compiler_moc_header_clean compiler_moc_source_clean
+
+mocables: compiler_moc_header_make_all compiler_moc_source_make_all
+
+check: first
+
+compiler_rcc_make_all:
+compiler_rcc_clean:
+compiler_moc_header_make_all:
+compiler_moc_header_clean:
+compiler_moc_source_make_all:
+compiler_moc_source_clean:
+compiler_yacc_decl_make_all:
+compiler_yacc_decl_clean:
+compiler_yacc_impl_make_all:
+compiler_yacc_impl_clean:
+compiler_lex_make_all:
+compiler_lex_clean:
+compiler_clean: 
+
+####### Compile
+
+labeled_enum.o: ../../../labeled_enum.cpp ../../../labeled_enum.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../math/compare.hpp \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o labeled_enum.o ../../../labeled_enum.cpp
+
+data_type_enum.o: ../../../data_type_enum.cpp ../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../primitive.h \
+		../../../const.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o data_type_enum.o ../../../data_type_enum.cpp
+
+validtyp.o: ../../../validate/validtyp.cpp ../../../math/compare.hpp \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../measure/units.h \
+		../../../primitive.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../validate/validtyp.pc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o validtyp.o ../../../validate/validtyp.cpp
+
+delineation.o: ../../../tabular/delineation.cpp ../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../string \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../tabular/delineation.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o delineation.o ../../../tabular/delineation.cpp
+
+tabular_text.o: ../../../tabular/tabular_text.cpp ../../../tabular/tabular_text.h \
+		../../../container/text_list.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../tabular/file.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../string \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../data_source/data_table.h \
+		../../../data_source/datasrc.h \
+		../../../tabular/delineation.h \
+		../../../labeled_enum.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../math/moremath.h \
+		../../../math/compare.hpp \
+		../../../std/std_iomanip.h \
+		../../../std/std_check.h \
+		../../../std/std_iostream.h \
+		../../../math/compare.h \
+		../../../tabular/delineated_datarec.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../tabular/tabular.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tabular_text.o ../../../tabular/tabular_text.cpp
+
+tabular.o: ../../../tabular/tabular.cpp ../../../tabular/tabular.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../string \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tabular.o ../../../tabular/tabular.cpp
+
+uiostring.o: ../../../string/uiostring.cpp ../../../string/uiostring.h \
+		../../../string/ustring.h \
+		../../../const.h \
+		../../../string/str/include.h \
+		../../../string/str/str.h \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../string/str/myexcept.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o uiostring.o ../../../string/uiostring.cpp
+
+ustring.o: ../../../string/ustring.cpp ../../../string/ustring.h \
+		../../../const.h \
+		../../../string/str/include.h \
+		../../../string/str/str.h \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../string/str/myexcept.h \
+		../../../string \
+		../../../primitive.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ustring.o ../../../string/ustring.cpp
+
+explaination_location.o: ../../../application/explaination/explaination_location.cpp ../../../application/explaination/explaination_location.h \
+		../../../container/text_list.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../labeled_enum.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../math/moremath.h \
+		../../../math/compare.hpp \
+		../../../std/std_iomanip.h \
+		../../../std/std_check.h \
+		../../../std/std_iostream.h \
+		../../../datetime/date.hpp \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../OS/uniform_resource_locator.h \
+		../../../OS/uniform_resource_identifier.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/time_format.h \
+		../../../application/program_directory_OS_FS.h \
+		../../../application/adjunct_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../application/documentation_directory_OS_FS.h \
+		../../../OS/file_system_engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o explaination_location.o ../../../application/explaination/explaination_location.cpp
+
+explainations.o: ../../../application/explaination/explainations.cpp ../../../application/explaination/explainations.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../application/explaination/explaination_location.h \
+		../../../container/text_list.h \
+		../../../labeled_enum.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../math/moremath.h \
+		../../../math/compare.hpp \
+		../../../std/std_iomanip.h \
+		../../../std/std_check.h \
+		../../../std/std_iostream.h \
+		../../../datetime/date.hpp \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../OS/uniform_resource_locator.h \
+		../../../OS/uniform_resource_identifier.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/time_format.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o explainations.o ../../../application/explaination/explainations.cpp
+
+settings.o: ../../../application/user/settings.cpp ../../../application/user/settings.h \
+		../../../primitive.h \
+		../../../string/ustring.h \
+		../../../const.h \
+		../../../string/str/include.h \
+		../../../string/str/str.h \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../string/str/myexcept.h \
+		../../../string \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o settings.o ../../../application/user/settings.cpp
+
+translations.o: ../../../application/translations.cpp ../../../application/translations.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../container/search_tree.h \
+		../../../container/binary_tree.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../application/program_directory_OS_FS.h \
+		../../../application/adjunct_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../OS/directory_entry_name.h \
+		../../../OS/file_system_types.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../application/documentation_directory_OS_FS.h \
+		../../../application/application_directory_OS_FS.h \
+		../../../application/suite_directory_OS_FS.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o translations.o ../../../application/translations.cpp
+
+unilist.o: ../../../container/unilist.cpp ../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o unilist.o ../../../container/unilist.cpp
+
+text_list.o: ../../../container/text_list.cpp ../../../container/text_list.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o text_list.o ../../../container/text_list.cpp
+
+search_tree.o: ../../../container/search_tree.cpp ../../../container/search_tree.h \
+		../../../container/binary_tree.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../container/enumlist.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/association.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o search_tree.o ../../../container/search_tree.cpp
+
+SDF_list.o: ../../../container/SDF_list.cpp ../../../container/SDF_list.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SDF_list.o ../../../container/SDF_list.cpp
+
+item.o: ../../../container/item.cpp ../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o item.o ../../../container/item.cpp
+
+indexer.o: ../../../container/indexer.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o indexer.o ../../../container/indexer.cpp
+
+enumlist.o: ../../../container/enumlist.cpp ../../../container/enumlist.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o enumlist.o ../../../container/enumlist.cpp
+
+container.o: ../../../container/container.cpp ../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../container/unilist.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o container.o ../../../container/container.cpp
+
+binary_tree.o: ../../../container/binary_tree.cpp ../../../container/binary_tree.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../container/unilist.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o binary_tree.o ../../../container/binary_tree.cpp
+
+bilist.o: ../../../container/bilist.cpp ../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o bilist.o ../../../container/bilist.cpp
+
+association.o: ../../../container/association.cpp ../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../primitive.h \
+		../../../string \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../const.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o association.o ../../../container/association.cpp
+
+array.o: ../../../container/array.cpp ../../../container/container_pch.h \
+		../../../corn_pch.h \
+		../../../primitive.h \
+		../../../string/strconv.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../const.h \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../data_source/vv_file.h \
+		../../../data_source/vv_datasrc.h \
+		../../../data_source/datasrc.h \
+		../../../OS/directory_entry_name.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../OS/file_system_types.h \
+		../../../format/spreadsheet/biff.h \
+		../../../format/spreadsheet/css_file.h \
+		../../../format/binary/oldbinrec/oldbinrec_s.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../format/binary/binary_file_fstream.h \
+		../../../format/binary/binary_file_abstract.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../format/spreadsheet/biffcode.h \
+		../../../math/compare.h \
+		../../../math/compare.hpp \
+		../../../math/moremath.h \
+		../../../math/random.hpp \
+		../../../math/random.h \
+		../../../math/statistical/stats.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../std/std_iomanip.h \
+		../../../math/statistical/sample_cumulative_T.h \
+		../../../math/statistical/sample_T.h \
+		../../../math/statistical/statistics_descriptive.h \
+		../../../math/statistical/statistics_types.hpp \
+		../../../math/statistical/statistics_types.h \
+		../../../math/statistical/stats_best.h \
+		../../../math/statistical/distribution_normal.h \
+		../../../OS/OS.h \
+		../../../container/array.h \
+		../../../container/binary_tree.h \
+		../../../container/association.h \
+		../../../container/enumlist.h \
+		../../../container/datagrid.h \
+		../../../container/text_list.h \
+		../../../container/search_tree.h \
+		../../../container/indexer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o array.o ../../../container/array.cpp
+
+vv_entry.o: ../../../data_source/vv_entry.cpp ../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../primitive.h \
+		../../../string \
+		../../../math/compare.hpp \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../const.h \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/datetime64.h \
+		../../../datetime/time_format.h \
+		../../../OS/directory_entry_name.h \
+		../../../container/item.h \
+		../../../OS/file_system_types.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_clad.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/time.h \
+		../../../tabular/tabular.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o vv_entry.o ../../../data_source/vv_entry.cpp
+
+generic_datarec.o: ../../../data_source/generic_datarec.cpp ../../../data_source/generic_datarec.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../primitive.h \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../const.h \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o generic_datarec.o ../../../data_source/generic_datarec.cpp
+
+dbase_datasrc.o: ../../../data_source/dbase_datasrc.cpp ../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../math/compare.hpp \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../primitive.h \
+		../../../string \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../const.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../OS/file_system_types.h \
+		../../../data_source/generic_datarec.h \
+		../../../data_source/dbase_datasrc.h \
+		../../../format/binary/binfstrm.h \
+		../../../container/search_tree.h \
+		../../../container/binary_tree.h \
+		../../../data_source/data_table.h \
+		../../../data_source/datasrc.h \
+		../../../container/indexer.h \
+		../../../container/text_list.h \
+		../../../format/binary/binary_file_fstream.h \
+		../../../format/binary/binary_file_abstract.h \
+		../../../format/binary/binary_file_interface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dbase_datasrc.o ../../../data_source/dbase_datasrc.cpp
+
+datasrc.o: ../../../data_source/datasrc.cpp ../../../data_source/datasrc.h \
+		../../../const.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../string \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasrc.o ../../../data_source/datasrc.cpp
+
+date_format.o: ../../../datetime/date_format.cpp ../../../datetime/date_format.h \
+		../../../const.h \
+		../../../primitive.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o date_format.o ../../../datetime/date_format.cpp
+
+date_translator.o: ../../../datetime/date_translator.cpp ../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../primitive.h \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../const.h \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o date_translator.o ../../../datetime/date_translator.cpp
+
+time_format.o: ../../../datetime/time_format.cpp ../../../datetime/time_format.h \
+		../../../const.h \
+		../../../primitive.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o time_format.o ../../../datetime/time_format.cpp
+
+time.o: ../../../datetime/time.cpp ../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../primitive.h \
+		../../../string \
+		../../../datetime/time.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../const.h \
+		../../../datetime/time_format.h \
+		../../../math/compare.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o time.o ../../../datetime/time.cpp
+
+date_time_format.o: ../../../datetime/date_time_format.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o date_time_format.o ../../../datetime/date_time_format.cpp
+
+datetime64.o: ../../../datetime/datetime64.cpp ../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../const.h \
+		../../../chronometry/date_types.hpp \
+		../../../primitive.h \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../string \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../math/compare.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datetime64.o ../../../datetime/datetime64.cpp
+
+binary_record_file.o: ../../../format/binary/binary_record_file.cpp ../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../primitive.h \
+		../../../string \
+		../../../format/binary/binary_record_file.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../const.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../format/binary/binary_record.h \
+		../../../format/binary/binary_types.h \
+		../../../format/binary/binary_file_fstream.h \
+		../../../format/binary/binary_file_abstract.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o binary_record_file.o ../../../format/binary/binary_record_file.cpp
+
+binary_record.o: ../../../format/binary/binary_record.cpp ../../../format/binary/binary_record.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../format/binary/binary_types.h \
+		../../../format/binary/binary_record_file.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../string \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../math/compare.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o binary_record.o ../../../format/binary/binary_record.cpp
+
+binary_file_fstream.o: ../../../format/binary/binary_file_fstream.cpp ../../../format/binary/binary_file_fstream.h \
+		../../../format/binary/binary_file_abstract.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o binary_file_fstream.o ../../../format/binary/binary_file_fstream.cpp
+
+binary_file_abstract.o: ../../../format/binary/binary_file_abstract.cpp ../../../format/binary/binary_file_abstract.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o binary_file_abstract.o ../../../format/binary/binary_file_abstract.cpp
+
+content.o: ../../../format/html/form_IO/content.cpp ../../../format/html/form_IO/content.h \
+		../../../string \
+		../../../labeled_enum.h \
+		../../../primitive.h \
+		../../../const.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o content.o ../../../format/html/form_IO/content.cpp
+
+import_export_table.o: ../../../format/MicroSoft/Access/import_export_table.cpp ../../../format/MicroSoft/Access/import_export_table.h \
+		../../../tabular/tabular_text.h \
+		../../../container/text_list.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../tabular/file.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../string \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../data_source/data_table.h \
+		../../../data_source/datasrc.h \
+		../../../tabular/delineation.h \
+		../../../labeled_enum.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../math/moremath.h \
+		../../../math/compare.hpp \
+		../../../std/std_iomanip.h \
+		../../../std/std_check.h \
+		../../../std/std_iostream.h \
+		../../../data_source/generic_datarec.h \
+		../../../datetime/date.hpp \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../container/indexer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o import_export_table.o ../../../format/MicroSoft/Access/import_export_table.cpp
+
+units_enum.o: ../../../measure/units_enum.cpp ../../../measure/units_enum.h \
+		../../../labeled_enum.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o units_enum.o ../../../measure/units_enum.cpp
+
+unitconv.o: ../../../measure/unitconv.cpp ../../../math/compare.hpp \
+		../../../measure/measures.h \
+		../../../primitive.h \
+		../../../measure/unitconv.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o unitconv.o ../../../measure/unitconv.cpp
+
+common_units.o: ../../../measure/common_units.cpp ../../../measure/common_units.h \
+		../../../measure/units.h \
+		../../../primitive.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o common_units.o ../../../measure/common_units.cpp
+
+stats.o: ../../../math/statistical/stats.cpp ../../../math/compare.hpp \
+		../../../math/moremath.h \
+		../../../primitive.h \
+		../../../math/statistical/stats.h \
+		../../../const.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../std/std_iomanip.h \
+		../../../std/std_check.h \
+		../../../std/std_iostream.h \
+		../../../labeled_enum.h \
+		../../../math/statistical/sample_cumulative_T.h \
+		../../../math/statistical/sample_T.h \
+		../../../math/statistical/statistics_descriptive.h \
+		../../../math/statistical/statistics_types.hpp \
+		../../../math/statistical/statistics_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o stats.o ../../../math/statistical/stats.cpp
+
+timestep.o: ../../../metrology/timestep.cpp ../../../metrology/timestep.c_cpp \
+		../../../metrology/timestep.h \
+		../../../metrology/units_code.h \
+		../../../primitive.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o timestep.o ../../../metrology/timestep.cpp
+
+units_symbology.o: ../../../metrology/units_symbology.cpp ../../../metrology/units_symbology.h \
+		../../../primitive.h \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../metrology/units_symbology.c_cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o units_symbology.o ../../../metrology/units_symbology.cpp
+
+units_clad.o: ../../../metrology/units_clad.cpp ../../../metrology/units_clad.h \
+		../../../metrology/units_code.hpp \
+		../../../primitive.h \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_symbology.h \
+		../../../math/moremath.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o units_clad.o ../../../metrology/units_clad.cpp
+
+file_system_logical.o: ../../../OS/file_system_logical.cpp ../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../const.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/file_system_engine.h \
+		../../../container/text_list.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o file_system_logical.o ../../../OS/file_system_logical.cpp
+
+file_system_engine_common.o: ../../../OS/file_system_engine_common.cpp ../../../string \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../const.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system_engine_common.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../container/text_list.h \
+		../../../seclusion.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o file_system_engine_common.o ../../../OS/file_system_engine_common.cpp
+
+file_system.o: ../../../OS/file_system.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o file_system.o ../../../OS/file_system.cpp
+
+parameters_datarec.o: ../../../parameters/parameters_datarec.cpp ../../../parameters/parameters_datarec.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../string \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../parameters/parameters.h \
+		../../../string/ustring.h \
+		../../../string/str/include.h \
+		../../../string/str/str.h \
+		../../../string/str/myexcept.h \
+		../../../parameters/parameters_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parameters_datarec.o ../../../parameters/parameters_datarec.cpp
+
+parameters.o: ../../../parameters/parameters.cpp ../../../parameters/parameters.h \
+		../../../string/ustring.h \
+		../../../const.h \
+		../../../string/str/include.h \
+		../../../string/str/str.h \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../string/str/myexcept.h \
+		../../../string \
+		../../../primitive.h \
+		../../../parameters/parameters_types.h \
+		../../../parameters/parameters_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../OS/directory_entry_name.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/file_system_engine.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../container/enumlist.h \
+		../../../OS/OS.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parameters.o ../../../parameters/parameters.cpp
+
+parameter.o: ../../../parameters/parameter.cpp ../../../parameters/parameter.h \
+		../../../string \
+		../../../const.h \
+		../../../measure/units.h \
+		../../../primitive.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../measure/units_enum.h \
+		../../../labeled_enum.h \
+		../../../container/item.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../data_type_enum.h \
+		../../../values_MSC.h \
+		../../../math/compare.hpp \
+		../../../validate/validtyp.ph \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../validate/validtyp.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parameter.o ../../../parameters/parameter.cpp
+
+parameters_directory_OS_FS.o: ../../../parameters/parameters_directory_OS_FS.cpp ../../../parameters/parameters_directory_OS_FS.h \
+		../../../parameters/parameters_types.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../const.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/file_system_engine.h \
+		../../../application/project_directory_OS_FS.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parameters_directory_OS_FS.o ../../../parameters/parameters_directory_OS_FS.cpp
+
+measures.o: ../../../measure/measures.cpp ../../../measure/measures.h \
+		../../../primitive.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o measures.o ../../../measure/measures.cpp
+
+units.o: ../../../measure/units.cpp ../../../corn_pch.h \
+		../../../primitive.h \
+		../../../string/strconv.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../const.h \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../data_source/vv_file.h \
+		../../../data_source/vv_datasrc.h \
+		../../../data_source/datasrc.h \
+		../../../OS/directory_entry_name.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../OS/file_system_types.h \
+		../../../format/spreadsheet/biff.h \
+		../../../format/spreadsheet/css_file.h \
+		../../../format/binary/oldbinrec/oldbinrec_s.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../format/binary/binary_file_fstream.h \
+		../../../format/binary/binary_file_abstract.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../format/spreadsheet/biffcode.h \
+		../../../math/compare.h \
+		../../../math/compare.hpp \
+		../../../math/moremath.h \
+		../../../math/random.hpp \
+		../../../math/random.h \
+		../../../math/statistical/stats.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../std/std_iomanip.h \
+		../../../math/statistical/sample_cumulative_T.h \
+		../../../math/statistical/sample_T.h \
+		../../../math/statistical/statistics_descriptive.h \
+		../../../math/statistical/statistics_types.hpp \
+		../../../math/statistical/statistics_types.h \
+		../../../math/statistical/stats_best.h \
+		../../../math/statistical/distribution_normal.h \
+		../../../OS/OS.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o units.o ../../../measure/units.cpp
+
+BIFF_record.o: ../../../format/excel/BIFF_record.cpp ../../../format/excel/BIFF_record.h \
+		../../../format/binary/binary_record.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../format/binary/binary_types.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../string \
+		../../../format/spreadsheet/biffcode.h \
+		../../../container/unilist.h \
+		../../../spreadsheet/cell.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o BIFF_record.o ../../../format/excel/BIFF_record.cpp
+
+biff.o: ../../../format/spreadsheet/biff.cpp ../../../format/spreadsheet/biff.h \
+		../../../format/spreadsheet/css_file.h \
+		../../../format/binary/oldbinrec/oldbinrec_s.h \
+		../../../primitive.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../const.h \
+		../../../format/binary/binary_file_fstream.h \
+		../../../format/binary/binary_file_abstract.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../string \
+		../../../format/spreadsheet/biffcode.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o biff.o ../../../format/spreadsheet/biff.cpp
+
+css_file.o: ../../../format/spreadsheet/css_file.cpp ../../../corn_pch.h \
+		../../../primitive.h \
+		../../../string/strconv.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../const.h \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../data_source/vv_file.h \
+		../../../data_source/vv_datasrc.h \
+		../../../data_source/datasrc.h \
+		../../../OS/directory_entry_name.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../OS/file_system_types.h \
+		../../../format/spreadsheet/biff.h \
+		../../../format/spreadsheet/css_file.h \
+		../../../format/binary/oldbinrec/oldbinrec_s.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../format/binary/binary_file_fstream.h \
+		../../../format/binary/binary_file_abstract.h \
+		../../../format/binary/binary_file_interface.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../format/spreadsheet/biffcode.h \
+		../../../math/compare.h \
+		../../../math/compare.hpp \
+		../../../math/moremath.h \
+		../../../math/random.hpp \
+		../../../math/random.h \
+		../../../math/statistical/stats.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../std/std_iomanip.h \
+		../../../math/statistical/sample_cumulative_T.h \
+		../../../math/statistical/sample_T.h \
+		../../../math/statistical/statistics_descriptive.h \
+		../../../math/statistical/statistics_types.hpp \
+		../../../math/statistical/statistics_types.h \
+		../../../math/statistical/stats_best.h \
+		../../../math/statistical/distribution_normal.h \
+		../../../OS/OS.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o css_file.o ../../../format/spreadsheet/css_file.cpp
+
+moremath.o: ../../../math/moremath.cpp ../../../math/moremath.hpp \
+		../../../math/moremath.h \
+		../../../primitive.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moremath.o ../../../math/moremath.cpp
+
+random.o: ../../../math/random.cpp ../../../math/moremath.h \
+		../../../primitive.h \
+		../../../math/random.hpp \
+		../../../math/random.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o random.o ../../../math/random.cpp
+
+interpolate.o: ../../../math/numerical/interpolate.cpp ../../../math/numerical/interpolate.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o interpolate.o ../../../math/numerical/interpolate.cpp
+
+stats_best.o: ../../../math/statistical/stats_best.cpp ../../../math/statistical/stats_best.h \
+		../../../math/statistical/stats.h \
+		../../../const.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../primitive.h \
+		../../../math/moremath.h \
+		../../../math/compare.hpp \
+		../../../std/std_iomanip.h \
+		../../../std/std_check.h \
+		../../../std/std_iostream.h \
+		../../../labeled_enum.h \
+		../../../math/statistical/sample_cumulative_T.h \
+		../../../math/statistical/sample_T.h \
+		../../../math/statistical/statistics_descriptive.h \
+		../../../math/statistical/statistics_types.hpp \
+		../../../math/statistical/statistics_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o stats_best.o ../../../math/statistical/stats_best.cpp
+
+vv_file.o: ../../../data_source/vv_file.cpp ../../../data_source/vv_file.h \
+		../../../data_source/vv_datasrc.h \
+		../../../data_source/datasrc.h \
+		../../../const.h \
+		../../../string \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o vv_file.o ../../../data_source/vv_file.cpp
+
+application_directory_OS_FS.o: ../../../application/application_directory_OS_FS.cpp ../../../application/application_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../const.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../application/documentation_directory_OS_FS.h \
+		../../../application/adjunct_directory_OS_FS.h \
+		../../../application/suite_directory_OS_FS.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o application_directory_OS_FS.o ../../../application/application_directory_OS_FS.cpp
+
+project_directory_OS_FS.o: ../../../application/project_directory_OS_FS.cpp ../../../application/project_directory_OS_FS.h \
+		../../../parameters/parameters_directory_OS_FS.h \
+		../../../parameters/parameters_types.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../const.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/file_system_engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o project_directory_OS_FS.o ../../../application/project_directory_OS_FS.cpp
+
+date_unconventional.o: ../../../datetime/date_unconventional.cpp ../../../datetime/date_unconventional.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../primitive.h \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../const.h \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o date_unconventional.o ../../../datetime/date_unconventional.cpp
+
+vv_datasrc.o: ../../../data_source/vv_datasrc.cpp ../../../data_source/vv_datasrc.h \
+		../../../data_source/datasrc.h \
+		../../../const.h \
+		../../../string \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o vv_datasrc.o ../../../data_source/vv_datasrc.cpp
+
+datarec.o: ../../../data_source/datarec.cpp ../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../string \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../math/compare.hpp \
+		../../../container/indexer.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datarec.o ../../../data_source/datarec.cpp
+
+date.o: ../../../datetime/date.cpp ../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../primitive.h \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../const.h \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../datetime/date.c_cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o date.o ../../../datetime/date.cpp
+
+quality.o: ../../../quality.cpp ../../../string \
+		../../../quality.hpp \
+		../../../labeled_enum.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../quality.h \
+		../../../math/compare.h \
+		../../../math/compare.hpp \
+		../../../quality.c_cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o quality.o ../../../quality.cpp
+
+program_directory_OS_FS.o: ../../../application/program_directory_OS_FS.cpp ../../../application/program_directory_OS_FS.h \
+		../../../application/adjunct_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../const.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../application/documentation_directory_OS_FS.h \
+		../../../application/application_directory_OS_FS.h \
+		../../../application/suite_directory_OS_FS.h \
+		../../../OS/file_system_engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o program_directory_OS_FS.o ../../../application/program_directory_OS_FS.cpp
+
+adjunct_directory_OS_FS.o: ../../../application/adjunct_directory_OS_FS.cpp ../../../application/adjunct_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../const.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o adjunct_directory_OS_FS.o ../../../application/adjunct_directory_OS_FS.cpp
+
+documentation_directory_OS_FS.o: ../../../application/documentation_directory_OS_FS.cpp ../../../application/documentation_directory_OS_FS.h \
+		../../../application/adjunct_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../const.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/file_system_engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o documentation_directory_OS_FS.o ../../../application/documentation_directory_OS_FS.cpp
+
+suite_directory_OS_FS.o: ../../../application/suite_directory_OS_FS.cpp ../../../application/suite_directory_OS_FS.h \
+		../../../application/documentation_directory_OS_FS.h \
+		../../../application/adjunct_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../const.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/file_system_engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o suite_directory_OS_FS.o ../../../application/suite_directory_OS_FS.cpp
+
+statistics_types.o: ../../../math/statistical/statistics_types.cpp ../../../primitive.h \
+		../../../math/statistical/statistics_types.hpp \
+		../../../labeled_enum.h \
+		../../../const.h \
+		../../../math/statistical/statistics_types.h \
+		../../../math/statistical/statistics_types.c
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o statistics_types.o ../../../math/statistical/statistics_types.cpp
+
+distribution_normal.o: ../../../math/statistical/distribution_normal.cpp ../../../math/statistical/distribution_normal.h \
+		../../../math/moremath.h \
+		../../../primitive.h \
+		../../../math/compare.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o distribution_normal.o ../../../math/statistical/distribution_normal.cpp
+
+filtered_filename.o: ../../../OS/filtered_filename.cpp ../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../primitive.h \
+		../../../string \
+		../../../OS/filtered_filename.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../const.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/directory_entry_name.h \
+		../../../container/item.h \
+		../../../OS/file_system_types.h \
+		../../../OS/file_type_description.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filtered_filename.o ../../../OS/filtered_filename.cpp
+
+tabular_format.o: ../../../tabular/tabular_format.cpp ../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../tabular/tabular_format.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../labeled_enum.h \
+		../../../parameters/parameters_datarec.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../parameters/parameters.h \
+		../../../string/ustring.h \
+		../../../string/str/include.h \
+		../../../string/str/str.h \
+		../../../string/str/myexcept.h \
+		../../../parameters/parameters_types.h \
+		../../../format/html/form_IO/content.h \
+		../../../math/statistical/stats.h \
+		../../../dynamic_array/dynamic_array_T.h \
+		../../../math/moremath.h \
+		../../../math/compare.hpp \
+		../../../std/std_iomanip.h \
+		../../../math/statistical/sample_cumulative_T.h \
+		../../../math/statistical/sample_T.h \
+		../../../math/statistical/statistics_descriptive.h \
+		../../../math/statistical/statistics_types.hpp \
+		../../../math/statistical/statistics_types.h \
+		../../../tabular/tabular_text.h \
+		../../../container/text_list.h \
+		../../../tabular/file.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../data_source/data_table.h \
+		../../../data_source/datasrc.h \
+		../../../tabular/delineation.h \
+		../../../tabular/tabular.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tabular_format.o ../../../tabular/tabular_format.cpp
+
+file_type_description.o: ../../../OS/file_type_description.cpp ../../../OS/file_type_description.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../const.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../string \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o file_type_description.o ../../../OS/file_type_description.cpp
+
+strconv.o: ../../../string/strconv.cpp ../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../primitive.h \
+		../../../string \
+		../../../math/compare.hpp \
+		../../../string/strconv.c_cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o strconv.o ../../../string/strconv.cpp
+
+float16.o: ../../../float16.cpp ../../../float16.h \
+		../../../primitive.h \
+		../../../math/compare.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o float16.o ../../../float16.cpp
+
+directory_entry_name.o: ../../../OS/directory_entry_name.cpp ../../../OS/directory_entry_name.h \
+		../../../const.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../container/text_list.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o directory_entry_name.o ../../../OS/directory_entry_name.cpp
+
+directory_entry_name_abstract.o: ../../../OS/directory_entry_name_abstract.cpp ../../../OS/directory_entry_name_abstract.h \
+		../../../string \
+		../../../OS/directory_entry_name.h \
+		../../../const.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../container/text_list.h \
+		../../../OS/directory_entry_name_concrete.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o directory_entry_name_abstract.o ../../../OS/directory_entry_name_abstract.cpp
+
+appdata_directory_OS_FS.o: ../../../application/user/appdata_directory_OS_FS.cpp ../../../application/user/appdata_directory_OS_FS.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../const.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../string \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../data_source/vv_file.h \
+		../../../data_source/vv_datasrc.h \
+		../../../data_source/datasrc.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../application/user/settings.h \
+		../../../string/ustring.h \
+		../../../string/str/include.h \
+		../../../string/str/str.h \
+		../../../string/str/myexcept.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o appdata_directory_OS_FS.o ../../../application/user/appdata_directory_OS_FS.cpp
+
+delineated_datarec.o: ../../../tabular/delineated_datarec.cpp ../../../spreadsheet/cell.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../string \
+		../../../tabular/delineated_datarec.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../tabular/tabular.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o delineated_datarec.o ../../../tabular/delineated_datarec.cpp
+
+directory_entry_name_concrete.o: ../../../OS/directory_entry_name_concrete.cpp ../../../OS/directory_entry_name_concrete.h \
+		../../../const.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../string \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../container/text_list.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o directory_entry_name_concrete.o ../../../OS/directory_entry_name_concrete.cpp
+
+number_keyed.o: ../../../parameters/number_keyed.cpp ../../../parameters/number_keyed.h \
+		../../../primitive.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../const.h \
+		../../../string \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../data_type_enum.h \
+		../../../labeled_enum.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o number_keyed.o ../../../parameters/number_keyed.cpp
+
+
+uniform_resource_identifier.o: ../../../OS/uniform_resource_identifier.cpp ../../../OS/uniform_resource_identifier.h \
+		../../../string \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../const.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o uniform_resource_identifier.o ../../../OS/uniform_resource_identifier.cpp
+
+uniform_resource_locator.o: ../../../OS/uniform_resource_locator.cpp ../../../OS/uniform_resource_locator.h \
+		../../../OS/uniform_resource_identifier.h \
+		../../../string \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../const.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/directory_entry_name.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system_logical.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o uniform_resource_locator.o ../../../OS/uniform_resource_locator.cpp
+
+labeled_bitmask.o: ../../../labeled_bitmask.cpp ../../../labeled_bitmask.h \
+		../../../const.h \
+		../../../primitive.h \
+		../../../string
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o labeled_bitmask.o ../../../labeled_bitmask.cpp
+
+command_options_datasrc.o: ../../../data_source/command_options_datasrc.cpp ../../../data_source/command_options_datasrc.h \
+		../../../data_source/vv_datasrc.h \
+		../../../data_source/datasrc.h \
+		../../../const.h \
+		../../../string \
+		../../../primitive.h \
+		../../../container/text_list.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../application/arguments.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../data_source/vv_file.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o command_options_datasrc.o ../../../data_source/command_options_datasrc.cpp
+
+seclusion.o: ../../../seclusion.cpp ../../../seclusion.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../container/text_list.h \
+		../../../container/bilist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o seclusion.o ../../../seclusion.cpp
+
+project.o: ../../../application/project.cpp ../../../parameters/parameters_pch.h \
+		../../../parameters/parameters.h \
+		../../../string/ustring.h \
+		../../../const.h \
+		../../../string/str/include.h \
+		../../../string/str/str.h \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../string/str/myexcept.h \
+		../../../string \
+		../../../primitive.h \
+		../../../parameters/parameters_types.h \
+		../../../parameters/parameters_datarec.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h \
+		../../../application/project.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../parameters/parameters_directory_OS_FS.h \
+		../../../OS/file_system_logical.h \
+		../../../OS/file_system.h \
+		../../../OS/file_system_engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o project.o ../../../application/project.cpp
+
+arguments.o: ../../../application/arguments.cpp ../../../application/arguments.h \
+		../../../data_source/datarec.h \
+		../../../data_source/vv_entry.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../container/item.h \
+		../../../primitive.h \
+		../../../const.h \
+		../../../labeled_enum.h \
+		../../../measure/units.h \
+		../../../metrology/units_code.hpp \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_symbology.h \
+		../../../metrology/timestep.h \
+		../../../measure/units_deprecated.h \
+		../../../validate/validtyp.h \
+		../../../values_MSC.h \
+		../../../data_type_enum.h \
+		../../../parameters/parameter.h \
+		../../../string \
+		../../../measure/units_enum.h \
+		../../../parameters/number_keyed.h \
+		../../../datetime/date.hpp \
+		../../../std/std_iostream.h \
+		../../../std/std_check.h \
+		../../../datetime/date_const.hpp \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../datetime/date_const.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/date_time_interface.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date.hh \
+		../../../datetime/time.h \
+		../../../datetime/time_format.h \
+		../../../datetime/datetime64.h \
+		../../../container/enumlist.h \
+		../../../OS/directory_entry_name.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../OS/file_system_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o arguments.o ../../../application/arguments.cpp
+
+file_system_engine_Unix_and_Linux.o: ../../../OS/file_system_engine_Unix_and_Linux.cpp ../../../OS/file_system_engine_Unix_and_Linux.h \
+		../../../OS/directory_entry_name.h \
+		../../../const.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system_engine_common.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../container/text_list.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/CSIDL.h \
+		../../../seclusion.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o file_system_engine_Unix_and_Linux.o ../../../OS/file_system_engine_Unix_and_Linux.cpp
+
+file_system_engine_Unix_and_Linux.o: ../../../OS/file_system_engine_Unix_and_Linux.cpp ../../../OS/file_system_engine_Unix_and_Linux.h \
+		../../../OS/directory_entry_name.h \
+		../../../const.h \
+		../../../primitive.h \
+		../../../container/item.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h \
+		../../../string \
+		../../../OS/file_system_types.h \
+		../../../OS/file_system_engine_common.h \
+		../../../OS/file_system_engine.h \
+		../../../OS/file_system.h \
+		../../../container/association.h \
+		../../../container/bilist.h \
+		../../../container/unilist.h \
+		../../../container/container.h \
+		../../../datetime/datetime64.h \
+		../../../datetime/date_time_interface.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/temporal_base.h \
+		../../../datetime/time_format.h \
+		../../../datetime/date_format.h \
+		../../../datetime/date_const.hpp \
+		../../../datetime/date_const.h \
+		../../../container/text_list.h \
+		../../../OS/directory_entry_name_concrete.h \
+		../../../OS/directory_entry_name_abstract.h \
+		../../../OS/CSIDL.h \
+		../../../seclusion.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o file_system_engine_Unix_and_Linux.o ../../../OS/file_system_engine_Unix_and_Linux.cpp
+
+progress.o: ../../../application/progress.cpp ../../../application/progress.h \
+		../../../metrology/units_clad.h \
+		../../../metrology/units_code.hpp \
+		../../../primitive.h \
+		../../../metrology/units_code.h \
+		../../../metrology/units_code_SI.h \
+		../../../metrology/units_code_common.h \
+		../../../metrology/units_code_temporal.h \
+		../../../metrology/units_code_CU.h \
+		../../../metrology/units_measure.h \
+		../../../const.h \
+		../../../datetime/time.h \
+		../../../datetime/temporal_base.h \
+		../../../chronometry/date_types.hpp \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../datetime/time_format.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o progress.o ../../../application/progress.cpp
+
+
+temporal.o: ../../../chronometry/temporal.cpp ../../../chronometry/temporal.h \
+		../../../chronometry/date_types.hpp \
+		../../../primitive.h \
+		../../../chronometry/date_types.hh \
+		../../../chronometry/time_types.hpp \
+		../../../chronometry/time_types.hh \
+		../../../const.h \
+		../../../string/strconv.hpp \
+		../../../string/strconv.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o temporal.o ../../../chronometry/temporal.cpp
+
+####### Install
+
+install_target: first FORCE
+	@test -d $(INSTALL_ROOT)/usr/lib || mkdir -p $(INSTALL_ROOT)/usr/lib
+	-$(INSTALL_FILE) $(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+
+uninstall_target: FORCE
+	-$(DEL_FILE) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+	-$(DEL_DIR) $(INSTALL_ROOT)/usr/lib/ 
+
+
+install: install_target  FORCE
+
+uninstall: uninstall_target  FORCE
+
+FORCE:
+

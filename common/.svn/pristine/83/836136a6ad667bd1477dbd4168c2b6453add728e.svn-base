@@ -1,0 +1,89 @@
+#ifndef UCAR_stationsH
+#define UCAR_stationsH
+/*
+UCAR ds512.0 STATION LIBRARIES FORMAT
+
+http://dss.ucar.edu/datasets/ds512.0/station_libraries/format_stationlib.html
+
+Warning this format doesn't actually match exactly the files on the webpage
+http://dss.ucar.edu/datasets/ds512.0/station_libraries/history.html
+
+example lines
+10238  5282  35007   69  28 99 0ETGB BERGEN_(MIL)           GERMANY
+10246  5292  34982   88  28 99 0ETHS FASSBERG_(GER-AFB)     GERMANY
+*/
+
+// These stations may have actually been assigned by the Climate Analysis Center
+
+#include "corn/container/bilist.h"
+using namespace std;
+//______________________________________________________________________________
+class UCAR_location
+: public CORN::Item //180101 Association
+{
+public: // Working variables (not saved in the file)
+   std::string unique_ID; // either BKIDN or CALL if BKIDN == 99999
+public: // Variables saved in the file
+   std::string BKIDN;
+   /* 5 CHARACTER STATION IDENTIFIER. THE 5 CHARACTERS
+      ARE THE WMO BLOCK STATION NUMBER WHEN ASSIGNED OR 99 FOLLOWED
+      BY THE 3 CHARACTER5 AIRWAYS CALLSIGN WHEN NO WMO BLOCK STATION
+      HAS BEEN ASSIGNED.
+   */
+
+   float32  LAT; // LATITUDE DEGREES TIMES 100 SOUTHERN LATITUDES ARE NEGATIVE. RANGE -9000 TO 9000.
+   float32  LON; // LONGITUDE DEGREES TIMES 100 EXPRESSED IN NUMBER OF DEGREES WEST OF GREENWICH. RANGE 0 TO 35999
+   float32  IELEV;// ELEVATION ABOVE SEA LEVEL IN METERS
+   int16    NUMCOU;  // A NUMBER ASSIGNED TO EACH COUNTRY BY CAC.
+   int16    NUMREG; // A REGION NUMBER ASSIGNED BY CAC.
+   int16    IQUAL;   // A QUALITY NUMBER ASSIGNED BY CAC. LOCATIONS WHICH WE CONSIDER THE BEST ARE ASSIGNED 0. ALL OTHERS ARE ASSIGNED 1.
+   std::string CALL;   // CALL- AIRWAYS CALL LETTERS USED IN THE UNITED STATES OF AMERICA AND CANADA. (3 or 4 letters; letters have been right-justified in field)
+   std::string LNAME;  // LOCATION NAME.
+   std::string CNAME;  // REGION NAME.
+public:
+   inline UCAR_location()
+   : CORN::Item() //180101 Association()
+   , BKIDN  ("")
+   , LAT    (0)
+   , LON    (0)
+   , IELEV  (0)
+   , NUMCOU (0)
+   , NUMREG (0)
+   , IQUAL  (0)
+   , CALL   ("")
+   , LNAME  ("")
+   , CNAME  ("")
+   {}
+   inline UCAR_location(const UCAR_location &copy_from)
+   : CORN::Item()
+   , unique_ID(copy_from.unique_ID)
+   , BKIDN  (copy_from.BKIDN)
+   , LAT    (copy_from.LAT)
+   , LON    (copy_from.LON)
+   , IELEV  (copy_from.IELEV)
+   , NUMCOU (copy_from.NUMCOU)
+   , NUMREG (copy_from.NUMREG)
+   , IQUAL  (copy_from.IQUAL)
+   , CALL   (copy_from.CALL)
+   , LNAME  (copy_from.LNAME)
+   , CNAME  (copy_from.CNAME)
+   {}
+   bool read(istream &stationslib_file);
+   virtual bool write(std::ostream &)                               performs_IO_;//150728
+   inline virtual bool is_key_string(const std::string &key)        affirmation_  //180820
+      { return unique_ID == key; }
+
+/*180820  was probably only used for find_cstr now using is_key
+      inline virtual const char *get_key()                                    const { return unique_ID.c_str(); }
+*/   
+   void get_description(std::string &buffer)                               const;
+   float32  get_longitude_dec_deg()                                        const;
+   float32  get_latitude_dec_deg()                                         const;
+   float32  get_elevation_m()                                              const;
+   int32 get_station_number()                                              const;
+};
+//______________________________________________________________________________
+extern bool load_UCAR_stations(CORN::Bidirectional_list /*180101 Association_list*/ &locations);
+
+#endif
+

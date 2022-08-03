@@ -1,0 +1,62 @@
+#include "phenology_interface.h"
+namespace CropSyst
+{
+//______________________________________________________________________________
+bool Phenology_interface::has_emerged()                             affirmation_ //101030 was is_in_season
+{  Normal_crop_event_sequence growth_stage = get_growth_stage_sequence();        //120820
+   return growth_stage >= NGS_ACTIVE_GROWTH
+       && growth_stage < NGS_DORMANT_or_INACTIVE;
+}
+//______________________________________________________________________________
+bool Phenology_interface::is_in_yield_formation()                   affirmation_
+{  Normal_crop_event_sequence growth_stage = get_growth_stage_sequence();        //120820
+   return growth_stage == NGS_BULK_FILLING;
+}
+//______________________________________________________________________________
+bool Phenology_interface::is_mature()                               affirmation_
+{  Normal_crop_event_sequence growth_stage = get_growth_stage_sequence();        //120820
+   return growth_stage == NGS_MATURITY;
+}
+//______________________________________________________________________________
+bool Phenology_interface::has_matured()                             affirmation_
+{  Normal_crop_event_sequence growth_stage = get_growth_stage_sequence();        //130903
+   return (growth_stage == NGS_MATURITY) || ((growth_stage >= NGS_HARVESTABLE)
+         #if (CS_VERSION != 4)
+          && (growth_stage <= NGS_POSTHARVEST)
+          #endif
+   );
+}
+//______________________________________________________________________________
+bool Phenology_interface::is_in_growing_season()                    affirmation_
+{  Normal_crop_event_sequence growth_stage = get_growth_stage_sequence();        //130903
+   bool in_season = (growth_stage >= NGS_GERMINATION) && (growth_stage < NGS_DORMANT_or_INACTIVE);  //130902_040608
+   if ((growth_stage == NGS_HARVEST)                                             //130902_040608
+             //         && (!biomass_fate_today)   // there is a condition that we dont wan't to return true if we still have biomatter fate to dispose
+           )    // Indicates in season harvest today.
+       in_season = true; // special case for clipping harvest which may occur during growing season //040608
+   return in_season;
+}
+//______________________________________________________________________________
+bool Phenology_interface::is_flowering()                            affirmation_
+{  Normal_crop_event_sequence growth_stage = get_growth_stage_sequence();        //130903
+   return growth_stage == NGS_ANTHESIS;
+}
+//______________________________________________________________________________
+bool Phenology_interface::is_dormant()                              affirmation_
+{  Normal_crop_event_sequence growth_stage = get_growth_stage_sequence();        //130903
+   return growth_stage == NGS_DORMANT_or_INACTIVE;
+}
+//______________________________________________________________________________
+bool Phenology_interface::is_in_growth_period()                     affirmation_
+{  Normal_crop_event_sequence growth_stage = get_growth_stage_sequence();        //130903
+   return ((growth_stage >= NGS_GERMINATION)&&(growth_stage < NGS_HARVESTABLE)); //130902_970313
+}
+//______________________________________________________________________________
+bool Phenology_interface::is_harvested()                            affirmation_
+{  return get_days_since_start_of(NGS_HARVEST) > 0;
+}
+//_2017-08-20___________________________________________________________________
+
+
+} // namespace CropSyst
+

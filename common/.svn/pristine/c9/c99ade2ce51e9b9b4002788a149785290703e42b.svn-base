@@ -1,0 +1,220 @@
+#ifdef OLD_SINGLE_RESIDUES_POOL
+#include "common/residue/residue_single_pool.h"
+#include "CropSyst/cpp/organic_matter/single_pool/OM_single_pool.h"
+#include "CropSyst/cpp/organic_matter/single_pool/OM_pools_single_pool.h"
+#include "CropSyst/cpp/soil/abiotic_environment.h"
+#include "corn/math/compare.h"
+#include "common/residue/residue_decomposition_param.h"
+
+using namespace std;
+
+//______________________________________________________________________________
+Residues_single_pool::Residues_single_pool
+(Organic_matter_pools_single_pool   &_pools
+,Soil_interface                     &_soil
+,Soil_abiotic_environment_profile   &_soil_abiotic_environment_profile
+,STD_NS ostream                     *_detail_log)                                //020307
+: Residues_V4_common(_pools,_soil,_soil_abiotic_environment_profile,_detail_log)
+{
+// Note that in the V4_4 version contact fractions are initialized differently
+// in V4_9 we may want to initialize as in V4_4, but for now this is sufficient.
+   stubble_contact_fraction      = DEFAULT_STANDING_STUBBLE_CONTACT_FRACTION;
+   flat_surface_contact_fraction = DEFAULT_SURFACE_ORGANIC_RESIDUE_CONTACT_FRACTION;
+   manure_surface_contact_fraction = DEFAULT_SURFACE_MANURE_CONTACT_FRACTION;    //090225
+}
+//______________________________________________________________________________
+void Residues_single_pool::add_surface_plant_pool
+(Organic_matter_position position                                                //040517
+,Organic_matter_cycling _om_cycling_obsolete_in_V4_4                             //060219
+,float64 new_surface_biomass
+#ifdef NITROGEN
+,float64 new_N_surface_conc
+#endif
+,const Residue_decomposition_parameters &residue_decomposition_params)           //060219
+{
+   Soil_abiotic_environment_layer *soil_environment_point_1 = soil_abiotic_environment_profile.point_soil_abiotic_environment_layer(1);
+   float64 component_surface_biomass   = new_surface_biomass;
+   float64 new_decomposition_constant  = residue_decomposition_params.max_decomposition_rate_single_pool;   //070707
+   float64 new_detrition_constant       = residue_decomposition_params.get_detrition_constant();                              //090702
+   // In each of these cases I append because this is the order in CropSystVB  and V4.1 prepended, not sure why
+      float64 carbon_fraction                = residue_decomposition_params.carbon_fraction;                                                                               //060328
+   // Note: I want to pass each: standing_stubble_biomass, flat_surface_biomass,  and subsurface array
+   if (component_surface_biomass > 0.0)                                                                                                                                    //060426
+   {                                                                                                                                                                       //060426
+      float64 CN_ratio               = calc_carbon_nitrogen_ratio(component_surface_biomass,new_N_surface_conc,carbon_fraction,straw_carbon_nitrogen_ratio_V4_9);          //060530
+      float64 area_per_mass          = 0.0;  // must be calculated for each different type of surface residue                                                              //060219
+      float64 &contact_fraction      = flat_surface_contact_fraction; // will be set below, note that this is a reference to residues object                               //060530
+      switch (position)                                                                                                                                                    //060530
+      {  case OM_stubble_surface_position :                                                                                                                                //060530
+         {   area_per_mass          = residue_decomposition_params.get_area_covered_to_mass_ratio(true);                                                                   //060530
+             contact_fraction       = stubble_contact_fraction;                                                                                                            //060530
+         } break;
+         case OM_attached_to_plant_position :                                                                                                                              //060530
+         {   area_per_mass          = residue_decomposition_params.get_area_covered_to_mass_ratio(true); // Same as stubble                                                //060530
+             contact_fraction       = stubble_contact_fraction;                                                                                                            //060530
+         } break;
+         default : // surface residue
+         {   area_per_mass          = residue_decomposition_params.get_area_covered_to_mass_ratio(false);                                                                  //060530
+             contact_fraction       = flat_surface_contact_fraction;                                                                                                       //060530
+         } break;
+      }
+      const Soil_organic_matter_single_pool * associated_SOM = (const Soil_organic_matter_single_pool *)organic_matter_pools.ref_organic_biomatter(SINGLE_SOM, 1);         //070711
+         // Surface residue is associated with the OM in layer 1.                                                                                                          //070711
+      Residue_single_pool *new_residue= new Residue_single_pool
+         (STRAW_RESIDUE,position,0 /*070707 Cycling does not apply to this model(Organic_matter_cycling)cycling*/
+         ,component_surface_biomass
+         ,carbon_fraction
+         ,CN_ratio
+         ,new_decomposition_constant
+            ,new_detrition_constant                                              //090702
+            ,area_per_mass
+            ,residue_decomposition_params.RUSLE2_type_labeled.get()
+            ,contact_fraction
+            ,*soil.get_texture()                                                 //070707
+            ,*soil.ref_structure()                                               //160412_110928
+            ,soil.get_nitrogen_modifiable()                                      //070707
+            ,soil_environment_point_1,associated_SOM); // all surface interacts with top soil layer
+         Residue_single_pool *existing_residue = (Residue_single_pool *)organic_matter_pools.find_similar_organic_biomatter(*new_residue);   //070707
+         if (existing_residue)                                                   //070707
+         {  existing_residue->add_different_mass(*new_residue);                  //070707
+            delete new_residue;                                                  //070707
+         } else
+         {  organic_matter_pools.append(new_residue);
+            setup_contribution(*new_residue);                                    //060728
+         }
+      }
+   // CropSyst V3 and V4.1  updated totals here
+   // In V4.4 adding pools marks the organic_matter_pools as modified which
+   // I am going to then update totals when get_total_();
+   // Delete this comment once I verify that I have done that
+}
+//______________________________________________________________________________
+void Residues_single_pool::add_subsurface_plant_pool
+(soil_sublayer_array_64(new_subsurface_biomass)                                  //970421
+NITRO       ,float64 new_N_subsurface_conc
+,const Residue_decomposition_parameters &residue_decomposition_params)           //060219
+{  // In these arrays only  OM_FAST_CYCLING, OM_SLOW_CYCLING, and OM_LIGNIFIED_CYCLING are relevent
+   // transfer coeficients for each pool:
+   float64 new_decomposition_constant  = residue_decomposition_params.max_decomposition_rate_single_pool;   //070707
+   // In each of these cases I append because this is the order in CropSystVB  and V4.1 prepended, not sure why
+   float64 carbon_fraction                = residue_decomposition_params.carbon_fraction;                   //060328
+   // Note: I want to pass each: standing_stubble_biomass, flat_surface_biomass,  and subsurface array
+   for (uint8 layer = 1; layer <= MAX_soil_sublayers; layer++)
+   if ((new_subsurface_biomass[layer] > 0.00001) && (horizons[layer] > NULL_HORIZON))
+   {  // we have straw in this layer
+      Soil_abiotic_environment_layer *soil_environment_point_layer = soil_abiotic_environment_profile.point_soil_abiotic_environment_layer(layer);
+      float64 component_subsuface_biomass    = new_subsurface_biomass[layer]; // 070707  * root_component_fract[cycling];
+      float64 subsurface_CN_ratio            = calc_carbon_nitrogen_ratio(component_subsuface_biomass,new_N_subsurface_conc,carbon_fraction,straw_carbon_nitrogen_ratio_V4_9);   //060225
+      const Soil_organic_matter_single_pool * associated_SOM = (const Soil_organic_matter_single_pool *)organic_matter_pools.ref_organic_biomatter(SINGLE_SOM, layer);           //070711
+      Residue_single_pool *subsurface_residue
+      = new Residue_single_pool(STRAW_RESIDUE,OM_subsurface_position
+        ,layer
+        ,component_subsuface_biomass
+        ,carbon_fraction
+        ,subsurface_CN_ratio
+        ,new_decomposition_constant
+        ,0.0 // subsurface residue has no detrition                          //090702
+        ,0.0 // area to mass not relevent subsurface
+        ,residue_decomposition_params.RUSLE2_type_labeled.get()
+        ,subsurface_contact_fraction
+        ,*soil.get_texture()                                                     //070707
+        ,*soil.ref_structure()                                                   //160412_110928
+        ,soil.get_nitrogen_modifiable()                                           //070707
+        ,soil_environment_point_layer,associated_SOM);
+      setup_contribution(*subsurface_residue);                                                                                      //060728
+         Organic_biomatter_common *comparable_residue = organic_matter_pools.find_similar_organic_biomatter(*subsurface_residue);   //060605
+         if (comparable_residue)                                                                                                    //060605
+             { comparable_residue->add_mass(subsurface_residue->kg()); delete subsurface_residue; subsurface_residue = 0; }         //060605
+         else organic_matter_pools.append(subsurface_residue);   // Find similar pool and add to it                                 //060605
+   }
+   // CropSyst V3 and V4.1  updated totals here
+   // In V4.4 adding pools marks the organic_matter_pools as modified which
+   // I am going to then update totals when get_total_();
+   // Delete this comment once I verify that I have done that
+}
+//______________________________________________________________________________
+#ifdef NITROGEN
+#if ((CROPSYST_VERSION > 0) && (CROPSYST_VERSION < 5))
+//in version 5 this will be obsolete replaced by    add_manure_pool_cycled
+void Residues_single_pool::add_manure_pool_original
+(Organic_matter_source org_N_source                                              //120316
+,float64             _surface_N_content                                          //090224
+,float64             _deep_N_content        // kg N/m2? currently goes in (sub)layer 2
+,float64             _decomposition_constant_lignified       // Currently not used here, need to get this from manure properties table (also it is by cycling) //060122
+,float64             _default_carbon_nitrogen_ratio_unused   // Used when no N mass (or for initial residue)                                      //060225
+,float64             _carbon_fraction                                                                                                                          //080225
+,float64             _area_per_mass_unused)
+{  // Previously all manure when into soil, it was decided that there should be surface residue. 090224
+   curr_water_hold += manure_water_hold;
+   // Warning need to have these for different types of manure
+   static const float64 manure_carbon_nitrogen_ratio = 50.0;  // fast_cycling
+   {
+      float64 decomposition_constant = _decomposition_constant_lignified;        //070122
+      // Layer 1 (shallow) pool
+      float64 biomass_to_surface = _surface_N_content                            //090224
+         * 100.0 / N_in_manure_percent_dry_wt[_org_N_source]; //shallow
+      const Soil_organic_matter_single_pool * associated_SOM_surface             //070711
+         = (const Soil_organic_matter_single_pool *)organic_matter_pools.ref_organic_biomatter(SINGLE_SOM, 1);
+         // Surface manure contributes to (is associated with) the organic matter of layer 1  //090224
+      float64 &contact_fraction      = manure_surface_contact_fraction; // will be set below, not that this is a reference to residues object //060530
+      Residue_single_pool *subsurface_manure_1
+         = new Residue_single_pool
+         (MANURE_RESIDUE
+         ,OM_flat_surface_position                                               //090224
+         ,1   // layer
+         ,biomass_to_surface                                                     //090224
+         ,_carbon_fraction,manure_carbon_nitrogen_ratio
+         ,decomposition_constant
+         ,0.0 // subsurface has no detrition                                     //090702
+         ,0.0 // area to mass not relevent to subsurface
+         ,RUSLE2_MANURE_RESIDUE_TYPE
+         ,contact_fraction                                                       //090224
+         ,*soil.get_texture()                                                    //070707
+         ,*soil.ref_structure()                                                  //160412_110928
+         ,soil.get_nitrogen_modifiable()                                         //070707
+         ,soil_abiotic_environment_profile.point_soil_abiotic_environment_layer(1)
+         ,associated_SOM_surface                                                 //090224
+         );
+      setup_contribution(*subsurface_manure_1);                                  //060721
+      organic_matter_pools.prepend(subsurface_manure_1);
+      // Layer 2 (deep)    pool
+      float64 biomass_to_layer_2 = _deep_N_content * 100.0 / N_in_manure_percent_dry_wt[_org_N_source];    //deep
+         const Soil_organic_matter_single_pool * associated_SOM_2 = (const Soil_organic_matter_single_pool *)organic_matter_pools.ref_organic_biomatter(SINGLE_SOM, 2); //070711
+      Residue_single_pool *subsurface_manure_2
+         = new Residue_single_pool
+         (MANURE_RESIDUE
+         ,OM_subsurface_position
+         ,2
+         ,biomass_to_layer_2,_carbon_fraction,manure_carbon_nitrogen_ratio
+         ,decomposition_constant
+         ,0.0 // subsurface has no detrition                                     //090702
+         ,0.0
+         ,RUSLE2_MANURE_RESIDUE_TYPE
+         ,subsurface_contact_fraction
+         ,*soil.get_texture()                                                    //070707
+         ,*soil.ref_structure()                                                  //110928
+         ,soil.get_nitrogen_modifiable()                                         //070707
+         ,soil_abiotic_environment_profile.point_soil_abiotic_environment_layer(2),associated_SOM_2);
+      setup_contribution(*subsurface_manure_2);                                  //060721
+      organic_matter_pools.prepend(subsurface_manure_2);
+   }
+}
+#endif
+//______________________________________________________________________________
+void Residues_single_pool::add_manure_pool_cycled
+(const Biomass_decomposition_parameters &manure_decomp_params
+,nat8    injection_layer
+,float64 surface_N_content      // kg N/m2? Currently goes in (sub)layer 1
+,float64 subsurface_N_content // kg N/m2? currently goes in specified sublayer
+)                                    modification_ //160120
+{ /*NYI in this model */
+   std::cout << "Error: Manure application has not yet been implement in single pool residues model." << endl;
+}
+//_2008-09-02___________________________________________________________________
+#endif
+void Residues_single_pool::setup_contribution(Organic_biomatter_common &residue) const
+{
+   // Currently not needed for this model, but could associated this residue with the matching organic matter
+}
+//_2006-07-28___________________________________________________________________
+#endif

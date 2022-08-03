@@ -1,0 +1,46 @@
+#ifndef da_uint32H
+#define da_uint32H
+
+#ifndef CORN_D_ARRAY_H
+#  include <corn/dynamic_array/da_common.h>
+#endif
+/*_______*/ namespace CORN {
+
+/*000517*/  class Dynamic_uint32_array
+/*______*/  : public Dynamic_array_common
+/*______*/  {
+/*______*/  private:
+/*______*/     mutable uint32 *array;
+/*000804*/     uint32 default_value;
+/*______*/  public:
+/*______*/     Dynamic_uint32_array
+/*______*/        (uint32 initial_size          // This is the initial allocation space
+/*______*/        ,uint32 i_resize_overage /*= 10*/
+/*______*/        ,uint32 i_default_value
+/*______*/        );   // This is the overage to give on reallocation
+/*______*/     Dynamic_uint32_array(const Dynamic_uint32_array &to_copy);
+/*______*/     Dynamic_uint32_array(uint32 i_default_value = 0);
+/*______*/     virtual ~Dynamic_uint32_array();
+/*______*/	public: // virtual or common to other type arrays'
+/*980318*/     inline virtual bool   good()             const { return array != 0; };
+/*______*/     virtual void reallocate_array(uint32 new_bloated_size) const;
+/*______*/     virtual uint32 set(uint32 index,uint32 value);
+/*______*/     void set(const Dynamic_uint32_array &to_copy,uint32 new_size  = 0);
+/*030801_*/       ///< Sets all entries
+/*990409*/     uint32 get_allow_resize(uint32 index );
+/*990409*/     uint32 get_no_resize(uint32 index ) const; // No resizing
+/*980721_*/    virtual void remove(uint32 at_index) ;
+/*001103*/		inline void set_default_value(uint32 i_default_value) { default_value = i_default_value; };
+/*030801_*/       /// The following methods are unique to uint32 (so far)
+/*041002_*/    virtual uint32 append(uint32 value);
+/*030801_*/       ///< \return the value appended.
+/*030801*/     virtual uint32 append_array(uint32 values[],bool null_terminated,  uint32 values_count = 0);
+/*030801_*/       ///< Adds the arrays of values to the array
+/*030801_*/       /// If null terminated it true then values are appended until values[n] is 0 otherwise the size specified by values_count is copied
+/*030801_*/       /// \return the new array size.
+/*______*/     virtual bool is_in_array(uint32 value, uint32 &found_index) const;
+/*030801_*/       ///< \return true if the specified value is in the array and returns the index of the first occurance in found_index.
+/*______*/  };
+/*_______*/ }; // namespace CORN
+#endif
+
