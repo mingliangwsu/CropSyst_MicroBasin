@@ -1,5 +1,5 @@
 # at this point the CWD should be dev
-rootdir=~/CropSyst_MicroBasin                                                                                                                 
+rootdir="$PWD"                                                                                                                 
 echo make common simulation                                                                                                                            
 cd ${rootdir}/common/simulation/build/gcc/Release                                                                                                             
 rm *.o  *.a                                                                                                                                            
