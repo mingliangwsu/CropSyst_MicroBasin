@@ -8,32 +8,32 @@ QT       -= gui
 
 TARGET = UED_static
 
-
+QMAKE_CXXFLAGS += -fpermissive
 TEMPLATE = lib
 CONFIG += staticlib
-INCLUDEPATH += ../../../../..
+INCLUDEPATH += ../UED_static . ../../../../..
 DEFINES += CS_VERSION=5
 
 
 SOURCES += \
-    ../../../codes.cpp \
-    ../../../varrec.cpp \
-    ../../../variable_format.cpp \
-    ../../../varcodes.cpp \
-    ../../../unitsrec.cpp \
-    ../../../units_def.cpp \
-    ../../../UED_tuple_datasrc.cpp \
-    ../../../UED_fname.cpp \
-    ../../../std_variables.cpp \
-    ../../../timeqry.cpp \
-    ../../../std_codes.cpp \
-    ../../../record.cpp \
-    ../../../rec_io.cpp \
-    ../../../index.cpp \
-    ../../../datasetrec_creation.cpp \
-    ../../../datasetrec.cpp \
-    ../../../database_file.cpp \
-    ../../../locrec.cpp
+      ../../../codes.cpp \
+      ../../../varrec.cpp \
+      ../../../variable_format.cpp \
+      ../../../varcodes.cpp \
+      ../../../unitsrec.cpp \
+      ../../../units_def.cpp \
+      ../../../UED_tuple_datasrc.cpp \
+      ../../../UED_fname.cpp \
+      ../../../std_variables.cpp \
+      ../../../timeqry.cpp \
+      ../../../std_codes.cpp \
+      ../../../record.cpp \
+      ../../../rec_io.cpp \
+      ../../../index.cpp \
+      ../../../datasetrec_creation.cpp \
+      ../../../datasetrec.cpp \
+      ../../../database_file.cpp \
+      ../../../locrec.cpp
 
 HEADERS += ued_static.h
 unix:!symbian {
