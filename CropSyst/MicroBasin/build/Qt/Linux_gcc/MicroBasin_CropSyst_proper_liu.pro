@@ -16,7 +16,7 @@ CONFIG   -= app_bundle
 QMAKE_CXXFLAGS += -fpermissive -w -g
 QMAKE_CXXFLAGS += -Wno-reorder -Wno-unused-parameter -Wno-unused-but-set-parameter
 
-#LIBS += -ldl
+LIBS += -ldl
 INCLUDEPATH += ../../../ \
             ../../../../../ \
             ../../../../../common \
@@ -182,8 +182,32 @@ SOURCES += \
       ../../../../../corn/measure/common_units.cpp \
       ../../../../../common/biometeorology/ET_model.cpp \
       ../../../../../CS_suite/observation/CS_inspector.cpp \
-      ../../../../../corn/chronometry/temporal.cpp
-
+      ../../../../../corn/chronometry/temporal.cpp \
+      ../../../../../UED/library/varcodes.cpp \
+      ../../../../../UED/library/UED_fname.cpp \
+      ../../../../../common/weather/sun.cpp \
+      ../../../../../common/weather/sky.cpp \
+      ../../../../../common/weather/day/sun_days.cpp \
+      ../../../../../common/weather/atmospheric_CO2_change_recalibration.cpp \
+      ../../../../../common/weather/atmospheric_CO2_change_linear.cpp \
+      ../../../../../common/weather/seasons.cpp \
+      ../../../../../common/weather/subdaily.cpp \
+      ../../../../../UED/library/std_variables.cpp \
+      ../../../../../UED/library/variable_format.cpp \
+      ../../../../../corn/data_source/vv_file.cpp \
+      ../../../../../common/weather/hour/weather_hours.cpp \
+      ../../../../../common/weather/snow_pack.cpp \
+      ../../../../../UED/library/varrec.cpp \
+      ../../../../../UED/library/record.cpp \
+      ../../../../../UED/library/rec_io.cpp \
+      ../../../../../UED/library/database_file.cpp \
+      ../../../../../UED/library/datasetrec.cpp \
+      ../../../../../UED/library/locrec.cpp \
+      ../../../../../UED/library/index.cpp \
+      ../../../../../UED/library/unitsrec.cpp \
+      ../../../../../UED/library/timeqry.cpp \
+      ../../../../../UED/library/units_def.cpp \
+      ../../../../../UED/library/datasetrec_creation.cpp
 
 
 
@@ -195,3 +219,31 @@ INCLUDEPATH += $$PWD/../../../../../common/simulation/build/Qt/Debug
 DEPENDPATH += $$PWD/../../../../../common/simulation/build/Qt/Debug
 
 unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../../common/simulation/build/Qt/Debug/libcommon_sim_static.a
+
+unix:!macx: LIBS += -L$$PWD/../../../../../common/weather/build/Qt/Debug/ -lweather_static
+
+INCLUDEPATH += $$PWD/../../../../../common/weather/build/Qt/Debug
+DEPENDPATH += $$PWD/../../../../../common/weather/build/Qt/Debug
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../../common/weather/build/Qt/Debug/libweather_static.a
+
+unix:!macx: LIBS += -L$$PWD/../../../../../corn/build/Qt/Debug/ -lcorn_complete_static
+
+INCLUDEPATH += $$PWD/../../../../../corn/build/Qt/Debug
+DEPENDPATH += $$PWD/../../../../../corn/build/Qt/Debug
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../../corn/build/Qt/Debug/libcorn_complete_static.a
+
+unix:!macx: LIBS += -L$$PWD/../../../../../CS_suite/build/Qt/Debug/ -lCS_suite_static
+
+INCLUDEPATH += $$PWD/../../../../../CS_suite/build/Qt/Debug
+DEPENDPATH += $$PWD/../../../../../CS_suite/build/Qt/Debug
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../../CS_suite/build/Qt/Debug/libCS_suite_static.a
+
+unix:!macx: LIBS += -L$$PWD/../../library/Qt/Debug/ -lCropSyst_elements
+
+INCLUDEPATH += $$PWD/../../library/Qt/Debug
+DEPENDPATH += $$PWD/../../library/Qt/Debug
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../library/Qt/Debug/libCropSyst_elements.a

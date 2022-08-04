@@ -1262,7 +1262,7 @@ Event_status_indicator BasinCellClass::perform_start_automatic_N_application_mod
    (CropSyst::N_application_soil_observation_mode_class  &auto_N_mode_op)
 {  //170321LML revised from its parent class
     Soil_chemicals_profile  *soil_chemicals = get_soil_chemicals();  // may return 0 if not soil and/or no soil chemicals. //060803
-    std::string active_management_name = auto_N_mode_op.common_operation_filename;
+    std::string active_management_name = auto_N_mode_op.name; //common_operation_filename;
     const std::string varname_targetN("target_yield_N_uptake");                  //170403LML
     const std::string varname_mineralization("estimated_mineralization");        //170403LML
        total_N_application_kg_m2 = 0.0;

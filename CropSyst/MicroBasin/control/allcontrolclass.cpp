@@ -348,7 +348,13 @@ bool AllControlClass::get_end()                                                 
     pCrop_Parameter_Collection->ReadCropParameterFiles();
     read_management_files();                        //LML 140827
     #endif
-    readInitialSoilState();                                                      //170404LML
+
+    //08033033LML moved to basinclass::initialize()
+    //readInitialSoilState();                                                      //170404LML
+    //if (readInitialSoilState() != 0) {
+    //    std::cerr << "Initialization of soil state failed!\n";
+    //    //exit(-1);
+    //}
     return CropSyst::Scenario::get_end();
 }
 //_2015-07-01___________________________________________________________________
@@ -469,13 +475,14 @@ bool AllControlClass::readInitialSoilState()
     //this head info will be skipped
     //This information will be used for entire watershed
     std::ifstream ifile(initial_soil_N_and_available_water_name.c_str());
-    const int var_counts = 4;
+    std::clog << " initial_soil_N_and_available_water_name:" << initial_soil_N_and_available_water_name.c_str() << std::endl;
+    const int var_counts_correct = 4;
     if (ifile.is_open()) {
         std::string line("");
         std::getline(ifile,line);
         std::stringstream ss(line);
         size_t var_counts = std::count(line.begin(), line.end(), ',') + 1;
-        if (var_counts != var_counts) {
+        if (var_counts != var_counts_correct) {
             std::cerr << "Wrong var columns of input soil initial file:" << initial_soil_N_and_available_water_name.c_str()
                       << std::endl;
             return -1;

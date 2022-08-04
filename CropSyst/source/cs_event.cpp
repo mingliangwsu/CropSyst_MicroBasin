@@ -9,6 +9,7 @@
 #  include "LADSS.h"
 #endif
 #include "corn/measure/measures.h"
+#include <string>
 
 using namespace std;
 #include "common/simulation/log.h"
@@ -202,7 +203,7 @@ COUTSAFE                   cout << endl;
                if (rot_mgmt.N_application_soil_observation_event) {
                    std::string sfilename;
                    CORN::wstring_to_string(sowing_op.management_filename.get_name(),sfilename);
-                   rot_mgmt.N_application_soil_observation_event->common_operation_filename = sfilename;
+                   rot_mgmt.N_application_soil_observation_event->name = sfilename;
                }
 #endif
             }                                                                    //020915
@@ -348,6 +349,8 @@ bool Land_unit_simulation_VX::load_rotation_planting_events()
                CORN::Year actual_plant_year = year;
                CORN::Date_clad_32 actual_plant_date(actual_plant_year,entry->begin_sync.get_DOY());
                Sowing_operation *actual_op = planting_event->sowing_op;
+
+
                resolve_and_schedule(actual_plant_date,*actual_op,entry->ID.c_str(),rotation_dir);
                planting_event->begin_sync.sync_mode_labeled.set(ACTUAL_DATE_MODE);
                planting_event->begin_sync.set(actual_plant_date);
@@ -398,9 +401,11 @@ bool Land_unit_simulation_VX::load_rotation_planting_events()
    #endif
 */
    //NYI if (arguments.verbose_level(1))
-   if (global_arguments->is_verbose(1))
-   {
+   if (global_arguments) {
+     if (global_arguments->is_verbose(1))
+     {
       cout << "Sowing and management operations loaded" << endl;
+     }
    }
    return true;
 }

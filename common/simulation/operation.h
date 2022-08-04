@@ -21,9 +21,9 @@ class Common_operation
          031023 Note, I thought I had moved this to event, if so this is only a record and should be private!
          Name matches the operation ID (040909)
       **/
-#ifdef MICROBASIN_VERSION
-   std::string common_operation_filename;                                        //170321LML used to store management file name (without extention) that conduct this operation.
-#endif
+//#ifdef MICROBASIN_VERSION
+//   std::string common_operation_filename;                                        //170321LML used to store management file name (without extention) that conduct this operation.
+//#endif
    int16 start_hour;
    int16 duration_hours;
 // NYI     int16 duration_minutes;                                               //071029

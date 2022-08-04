@@ -8,6 +8,7 @@
 #include "CropSyst/source/management/management_param_V5.h"
 #endif
 #include "common/recorder/recorder.h"
+
 class Common_event_list;                                                         //120620
 namespace CropSyst {
 class Desired_variables;                                                         //030801

@@ -476,7 +476,19 @@ bool BasinClass::initialize()                                    initialization_
 #endif
     //Initilize soil properties (soil)
 
+
+    //08032022LML moved to here
+    if (ControlRef.use_even_soil_N_and_FC) {
+        if (ControlRef.readInitialSoilState() != 0) {
+            std::cerr << "Initialization of soil state failed!\n";
+            exit(-1);
+        }
+    }
+
     initializeSoilProperties();
+
+
+
     /*160808RLN this would not work
     #ifdef MICROBASIN_VERSION_SINGLE_ROTATION_READING_WORKING
     initializeRotationParameters();                                              //160317LML
