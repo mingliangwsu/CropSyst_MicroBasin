@@ -67,7 +67,7 @@ BasinCellClass::BasinCellClass
    (cell_ID
    ,0 // no cylcing                                                              //141206
    ,ControlRef_ //scenario_control_and_model_options //*this //_scenario_control_and_model_options
-   ,today_.get_date32()                                                                       //170615LML
+   ,today_.ref_date32() //get_date32()                                           //170615LML
    ,geocoordinate
    ,meteorology_site_
    ,0//scenario_directory should be current working directory
@@ -374,7 +374,8 @@ bool BasinCellClass::start_day()                                                
     //160722RLN #ifdef MBVB_SOIL
     //160722RLN pSoilState->InitDailyFluxes();
     //160722RLN #else
-    soil_tallies->start_day();                                                   //160722RLN
+    soil_tallies->start_day();
+    //160722RLN
     //160722RLN #endif
     init_accumulater_outflow(TACUM_DAILY);
     if ((today == ControlRef.start_date) || (today.get_DOY() == 1))
@@ -895,7 +896,7 @@ bool BasinCellClass::end_day()                                     modification_
         #ifndef CROPSYST_VERSION
         pSimulation->
         #endif
-        pOutput->WriteDailySoilCropOutput(LAND_UNIT_SIM_ ref_today());           //151208RLN
+        pOutput->WriteDailySoilCropOutput(/*LAND_UNIT_SIM_ ref_today()*/);           //151208RLN
     }
     return ended;
 }

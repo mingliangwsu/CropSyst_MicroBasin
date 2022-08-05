@@ -51,10 +51,12 @@ class Date_cowl
       { date_ref = (dateT)(year*1000+doy); return get_datetime64(); }
    virtual datetime64 set(const Temporal &new_date)                 assignation_
       { date_ref = (dateT)(new_date.get_datetime64()); return get_datetime64();}
+
  public: // accessors
    inline virtual datetime64 get_datetime64()                             const
       { return (datetime64)(nat32)(date_ref);}
    inline virtual date32 get_date32()         const { return (date32)date_ref; }
+   inline virtual const date32 &ref_date32()  const { return (date32)date_ref; }
 };
 //_2017-08-24________________________________________________________Date_cowl_/
 template <typename dateT>  // floating point or integer

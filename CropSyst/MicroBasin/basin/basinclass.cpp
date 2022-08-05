@@ -1327,6 +1327,8 @@ bool BasinClass::process_day()                                     modification_
                 #endif
             */
             }
+            //cell->ref_today().get_date32() = today.ref_date32();
+            //cell->
             bool temp = cell->start_day();                                       //141221RLN
             #pragma omp critical
             processed &= temp;

@@ -20,6 +20,8 @@ interface_ Date_const  // Eventually rename to Date_const
       ///< \returns the date, time or date time as a 64 bit float (double)
    inline virtual float64 get_time64()                       const { return 0; } //170815
    virtual date32       get_date32()                                    const=0;
+   inline virtual const date32 &ref_date32()                            const=0; //08042022LML
+
    virtual Year         get_year()                                      const=0;
       // Note that in ISO8601:2004 negative years are 1 - the BC year
       // I.e.  0 is 1BC  -1 is 2BC

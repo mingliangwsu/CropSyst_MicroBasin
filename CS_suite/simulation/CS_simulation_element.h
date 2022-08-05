@@ -112,8 +112,8 @@ class Simulation_element_abstract
    const CORN::date32 &today_raw;                                                //170524
 
       //Conceptual: The date (today) should probably be any temporal class
-
    CORN::Date_cowl_const_32 today;                                               //170524
+ protected:
    cognate_ Event_scheduler *event_scheduler; // optional
    contribute_ bool ended_year;                                                  //170413
  public:

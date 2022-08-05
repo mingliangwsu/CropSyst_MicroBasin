@@ -365,9 +365,9 @@ void OutputMainClass::WriteGrowingSeasonOutput
 //______________________________________________________________________________
 void OutputMainClass::WriteDailySoilCropOutput
 (
-#ifdef CROPSYST_VERSION
-const CORN::Date_const &today
-#endif
+//#ifdef CROPSYST_VERSION
+//const CORN::Date_const &ltoday
+//#endif
                                                )
 {
 #ifndef CROPSYST_VERSION
@@ -520,6 +520,7 @@ const CORN::Date_const &today
   //160415LML pDaily_Soil_out->Current_DOM = today.get_DOM();
   //160415LML pDaily_Soil_out->Current_DOY = today.get_DOY();                                //151002LML (int)Simulation.pTimeState->getToday().get_DOY();
   pDaily_Soil_out->Current_Date.set_date32(today.get_date32());
+
   pDaily_Soil_out->Crop_Name = active_crop_name;
   pDaily_Soil_out->Development_Stage = current_crop ? current_crop->describe_growth_stage() : "NONE"; //151016LML
   pDaily_Soil_out->Leaf_Area_Index = current_crop ? current_crop->get_LAI(true) : 0; //151016LML

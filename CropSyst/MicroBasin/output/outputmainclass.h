@@ -99,9 +99,9 @@ public:
         (/*clsSoil &Soil
         , WeatherStateDailyClass &Weather
         , clsCrop &Crop*/
-        #ifdef CROPSYST_VERSION
-        const CORN::Date_const &today
-        #endif
+        //#ifdef CROPSYST_VERSION
+        //const CORN::Date_const &today
+        //#endif
          );
     void WriteDailyGrowthOutput
         (/*clsSimulation &Simulation
