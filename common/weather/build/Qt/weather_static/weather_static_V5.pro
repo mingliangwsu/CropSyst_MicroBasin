@@ -10,8 +10,8 @@ TARGET = weather_static
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += ../../../../../common \
-               ../../../../../../dev \
-               ../../../../../../dev/CS_suite
+               ../../../../../ \
+               ../../../../../CS_suite
 DEFINES += CS_VERSION=5 REACCH_VERSION WEATHER_PROVIDER_VERSION=5
 #USE_WEATHER_PROVIDER
 QMAKE_CXXFLAGS += -fpermissive  -w -g

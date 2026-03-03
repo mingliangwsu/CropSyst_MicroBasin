@@ -207,7 +207,8 @@ SOURCES += \
       ../../../../../UED/library/unitsrec.cpp \
       ../../../../../UED/library/timeqry.cpp \
       ../../../../../UED/library/units_def.cpp \
-      ../../../../../UED/library/datasetrec_creation.cpp
+      ../../../../../UED/library/datasetrec_creation.cpp \
+      ../../../../../common/weather/parameter/WC_humidity_specific.cpp
 
 
 

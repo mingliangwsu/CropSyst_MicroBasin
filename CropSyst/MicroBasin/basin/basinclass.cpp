@@ -2630,6 +2630,9 @@ void BasinClass::SoilLateralflowTimeloop(const double t_start,const double t_len
                 #else
                     //LML 150518 cell->pSoilState->hydrology->
                     //LML 150518     get_K_Theta(layer,Theta[i][layer], Theta_s[i][layer]);
+
+                    //230623 KVB used Feild Capacity as Theta_b
+                    Theta_b = cell->pSoilProfile->Field_Capacity[layer];
                     cell->pSoilState->get_K_Theta_Lateralflow(layer
                                                               ,Theta[i][layer]
                                                               ,Theta_s[i][layer]
